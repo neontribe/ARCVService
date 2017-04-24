@@ -1,0 +1,18 @@
+A List of models and relationships
+
+Voucher
+-- Sponsor
+
+Sponsor
+assigned -< Voucher
+adminsters -< Market
+
+Trader
+emplaced -< Market
+redeems ~< Voucher
+administers ~< Traders
+
+
+Traders
+
+Market
