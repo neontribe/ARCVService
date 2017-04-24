@@ -3,20 +3,17 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+// hard deletes on these; if only because we'll data-warehouse them at some point.
 
-class Trader extends Model
+
+class VoucherEvent extends Model
 {
-    use SoftDeletes;
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'name',
-        'picURL',
-        'market_id'
     ];
 
     /**
@@ -26,7 +23,5 @@ class Trader extends Model
      */
     protected $hidden = [
     ];
-
-    
 
 }

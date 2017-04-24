@@ -15,6 +15,12 @@ class Voucher extends Model
      * @var array
      */
     protected $fillable = [
+        'sponsor_id',
+        'assignee_id',
+        'redeemer_id',
+        'creditor_id',
+        'code',
+        'state'
     ];
 
     /**
@@ -31,6 +37,11 @@ class Voucher extends Model
     }
 
     public function redeemer()
+    {
+        return $this->belongsTo(Trader::class);
+    }
+
+    public function creditor()
     {
         return $this->belongsTo(Trader::class);
     }

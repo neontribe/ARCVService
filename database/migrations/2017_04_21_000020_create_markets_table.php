@@ -20,6 +20,13 @@ class CreateMarketsTable extends Migration
             $table->integer('sponsor_id')->unsigned()->nullable(); // who's the primary sponsor here.
             $table->timestamps();
         });
+
+        Schema::table('markets', function (Blueprint $table) {
+
+            $table->foreign('sponsor_id')
+                ->references('id')
+                ->on('sponsors');
+        });
     }
 
     /**
@@ -29,6 +36,9 @@ class CreateMarketsTable extends Migration
      */
     public function down()
     {
+        Schema::table('markets', function (Blueprint $table) {
+            $table->dropForeign(['sponsor_id']);
+        });
         Schema::dropIfExists('markets');
     }
 }

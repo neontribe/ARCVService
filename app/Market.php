@@ -5,7 +5,6 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-
 class Market extends Model
 {
     use SoftDeletes;
@@ -15,6 +14,9 @@ class Market extends Model
      * @var array
      */
     protected $fillable = [
+        'name',
+        'location',
+        'sponsor_id',
     ];
 
     /**

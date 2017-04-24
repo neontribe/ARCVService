@@ -22,6 +22,12 @@ class CreateTradersTable extends Migration
                 // Q: can a trader belong to many markets
             $table->timestamps();
         });
+
+        Schema::table('traders', function (Blueprint $table) {
+            $table->foreign('market_id')
+                ->references('id')
+                ->on('markets');
+        });
     }
 
     /**
@@ -31,6 +37,9 @@ class CreateTradersTable extends Migration
      */
     public function down()
     {
+        Schema::table('traders', function (Blueprint $table) {
+            $table->dropForeign(['market_id']);
+        });
         Schema::dropIfExists('traders');
     }
 }

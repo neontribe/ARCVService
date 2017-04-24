@@ -1,18 +1,30 @@
 A List of models and relationships
 
-Voucher
--- Sponsor
+Users   - a source of extra system events, and process products
+    string::name
+    string::email
+    string::password
+    administers ~< Traders  // One of which may be an alias for the User. Or not.
 
-Sponsor
-assigned -< Voucher
-adminsters -< Market
+Voucher - a state machine for tracking processes
+    creditor >~ Trader  // person who should be repaid
+    redeemer >~ User    // shoudl be shunted to reports
+    integer::assigned   //could be a family tables.
+    string::code
+    string::state
+    backed >~ Sponsor
 
-Trader
-emplaced -< Market
-redeems ~< Voucher
-administers ~< Traders
+Sponsor - A administrative entity with oversight of vouchers and markets
+    string::name
+    assigned ~< Voucher
+    administers -< Market
 
+Trader  -   A payable entity that collects vouchers
+    string::picURL
+    worksAt -< Market
+    credited ~< Voucher
 
-Traders
+Market  -   A place where business is done
+    string::name
+    string::location
 
-Market
