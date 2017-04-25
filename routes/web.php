@@ -14,3 +14,15 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('voucher/{code}/{transition}', function (App\Voucher $voucher, $transition)
+{
+    // make sure you have autheticated user by route middleware or Auth check
+
+    try {
+        $voucher->state($transition);
+    } catch (Exception $e) {
+        abort(500, $e->getMessage());
+    }
+    return $voucher->history()->get();
+});

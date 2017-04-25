@@ -1,0 +1,83 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: charles
+ * Date: 25/04/17
+ * Time: 12:42
+ */
+
+namespace App\Traits;
+
+use SM\Factory\FactoryInterface;
+
+/**
+ * Class Statable
+ * @package App\Traits
+ */
+trait Statable
+{
+    /**
+     * @var StateMachine $stateMachine
+     */
+    protected $stateMachine;
+
+
+    /**
+     * gets the FSM associated with the Stateable model.
+     *
+     * @return StateMachine|\SM\StateMachine\StateMachineInterface
+     */
+    public function getStateMachine()
+    {
+        if (!$this->stateMachine) {
+            $this->stateMachine =
+            $this->stateMachine = app(FactoryInterface::class)->get($this, self::SM_CONFIG);
+        }
+        return $this->stateMachine;
+    }
+
+    /**
+     * Getter/Setter for the new state by transition
+     *
+     * @param string $transition
+     * @return string State
+     */
+    public function state($transition = null)
+    {
+        if ($transition) {
+            return $this->applyTransition($transition);
+        } else {
+            return $this->getStateMachine()->getState();
+        }
+    }
+
+    /**
+     * @param string $transition
+     * @return bool
+     */
+    public function applyTransition($transition)
+    {
+        return $this->getStateMachine()->apply($transition);
+    }
+
+    /**
+     * Checks if a transition is "allowed" by the FSM graph
+     *
+     * @param string $transition
+     * @return bool
+     */
+    public function transitionAllowed($transition)
+    {
+        return $this->getStateMachine()->can($transition);
+    }
+
+    /**
+     * Gets a collection of Models representing the history.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function history()
+    {
+        return $this->hasMany(self::HISTORY_MODEL);
+    }
+}

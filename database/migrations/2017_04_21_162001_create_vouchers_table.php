@@ -19,7 +19,7 @@ class CreateVouchersTable extends Migration
             $table->integer('redeemer_id')->unsigned()->nullable(); // who redeemed this with
             $table->integer('creditor_id')->unsigned()->nullable(); // who's owed money for this.
             $table->string('code', 32); // the actual voucher code.
-            $table->string('state', 16);    // TODO sub out to a table at some point.
+            $table->string('state', 16)->default('requested');
             $table->integer('sponsor_id')->unsigned();  // the organisation that sponsored this token (usually an LA).
             $table->timestamps();
         });

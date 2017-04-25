@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class VoucherEventsSeeder extends Seeder
+class VoucherStatesSeeder extends Seeder
 {
     /**
      * Run the database seeds.

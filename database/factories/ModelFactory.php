@@ -27,17 +27,17 @@ $factory->define(App\Sponsor::class, function (Faker\Generator $faker) {
 
     return [
         'name' => $faker->company,
+        'shortcode' => 'UNK',
     ];
 });
 
 $factory->define(App\Market::class, function (Faker\Generator $faker) {
 
-    $sponsor_id = null;
     if ($sponsor_ids = \DB::table('sponsors')->select('id')->get()->toArray()) {
         $sponsor_id = $faker->randomElement($sponsor_ids)->id;
     } else {
         $sponsor = factory(App\Sponsor::class)->create(['name' => 'Null Adminstrations']);
-        $sponsor_id = $sponsor->id();
+        $sponsor_id = $sponsor->id;
     }
 
     return [
@@ -46,7 +46,6 @@ $factory->define(App\Market::class, function (Faker\Generator $faker) {
         'sponsor_id' => $sponsor_id
     ];
 });
-
 
 $factory->define(App\Trader::class, function (Faker\Generator $faker) {
 
@@ -59,7 +58,17 @@ $factory->define(App\Trader::class, function (Faker\Generator $faker) {
 
 $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
 
-    return [
+    if ($sponsor_ids = \DB::table('sponsors')->select('id')->get()->toArray()) {
+        $sponsor_id = $faker->randomElement($sponsor_ids)->id;
+    } else {
+        // there are no sponsors. odd. make a null one
+        $sponsor = factory(App\Sponsor::class)->create(['name' => 'Null Sponsors Inc.']);
+        $sponsor_id = $sponsor->id;
+    }
 
+    return [
+        'sponsor_id' => $sponsor_id,
+        'code' => $faker->ean8, // 8 digit barcode
+        'state' => 'requested'
     ];
 });
