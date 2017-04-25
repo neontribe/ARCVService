@@ -38,11 +38,24 @@ class Voucher extends Model
 
     public function redeemer()
     {
-        return $this->belongsTo(Trader::class);
+        return $this->belongsTo(User::class);
     }
 
     public function creditor()
     {
         return $this->belongsTo(Trader::class);
+    }
+
+    public function events()
+    {
+        return $this->hasMany(VoucherEvents::class);
+    }
+
+    public function store()
+    {
+        // Todo: MOAR MEAT
+        // tis is for updating the
+
+
     }
 }

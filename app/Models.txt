@@ -28,3 +28,13 @@ Market  -   A place where business is done
     string::name
     string::location
 
+
+Service notes
+
+https://gist.github.com/iben12/7e24b695421d92cbe1fec3eb5f32fc94
+  https://github.com/sebdesign/laravel-state-machine
+  https://github.com/winzou/state-machine
+
+
+
+
