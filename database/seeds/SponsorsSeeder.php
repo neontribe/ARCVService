@@ -13,8 +13,7 @@ class SponsorsSeeder extends Seeder
     {
         $sponsors = [];
         $sponsorData = [
-            ['name' => "thelaundry.gov.uk"],
-            ['name' => "The Dark Future Imperium PLC"],
+            ['name' => "imperium.gov"],
             ['name' => "CthulhuShire County Council"]
         ];
 

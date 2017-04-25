@@ -29,3 +29,37 @@ $factory->define(App\Sponsor::class, function (Faker\Generator $faker) {
         'name' => $faker->company,
     ];
 });
+
+$factory->define(App\Market::class, function (Faker\Generator $faker) {
+
+    $sponsor_id = null;
+    if ($sponsor_ids = \DB::table('sponsors')->select('id')->get()->toArray()) {
+        $sponsor_id = $faker->randomElement($sponsor_ids)->id;
+    } else {
+        $sponsor = factory(App\Sponsor::class)->create(['name' => 'Null Adminstrations']);
+        $sponsor_id = $sponsor->id();
+    }
+
+    return [
+        'name' => $faker->company,
+        'location' => $faker->postcode,
+        'sponsor_id' => $sponsor_id
+    ];
+});
+
+
+$factory->define(App\Trader::class, function (Faker\Generator $faker) {
+
+    return [
+        'name' => $faker->name,
+        'picURL' => null,
+        'market_id' => null,
+    ];
+});
+
+$factory->define(App\Voucher::class, function (Faker\Generator $faker) {
+
+    return [
+
+    ];
+});
