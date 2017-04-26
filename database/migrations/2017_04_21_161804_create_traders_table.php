@@ -21,6 +21,7 @@ class CreateTradersTable extends Migration
                 // Q: is it possible to have an unassigned trader?
                 // Q: can a trader belong to many markets
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::table('traders', function (Blueprint $table) {

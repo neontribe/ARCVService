@@ -10,6 +10,7 @@ class Voucher extends Model
 {
     use Statable; // import the state transition stuff.
     use SoftDeletes; // import soft delete.
+    protected $dates = ['deleted_at'];
 
     const HISTORY_MODEL = 'App\VoucherState'; // the related model to store the history
     const SM_CONFIG = 'Voucher'; // the SM graph to use
@@ -39,11 +40,6 @@ class Voucher extends Model
     public function sponsor()
     {
         return $this->belongsTo(Sponsor::class);
-    }
-
-    public function redeemer()
-    {
-        return $this->belongsTo(User::class);
     }
 
     public function creditor()

@@ -19,6 +19,7 @@ class CreateMarketsTable extends Migration
             $table->string('location'); // Where it is.
             $table->integer('sponsor_id')->unsigned()->nullable(); // who's the primary sponsor here.
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::table('markets', function (Blueprint $table) {

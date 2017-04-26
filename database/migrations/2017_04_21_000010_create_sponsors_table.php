@@ -18,6 +18,7 @@ class CreateSponsorsTable extends Migration
             $table->string('name');
             $table->string('shortcode');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

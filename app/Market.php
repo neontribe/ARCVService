@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Market extends Model
 {
     use SoftDeletes;
+    protected $dates = ['deleted_at'];
     /**
      * The attributes that are mass assignable.
      *
@@ -26,6 +27,5 @@ class Market extends Model
      */
     protected $hidden = [
     ];
-
 
 }

@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Trader extends Model
 {
     use SoftDeletes;
+    protected $dates = ['deleted_at'];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -27,6 +29,9 @@ class Trader extends Model
     protected $hidden = [
     ];
 
-    
+    public function users()
+    {
+        return $this->belongsToMany('App\Users');
+    }
 
 }

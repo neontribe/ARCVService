@@ -15,20 +15,16 @@ class CreateVouchersTable extends Migration
     {
         Schema::create('vouchers', function (Blueprint $table) {
             $table->increments('id'); // a voucher *instance*.
-            $table->integer('assigner_id')->unsigned()->nullable(); // who was assigned this voucher.
-            $table->integer('redeemer_id')->unsigned()->nullable(); // who redeemed this with
+            $table->integer('assignee_id')->unsigned()->nullable(); // who was assigned this voucher.
             $table->integer('creditor_id')->unsigned()->nullable(); // who's owed money for this.
             $table->string('code', 32); // the actual voucher code.
             $table->string('currentstate', 24)->default('requested');
             $table->integer('sponsor_id')->unsigned();  // the organisation that sponsored this token (usually an LA).
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::table('vouchers', function (Blueprint $table) {
-            $table->foreign('redeemer_id')
-                ->references('id')
-                ->on('traders');
-
             $table->foreign('creditor_id')
                 ->references('id')
                 ->on('traders');

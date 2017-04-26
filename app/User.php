@@ -28,4 +28,8 @@ class User extends Authenticatable
     ];
 
 
+    public function traders()
+    {
+        return $this->belongsToMany('App\Traders');
+    }
 }
