@@ -47,4 +47,8 @@ class Voucher extends Model
         return $this->belongsTo(Trader::class);
     }
 
+    public static function findByCode($code)
+    {
+        return self::where('code', $code)->get()->first();
+    }
 }
