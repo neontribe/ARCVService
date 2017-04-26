@@ -16,6 +16,7 @@ class CreateSponsorsTable extends Migration
         Schema::create('sponsors', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->string('shortcode');
             $table->timestamps();
         });
     }

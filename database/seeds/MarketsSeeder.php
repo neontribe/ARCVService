@@ -43,6 +43,5 @@ class MarketsSeeder extends Seeder
         foreach ($marketsData as $market) {
             $markets[] = factory(App\Market::class)->create($market);
         }
-
     }
 }

@@ -17,6 +17,6 @@ class DatabaseSeeder extends Seeder
         $this->call(MarketsSeeder::class);
         $this->call(TradersSeeder::class);
         $this->call(VouchersSeeder::class);
-        $this->call(VoucherEventsSeeder::class);
+        $this->call(VoucherStatesSeeder::class);
     }
 }

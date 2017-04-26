@@ -2,13 +2,18 @@
 
 namespace App;
 
+use App\Traits\Statable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Voucher extends Model
 {
+    use Statable; // import the state transition stuff.
+    use SoftDeletes; // import soft delete.
 
-    use SoftDeletes;
+    const HISTORY_MODEL = 'App\VoucherState'; // the related model to store the history
+    const SM_CONFIG = 'Voucher'; // the SM graph to use
+
     /**
      * The attributes that are mass assignable.
      *
@@ -20,7 +25,7 @@ class Voucher extends Model
         'redeemer_id',
         'creditor_id',
         'code',
-        'state'
+        'currentstate' // SM_CONFIG looks at this.
     ];
 
     /**
@@ -46,16 +51,4 @@ class Voucher extends Model
         return $this->belongsTo(Trader::class);
     }
 
-    public function events()
-    {
-        return $this->hasMany(VoucherEvents::class);
-    }
-
-    public function store()
-    {
-        // Todo: MOAR MEAT
-        // tis is for updating the
-
-
-    }
 }

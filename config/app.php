@@ -177,8 +177,9 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
-        Barryvdh\Debugbar\ServiceProvider::class,
-        Barryvdh\Cors\ServiceProvider::class,
+        Barryvdh\Debugbar\ServiceProvider::class, //DebugBar
+        Barryvdh\Cors\ServiceProvider::class, //CORS framework
+        Sebdesign\SM\ServiceProvider::class, //FSM
     ],
 
     /*
@@ -227,7 +228,11 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
+        /*
+         * Convenience Facades
+         */
         'Debugbar' => Barryvdh\Debugbar\Facade::class,
+        'StateMachine' => Sebdesign\SM\Facade::class,
 
     ],
 

@@ -16,6 +16,16 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\Event' => [
             'App\Listeners\EventListener',
         ],
+        \SM\Event\SMEvents::POST_TRANSITION => [
+            'App\Listeners\StateHistoryManager@postTransition',
+        ],
+        \SM\Event\SMEvents::PRE_TRANSITION => [
+            'App\Listeners\StateHistoryManager@preTransition',
+        ],
+        \SM\Event\SMEvents::TEST_TRANSITION => [
+            'App\Listeners\StateHistoryManager@testTransition',
+        ],
+
     ];
 
     /**
@@ -29,4 +39,5 @@ class EventServiceProvider extends ServiceProvider
 
         //
     }
+
 }
