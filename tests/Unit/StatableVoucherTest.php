@@ -20,7 +20,7 @@ class StatableVoucherTest extends TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->voucher = factory(Voucher::class)->create(['sponsor_id' => 1]);
+        $this->voucher = factory(Voucher::class)->create();
         Auth::login(factory(User::class)->create());
     }
 
@@ -38,30 +38,30 @@ class StatableVoucherTest extends TestCase
     public function testGetVoucherState()
     {
         // Start state should be requested
-        $this->assertEquals('requested', $this->voucher->state());
+        $this->assertEquals('requested', $this->voucher->currentstate);
     }
-/*
+
     public function testProgressVoucherState()
     {
         // Order some printed copies
         $this->voucher->applyTransition('order');
 
         // Should 1 state event, "ordered"
-        $this->assertEquals('ordered', $this->voucher->state());
+        $this->assertEquals('ordered', $this->voucher->currentstate);
         $this->assertEquals(1, $this->voucher->history()->count());
 
         // Register printed vouchers
         $this->voucher->applyTransition('print');
 
         // Should be 2 events, "ordered" and "printed".
-        $this->assertEquals('printed', $this->voucher->state());
+        $this->assertEquals('printed', $this->voucher->currentstate);
         $this->assertEquals(2, $this->voucher->history()->count());
     }
 
     public function testTransitionAllowed()
     {
-        // Can we progress to the next step?
-        $this->assertTrue($this->voucher->transitionAllowed('dispatch'));
+        // Can we progress to the next step? requested->ordered
+        $this->assertTrue($this->voucher->transitionAllowed('order'));
         // Can we jump a few steps?
         $this->assertFalse($this->voucher->transitionAllowed('collect'));
     }
@@ -71,5 +71,5 @@ class StatableVoucherTest extends TestCase
         $this->expectException(SMException::class);
         $this->voucher->state('collect');
     }
-*/
+
 }

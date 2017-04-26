@@ -69,6 +69,7 @@ $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
     return [
         'sponsor_id' => $sponsor_id,
         'code' => $faker->ean8, // 8 digit barcode
-        'state' => 'requested'
+        'currentstate' => 'requested'
     ];
 });
+

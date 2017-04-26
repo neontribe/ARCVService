@@ -37,6 +37,7 @@ class StateHistoryManager
             "from" => "", // what the state was before.
             "to" => $sm->getState(),
             "user_id" => auth()->id(),
+            "source" => "",
         ]);
 
         $model->save();

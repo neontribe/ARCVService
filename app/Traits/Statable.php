@@ -9,6 +9,8 @@
 namespace App\Traits;
 
 use SM\Factory\FactoryInterface;
+use SM\StateMachine\StateMachine;
+use Log;
 
 /**
  * Class Statable
@@ -21,7 +23,6 @@ trait Statable
      */
     protected $stateMachine;
 
-
     /**
      * gets the FSM associated with the Stateable model.
      *
@@ -30,7 +31,6 @@ trait Statable
     public function getStateMachine()
     {
         if (!$this->stateMachine) {
-            $this->stateMachine =
             $this->stateMachine = app(FactoryInterface::class)->get($this, self::SM_CONFIG);
         }
         return $this->stateMachine;

@@ -6,7 +6,7 @@ return [
         'class' => App\Voucher::class,
 
         // property of your object holding the actual state (default is "state")
-        'property_path' => 'state',
+        'property_path' => 'currentstate',
 
         // list of all possible states
         'states' => [

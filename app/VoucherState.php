@@ -18,7 +18,8 @@ class VoucherState extends Model
         'from',
         'user_id',
         'voucher_id',
-        'to'
+        'to',
+        'source'
     ];
 
     /**
