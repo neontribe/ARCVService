@@ -16,7 +16,7 @@ class CreateTradersTable extends Migration
         Schema::create('traders', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name'); // name of the trader
-            $table->string('picURL')->nullable(); // some kind of pic link
+            $table->string('pic_url')->nullable(); // some kind of pic link
             $table->integer('market_id')->unsigned()->nullable();
                 // Q: is it possible to have an unassigned trader?
                 // Q: can a trader belong to many markets

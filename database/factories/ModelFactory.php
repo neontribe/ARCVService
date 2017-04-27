@@ -51,7 +51,7 @@ $factory->define(App\Trader::class, function (Faker\Generator $faker) {
 
     return [
         'name' => $faker->name,
-        'picURL' => null,
+        'pic_url' => null,
         'market_id' => null,
     ];
 });
