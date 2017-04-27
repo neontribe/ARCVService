@@ -43,7 +43,6 @@ class CreateVouchersTable extends Migration
     public function down()
     {
         Schema::table('vouchers', function (Blueprint $table) {
-            $table->dropForeign(['redeemer_id']);
             $table->dropForeign(['creditor_id']);
             $table->dropForeign(['sponsor_id']);
         });

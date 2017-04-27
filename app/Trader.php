@@ -34,4 +34,9 @@ class Trader extends Model
         return $this->belongsToMany('App\Users');
     }
 
+    public function redemptions()
+    {
+        return $this->belongsToMany('App\Redemptions');
+    }
+
 }

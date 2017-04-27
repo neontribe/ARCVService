@@ -62,8 +62,7 @@ class VoucherController extends Controller
      */
     public function show(Voucher $voucher)
     {
-        return response(dd($voucher));
-    //  return response()->json(Voucher::findByCode($voucher));
+        return response()->json(Voucher::findByCode($voucher));
     }
 
     /**
