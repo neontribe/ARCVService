@@ -26,7 +26,7 @@ class Voucher extends Model
         'redeemer_id',
         'creditor_id',
         'code',
-        'currentstate' // SM_CONFIG looks at this.
+        'currentstate', // SM_CONFIG looks at this.
     ];
 
     /**

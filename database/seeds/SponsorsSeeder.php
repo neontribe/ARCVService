@@ -14,7 +14,7 @@ class SponsorsSeeder extends Seeder
         $sponsors = [];
         $sponsorData = [
             ['name' => "imperium.gov", "shortcode" =>"SOL"],
-            ['name' => "CthulhuShire County Council", 'shortcode' => "CCC"]
+            ['name' => "CthulhuShire County Council", 'shortcode' => "CCC"],
         ];
 
         foreach ($sponsorData as $sponsor) {
