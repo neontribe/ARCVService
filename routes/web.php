@@ -15,6 +15,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+/*
 Route::get('voucher/{code}/{transition}', function (App\Voucher $voucher, $transition)
 {
     // make sure you have autheticated user by route middleware or Auth check
@@ -26,3 +27,4 @@ Route::get('voucher/{code}/{transition}', function (App\Voucher $voucher, $trans
     }
     return $voucher->history()->get();
 });
+*/

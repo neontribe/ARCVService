@@ -36,7 +36,7 @@ class TradersSeeder extends Seeder
             [
                 'name' => "Desmond Artifex",
                 'market_id' => 5
-            ]
+            ],
         ];
 
         foreach ($tradersData as $trader) {

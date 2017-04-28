@@ -12,5 +12,6 @@ class VoucherStatesSeeder extends Seeder
     public function run()
     {
         //
+
     }
 }

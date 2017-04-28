@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateVoucherStatesTable extends Migration
+class CreateSubmissionStatesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,27 +13,26 @@ class CreateVoucherStatesTable extends Migration
      */
     public function up()
     {
-        Schema::create('voucher_states', function (Blueprint $table) {
+        Schema::create('submission_states', function (Blueprint $table) {
             $table->increments('id');
             $table->string('transition');
             $table->string('from')->nullable(); // What we were before this event.
             $table->integer('user_id')->unsigned(); // a User who made this happen.
-            $table->integer('voucher_id')->unsigned();
+            $table->integer('submission_id')->unsigned();
             $table->string('to');   // What state we are now.
             $table->string('source'); // Where it was done from.
-
             $table->timestamps(); // captures "When"
         });
 
-        Schema::table('voucher_states', function (Blueprint $table) {
+        Schema::table('submission_states', function (Blueprint $table) {
 
             $table->foreign('user_id')
                 ->references('id')
                 ->on('users');
 
-            $table->foreign('voucher_id')
+            $table->foreign('submission_id')
                 ->references('id')
-                ->on('vouchers');
+                ->on('submissions');
         });
     }
 
@@ -44,11 +43,10 @@ class CreateVoucherStatesTable extends Migration
      */
     public function down()
     {
-        Schema::table('voucher_states', function (Blueprint $table) {
-
+        Schema::table('submission_states', function (Blueprint $table) {
             $table->dropForeign(['user_id']);
-            $table->dropForeign(['voucher_id']);
+            $table->dropForeign(['submission_id']);
         });
-        Schema::dropIfExists('voucher_states');
+        Schema::dropIfExists('submission_states');
     }
 }

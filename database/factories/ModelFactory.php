@@ -43,7 +43,7 @@ $factory->define(App\Market::class, function (Faker\Generator $faker) {
     return [
         'name' => $faker->company,
         'location' => $faker->postcode,
-        'sponsor_id' => $sponsor_id
+        'sponsor_id' => $sponsor_id, // a random sponsor
     ];
 });
 
@@ -51,7 +51,7 @@ $factory->define(App\Trader::class, function (Faker\Generator $faker) {
 
     return [
         'name' => $faker->name,
-        'picURL' => null,
+        'pic_url' => null,
         'market_id' => null,
     ];
 });
@@ -67,9 +67,8 @@ $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
     }
 
     return [
-        'sponsor_id' => $sponsor_id,
+        'sponsor_id' => $sponsor_id, // a random sponsor
         'code' => $faker->ean8, // 8 digit barcode
-        'currentstate' => 'requested'
+        'currentstate' => 'requested',
     ];
 });
-

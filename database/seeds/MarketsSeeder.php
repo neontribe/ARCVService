@@ -37,7 +37,7 @@ class MarketsSeeder extends Seeder
                 'name' => "Mechanicum Carboot",
                 'location'=> "ForgeWorld Mars",
                 'sponsor_id' => 1
-            ]
+            ],
         ];
 
         foreach ($marketsData as $market) {

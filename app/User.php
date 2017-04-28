@@ -27,5 +27,13 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    public function traders()
+    {
+        return $this->belongsToMany('App\Traders');
+    }
 
+    public function submissions()
+    {
+        return $this->hasMany('App\Submissions');
+    }
 }
