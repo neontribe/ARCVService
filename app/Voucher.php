@@ -22,7 +22,6 @@ class Voucher extends Model
      */
     protected $fillable = [
         'sponsor_id',
-        'assignee_id',
         'redeemer_id',
         'creditor_id',
         'code',
