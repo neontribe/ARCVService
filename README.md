@@ -2,6 +2,7 @@
 ARC Voucher Service/API
 
 ## CI deploy with Travis set up notes
+
 1- Install travis cli tool wih `gem install travis`
 2- Log in to travis cli with `travis login` using git token or creds
 3- Create a `.env.travis` that is in `local` env with user `travis` and no password for database.
