@@ -22,6 +22,8 @@ deploy:
   script: rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR $DEPLOY_USER@$DEPLOY_IP:/var/www/$DEPLOY_URL
   on:
     branch: 0.1/release
+services:
+  - mysql
 env:
   global:
   - secure: Y5PxqLAMYt4G+SiiVQQx5O5ytKeuFaFBhh5uo0MKc3Y8ODSCIXlHXdSZSta3kYcEaQWbMMnvzNLYcm8/4WdhslYhAfNMt6cR0DJLOQJgzIeBlUakPzyjAMTQ9AbgTBMvK+SuFEEnXmuiaxRBz7Rt9pHiMdqxvMRA7naq+0FvaPbK9IRDSWCykD3oxMkgRv+mCuOXPABprF0TGo6Smw+38W6sbgi/PfddTBSv7q+w9tNN0VFDBMoofdD8NPyGjjcO2Or7I+GFFPpr7I+W3m35zcuq9W+QthkI4ZBqUgM0GKHEeHDWEYoPHDCRkP85Sr3yrEI7KvjqsXg4Ksd/9TWuIfzRu59G31OmBmZlfbiFwEZiDHsxf/cO6wRdQYcz5ShfHx+POZ0u+0u7UnMAwQLU7vc7nxQn+ljxPZhiyxxQ2N/rU/S7awkdGyp5czbPR49PpPXg92+0rkQecwV8pYDqldz4nFeUItCSph0WFk5VF2LP61P9d8hed8HE/izVjyydjJZ4ow3Ek2xZlf/nAA18/S4/NP6EZLxobmGiziuPryQkGteqNJ7AWqgJIyO+FPFjRuSlLZ7wS+oBfSmKu1KzovePGgzgKbqcQ5gfBcaEeEZHSiLYAB4nNNXi5ImlnmiD0/avOcgSKVFwP0fRWFs1596xK2WE/fRph9xEEK7A3qw=
