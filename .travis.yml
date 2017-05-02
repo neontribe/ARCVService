@@ -1,0 +1,23 @@
+language: php
+php:
+- '7.0'
+addons:
+  ssh_known_hosts: 46.101.18.83
+before_install: composer install
+before_deploy:
+- openssl aes-256-cbc -K $encrypted_499e418efa07_key -iv $encrypted_499e418efa07_iv
+  -in deploy_rsa.enc -out deploy_rsa -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/deploy_rsa
+- ssh-add /tmp/deploy_rsa
+- npm run production
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR $DEPLOY_USER@$DEPLOY_IP:/var/www/
+  on:
+    branch: 0.1/release
+env:
+  global:
+  - secure: Y5PxqLAMYt4G+SiiVQQx5O5ytKeuFaFBhh5uo0MKc3Y8ODSCIXlHXdSZSta3kYcEaQWbMMnvzNLYcm8/4WdhslYhAfNMt6cR0DJLOQJgzIeBlUakPzyjAMTQ9AbgTBMvK+SuFEEnXmuiaxRBz7Rt9pHiMdqxvMRA7naq+0FvaPbK9IRDSWCykD3oxMkgRv+mCuOXPABprF0TGo6Smw+38W6sbgi/PfddTBSv7q+w9tNN0VFDBMoofdD8NPyGjjcO2Or7I+GFFPpr7I+W3m35zcuq9W+QthkI4ZBqUgM0GKHEeHDWEYoPHDCRkP85Sr3yrEI7KvjqsXg4Ksd/9TWuIfzRu59G31OmBmZlfbiFwEZiDHsxf/cO6wRdQYcz5ShfHx+POZ0u+0u7UnMAwQLU7vc7nxQn+ljxPZhiyxxQ2N/rU/S7awkdGyp5czbPR49PpPXg92+0rkQecwV8pYDqldz4nFeUItCSph0WFk5VF2LP61P9d8hed8HE/izVjyydjJZ4ow3Ek2xZlf/nAA18/S4/NP6EZLxobmGiziuPryQkGteqNJ7AWqgJIyO+FPFjRuSlLZ7wS+oBfSmKu1KzovePGgzgKbqcQ5gfBcaEeEZHSiLYAB4nNNXi5ImlnmiD0/avOcgSKVFwP0fRWFs1596xK2WE/fRph9xEEK7A3qw=
+  - secure: X/MOT4AUXnqGWgatrxZip7Zb5ZZgcbZqCNaJvNjS3FReB2e6CH7sdhnGE9gyTQn7hwoo+Kbw5i2oTEyFYU7mgVlAgJ7vwtZHby7W4dv/hE+mJNy9ADuq8TX6cFzKEuZhsoj8BHYB4D4NWxksmHOPARDXJt45dw5FR9di6mowrKMPBindSzSasqaxV1kLXC02clqcZFqfaGhPh3fLqXdJgalaJiNGr64ZGzqGjECOY8UjUZJl6qUZTSooKr3I7ChUv1E+kKtw1HuUNrvmgQ+hkUtmpXORv620AcQSnTUz4GLzUi83N1tn0cjLLn8DeFQHRyhnsXzfni2p44SkU3wdGAfA04YvCKQtg16fgzTYZfFJvRZ8X0PvbNImWX6YR4y6Jcwp+sAnyokc4WldFcVXKMe7wz8ZN6HFiYC+KgDCwxgKEXkTcZwnQH8mB57YlXfUPPDJrSM/4oXJnVjDplOYtWU2XKMLOHnG+h+Noo0c4TKI81GKVauwxk1Ti7B8o/vHmXLyDi/e4MmHgqFFL6mRdgK/IZykaKwy6/tv1UISWEqqX7JeHL1HguvYsep6iecyGw7dQZqNP5iBV0PO5+oSI7C91BBvZf+zGB2/UAjk42MJTBtQP+KutTxpORO5Ok2G8iqPphLixtyl0D07DbmD4FwS2iSNR09HAKf0jsiJr88=
