@@ -2,7 +2,7 @@ language: php
 php:
 - '7.0'
 addons:
-  ssh_known_hosts: $DEPLOY_IP
+  ssh_known_hosts: 46.101.18.83
 before_script:
 - cp .env.travis .env
 - mysql -e 'create database homestead;'
