@@ -41,7 +41,7 @@ class Voucher extends Model
         return $this->belongsTo(Sponsor::class);
     }
 
-    public function creditor()
+    public function trader()
     {
         return $this->belongsTo(Trader::class);
     }
@@ -49,5 +49,11 @@ class Voucher extends Model
     public static function findByCode($code)
     {
         return self::where('code', $code)->get()->first();
+    }
+
+
+    public static function findByCodes($codes)
+    {
+        return self::whereIn('code', $codes)->get();
     }
 }
