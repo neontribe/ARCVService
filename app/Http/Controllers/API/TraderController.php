@@ -97,7 +97,7 @@ class TraderController extends Controller
 
         $status = request()->input('status');
 
-        if (empty($state)) {
+        if (empty($status)) {
             // Get all the trader's assigned vouchers
             $vouchers = $trader->vouchers->all();
         } else {
