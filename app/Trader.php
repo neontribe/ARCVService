@@ -34,9 +34,9 @@ class Trader extends Model
         return $this->belongsToMany('App\Users');
     }
 
-    public function redemptions()
+    public function vouchers()
     {
-        return $this->belongsToMany('App\Redemptions');
+        return $this->hasMany('App\Voucher');
     }
 
 }
