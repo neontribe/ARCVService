@@ -95,7 +95,7 @@ class TraderController extends Controller
         // Find all the vouchers that belong to {trader}
         // that have current voucher_state of given currentstate.
 
-        $state = request()->input('status');
+        $status = request()->input('status');
 
         if (empty($state)) {
             // Get all the trader's assigned vouchers
