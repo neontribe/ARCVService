@@ -31,7 +31,11 @@ Route::resource('markets', 'API\MarketController', [
     'only' => ['index','show',]
 ]);
 
-Route::get('traders/{trader}/vouchers', 'API\TraderController@showVouchers')->name('trader.vouchers');
 Route::resource('traders', 'API\TraderController', [
-    'only' => ['index','show','showVouchers']
+    'only' => ['index','show']
 ]);
+Route::get('traders/{trader}/vouchers', [
+    'as' => 'api.trader.vouchers',
+    'uses' => 'API\TraderController@showVouchers'
+]);
+

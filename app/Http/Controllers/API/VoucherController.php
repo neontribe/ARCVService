@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\API;
 
-use \App\User;
 use Auth;
 use Illuminate\Pagination\Paginator;
 use Response;
-use App\Voucher;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use \App\Trader;
+use App\Trader;
+use App\Voucher;
+use App\User;
 
 class VoucherController extends Controller
 {

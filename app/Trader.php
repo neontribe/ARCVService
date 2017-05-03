@@ -17,7 +17,7 @@ class Trader extends Model
      */
     protected $fillable = [
         'name',
-        'picURL',
+        'pic_url',
         'market_id',
     ];
 
