@@ -35,5 +35,14 @@ class VouchersSeeder extends Seeder
                 $voucher->applyTransition('allocate');
             }
         }
+
+        // get a trader, assign first 10
+        $trader = \App\Trader::find(1);
+        $link_size = 10;
+        for ($i=1; $i <= $link_size; $i++) {
+            $voucher = App\Voucher::find($i);
+            $voucher->trader_id = $trader->id;
+            $voucher->applyTransition('collect');
+        }
     }
 }

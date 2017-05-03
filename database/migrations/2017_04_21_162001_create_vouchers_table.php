@@ -15,7 +15,7 @@ class CreateVouchersTable extends Migration
     {
         Schema::create('vouchers', function (Blueprint $table) {
             $table->increments('id'); // a voucher *instance*.
-            $table->integer('creditor_id')->unsigned()->nullable(); // who's owed money for this.
+            $table->integer('trader_id')->unsigned()->nullable(); // who's owed money for this.
             $table->string('code', 32); // the actual voucher code.
             $table->string('currentstate', 24)->default('requested');
             $table->integer('sponsor_id')->unsigned();  // the organisation that sponsored this token (usually an LA).
@@ -24,7 +24,7 @@ class CreateVouchersTable extends Migration
         });
 
         Schema::table('vouchers', function (Blueprint $table) {
-            $table->foreign('creditor_id')
+            $table->foreign('trader_id')
                 ->references('id')
                 ->on('traders');
 
@@ -42,7 +42,7 @@ class CreateVouchersTable extends Migration
     public function down()
     {
         Schema::table('vouchers', function (Blueprint $table) {
-            $table->dropForeign(['creditor_id']);
+            $table->dropForeign(['trader_id']);
             $table->dropForeign(['sponsor_id']);
         });
         Schema::dropIfExists('vouchers');

@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\API;
 
 use Auth;
+use Illuminate\Pagination\Paginator;
 use Response;
-use App\Voucher;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Trader;
+use App\Voucher;
+use App\User;
 
 class VoucherController extends Controller
 {
@@ -51,18 +54,102 @@ class VoucherController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // TODO: Generalise and reroute
+        // for the prupsoes of this iteration, store() will progress "allocated" to "recorded";
+        // This would better be generalised as an "update" that progresses to the given state for each voucher.
+
+
+        // TODO: validation
+        // does it declare itself a format ?
+        // formats to support
+        // application/json <- preferred
+        // application/x-www-form-urlencoded <- from a dumb POST form?
+        // Rules:
+        // - needs a trader id
+        // - needs an array of vouchers
+
+        /*
+         * expecting a body of type application/josn
+        {
+            "user_id" : 1,
+	        "trader_id" : 1,
+	        "vouchers"	: [
+                "SOL00000001",
+                "SOL00000002",
+                "SOL00000002",
+                "SOL00000002",
+                "SOL00000003",
+                "SOL00000014"
+                ]
+        }
+
+        with current seeds, all should fail except the last one.
+
+        */
+
+
+        //TODO: and duplicates?
+        $responseData = [
+            'success' => [],
+            'failure' => []
+        ];
+
+
+        $transition = "collect";
+
+        if (request()->isJson()) {
+            // get all the data to an assoc array.
+            $data = request()->json()->all();
+        }
+
+        if (!$user = User::find($data['user_id'])) {
+            $user = User::find(1); // just be the first person for now.
+        }
+        Auth::login($user);
+
+
+        if (!$trader = Trader::find($data['trader_id'])) {
+            return response("no trader data", 400);
+        }
+
+        if (!$data['vouchers'] || $data['vouchers'] < 1) {
+            return response("no voucher data", 400);
+        }
+
+        $inputVouchers = $data['vouchers'];
+        natsort($inputVouchers);
+
+        $uniqueVouchers = array_unique($inputVouchers);
+
+        $vouchers = Voucher::findByCodes($uniqueVouchers);
+
+        foreach ($vouchers as $voucher) {
+            // can we?
+            if ($voucher->transitionAllowed($transition)) {
+                // yes! do the thing!
+                $voucher->trader_id = $trader->id;
+
+                // this saves the model too.
+                $voucher->applyTransition($transition);
+                array_push($responseData['success'], $voucher->code);
+            } else {
+                // no! add it to a list of failures.
+                array_push($responseData['failure'], $voucher->code);
+            }
+        }
+
+        return response()->json($responseData, 200);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Voucher  $voucher
+     * @param  string $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Voucher $voucher)
+    public function show($id)
     {
-        return response()->json(Voucher::findByCode($voucher));
+        return response()->json(Voucher::findByCode($id));
     }
 
     /**
