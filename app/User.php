@@ -32,8 +32,4 @@ class User extends Authenticatable
         return $this->belongsToMany('App\Traders');
     }
 
-    public function submissions()
-    {
-        return $this->hasMany('App\Submissions');
-    }
 }
