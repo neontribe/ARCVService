@@ -67,13 +67,17 @@ $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
         $sponsor_id = $faker->randomElement($sponsor_ids);
     } else {
         // there are no sponsors. odd. make a null one
-        factory(App\Sponsor::class)->create(['name' => 'Null Sponsors Inc.']);
+        $sponsor = factory(App\Sponsor::class)->create([
+            'name' => 'Null Sponsors Inc.'
+        ]);
         $sponsor_id = $sponsor->id;
     }
-
-    $currentstate = $faker->randomElement(config('state-machine.Voucher.states'));
+    $states = config('state-machine.Voucher.states');
+    $currentstate = $faker->randomElement($states);
 
     // Todo Create the voucher_states that got us here.
+    $transitions = config('state-machine.Voucher.transitions');
+    // Todo find $currentstate in the $transitions[$key]['from']
 
     return [
         'sponsor_id' => $sponsor_id, // a random sponsor

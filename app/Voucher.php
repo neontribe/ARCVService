@@ -22,10 +22,19 @@ class Voucher extends Model
      */
     protected $fillable = [
         'sponsor_id',
-        'redeemer_id',
-        'creditor_id',
+        'trader_id',
         'code',
         'currentstate', // SM_CONFIG looks at this.
+    ];
+
+    /**
+     * The attributes that should be case to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'sponsor_id' => 'int',
+        'trader_id' => 'int',
     ];
 
     /**
@@ -34,6 +43,21 @@ class Voucher extends Model
      * @var array
      */
     protected $hidden = [
+    ];
+
+    /**
+     * Rules for validation.
+     *
+     * @var array
+     */
+    public static $rules = [
+        // Might need to add a 'sometimes' if any required fields can be absent from requests.
+        'trader_id' => ['numeric', 'exists:traders,id'],
+        // DB constraint is max chars, but is it in fact always supposed to be 8 chars?
+        'code' => ['required', 'unique:vouchers', 'max:32'],
+        // Not sure about this one. We might be able to secify config instead.
+        'currentstate' => ['required', 'in_array:voucher_state,to', 'max:24'],
+        'sponsor_id' => ['numeric', 'required', 'exists:sponsors,id'],
     ];
 
     public function sponsor()
