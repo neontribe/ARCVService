@@ -11,36 +11,35 @@ class TradersSeeder extends Seeder
      */
     public function run()
     {
-        $traders = [];
         $tradersData = [
             [
                 'name' => "Lord Nodens",
-                'market_id'=> 1
+                'market_id'=> 1,
             ],
             [
                 'name' => "Byakhee Brothers",
-                'market_id'=> 2
+                'market_id'=> 2,
             ],
             [
                 'name' => "Tracey Tyndalos",
-                'market_id'=> 2
+                'market_id'=> 2,
             ],
             [
                 'name' => "Dave Ultramureehn",
-                'market_id' => 4
+                'market_id' => 4,
             ],
             [
                 'name' => "Harry Darkangel",
-                'market_id' => 5
+                'market_id' => 5,
             ],
             [
                 'name' => "Desmond Artifex",
-                'market_id' => 5
+                'market_id' => 5,
             ],
         ];
 
         foreach ($tradersData as $trader) {
-            $traders[] = factory(App\Trader::class)->create($trader);
+            factory(App\Trader::class)->create($trader);
         }
     }
 }

@@ -11,7 +11,7 @@ class MarketsSeeder extends Seeder
      */
     public function run()
     {
-        $markets = [];
+        // Some without 'location' string will get a post code from faker.
         $marketsData = [
             [
                 'name' => "Cho-Cho Retail Park",
@@ -25,7 +25,6 @@ class MarketsSeeder extends Seeder
             ],
             [
                 'name' => "Angle-Time Street Market",
-                'location' => "Carcosa",
                 'sponsor_id'=> 2
             ],
             [
@@ -35,13 +34,12 @@ class MarketsSeeder extends Seeder
             ],
             [
                 'name' => "Mechanicum Carboot",
-                'location'=> "ForgeWorld Mars",
                 'sponsor_id' => 1
             ],
         ];
 
         foreach ($marketsData as $market) {
-            $markets[] = factory(App\Market::class)->create($market);
+            factory(App\Market::class)->create($market);
         }
     }
 }

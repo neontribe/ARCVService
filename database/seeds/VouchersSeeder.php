@@ -25,7 +25,7 @@ class VouchersSeeder extends Seeder
 
         foreach ($sponsors as $sponsor) {
             for ($i = 1; $i <= $batch_size; $i++) {
-                $voucher = factory(App\Voucher::class)->create([
+                $voucher = factory(App\Voucher::class, 'requested')->create([
                     'code' => $sponsor->shortcode . str_pad($i, 8, "0", STR_PAD_LEFT),
                     'sponsor_id' => $sponsor->id,
                 ]);
