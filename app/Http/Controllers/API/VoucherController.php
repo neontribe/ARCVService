@@ -59,16 +59,30 @@ class VoucherController extends Controller
             return response("no voucher data", 400);
         }
 
+        // Get out - no vouchers to process.
+        if (!$request['trader_id']) {
+            return response("no trader id", 400);
+        }
+
+        // Make sure we have a valid trader.
+        if (!$trader = Trader::find($request['trader_id'])) {
+            // For pre-alpha - we just want to be number 1 anyway.
+            $trader = Trader::find(1);
+        }
+
         // Once we have implemented login...
         $user = Auth::user();
         // Until then...
         if (!$user = User::find($request['user_id'])) {
-            $user = User::find(1); // just be the first person for now.
+            // Just be the first person for now.
+            $user = User::find(1);
         }
         // We need auth'd user to perform voucher state changes.
         Auth::login($user);
 
         $uniqueVouchers = array_unique($request['vouchers']);
+
+        // Do we want to validate codes by regex rule before we try to find them or meh?
 
         // What response do we get for invalids here?
         // Might be better to fetch in turn so we have response for each.

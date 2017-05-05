@@ -53,8 +53,8 @@ class Voucher extends Model
     public static $rules = [
         // Might need to add a 'sometimes' if any required fields can be absent from requests.
         'trader_id' => ['numeric', 'exists:traders,id'],
-        // DB constraint is max chars, but is it in fact always supposed to be 8 chars?
-        'code' => ['required', 'unique:vouchers', 'max:32'],
+        // My regex might be pants... but until we get the edit form spun up who cares?
+        'code' => ['required', 'unique:vouchers', 'regex:[A-Z][A-Z][A-Z][0-9]{8}'],
         // Not sure about this one. We might be able to secify config instead.
         'currentstate' => ['required', 'in_array:voucher_state,to', 'max:24'],
         'sponsor_id' => ['numeric', 'required', 'exists:sponsors,id'],

@@ -24,5 +24,5 @@ Route::get('traders/{trader}/vouchers', [
 
 Route::post('vouchers', [
     'as' => 'api.voucher.collect',
-    'uses' => 'VoucherController@collectVouchers',
+    'uses' => 'VoucherController@collect',
 ]);
