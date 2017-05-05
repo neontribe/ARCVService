@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\API;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -15,17 +15,32 @@ class VoucherControllerTest extends TestCase
     use DatabaseMigrations, DatabaseTransactions;
 
     protected $vouchers;
+
+    protected $payload = {
+        trader_id: 1,
+        user_id: 1,
+        vouchers: [
+            "notavoucher",
+            "UYH78787878",
+            "SOL00000001",
+            "SOL00000002",
+            "SOL00000003"
+        ]
+    };
+
     protected function setUp()
     {
         parent::setUp();
-        $this->vouchers = factory(Voucher::class, 20)->create();
+        // All belong to user1, trader 1.
+        $codes = ['SOL00000001', 'SOL00000002', 'SOL00000003', 'SOL00000004'];
+        foreach ($codes as $code)
+        // Cannot be collected.
+        $this->vouchers[] = factory(Voucher::class)->create([
+            'code' => $code,
+        ];
     }
 
-    public function testVouchersIndex()
-    {
-        //Todo
-    }
-    public function testVouchersStore()
+    public function testVouchersCollect()
     {
         //Todo
     }
