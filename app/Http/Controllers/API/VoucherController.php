@@ -30,6 +30,8 @@ class VoucherController extends Controller
     /**
      * Collect vouchers - this might change to a more all-purpose update vouchers.
      *
+     * route POST api/vouchers
+     *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
@@ -52,7 +54,7 @@ class VoucherController extends Controller
         }
         */
 
-        // Get out - no vuochers to process.
+        // Get out - no vouchers to process.
         if (!$request['vouchers'] || $request['vouchers'] < 1) {
             return response("no voucher data", 400);
         }
@@ -99,13 +101,10 @@ class VoucherController extends Controller
             }
         }
 
-        $messages['success'] = 'Sucessfully collected ';
-        $messages['failures'] .= 'Failed to collect ';
-        foreach ($fail_codes as $code) {
-            $messages['failures'] .= $code;
-        }
-        dd($messages);
-        return response()->json($messages, 200);
+        $responses['success'] = $success_codes;
+        $responses['fail'] = $fail_codes;
+        $responses['invalid'] = $bad_codes;
+        return response()->json($responses, 200);
     }
 
     /**
