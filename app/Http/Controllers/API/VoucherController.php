@@ -38,7 +38,7 @@ class VoucherController extends Controller
     public function collect(Request $request)
     {
         // TODO: Generalise and reroute
-        // for the prupsoes of this iteration, store() will progress
+        // for the prupsoes of this iteration, collect() will progress
         // "allocated" to "recorded";
         // This would better be generalised as an "update" that progresses
         // to the given state for each voucher.
@@ -59,7 +59,7 @@ class VoucherController extends Controller
             return response("no voucher data", 400);
         }
 
-        // Get out - no vouchers to process.
+        // Get out - no trader declared.
         if (!$request['trader_id']) {
             return response("no trader id", 400);
         }
