@@ -12,8 +12,8 @@ class SponsorsSeeder extends Seeder
     public function run()
     {
         $sponsorData = [
-            ['name' => "imperium.gov", "shortcode" =>"SOL"],
-            ['name' => "CthulhuShire County Council", 'shortcode' => "CCC"],
+            ['name' => "Real Virtual Project", "shortcode" =>"RVP"],
+            ['name' => "Sponsor of Latinum", 'shortcode' => "SOL"],
         ];
 
         foreach ($sponsorData as $sponsor) {

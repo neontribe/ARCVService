@@ -79,9 +79,10 @@ $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
     $transitions = config('state-machine.Voucher.transitions');
     // Todo find $currentstate in the $transitions[$key]['from']
 
+    $shortcode = App\Sponsor::find($sponsor_id)->shortcode;
     return [
         'sponsor_id' => $sponsor_id, // a random sponsor
-        'code' => $faker->ean8, // 8 digit barcode
+        'code' => $shortcode . $faker->ean8, // 8 digit barcode
         'currentstate' => $currentstate,
     ];
 });
