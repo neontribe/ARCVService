@@ -17,25 +17,12 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// TODO: sort these out into proper PS-4 heirarchy or something...
-
-Route::resource('vouchers', 'API\VoucherController', [
-    'only' => ['index','show','store']
-]);
-
-Route::resource('users', 'API\UserController', [
-    'only' => ['index','show',]
-]);
-
-Route::resource('markets', 'API\MarketController', [
-    'only' => ['index','show',]
-]);
-
-Route::resource('traders', 'API\TraderController', [
-    'only' => ['index','show']
-]);
 Route::get('traders/{trader}/vouchers', [
     'as' => 'api.trader.vouchers',
-    'uses' => 'API\TraderController@showVouchers'
+    'uses' => 'TraderController@showVouchers',
 ]);
 
+Route::post('vouchers', [
+    'as' => 'api.voucher.collect',
+    'uses' => 'VoucherController@collect',
+]);

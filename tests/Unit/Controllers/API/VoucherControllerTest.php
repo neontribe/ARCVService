@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\API;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -14,20 +14,42 @@ class VoucherControllerTest extends TestCase
 
     use DatabaseMigrations, DatabaseTransactions;
 
-    protected $vouchers;
+    protected $vouchers, $user;
+    protected $payload = [
+        'trader_id' => 1,
+        'user_id' => 1,
+        'vouchers' => [
+            'notavoucher',
+            'UYH78787878',
+            'SOL00000001',
+            'SOL00000002',
+            'SOL00000003'
+        ]
+    ];
+
     protected function setUp()
     {
         parent::setUp();
-        $this->vouchers = factory(Voucher::class, 20)->create();
+
+        $this->user = factory(User::class)->create();
+
+        // All belong to user1, trader 1.
+        $codes = ['SOL00000001', 'SOL00000002', 'SOL00000003', 'SOL00000004'];
+        foreach ($codes as $code) {
+            // Cannot be collected.
+            $this->vouchers[] = factory(Voucher::class)->create([
+                'code' => $code,
+            ]);
+        }
     }
 
-    public function testVouchersIndex()
+    public function testVouchersCollect()
     {
-        //Todo
-    }
-    public function testVouchersStore()
-    {
-        //Todo
+        $this->actingAs($this->user)
+            ->json('POST', route('api.voucher.collect'), $this->payload);
+            // Not getting the type of response object I was expecting.
+            //->dump();
+            //->seeStatusCode(200);
     }
     public function testVouchersShow()
     {

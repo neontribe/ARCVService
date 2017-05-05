@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\Service;
 
 use App\Market;
 use Illuminate\Http\Request;
