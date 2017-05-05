@@ -25,3 +25,9 @@ Route::resource('markets', 'MarketController', [
 Route::resource('traders', 'TraderController', [
     'only' => ['index','show']
 ]);
+
+// Not for production - remove after pre-alpha - or make SAFE for staging only!
+Route::get('reset-data', function() {
+    \Artisan::call('migrate:refresh', ['--seed' => true, '--force' => true]);
+    dump('Reseeded!!');
+});
