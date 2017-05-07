@@ -35,6 +35,14 @@ class VouchersSeeder extends Seeder
             $rvp_vouchers[$i-60]->code = 'RVP123455'.$i;
             $rvp_vouchers[$i-60]->sponsor_id = $rvp->id;
             $rvp_vouchers[$i-60]->save();
+
+            if ($rvp_vouchers[$i-60]->id < 10) {
+                //Progress these to allocated.
+                $rvp_vouchers[$i-60]->applyTransition('order');
+                $rvp_vouchers[$i-60]->applyTransition('print');
+                $rvp_vouchers[$i-60]->applyTransition('dispatch');
+                $rvp_vouchers[$i-60]->applyTransition('allocate');
+            }
         }
 
         $size = sizeOf($sol_vouchers);
