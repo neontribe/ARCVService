@@ -19,7 +19,43 @@ class VouchersSeeder extends Seeder
 
         Auth::login($user);
 
-        // for each Sponsor, instantiate *over 100* vouchers!
+        // Create RVP one as id 1 our trader will be affiliated with this.
+        $rvp = App\Sponsor::where('shortcode', 'RVP')->first();
+        $sol = App\Sponsor::where('shortcode', 'SOL')->first();
+
+        // Only requested state works with seeder for now.
+        // Only 40 for now or we will get 9 digits.
+        $rvp_vouchers = factory(App\Voucher::class, 'requested', 40)->create();
+
+        $sol_vouchers = factory(App\Voucher::class, 'requested', 50)->create();
+
+        $size = sizeOf($rvp_vouchers);
+        // Assign the codes that match the paper.
+        for ($i=60; $i<$size+60; $i++) {
+            $rvp_vouchers[$i-60]->code = 'RVP123455'.$i;
+            $rvp_vouchers[$i-60]->sponsor_id = $rvp->id;
+            $rvp_vouchers[$i-60]->save();
+
+            if ($rvp_vouchers[$i-60]->id < 10) {
+                //Progress these to allocated.
+                $rvp_vouchers[$i-60]->applyTransition('order');
+                $rvp_vouchers[$i-60]->applyTransition('print');
+                $rvp_vouchers[$i-60]->applyTransition('dispatch');
+                $rvp_vouchers[$i-60]->applyTransition('allocate');
+            }
+        }
+
+        $size = sizeOf($sol_vouchers);
+        // Assign the codes that match the paper.
+        for ($i=10; $i<$size+10; $i++) {
+            $sol_vouchers[$i-10]->code = 'SOL100000'.$i;
+            $sol_vouchers[$i-10]->sponsor_id = $sol->id;
+            $sol_vouchers[$i-10]->save();
+        }
+
+        /* SAVE for LATER
+
+          for each Sponsor, instantiate *over 100* vouchers!
         $batch_size = 101;
         $sponsors = \App\Sponsor::all();
 
@@ -43,6 +79,7 @@ class VouchersSeeder extends Seeder
             $voucher = App\Voucher::find($i);
             $voucher->trader_id = $trader->id;
             $voucher->applyTransition('collect');
-        }
+        } */
     }
+
 }
