@@ -25,21 +25,25 @@ class VouchersSeeder extends Seeder
 
         // Only requested state works with seeder for now.
         // Only 40 for now or we will get 9 digits.
-        $rvp_vouchers = factory(App\Voucher::class, 'requested', 40)->create([
-            'sponsor_id' => $rvp->id,
-        ]);
+        $rvp_vouchers = factory(App\Voucher::class, 'requested', 40)->create();
 
-        $sol_vouchers = factory(App\Voucher::class, 'requested', 50)->create([
-            'sponsor_id' => $sol->id,
-        ]);
+        $sol_vouchers = factory(App\Voucher::class, 'requested', 50)->create();
 
         $size = sizeOf($rvp_vouchers);
         // Assign the codes that match the paper.
         for ($i=60; $i<$size+60; $i++) {
             $rvp_vouchers[$i-60]->code = 'RVP123455'.$i;
+            $rvp_vouchers[$i-60]->sponsor_id = $rvp->id;
             $rvp_vouchers[$i-60]->save();
         }
 
+        $size = sizeOf($sol_vouchers);
+        // Assign the codes that match the paper.
+        for ($i=10; $i<$size+10; $i++) {
+            $sol_vouchers[$i-10]->code = 'SOL100000'.$i;
+            $sol_vouchers[$i-10]->sponsor_id = $sol->id;
+            $sol_vouchers[$i-10]->save();
+        }
 
         /* SAVE for LATER
 
