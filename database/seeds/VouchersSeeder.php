@@ -45,6 +45,10 @@ class VouchersSeeder extends Seeder
             }
         }
 
+        // Transition one voucher to recorded by trader 1.
+        $rvp_vouchers[1]->trader_id = 1;
+        $rvp_vouchers[1]->applyTransition('collect');
+
         $size = sizeOf($sol_vouchers);
         // Assign the codes that match the paper.
         for ($i=10; $i<$size+10; $i++) {
