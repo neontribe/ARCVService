@@ -10,7 +10,7 @@ before_script:
 - mysql -e 'create database homestead;'
 - composer install --no-interaction
 - php artisan key:generate
-- php artisan migrate
+- php artisan migrate --seed --force
 - sudo apt-get update && sudo apt-get install -y libxpm4 libxrender1 libgtk2.0-0 libnss3 libgconf-2-4
 - sudo apt-get install -y chromium-browser
 - sudo apt-get install -y xvfb gtk2-engines-pixbuf
