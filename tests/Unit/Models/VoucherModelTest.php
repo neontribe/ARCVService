@@ -84,6 +84,5 @@ class VoucherModelTest extends TestCase
 
     public function testFindVouchersByCodes()
     {
-        //Todo
     }
 }
