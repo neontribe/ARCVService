@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Sponsor extends Model
 {
     use SoftDeletes;
+
     protected $dates = ['deleted_at'];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -26,8 +28,13 @@ class Sponsor extends Model
     protected $hidden = [
     ];
 
+    /**
+     * Get the vouchers associated with this Sponsor.
+     *
+     * @return App\Voucher Collection
+     */
     public function vouchers()
     {
-        $this->hasMany(Voucher::class);
+        return $this->hasMany(Voucher::class);
     }
 }
