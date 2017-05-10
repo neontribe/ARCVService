@@ -29,11 +29,11 @@ class Trader extends Model
     protected $hidden = [
     ];
 
-    public function users()
-    {
-        return $this->belongsToMany('App\Users');
-    }
-
+    /**
+     * Get the voucehrs belonging to this trader.
+     *
+     * @return App\Voucher collection
+     */
     public function vouchers()
     {
         return $this->hasMany('App\Voucher');

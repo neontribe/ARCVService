@@ -59,6 +59,17 @@ $factory->define(App\Trader::class, function (Faker\Generator $faker) {
 });
 
 /**
+ * Trader with nullables filled.
+ */
+$factory->defineAs(App\Trader::class, 'withnullable', function ($faker) use ($factory) {
+    $trader = $factory->raw(App\Trader::class);
+
+    return array_merge($trader, [
+        'pic_url' => 'https://placeholdit.com/150x150',
+        'market_id' => factory(App\Market::class)->create()->id,
+    ]);
+});
+/**
  * Voucher with a random current state.
  */
 $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
