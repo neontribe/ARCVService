@@ -12,7 +12,7 @@ before_script:
 - php artisan key:generate
 - php artisan migrate
 - sudo apt-get update && sudo apt-get install -y google-chrome-stable
-- export Display=:0
+- export Display=:99.0
 - sh -e /etc/init.d/xvfb start
 - chmod a+x ./vendor/laravel/dusk/bin/chromedriver-linux
 - ./vendor/laravel/dusk/bin/chromedriver-linux --port=8888 &
@@ -30,7 +30,7 @@ deploy:
   skip_cleanup: true
   script: rsync -r --exclude storage --delete-after --quiet $TRAVIS_BUILD_DIR/* $DEPLOY_USER@$DEPLOY_IP:/var/www/$DEPLOY_DIR
   on:
-    branch: 0.2/release
+    branch: 0.1/release
 services:
 - mysql
 env:
