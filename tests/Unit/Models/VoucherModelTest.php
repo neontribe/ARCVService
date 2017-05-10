@@ -1,10 +1,9 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\Models;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use SM\StateMachine\StateMachine;
 use App\Voucher;
 use App\Sponsor;
@@ -13,7 +12,7 @@ use App\Trader;
 class VoucherModelTest extends TestCase
 {
 
-    use DatabaseMigrations, DatabaseTransactions;
+    use DatabaseMigrations;
 
     protected $voucher;
     protected function setUp()
