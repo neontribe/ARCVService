@@ -2,7 +2,7 @@ This directory contains unit tests for Models Commands, Listeners, Routes and Co
 
 A test should be created for every new function added to a Model, Command, Listener or Controller.
 
-A test should be created for every new route implemented.
+A test should be created for every new Route implemented.
 
 There is some crossover with controllers and acceptance/ feature - so open to discussion.
 

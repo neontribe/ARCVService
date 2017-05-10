@@ -44,7 +44,7 @@ class ApiRoutesTest extends TestCase
 
     }
 
-    public function testCollectVoucheRoute()
+    public function testCollectVoucherRoute()
     {
         $payload= [
             'user_id' => 1,

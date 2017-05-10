@@ -17,11 +17,7 @@ class ServiceRoutesTest extends TestCase
         parent::setUp();
         $this->vouchers = factory(Voucher::class, 10)->create();
      }
-    /**
-     * A basic browser test example.
-     *
-     * @return void
-     */
+
     public function testVouchersResourseRoutes()
     {
         $this->get(route('vouchers.index'))
