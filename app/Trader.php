@@ -30,7 +30,7 @@ class Trader extends Model
     ];
 
     /**
-     * Get the voucehrs belonging to this trader.
+     * Get the vouchers belonging to this trader.
      *
      * @return App\Voucher collection
      */
