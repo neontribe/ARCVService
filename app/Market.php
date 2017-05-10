@@ -21,6 +21,15 @@ class Market extends Model
     ];
 
     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'sponsor_id' => 'int',
+    ];
+
+    /**
      * The attributes that should be hidden for arrays.
      *
      * @var array
