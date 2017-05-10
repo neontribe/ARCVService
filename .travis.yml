@@ -20,8 +20,6 @@ before_script:
 - chmod a+x ./vendor/laravel/dusk/bin/chromedriver-linux
 - ./vendor/laravel/dusk/bin/chromedriver-linux --port=8888 &
 - php artisan serve &
-script:
-- php artisan dusk
 before_deploy:
 - openssl aes-256-cbc -K $encrypted_499e418efa07_key -iv $encrypted_499e418efa07_iv
   -in deploy_rsa.enc -out deploy_rsa -d
