@@ -1,5 +1,22 @@
 # ARCVService
-ARC Voucher Service/API
+## About ARC Voucher Service/API
+ARCV Service is the service portal and API for ARCV Market.
+
+## Installation of Development instance
+
+1. Clone the repo
+2. Create a database and user (homestead, sqlite or mysql)
+3. Copy `.env.example` to `.env` and edit to local settings
+4. `composer install`
+5. `php artisan key:generate`
+6. `php artisan migrate --seed`
+7. Reseed with `php artisan migrate:refresh --seed`
+8. Run tests with `phpunit`
+
+## Deployment
+
+1. Travis will build and test with every push to the repo.
+2. Travis will deploy to staging `https://arcvservice-prealpha.neontribe.org` with every merge to default branch. When default branch is updated, change value in `.travis.yml`.
 
 ## CI deploy with Travis set up notes
 
