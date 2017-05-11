@@ -18,20 +18,18 @@ class VoucherControllerTest extends TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->vouchers = factory(Voucher::class, 20)->create();
     }
 
     public function testVouchersIndex()
     {
+        // This will change but is currently a JSON endpoint.
+        // The status and structure are being tested in Unit/Routes/ServiceRoutesTest
+    }
 
-    }
-    public function testVouchersStore()
-    {
-        //Todo
-    }
     public function testVouchersShow()
     {
-        //Todo
+        // This will change but currently JSON for easier dev.
+        // The status and structure tested in Unit/Routes/ServiceRoutesTest
     }
 
 

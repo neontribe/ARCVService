@@ -8,24 +8,21 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Auth;
 use Log;
-use App\Trader;
 use App\Voucher;
-use App\User;
 
 class VoucherController extends Controller
 {
 
-    protected $user;
-
     /**
-     * Display a listing of the resource.
+     * Display a listing of Vouchers.
+     * // Todo this will change.
      *
-     * @return \Illuminate\Http\Response
+     * @return json
      */
     public function index()
     {
         $vouchers = Voucher::all();
-        return response()->json($vouchers->toArray());
+        return json_decode($vouchers);
     }
 
 
@@ -84,13 +81,14 @@ class VoucherController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified Voucher.
+     * Todo this will change
      *
-     * @param  string $code
+     * @param  App\Voucher $voucher
      * @return \Illuminate\Http\Response
      */
-    public function show($code)
+    public function show(Voucher $voucher)
     {
-        return response()->json(Voucher::findByCode($code));
+        return $voucher;
     }
 }
