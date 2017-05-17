@@ -14,6 +14,7 @@
         "laravel/passport": "^2.0",
         "laravel/tinker": "~1.0",
         "moontoast/math": "^1.1",
+        "optimus/api-consumer": "0.2.*",
         "ramsey/uuid": "^3.6",
         "sebdesign/laravel-state-machine": "^1.1"
     },

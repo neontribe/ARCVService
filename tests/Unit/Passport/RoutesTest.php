@@ -24,8 +24,11 @@ class RoutesTest extends TestCase
             '--password' => null,
         ]);
 
- // fetch client for id and secret
-        $this->client = \DB::table('oauth_clients')->where('password_client', 1)->first();
+        // fetch client for id and secret
+        $this->client = \DB::table('oauth_clients')
+            ->where('password_client', 1)
+            ->first()
+        ;
     }
 
     public function testGetAccessTokenWithGoodCredentials()

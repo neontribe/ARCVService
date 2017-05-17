@@ -181,6 +181,8 @@ return [
         Barryvdh\Debugbar\ServiceProvider::class, //DebugBar
         Barryvdh\Cors\ServiceProvider::class, //CORS framework
         Sebdesign\SM\ServiceProvider::class, //FSM
+        Optimus\ApiConsumer\Provider\LaravelServiceProvider::class,
+
     ],
 
     /*
