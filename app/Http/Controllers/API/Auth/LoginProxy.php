@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API\Auth;
 
 use Illuminate\Foundation\Application;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use App\User;
 
 class LoginProxy
@@ -37,13 +36,18 @@ class LoginProxy
         $user = User::where('email', $email)->first();
 
         if (!is_null($user)) {
+
             return $this->proxy('password', [
                 'username' => $email,
                 'password' => $password
             ]);
         }
 
-        return response()->json('Invalid credentials', 403);
+        // Mimic the OAuthServerException invalidCredentials
+        return [
+            'error' => 'invalid_credentials',
+            'message' => 'The user credentials were incorrect.',
+        ];
     }
 
     /**
@@ -78,8 +82,8 @@ class LoginProxy
         $response = $this->apiConsumer->post('/oauth/token', $data);
 
         if (!$response->isSuccessful()) {
-            return $response->getContent();
-            //throw new UnauthorizedHttpException('');
+            // Todo this is the wrong response... returning empty headers.
+            return $response;
         }
 
         $data = json_decode($response->getContent());

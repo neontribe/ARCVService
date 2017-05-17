@@ -11,12 +11,12 @@ abstract class ApiRequest extends FormRequest
 {
     protected function failedValidation(Validator $validator)
     {
-        throw new UnprocessableEntityHttpException($validator->errors()->toJson());
+        return $validator->errors();
     }
 
     protected function failedAuthorization()
     {
-        throw new HttpException(403);
+        return response('403');
     }
 }
 
