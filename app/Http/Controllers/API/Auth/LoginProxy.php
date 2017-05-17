@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\API\Auth;
 
 use Illuminate\Foundation\Application;
-use Infrastructure\Auth\Exceptions\InvalidCredentialsException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use App\User;
 
 class LoginProxy
@@ -19,7 +19,6 @@ class LoginProxy
 
     public function __construct(Application $app, User $user) {
         $this->user = $user;
-
         $this->apiConsumer = $app->make('apiconsumer');
         $this->auth = $app->make('auth');
         $this->cookie = $app->make('cookie');
@@ -35,7 +34,7 @@ class LoginProxy
      */
     public function attemptLogin($email, $password)
     {
-        $user = $this->user;
+        $user = User::where('email', $email)->first();
 
         if (!is_null($user)) {
             return $this->proxy('password', [
@@ -44,7 +43,7 @@ class LoginProxy
             ]);
         }
 
-        throw new InvalidCredentialsException();
+        return response()->json('Invalid credentials', 403);
     }
 
     /**
@@ -69,15 +68,18 @@ class LoginProxy
     public function proxy($grantType, array $data = [])
     {
         $data = array_merge($data, [
-            'client_id'     => env('PASSWORD_CLIENT_ID'),
-            'client_secret' => env('PASSWORD_CLIENT_SECRET'),
-            'grant_type'    => $grantType
+            'client_id'     => (int) config('passport.password_client'),
+            'client_secret' => config('passport.password_client_secret'),
+            'grant_type'    => $grantType,
+            // All users equal for now. No scopes.
+            'scope' => '',
         ]);
 
         $response = $this->apiConsumer->post('/oauth/token', $data);
 
         if (!$response->isSuccessful()) {
-            throw new InvalidCredentialsException();
+            return $response->getContent();
+            //throw new UnauthorizedHttpException('');
         }
 
         $data = json_decode($response->getContent());

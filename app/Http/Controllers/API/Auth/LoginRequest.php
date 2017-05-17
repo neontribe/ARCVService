@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API\Auth;
 
 use App\Http\ApiRequest;
 
+// I feel like we could be using Laravels gates and built in validation.
+
 class LoginRequest extends ApiRequest
 {
     public function authorize()
@@ -13,9 +15,10 @@ class LoginRequest extends ApiRequest
 
     public function rules()
     {
+        // These should really be rules on the User::class.
         return [
-            'email'    => 'required|email',
-            'password' => 'required'
+            'username' => 'required|email',
+            'password' => 'required',
         ];
     }
 }

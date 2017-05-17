@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 |--------------------------------------------------------------------------
 */
 
-Route::get('login', [
+Route::post('login', [
     'as' => 'api.login',
     'uses' => 'Auth\LoginController@login',
 ]);
