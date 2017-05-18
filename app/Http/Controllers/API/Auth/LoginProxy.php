@@ -17,7 +17,8 @@ class LoginProxy
     private $request;
     private $user;
 
-    public function __construct(Application $app, User $user) {
+    public function __construct(Application $app, User $user)
+    {
         $this->user = $user;
         $this->apiConsumer = $app->make('apiconsumer');
         $this->auth = $app->make('auth');
@@ -37,7 +38,6 @@ class LoginProxy
         $user = User::where('email', $email)->first();
 
         if (!is_null($user)) {
-
             return $this->proxy('password', [
                 'username' => $email,
                 'password' => $password
@@ -115,12 +115,14 @@ class LoginProxy
     {
         $accessToken = $this->auth->user()->token();
 
-        $refreshToken = $this->db
+        // Revoke the refreshToken.
+        $this->db
             ->table('oauth_refresh_tokens')
             ->where('access_token_id', $accessToken->id)
             ->update([
                 'revoked' => true
-            ]);
+            ])
+        ;
 
         $accessToken->revoke();
 
