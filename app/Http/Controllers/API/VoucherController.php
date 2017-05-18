@@ -68,15 +68,8 @@ class VoucherController extends Controller
             $trader = Trader::find(1);
         }
 
-        // Once we have implemented login...
+        // The user who performs the transition. Are we using this anywhere yet?
         $user = Auth::user();
-        // Until then...
-        if (!$user = User::find($request['user_id'])) {
-            // Just be the first person for now.
-            $user = User::find(1);
-        }
-        // We need auth'd user to perform voucher state changes.
-        Auth::login($user);
 
         $uniqueVouchers = array_unique($request['vouchers']);
 

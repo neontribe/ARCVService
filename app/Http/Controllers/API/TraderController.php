@@ -17,7 +17,7 @@ class TraderController extends Controller
      */
     public function show(Trader $trader)
     {
-        //
+        return response()->json($trader, 200);
     }
 
     /**
