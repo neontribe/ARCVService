@@ -26,8 +26,9 @@ class UserModelTest extends TestCase
 
     public function testUserBelongsToManyTraders()
     {
+        $this->assertCount(3, $this->users[0]->traders);
+        $this->assertCount(2, $this->users[1]->traders);
     }
-
 
     public function testSoftDeleteUser()
     {
@@ -35,5 +36,12 @@ class UserModelTest extends TestCase
         $this->assertCount(2, User::withTrashed()->get());
         $this->assertCount(1, User::all());
     }
+
+    public function testCheckIfTraderBelongsToUser()
+    {
+        $this->assertTrue($this->users[0]->hasTrader(1));
+        $this->assertFalse($this->users[1]->hasTrader(1));
+    }
+
 
 }

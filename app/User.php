@@ -48,9 +48,9 @@ class User extends Authenticatable
      *
      * @return boolean
      */
-    public function hasTrader($trader)
+    public function hasTrader($trader_id)
     {
-        return in_array($trader_id, $this->traders()->pluck('id'));
+        return in_array($trader_id, $this->traders()->pluck('id')->toArray());
     }
 
 }

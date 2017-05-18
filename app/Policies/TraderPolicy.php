@@ -19,6 +19,7 @@ class TraderPolicy
      */
     public function view(User $user, Trader $trader)
     {
+        dump($user);
         // Only if the Trader belongs to the user.
         return $user->hasTrader($trader->id);
     }

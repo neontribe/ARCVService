@@ -138,4 +138,15 @@ class ApiRoutesTest extends TestCase
             ->assertJson(['error' => 'Unauthenticated.'])
         ;
     }
+
+    public function testUserCanSeeOwnTrader()
+    {
+        $trader = factory(Trader::class)->create();
+        $this->user->traders()->sync([$trader->id]);
+        $this->actingAs($this->user, 'api')
+            ->get(route('api.traders.trader', $trader->id))
+            ;//->dump()
+            //->assertStatus(200);
+    }
+
 }
