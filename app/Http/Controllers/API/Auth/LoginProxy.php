@@ -8,7 +8,7 @@ use App\User;
 
 class LoginProxy
 {
-    const REFRESH_TOKEN = 'refreshToken';
+    const REFRESH_TOKEN = 'refresh_token';
 
     private $apiConsumer;
     private $auth;
@@ -59,10 +59,10 @@ class LoginProxy
      */
     public function attemptRefresh()
     {
-        $refreshToken = $this->request->cookie(self::REFRESH_TOKEN);
+        $refresh_token = $this->request->refresh_token; //cookie(self::REFRESH_TOKEN);
 
         return $this->proxy('refresh_token', [
-            'refresh_token' => $refreshToken
+            'refresh_token' => $refresh_token
         ]);
     }
 
@@ -89,7 +89,6 @@ class LoginProxy
         }
 
         $data = json_decode($response->getContent());
-
         // Create a refresh token cookie
         $this->cookie->queue(
             self::REFRESH_TOKEN,
@@ -103,7 +102,8 @@ class LoginProxy
 
         return response()->json([
             'access_token' => $data->access_token,
-            'expires_in' => $data->expires_in
+            'expires_in' => $data->expires_in,
+            'refresh_token' => $data->refresh_token,
         ]);
     }
 
