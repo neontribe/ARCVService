@@ -64,12 +64,11 @@ class ApiRoutesTest extends TestCase
 
     public function testDontGetAccessTokenWithBadUsername()
     {
-        $response = $this->post(route('api.login'), [
-            'username' => 'nottheusersname',
+        $this->post(route('api.login'), [
+            'username' => 'nottheusersname@example.com',
             'password' => 'secret',
-        ])->getContent();
-
-        $this->assertEquals(json_decode($response, true), [
+        ])->assertStatus(401)
+        ->assertJson([
             'error' => 'invalid_credentials',
             'message' => 'The user credentials were incorrect.',
         ]);
@@ -88,7 +87,7 @@ class ApiRoutesTest extends TestCase
         ]);
     }
 
-    /** REQUIRES AUTH ----------------------------------------------------------- */
+    /** REQUIRES AUTH ------------------------------------------------- */
 
     public function testShowTraderVouchersRoute()
     {

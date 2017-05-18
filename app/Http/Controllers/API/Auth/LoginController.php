@@ -19,7 +19,7 @@ class LoginController extends Controller
         $email = $request->username;
         $password = $request->password;
 
-        return response()->json($this->loginProxy->attemptLogin($email, $password));
+        return $this->loginProxy->attemptLogin($email, $password);
     }
 
     public function refresh(Request $request)

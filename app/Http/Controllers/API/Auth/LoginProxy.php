@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Auth;
 
 use Illuminate\Foundation\Application;
+use Log;
 use App\User;
 
 class LoginProxy
@@ -43,11 +44,13 @@ class LoginProxy
             ]);
         }
 
+        // Log the failed attempt.
+        Log::info('Login attempt with invalid credentials for ' . $email . '.');
         // Mimic the OAuthServerException invalidCredentials
-        return [
+        return response([
             'error' => 'invalid_credentials',
             'message' => 'The user credentials were incorrect.',
-        ];
+        ], 401);
     }
 
     /**
@@ -82,7 +85,6 @@ class LoginProxy
         $response = $this->apiConsumer->post('/oauth/token', $data);
 
         if (!$response->isSuccessful()) {
-            // Todo this is the wrong response... returning empty headers.
             return $response;
         }
 
@@ -99,10 +101,10 @@ class LoginProxy
             true // HttpOnly
         );
 
-        return [
+        return response()->json([
             'access_token' => $data->access_token,
             'expires_in' => $data->expires_in
-        ];
+        ]);
     }
 
     /**
