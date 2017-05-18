@@ -23,6 +23,26 @@ class ApiRoutesTest extends TestCase
         $this->trader = factory(Trader::class)->create();
         $this->vouchers = factory(Voucher::class, 'requested', 10)->create();
         $this->user = factory(User::class)->create();
+
+        // Set up password client
+        $this->artisan('passport:client', [
+            '--no-interaction' => true,
+            '--password' => null,
+        ]);
+
+        // fetch client for id and secret
+        $this->client = \DB::table('oauth_clients')
+            ->where('password_client', 1)
+            ->first()
+        ;
+
+        // Override the .env values with the newly created client.
+        config([
+            'passport.password_client' => (int) $this->client->id,
+            'passport.password_client_secret' => $this->client->secret,
+        ]);
+
+        // Set up voucher states.
         Auth::login($this->user);
         foreach ($this->vouchers as $v) {
             $v->applyTransition('order');
@@ -33,6 +53,41 @@ class ApiRoutesTest extends TestCase
         $this->vouchers[1]->trader_id = 1;
         $this->vouchers[1]->applyTransition('collect');
     }
+
+    public function testGetAccessTokenWithGoodCredentials()
+    {
+        $this->post(route('api.login'), [
+            'username' => $this->user->email,
+            'password' => 'secret',
+        ])->assertJsonStructure(['access_token', 'expires_in']);
+    }
+
+    public function testDontGetAccessTokenWithBadUsername()
+    {
+        $this->post(route('api.login'), [
+            'username' => 'nottheusersname@example.com',
+            'password' => 'secret',
+        ])->assertStatus(401)
+        ->assertJson([
+            'error' => 'invalid_credentials',
+            'message' => 'The user credentials were incorrect.',
+        ]);
+    }
+
+    public function testDontGetAccessTokenWithBadUserPassword()
+    {
+        $response = $this->post(route('api.login'), [
+            'username' => $this->user->email,
+            'password' => 'notthesecret',
+        ])->getContent();
+
+        $this->assertEquals(json_decode($response, true), [
+            'error' => 'invalid_credentials',
+            'message' => 'The user credentials were incorrect.',
+        ]);
+    }
+
+    /** REQUIRES AUTH ------------------------------------------------- */
 
     public function testShowTraderVouchersRoute()
     {
