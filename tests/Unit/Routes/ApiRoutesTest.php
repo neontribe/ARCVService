@@ -59,7 +59,7 @@ class ApiRoutesTest extends TestCase
         $this->post(route('api.login'), [
             'username' => $this->user->email,
             'password' => 'secret',
-        ])->assertJsonStructure(['access_token', 'expires_in']);
+        ])->assertJsonStructure(['access_token', 'expires_in', 'refresh_token']);
     }
 
     public function testDontGetAccessTokenWithBadUsername()
