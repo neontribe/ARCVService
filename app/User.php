@@ -4,11 +4,14 @@ namespace App;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Passport\HasApiTokens;
+use App\Trader;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable;
+    use HasApiTokens, Notifiable, SoftDeletes;
+    protected $dates = ['deleted_at'];
 
     /**
      * The attributes that are mass assignable.
@@ -28,9 +31,26 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    /**
+     * Get the user's traders.
+     *
+     * @return App\Trader Collection.
+     */
     public function traders()
     {
-        return $this->belongsToMany('App\Traders');
+        return $this->belongsToMany(Trader::class);
+    }
+
+    /**
+     * Check if the trader belongs to the user.
+     *
+     * @param App\Trader $trader
+     *
+     * @return boolean
+     */
+    public function hasTrader($trader)
+    {
+        return in_array($trader_id, $this->traders()->pluck('id'));
     }
 
 }
