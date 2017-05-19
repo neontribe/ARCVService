@@ -20,21 +20,32 @@ Route::get('login/refresh', [
 
 /** Authentication required --------------------------------------------- */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::group(['middleware' => 'auth:api'], function () {
+
+    Route::post('logout', [
+        'as' => 'api.logout',
+        'uses' => 'Auth\LoginController@logout',
+    ]);
+
+    Route::get('traders', [
+        'as' => 'api.traders',
+        'uses' => 'TraderController@index',
+    ]);
+
+    Route::get('traders/{trader}', [
+        'as' => 'api.traders.trader',
+        'uses' => 'TraderController@show',
+        // $user and App\Trader sent implicitly to policy.
+    ])->middleware('can:view,trader');
+
+    Route::get('traders/{trader}/vouchers', [
+        'as' => 'api.trader.vouchers',
+        'uses' => 'TraderController@showVouchers',
+    ]);
+
+    Route::post('vouchers', [
+        'as' => 'api.voucher.collect',
+        'uses' => 'VoucherController@collect',
+    ]);
+
 });
-
-Route::post('logout', [
-    'as' => 'api.logout',
-    'uses' => 'Auth\LoginController@logout',
-]);
-
-Route::get('traders/{trader}/vouchers', [
-    'as' => 'api.trader.vouchers',
-    'uses' => 'TraderController@showVouchers',
-]);
-
-Route::post('vouchers', [
-    'as' => 'api.voucher.collect',
-    'uses' => 'VoucherController@collect',
-]);
