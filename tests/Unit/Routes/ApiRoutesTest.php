@@ -145,8 +145,7 @@ class ApiRoutesTest extends TestCase
         $this->user->traders()->sync([$trader->id]);
         $this->actingAs($this->user, 'api')
             ->get(route('api.traders.trader', $trader->id))
-            ;//->dump()
-            //->assertStatus(200);
+            ->assertStatus(200);
     }
 
 }
