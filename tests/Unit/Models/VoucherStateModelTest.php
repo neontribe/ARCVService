@@ -46,6 +46,7 @@ class VoucherStateModelTest extends TestCase
         // Should be 2 events, "ordered" and "printed".
         $this->assertEquals('printed', $voucher->currentstate);
         $this->assertEquals(2, $voucher->history()->count());
+
     }
 
     public function testTransitionAllowed()
