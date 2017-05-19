@@ -31,7 +31,6 @@ class TraderPolicy
      */
     public function create(User $user)
     {
-        dump('create');
     }
 
     /**
