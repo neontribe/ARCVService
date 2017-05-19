@@ -30,7 +30,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('traders/{trader}', [
         'as' => 'api.traders.trader',
         'uses' => 'TraderController@show',
-    ])->middleware('can:view,App\Trader,trader');
+        // $user and App\Trader sent implicitly to policy.
+    ])->middleware('can:view,trader');
 
     Route::get('traders/{trader}/vouchers', [
         'as' => 'api.trader.vouchers',

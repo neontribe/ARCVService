@@ -144,8 +144,17 @@ class ApiRoutesTest extends TestCase
         $trader = factory(Trader::class)->create();
         $this->user->traders()->sync([$trader->id]);
         $this->actingAs($this->user, 'api')
-            ->get(route('api.traders.trader', $trader->id))
+            ->get(route('api.traders.trader', $trader))
             ->assertStatus(200);
+    }
+
+    public function testUserCannotSeeNotOwnTrader()
+    {
+        $trader = factory(Trader::class)->create();
+        // Don't sync this trader to our user.
+        $this->actingAs($this->user, 'api')
+            ->get(route('api.traders.trader', $trader))
+            ->assertStatus(403);
     }
 
 }
