@@ -27,6 +27,11 @@ Route::group(['middleware' => 'auth:api'], function () {
         'uses' => 'Auth\LoginController@logout',
     ]);
 
+    Route::get('traders', [
+        'as' => 'api.traders',
+        'uses' => 'TraderController@index',
+    ]);
+
     Route::get('traders/{trader}', [
         'as' => 'api.traders.trader',
         'uses' => 'TraderController@show',

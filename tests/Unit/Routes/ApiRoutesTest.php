@@ -124,16 +124,35 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testUnauthenticatedDontCollectVoucherRoute()
+    public function testUnauthenticatedDontcollectVoucherRoute()
     {
         $payload= [
             'user_id' => 1,
             'trader_id' => 1,
             'vouchers' => [
-                'RVP12345563',
+                'rvp12345563',
             ]
         ];
         $this->json('POST', route('api.voucher.collect'), $payload)
+            ->assertStatus(401)
+            ->assertJson(['error' => 'Unauthenticated.'])
+        ;
+    }
+
+    public function testUserCanSeeOwnTraders()
+    {
+        $traders = factory(Trader::class, 5)->create();
+        $this->user->traders()->sync([1,2,3]);
+        $this->actingAs($this->user, 'api')
+            ->json('GET', route('api.traders'))
+            ->assertJsonStructure([['id', 'name', 'pic_url', 'market_id']])
+            ->assertStatus(200)
+        ;
+    }
+
+    public function testUnauthenticatedUserCannotSeeTraders()
+    {
+        $this->json('GET', route('api.traders'))
             ->assertStatus(401)
             ->assertJson(['error' => 'Unauthenticated.'])
         ;
@@ -144,8 +163,9 @@ class ApiRoutesTest extends TestCase
         $trader = factory(Trader::class)->create();
         $this->user->traders()->sync([$trader->id]);
         $this->actingAs($this->user, 'api')
-            ->get(route('api.traders.trader', $trader))
-            ->assertStatus(200);
+            ->json('GET', route('api.traders.trader', $trader))
+            ->assertStatus(200)
+        ;
     }
 
     public function testUserCannotSeeNotOwnTrader()
@@ -153,8 +173,21 @@ class ApiRoutesTest extends TestCase
         $trader = factory(Trader::class)->create();
         // Don't sync this trader to our user.
         $this->actingAs($this->user, 'api')
-            ->get(route('api.traders.trader', $trader))
-            ->assertStatus(403);
+            ->json('GET', route('api.traders.trader', $trader))
+            ->assertStatus(403)
+            // Throwing an Illuminate\Auth\Access\AuthorizationException
+            // No desired - Json response. Because of can policy default?
+            //->assertJson(['error' => 'Unauthorized'])
+        ;
     }
+
+    public function testUnauthenticatedUserCannotSeeTrader()
+    {
+        $this->json('GET', route('api.traders'))
+            ->assertStatus(401)
+            ->assertJson(['error' => 'Unauthenticated.'])
+        ;
+    }
+
 
 }

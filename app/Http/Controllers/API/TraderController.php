@@ -3,12 +3,31 @@
 namespace App\Http\Controllers\API;
 
 use DB;
+use Auth;
 use App\Trader;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 class TraderController extends Controller
 {
+
+    /**
+     * A list of traders belonging to auth's user.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        // We won't be here if not because of the api middleware but...
+        if (!Auth::user()) { abort(401); }
+
+        $traders = Auth::user()->traders;
+
+        return response()->json($traders, 200);
+    }
+
+
+
     /**
      * Display the specified resource.
      *
