@@ -13,7 +13,7 @@ Route::post('login', [
     'uses' => 'Auth\LoginController@login',
 ]);
 
-Route::get('login/refresh', [
+Route::post('login/refresh', [
     'as' => 'api.login.refresh',
     'uses' => 'Auth\LoginController@refresh',
 ]);
