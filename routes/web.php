@@ -11,8 +11,8 @@
 |
 */
 
-Route::get('/', [
-    'uses' => 'API\TraderController@showVoucherHistory',
-]);
+Route::get('/', function () {
+    return view('welcome');
+});
 
 

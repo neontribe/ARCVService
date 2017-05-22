@@ -71,6 +71,46 @@ class Voucher extends Model
     }
 
     /**
+     * Get the most recent created_at date
+     * There should only ever be one per voucher - but most recent safer.
+     *
+     * @return App\VoucherState
+     */
+    public function paymentPendedOn()
+    {
+        return $this->hasOne(VoucherState::class)
+                ->where('to', 'payment_pending')
+                ->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get the most recent created_at date
+     * There should only ever be one per voucher - but most recent safer.
+     *
+     * @return App\VoucherState
+     */
+    public function recordedOn()
+    {
+        return $this->hasOne(VoucherState::class)
+                ->where('to', 'recorded')
+                ->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get the most recent created_at date
+     * There should only ever be one per voucher - but most recent safer.
+     *
+     * @return App\VoucherState
+     */
+    public function reimbursedOn()
+    {
+        return $this->hasOne(VoucherState::class)
+                ->where('to', 'reimbursed')
+                ->orderBy('created_at', 'desc');
+    }
+
+
+    /**
      * Limit Vouchers to ones that have been confirmed for payment.
      * This will include both pending and reimbersed vouchers.
      *
@@ -78,7 +118,7 @@ class Voucher extends Model
      */
     public function scopeConfirmed($query)
     {
-        $states = ['payment_pending', 'reimbersed'];
+        $states = ['payment_pending', 'reimbursed'];
         return $query->whereIn('currentstate', $states);
     }
 

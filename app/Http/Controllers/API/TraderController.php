@@ -125,17 +125,30 @@ class TraderController extends Controller
      */
     public function showVoucherHistory(Trader $trader)
     {
-        $trader = \App\Trader::find(1);
-
         $vouchers = $trader->vouchersConfirmed;
         $voucher_history = [];
         foreach ($vouchers as $v) {
-            // Group by the created at date on the payment_pending state.
-            //$voucher_history[$v->voucher_state->created_at][] = $v;
+            // If this voucher has been confirmed.
+            if ($v->paymentPendedOn) {
+                $pended_day = $v->paymentPendedOn->created_at->format('Y-m-d');
+                // Group by the created at date on the payment_pending state.
+                $data[$pended_day][] = [
+                    'code' => $v->code,
+                    'recorded_on' => $v->recordedOn->created_at->format('Y-m-d'),
+                    'reimbursed_on' => $v->reimbursedOn
+                        ? $v->reimbursedOn->created_at->format('Y-m-d')
+                        : ''
+                    ,
+                ];
+                foreach ($data as $pended_day => $vouchers) {
+                    $voucher_history[$pended_day] = [
+                        'pended_on' => $pended_day,
+                        'vouchers' => $vouchers,
+                    ];
+                }
+            }
         }
-        return response()->json($voucher_history, 200);
+        return response()->json(array_values($voucher_history), 200);
     }
-
-
 
 }
