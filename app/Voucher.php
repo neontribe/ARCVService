@@ -109,7 +109,6 @@ class Voucher extends Model
                 ->orderBy('created_at', 'desc');
     }
 
-
     /**
      * Limit Vouchers to ones that have been confirmed for payment.
      * This will include both pending and reimbersed vouchers.
