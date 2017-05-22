@@ -198,5 +198,36 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
+    public function testUserCanSeeOwnTraderVoucherHistory()
+    {
+        $trader = factory(Trader::class)->create();
+        $this->user->traders()->sync([$trader->id]);
+        $this->actingAs($this->user, 'api')
+            ->json('GET', route('api.trader.voucher-history', $trader))
+            ->assertStatus(200)
+        ;
+    }
+
+    public function testUserCannotSeeNotOwnTraderVoucherHistory()
+    {
+        $trader = factory(Trader::class)->create();
+        // Don't sync this trader to our user.
+        $this->actingAs($this->user, 'api')
+            ->json('GET', route('api.trader.voucher-history', $trader))
+            ->assertStatus(403)
+            // Throwing an Illuminate\Auth\Access\AuthorizationException
+            // No desired - Json response. Because of can policy default?
+            //->assertJson(['error' => 'Unauthorized'])
+        ;
+    }
+
+    public function testUnauthenticatedUserCannotSeeTraderVoucherHistory()
+    {
+        $this->json('GET', route('api.trader.voucher-history', 1))
+            ->assertStatus(401)
+            ->assertJson(['error' => 'Unauthenticated.'])
+        ;
+    }
+
 
 }
