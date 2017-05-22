@@ -26,8 +26,6 @@ class TraderController extends Controller
         return response()->json($traders, 200);
     }
 
-
-
     /**
      * Display the specified resource.
      *
@@ -73,6 +71,13 @@ class TraderController extends Controller
         //
     }
 
+    /**
+     * Display the vouchers associated with the trader.
+     * Optionally include query param 'status' to filter results by state.
+     *
+     * @param  \App\Trader  $trader
+     * @return \Illuminate\Http\Response
+     */
     public function showVouchers(Trader $trader)
     {
         // GET api/traders/{trader}/vouchers?status=unpaid
@@ -111,4 +116,18 @@ class TraderController extends Controller
 
         return response()->json($vouchers, 200);
     }
+
+    /**
+     * Display the Trader's Voucher history.
+     *
+     * @param  \App\Trader  $trader
+     * @return \Illuminate\Http\Response
+     */
+    public function showVoucherHistory(Trader $trader)
+    {
+        return response()->json($trader, 200);
+    }
+
+
+
 }
