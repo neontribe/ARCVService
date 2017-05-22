@@ -39,4 +39,14 @@ class Trader extends Model
         return $this->hasMany('App\Voucher');
     }
 
+    /**
+     * Vouchers that have been submitted for payment on behalf of this trader.
+     * They will have currentstate: payment_pending or reimbursed.
+     *
+     * @return Collection App\Voucher
+     */
+    public function vouchersConfirmed()
+    {
+        return $this->vouchers()->confirmed();
+    }
 }

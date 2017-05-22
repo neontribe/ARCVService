@@ -125,7 +125,15 @@ class TraderController extends Controller
      */
     public function showVoucherHistory(Trader $trader)
     {
-        return response()->json($trader, 200);
+        $trader = \App\Trader::find(1);
+
+        $vouchers = $trader->vouchersConfirmed;
+        $voucher_history = [];
+        foreach ($vouchers as $v) {
+            // Group by the created at date on the payment_pending state.
+            //$voucher_history[$v->voucher_state->created_at][] = $v;
+        }
+        return response()->json($voucher_history, 200);
     }
 
 

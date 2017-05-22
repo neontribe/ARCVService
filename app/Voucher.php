@@ -70,6 +70,18 @@ class Voucher extends Model
         return $this->belongsTo(Trader::class);
     }
 
+    /**
+     * Limit Vouchers to ones that have been confirmed for payment.
+     * This will include both pending and reimbersed vouchers.
+     *
+     * @return query $query
+     */
+    public function scopeConfirmed($query)
+    {
+        $states = ['payment_pending', 'reimbersed'];
+        return $query->whereIn('currentstate', $states);
+    }
+
     public static function findByCode($code)
     {
         return self::where('code', $code)->get()->first();
