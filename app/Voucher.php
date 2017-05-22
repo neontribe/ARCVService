@@ -71,7 +71,7 @@ class Voucher extends Model
     }
 
     /**
-     * Get the most recent created_at date
+     * Get the most recent voucher_state change to payment_pending.
      * There should only ever be one per voucher - but most recent safer.
      *
      * @return App\VoucherState
@@ -84,7 +84,7 @@ class Voucher extends Model
     }
 
     /**
-     * Get the most recent created_at date
+     * Get the most recent voucher_state change to recorded.
      * There should only ever be one per voucher - but most recent safer.
      *
      * @return App\VoucherState
@@ -97,7 +97,7 @@ class Voucher extends Model
     }
 
     /**
-     * Get the most recent created_at date
+     * Get the most recent voucher_state change to reimbursed.
      * There should only ever be one per voucher - but most recent safer.
      *
      * @return App\VoucherState
