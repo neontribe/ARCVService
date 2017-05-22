@@ -15,8 +15,9 @@ return [
             'printed',
             'dispatched',
             'allocated', // to families
-            'recorded',
-            'reimbursed',
+            'recorded', // submitted to shortlist
+            'payment_pending', // shortlist completed
+            'reimbursed', // paid out
             'expired',
             'lost',
             'retired'
@@ -49,8 +50,12 @@ return [
                 'from' => ['allocated'],
                 'to' =>  'recorded',
             ],
-            'payout' => [
+            'confirm' => [
                 'from' => ['recorded'],
+                'to' => 'payment_pending'
+            ],
+            'payout' => [
+                'from' => ['payment_pending'],
                 'to' =>  'reimbursed',
             ],
             'expire' => [
