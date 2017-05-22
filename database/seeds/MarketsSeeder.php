@@ -14,26 +14,26 @@ class MarketsSeeder extends Seeder
         // Some without 'location' string will get a post code from faker.
         $marketsData = [
             [
-                'name' => "Cho-Cho Retail Park",
-                'location' => "Plateau of Leng",
+                'name' => "Beechwood Hall",
+                'location' => "Sylvania",
                 'sponsor_id'=> 2
             ],
             [
-                'name' => "RightStars Commercial District",
-                'location' => "Sunken R'yleh",
+                'name' => "Sea Breeze Cape",
+                'location' => "Secret Island",
                 'sponsor_id'=> 2
             ],
             [
-                'name' => "Angle-Time Street Market",
+                'name' => "Fruit Wagon",
                 'sponsor_id'=> 2
             ],
             [
-                'name' => "Hive Primus Community Jamboree",
-                'location'=> "Necromunda",
+                'name' => "Brick Oven Bakery",
+                'location'=> "Cloverleaf Corners",
                 'sponsor_id' => 1
             ],
             [
-                'name' => "Mechanicum Carboot",
+                'name' => "Cedar Terrace",
                 'sponsor_id' => 1
             ],
         ];

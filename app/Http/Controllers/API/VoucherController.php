@@ -68,9 +68,6 @@ class VoucherController extends Controller
             $trader = Trader::find(1);
         }
 
-        // The user who performs the transition. Are we using this anywhere yet?
-        $user = Auth::user();
-
         $uniqueVouchers = array_unique($request['vouchers']);
 
         // Do we want to validate codes by regex rule before we try to find them or meh?
