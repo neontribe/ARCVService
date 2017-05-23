@@ -26,8 +26,6 @@ class TraderController extends Controller
         return response()->json($traders, 200);
     }
 
-
-
     /**
      * Display the specified resource.
      *
@@ -73,6 +71,13 @@ class TraderController extends Controller
         //
     }
 
+    /**
+     * Display the vouchers associated with the trader.
+     * Optionally include query param 'status' to filter results by state.
+     *
+     * @param  \App\Trader  $trader
+     * @return \Illuminate\Http\Response
+     */
     public function showVouchers(Trader $trader)
     {
         // GET api/traders/{trader}/vouchers?status=unpaid
@@ -111,4 +116,39 @@ class TraderController extends Controller
 
         return response()->json($vouchers, 200);
     }
+
+    /**
+     * Display the Trader's Voucher history.
+     *
+     * @param  \App\Trader  $trader
+     * @return \Illuminate\Http\Response
+     */
+    public function showVoucherHistory(Trader $trader)
+    {
+        $vouchers = $trader->vouchersConfirmed;
+        $voucher_history = [];
+        foreach ($vouchers as $v) {
+            // If this voucher has been confirmed.
+            if ($v->paymentPendedOn) {
+                $pended_day = $v->paymentPendedOn->created_at->format('Y-m-d');
+                // Group by the created at date on the payment_pending state.
+                $data[$pended_day][] = [
+                    'code' => $v->code,
+                    'recorded_on' => $v->recordedOn->created_at->format('Y-m-d'),
+                    'reimbursed_on' => $v->reimbursedOn
+                        ? $v->reimbursedOn->created_at->format('Y-m-d')
+                        : ''
+                    ,
+                ];
+                foreach ($data as $pended_day => $vouchers) {
+                    $voucher_history[$pended_day] = [
+                        'pended_on' => $pended_day,
+                        'vouchers' => $vouchers,
+                    ];
+                }
+            }
+        }
+        return response()->json(array_values($voucher_history), 200);
+    }
+
 }

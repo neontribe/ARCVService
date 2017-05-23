@@ -70,6 +70,57 @@ class Voucher extends Model
         return $this->belongsTo(Trader::class);
     }
 
+    /**
+     * Get the most recent voucher_state change to payment_pending.
+     * There should only ever be one per voucher - but most recent safer.
+     *
+     * @return App\VoucherState
+     */
+    public function paymentPendedOn()
+    {
+        return $this->hasOne(VoucherState::class)
+                ->where('to', 'payment_pending')
+                ->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get the most recent voucher_state change to recorded.
+     * There should only ever be one per voucher - but most recent safer.
+     *
+     * @return App\VoucherState
+     */
+    public function recordedOn()
+    {
+        return $this->hasOne(VoucherState::class)
+                ->where('to', 'recorded')
+                ->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get the most recent voucher_state change to reimbursed.
+     * There should only ever be one per voucher - but most recent safer.
+     *
+     * @return App\VoucherState
+     */
+    public function reimbursedOn()
+    {
+        return $this->hasOne(VoucherState::class)
+                ->where('to', 'reimbursed')
+                ->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Limit Vouchers to ones that have been confirmed for payment.
+     * This will include both pending and reimbersed vouchers.
+     *
+     * @return query $query
+     */
+    public function scopeConfirmed($query)
+    {
+        $states = ['payment_pending', 'reimbursed'];
+        return $query->whereIn('currentstate', $states);
+    }
+
     public static function findByCode($code)
     {
         return self::where('code', $code)->get()->first();

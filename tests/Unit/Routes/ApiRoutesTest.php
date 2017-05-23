@@ -91,6 +91,15 @@ class ApiRoutesTest extends TestCase
 
     public function testShowTraderVouchersRoute()
     {
+
+        // This user is not associated with Trader 1.
+        $this->actingAs($this->user, 'api')
+            ->json('GET', route('api.trader.vouchers', 1))
+            ->assertStatus(403)
+        ;
+
+        // Associate this user with Trader id 1.
+        $this->user->traders()->sync([1]);
         $this->actingAs($this->user, 'api')
             ->json('GET', route('api.trader.vouchers', 1))
             ->assertJsonStructure([ 0 => [
@@ -163,7 +172,7 @@ class ApiRoutesTest extends TestCase
         $trader = factory(Trader::class)->create();
         $this->user->traders()->sync([$trader->id]);
         $this->actingAs($this->user, 'api')
-            ->json('GET', route('api.traders.trader', $trader))
+            ->json('GET', route('api.trader', $trader))
             ->assertStatus(200)
         ;
     }
@@ -173,7 +182,7 @@ class ApiRoutesTest extends TestCase
         $trader = factory(Trader::class)->create();
         // Don't sync this trader to our user.
         $this->actingAs($this->user, 'api')
-            ->json('GET', route('api.traders.trader', $trader))
+            ->json('GET', route('api.trader', $trader))
             ->assertStatus(403)
             // Throwing an Illuminate\Auth\Access\AuthorizationException
             // No desired - Json response. Because of can policy default?
