@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Models;
 
+use Auth;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use App\Trader;
@@ -51,4 +52,39 @@ class TraderModelTest extends TestCase
         $this->assertCount(10, $this->trader->vouchers);
         $this->assertNotEquals($this->trader->vouchers, Voucher::all());
     }
+
+    public function testTraderHasConfirmedVouchers()
+    {
+        $vouchers = factory(Voucher::class, 'requested', 3)->create([
+            'trader_id' => $this->trader->id,
+        ]);
+
+        // Make a user and progress voucher states.
+        $user = factory(User::class)->create();
+        Auth::login($user);
+
+        foreach ($vouchers as $v) {
+            $v->applyTransition('order');
+            $v->applyTransition('print');
+            $v->applyTransition('dispatch');
+            $v->applyTransition('allocate');
+            $v->trader_id = 1;
+            $v->applyTransition('collect');
+        }
+        $vouchers[0]->applyTransition('confirm');
+        $vouchers[0]->applyTransition('payout');
+        $vouchers[1]->applyTransition('confirm');
+        $vouchers[2]->applyTransition('confirm');
+
+        $confirmed_codes = [
+            $vouchers[0]->code => $vouchers[0]->currentstate,
+            $vouchers[1]->code => $vouchers[1]->currentstate,
+            $vouchers[2]->code => $vouchers[2]->currentstate,
+        ];
+        $vc = $this->trader->vouchersConfirmed();
+        $this->assertCount(3, $vc->get());
+        $vc_code_states = $vc->pluck('currentstate', 'code')->toArray();
+        $this->assertEquals($confirmed_codes, $vc_code_states);
+    }
+
 }
