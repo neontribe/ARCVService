@@ -69,6 +69,7 @@ $factory->defineAs(App\Trader::class, 'withnullable', function ($faker) use ($fa
         'market_id' => factory(App\Market::class)->create()->id,
     ]);
 });
+
 /**
  * Voucher with a random current state.
  */
@@ -104,9 +105,52 @@ $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
 $factory->defineAs(App\Voucher::class, 'requested', function ($faker) use ($factory) {
     $voucher = $factory->raw(App\Voucher::class);
 
-    // Todo create the voucher_states on the road to requested.
-
     return array_merge($voucher, [
         'currentstate' => 'requested',
     ]);
 });
+
+/**
+ * Voucher with currentstate allocated.
+ */
+$factory->defineAs(App\Voucher::class, 'allocated', function ($faker) use ($factory) {
+    $voucher = $factory->raw(App\Voucher::class);
+
+    // Todo create the voucher_states on the road to allocated.
+    factory(App\VoucherState::class)->create();
+    factory(App\VoucherState::class)->create([
+        'transition' => 'print',
+        'from' => 'ordered',
+        'to' => 'printed',
+    ]);
+    factory(App\VoucherState::class)->create([
+        'transition' => 'dispatch',
+        'from' => 'printed',
+        'to' => 'dispatched',
+    ]);
+    factory(App\VoucherState::class)->create([
+        'transition' => 'allocate',
+        'from' => 'printed',
+        'to' => 'allocated',
+    ]);
+    return array_merge($voucher, [
+        'currentstate' => 'allocated',
+    ]);
+});
+
+$factory->define(App\VoucherState::class, function (Faker\Generator $faker) {
+
+    // Factory adds initial values - overwrite when we create.
+    // There will be a batter way to seed states - but for now
+    // just need a way to force one.
+    return [
+        'transition' => 'order',
+        'from' => 'requested',
+        'user_id' => 1,
+        'voucher_id' => 1,
+        'to' => 'ordered',
+        // Not sure what source refers to.
+        'source' => 'factory',
+    ];
+});
+
