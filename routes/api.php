@@ -51,6 +51,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('vouchers', [
         'as' => 'api.voucher.collect',
         'uses' => 'VoucherController@collect',
-    ]);
+    ])->middleware('can:collect,App\Voucher');
 
 });

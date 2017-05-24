@@ -125,6 +125,7 @@ class ApiRoutesTest extends TestCase
                 'RVP12345563',
             ]
         ];
+        $this->user->traders()->sync([1]);
         $this->actingAs($this->user, 'api')
             ->json('POST', route('api.voucher.collect'), $payload)
             ->assertJsonStructure([
@@ -147,6 +148,25 @@ class ApiRoutesTest extends TestCase
             ->assertJson(['error' => 'Unauthenticated.'])
         ;
     }
+
+    public function testCantCollectVoucherOnBehalfOfNotOwnTraderRoute()
+    {
+        $payload= [
+            'user_id' => 1,
+            'trader_id' => 1,
+            'vouchers' => [
+                'RVP12345563',
+            ]
+        ];
+        // Don't sync trader 1 to our user and try to collect.
+        $this->actingAs($this->user, 'api')
+            ->json('POST', route('api.voucher.collect'), $payload)
+            ->assertStatus(403)
+        // Policy/ Gate still an issue throwing
+        // Illuminate\Auth\Access\AuthorizationException rather than json.
+        ;
+    }
+
 
     public function testUserCanSeeOwnTraders()
     {

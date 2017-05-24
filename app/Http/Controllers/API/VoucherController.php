@@ -12,19 +12,6 @@ use App\User;
 
 class VoucherController extends Controller
 {
-
-    protected $user;
-
-/*
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            $this->user = Auth::guard('api')->user();
-            return $next($request);
-        });
-    }
- */
-
     /**
      * Collect vouchers - this might change to a more all-purpose update vouchers.
      *
@@ -54,18 +41,17 @@ class VoucherController extends Controller
 
         // Get out - no vouchers to process.
         if (!$request['vouchers'] || $request['vouchers'] < 1) {
-            return response("no voucher data", 400);
+            return response("No voucher data", 400);
         }
 
         // Get out - no trader declared.
         if (!$request['trader_id']) {
-            return response("no trader id", 400);
+            return response("No trader id", 400);
         }
 
         // Make sure we have a valid trader.
         if (!$trader = Trader::find($request['trader_id'])) {
-            // For pre-alpha - we just want to be number 1 anyway.
-            $trader = Trader::find(1);
+            return response("Trader not found", 400);
         }
 
         $uniqueVouchers = array_unique($request['vouchers']);

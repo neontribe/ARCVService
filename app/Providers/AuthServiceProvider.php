@@ -16,6 +16,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         \App\Trader::class => \App\Policies\TraderPolicy::class,
+        \App\Voucher::class => \App\Policies\VoucherPolicy::class,
     ];
 
     /**
