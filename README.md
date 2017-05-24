@@ -11,7 +11,7 @@ ARCV Service is the service portal and API for ARCV Market.
 5. `php artisan key:generate`
 6. `php artisan migrate --seed`
 7. `php artisan passport:install` to create keys and client.
-8. Add the `password_client` id and secret to your `.env`.
+8. Add the "password grant client" id and secret to your `.env`.
 
  - Reseed with `php artisan migrate:refresh --seed`
  - Run tests with `phpunit`
