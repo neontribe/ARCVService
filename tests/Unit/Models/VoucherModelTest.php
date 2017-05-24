@@ -5,9 +5,13 @@ namespace Tests\Unit\Models;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use SM\StateMachine\StateMachine;
+use App\VoucherState;
 use App\Voucher;
 use App\Sponsor;
 use App\Trader;
+use App\User;
+use Carbon\Carbon;
+use Auth;
 
 class VoucherModelTest extends TestCase
 {
@@ -18,7 +22,7 @@ class VoucherModelTest extends TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->voucher = factory(Voucher::class)->create();
+        $this->voucher = factory(Voucher::class, 'allocated')->create();
     }
 
     public function testAVoucherIsCreatedWithExpectedAttributes()
@@ -82,7 +86,70 @@ class VoucherModelTest extends TestCase
         $this->assertNotEquals($b->fresh(), Voucher::findByCode('aaaaa'));
     }
 
-    public function testFindVouchersByCodes()
+    public function testGetVoucherPendedOnDay()
     {
+        $v = $this->voucher;
+        $user = factory(User::class)->create();
+        Auth::login($user);
+        $v->applyTransition('collect');
+        $v->applyTransition('confirm');
+        $this->assertInstanceOf(VoucherState::class, $v->paymentPendedOn);
+        $this->assertEquals(
+            Carbon::now()->format('Ymd'),
+            $v->paymentPendedOn->created_at->format('Ymd')
+        );
     }
+
+    public function testGetVoucherRecordedOnDay()
+    {
+        $v = $this->voucher;
+        $user = factory(User::class)->create();
+        Auth::login($user);
+        $v->applyTransition('collect');
+        $this->assertInstanceOf(VoucherState::class, $v->recordedOn);
+        $this->assertEquals(
+            Carbon::now()->format('Ymd'),
+            $v->recordedOn->created_at->format('Ymd')
+        );
+    }
+
+    public function testGetVoucherReimbursedOnDay()
+    {
+        $v = $this->voucher;
+        $user = factory(User::class)->create();
+        Auth::login($user);
+        $v->applyTransition('collect');
+        $v->applyTransition('confirm');
+        $v->applyTransition('payout');
+        $this->assertInstanceOf(VoucherState::class, $v->reimbursedOn);
+        $this->assertEquals(
+            Carbon::now()->format('Ymd'),
+            $v->reimbursedOn->created_at->format('Ymd')
+        );
+    }
+
+    public function testScopeConfirmedVouchers()
+    {
+        $user = factory(User::class)->create();
+        Auth::login($user);
+
+        // An allocated Voucher.
+        $v1 = $this->voucher;
+        // A reimbursed Voucher.
+        $v2 = factory(Voucher::class, 'allocated')->create();
+        $v2->applyTransition('collect');
+        $v2->applyTransition('confirm');
+        $v2->applyTransition('payout');
+        // A couple of Payment Pending Vouchers.
+        $v3 = factory(Voucher::class, 'allocated', 2)->create();
+        $v3[0]->applyTransition('collect');
+        $v3[0]->applyTransition('confirm');
+        $v3[1]->applyTransition('collect');
+        $v3[1]->applyTransition('confirm');
+
+        $this->assertCount(3, Voucher::confirmed()->get());
+        $this->assertEquals([2,3,4], Voucher::confirmed()->pluck('id')->toArray());
+
+    }
+
 }
