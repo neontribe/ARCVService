@@ -48,7 +48,7 @@ class VoucherPolicy
     }
 
     /**
-     * Determine whether the user can view the voucher.
+     * Determine whether the user can collect the voucher.
      *
      * @param  \App\User  $user
      * @return mixed
