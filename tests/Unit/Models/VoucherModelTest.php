@@ -128,4 +128,28 @@ class VoucherModelTest extends TestCase
         );
     }
 
+    public function testScopeConfirmedVouchers()
+    {
+        $user = factory(User::class)->create();
+        Auth::login($user);
+
+        // An allocated Voucher.
+        $v1 = $this->voucher;
+        // A reimbursed Voucher.
+        $v2 = factory(Voucher::class, 'allocated')->create();
+        $v2->applyTransition('collect');
+        $v2->applyTransition('confirm');
+        $v2->applyTransition('payout');
+        // A couple of Payment Pending Vouchers.
+        $v3 = factory(Voucher::class, 'allocated', 2)->create();
+        $v3[0]->applyTransition('collect');
+        $v3[0]->applyTransition('confirm');
+        $v3[1]->applyTransition('collect');
+        $v3[1]->applyTransition('confirm');
+
+        $this->assertCount(3, Voucher::confirmed()->get());
+        $this->assertEquals([2,3,4], Voucher::confirmed()->pluck('id')->toArray());
+
+    }
+
 }
