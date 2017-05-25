@@ -123,7 +123,8 @@ class TraderController extends Controller
      *
      * @return Maatwebsite\Excel
      */
-    private function createExcel($trader, $vouchers) {
+    private function createExcel($trader, $vouchers)
+    {
         $excel = Excel::create('Vouchers Download', function($excel) use ($trader, $vouchers) {
             // Set the title
             $excel->setTitle($trader->name . 'Voucher Download')
