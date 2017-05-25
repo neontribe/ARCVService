@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\API;
 
-use DB;
 use Auth;
+use DB;
+use Excel;
 use App\Trader;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -90,31 +91,57 @@ class TraderController extends Controller
 
         $status = request()->input('status');
 
-        if (empty($status)) {
-            // Get all the trader's assigned vouchers
-            $vouchers = $trader->vouchers->all();
-        } else {
-            // Get the vouchers with given status, mapped to these states.
-            switch ($status) {
-                case "unpaid":
-                    $stateCondition = "reimbursed";
-                    break;
-                default:
-                    $stateCondition = null;
-                    break;
-            }
+        $vouchers = $trader->vouchersWithStatus($status);
 
-            $statedVoucherIDs = DB::table('vouchers')
-                ->leftJoin('voucher_states', 'vouchers.id', '=', 'voucher_states.voucher_id')
-                ->leftJoin('traders', 'vouchers.trader_id', '=', 'traders.id')
-                ->where('voucher_states.to', $stateCondition)
-                ->pluck('vouchers.id')->toArray();
-
-            // subtract them from the collected ones
-            $vouchers = $trader->vouchers->whereNotIn('id', $statedVoucherIDs);
+        // What format are we after?
+        $datatype = request()->getAcceptableContentTypes()
+            ? request()->getAcceptableContentTypes()[0]
+            : null
+        ;
+        switch($datatype) {
+            case 'text/csv':
+            case 'application/csv':
+                $response = $this->createExcel($trader, $vouchers)->download('csv');
+                break;
+            case 'application/xlsx':
+                $response = $this->createExcel($trader, $vouchers)->download('xlsx');
+                break;
+            case 'application/json':
+            default:
+                $response = response()->json($vouchers, 200);
+                break;
         }
+        return $response;
+    }
 
-        return response()->json($vouchers, 200);
+    /**
+     * Helper to create Excel downloads.
+     * There may be a better place for this but fine for now.
+     *
+     * @param \App\Trader $trader
+     * @param \App\Voucher collection $vouchers
+     *
+     * @return Maatwebsite\Excel
+     */
+    private function createExcel($trader, $vouchers)
+    {
+        $excel = Excel::create('Vouchers Download', function($excel) use ($trader, $vouchers) {
+            // Set the title
+            $excel->setTitle($trader->name . 'Voucher Download')
+                ->setCompany(Auth::user()->name)
+                ->setDescription('A report containing queued vouchers.')
+            ;
+
+            $excel->sheet('Vouchers', function ($sheet) use ($trader, $vouchers) {
+                $sheet->loadView('api.downloads.vouchers', [
+                    'vouchers' => $vouchers,
+                    'trader' => $trader->name,
+                    'user' => Auth::user()->name,
+                ]);
+            });
+        });
+
+        return $excel;
     }
 
     /**

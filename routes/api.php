@@ -32,21 +32,24 @@ Route::group(['middleware' => 'auth:api'], function () {
         'uses' => 'TraderController@index',
     ]);
 
-    Route::get('traders/{trader}', [
-        'as' => 'api.trader',
-        'uses' => 'TraderController@show',
-        // $user and App\Trader sent implicitly to policy.
-    ])->middleware('can:view,trader');
+    Route::group(['middleware' => 'can:view,trader'], function () {
 
-    Route::get('traders/{trader}/vouchers', [
-        'as' => 'api.trader.vouchers',
-        'uses' => 'TraderController@showVouchers',
-    ])->middleware('can:view,trader');
+        Route::get('traders/{trader}', [
+            'as' => 'api.trader',
+            'uses' => 'TraderController@show',
+            // $user and App\Trader sent implicitly to policy.
+        ]);
 
-    Route::get('traders/{trader}/voucher-history', [
-        'as' => 'api.trader.voucher-history',
-        'uses' => 'TraderController@showVoucherHistory',
-    ])->middleware('can:view,trader');
+        Route::get('traders/{trader}/vouchers', [
+            'as' => 'api.trader.vouchers',
+            'uses' => 'TraderController@showVouchers',
+        ]);
+
+        Route::get('traders/{trader}/voucher-history', [
+            'as' => 'api.trader.voucher-history',
+            'uses' => 'TraderController@showVoucherHistory',
+        ]);
+    });
 
     Route::post('vouchers', [
         'as' => 'api.voucher.collect',

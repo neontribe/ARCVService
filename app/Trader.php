@@ -49,4 +49,40 @@ class Trader extends Model
     {
         return $this->vouchers()->confirmed();
     }
+
+    /**
+     * Vouchers submitted by this trader that have a given status.
+     *
+     * @param String $status
+     *
+     * @return Collection App\Voucher
+     */
+    public function vouchersWithStatus($status = null)
+    {
+        if (empty($status)) {
+            // Get all the trader's assigned vouchers
+            $vouchers = $this->vouchers->all();
+        } else {
+            // Get the vouchers with given status, mapped to these states.
+            switch ($status) {
+                case "unpaid":
+                    $stateCondition = "reimbursed";
+                    break;
+                default:
+                    $stateCondition = null;
+                    break;
+            }
+            $statedVoucherIDs = DB::table('vouchers')
+                ->leftJoin('voucher_states', 'vouchers.id', '=', 'voucher_states.voucher_id')
+                ->leftJoin('traders', 'vouchers.trader_id', '=', 'traders.id')
+                ->where('voucher_states.to', $stateCondition)
+                ->pluck('vouchers.id')->toArray();
+            // subtract them from the collected ones
+            $vouchers = $this->vouchers->whereNotIn('id', $statedVoucherIDs);
+        }
+
+        return $vouchers;
+
+    }
+
 }

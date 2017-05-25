@@ -2,6 +2,8 @@
 ## About ARC Voucher Service/API
 ARCV Service is the service portal and API for ARCV Market.
 
+[![Build Status](https://travis-ci.org/neontribe/ARCVMarket.svg?branch=0.2/release)](https://travis-ci.org/neontribe/ARCVMarket.svg?branch=master)
+
 ## Installation of Development instance
 
 1. Clone the repo

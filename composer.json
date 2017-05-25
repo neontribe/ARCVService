@@ -13,6 +13,7 @@
         "laravel/framework": "5.4.*",
         "laravel/passport": "^2.0",
         "laravel/tinker": "~1.0",
+        "maatwebsite/excel": "^2.1",
         "moontoast/math": "^1.1",
         "optimus/api-consumer": "0.2.*",
         "ramsey/uuid": "^3.6",
