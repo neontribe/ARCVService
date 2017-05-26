@@ -102,10 +102,38 @@ class ApiRoutesTest extends TestCase
         $this->user->traders()->sync([1]);
         $this->actingAs($this->user, 'api')
             ->json('GET', route('api.trader.vouchers', 1))
+            ->assertHeader('Content-Type', 'application/json')
             ->assertJsonStructure([ 0 => [
                 'id', 'trader_id', 'code', 'currentstate', 'sponsor_id'
             ]])
         ;
+    }
+
+    public function testDownloadTraderVouchersXlsxRoute()
+    {
+        // Associate this user with Trader id 1.
+        $this->user->traders()->sync([1]);
+        $this->actingAs($this->user, 'api')
+            ->call('get', route('api.trader.vouchers', 1),
+                [], [], [], ['HTTP_Accept' => 'application/xlsx']
+            )
+            //->assertStatus(200)
+            //->assertHeader('Content-Type', 'application/xlsx')
+        ;
+    }
+
+    public function testDownloadTraderVouchersCsvRoute()
+    {
+        // Associate this user with Trader id 1.
+        $this->user->traders()->sync([1]);
+        $this->actingAs($this->user, 'api')
+            ->call('get', route('api.trader.vouchers', 1),
+                [], [], [], ['HTTP_Accept' => 'application/csv']
+            )
+            //->assertStatus(200)
+            //->assertHeader('Content-Type', 'text/csv')
+        ;
+
     }
 
     public function testUnauthenticatedDontShowTraderVouchersRoute()

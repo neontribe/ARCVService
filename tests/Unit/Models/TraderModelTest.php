@@ -87,4 +87,43 @@ class TraderModelTest extends TestCase
         $this->assertEquals($confirmed_codes, $vc_code_states);
     }
 
+    public function testTraderHasVouchersWithStatus()
+    {
+        $vouchers = factory(Voucher::class, 'requested', 6)->create([
+            'trader_id' => $this->trader->id,
+        ]);
+
+        // Make a user and progress voucher states.
+        $user = factory(User::class)->create();
+        Auth::login($user);
+
+        foreach ($vouchers as $v) {
+            $v->applyTransition('order');
+            $v->applyTransition('print');
+            $v->applyTransition('dispatch');
+            $v->applyTransition('allocate');
+            $v->trader_id = 1;
+            $v->applyTransition('collect');
+        }
+        $vouchers[0]->applyTransition('confirm');
+        $vouchers[0]->applyTransition('payout');
+        $vouchers[1]->applyTransition('confirm');
+        $vouchers[2]->applyTransition('confirm');
+
+        // 6 vouchers. 1x reimbursed ($vouchers[0]), 2x payment_pending, 3x recorded.
+        $unpaid_codes = [
+            $vouchers[1]->code => $vouchers[1]->currentstate,
+            $vouchers[2]->code => $vouchers[2]->currentstate,
+            $vouchers[3]->code => $vouchers[3]->currentstate,
+            $vouchers[4]->code => $vouchers[4]->currentstate,
+            $vouchers[5]->code => $vouchers[5]->currentstate,
+        ];
+
+        // Vouchers the trader has submitted for payment but have not been reimbursed.
+        $vc = $this->trader->vouchersWithStatus('unpaid');
+        $this->assertCount(5, $vc);
+        $vc_code_states = $vc->pluck('currentstate', 'code')->toArray();
+        $this->assertEquals($unpaid_codes, $vc_code_states);
+    }
+
 }
