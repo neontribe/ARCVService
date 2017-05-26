@@ -125,7 +125,7 @@ class TraderController extends Controller
      */
     private function createExcel($trader, $vouchers)
     {
-        $excel = Excel::create('Vouchers Download', function($excel) use ($trader, $vouchers) {
+        $excel = Excel::create('VouchersDownload', function($excel) use ($trader, $vouchers) {
             // Set the title
             $excel->setTitle($trader->name . 'Voucher Download')
                 ->setCompany(Auth::user()->name)
