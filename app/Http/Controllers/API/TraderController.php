@@ -108,7 +108,7 @@ class TraderController extends Controller
                     ->download('xlsx', ['Access-Control-Allow-Origin' => '*']);
             case 'application/json':
             default:
-                return respose()->json($vouchers, 200);
+                return response()->json($vouchers, 200);
         }
     }
 
