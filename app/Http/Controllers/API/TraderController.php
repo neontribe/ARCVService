@@ -101,17 +101,15 @@ class TraderController extends Controller
         switch($datatype) {
             case 'text/csv':
             case 'application/csv':
-                $response = $this->createExcel($trader, $vouchers)->download('csv');
-                break;
+                return $this->createExcel($trader, $vouchers)
+                    ->download('csv', ['Access-Control-Allow-Origin' => '*']);
             case 'application/xlsx':
-                $response = $this->createExcel($trader, $vouchers)->download('xlsx');
-                break;
+                return $this->createExcel($trader, $vouchers)
+                    ->download('xlsx', ['Access-Control-Allow-Origin' => '*']);
             case 'application/json':
             default:
-                $response = response()->json($vouchers, 200);
-                break;
+                return response()->json($vouchers, 200);
         }
-        return $response;
     }
 
     /**
