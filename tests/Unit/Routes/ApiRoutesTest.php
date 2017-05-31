@@ -149,13 +149,13 @@ class ApiRoutesTest extends TestCase
         $payload= [
             'user_id' => 1,
             'trader_id' => 1,
-            'vouchers' => [
+            'transition_collect' => [
                 'RVP12345563',
             ]
         ];
         $this->user->traders()->sync([1]);
         $this->actingAs($this->user, 'api')
-            ->json('POST', route('api.voucher.collect'), $payload)
+            ->json('POST', route('api.voucher.progress'), $payload)
             ->assertJsonStructure([
                 'success', 'fail', 'invalid'
             ])
@@ -167,11 +167,11 @@ class ApiRoutesTest extends TestCase
         $payload= [
             'user_id' => 1,
             'trader_id' => 1,
-            'vouchers' => [
+            'transition_collect' => [
                 'rvp12345563',
             ]
         ];
-        $this->json('POST', route('api.voucher.collect'), $payload)
+        $this->json('POST', route('api.voucher.progress'), $payload)
             ->assertStatus(401)
             ->assertJson(['error' => 'Unauthenticated.'])
         ;
@@ -182,13 +182,13 @@ class ApiRoutesTest extends TestCase
         $payload= [
             'user_id' => 1,
             'trader_id' => 1,
-            'vouchers' => [
+            'transition_collect' => [
                 'RVP12345563',
             ]
         ];
         // Don't sync trader 1 to our user and try to collect.
         $this->actingAs($this->user, 'api')
-            ->json('POST', route('api.voucher.collect'), $payload)
+            ->json('POST', route('api.voucher.progress'), $payload)
             ->assertStatus(403)
         // Policy/ Gate still an issue throwing
         // Illuminate\Auth\Access\AuthorizationException rather than json.
