@@ -118,8 +118,8 @@ class ApiRoutesTest extends TestCase
             ->call('get', route('api.trader.vouchers', 1),
                 [], [], [], ['HTTP_Accept' => 'application/xlsx']
             )
-            //->assertStatus(200)
-            //->assertHeader('Content-Type', 'application/xlsx')
+            ->assertStatus(200)
+            ->assertHeader('Content-Type', 'application/xlsx')
         ;
     }
 
@@ -129,11 +129,10 @@ class ApiRoutesTest extends TestCase
         $this->user->traders()->sync([1]);
         $this->actingAs($this->user, 'api')
             ->call('get', route('api.trader.vouchers', 1),
-                [], [], [], ['HTTP_Accept' => 'application/csv']
+                [], [], [], ['HTTP_Accept' => 'text/csv']
             )
-            // Can't test - getting 'Headers already sent in' exception from LaravelExcelWriter.php
-            //->assertStatus(200)
-            //->assertHeader('Content-Type', 'text/csv')
+            ->assertStatus(200)
+            ->assertHeader('Content-Type', 'text/csv; charset=UTF-8')
         ;
 
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Excel;
 use App\Trader;
@@ -101,11 +102,17 @@ class TraderController extends Controller
         switch($datatype) {
             case 'text/csv':
             case 'application/csv':
-                return $this->createExcel($trader, $vouchers)
-                    ->download('csv', ['Access-Control-Allow-Origin' => '*']);
+                $file = $this->createExcel($trader, $vouchers)
+                    ->string('csv');
+                return response($file, 200, [
+                    'Content-Type' => 'text/csv',
+                ]);
             case 'application/xlsx':
-                return $this->createExcel($trader, $vouchers)
-                    ->download('xlsx', ['Access-Control-Allow-Origin' => '*']);
+                $file = $this->createExcel($trader, $vouchers)
+                    ->string('xlsx');
+                return response($file, 200, [
+                    'Content-Type' => 'application/xlsx',
+                ]);
             case 'application/json':
             default:
                 return response()->json($vouchers, 200);
