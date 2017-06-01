@@ -52,7 +52,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     });
 
     Route::post('vouchers', [
-        'as' => 'api.voucher.progress',
-        'uses' => 'VoucherController@progress',
-    ])->middleware('can:progress,App\Voucher');
+        'as' => 'api.voucher.transition',
+        'uses' => 'VoucherController@transition',
+    ])->middleware('can:collect,App\Voucher');
 });
