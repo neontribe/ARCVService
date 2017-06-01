@@ -69,6 +69,9 @@ class Trader extends Model
                 case "unpaid":
                     $stateCondition = "reimbursed";
                     break;
+                case "unconfirmed":
+                    $stateCondition = "payment_pending";
+                    break;
                 default:
                     $stateCondition = null;
                     break;
