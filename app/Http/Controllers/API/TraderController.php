@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API;
 
 use Auth;
-use Carbon\Carbon;
 use DB;
 use Excel;
 use App\Trader;
