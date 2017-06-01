@@ -111,6 +111,7 @@ class ApiRoutesTest extends TestCase
 
     public function testDownloadTraderVouchersXlsxRoute()
     {
+        // Todo not yet implemented - the encoding was not working frontend.
         // Associate this user with Trader id 1.
         $this->user->traders()->sync([1]);
         $this->actingAs($this->user, 'api')
@@ -130,6 +131,7 @@ class ApiRoutesTest extends TestCase
             ->call('get', route('api.trader.vouchers', 1),
                 [], [], [], ['HTTP_Accept' => 'application/csv']
             )
+            // Can't test - getting 'Headers already sent in' exception from LaravelExcelWriter.php
             //->assertStatus(200)
             //->assertHeader('Content-Type', 'text/csv')
         ;
