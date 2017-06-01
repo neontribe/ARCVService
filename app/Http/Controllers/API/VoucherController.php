@@ -34,7 +34,7 @@ class VoucherController extends Controller
         }
         */
 
-        // Get out - no vouchers to process.
+        // Get out - no transition specified.
         if (!$request['transition']) {
             return response("No transition", 400);
         }
