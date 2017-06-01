@@ -69,10 +69,14 @@ class Trader extends Model
                 case "unpaid":
                     $stateCondition = "reimbursed";
                     break;
+                case "unconfirmed":
+                    $stateCondition = "payment_pending";
+                    break;
                 default:
                     $stateCondition = null;
                     break;
             }
+            // get all the vouchers that have a state record of $stateCondition
             $statedVoucherIDs = DB::table('vouchers')
                 ->leftJoin('voucher_states', 'vouchers.id', '=', 'voucher_states.voucher_id')
                 ->leftJoin('traders', 'vouchers.trader_id', '=', 'traders.id')
