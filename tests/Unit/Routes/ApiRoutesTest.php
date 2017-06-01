@@ -162,7 +162,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testUnauthenticatedDontcollectVoucherRoute()
+    public function testUnauthenticatedDontCollectVoucherRoute()
     {
         $payload= [
             'transition' => 'collect',
@@ -194,7 +194,6 @@ class ApiRoutesTest extends TestCase
         // Illuminate\Auth\Access\AuthorizationException rather than json.
         ;
     }
-
 
     public function testUserCanSeeOwnTraders()
     {
