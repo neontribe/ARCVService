@@ -20,17 +20,12 @@ class VoucherController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function collect(Request $request)
+    public function transition(Request $request)
     {
-        // TODO: Generalise and reroute
-        // for the prupsoes of this iteration, collect() will progress
-        // "allocated" to "recorded";
-        // This would better be generalised as an "update" that progresses
-        // to the given state for each voucher.
-        /* expecting a body of type application/josn
+        /* expecting a body of type application/josn; a collect transition looks like
         {
-            "user_id" : 1,
             "trader_id" : 1,
+            "transition" : "collect"
             "vouchers" : [
                 "SOL00000001",
                 "SOL00000002",
@@ -38,6 +33,11 @@ class VoucherController extends Controller
             ]
         }
         */
+
+        // Get out - no transition specified.
+        if (!$request['transition']) {
+            return response("No transition", 400);
+        }
 
         // Get out - no vouchers to process.
         if (!$request['vouchers'] || $request['vouchers'] < 1) {
@@ -69,7 +69,7 @@ class VoucherController extends Controller
         );
 
         // For the pre-alpha we 'collect'.
-        $transition = 'collect';
+        $transition = $request['transition'];
         $success_codes = [];
         $fail_codes = [];
         foreach ($vouchers as $voucher) {

@@ -147,7 +147,7 @@ class ApiRoutesTest extends TestCase
     public function testCollectVoucherRoute()
     {
         $payload= [
-            'user_id' => 1,
+            'transition' => 'collect',
             'trader_id' => 1,
             'vouchers' => [
                 'RVP12345563',
@@ -155,23 +155,23 @@ class ApiRoutesTest extends TestCase
         ];
         $this->user->traders()->sync([1]);
         $this->actingAs($this->user, 'api')
-            ->json('POST', route('api.voucher.collect'), $payload)
+            ->json('POST', route('api.voucher.transition'), $payload)
             ->assertJsonStructure([
                 'success', 'fail', 'invalid'
             ])
         ;
     }
 
-    public function testUnauthenticatedDontcollectVoucherRoute()
+    public function testUnauthenticatedDontCollectVoucherRoute()
     {
         $payload= [
-            'user_id' => 1,
+            'transition' => 'collect',
             'trader_id' => 1,
             'vouchers' => [
                 'rvp12345563',
             ]
         ];
-        $this->json('POST', route('api.voucher.collect'), $payload)
+        $this->json('POST', route('api.voucher.transition'), $payload)
             ->assertStatus(401)
             ->assertJson(['error' => 'Unauthenticated.'])
         ;
@@ -180,7 +180,7 @@ class ApiRoutesTest extends TestCase
     public function testCantCollectVoucherOnBehalfOfNotOwnTraderRoute()
     {
         $payload= [
-            'user_id' => 1,
+            'transition' => 'collect',
             'trader_id' => 1,
             'vouchers' => [
                 'RVP12345563',
@@ -188,13 +188,12 @@ class ApiRoutesTest extends TestCase
         ];
         // Don't sync trader 1 to our user and try to collect.
         $this->actingAs($this->user, 'api')
-            ->json('POST', route('api.voucher.collect'), $payload)
+            ->json('POST', route('api.voucher.transition'), $payload)
             ->assertStatus(403)
         // Policy/ Gate still an issue throwing
         // Illuminate\Auth\Access\AuthorizationException rather than json.
         ;
     }
-
 
     public function testUserCanSeeOwnTraders()
     {
