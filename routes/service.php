@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Http\Request;
+use Symfony\Component\Process\Process;
+use Carbon\Carbon;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,8 +28,11 @@ Route::resource('traders', 'TraderController', [
     'only' => ['index','show']
 ]);
 
-// Not for production - remove after pre-alpha - or make SAFE for staging only!
+
+// Temp route for demo only.
 Route::get('reset-data', function() {
-    \Artisan::call('migrate:refresh', ['--seed' => true, '--force' => true]);
-    dump('Reseeded!!');
+    $process = new Process('php artisan migrate:refresh --seed --force');
+    $process->run();
+    return Redirect::route('dashboard')
+        ->with('message', 'Reseeded @' . Carbon::now());
 });
