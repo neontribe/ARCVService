@@ -15,6 +15,10 @@ ARCV Service is the service portal and API for ARCV Market.
 7. `php artisan passport:install` to create keys and client
 8. Add the "password grant client" id and secret to your `.env`
 
+### To use the Reset data buttton on the dashboard:
+ - chown `env` to the console user and web user group e.g. `chown neontribe:www-data .env`
+ - And `chmod 775 .env`
+
  - Reseed with `php artisan migrate:refresh --seed`
  - Run tests with `phpunit`
 
