@@ -16,7 +16,7 @@ class TraderController extends Controller
      */
     public function index()
     {
-        return Trader::find(1)->vouchersWithStatus();
+        return Trader::all();
     }
 
     /**
