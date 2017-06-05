@@ -54,5 +54,8 @@ class UsersSeeder extends Seeder
             }
             $user->traders()->sync($trade_ids);
         }
+
+        // So we reliably have one user with a single trader.
+        $users[0]->traders()->sync([1]);
     }
 }
