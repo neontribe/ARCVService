@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Http\Request;
+use Symfony\Component\Process\Process;
+use Carbon\Carbon;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,8 +28,27 @@ Route::resource('traders', 'TraderController', [
     'only' => ['index','show']
 ]);
 
-// Not for production - remove after pre-alpha - or make SAFE for staging only!
+
+// Temp route for demo only.
 Route::get('reset-data', function() {
-    \Artisan::call('migrate:refresh', ['--seed' => true, '--force' => true]);
-    dump('Reseeded!!');
+    $process = new Process('
+        php ../artisan migrate:refresh --seed --force
+    ');
+    $process->run();
+    $process = new Process('
+        php ../artisan passport:install
+    ');
+    $process->run();
+
+    $new_secret = DB::table('oauth_clients')->where('id', 2)->pluck('secret')[0];
+    $env_file_path = base_path('.env');
+    $old_secret = env('PASSWORD_CLIENT_SECRET');
+    file_put_contents($env_file_path, preg_replace(
+        "/^PASSWORD_CLIENT_SECRET={$old_secret}/m",
+        "PASSWORD_CLIENT_SECRET={$new_secret}",
+        file_get_contents($env_file_path)
+    ));
+
+    return Redirect::route('dashboard')
+        ->with('message', 'Reseeded @' . Carbon::now());
 });

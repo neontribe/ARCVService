@@ -15,7 +15,7 @@ class MarketController extends Controller
      */
     public function index()
     {
-        //
+        return Market::all();
     }
 
     /**
