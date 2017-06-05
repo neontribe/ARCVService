@@ -13,27 +13,27 @@ class TradersSeeder extends Seeder
     {
         $tradersData = [
             [
-                'name' => "Hector Hopinsett",
+                'name' => "Fred's Fruit and Veg",
                 'market_id'=> 1,
             ],
             [
-                'name' => "Kristy Corntop",
+                'name' => "Larry's Local Larder",
                 'market_id'=> 2,
             ],
             [
-                'name' => "Daisy Buttercup",
+                'name' => "The Happy Fruit Company",
                 'market_id'=> 2,
             ],
             [
-                'name' => "Hazel Pickleweed",
+                'name' => "Red's Tomato Trader",
                 'market_id' => 4,
             ],
             [
-                'name' => "Barry Thistlethorn",
+                'name' => "Mr Bear's Apples and Pears",
                 'market_id' => 5,
             ],
             [
-                'name' => "Fern Timbertop",
+                'name' => "Sally's Fruit Stall",
                 'market_id' => 5,
             ],
         ];
