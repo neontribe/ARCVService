@@ -59,6 +59,6 @@ class UsersSeeder extends Seeder
         $users[0]->traders()->sync([1]);
 
         // So we reliably have one user who can act on behalf of all traders.
-        $users[3]->traders->sync([1, 2, 3, 4, 5, 6]);
+        $users[3]->traders()->sync([1, 2, 3, 4, 5, 6]);
     }
 }
