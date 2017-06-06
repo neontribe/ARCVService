@@ -42,7 +42,7 @@ class UsersSeeder extends Seeder
         foreach ($users as $user) {
             // Sync to a random subset of 1 2 or 3 traders.
             // Unique subset of traders.
-            $id_keys = array_rand($traders, rand(1,3));
+            $id_keys = array_rand($traders, rand(1, 3));
             // Sometimes returns a single int rather than array.
             if (!is_array($id_keys)) {
                 $id_keys = [$id_keys];
@@ -57,5 +57,8 @@ class UsersSeeder extends Seeder
 
         // So we reliably have one user with a single trader.
         $users[0]->traders()->sync([1]);
+
+        // So we reliably have one user who can act on behalf of all traders.
+        $users[3]->traders->sync([1, 2, 3, 4, 5, 6]);
     }
 }
