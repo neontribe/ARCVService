@@ -63,7 +63,7 @@ class Trader extends Model
         if (empty($status)) {
             // Get all the trader's assigned vouchers.
             // Use values() to reset array keys after sort.
-            $vouchers = $this->vouchers->sortBy('updated_at')->values()->all();
+            $vouchers = $this->vouchers->sortByDesc('updated_at')->values()->all();
         } else {
             // Get the vouchers with given status, mapped to these states.
             switch ($status) {
@@ -85,7 +85,7 @@ class Trader extends Model
                 ->pluck('vouchers.id')->toArray();
             // subtract them from the collected ones
             $vouchers = $this->vouchers
-                ->sortBy('updated_at')
+                ->sortByDesc('updated_at')
                 ->values()
                 ->whereNotIn('id', $statedVoucherIDs);
         }
