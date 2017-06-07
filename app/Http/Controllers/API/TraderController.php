@@ -115,9 +115,8 @@ class TraderController extends Controller
             default:
                 // Get date into display format.
                 $formatted_vouchers = [];
-                foreach ($vouchers as $k => $v) {
-                    $formatted_vouchers[$k] = [
-
+                foreach ($vouchers as $v) {
+                    $formatted_vouchers[] = [
                         // In fixtures.
                         'code' => $v->code,
                         'updated_at' => $v->updated_at->format('d-m-Y'),
