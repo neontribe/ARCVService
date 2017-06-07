@@ -10,7 +10,7 @@
     @foreach ($vouchers as $voucher)
         <tr>
             <td>{{ $voucher->code }}</td>
-            <td>{{ $voucher->updated_at->format('Y-m-d H:i.s') }}</td>
+            <td>{{ $voucher->updated_at->format('d-m-Y H:i.s') }}</td>
         </tr>
     @endforeach
     </tbody>

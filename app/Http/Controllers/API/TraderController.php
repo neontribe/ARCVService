@@ -161,13 +161,13 @@ class TraderController extends Controller
         foreach ($vouchers as $v) {
             // If this voucher has been confirmed.
             if ($v->paymentPendedOn) {
-                $pended_day = $v->paymentPendedOn->created_at->format('Y-m-d');
+                $pended_day = $v->paymentPendedOn->created_at->format('d-m-Y');
                 // Group by the created at date on the payment_pending state.
                 $data[$pended_day][] = [
                     'code' => $v->code,
-                    'recorded_on' => $v->recordedOn->created_at->format('Y-m-d'),
+                    'recorded_on' => $v->recordedOn->created_at->format('d-m-Y'),
                     'reimbursed_on' => $v->reimbursedOn
-                        ? $v->reimbursedOn->created_at->format('Y-m-d')
+                        ? $v->reimbursedOn->created_at->format('d-m-Y')
                         : ''
                     ,
                 ];
