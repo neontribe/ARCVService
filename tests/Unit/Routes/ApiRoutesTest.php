@@ -147,19 +147,67 @@ class ApiRoutesTest extends TestCase
 
     public function testCollectVoucherRoute()
     {
+        // Get a valid allocated code.
+        $code = $this->vouchers[0]->code;
         $payload= [
             'transition' => 'collect',
             'trader_id' => 1,
             'vouchers' => [
-                'RVP12345563',
+                $code,
             ]
         ];
         $this->user->traders()->sync([1]);
         $this->actingAs($this->user, 'api')
             ->json('POST', route('api.voucher.transition'), $payload)
+            ->assertStatus(200)
             ->assertJsonStructure([
                 'success', 'fail', 'invalid'
             ])
+            ->assertJson(['success' => [$code]])
+        ;
+    }
+
+    public function testCollectInvalidVoucherRoute()
+    {
+        // Make up a bogus code.
+        $code = 'BAD88888888';
+        $payload= [
+            'transition' => 'collect',
+            'trader_id' => 1,
+            'vouchers' => [
+                $code,
+            ]
+        ];
+        $this->user->traders()->sync([1]);
+        $this->actingAs($this->user, 'api')
+            ->json('POST', route('api.voucher.transition'), $payload)
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'success', 'fail', 'invalid'
+            ])
+            ->assertJson(['invalid' => [$code]])
+        ;
+    }
+
+    public function testCollectFailVoucherRoute()
+    {
+        // Get the code already in recorded state.
+        $code = $this->vouchers[1]->code;
+        $payload= [
+            'transition' => 'collect',
+            'trader_id' => 1,
+            'vouchers' => [
+                $code,
+            ]
+        ];
+        $this->user->traders()->sync([1]);
+        $this->actingAs($this->user, 'api')
+            ->json('POST', route('api.voucher.transition'), $payload)
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'success', 'fail', 'invalid'
+            ])
+            ->assertJson(['fail' => [$code]])
         ;
     }
 
@@ -169,7 +217,7 @@ class ApiRoutesTest extends TestCase
             'transition' => 'collect',
             'trader_id' => 1,
             'vouchers' => [
-                'rvp12345563',
+                'RVP12345563',
             ]
         ];
         $this->json('POST', route('api.voucher.transition'), $payload)
