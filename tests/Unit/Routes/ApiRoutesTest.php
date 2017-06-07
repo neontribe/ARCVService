@@ -104,7 +104,7 @@ class ApiRoutesTest extends TestCase
             ->json('GET', route('api.trader.vouchers', 1))
             ->assertHeader('Content-Type', 'application/json')
             ->assertJsonStructure([ 0 => [
-                'id', 'trader_id', 'code', 'currentstate', 'sponsor_id'
+                'code', 'updated_at'
             ]])
         ;
     }

@@ -120,13 +120,7 @@ class TraderController extends Controller
                         // In fixtures.
                         'code' => $v->code,
                         'updated_at' => $v->updated_at->format('d-m-Y'),
-                        // In tests but not fixtures.
-                        // Perhaps left over from when we 'might' have needed the whole kitchen sink?
-                        'id' => $v->id,
-                        'currentstate' => $v->currentstate,
-                        'trader_id' => $v->trader_id,
-                        'sponsor_id' => $v->sponsor_id,
-                    ];
+                   ];
                 }
                 return response()->json($formatted_vouchers, 200);
         }
