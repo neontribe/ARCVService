@@ -60,7 +60,7 @@ class TraderControllerTest extends TestCase
             $traderController
             ->showVoucherHistory($this->traders[0])->getContent()
         );
-        $today = Carbon::now()->format('Y-m-d');
+        $today = Carbon::now()->format('d-m-Y');
 
         // We should have one group of pended_on vouchers x3.
         $this->assertCount(1, $data);

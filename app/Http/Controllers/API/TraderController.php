@@ -90,7 +90,6 @@ class TraderController extends Controller
         // that have current voucher_state of given currentstate.
 
         $status = request()->input('status');
-
         $vouchers = $trader->vouchersWithStatus($status);
 
         // What format are we after?
@@ -98,7 +97,7 @@ class TraderController extends Controller
             ? request()->getAcceptableContentTypes()[0]
             : null
         ;
-        switch($datatype) {
+        switch ($datatype) {
             case 'text/csv':
             case 'application/csv':
                 $file = $this->createExcel($trader, $vouchers)
@@ -114,7 +113,16 @@ class TraderController extends Controller
                 ]);
             case 'application/json':
             default:
-                return response()->json($vouchers, 200);
+                // Get date into display format.
+                $formatted_vouchers = [];
+                foreach ($vouchers as $v) {
+                    $formatted_vouchers[] = [
+                        // In fixtures.
+                        'code' => $v->code,
+                        'updated_at' => $v->updated_at->format('d-m-Y'),
+                   ];
+                }
+                return response()->json($formatted_vouchers, 200);
         }
     }
 
@@ -129,7 +137,7 @@ class TraderController extends Controller
      */
     private function createExcel($trader, $vouchers)
     {
-        $excel = Excel::create('VouchersDownload', function($excel) use ($trader, $vouchers) {
+        $excel = Excel::create('VouchersDownload', function ($excel) use ($trader, $vouchers) {
             // Set the title
             $excel->setTitle($trader->name . 'Voucher Download')
                 ->setCompany(Auth::user()->name)
@@ -161,13 +169,13 @@ class TraderController extends Controller
         foreach ($vouchers as $v) {
             // If this voucher has been confirmed.
             if ($v->paymentPendedOn) {
-                $pended_day = $v->paymentPendedOn->created_at->format('Y-m-d');
+                $pended_day = $v->paymentPendedOn->created_at->format('d-m-Y');
                 // Group by the created at date on the payment_pending state.
                 $data[$pended_day][] = [
                     'code' => $v->code,
-                    'recorded_on' => $v->recordedOn->created_at->format('Y-m-d'),
+                    'recorded_on' => $v->recordedOn->created_at->format('d-m-Y'),
                     'reimbursed_on' => $v->reimbursedOn
-                        ? $v->reimbursedOn->created_at->format('Y-m-d')
+                        ? $v->reimbursedOn->created_at->format('d-m-Y')
                         : ''
                     ,
                 ];
