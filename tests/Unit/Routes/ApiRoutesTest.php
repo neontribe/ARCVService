@@ -217,7 +217,7 @@ class ApiRoutesTest extends TestCase
             'transition' => 'collect',
             'trader_id' => 1,
             'vouchers' => [
-                'RVP12345563',
+                $this->vouchers[0]->code,
             ]
         ];
         $this->json('POST', route('api.voucher.transition'), $payload)
@@ -232,7 +232,7 @@ class ApiRoutesTest extends TestCase
             'transition' => 'collect',
             'trader_id' => 1,
             'vouchers' => [
-                'RVP12345563',
+                $this->vouchers[0]->code,
             ]
         ];
         // Don't sync trader 1 to our user and try to collect.
@@ -324,6 +324,5 @@ class ApiRoutesTest extends TestCase
             ->assertJson(['error' => 'Unauthenticated.'])
         ;
     }
-
 
 }
