@@ -97,7 +97,7 @@ class TraderController extends Controller
             ? request()->getAcceptableContentTypes()[0]
             : null
         ;
-        switch($datatype) {
+        switch ($datatype) {
             case 'text/csv':
             case 'application/csv':
                 $file = $this->createExcel($trader, $vouchers)
@@ -113,11 +113,11 @@ class TraderController extends Controller
                 ]);
             case 'application/json':
             default:
-                return response()->json($vouchers->map(function($voucher){
+                return response()->json($vouchers->map(function ($voucher) {
                     $newVoucher = $voucher->toArray();
                     $newVoucher["updated_at"] = $voucher->updated_at->format('d-m-Y H:i.s');
                     return $newVoucher;
-                }),200);
+                }), 200);
         }
     }
 
@@ -132,7 +132,7 @@ class TraderController extends Controller
      */
     private function createExcel($trader, $vouchers)
     {
-        $excel = Excel::create('VouchersDownload', function($excel) use ($trader, $vouchers) {
+        $excel = Excel::create('VouchersDownload', function ($excel) use ($trader, $vouchers) {
             // Set the title
             $excel->setTitle($trader->name . 'Voucher Download')
                 ->setCompany(Auth::user()->name)
