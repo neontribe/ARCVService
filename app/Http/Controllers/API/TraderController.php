@@ -92,7 +92,6 @@ class TraderController extends Controller
         $status = request()->input('status');
         $vouchers = $trader->vouchersWithStatus($status);
 
-
         // What format are we after?
         $datatype = request()->getAcceptableContentTypes()
             ? request()->getAcceptableContentTypes()[0]
@@ -115,11 +114,10 @@ class TraderController extends Controller
             case 'application/json':
             default:
                 return response()->json($vouchers->map(function($voucher){
-                  $newVoucher = $voucher->toArray();
-                  $newVoucher["updated_at"] = $voucher->updated_at->format('d-m-Y H:i.s');
-                  return $newVoucher;
+                    $newVoucher = $voucher->toArray();
+                    $newVoucher["updated_at"] = $voucher->updated_at->format('d-m-Y H:i.s');
+                    return $newVoucher;
                 }),200);
-
         }
     }
 
