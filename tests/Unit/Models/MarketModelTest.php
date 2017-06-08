@@ -8,7 +8,6 @@ use App\Market;
 
 class MarketModelTest extends TestCase
 {
-
     use DatabaseMigrations;
 
     protected $market;

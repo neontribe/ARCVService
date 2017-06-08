@@ -15,7 +15,6 @@ use Auth;
 
 class VoucherModelTest extends TestCase
 {
-
     use DatabaseMigrations;
 
     protected $voucher;
@@ -149,7 +148,5 @@ class VoucherModelTest extends TestCase
 
         $this->assertCount(3, Voucher::confirmed()->get());
         $this->assertEquals([2,3,4], Voucher::confirmed()->pluck('id')->toArray());
-
     }
-
 }

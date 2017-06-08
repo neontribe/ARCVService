@@ -86,5 +86,4 @@ class RouteServiceProvider extends ServiceProvider
              ->namespace($this->namespace . '\Service')
              ->group(base_path('routes/service.php'));
     }
-
 }

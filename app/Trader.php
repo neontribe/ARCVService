@@ -91,7 +91,5 @@ class Trader extends Model
         }
 
         return $vouchers;
-
     }
-
 }

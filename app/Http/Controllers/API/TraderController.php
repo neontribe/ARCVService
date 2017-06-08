@@ -20,7 +20,9 @@ class TraderController extends Controller
     public function index()
     {
         // We won't be here if not because of the api middleware but...
-        if (!Auth::user()) { abort(401); }
+        if (!Auth::user()) {
+            abort(401);
+        }
 
         $traders = Auth::user()->traders;
 
@@ -189,5 +191,4 @@ class TraderController extends Controller
         }
         return response()->json(array_values($voucher_history), 200);
     }
-
 }

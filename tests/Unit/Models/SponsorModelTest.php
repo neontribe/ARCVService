@@ -9,7 +9,6 @@ use App\Voucher;
 
 class SponsorModelTest extends TestCase
 {
-
     use DatabaseMigrations;
 
     protected $sponsor;
@@ -41,7 +40,7 @@ class SponsorModelTest extends TestCase
         factory(Voucher::class, 10)->create([
             'sponsor_id' => $this->sponsor->id,
         ]);
-         factory(Voucher::class, 2)->create([
+        factory(Voucher::class, 2)->create([
             'sponsor_id' => $this->sponsor->id +1,
         ]);
         $this->assertCount(10, $this->sponsor->vouchers);

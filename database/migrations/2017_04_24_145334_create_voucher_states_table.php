@@ -26,7 +26,6 @@ class CreateVoucherStatesTable extends Migration
         });
 
         Schema::table('voucher_states', function (Blueprint $table) {
-
             $table->foreign('user_id')
                 ->references('id')
                 ->on('users');
@@ -45,7 +44,6 @@ class CreateVoucherStatesTable extends Migration
     public function down()
     {
         Schema::table('voucher_states', function (Blueprint $table) {
-
             $table->dropForeign(['user_id']);
             $table->dropForeign(['voucher_id']);
         });

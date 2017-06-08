@@ -21,7 +21,6 @@ Route::post('login/refresh', [
 /** Authentication required --------------------------------------------- */
 
 Route::group(['middleware' => 'auth:api'], function () {
-
     Route::post('logout', [
         'as' => 'api.logout',
         'uses' => 'Auth\LoginController@logout',
@@ -33,7 +32,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     ]);
 
     Route::group(['middleware' => 'can:view,trader'], function () {
-
         Route::get('traders/{trader}', [
             'as' => 'api.trader',
             'uses' => 'TraderController@show',

@@ -8,7 +8,7 @@ use App\Voucher;
 
 class ServiceRoutesTest extends TestCase
 {
-   use DatabaseMigrations;
+    use DatabaseMigrations;
 
     protected $vouchers;
 
@@ -16,7 +16,7 @@ class ServiceRoutesTest extends TestCase
     {
         parent::setUp();
         $this->vouchers = factory(Voucher::class, 10)->create();
-     }
+    }
 
     public function testVouchersIndexRoute()
     {
@@ -35,5 +35,4 @@ class ServiceRoutesTest extends TestCase
             ->assertJsonStructure(['id', 'trader_id', 'code', 'currentstate', 'sponsor_id'])
         ;
     }
-
 }

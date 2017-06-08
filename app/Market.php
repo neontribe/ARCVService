@@ -36,5 +36,4 @@ class Market extends Model
      */
     protected $hidden = [
     ];
-
 }

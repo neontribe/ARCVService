@@ -72,5 +72,4 @@ class TraderControllerTest extends TestCase
         $this->assertEquals($data[0]->vouchers[1]->recorded_on, $today);
         $this->assertEquals($data[0]->vouchers[2]->reimbursed_on, $today);
     }
-
 }
