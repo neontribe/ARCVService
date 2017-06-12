@@ -11,7 +11,6 @@ use App\User;
 
 class TraderModelTest extends TestCase
 {
-
     use DatabaseMigrations;
 
     protected $trader;
@@ -46,7 +45,7 @@ class TraderModelTest extends TestCase
         factory(Voucher::class, 10)->create([
             'trader_id' => $this->trader->id,
         ]);
-         factory(Voucher::class, 2)->create([
+        factory(Voucher::class, 2)->create([
             'trader_id' => $this->trader->id +1,
         ]);
         $this->assertCount(10, $this->trader->vouchers);
@@ -125,5 +124,4 @@ class TraderModelTest extends TestCase
         $vc_code_states = $vc->pluck('currentstate', 'code')->toArray();
         $this->assertEquals($unpaid_codes, $vc_code_states);
     }
-
 }

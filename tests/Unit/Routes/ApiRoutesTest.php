@@ -134,7 +134,6 @@ class ApiRoutesTest extends TestCase
             ->assertStatus(200)
             ->assertHeader('Content-Type', 'text/csv; charset=UTF-8')
         ;
-
     }
 
     public function testUnauthenticatedDontShowTraderVouchersRoute()
@@ -324,5 +323,4 @@ class ApiRoutesTest extends TestCase
             ->assertJson(['error' => 'Unauthenticated.'])
         ;
     }
-
 }

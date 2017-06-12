@@ -110,5 +110,4 @@ class RoutesTest extends TestCase
             'message' => 'The user credentials were incorrect.',
         ]);
     }
-
 }

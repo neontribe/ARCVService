@@ -85,5 +85,4 @@ class VouchersSeeder extends Seeder
             $voucher->applyTransition('collect');
         } */
     }
-
 }

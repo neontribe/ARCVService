@@ -8,7 +8,6 @@ use Laracasts\Generators\GeneratorsServiceProvider;
 use Laravel\Dusk\DuskServiceProvider;
 use Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider;
 
-
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -21,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
         // Fix for MySQL < v5.7.7 and MariaDB environs.
         // Recommended at https://laravel-news.com/laravel-5-4-key-too-long-error/
         Schema::defaultStringLength(191);
-   }
+    }
 
     /**
      * Register any application services.

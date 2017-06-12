@@ -9,7 +9,6 @@ use App\User;
 
 class UserModelTest extends TestCase
 {
-
     use DatabaseMigrations;
 
     protected $users;
@@ -43,6 +42,4 @@ class UserModelTest extends TestCase
         $this->assertTrue($this->users[0]->hasTrader($trader));
         $this->assertFalse($this->users[1]->hasTrader($trader));
     }
-
-
 }

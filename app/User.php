@@ -52,5 +52,4 @@ class User extends Authenticatable
     {
         return in_array($trader->id, $this->traders()->pluck('id')->toArray());
     }
-
 }

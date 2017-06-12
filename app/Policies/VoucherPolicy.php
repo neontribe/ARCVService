@@ -32,7 +32,7 @@ class VoucherPolicy
      */
     public function create(User $user)
     {
-       //
+        //
     }
 
     /**
@@ -70,5 +70,4 @@ class VoucherPolicy
     {
         //
     }
-
 }

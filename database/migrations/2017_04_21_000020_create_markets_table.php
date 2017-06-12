@@ -23,7 +23,6 @@ class CreateMarketsTable extends Migration
         });
 
         Schema::table('markets', function (Blueprint $table) {
-
             $table->foreign('sponsor_id')
                 ->references('id')
                 ->on('sponsors');

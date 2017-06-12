@@ -30,7 +30,7 @@ Route::resource('traders', 'TraderController', [
 
 
 // Temp route for demo only.
-Route::get('reset-data', function() {
+Route::get('reset-data', function () {
     $process = new Process('
         php ../artisan migrate:refresh --seed --force
     ');

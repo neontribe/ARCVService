@@ -12,7 +12,6 @@ use SM\Event\TransitionEvent;
 
 class StateHistoryManager
 {
-
     public function testTransition(TransitionEvent $event)
     {
     }

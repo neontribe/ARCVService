@@ -13,7 +13,6 @@ use Auth;
 // We might move these out of Model tests - as they are really StateMachine tests.
 class VoucherStateModelTest extends TestCase
 {
-
     use DatabaseMigrations, DatabaseTransactions;
 
     protected $user;
@@ -74,5 +73,4 @@ class VoucherStateModelTest extends TestCase
         // But using the function annotation @expectedException works.
         $voucher->state('collect');
     }
-
 }

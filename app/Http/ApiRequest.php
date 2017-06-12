@@ -19,4 +19,3 @@ abstract class ApiRequest extends FormRequest
         return response('403');
     }
 }
-

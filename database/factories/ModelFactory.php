@@ -26,7 +26,6 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
 });
 
 $factory->define(App\Sponsor::class, function (Faker\Generator $faker) {
-
     return [
         'name' => $faker->company,
         'shortcode' => $faker->regexify('[A-Z][A-Z][A-Z]'),
@@ -34,7 +33,6 @@ $factory->define(App\Sponsor::class, function (Faker\Generator $faker) {
 });
 
 $factory->define(App\Market::class, function (Faker\Generator $faker) {
-
     if ($sponsor_ids = App\Sponsor::pluck('id')->toArray()) {
         $sponsor_id = $faker->randomElement($sponsor_ids);
     } else {
@@ -50,7 +48,6 @@ $factory->define(App\Market::class, function (Faker\Generator $faker) {
 });
 
 $factory->define(App\Trader::class, function (Faker\Generator $faker) {
-
     return [
         'name' => $faker->name,
         'pic_url' => null,
@@ -74,7 +71,6 @@ $factory->defineAs(App\Trader::class, 'withnullable', function ($faker) use ($fa
  * Voucher with a random current state.
  */
 $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
-
     if ($sponsor_ids = App\Sponsor::pluck('id')->toArray()) {
         $sponsor_id = $faker->randomElement($sponsor_ids);
     } else {
@@ -153,4 +149,3 @@ $factory->define(App\VoucherState::class, function (Faker\Generator $faker) {
         'source' => 'factory',
     ];
 });
-
