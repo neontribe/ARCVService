@@ -7,6 +7,7 @@ use DB;
 use Excel;
 use App\Trader;
 use Illuminate\Http\Request;
+use App\Events\VoucherHistoryEmailRequested;
 use App\Http\Controllers\Controller;
 
 class TraderController extends Controller
@@ -190,5 +191,42 @@ class TraderController extends Controller
             }
         }
         return response()->json(array_values($voucher_history), 200);
+    }
+
+    /**
+     * Email the Trader's Voucher history.
+     *
+     * @param  \App\Trader  $trader
+     * @return \Illuminate\Http\Response
+     */
+    public function emailVoucherHistory(Trader $trader)
+    {
+        $vouchers = $trader->vouchersConfirmed;
+        $voucher_history = [];
+        foreach ($vouchers as $v) {
+            // If this voucher has been confirmed.
+            if ($v->paymentPendedOn) {
+                $pended_day = $v->paymentPendedOn->created_at->format('d-m-Y');
+                // Group by the created at date on the payment_pending state.
+                $data[$pended_day][] = [
+                    'code' => $v->code,
+                    'recorded_on' => $v->recordedOn->created_at->format('d-m-Y'),
+                    'reimbursed_on' => $v->reimbursedOn
+                        ? $v->reimbursedOn->created_at->format('d-m-Y')
+                        : ''
+                    ,
+                ];
+                foreach ($data as $pended_day => $vouchers) {
+                    $voucher_history[$pended_day] = [
+                        'pended_on' => $pended_day,
+                        'vouchers' => $vouchers,
+                    ];
+                }
+            }
+        }
+        $history = array_values($voucher_history);
+        event(new VoucherHistoryEmailRequested(Auth::user(), $history));
+
+        return response(200);
     }
 }
