@@ -8,12 +8,13 @@ ARCV Service is the service portal and API for ARCV Market.
 
 1. Clone the repo
 2. Create a database and user (homestead, sqlite or mysql)
-3. Copy `.env.example` to `.env` and edit to local settings
-4. `composer install`
-5. `php artisan key:generate`
-6. `php artisan migrate --seed`
-7. `php artisan passport:install` to create keys and client
-8. Add the "password grant client" id and secret to your `.env`
+3. If not using [Homestead](https://https://laravel.com/docs/5.4/homestead) or Valet - you will need to cofigure permissions on `storage` and `bootstrap/cache`. See [Laravel 5.4 Installation](https://laravel.com/docs/5.4#installation) for more info.
+4. Copy `.env.example` to `.env` and edit to local settings
+5. `composer install`
+6. `php artisan key:generate`
+7. `php artisan migrate --seed`
+8. `php artisan passport:install` to create keys and client
+9. Add the "password grant client" id and secret to your `.env`
 
 ### To use the Reset data buttton on the dashboard:
  - chown `env` to the console user and web user group e.g. `chown neontribe:www-data .env`
