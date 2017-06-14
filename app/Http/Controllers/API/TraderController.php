@@ -95,68 +95,16 @@ class TraderController extends Controller
         $status = request()->input('status');
         $vouchers = $trader->vouchersWithStatus($status);
 
-        // What format are we after?
-        $datatype = request()->getAcceptableContentTypes()
-            ? request()->getAcceptableContentTypes()[0]
-            : null
-        ;
-        switch ($datatype) {
-            case 'text/csv':
-            case 'application/csv':
-                $file = $this->createExcel($trader, $vouchers)
-                    ->string('csv');
-                return response($file, 200, [
-                    'Content-Type' => 'text/csv',
-                ]);
-            case 'application/xlsx':
-                $file = $this->createExcel($trader, $vouchers)
-                    ->string('xlsx');
-                return response($file, 200, [
-                    'Content-Type' => 'application/xlsx',
-                ]);
-            case 'application/json':
-            default:
-                // Get date into display format.
-                $formatted_vouchers = [];
-                foreach ($vouchers as $v) {
-                    $formatted_vouchers[] = [
-                        // In fixtures.
-                        'code' => $v->code,
-                        'updated_at' => $v->updated_at->format('d-m-Y'),
-                   ];
-                }
-                return response()->json($formatted_vouchers, 200);
+        // Get date into display format.
+        $formatted_vouchers = [];
+        foreach ($vouchers as $v) {
+            $formatted_vouchers[] = [
+                // In fixtures.
+                'code' => $v->code,
+                'updated_at' => $v->updated_at->format('d-m-Y'),
+            ];
         }
-    }
-
-    /**
-     * Helper to create Excel downloads.
-     * There may be a better place for this but fine for now.
-     *
-     * @param \App\Trader $trader
-     * @param \App\Voucher collection $vouchers
-     *
-     * @return Maatwebsite\Excel
-     */
-    private function createExcel($trader, $vouchers)
-    {
-        $excel = Excel::create('VouchersDownload', function ($excel) use ($trader, $vouchers) {
-            // Set the title
-            $excel->setTitle($trader->name . 'Voucher Download')
-                ->setCompany(Auth::user()->name)
-                ->setDescription('A report containing queued vouchers.')
-            ;
-
-            $excel->sheet('Vouchers', function ($sheet) use ($trader, $vouchers) {
-                $sheet->loadView('api.downloads.vouchers', [
-                    'vouchers' => $vouchers,
-                    'trader' => $trader->name,
-                    'user' => Auth::user()->name,
-                ]);
-            });
-        });
-
-        return $excel;
+        return response()->json($formatted_vouchers, 200);
     }
 
     /**
@@ -190,6 +138,7 @@ class TraderController extends Controller
                 }
             }
         }
+
         return response()->json(array_values($voucher_history), 200);
     }
 
@@ -225,8 +174,44 @@ class TraderController extends Controller
             }
         }
         $history = array_values($voucher_history);
+        $file = $this->createExcel($trader, $vouchers)
+            ->string('csv');
+        return response($file, 200, [
+            'Content-Type' => 'text/csv',
+        ]);
+
         event(new VoucherHistoryEmailRequested(Auth::user(), $history));
 
         return response(200);
+    }
+
+    /**
+     * Helper to create Excel and csv files.
+     * There may be a better place for this but fine for now.
+     *
+     * @param \App\Trader $trader
+     * @param \App\Voucher collection $vouchers
+     *
+     * @return Maatwebsite\Excel
+     */
+    private function createExcel($trader, $vouchers)
+    {
+        $excel = Excel::create('VouchersDownload', function ($excel) use ($trader, $vouchers) {
+            // Set the title
+            $excel->setTitle($trader->name . 'Voucher Download')
+                ->setCompany(Auth::user()->name)
+                ->setDescription('A report containing queued vouchers.')
+            ;
+
+            $excel->sheet('Vouchers', function ($sheet) use ($trader, $vouchers) {
+                $sheet->loadView('api.downloads.vouchers', [
+                    'vouchers' => $vouchers,
+                    'trader' => $trader->name,
+                    'user' => Auth::user()->name,
+                ]);
+            });
+        });
+
+        return $excel;
     }
 }
