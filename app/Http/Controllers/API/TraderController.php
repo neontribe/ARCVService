@@ -151,36 +151,21 @@ class TraderController extends Controller
     public function emailVoucherHistory(Trader $trader)
     {
         $vouchers = $trader->vouchersConfirmed;
-        $voucher_history = [];
+        $data = [
+            'user' => Auth::user()->name,
+            'trader' => $trader->name,
+            'market' => $trader->market->name,
+            'vouchers' => [],
+        ];
         foreach ($vouchers as $v) {
             // If this voucher has been confirmed.
             if ($v->paymentPendedOn) {
-                $pended_day = $v->paymentPendedOn->created_at->format('d-m-Y');
-                // Group by the created at date on the payment_pending state.
-                $data[$pended_day][] = [
-                    'code' => $v->code,
-                    'recorded_on' => $v->recordedOn->created_at->format('d-m-Y'),
-                    'reimbursed_on' => $v->reimbursedOn
-                        ? $v->reimbursedOn->created_at->format('d-m-Y')
-                        : ''
-                    ,
-                ];
-                foreach ($data as $pended_day => $vouchers) {
-                    $voucher_history[$pended_day] = [
-                        'pended_on' => $pended_day,
-                        'vouchers' => $vouchers,
-                    ];
-                }
+                $data['vouchers'][] = $v;
             }
         }
-        $history = array_values($voucher_history);
-        $file = $this->createExcel($trader, $vouchers)
-            ->string('csv');
-        return response($file, 200, [
-            'Content-Type' => 'text/csv',
-        ]);
+        $file = $this->createExcel($data)->store('csv', false, true);
 
-        event(new VoucherHistoryEmailRequested(Auth::user(), $history));
+        event(new VoucherHistoryEmailRequested(Auth::user(), $file));
 
         return response(200);
     }
@@ -189,28 +174,29 @@ class TraderController extends Controller
      * Helper to create Excel and csv files.
      * There may be a better place for this but fine for now.
      *
-     * @param \App\Trader $trader
-     * @param \App\Voucher collection $vouchers
+     * @param Array $data
      *
      * @return Maatwebsite\Excel
      */
-    private function createExcel($trader, $vouchers)
+    private function createExcel($data)
     {
-        $excel = Excel::create('VouchersDownload', function ($excel) use ($trader, $vouchers) {
+        $excel = Excel::create('VouchersDownload', function ($excel) use ($data) {
             // Set the title
-            $excel->setTitle($trader->name . 'Voucher Download')
-                ->setCompany(Auth::user()->name)
-                ->setDescription('A report containing queued vouchers.')
+            $excel->setTitle($data['trader'] . 'Voucher History')
+                ->setCompany($data['user'])
+                ->setDescription('A report containing voucher history.')
             ;
 
-            $excel->sheet('Vouchers', function ($sheet) use ($trader, $vouchers) {
-                $sheet->loadView('api.downloads.vouchers', [
-                    'vouchers' => $vouchers,
-                    'trader' => $trader->name,
-                    'user' => Auth::user()->name,
+            $excel->sheet('Vouchers', function ($sheet) use ($data) {
+                $sheet->loadView('api.reports.vouchers', [
+                    'user' => $data['user'],
+                    'trader' => $data['trader'],
+                    'market' => $data['market'],
+                    'vouchers' => $data['vouchers'],
                 ]);
             });
         });
+
 
         return $excel;
     }
