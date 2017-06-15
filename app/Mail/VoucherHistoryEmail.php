@@ -11,14 +11,16 @@ class VoucherHistoryEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $file;
+
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($file)
     {
-        //
+        $this->file = $file;
     }
 
     /**
@@ -28,6 +30,11 @@ class VoucherHistoryEmail extends Mailable
      */
     public function build()
     {
-        return $this->view('api.emails.voucher_history_email');
+        return $this->view('api.emails.voucher_history_email')
+            ->attach($this->file['full'], [
+                'as' => $this->file['file'],
+                'mime' => 'text/csv',
+            ])
+        ;
     }
 }

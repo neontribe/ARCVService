@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Excel;
 use App\Trader;
@@ -180,7 +181,9 @@ class TraderController extends Controller
      */
     private function createExcel($data)
     {
-        $excel = Excel::create('VouchersDownload', function ($excel) use ($data) {
+        $time = Carbon::now()->format('Y-m-d_Hi');
+        $filename = str_slug($data['trader'] . '-vouchers-' .$time);
+        $excel = Excel::create($filename, function ($excel) use ($data) {
             // Set the title
             $excel->setTitle($data['trader'] . 'Voucher History')
                 ->setCompany($data['user'])

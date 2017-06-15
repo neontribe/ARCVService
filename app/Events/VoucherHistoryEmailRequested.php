@@ -23,10 +23,10 @@ class VoucherHistoryEmailRequested
      *
      * @return void
      */
-    public function __construct(User $user, array $history)
+    public function __construct(User $user, $file)
     {
         $this->user = $user;
-        $this->history = $history;
+        $this->file = $file;
     }
 
     /**
