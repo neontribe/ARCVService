@@ -41,6 +41,17 @@ class Trader extends Model
     }
 
     /**
+     * Get the market this trader belongs to.
+     *
+     * @return App\Market
+     */
+    public function market()
+    {
+        return $this->belongsTo('App\Market');
+    }
+
+
+    /**
      * Vouchers that have been submitted for payment on behalf of this trader.
      * They will have currentstate: payment_pending or reimbursed.
      *

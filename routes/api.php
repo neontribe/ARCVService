@@ -47,6 +47,11 @@ Route::group(['middleware' => 'auth:api'], function () {
             'as' => 'api.trader.voucher-history',
             'uses' => 'TraderController@showVoucherHistory',
         ]);
+
+        Route::post('traders/{trader}/voucher-history-email', [
+            'as' => 'api.trader.voucher-history-email',
+            'uses' => 'TraderController@emailVoucherHistory',
+        ]);
     });
 
     Route::post('vouchers', [

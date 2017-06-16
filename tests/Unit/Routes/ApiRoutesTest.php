@@ -109,33 +109,6 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testDownloadTraderVouchersXlsxRoute()
-    {
-        // Todo not yet implemented - the encoding was not working frontend.
-        // Associate this user with Trader id 1.
-        $this->user->traders()->sync([1]);
-        $this->actingAs($this->user, 'api')
-            ->call('get', route('api.trader.vouchers', 1),
-                [], [], [], ['HTTP_Accept' => 'application/xlsx']
-            )
-            ->assertStatus(200)
-            ->assertHeader('Content-Type', 'application/xlsx')
-        ;
-    }
-
-    public function testDownloadTraderVouchersCsvRoute()
-    {
-        // Associate this user with Trader id 1.
-        $this->user->traders()->sync([1]);
-        $this->actingAs($this->user, 'api')
-            ->call('get', route('api.trader.vouchers', 1),
-                [], [], [], ['HTTP_Accept' => 'text/csv']
-            )
-            ->assertStatus(200)
-            ->assertHeader('Content-Type', 'text/csv; charset=UTF-8')
-        ;
-    }
-
     public function testUnauthenticatedDontShowTraderVouchersRoute()
     {
         $this->json('GET', route('api.trader.vouchers', 1))

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Excel;
 use App\Trader;
 use Illuminate\Http\Request;
+use App\Events\VoucherHistoryEmailRequested;
 use App\Http\Controllers\Controller;
 
 class TraderController extends Controller
@@ -94,68 +96,16 @@ class TraderController extends Controller
         $status = request()->input('status');
         $vouchers = $trader->vouchersWithStatus($status);
 
-        // What format are we after?
-        $datatype = request()->getAcceptableContentTypes()
-            ? request()->getAcceptableContentTypes()[0]
-            : null
-        ;
-        switch ($datatype) {
-            case 'text/csv':
-            case 'application/csv':
-                $file = $this->createExcel($trader, $vouchers)
-                    ->string('csv');
-                return response($file, 200, [
-                    'Content-Type' => 'text/csv',
-                ]);
-            case 'application/xlsx':
-                $file = $this->createExcel($trader, $vouchers)
-                    ->string('xlsx');
-                return response($file, 200, [
-                    'Content-Type' => 'application/xlsx',
-                ]);
-            case 'application/json':
-            default:
-                // Get date into display format.
-                $formatted_vouchers = [];
-                foreach ($vouchers as $v) {
-                    $formatted_vouchers[] = [
-                        // In fixtures.
-                        'code' => $v->code,
-                        'updated_at' => $v->updated_at->format('d-m-Y'),
-                   ];
-                }
-                return response()->json($formatted_vouchers, 200);
+        // Get date into display format.
+        $formatted_vouchers = [];
+        foreach ($vouchers as $v) {
+            $formatted_vouchers[] = [
+                // In fixtures.
+                'code' => $v->code,
+                'updated_at' => $v->updated_at->format('d-m-Y'),
+            ];
         }
-    }
-
-    /**
-     * Helper to create Excel downloads.
-     * There may be a better place for this but fine for now.
-     *
-     * @param \App\Trader $trader
-     * @param \App\Voucher collection $vouchers
-     *
-     * @return Maatwebsite\Excel
-     */
-    private function createExcel($trader, $vouchers)
-    {
-        $excel = Excel::create('VouchersDownload', function ($excel) use ($trader, $vouchers) {
-            // Set the title
-            $excel->setTitle($trader->name . 'Voucher Download')
-                ->setCompany(Auth::user()->name)
-                ->setDescription('A report containing queued vouchers.')
-            ;
-
-            $excel->sheet('Vouchers', function ($sheet) use ($trader, $vouchers) {
-                $sheet->loadView('api.downloads.vouchers', [
-                    'vouchers' => $vouchers,
-                    'trader' => $trader->name,
-                    'user' => Auth::user()->name,
-                ]);
-            });
-        });
-
-        return $excel;
+        return response()->json($formatted_vouchers, 200);
     }
 
     /**
@@ -189,6 +139,68 @@ class TraderController extends Controller
                 }
             }
         }
+
         return response()->json(array_values($voucher_history), 200);
+    }
+
+    /**
+     * Email the Trader's Voucher history.
+     *
+     * @param  \App\Trader  $trader
+     * @return \Illuminate\Http\Response
+     */
+    public function emailVoucherHistory(Trader $trader)
+    {
+        $vouchers = $trader->vouchersConfirmed;
+        $data = [
+            'user' => Auth::user()->name,
+            'trader' => $trader->name,
+            'market' => $trader->market->name,
+            'vouchers' => [],
+        ];
+        foreach ($vouchers as $v) {
+            // If this voucher has been confirmed.
+            if ($v->paymentPendedOn) {
+                $data['vouchers'][] = $v;
+            }
+        }
+        $file = $this->createExcel($data)->store('csv', false, true);
+
+        event(new VoucherHistoryEmailRequested(Auth::user(), $file));
+
+        return response(200);
+    }
+
+    /**
+     * Helper to create Excel and csv files.
+     * There may be a better place for this but fine for now.
+     *
+     * @param Array $data
+     *
+     * @return Maatwebsite\Excel
+     */
+    private function createExcel($data)
+    {
+        $time = Carbon::now()->format('Y-m-d_Hi');
+        $filename = str_slug($data['trader'] . '-vouchers-' .$time);
+        $excel = Excel::create($filename, function ($excel) use ($data) {
+            // Set the title
+            $excel->setTitle($data['trader'] . 'Voucher History')
+                ->setCompany($data['user'])
+                ->setDescription('A report containing voucher history.')
+            ;
+
+            $excel->sheet('Vouchers', function ($sheet) use ($data) {
+                $sheet->loadView('api.reports.vouchers', [
+                    'user' => $data['user'],
+                    'trader' => $data['trader'],
+                    'market' => $data['market'],
+                    'vouchers' => $data['vouchers'],
+                ]);
+            });
+        });
+
+
+        return $excel;
     }
 }
