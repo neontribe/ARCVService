@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Events\VoucherHistoryEmailRequested;
+use App\Http\Controllers\Controller;
+use App\Trader;
 use Auth;
 use Carbon\Carbon;
 use DB;
 use Excel;
-use App\Trader;
 use Illuminate\Http\Request;
-use App\Events\VoucherHistoryEmailRequested;
-use App\Http\Controllers\Controller;
+use Log;
 
 class TraderController extends Controller
 {
@@ -149,26 +150,47 @@ class TraderController extends Controller
      * @param  \App\Trader  $trader
      * @return \Illuminate\Http\Response
      */
-    public function emailVoucherHistory(Trader $trader)
+    public function emailVoucherHistory(Request $request, Trader $trader)
+    {
+        // Request date string as dd-mm-yyyy
+        $date = $request->submission_date ? $request->submission_date : null;
+        $file = $this->createVoucherHistoryFile($trader, $date);
+
+        event(new VoucherHistoryEmailRequested(Auth::user(), $file));
+
+        return response(['message' => 'The voucher history has been emailed.'], 202);
+    }
+
+    /**
+     * Helper to create the Trader's Voucher history file.
+     *
+     * @param  \App\Trader  $trader
+     * @return txt/csv File
+     */
+    public function createVoucherHistoryFile(Trader $trader, $date = null)
     {
         $vouchers = $trader->vouchersConfirmed;
         $data = [
             'user' => Auth::user()->name,
             'trader' => $trader->name,
-            'market' => $trader->market->name,
+            // This is currently a nullable relation.
+            'market' => $trader->market
+                 ? $trader->market->name
+                 : 'no associated market',
             'vouchers' => [],
         ];
         foreach ($vouchers as $v) {
-            // If this voucher has been confirmed.
+            // If this voucher has been pended for payment.
             if ($v->paymentPendedOn) {
-                $data['vouchers'][] = $v;
+                $pended_day = $v->paymentPendedOn->updated_at->format('d-m-Y');
+                // Either all the pended vouchers (null date) or the requested one.
+                if ($date === null || $date === $pended_day) {
+                    $data['vouchers'][] = $v;
+                }
             }
         }
         $file = $this->createExcel($data)->store('csv', false, true);
-
-        event(new VoucherHistoryEmailRequested(Auth::user(), $file));
-
-        return response(200);
+        return $file;
     }
 
     /**

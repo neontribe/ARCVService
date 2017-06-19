@@ -17,7 +17,8 @@
         "moontoast/math": "^1.1",
         "optimus/api-consumer": "0.2.*",
         "ramsey/uuid": "^3.6",
-        "sebdesign/laravel-state-machine": "^1.1"
+        "sebdesign/laravel-state-machine": "^1.1",
+        "spinen/laravel-mail-assertions": "^0.2.0"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.3",
