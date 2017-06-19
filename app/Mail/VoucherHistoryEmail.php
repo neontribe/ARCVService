@@ -22,8 +22,8 @@ class VoucherHistoryEmail extends Mailable
      */
     public function __construct($user, $trader, $file)
     {
-        $this->user = $user;
-        $this->trader = $trader;
+        $this->user = $user->name;
+        $this->trader = $trader->name;
         $this->file = $file;
     }
 
@@ -34,10 +34,7 @@ class VoucherHistoryEmail extends Mailable
      */
     public function build()
     {
-        return $this->view('api.emails.voucher_history_email', [
-            'user' => $this->user->name,
-            'trader' => $this->trader->name,
-        ])
+        return $this->view('api.emails.voucher_history_email')
             ->attach($this->file['full'], [
                 'as' => $this->file['file'],
                 'mime' => 'text/csv',
