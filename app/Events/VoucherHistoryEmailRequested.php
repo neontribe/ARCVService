@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\User;
+use App\Trader;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -16,16 +17,18 @@ class VoucherHistoryEmailRequested
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $user;
-    public $history;
+    public $trader;
+    public $file;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(User $user, $file)
+    public function __construct(User $user, Trader $trader, $file)
     {
         $this->user = $user;
+        $this->trader = $trader;
         $this->file = $file;
     }
 

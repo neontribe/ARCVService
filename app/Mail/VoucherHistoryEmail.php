@@ -11,6 +11,8 @@ class VoucherHistoryEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $user;
+    public $trader;
     public $file;
 
     /**
@@ -18,8 +20,10 @@ class VoucherHistoryEmail extends Mailable
      *
      * @return void
      */
-    public function __construct($file)
+    public function __construct($user, $trader, $file)
     {
+        $this->user = $user;
+        $this->trader = $trader;
         $this->file = $file;
     }
 
@@ -30,7 +34,10 @@ class VoucherHistoryEmail extends Mailable
      */
     public function build()
     {
-        return $this->view('api.emails.voucher_history_email')
+        return $this->view('api.emails.voucher_history_email', [
+            'user' => $this->user->name,
+            'trader' => $this->trader->name,
+        ])
             ->attach($this->file['full'], [
                 'as' => $this->file['file'],
                 'mime' => 'text/csv',

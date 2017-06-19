@@ -156,7 +156,7 @@ class TraderController extends Controller
         $date = $request->submission_date ? $request->submission_date : null;
         $file = $this->createVoucherHistoryFile($trader, $date);
 
-        event(new VoucherHistoryEmailRequested(Auth::user(), $file));
+        event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file));
 
         return response(['message' => 'The voucher history has been emailed.'], 202);
     }

@@ -2,9 +2,9 @@
 
 @section('content')
 [xXx]
-    <p>Hi there,</p>
+    <p>Hi {{ $user }},</p>
 
-    <p>You've requested a record of your voucher payment history, which is attached to this email.</p>
+    <p>You've requested a record of {{ $trader }}'s voucher payment history, which is attached to this email.</p>
     <!-- Is this the right email> -->
     <p>If you have any problems with opening or downloading the file attached, please <a href="mailto:arc@neontribe.co.uk">email arc@neontribe.co.uk</a>.</p>
 

@@ -72,7 +72,7 @@ class SendVoucherHistoryEmailTest extends TestCase
         $controller = new TraderController();
         $file = $controller->createVoucherHistoryFile($this->traders[0]);
 
-        $event = new VoucherHistoryEmailRequested($this->user, $file);
+        $event = new VoucherHistoryEmailRequested($this->user, $this->traders[0], $file);
         $listener = new SendVoucherHistoryEmail();
         $listener->handle($event);
     }
