@@ -158,7 +158,7 @@ class TraderController extends Controller
 
         event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file));
 
-        return response(['message' => 'The voucher history has been emailed.'], 202);
+        return response()->json(['message' => 'The voucher history has been emailed.'], 202);
     }
 
     /**
