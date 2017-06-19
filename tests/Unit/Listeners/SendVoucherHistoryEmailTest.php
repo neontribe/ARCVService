@@ -68,12 +68,23 @@ class SendVoucherHistoryEmailTest extends TestCase
 
     public function testRequestVoucherHistoryEmail()
     {
-        Auth::login($this->user);
+        // Todo this test could be split up and improved.
+        $user = $this->user;
+        $trader = $this->traders[0];
+        Auth::login($user);
         $controller = new TraderController();
-        $file = $controller->createVoucherHistoryFile($this->traders[0]);
+        $file = $controller->createVoucherHistoryFile($trader);
 
         $event = new VoucherHistoryEmailRequested($this->user, $this->traders[0], $file);
         $listener = new SendVoucherHistoryEmail();
         $listener->handle($event);
+
+        // We can improve this - but test basic data is correct.
+        $this->seeEmailWasSent()
+            ->seeEmailTo($user->email)
+            ->seeEmailSubject('Voucher History Email')
+            ->seeEmailContains('Hi ' . $user->name)
+            ->seeEmailContains('requested a record of ' . $trader->name)
+        ;
     }
 }

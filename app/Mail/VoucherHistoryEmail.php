@@ -35,6 +35,8 @@ class VoucherHistoryEmail extends Mailable
     public function build()
     {
         return $this->view('api.emails.voucher_history_email')
+            // Todo Add a textonly version.
+            //->text('api.emails.voucher_history_email_textonly')
             ->attach($this->file['full'], [
                 'as' => $this->file['file'],
                 'mime' => 'text/csv',
