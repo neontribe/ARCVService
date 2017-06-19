@@ -30,7 +30,13 @@ class SendVoucherHistoryEmail
      */
     public function handle(VoucherHistoryEmailRequested $event)
     {
-        Mail::to($event->user)->send(new VoucherHistoryEmail($event->file));
+        Mail::to($event->user)
+            ->send(new VoucherHistoryEmail(
+                $event->user,
+                $event->trader,
+                $event->file
+            ))
+        ;
         Log::info($event->file['file'] . ' emailed.');
         File::delete($event->file);
         Log::info($event->file['file'] . ' deleted.');

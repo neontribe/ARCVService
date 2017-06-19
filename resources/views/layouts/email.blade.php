@@ -12,12 +12,12 @@
         </style>
     </head>
     <body>
-        [xXx]Voucher hisotry email copy[xXx]
         @yield('content')
 
-        <div class="footer" style="margin-top: 40px;">
-            <p style="font-size: 13px; color: #999;">For more information please go to <a href="http://www.alexandrarose.org.uk/">www.alexandrarose.org.uk</a> or email us at <a href="mailto:arc@neontribe.co.uk">arc@neontribe.co.uk</a>.</p>
-            <p style="font-size: 13px; color: #999;"><a href="http://www.alexandrarose.org.uk/privacy/">Privacy Policy</a></p>
+        <div class="footer" style="margin-top: 40px; font-size: 13px; color: #999;">
+            <p>Rose Vouchers text</p>
+            <p>For more information please go to <a href="http://www.alexandrarose.org.uk/">www.alexandrarose.org.uk</a> or email us at <a href="mailto:arc@neontribe.co.uk">arc@neontribe.co.uk</a>.</p>
+            <p><a href="http://www.alexandrarose.org.uk/privacy/">Privacy Policy</a></p>
         </div>
 
     </body>
