@@ -2,6 +2,8 @@
 
 @section('content')
 [xXx]
+	<h1 style="text-align: center;">Voucher payment history request</h1>
+
     <p>Hi {{ $user }},</p>
 
     <p>You've requested a record of {{ $trader }}'s voucher payment history, which is attached to this email.</p>
