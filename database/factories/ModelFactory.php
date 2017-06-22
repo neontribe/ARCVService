@@ -28,7 +28,7 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
 $factory->define(App\Sponsor::class, function (Faker\Generator $faker) {
     return [
         'name' => $faker->company,
-        'shortcode' => $faker->regexify('[A-Z][A-Z][A-Z]'),
+        'shortcode' => $faker->regexify('[A-Z]{2,5}'),
     ];
 });
 
@@ -89,8 +89,10 @@ $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
 
     $shortcode = App\Sponsor::find($sponsor_id)->shortcode;
     return [
-        'sponsor_id' => $sponsor_id, // a random sponsor
-        'code' => $shortcode . $faker->ean8, // 8 digit barcode
+        // A random sponsor
+        'sponsor_id' => $sponsor_id,
+        // Sponsor code + 4-8 integers
+        'code' => $shortcode . $faker->regexify('[0-9]{4,8}'),
         'currentstate' => $currentstate,
     ];
 });
