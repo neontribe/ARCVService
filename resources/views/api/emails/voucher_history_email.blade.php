@@ -1,7 +1,7 @@
 @extends('layouts.email')
 
 @section('content')
-[xXx]
+
     <div role="main">
         <h1 style="text-align: center;">Voucher Payment Request History</h1>
 
@@ -14,5 +14,5 @@
         <p>Thanks,<br>
         Rose Vouchers</p>
     </div>
-[xXx]
+
 @endsection

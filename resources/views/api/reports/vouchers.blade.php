@@ -1,4 +1,4 @@
-<h2>[xXx] Vouchers submitted by {{ $user }} for payment on behalf of {{ $trader }} from {{ $market }}</h2>
+<h2>Vouchers submitted by {{ $user }} for payment on behalf of {{ $trader }} from {{ $market }}</h2>
 <table>
     <thead>
         <tr>
