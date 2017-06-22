@@ -54,7 +54,7 @@ class Voucher extends Model
         // Might need to add a 'sometimes' if any required fields can be absent from requests.
         'trader_id' => ['numeric', 'exists:traders,id'],
         // My regex might be pants... but until we get the edit form spun up who cares?
-        'code' => ['required', 'unique:vouchers', 'regex:[A-Z][A-Z][A-Z][0-9]{8}'],
+        'code' => ['required', 'unique:vouchers', 'regex:[A-Z]{2,5}[0-9]{4,8}'],
         // Not sure about this one. We might be able to secify config instead.
         'currentstate' => ['required', 'in_array:voucher_state,to', 'max:24'],
         'sponsor_id' => ['numeric', 'required', 'exists:sponsors,id'],
