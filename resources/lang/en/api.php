@@ -7,4 +7,4 @@ return [
 	'errors' => [
 		'invalid_credentials' => 'The user credentials were incorrect.'
 	]
-]
+];
