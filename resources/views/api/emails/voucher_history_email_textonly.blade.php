@@ -1,4 +1,3 @@
-[xXx]
 * Voucher Payment Request History *
 
 ==============================================
@@ -19,4 +18,3 @@ Alexandra Rose Charity
 For more information please go to <a href="http://www.alexandrarose.org.uk/">www.alexandrarose.org.uk</a>.
 
 <a href="http://www.alexandrarose.org.uk/privacy/">Privacy Policy</a>
-[xXx]
