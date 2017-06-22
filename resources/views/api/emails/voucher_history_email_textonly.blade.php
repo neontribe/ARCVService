@@ -1,3 +1,4 @@
+[xXx]
 * VOUCHER PAYMENT HISTORY REQUEST *
 
 ==============================================
@@ -17,3 +18,4 @@ Rose Vouchers
 For more information please go to <a href="http://www.alexandrarose.org.uk/">www.alexandrarose.org.uk</a> or email us at <a href="mailto:arc@neontribe.co.uk">arc@neontribe.co.uk</a>.
 
 <a href="http://www.alexandrarose.org.uk/privacy/">Privacy Policy</a>
+[xXx]
