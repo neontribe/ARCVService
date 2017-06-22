@@ -11,13 +11,10 @@ class SponsorsSeeder extends Seeder
      */
     public function run()
     {
-        $sponsorData = [
-            ['name' => "Real Virtual Project", "shortcode" =>"RVP"],
-            ['name' => "Sponsor of Latinum", 'shortcode' => "SOL"],
-        ];
+        $sponsor = ['name' => "Real Virtual Project", "shortcode" =>"RVP"];
+        factory(App\Sponsor::class)->create($sponsor);
 
-        foreach ($sponsorData as $sponsor) {
-            factory(App\Sponsor::class)->create($sponsor);
-        }
+        // And 4 default factory models.
+        factory(App\Sponsor::class, 4)->create();
     }
 }
