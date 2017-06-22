@@ -49,7 +49,7 @@ class LoginProxy
         // Mimic the OAuthServerException invalidCredentials
         return response([
             'error' => 'invalid_credentials',
-            'message' => trans(api.errors.invalid_credentials),
+            'message' => trans('api.errors.invalid_credentials'),
         ], 401);
     }
 
