@@ -12,11 +12,12 @@
         </style>
     </head>
     <body>
+
         @yield('content')
 
         <div class="footer" style="margin-top: 40px; font-size: 13px; color: #999;">
-            <p>Rose Vouchers text</p>
-            <p>For more information please go to <a href="http://www.alexandrarose.org.uk/" role="link">www.alexandrarose.org.uk</a> or email us at <a href="mailto:arc@neontribe.co.uk">arc@neontribe.co.uk</a>.</p>
+            <p>&copy; Alexandra Rose Charity</p>
+            <p>For more information please go to <a href="http://www.alexandrarose.org.uk/" role="link">www.alexandrarose.org.uk</a>.</p>
             <p><a href="http://www.alexandrarose.org.uk/privacy/" role="link">Privacy Policy</a></p>
         </div>
 

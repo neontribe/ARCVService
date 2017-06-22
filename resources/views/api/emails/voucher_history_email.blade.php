@@ -3,7 +3,7 @@
 @section('content')
 [xXx]
     <div role="main">
-        <h1 style="text-align: center;">Voucher payment history request</h1>
+        <h1 style="text-align: center;">Voucher Payment Request History</h1>
 
         <p>Hi {{ $user }},</p>
 
@@ -12,8 +12,7 @@
         <p>If you have any problems with opening or downloading the file attached, please <a href="mailto:arc@neontribe.co.uk">email arc@neontribe.co.uk</a>.</p>
 
         <p>Thanks,<br>
-        Rose Vouchers<br>
-        <a href="http://www.alexandrarose.org.uk/" role="link">www.alexandrarose.org.uk</a></p>
+        Rose Vouchers</p>
     </div>
 [xXx]
 @endsection
