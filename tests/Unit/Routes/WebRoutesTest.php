@@ -8,12 +8,14 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 class WebRoutesTest extends TestCase
 {
     /**
-     * A basic browser test example.
+     * Verify content on dashboard.
      *
      * @return void
      */
-    public function testLandingPage()
+    public function testDashboardPage()
     {
-        $this->get('/')->assertStatus(200);
+        $this->get('/')
+            ->assertStatus(200)
+        ;
     }
 }

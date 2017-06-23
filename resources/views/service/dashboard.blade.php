@@ -51,7 +51,7 @@
         </style>
     </head>
     <body>
-    @unless(Config::get('app.url') === 'https://voucher-admin.alexandrarose.org.uk')
+    @unless(Config('app.url') === 'https://voucher-admin.alexandrarose.org.uk')
         <p>{{ Session::get('message') }}</p>
         <h1>Service data endpoints</h1>
 
