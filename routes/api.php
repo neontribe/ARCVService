@@ -31,7 +31,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'uses' => 'TraderController@index',
     ]);
 
-    Route::group(['middleware' => 'can:apiView,trader'], function () {
+    Route::group(['middleware' => 'can:view,trader'], function () {
         Route::get('traders/{trader}', [
             'as' => 'api.trader',
             'uses' => 'TraderController@show',

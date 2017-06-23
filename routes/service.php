@@ -8,12 +8,12 @@ use Carbon\Carbon;
 |--------------------------------------------------------------------------
 | Service Routes
 |--------------------------------------------------------------------------
- */
+*/
 
 // For now these routes are only available in dev and staging environs.
 Route::group(['middleware' => 'isNotProduction'], function () {
     Route::resource('vouchers', 'VoucherController', [
-        'only' => ['index','show','store']
+        'only' => ['index','show','store',]
     ]);
 
     Route::resource('users', 'UserController', [
@@ -25,7 +25,7 @@ Route::group(['middleware' => 'isNotProduction'], function () {
     ]);
 
     Route::resource('traders', 'TraderController', [
-        'only' => ['index','show']
+        'only' => ['index','show',]
     ]);
 
 
