@@ -49,7 +49,7 @@ class LoginProxy
         // Mimic the OAuthServerException invalidCredentials
         return response([
             'error' => 'invalid_credentials',
-            'message' => 'The user credentials were incorrect.',
+            'message' => trans('api.errors.invalid_credentials'),
         ], 401);
     }
 
@@ -82,7 +82,7 @@ class LoginProxy
             'scope' => '',
         ]);
 
-        $response = $this->apiConsumer->post('/oauth/token', $data);
+        $response = $this->apiConsumer->post('/oauth/token', $data); 
 
         if (!$response->isSuccessful()) {
             return $response;
