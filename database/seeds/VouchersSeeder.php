@@ -37,10 +37,18 @@ class VouchersSeeder extends Seeder
             $rvp_vouchers[$i-60]->save();
 
             if ($rvp_vouchers[$i-60]->id < 32) {
-                //Progress these to allocated.
+                //Progress these to printed.
                 $rvp_vouchers[$i-60]->applyTransition('order');
                 $rvp_vouchers[$i-60]->applyTransition('print');
+            }
+
+            if ($rvp_vouchers[$i-60]->id < 22) {
+                //Progress these to dispatched.
                 $rvp_vouchers[$i-60]->applyTransition('dispatch');
+            }
+
+            if ($rvp_vouchers[$i-60]->id < 11) {
+                //Progress these to allocated.
                 $rvp_vouchers[$i-60]->applyTransition('allocate');
             }
         }

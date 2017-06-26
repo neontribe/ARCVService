@@ -47,7 +47,7 @@ return [
                 'to' =>  'allocated',
             ],
             'collect' => [
-                'from' => ['allocated'],
+                'from' => ['printed','dispatched','allocated'],
                 'to' =>  'recorded',
             ],
             'confirm' => [

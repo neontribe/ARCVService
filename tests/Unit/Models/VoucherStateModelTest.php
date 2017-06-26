@@ -73,4 +73,29 @@ class VoucherStateModelTest extends TestCase
         // But using the function annotation @expectedException works.
         $voucher->state('collect');
     }
+
+    public function testAPrintedVoucherCanBeCollected()
+    {
+        Auth::login($this->user);
+        $voucher = factory(Voucher::class, 'requested')->create();
+
+        $voucher->applyTransition('order');
+        $voucher->applyTransition('print');
+        $voucher->applyTransition('collect');
+
+        $this->assertEquals($voucher->currentstate, 'recorded');
+    }
+
+    public function testADispatchedVoucherCanBeCollected()
+    {
+        Auth::login($this->user);
+        $voucher = factory(Voucher::class, 'requested')->create();
+
+        $voucher->applyTransition('order');
+        $voucher->applyTransition('print');
+        $voucher->applyTransition('dispatch');
+        $voucher->applyTransition('collect');
+
+        $this->assertEquals($voucher->currentstate, 'recorded');
+    }
 }
