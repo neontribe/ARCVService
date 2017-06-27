@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Policies;
+namespace App\Policies\Api;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Http\Request;

@@ -51,7 +51,7 @@
         </style>
     </head>
     <body>
-
+    @unless(Config('app.url') === 'https://voucher-admin.alexandrarose.org.uk')
         <p>{{ Session::get('message') }}</p>
         <h1>Service data endpoints</h1>
 
@@ -64,5 +64,6 @@
                 <li class="danger"><a href="service/reset-data">Reset data</a></li>
             </ul>
         </div>
+    @endUnless
     </body>
 </html>

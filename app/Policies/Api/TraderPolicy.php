@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Policies;
+namespace App\Policies\Api;
 
 use App\User;
 use App\Trader;
@@ -11,7 +11,7 @@ class TraderPolicy
     use HandlesAuthorization;
 
     /**
-     * Determine whether the user can view the trader.
+     * Determine whether the api user can view the trader.
      *
      * @param  \App\User  $user
      * @param  \App\Trader  $trader
