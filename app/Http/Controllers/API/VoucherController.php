@@ -63,10 +63,11 @@ class VoucherController extends Controller
         $vouchers = Voucher::findByCodes($uniqueVouchers);
 
         // For now - get the ones not in that list - they are bad codes.
-        $bad_codes = array_diff(
+        // We need to rekey the array here because otherwise the json reponse will return object for non 0 starting.
+        $bad_codes = array_values(array_diff(
             $uniqueVouchers,
             $vouchers->pluck('code')->toArray()
-        );
+        ));
 
         // For the pre-alpha we 'collect'.
         $transition = $request['transition'];
