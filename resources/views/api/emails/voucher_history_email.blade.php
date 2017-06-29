@@ -2,7 +2,7 @@
 
 @section('content')
 
-    <div role="main">
+    <section role="main">
         <h1 style="text-align: center;">Voucher Payment Request History</h1>
 
         <p>Hi {{ $user }},</p>
@@ -13,6 +13,6 @@
 
         <p>Thanks,<br>
         Rose Vouchers</p>
-    </div>
+    </section>
 
 @endsection
