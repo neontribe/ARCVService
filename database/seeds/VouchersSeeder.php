@@ -19,8 +19,8 @@ class VouchersSeeder extends Seeder
 
         Auth::login($user);
 
-        // Create RVP one as id 1 our trader will be affiliated with this.
-        $rvp = App\Sponsor::where('shortcode', 'RVP')->first();
+        // Create RVNT one as id 1 our trader will be affiliated with this.
+        $rvp = App\Sponsor::where('shortcode', 'RVNT')->first();
 
         // Only requested state works with seeder for now.
         // Only 40 for now or we will get 9 digits.
@@ -32,7 +32,7 @@ class VouchersSeeder extends Seeder
         $size = sizeOf($rvp_vouchers);
         // Assign the codes that match the paper.
         for ($i=60; $i<$size+60; $i++) {
-            $rvp_vouchers[$i-60]->code = 'RVP123455'.$i;
+            $rvp_vouchers[$i-60]->code = 'RVNT123455'.$i;
             $rvp_vouchers[$i-60]->sponsor_id = $rvp->id;
             $rvp_vouchers[$i-60]->save();
 

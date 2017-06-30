@@ -11,7 +11,7 @@ class SponsorsSeeder extends Seeder
      */
     public function run()
     {
-        $sponsor = ['name' => "Real Virtual Project", "shortcode" =>"RVP"];
+        $sponsor = ['name' => "Real Virtual Project", "shortcode" =>"RVNT"];
         factory(App\Sponsor::class)->create($sponsor);
 
         // And 4 default factory models.
