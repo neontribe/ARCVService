@@ -56,5 +56,15 @@ class VouchersSeeder extends Seeder
         // Transition one voucher to recorded by trader 1.
         $rvp_vouchers[1]->trader_id = 1;
         $rvp_vouchers[1]->applyTransition('collect');
+
+        // 4 digit printed vouchers for trial.
+        $rvnt4 = factory(App\Voucher::class, 'requested', 100)->create();
+        foreach ($rvnt4 as $k => $v) {
+            $v->code = 'RVNT' . str_pad($k, 4, '0', STR_PAD_LEFT);
+            $v->sponsor_id = $rvp->id;
+            // Progress to printed.
+            $v->applyTransition('order');
+            $v->applyTransition('print');
+        }
     }
 }
