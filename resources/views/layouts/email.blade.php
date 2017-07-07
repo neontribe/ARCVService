@@ -2,7 +2,7 @@
 <html lang="en-GB">
     <head>
         <meta charset="utf-8">
-        <title>Rose Vouchers</title>
+        <title>Rosie: Rose Voucher Records &amp; Reimbursement</title>
         <style type="text/css">
             @import url(http://fonts.googleapis.com/css?family=Open+Sans);
             body {
