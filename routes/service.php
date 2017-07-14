@@ -10,6 +10,8 @@ use Carbon\Carbon;
 |--------------------------------------------------------------------------
 */
 
+Route::get('/', 'DashboardController@index')->name('dashboard');
+
 // For now these routes are only available in dev and staging environs.
 Route::group(['middleware' => 'isNotProduction'], function () {
     Route::resource('vouchers', 'VoucherController', [
