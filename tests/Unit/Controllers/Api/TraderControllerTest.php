@@ -103,13 +103,13 @@ class TraderControllerTest extends TestCase
         $date = Carbon::now()->format('d-m-Y');
         $this->actingAs($this->user, 'api')
             ->json('POST', route('api.trader.voucher-history-email', 1), [
-                'submission_date' => null,
+                'submission_date' => $date,
             ])
             ->assertStatus(202)
             ->assertJson([
                 'message' => trans(
-                    'api.messages.email_voucher_history', [
-                        'submission_date' => $date,
+                    'api.messages.email_voucher_history_date', [
+                        'date' => $date,
                     ]
                 )
             ])
