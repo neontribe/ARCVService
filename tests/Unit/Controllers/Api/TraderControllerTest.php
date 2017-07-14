@@ -75,49 +75,57 @@ class TraderControllerTest extends TestCase
     }
 
     /**
-     * Tests the email voucher history API response.
-     * @dataProvider testEmailVoucherHistoryDataProvider
-     * @group error
+     * Tests the email all voucher history API response.
      */
-    public function testEmailVoucherHistory($requestParams) {
-      $post_operation = $this->actingAs($this->user, 'api')
-          ->post(
-              route('api.trader.voucher-history-email', ['trader' => 2]),
-              $requestParams
-          );
-
-      $submission_date = $requestParams['submission_date'];
-      $email_voucher_history_message = trans('api.messages.email_voucher_history');
-      $email_voucher_history_message_date = trans('api.messages.email_voucher_history_date', [
-        'date' => $submission_date
-      ]);
-
-
-      if(is_null($submission_date) || empty($submission_date)) {
-        // If no date is provided we expect the standard message to be returned.
-        $post_operation->assertJson([
-          'message' => $email_voucher_history_message,
-        ]);
-      } else {
-        // If a date is provided we expect the message to mirror $email_voucher_history_message_date.
-        $post_operation->assertJson([
-          'message' => $email_voucher_history_message_date,
-        ]);
-      }
+    public function testEmailVoucherHistoryAllDates()
+    {
+        // Sync the user with trader 1.
+        $this->user->traders()->sync([1]);
+        $this->actingAs($this->user, 'api')
+            ->json('POST', route('api.trader.voucher-history-email', 1), [
+                'submission_date' => null,
+            ])
+            ->assertStatus(202)
+            ->assertJson([
+                'message' => trans('api.messages.email_voucher_history')
+            ])
+        ;
     }
 
-    public function testEmailVoucherHistoryDataProvider() {
-      return [
-          [
-              ['submission_date' => '']
+    /**
+     * Tests the email specific date voucher history API response.
+     */
+    public function testEmailVoucherHistorySpecificDate()
+    {
+        // Sync the user with trader 1.
+        $this->user->traders()->sync([1]);
+        // There should be some vouchers pended today.
+        $date = Carbon::now()->format('d-m-Y');
+        $this->actingAs($this->user, 'api')
+            ->json('POST', route('api.trader.voucher-history-email', 1), [
+                'submission_date' => null,
+            ])
+            ->assertStatus(202)
+            ->assertJson([
+                'message' => trans(
+                    'api.messages.email_voucher_history', [
+                        'submission_date' => $date,
+                    ]
+                )
+            ])
+        ;
+    }
 
-          ],
-          [
-              ['submission_date' => null]
-          ],
-          [
-              ['submission_date' => '14-07-2017']
-          ],
-      ];
+    /**
+     * Tests the voucher history not emailed to user not auth'd for trader.
+     */
+    public function testEmailVoucherHistoryToNonAuthdUser()
+    {
+        $this->actingAs($this->user, 'api')
+            ->json('POST', route('api.trader.voucher-history-email', 1), [
+                'submission_date' => null,
+            ])
+            ->assertStatus(403)
+        ;
     }
 }
