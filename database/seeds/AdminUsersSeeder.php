@@ -25,4 +25,5 @@ class AdminUsersSeeder extends Seeder
         foreach ($usersData as $user) {
             factory(App\AdminUser::class)->create($user);
         }
+    }
 }

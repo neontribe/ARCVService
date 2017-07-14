@@ -59,15 +59,14 @@ class Handler extends ExceptionHandler
         if ($request->expectsJson()) {
             return response()->json(['error' => 'Unauthenticated.'], 401);
         }
-
         // For later if we have different users.
         $guard = array_get($exception->guards(), 0);
         switch ($guard) {
-            case 'service':
-                $login = route('service.login');
+            case 'api':
+                $login = route('api.login');
                 break;
             default:
-                $login = route('login');
+                $login = route('admin.login');
                 break;
         }
 
