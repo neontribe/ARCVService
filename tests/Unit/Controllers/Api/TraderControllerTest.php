@@ -77,9 +77,14 @@ class TraderControllerTest extends TestCase
     /**
      * Tests the email voucher history API response.
      * @dataProvider testEmailVoucherHistoryDataProvider
+     * @group error
      */
     public function testEmailVoucherHistory($requestParams) {
-      $req = Request::create('', 'GET', $requestParams);
+      $post_operation = $this->actingAs($this->user, 'api')
+          ->post(
+              route('api.trader.voucher-history-email', ['trader' => 2]),
+              $requestParams
+          );
 
       $submission_date = $requestParams['submission_date'];
       $email_voucher_history_message = trans('api.messages.email_voucher_history');
@@ -87,21 +92,17 @@ class TraderControllerTest extends TestCase
         'date' => $submission_date
       ]);
 
-      $traderController = new TraderController;
-      $data = json_decode(
-        $traderController
-          ->emailVoucherHistory($req, $this->traders[0])->getContent()
-      );
-
-      // We should have a message attribute.
-      $this->assertObjectHasAttribute('message', $data);
 
       if(is_null($submission_date) || empty($submission_date)) {
         // If no date is provided we expect the standard message to be returned.
-        $this->assertEquals($email_voucher_history_message, $data->message);
+        $post_operation->assertJson([
+          'message' => $email_voucher_history_message,
+        ]);
       } else {
         // If a date is provided we expect the message to mirror $email_voucher_history_message_date.
-        $this->assertEquals($email_voucher_history_message_date, $data->message);
+        $post_operation->assertJson([
+          'message' => $email_voucher_history_message_date,
+        ]);
       }
     }
 
