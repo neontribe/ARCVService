@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Controllers\Api;
 
+use Illuminate\Http\Request;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use App\Voucher;
@@ -71,5 +72,60 @@ class TraderControllerTest extends TestCase
         $this->assertEquals($data[0]->vouchers[0]->reimbursed_on, '');
         $this->assertEquals($data[0]->vouchers[1]->recorded_on, $today);
         $this->assertEquals($data[0]->vouchers[2]->reimbursed_on, $today);
+    }
+
+    /**
+     * Tests the email all voucher history API response.
+     */
+    public function testEmailVoucherHistoryAllDates()
+    {
+        // Sync the user with trader 1.
+        $this->user->traders()->sync([1]);
+        $this->actingAs($this->user, 'api')
+            ->json('POST', route('api.trader.voucher-history-email', 1), [
+                'submission_date' => null,
+            ])
+            ->assertStatus(202)
+            ->assertJson([
+                'message' => trans('api.messages.email_voucher_history')
+            ])
+        ;
+    }
+
+    /**
+     * Tests the email specific date voucher history API response.
+     */
+    public function testEmailVoucherHistorySpecificDate()
+    {
+        // Sync the user with trader 1.
+        $this->user->traders()->sync([1]);
+        // There should be some vouchers pended today.
+        $date = Carbon::now()->format('d-m-Y');
+        $this->actingAs($this->user, 'api')
+            ->json('POST', route('api.trader.voucher-history-email', 1), [
+                'submission_date' => $date,
+            ])
+            ->assertStatus(202)
+            ->assertJson([
+                'message' => trans(
+                    'api.messages.email_voucher_history_date', [
+                        'date' => $date,
+                    ]
+                )
+            ])
+        ;
+    }
+
+    /**
+     * Tests the voucher history not emailed to user not auth'd for trader.
+     */
+    public function testEmailVoucherHistoryToNonAuthdUser()
+    {
+        $this->actingAs($this->user, 'api')
+            ->json('POST', route('api.trader.voucher-history-email', 1), [
+                'submission_date' => null,
+            ])
+            ->assertStatus(403)
+        ;
     }
 }
