@@ -160,7 +160,7 @@ class TraderController extends Controller
 
         $response_text = trans('api.messages.email_voucher_history');
 
-        // If a date is provided generate a response message
+        // If a date is provided generate a specific response message.
         if($date) {
             $response_text = trans(
                 'api.messages.email_voucher_history_date',
