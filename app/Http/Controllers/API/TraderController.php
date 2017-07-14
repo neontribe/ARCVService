@@ -158,7 +158,17 @@ class TraderController extends Controller
 
         event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file));
 
-        return response()->json(['message' => trans('api.messages.email_voucher_history')], 202);
+        $response_text = trans('api.messages.email_voucher_history');
+
+        // If a date is provided generate a specific response message.
+        if($date) {
+            $response_text = trans(
+                'api.messages.email_voucher_history_date',
+                ['date' => $date]
+            );
+        }
+
+        return response()->json(['message' => $response_text], 202);
     }
 
     /**
