@@ -105,7 +105,6 @@ return [
         ],
 
         'admins' => [
-            'email' => 'service.auth.passwords.email',
             'provider' => 'users',
             'table' => 'password_resets',
             'expire' => 60,

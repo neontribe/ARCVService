@@ -29,4 +29,12 @@ class ForgotPasswordController extends Controller
     {
         $this->middleware('guest');
     }
+
+    /**
+     * Override to use service auth view.
+     */
+    public function showLinkRequestForm()
+    {
+        return view('service.auth.passwords.email');
+    }
 }
