@@ -80,7 +80,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapServiceRoutes()
     {
-        Route::middleware('auth')
+        Route::middleware(['web', 'guest'])
              ->namespace($this->namespace . '\Service')
              ->group(base_path('routes/service.php'));
     }

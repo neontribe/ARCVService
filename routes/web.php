@@ -6,12 +6,15 @@
 |--------------------------------------------------------------------------
 */
 
+
+
 // Admin (Service) Authentication Routes...
 Route::get('login', [
     'as' => 'admin.login',
     'uses' => 'Service\Auth\LoginController@showLoginForm',
 ]);
 Route::post('login', 'Service\Auth\LoginController@login');
+Route::get('/', 'Service\AdminController@index')->name('admin.dashboard');
 
 // Admin (Service) Password Reset Routes...
 Route::get('password/reset', 'Service\Auth\ForgotPasswordController@showLinkRequestForm')

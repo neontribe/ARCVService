@@ -10,17 +10,16 @@ use Carbon\Carbon;
 |--------------------------------------------------------------------------
 */
 
-Route::group(['middleware' => 'auth:admins'], function () {
-    Route::get('/', function () {
-        return view('service.dashboard');
-    })->name('dashboard');
+Route::get('dashboard', function () {
+    return view('service.dashboard');
+})->name('dashboard');
 
-    Route::post('logout', [
-        'as' =>'admin.logout',
-        'uses' => 'Auth\LoginController@logout',
-    ]);
-});
-// For now these routes are only available in dev and staging environs.
+Route::post('logout', [
+    'as' =>'admin.logout',
+    'uses' => 'Auth\LoginController@logout',
+]);
+
+    // For now these routes are only available in dev and staging environs.
 Route::group(['middleware' => 'isNotProduction'], function () {
     Route::resource('vouchers', 'VoucherController', [
         'only' => ['index','show','store',]
