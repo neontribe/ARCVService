@@ -41,7 +41,7 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapServiceRoutes();
 
-        //
+        $this->mapDataRoutes();
     }
 
     /**
@@ -68,9 +68,9 @@ class RouteServiceProvider extends ServiceProvider
     protected function mapApiRoutes()
     {
         Route::prefix('api')
-             ->middleware('api')
-             ->namespace($this->namespace . '\API')
-             ->group(base_path('routes/api.php'));
+            ->middleware('api')
+            ->namespace($this->namespace . '\API')
+            ->group(base_path('routes/api.php'));
     }
 
     /**
@@ -80,8 +80,21 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapServiceRoutes()
     {
-        Route::middleware(['web', 'guest'])
-             ->namespace($this->namespace . '\Service')
-             ->group(base_path('routes/service.php'));
+        Route::middleware(['web'])
+            ->namespace($this->namespace . '\Service')
+            ->group(base_path('routes/service.php'));
+    }
+
+    /**
+     * Define the "data" routes for the application.
+     *
+     * @return void
+     */
+    protected function mapDataRoutes()
+    {
+        Route::prefix('data')
+            ->middleware(['web', 'isNotProduction'])
+            ->namespace($this->namespace . '\Service')
+            ->group(base_path('routes/data.php'));
     }
 }

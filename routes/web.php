@@ -14,7 +14,8 @@ Route::get('login', [
     'uses' => 'Service\Auth\LoginController@showLoginForm',
 ]);
 Route::post('login', 'Service\Auth\LoginController@login');
-Route::get('/', 'Service\AdminController@index')->name('admin.dashboard');
+
+Route::get('/', 'Service\AdminController@index')->name('dashboard');
 
 // Admin (Service) Password Reset Routes...
 Route::get('password/reset', 'Service\Auth\ForgotPasswordController@showLinkRequestForm')
