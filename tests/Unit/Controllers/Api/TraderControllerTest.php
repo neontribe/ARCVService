@@ -21,27 +21,13 @@ class TraderControllerTest extends TestCase
     protected $traders;
     protected $vouchers;
     protected $user;
-    protected $sponsor;
-    protected $market;
 
     protected function setUp()
     {
         parent::setUp();
         $this->traders = factory(Trader::class, 2)->create();
         $this->vouchers = factory(Voucher::class, 'requested', 10)->create();
-        $this->market = factory(Market::class)->create();
-        $this->sponsor = factory(Sponsor::class)->create();
         $this->user = factory(User::class)->create();
-
-        // Set up market and trader states.
-        $this->market->id = 1;
-        $this->market->sponsor_id = 2;
-        $this->sponsor->id = 2;
-        $this->sponsor->shortcode = 'TEST';
-        $this->traders[1]->market_id = 1;
-        $this->market->save();
-        $this->traders[1]->save();
-        $this->sponsor->save();
 
         // Set up voucher states.
         Auth::login($this->user);
@@ -71,20 +57,20 @@ class TraderControllerTest extends TestCase
     }
 
   /**
-   * Tests the controller and the append for shortcode.
-   *
-   * @group failing
+   * Tests the for the api.trader.market route and controller.
    */
     public function testShowMarket()
     {
-
-      $this->user->traders()->sync([1]);
+      $trader = factory(Trader::class, 'with_market_sponsor')->create();
+      $this->user->traders()->sync([$trader->id]);
       $this->actingAs($this->user, 'api')
-        ->get(route('api.trader.market', 2))
+        ->get(route('api.trader.market', $trader->id))
         ->assertStatus(200)
         ->assertJsonFragment([
-            'sponsor_id' => $this->sponsor->id,
-            'sponsor_shortcode' => $this->market->sponsor->shortcode,
+            'id' => $trader->market_id,
+            'sponsor_id' => $trader->market->sponsor_id,
+            'sponsor_shortcode' => $trader->market->sponsor_shortcode,
+            'payment_message' => $trader->market->payment_message,
         ]);
     }
 

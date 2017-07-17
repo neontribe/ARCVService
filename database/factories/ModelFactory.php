@@ -99,6 +99,39 @@ $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
 });
 
 /**
+ * Trader with linked market and sponsor.
+ */
+$factory->defineAs(App\Trader::class, 'with_market_sponsor', function ($faker) use ($factory) {
+    // Setup Sponsor.
+    if ($sponsor_ids = App\Sponsor::pluck('id')->toArray()) {
+        $sponsor_id = $faker->randomElement($sponsor_ids);
+    } else {
+        $sponsor = factory(App\Sponsor::class)->create(['name' => 'Null Adminstrations']);
+        $sponsor_id = $sponsor->id;
+    }
+
+    // Setup Market.
+    if ($market_ids = App\Market::pluck('id')->toArray()) {
+        $market_id = $faker->randomElement($market_ids);
+    } else {
+        // there are no sponsors. odd. make a null one
+        $sponsor = factory(App\Market::class)->create([
+            'name' => $faker->company,
+            'location' => $faker->postcode,
+            'sponsor_id' => $sponsor_id, // a random sponsor
+            'payment_message' => $faker->sentence($nbWords = 12, $variableNbWords = true),
+        ]);
+        $market_id = $sponsor->id;
+    }
+
+    return [
+        'name' => $faker->name,
+        'pic_url' => null,
+        'market_id' => $market_id,
+    ];
+});
+
+/**
  * Voucher with currentstate requested.
  */
 $factory->defineAs(App\Voucher::class, 'requested', function ($faker) use ($factory) {
