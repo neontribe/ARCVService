@@ -2,14 +2,14 @@
 
 namespace Tests\Unit\Controllers\Api;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use App\Voucher;
 use App\Trader;
 use App\User;
 use App\Http\Controllers\API\TraderController;
 use Auth;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\TestCase;
 
 class TraderControllerTest extends TestCase
 {
