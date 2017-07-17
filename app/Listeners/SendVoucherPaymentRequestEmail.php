@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\VoucherPaymentRequestEmailRequested;
+use App\Events\VoucherPaymentRequested;
 use App\Mail\VoucherPaymentRequestEmail;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -28,9 +28,9 @@ class SendVoucherPaymentRequestEmail
      * @param  VoucherHistoryEmailRequested  $event
      * @return void
      */
-    public function handle(VoucherPaymentRequestEmailRequested $event)
+    public function handle(VoucherPaymentRequested $event)
     {
-        Mail::to($event->user)
+        Mail::to(config('mail.to.address'))
             ->send(new VoucherPaymentRequestEmail(
                 $event->user,
                 $event->trader,
