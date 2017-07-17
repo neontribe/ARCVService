@@ -66,7 +66,6 @@ class Handler extends ExceptionHandler
                 $login = route('api.login');
                 break;
             case 'admin':
-                $login = route('admin.login');
             default:
                 $login = route('admin.login');
                 break;
