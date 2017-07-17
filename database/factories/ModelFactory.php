@@ -102,33 +102,25 @@ $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
  * Trader with linked market and sponsor.
  */
 $factory->defineAs(App\Trader::class, 'with_market_sponsor', function ($faker) use ($factory) {
+    $trader = $factory->raw(App\Trader::class);
+
     // Setup Sponsor.
-    if ($sponsor_ids = App\Sponsor::pluck('id')->toArray()) {
-        $sponsor_id = $faker->randomElement($sponsor_ids);
-    } else {
-        $sponsor = factory(App\Sponsor::class)->create(['name' => 'Null Adminstrations']);
-        $sponsor_id = $sponsor->id;
-    }
+    $sponsor_def = $factory->raw(App\Sponsor::class);
+    $sponsor_def = array_merge($sponsor_def, [
+        'id' => 100,
+    ]);
+    factory(App\Sponsor::class)->create($sponsor_def);
 
     // Setup Market.
-    if ($market_ids = App\Market::pluck('id')->toArray()) {
-        $market_id = $faker->randomElement($market_ids);
-    } else {
-        // there are no sponsors. odd. make a null one
-        $sponsor = factory(App\Market::class)->create([
-            'name' => $faker->company,
-            'location' => $faker->postcode,
-            'sponsor_id' => $sponsor_id, // a random sponsor
-            'payment_message' => $faker->sentence($nbWords = 12, $variableNbWords = true),
-        ]);
-        $market_id = $sponsor->id;
-    }
+    $market_def = $factory->raw(App\Market::class);
+    $market_def = array_merge($market_def, [
+        'sponsor_id' => 100,
+    ]);
+    $market = factory(App\Market::class)->create($market_def);
 
-    return [
-        'name' => $faker->name,
-        'pic_url' => null,
-        'market_id' => $market_id,
-    ];
+    return array_merge($trader, [
+        'market_id' => $market->id,
+    ]);
 });
 
 /**

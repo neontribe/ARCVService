@@ -22,7 +22,9 @@ class Market extends Model
     ];
 
     protected $rules = [
-        'payment_message' => 'required',
+        'payment_message' => [
+            'required',
+        ],
     ];
 
     /**
@@ -40,7 +42,7 @@ class Market extends Model
      * @var array
      */
     protected $hidden = [
-        'sponsor'
+        'sponsor',
     ];
 
     /**
@@ -49,18 +51,8 @@ class Market extends Model
      * @var array
      */
     protected $appends = [
-        'sponsor_shortcode'
+        'sponsor_shortcode',
     ];
-
-    /**
-     * Get the sponsor shortcode.
-     *
-     * @return string
-     */
-    public function getSponsorShortcodeAttribute()
-    {
-        return $this->sponsor->shortcode;
-    }
 
     /**
      * Get the sponsor belonging to this market.
@@ -70,5 +62,15 @@ class Market extends Model
     public function sponsor()
     {
         return $this->hasOne(Sponsor::class, 'id', 'sponsor_id');
+    }
+
+    /**
+     * Get the sponsor shortcode.
+     *
+     * @return string
+     */
+    public function getSponsorShortcodeAttribute()
+    {
+        return $this->sponsor->shortcode;
     }
 }
