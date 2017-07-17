@@ -34,6 +34,7 @@ class SendVoucherPaymentRequestEmail
             ->send(new VoucherPaymentRequestEmail(
                 $event->user,
                 $event->trader,
+                $event->vouchers,
                 $event->file
             ))
         ;

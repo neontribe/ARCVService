@@ -6,7 +6,7 @@
 Hi ARC Admin,
 
 {{ $user }} has just successfully requested payment for
-{{ $vouchers }} worth {{ $vouchers }} against
+{{ $vouchers->count() }} vouchers, against
 {{ $trader }} of
 {{ $market }}'s account.
 

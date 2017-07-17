@@ -8,7 +8,7 @@
         <p>[xXx]Hi ARC Admin,</p>
 
         <p> {{ $user }} has just successfully requested payment for</p>
-        <p> {{ $vouchers }} worth {{ $vouchers }} against</p>
+        <p> {{ $vouchers->count() }} vouchers, against</p>
         <p> {{ $trader }} of </p>
         <p> {{ $market }}'s account.</p>
 

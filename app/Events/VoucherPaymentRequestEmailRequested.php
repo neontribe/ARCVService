@@ -4,6 +4,7 @@ namespace App\Events;
 
 use App\User;
 use App\Trader;
+use App\Voucher;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -18,6 +19,7 @@ class VoucherPaymentRequestEmailRequested
 
     public $user;
     public $trader;
+    public $vouchers;
     public $file;
 
     /**
@@ -25,11 +27,12 @@ class VoucherPaymentRequestEmailRequested
      *
      * @return void
      */
-    public function __construct(User $user, Trader $trader, $file)
+    public function __construct(User $user, Trader $trader, Voucher $vouchers, $file)
     {
         $this->user = $user;
         $this->trader = $trader;
         $this->file = $file;
+        $this->vouchers = $vouchers;
     }
 
     /**

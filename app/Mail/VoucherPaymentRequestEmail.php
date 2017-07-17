@@ -13,18 +13,20 @@ class VoucherPaymentRequestEmail extends Mailable
 
     public $user;
     public $trader;
+    public $vouchers;
     public $file;
 
     /**
      * Create a new message instance.
      */
 
-    public function __construct($user, $trader, $file)
+    public function __construct($user, $trader, $vouchers, $file)
     {
         $this->user = $user->name;
         $this->trader = $trader->name;
+        // Sending vouchers collection in case we want more than just count in email for copy.
+        $this->vouchers = $vouchers;
         $this->file = $file;
-        $this->vouchers = $trader->vouchers;
     }
 
     /**

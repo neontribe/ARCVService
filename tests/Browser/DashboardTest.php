@@ -10,11 +10,6 @@ use Config;
 
 class DashboardTest extends DuskTestCase
 {
-
-    public function setUp()
-    {
-        $this->markTestSkipped('Skipped Laravel/Dusk test.');
-    }
     /**
      * Test that all enirons except production have data routes.
      *
