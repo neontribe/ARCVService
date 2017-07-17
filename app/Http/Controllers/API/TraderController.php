@@ -109,6 +109,16 @@ class TraderController extends Controller
         return response()->json($formatted_vouchers, 200);
     }
 
+  /**
+   * @param \App\Trader $trader
+   */
+    public function showMarket(Trader $trader) {
+      $market = $trader->market;
+
+
+      return response()->json($market, 200);
+    }
+
     /**
      * Display the Trader's Voucher history.
      *
