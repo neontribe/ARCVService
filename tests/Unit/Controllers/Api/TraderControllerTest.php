@@ -2,9 +2,6 @@
 
 namespace Tests\Unit\Controllers\Api;
 
-use App\Market;
-use App\Sponsor;
-use Illuminate\Http\Request;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use App\Voucher;
