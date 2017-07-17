@@ -26,6 +26,7 @@ class MarketModelTest extends TestCase
         $this->assertNotNull($m->name);
         $this->assertNotNull($m->location);
         $this->assertNotNull($m->payment_message);
+        $this->assertNotNull($m->sponsor_shortcode);
         $this->assertNotNull($m->sponsor_id);
         $this->assertInternalType('integer', $m->sponsor_id);
     }
