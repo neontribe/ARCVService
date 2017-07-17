@@ -2,6 +2,8 @@
 
 namespace Tests\Unit\Controllers\Api;
 
+use App\Market;
+use App\Sponsor;
 use Illuminate\Http\Request;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -19,13 +21,27 @@ class TraderControllerTest extends TestCase
     protected $traders;
     protected $vouchers;
     protected $user;
+    protected $sponsor;
+    protected $market;
 
     protected function setUp()
     {
         parent::setUp();
         $this->traders = factory(Trader::class, 2)->create();
         $this->vouchers = factory(Voucher::class, 'requested', 10)->create();
+        $this->market = factory(Market::class)->create();
+        $this->sponsor = factory(Sponsor::class)->create();
         $this->user = factory(User::class)->create();
+
+        // Set up market and trader states.
+        $this->market->id = 1;
+        $this->market->sponsor_id = 2;
+        $this->sponsor->id = 2;
+        $this->sponsor->shortcode = 'TEST';
+        $this->traders[1]->market_id = 1;
+        $this->market->save();
+        $this->traders[1]->save();
+        $this->sponsor->save();
 
         // Set up voucher states.
         Auth::login($this->user);
@@ -52,6 +68,24 @@ class TraderControllerTest extends TestCase
         $this->vouchers[9]->save();
 
         // Todo set some of the pended_at times to yesterday.
+    }
+
+  /**
+   * Tests the controller and the append for shortcode.
+   *
+   * @group failing
+   */
+    public function testShowMarket()
+    {
+
+      $this->user->traders()->sync([1]);
+      $this->actingAs($this->user, 'api')
+        ->get(route('api.trader.market', 2))
+        ->assertStatus(200)
+        ->assertJsonFragment([
+            'sponsor_id' => $this->sponsor->id,
+            'sponsor_shortcode' => $this->market->sponsor->shortcode,
+        ]);
     }
 
     public function testShowVoucherHistoryCompilesListOfPaymentHistory()
