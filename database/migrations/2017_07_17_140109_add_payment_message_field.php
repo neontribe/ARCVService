@@ -14,7 +14,7 @@ class AddPaymentMessageField extends Migration
     public function up()
     {
         Schema::table('markets', function($table) {
-          $table->string('payment_message')->default("");
+            $table->string('payment_message')->default("");
         });
     }
 
@@ -26,7 +26,7 @@ class AddPaymentMessageField extends Migration
     public function down()
     {
         Schema::table('markets', function($table) {
-          $table->dropColumn('payment_message');
+            $table->dropColumn('payment_message');
         });
     }
 }

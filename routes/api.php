@@ -39,8 +39,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         ]);
 
         Route::get('traders/{trader}/market', [
-          'as' => 'api.trader.market',
-          'uses' => 'TraderController@showMarket'
+            'as' => 'api.trader.market',
+            'uses' => 'TraderController@showMarket'
         ]);
 
         Route::get('traders/{trader}/vouchers', [
