@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Log;
 
 class LoginController extends Controller
 {
@@ -61,6 +62,21 @@ class LoginController extends Controller
           // if successful, then redirect to their intended location
           return redirect()->intended(route('dashboard'));
       }
+
+      // Throttle uses AuthenticatesUser trait's ThrottleLogins.
+      // Default 5 attempts per minute per email+IP.
+      if ($this->hasTooManyLoginAttempts($request)) {
+          $this->fireLockoutEvent($request);
+          return $this->sendLockoutResponse($request);
+      }
+      // Login has Failed - increment attempts.
+      $this->IncrementLoginAttempts($request);
+        Log::info(
+          'Attempt to login with wrong credentials by '
+          . $request->email . ' on '
+          . $request->ip()
+      );
+
       // if unsuccessful, then redirect back to the login with the form data
       return redirect()->back()->withInput($request->only('email', 'remember'));
     }
