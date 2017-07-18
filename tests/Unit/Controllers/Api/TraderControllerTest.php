@@ -54,9 +54,11 @@ class TraderControllerTest extends TestCase
         // Todo set some of the pended_at times to yesterday.
     }
 
-  /**
-   * @group failing
-   */
+    /**
+     * Test for the trader list index controller.
+     *
+     * Asserts that the correct JSON structure is returned along with the correct market data.
+     */
     public function testTradersControllerIndex() {
         $trader = factory(Trader::class)->create(
             [
@@ -64,11 +66,25 @@ class TraderControllerTest extends TestCase
             ]
         );
 
-
         $this->user->traders()->sync([$trader->id]);
         $this->actingAs($this->user, 'api')
             ->get(route('api.traders', $trader->id))
             ->assertStatus(200)
+            ->assertJsonStructure(
+                [
+                    '*' => [
+                        'id',
+                        'name',
+                        'market_id',
+                        'market' => [
+                            'id',
+                            'sponsor_id',
+                            'sponsor_shortcode',
+                            'payment_message',
+                        ],
+                    ],
+                ]
+            )
             ->assertJsonFragment([
                   'id' => $trader->market_id,
                   'sponsor_id' => $trader->market->sponsor_id,
