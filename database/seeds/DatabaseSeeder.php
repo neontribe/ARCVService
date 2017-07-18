@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
         // Relies on some Traders existing to make relations.
         // For now - User is API user.
         $this->call(UsersSeeder::class);
+        $this->call(AdminUsersSeeder::class);
         $this->call(VouchersSeeder::class);
         $this->call(VoucherStatesSeeder::class);
     }
