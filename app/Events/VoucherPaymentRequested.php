@@ -27,7 +27,7 @@ class VoucherPaymentRequested
      *
      * @return void
      */
-    public function __construct(User $user, Trader $trader, Voucher $vouchers, $file)
+    public function __construct(User $user, Trader $trader, $vouchers, $file)
     {
         $this->user = $user;
         $this->trader = $trader;

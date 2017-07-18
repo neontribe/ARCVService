@@ -83,12 +83,17 @@ class VoucherController extends Controller
                 $voucher->applyTransition($transition);
                 // Success for this one.
                 $success_codes[] = $voucher->code;
+                // Todo If this is a confirm trasnsition - we need to add to
+                // a list for sending to ARC admin.
             } else {
                 // no! add it to a list of failures.
                 // Fail for this one.
                 $fail_codes[] = $voucher->code;
             }
         }
+
+        // And then - if there are any confirmed ones... trigger the email
+        // event paymentRequestedEmail.
 
         $responses['success'] = $success_codes;
         $responses['fail'] = $fail_codes;
