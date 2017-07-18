@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\API;
 
-use Illuminate\Http\Request;
+use App\Events\VoucherPaymentRequested;
+use App\Http\Controllers\API\TraderController;
 use App\Http\Controllers\Controller;
-use Auth;
-use Log;
 use App\Trader;
 use App\Voucher;
 use App\User;
+use Auth;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Log;
 
 class VoucherController extends Controller
 {
@@ -69,10 +72,10 @@ class VoucherController extends Controller
             $vouchers->pluck('code')->toArray()
         ));
 
-        // For the pre-alpha we 'collect'.
         $transition = $request['transition'];
         $success_codes = [];
         $fail_codes = [];
+        $vouchers_for_payment = [];
         foreach ($vouchers as $voucher) {
             // can we?
             if ($voucher->transitionAllowed($transition)) {
@@ -83,8 +86,11 @@ class VoucherController extends Controller
                 $voucher->applyTransition($transition);
                 // Success for this one.
                 $success_codes[] = $voucher->code;
-                // Todo If this is a confirm trasnsition - we need to add to
-                // a list for sending to ARC admin.
+                // If this is a confirm transition - add to a list
+                // for sending to ARC admin. This is a request for payment.
+                if ($transition === 'confirm') {
+                    $vouchers_for_payment[] = $voucher;
+                }
             } else {
                 // no! add it to a list of failures.
                 // Fail for this one.
@@ -92,13 +98,38 @@ class VoucherController extends Controller
             }
         }
 
-        // And then - if there are any confirmed ones... trigger the email
+        // If there are any confirmed ones... trigger the email
         // event paymentRequestedEmail.
+        if (sizeof($vouchers_for_payment) > 0) {
+            $this->emailVoucherPaymentRequest($trader, $vouchers_for_payment);
+        }
 
         $responses['success'] = $success_codes;
         $responses['fail'] = $fail_codes;
         $responses['invalid'] = $bad_codes;
         return response()->json($responses, 200);
+    }
+
+    /**
+     * Email a Trader's Voucher Payment Request.
+     *
+     * @param Trader $trader
+     * @param Collection Voucher $vouchers
+     * @return \Illuminate\Http\Response
+     */
+    public function emailVoucherPaymentRequest(Trader $trader, $vouchers)
+    {
+        $title = 'A report containing voucher payment request for '
+            . $trader->name . '.'
+        ;
+        // Request date string as dd-mm-yyyy
+        $date = Carbon::now()->format('d-m-Y');
+        // Todo factor csv create functions out into service.
+        $traderController = new TraderController();
+        // Todo Look into why failing here.
+        $file = $traderController->createVoucherListFile($trader, $vouchers, $title, $date);
+        event(new VoucherPaymentRequested(Auth::user(), $trader, $vouchers, $file));
+        return response()->json(['message' => trans('api.messages.voucher_payment_requested')], 202);
     }
 
     /**

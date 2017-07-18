@@ -30,6 +30,7 @@ class SendVoucherPaymentRequestEmail
      */
     public function handle(VoucherPaymentRequested $event)
     {
+        dump('handile');
         Mail::to(config('mail.to_admin.address'))
             ->send(new VoucherPaymentRequestEmail(
                 $event->user,

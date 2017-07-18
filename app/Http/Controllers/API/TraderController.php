@@ -187,28 +187,6 @@ class TraderController extends Controller
     }
 
     /**
-     * Email the Trader's Voucher Payment Request.
-     *
-     * @param  \App\Trader  $trader
-     * @return \Illuminate\Http\Response
-     */
-    public function emailVoucherPaymentRequest(Request $request, Trader $trader)
-    {
-        $vouchers = $trader->vouchersConfirmed;
-        $title = 'A report containing voucher payment request for '
-            . $trader->name . '.'
-        ;
-        // Request date string as dd-mm-yyyy
-        $date = Carbon::now()->format('d-m-Y');
-        $file = $this->createVoucherListFile($trader, $vouchers, $title, $date);
-
-        event(new VoucherPaymentRequested(Auth::user(), $trader, $vouchers, $file));
-
-        return response()->json(['message' => trans('api.messages.voucher_payment_requested')], 202);
-    }
-
-
-    /**
      * Helper to create a list of Trader Vouchers file.
      *
      * @param  \App\Trader  $trader
