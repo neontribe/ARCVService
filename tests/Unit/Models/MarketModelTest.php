@@ -2,19 +2,22 @@
 
 namespace Tests\Unit\Models;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use App\Market;
+use App\Sponsor;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\TestCase;
 
 class MarketModelTest extends TestCase
 {
     use DatabaseMigrations;
 
     protected $market;
+    protected $sponsor;
     protected function setUp()
     {
         parent::setUp();
         $this->market = factory(Market::class)->create();
+        $this->sponsor = $this->market->sponsor;
     }
 
     public function testMarketIsCreatedWithExpectedAttributes()
@@ -25,10 +28,23 @@ class MarketModelTest extends TestCase
         $this->assertInstanceOf(Market::class, $m);
         $this->assertNotNull($m->name);
         $this->assertNotNull($m->location);
+        $this->assertNotNull($m->payment_message);
+        $this->assertNotNull($m->sponsor_shortcode);
         $this->assertNotNull($m->sponsor_id);
         $this->assertInternalType('integer', $m->sponsor_id);
     }
 
+    public function testMarketBelongsToSponsor()
+    {
+        $this->assertInstanceOf(Sponsor::class, $this->market->sponsor);
+    }
+
+    public function testGetSponsorShortcodeAttribute()
+    {
+        $shortcode_market = $this->market->sponsor_shortcode;
+        $shortcode_sponsor = $this->sponsor->shortcode;
+        $this->assertEquals($shortcode_sponsor, $shortcode_market);
+    }
 
     public function testSoftDeleteMarket()
     {
