@@ -17,9 +17,7 @@ class MarketModelTest extends TestCase
     {
         parent::setUp();
         $this->market = factory(Market::class)->create();
-        $this->sponsor = factory(Sponsor::class)->create([
-            'id' => $this->market->sponsor_id = 10,
-        ]);
+        $this->sponsor = $this->market->sponsor;
     }
 
     public function testMarketIsCreatedWithExpectedAttributes()
@@ -35,7 +33,6 @@ class MarketModelTest extends TestCase
         $this->assertNotNull($m->sponsor_id);
         $this->assertInternalType('integer', $m->sponsor_id);
     }
-
 
     public function testMarketBelongsToSponsor()
     {
