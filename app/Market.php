@@ -61,7 +61,7 @@ class Market extends Model
      */
     public function sponsor()
     {
-        return $this->hasOne(Sponsor::class, 'id', 'sponsor_id');
+        return $this->belongsTo('App\Sponsor');
     }
 
     /**

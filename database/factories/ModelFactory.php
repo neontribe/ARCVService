@@ -40,11 +40,12 @@ $factory->define(App\Market::class, function (Faker\Generator $faker) {
         $sponsor_id = $sponsor->id;
     }
 
+    $payment_sentence = $faker->sentence(12, true);
     return [
         'name' => $faker->company,
         'location' => $faker->postcode,
         'sponsor_id' => $sponsor_id, // a random sponsor
-        'payment_message' => $faker->sentence($nbWords = 12, $variableNbWords = true),
+        'payment_message' => "Placeholder Payment Message: $payment_sentence",
     ];
 });
 

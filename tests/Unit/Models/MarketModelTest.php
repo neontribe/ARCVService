@@ -36,7 +36,8 @@ class MarketModelTest extends TestCase
         $this->assertInternalType('integer', $m->sponsor_id);
     }
 
-    public function testMarketHasOneSponsor()
+
+    public function testMarketBelongsToSponsor()
     {
         $this->assertInstanceOf(Sponsor::class, $this->market->sponsor);
     }
