@@ -168,7 +168,7 @@ class TraderController extends Controller
         $title = 'A report containing voucher history.';
         // Request date string as dd-mm-yyyy
         $date = $request->submission_date ? $request->submission_date : null;
-        $file = $this->createVoucherHistoryFile($trader, $vouchers, $title, $date);
+        $file = $this->createVoucherListFile($trader, $vouchers, $title, $date);
 
         event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file));
 
