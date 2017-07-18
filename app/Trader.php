@@ -30,6 +30,11 @@ class Trader extends Model
     protected $hidden = [
     ];
 
+    /**
+     * The relations to eager load on every query.
+     *
+     * @var array
+     */
     protected $with = [
         'market'
     ];
@@ -43,7 +48,6 @@ class Trader extends Model
     {
         return $this->hasMany('App\Voucher');
     }
-
 
     /**
      * Get the market this trader belongs to.

@@ -2,13 +2,13 @@
 
 namespace Tests\Unit\Models;
 
-use App\Market;
 use Auth;
+use App\Market;
+use App\Trader;
+use App\User;
+use App\Voucher;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use App\Trader;
-use App\Voucher;
-use App\User;
 
 class TraderModelTest extends TestCase
 {
@@ -32,7 +32,6 @@ class TraderModelTest extends TestCase
         $this->assertNotNull($t->market_id);
         $this->assertInternalType('integer', $t->market_id);
     }
-
 
     public function testSoftDeleteTrader()
     {
