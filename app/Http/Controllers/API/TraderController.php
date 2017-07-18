@@ -110,6 +110,18 @@ class TraderController extends Controller
     }
 
     /**
+     * Show the market which the trader belongs to.
+     *
+     * @param \App\Trader $trader
+     * @return \Illuminate\Http\Response
+     */
+    public function showMarket(Trader $trader)
+    {
+        $market = $trader->market;
+        return response()->json($market, 200);
+    }
+
+    /**
      * Display the Trader's Voucher history.
      *
      * @param  \App\Trader  $trader
@@ -160,7 +172,18 @@ class TraderController extends Controller
 
         event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file));
 
-        return response()->json(['message' => trans('api.messages.email_voucher_history')], 202);
+        $response_text = trans('api.messages.email_voucher_history');
+
+        // If a date is provided generate a specific response message.
+        if ($date) {
+            $response_text = trans(
+                'api.messages.email_voucher_history_date', [
+                    'date' => $date
+                ]
+            );
+        }
+
+        return response()->json(['message' => $response_text], 202);
     }
 
     /**
