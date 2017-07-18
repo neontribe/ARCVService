@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Controllers\Api;
 
+use App\Market;
 use App\Voucher;
 use App\Trader;
 use App\User;
@@ -58,7 +59,12 @@ class TraderControllerTest extends TestCase
      */
     public function testShowMarket()
     {
-        $trader = factory(Trader::class, 'with_market_sponsor')->create();
+        $trader = factory(Trader::class)->create(
+            [
+                'market_id' => factory(Market::class)->create()->id,
+            ]
+        );
+
         $this->user->traders()->sync([$trader->id]);
         $this->actingAs($this->user, 'api')
             ->get(route('api.trader.market', $trader->id))

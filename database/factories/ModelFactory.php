@@ -100,31 +100,6 @@ $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
 });
 
 /**
- * Trader with linked market and sponsor.
- */
-$factory->defineAs(App\Trader::class, 'with_market_sponsor', function ($faker) use ($factory) {
-    $trader = $factory->raw(App\Trader::class);
-
-    // Setup Sponsor.
-    $sponsor_def = $factory->raw(App\Sponsor::class);
-    $sponsor_def = array_merge($sponsor_def, [
-        'id' => 100,
-    ]);
-    factory(App\Sponsor::class)->create($sponsor_def);
-
-    // Setup Market.
-    $market_def = $factory->raw(App\Market::class);
-    $market_def = array_merge($market_def, [
-        'sponsor_id' => 100,
-    ]);
-    $market = factory(App\Market::class)->create($market_def);
-
-    return array_merge($trader, [
-        'market_id' => $market->id,
-    ]);
-});
-
-/**
  * Voucher with currentstate requested.
  */
 $factory->defineAs(App\Voucher::class, 'requested', function ($faker) use ($factory) {
