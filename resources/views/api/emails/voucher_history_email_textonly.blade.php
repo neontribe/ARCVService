@@ -17,4 +17,4 @@ Alexandra Rose Charity
 
 For more information please go to <a href="http://www.alexandrarose.org.uk/">www.alexandrarose.org.uk</a>.
 
-<a href="http://www.alexandrarose.org.uk/privacy/">Privacy Policy</a>
+<a href="{{ config('app.arc_market_url') }}/privacy-policy" role="link">Privacy Policy</a>
