@@ -12,9 +12,9 @@ class WebRoutesTest extends TestCase
      *
      * @return void
      */
-    public function testDashboardPage()
+    public function testLoginRoute()
     {
-        $this->get('/')
+        $this->get('/login')
             ->assertStatus(200)
         ;
     }
