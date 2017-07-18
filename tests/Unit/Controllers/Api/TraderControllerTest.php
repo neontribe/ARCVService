@@ -54,27 +54,27 @@ class TraderControllerTest extends TestCase
         // Todo set some of the pended_at times to yesterday.
     }
 
-    /**
-     * Tests the for the api.trader.market route and controller.
-     */
-    public function testShowMarket()
-    {
+  /**
+   * @group failing
+   */
+    public function testTradersControllerIndex() {
         $trader = factory(Trader::class)->create(
             [
                 'market_id' => factory(Market::class)->create()->id,
             ]
         );
 
+
         $this->user->traders()->sync([$trader->id]);
         $this->actingAs($this->user, 'api')
-            ->get(route('api.trader.market', $trader->id))
+            ->get(route('api.traders', $trader->id))
             ->assertStatus(200)
             ->assertJsonFragment([
-                'id' => $trader->market_id,
-                'sponsor_id' => $trader->market->sponsor_id,
-                'sponsor_shortcode' => $trader->market->sponsor_shortcode,
-                'payment_message' => $trader->market->payment_message,
-            ])
+                  'id' => $trader->market_id,
+                  'sponsor_id' => $trader->market->sponsor_id,
+                  'sponsor_shortcode' => $trader->market->sponsor_shortcode,
+                  'payment_message' => $trader->market->payment_message,
+              ])
         ;
     }
 

@@ -30,6 +30,10 @@ class Trader extends Model
     protected $hidden = [
     ];
 
+    protected $with = [
+        'market'
+    ];
+
     /**
      * Get the vouchers belonging to this trader.
      *
@@ -40,6 +44,7 @@ class Trader extends Model
         return $this->hasMany('App\Voucher');
     }
 
+
     /**
      * Get the market this trader belongs to.
      *
@@ -49,7 +54,6 @@ class Trader extends Model
     {
         return $this->belongsTo('App\Market');
     }
-
 
     /**
      * Vouchers that have been submitted for payment on behalf of this trader.

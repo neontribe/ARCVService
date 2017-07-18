@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Models;
 
+use App\Market;
 use Auth;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -38,6 +39,10 @@ class TraderModelTest extends TestCase
         $this->trader->delete();
         $this->assertCount(1, Trader::withTrashed()->get());
         $this->assertCount(0, Trader::all());
+    }
+
+    public function testTraderBelongsToMarket() {
+        $this->assertInstanceOf(Market::class, $this->trader->market);
     }
 
     public function testTraderHasManyVouchers()
