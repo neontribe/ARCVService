@@ -15,6 +15,7 @@ class VoucherPaymentRequestEmail extends Mailable
     public $trader;
     public $vouchers;
     public $file;
+    public $market;
 
     /**
      * Create a new message instance.
@@ -27,6 +28,7 @@ class VoucherPaymentRequestEmail extends Mailable
         // Sending vouchers collection in case we want more than just count in email for copy.
         $this->vouchers = $vouchers;
         $this->file = $file;
+        $this->market = $trader->market;
     }
 
     /**

@@ -1,4 +1,4 @@
-@extends('layouts.email')
+@extends('api.layouts.email')
 
 @section('content')
 
@@ -8,7 +8,7 @@
         <p>[xXx]Hi ARC Admin,</p>
 
         <p> {{ $user }} has just successfully requested payment for</p>
-        <p> {{ $vouchers->count() }} vouchers, against</p>
+        <p> {{ sizeOf($vouchers) }} vouchers, against</p>
         <p> {{ $trader }} of </p>
         <p> {{ $market }}'s account.</p>
 

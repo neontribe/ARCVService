@@ -10,7 +10,6 @@ use Carbon\Carbon;
 use DB;
 use Excel;
 use Illuminate\Http\Request;
-use Log;
 
 class TraderController extends Controller
 {
@@ -208,11 +207,17 @@ class TraderController extends Controller
         ];
         foreach ($vouchers as $v) {
             // If this voucher has been pended for payment.
+            // Do we want to do something different if this is a request for payment?
+            // If pendedOn and not yet
             if ($v->paymentPendedOn) {
                 $pended_day = $v->paymentPendedOn->updated_at->format('d-m-Y');
                 // Either all the pended vouchers (null date) or the requested one.
                 if ($date === null || $date === $pended_day) {
-                    $data['vouchers'][] = $v;
+                    $data['vouchers'][] = [
+                        'pended_on' => $v->paymentPendedOn->created_at->format('d-m-Y'),
+                        'code' => $v->code,
+                        'added_on' => $v->updated_at->format('d-m-Y H:i:s'),
+                    ];
                 }
             }
         }
@@ -248,7 +253,6 @@ class TraderController extends Controller
                 ]);
             });
         });
-
 
         return $excel;
     }

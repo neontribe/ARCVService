@@ -104,6 +104,8 @@ class VoucherController extends Controller
             $this->emailVoucherPaymentRequest($trader, $vouchers_for_payment);
         }
 
+        // We might want to annotate somehow with the type of transition here.
+        // Currently we can 'collect' - submit and 'confirm' - request payment on.
         $responses['success'] = $success_codes;
         $responses['fail'] = $fail_codes;
         $responses['invalid'] = $bad_codes;
@@ -126,7 +128,6 @@ class VoucherController extends Controller
         $date = Carbon::now()->format('d-m-Y');
         // Todo factor csv create functions out into service.
         $traderController = new TraderController();
-        // Todo Look into why failing here.
         $file = $traderController->createVoucherListFile($trader, $vouchers, $title, $date);
         event(new VoucherPaymentRequested(Auth::user(), $trader, $vouchers, $file));
         return response()->json(['message' => trans('api.messages.voucher_payment_requested')], 202);
