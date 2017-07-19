@@ -10,7 +10,6 @@ use Carbon\Carbon;
 use DB;
 use Excel;
 use Illuminate\Http\Request;
-use Log;
 
 class TraderController extends Controller
 {
@@ -110,18 +109,6 @@ class TraderController extends Controller
     }
 
     /**
-     * Show the market which the trader belongs to.
-     *
-     * @param \App\Trader $trader
-     * @return \Illuminate\Http\Response
-     */
-    public function showMarket(Trader $trader)
-    {
-        $market = $trader->market;
-        return response()->json($market, 200);
-    }
-
-    /**
      * Display the Trader's Voucher history.
      *
      * @param  \App\Trader  $trader
@@ -164,9 +151,11 @@ class TraderController extends Controller
      */
     public function emailVoucherHistory(Request $request, Trader $trader)
     {
+        $vouchers = $trader->vouchersConfirmed;
+        $title = 'A report containing voucher history.';
         // Request date string as dd-mm-yyyy
         $date = $request->submission_date ? $request->submission_date : null;
-        $file = $this->createVoucherHistoryFile($trader, $date);
+        $file = $this->createVoucherListFile($trader, $vouchers, $title, $date);
 
         event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file));
 
@@ -185,15 +174,17 @@ class TraderController extends Controller
     }
 
     /**
-     * Helper to create the Trader's Voucher history file.
+     * Helper to create a list of Trader Vouchers file.
      *
      * @param  \App\Trader  $trader
+     * @param Collection \App\Voucher $vouchers
+     * @param String $report_type
      * @return txt/csv File
      */
-    public function createVoucherHistoryFile(Trader $trader, $date = null)
+    public function createVoucherListFile(Trader $trader, $vouchers, $title, $date = null)
     {
-        $vouchers = $trader->vouchersConfirmed;
         $data = [
+            'report_title' => $title,
             'user' => Auth::user()->name,
             'trader' => $trader->name,
             // This is currently a nullable relation.
@@ -204,11 +195,17 @@ class TraderController extends Controller
         ];
         foreach ($vouchers as $v) {
             // If this voucher has been pended for payment.
+            // Do we want to do something different if this is a request for payment?
+            // If pendedOn and not yet
             if ($v->paymentPendedOn) {
                 $pended_day = $v->paymentPendedOn->updated_at->format('d-m-Y');
                 // Either all the pended vouchers (null date) or the requested one.
                 if ($date === null || $date === $pended_day) {
-                    $data['vouchers'][] = $v;
+                    $data['vouchers'][] = [
+                        'pended_on' => $v->paymentPendedOn->created_at->format('d-m-Y'),
+                        'code' => $v->code,
+                        'added_on' => $v->updated_at->format('d-m-Y H:i:s'),
+                    ];
                 }
             }
         }
@@ -232,7 +229,7 @@ class TraderController extends Controller
             // Set the title
             $excel->setTitle($data['trader'] . 'Voucher History')
                 ->setCompany($data['user'])
-                ->setDescription('A report containing voucher history.')
+                ->setDescription($data['report_title'])
             ;
 
             $excel->sheet('Vouchers', function ($sheet) use ($data) {
@@ -244,7 +241,6 @@ class TraderController extends Controller
                 ]);
             });
         });
-
 
         return $excel;
     }

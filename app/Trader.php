@@ -31,6 +31,15 @@ class Trader extends Model
     ];
 
     /**
+     * The relations to eager load on every query.
+     *
+     * @var array
+     */
+    protected $with = [
+        'market'
+    ];
+
+    /**
      * Get the vouchers belonging to this trader.
      *
      * @return App\Voucher collection
@@ -49,7 +58,6 @@ class Trader extends Model
     {
         return $this->belongsTo('App\Market');
     }
-
 
     /**
      * Vouchers that have been submitted for payment on behalf of this trader.
