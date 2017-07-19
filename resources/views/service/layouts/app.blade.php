@@ -27,9 +27,9 @@
                         <span class="icon-bar"></span>
                     </button>
 
-                    <!-- Branding Image -->
-                    <a class="navbar-brand" href="{{ url('/') }}">
-                        {{ config('app.name', 'Laravel') }}
+                    <!-- Logo -->
+                    <a href="{{ url('/') }}">
+                        <img src="{{ url('/') }}/assets/logo.png" class="logo" alt="ARC Voucher logo">
                     </a>
                 </div>
 
