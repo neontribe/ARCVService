@@ -26,7 +26,7 @@
     </div>
 
     <div id="right">
-        This is the main content area in the admin dashboard.
+        This is the main content area in the admin dashboard. This is where content from each of the sidebar links will ideally load...
     </div>
 
 </div>
