@@ -55,10 +55,11 @@ class TraderControllerTest extends TestCase
     }
 
     /**
-     * Tests the for the api.trader.market route and controller.
+     * Test for the trader list index controller.
+     *
+     * Asserts that the correct JSON structure is returned along with the correct market data.
      */
-    public function testShowMarket()
-    {
+    public function testTradersControllerIndex() {
         $trader = factory(Trader::class)->create(
             [
                 'market_id' => factory(Market::class)->create()->id,
@@ -67,14 +68,29 @@ class TraderControllerTest extends TestCase
 
         $this->user->traders()->sync([$trader->id]);
         $this->actingAs($this->user, 'api')
-            ->get(route('api.trader.market', $trader->id))
+            ->get(route('api.traders', $trader->id))
             ->assertStatus(200)
+            ->assertJsonStructure(
+                [
+                    '*' => [
+                        'id',
+                        'name',
+                        'market_id',
+                        'market' => [
+                            'id',
+                            'sponsor_id',
+                            'sponsor_shortcode',
+                            'payment_message',
+                        ],
+                    ],
+                ]
+            )
             ->assertJsonFragment([
-                'id' => $trader->market_id,
-                'sponsor_id' => $trader->market->sponsor_id,
-                'sponsor_shortcode' => $trader->market->sponsor_shortcode,
-                'payment_message' => $trader->market->payment_message,
-            ])
+                  'id' => $trader->market_id,
+                  'sponsor_id' => $trader->market->sponsor_id,
+                  'sponsor_shortcode' => $trader->market->sponsor_shortcode,
+                  'payment_message' => $trader->market->payment_message,
+              ])
         ;
     }
 

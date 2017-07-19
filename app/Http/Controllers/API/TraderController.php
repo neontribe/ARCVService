@@ -109,18 +109,6 @@ class TraderController extends Controller
     }
 
     /**
-     * Show the market which the trader belongs to.
-     *
-     * @param \App\Trader $trader
-     * @return \Illuminate\Http\Response
-     */
-    public function showMarket(Trader $trader)
-    {
-        $market = $trader->market;
-        return response()->json($market, 200);
-    }
-
-    /**
      * Display the Trader's Voucher history.
      *
      * @param  \App\Trader  $trader

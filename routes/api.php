@@ -38,11 +38,6 @@ Route::group(['middleware' => 'auth:api'], function () {
             // $user and App\Trader sent implicitly to policy.
         ]);
 
-        Route::get('traders/{trader}/market', [
-            'as' => 'api.trader.market',
-            'uses' => 'TraderController@showMarket'
-        ]);
-
         Route::get('traders/{trader}/vouchers', [
             'as' => 'api.trader.vouchers',
             'uses' => 'TraderController@showVouchers',
