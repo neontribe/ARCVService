@@ -101,6 +101,8 @@ class VoucherController extends Controller
         // If there are any confirmed ones... trigger the email
         // event paymentRequestedEmail.
         if (sizeof($vouchers_for_payment) > 0) {
+            // Todo If the email fails for some reason, the User will not be aware.
+            // The Vouchers will be transitioned but the ARC admin will not know.
             $this->emailVoucherPaymentRequest($trader, $vouchers_for_payment);
         }
 
@@ -126,7 +128,7 @@ class VoucherController extends Controller
         ;
         // Request date string as dd-mm-yyyy
         $date = Carbon::now()->format('d-m-Y');
-        // Todo factor csv create functions out into service.
+        // Todo factor excel/csv create functions out into service.
         $traderController = new TraderController();
         $file = $traderController->createVoucherListFile($trader, $vouchers, $title, $date);
         event(new VoucherPaymentRequested(Auth::user(), $trader, $vouchers, $file));

@@ -5,7 +5,7 @@
     <section role="main">
         <h1 style="text-align: center;">Voucher Payment Request History</h1>
 
-        <p>[xXx]Hi ARC Admin,</p>
+        <p>[xXx]Hi {{ config('mail.to_admin.name') }},</p>
 
         <p> {{ $user }} has just successfully requested payment for</p>
         <p> {{ sizeOf($vouchers) }} vouchers, against</p>
