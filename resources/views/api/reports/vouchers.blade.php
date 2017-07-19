@@ -10,9 +10,9 @@
     <tbody>
     @foreach ($vouchers as $voucher)
         <tr>
-            <td>{{ $voucher->paymentPendedOn->created_at->format('d-m-Y') }}</td>
-            <td>{{ $voucher->code }}</td>
-            <td>{{ $voucher->updated_at->format('d-m-Y H:i.s') }}</td>
+            <td>{{ $voucher['pended_on'] }}</td>
+            <td>{{ $voucher['code'] }}</td>
+            <td>{{ $voucher['added_on'] }}</td>
         </tr>
     @endforeach
     </tbody>

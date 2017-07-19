@@ -19,6 +19,9 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\VoucherHistoryEmailRequested' => [
             'App\Listeners\SendVoucherHistoryEmail',
         ],
+        'App\Events\VoucherPaymentRequested' => [
+            'App\Listeners\SendVoucherPaymentRequestEmail',
+        ],
         \SM\Event\SMEvents::POST_TRANSITION => [
             'App\Listeners\StateHistoryManager@postTransition',
         ],
