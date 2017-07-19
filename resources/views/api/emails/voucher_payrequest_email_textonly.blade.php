@@ -3,7 +3,7 @@
 ==============================================
 
 [xXx]
-Hi ARC Admin,
+Hi {{ config('mail.to_admin.name') }},
 
 {{ $user }} has just successfully requested payment for
 {{ sizeOf($vouchers) }} vouchers, against

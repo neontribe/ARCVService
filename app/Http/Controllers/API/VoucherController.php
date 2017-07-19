@@ -132,6 +132,8 @@ class VoucherController extends Controller
         $traderController = new TraderController();
         $file = $traderController->createVoucherListFile($trader, $vouchers, $title, $date);
         event(new VoucherPaymentRequested(Auth::user(), $trader, $vouchers, $file));
+
+        // Todo not sure this is being delivered to the frontend.
         return response()->json(['message' => trans('api.messages.voucher_payment_requested')], 202);
     }
 
