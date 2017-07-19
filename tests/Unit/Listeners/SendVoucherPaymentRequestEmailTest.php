@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Listeners;
 
-use App\Events\VoucherHistoryEmailRequested;
+use App\Events\VoucherPaymentRequested;
 use App\Http\Controllers\API\TraderController;
-use App\Listeners\SendVoucherHistoryEmail;
+use App\Listeners\SendVoucherPaymentRequestEmail;
 use App\Market;
 use App\Sponsor;
 use App\Trader;
@@ -16,7 +16,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Spinen\MailAssertions\MailTracking;
 use Tests\TestCase;
 
-class SendVoucherHistoryEmailTest extends TestCase
+class SendVoucherPaymentRequestEmailTest extends TestCase
 {
     use DatabaseMigrations;
     use MailTracking;
@@ -66,9 +66,8 @@ class SendVoucherHistoryEmailTest extends TestCase
         $this->vouchers[9]->save();
     }
 
-    public function testRequestVoucherHistoryEmail()
+    public function testRequestVoucherPayment()
     {
-        // Todo this test could be split up and improved.
         $user = $this->user;
         $trader = $this->traders[0];
         $vouchers = $trader->vouchers;
@@ -77,16 +76,18 @@ class SendVoucherHistoryEmailTest extends TestCase
         $controller = new TraderController();
         $file = $controller->createVoucherListFile($trader, $vouchers, $title);
 
-        $event = new VoucherHistoryEmailRequested($user, $trader, $file);
-        $listener = new SendVoucherHistoryEmail();
+        $event = new VoucherPaymentRequested($user, $trader, $vouchers, $file);
+        $listener = new SendVoucherPaymentRequestEmail();
         $listener->handle($event);
 
         // We can improve this - but test basic data is correct.
         $this->seeEmailWasSent()
-            ->seeEmailTo($user->email)
-            ->seeEmailSubject('Voucher History Email')
-            ->seeEmailContains('Hi ' . $user->name)
-            ->seeEmailContains('requested a record of ' . $trader->name)
+            ->seeEmailTo(config('mail.to_admin.address'))
+            ->seeEmailSubject('Voucher Payment Request Email')
+            ->seeEmailContains('Hi ' . config('mail.to_admin.name'))
+            ->seeEmailContains($user->name . ' has just successfully requested payment for')
+            ->seeEmailContains($vouchers->count() . ' vouchers')
+            ->seeEmailContains($trader->name . ' of')
         ;
     }
 }
