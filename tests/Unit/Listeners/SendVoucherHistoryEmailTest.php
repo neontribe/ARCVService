@@ -73,11 +73,13 @@ class SendVoucherHistoryEmailTest extends TestCase
         $trader = $this->traders[0];
         $vouchers = $trader->vouchers;
         $title = 'Test Voucher History Email';
+
         Auth::login($user);
         $controller = new TraderController();
         $file = $controller->createVoucherListFile($trader, $vouchers, $title);
 
-        $event = new VoucherHistoryEmailRequested($user, $trader, $file);
+        list($min_date, $max_date) = $controller->getMinMaxVoucherDates($vouchers);
+        $event = new VoucherHistoryEmailRequested($user, $trader, $vouchers, $file, $min_date, $max_date);
         $listener = new SendVoucherHistoryEmail();
         $listener->handle($event);
 

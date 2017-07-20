@@ -160,20 +160,7 @@ class TraderController extends Controller
 
         // If all vouchers are requested attempt to get the minimum and maximum dates for the report.
         if(is_null($date)) {
-            $filter_callback = function($item) {
-                // Shorten date to d-m-Y for comparison purposes then grab the timestamp for min/max check.
-                return (new Carbon($item->paymentPendedOn->created_at->format('d-m-Y')))->timestamp;
-            };
-
-            // Find the voucher with the earliest created_at date and convert into readable format.
-            $min = $vouchers->min($filter_callback);
-            $max = $vouchers->max($filter_callback);
-            $min_date = Carbon::createFromTimestamp($min)->format('d-m-Y');
-            $max_date = Carbon::createFromTimestamp($max)->format('d-m-Y');
-
-            // If max date is the same as min date return null.
-            $max_date = ($min_date === $max_date) ? null : $max_date;
-
+            list($min_date, $max_date) = $this->getMinMaxVoucherDates($vouchers);
             event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $vouchers, $file, $min_date, $max_date));
         } else {
             event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $vouchers, $file, $date));
@@ -191,6 +178,30 @@ class TraderController extends Controller
         }
 
         return response()->json(['message' => $response_text], 202);
+    }
+
+    public function getMinMaxVoucherDates($vouchers) {
+        $callback = function($item) {
+            // Default to "now" if ->paymentPendedOn is not defined.
+            $pended_timestamp = Carbon::now()->timestamp;
+
+            // Shorten date to d-m-Y for comparison purposes then grab the timestamp for min/max check.
+            if($item->paymentPendedOn) {
+                $pended_timestamp = $item->paymentPendedOn->created_at->timestamp;
+            }
+            return $pended_timestamp;
+        };
+        // Find the voucher with the earliest created_at date and convert into readable format.
+        $min = $vouchers->min($callback);
+        $max = $vouchers->max($callback);
+
+        $min_date = Carbon::createFromTimestamp($min)->format('d-m-Y');
+        $max_date = Carbon::createFromTimestamp($max)->format('d-m-Y');
+
+        // If max date is the same as min date return null.
+        $max_date = ($min_date === $max_date) ? null : $max_date;
+
+        return [$min_date, $max_date];
     }
 
     /**
