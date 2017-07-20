@@ -93,12 +93,13 @@ class VoucherController extends Controller
                     $vouchers_for_payment[] = $voucher;
                 }
             } else {
-                // no! add it to a list of failures.
-                if {
+                // These are duplicates, look at changing later
+                if ($trader->id === $voucher->trader_id) {
                   // Trader has already submitted this voucher
                   $own_duplicate_codes[] = $voucher->code;
                 } else {
-                  // Another trader has mistakenly submitted this voucher
+                  // Another trader has mistakenly submitted this voucher,
+                  // Or the tranision isn't valid (i.e expired state)
                   $other_duplicate_codes[] = $voucher_code;
                 }
             }
