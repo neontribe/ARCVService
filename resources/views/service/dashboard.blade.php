@@ -8,8 +8,8 @@
         <ul>
             <li>Service portal</li>
             <li><a href="{{ url('/') }}"><span class="glyphicon glyphicon-home"></span>Dashboard</a></li>
-            <li><a href="{{ url('/') }}"><span class="glyphicon glyphicon-plus"></span>Add vouchers</a></li>
-            <li><a href="{{ url('/') }}"><span class="glyphicon glyphicon-th-list"></span>View added vouchers</a></li>
+            <li><a href="{{ url('/vouchers/create') }}"><span class="glyphicon glyphicon-plus"></span>Add vouchers</a></li>
+            <li><a href="{{ url('/vouchers') }}"><span class="glyphicon glyphicon-th-list"></span>View added vouchers</a></li>
 
             @unless(Config('app.url') === 'https://voucher-admin.alexandrarose.org.uk')
             <li>{{ Session::get('message') }}</li>
