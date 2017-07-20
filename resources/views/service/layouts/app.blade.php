@@ -11,6 +11,7 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Styles -->
+    <style>@import url('https://fonts.googleapis.com/css?family=Roboto');</style>
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
@@ -27,9 +28,9 @@
                         <span class="icon-bar"></span>
                     </button>
 
-                    <!-- Branding Image -->
-                    <a class="navbar-brand" href="{{ url('/') }}">
-                        {{ config('app.name', 'Laravel') }}
+                    <!-- Logo -->
+                    <a href="{{ url('/') }}">
+                        <img src="{{ url('/') }}/assets/logo.png" class="logo" alt="ARC Voucher logo">
                     </a>
                 </div>
 

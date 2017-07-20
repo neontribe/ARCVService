@@ -1,9 +1,103 @@
 
-// Fonts
-@import url(https://fonts.googleapis.com/css?family=Raleway:300,400,600);
-
 // Variables
 @import "variables";
 
 // Bootstrap
 @import "node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
+
+html,
+body,
+#app {
+  height: 100%;
+  background-color: $arc_bg;
+  color: $arc_copy;
+}
+
+a {
+  color: $arc_link;
+  &:active,
+  &:hover {
+    color: $arc_rose;
+    text-decoration: none;
+  }
+}
+
+h1 {
+  font-family: 'Roboto', sans-serif;
+  font-size: 2em;
+}
+
+.navbar {
+  background-color: $arc_white;
+  margin-bottom: 0;
+  border: none;
+  min-height: 100px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+  .navbar-header {
+    margin-left: 0;
+  }
+  .navbar-nav > li > a {
+    font-weight: bold;
+  }
+  .logo {
+    height: 50px;
+  }
+  .container {
+    padding: 2em;
+  }
+}
+
+.container.login {
+  margin-top: 3em;
+}
+
+.panel-body {
+  background-color: $arc_white;
+}
+
+#container {
+  height: 100%;
+  display: flex;
+}
+
+#sidebar {
+  flex: 0 0 300px;
+  height: 100%;
+  font-weight: 600;
+  background-color: $arc_white;
+  border-right: 1px solid #ededed;
+  ul {
+    padding-left: 0;
+    margin-top: 1em;
+    li {
+      color: #656565;
+      display: block;
+      padding: 1em 2em;
+      &:hover,
+      &:active {
+        background-color: #f5f5f5;
+      }
+    }
+    span {
+      padding-right: 10px;
+    }
+  }
+}
+
+#main-content {
+  background-color: $arc_bg;
+  flex: 1;
+  padding: 2em 3em;
+}
+
+@media (min-width: 992px) {
+  .container.login {
+    width: 970px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    width: initial;
+  }
+}

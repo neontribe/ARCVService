@@ -2,6 +2,13 @@
 
 @section('content')
 
+<div id="container">
+
+    @include('service.includes.sidebar')
+
+    <div id="main-content">
+
+
 <h1>Add Vouchers</h2>
 
      <form role="form" method="POST" action="{{ route('vouchers.storebatch') }}">
@@ -44,5 +51,9 @@
             </p>
 
         </form>
+
+    </div>
+
+</div>
 
 @endsection
