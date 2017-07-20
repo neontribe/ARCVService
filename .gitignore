@@ -2,7 +2,6 @@
 .php_cs.cache
 _ide_helper.php
 /node_modules
-/public/css
 /public/hot
 /public/storage
 /storage
