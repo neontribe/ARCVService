@@ -155,7 +155,6 @@ class TraderController extends Controller
         $title = 'A report containing voucher history.';
         // Request date string as dd-mm-yyyy
         $date = $request->submission_date ? $request->submission_date : null;
-
         $file = $this->createVoucherListFile($trader, $vouchers, $title, $date);
 
         // If all vouchers are requested attempt to get the minimum and maximum dates for the report.

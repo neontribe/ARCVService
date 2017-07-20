@@ -93,7 +93,7 @@ class SendVoucherHistoryEmailTest extends TestCase
             ->seeEmailTo($user->email)
             ->seeEmailSubject('Voucher History Email')
             ->seeEmailContains('Hi ' . $user->name)
-            ->seeEmailContains('requested a record of ' . $trader->name)
+            ->seeEmailContains('requested a copy of ' . $trader->name)
             ->seeEmailContains("The file includes payment records from $min_date to $max_date")
         ;
     }
