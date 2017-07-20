@@ -155,9 +155,29 @@ class TraderController extends Controller
         $title = 'A report containing voucher history.';
         // Request date string as dd-mm-yyyy
         $date = $request->submission_date ? $request->submission_date : null;
+
         $file = $this->createVoucherListFile($trader, $vouchers, $title, $date);
 
-        event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file));
+        // If all vouchers are requested attempt to get the minimum and maximum dates for the report.
+        if(is_null($date)) {
+            $filter_callback = function($item) {
+                // Shorten date to d-m-Y for comparison purposes then grab the timestamp for min/max check.
+                return (new Carbon($item->paymentPendedOn->created_at->format('d-m-Y')))->timestamp;
+            };
+
+            // Find the voucher with the earliest created_at date and convert into readable format.
+            $min = $vouchers->min($filter_callback);
+            $max = $vouchers->max($filter_callback);
+            $min_date = Carbon::createFromTimestamp($min)->format('d-m-Y');
+            $max_date = Carbon::createFromTimestamp($max)->format('d-m-Y');
+
+            // If max date is the same as min date return null.
+            $max_date = ($min_date === $max_date) ? null : $max_date;
+
+            event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $vouchers, $file, $min_date, $max_date));
+        } else {
+            event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $vouchers, $file, $date));
+        }
 
         $response_text = trans('api.messages.email_voucher_history');
 

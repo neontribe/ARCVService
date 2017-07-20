@@ -18,6 +18,9 @@ class VoucherHistoryEmailRequested
 
     public $user;
     public $trader;
+    public $vouchers;
+    public $date;
+    public $max_date;
     public $file;
 
     /**
@@ -25,10 +28,13 @@ class VoucherHistoryEmailRequested
      *
      * @return void
      */
-    public function __construct(User $user, Trader $trader, $file)
+    public function __construct(User $user, Trader $trader, $vouchers, $file, $date, $max_date = null)
     {
         $this->user = $user;
         $this->trader = $trader;
+        $this->date = $date;
+        $this->max_date = $max_date;
+        $this->vouchers = $vouchers;
         $this->file = $file;
     }
 
