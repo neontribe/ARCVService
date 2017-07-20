@@ -15,7 +15,6 @@ class VoucherController extends Controller
 
     /**
      * Display a listing of Vouchers.
-     * // Todo this will change.
      *
      * @return json
      */
