@@ -182,10 +182,10 @@ class TraderController extends Controller
     public function getMinMaxVoucherDates($vouchers) {
         $sorted_vouchers = $vouchers->sortBy(function($voucher) {
             return $voucher->paymentPendedOn->created_at->timestamp;
-        });
+        })->values()->all();
 
-        $max_date = $sorted_vouchers[0]->paymentPendedOn->created_at->format('d-m-Y');
-        $min_date = $sorted_vouchers[count($sorted_vouchers) - 1]->paymentPendedOn->created_at->format('d-m-Y');
+        $min_date = $sorted_vouchers[0]->paymentPendedOn->created_at->format('d-m-Y');
+        $max_date = $sorted_vouchers[count($sorted_vouchers) - 1]->paymentPendedOn->created_at->format('d-m-Y');
 
         // If max date is the same as min date return null.
         $max_date = ($min_date === $max_date) ? null : $max_date;
