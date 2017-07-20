@@ -185,7 +185,7 @@ class TraderController extends Controller
             // Default to "now" if ->paymentPendedOn is not defined.
             $pended_timestamp = Carbon::now()->timestamp;
 
-            // Shorten date to d-m-Y for comparison purposes then grab the timestamp for min/max check.
+            // Grab the timestamp for min/max check.
             if($item->paymentPendedOn) {
                 $pended_timestamp = $item->paymentPendedOn->created_at->timestamp;
             }
