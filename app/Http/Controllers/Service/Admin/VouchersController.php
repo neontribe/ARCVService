@@ -24,7 +24,6 @@ class VouchersController extends Controller
         return view('service.vouchers.index', compact('vouchers'));
     }
 
-
     /**
      * Show the form for creating new Vouchers.
      *
@@ -32,7 +31,9 @@ class VouchersController extends Controller
      */
     public function create()
     {
-        //
+        // A range of numbers from first to last.
+        // Last can be empty. Then only one is created.
+        return view('service.vouchers.create');
     }
 
     /**
@@ -41,52 +42,15 @@ class VouchersController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Voucher $voucher)
+    public function store($vouchers)
     {
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Voucher  $voucher
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Voucher $voucher)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Voucher  $voucher
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Voucher $voucher)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Voucher  $voucher
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Voucher $voucher)
-    {
-        //
-    }
-
-    /**
-     * Display the specified Voucher.
-     *
-     * @param  App\Voucher $voucher
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Voucher $voucher)
-    {
-        return $voucher;
+        //$new_vouchers = [];
+        //foreach($vouchers as $voucher) {
+        //    $v = new Voucher();
+        //    $v-> = $voucher->;
+        //    $v-> = $voucher->;
+        //    $new_vouchers[] = $v->attributesToArray();
+        //}
+        //Voucher::insert($new_vouchers);
     }
 }
