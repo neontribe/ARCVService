@@ -11,6 +11,7 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Styles -->
+    <style>@import url('https://fonts.googleapis.com/css?family=Roboto');</style>
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>

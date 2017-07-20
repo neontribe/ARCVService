@@ -1,34 +1,19 @@
 @extends('service.layouts.app')
 
 @section('content')
-<div id="container">
 
-    <div id="left">
+    <div id="container">
 
-        <ul>
-            <li>Service portal</li>
-            <li><a href="{{ url('/') }}"><span class="glyphicon glyphicon-home"></span>Dashboard</a></li>
-            <li><a href="{{ url('/vouchers/create') }}"><span class="glyphicon glyphicon-plus"></span>Add vouchers</a></li>
-            <li><a href="{{ url('/vouchers') }}"><span class="glyphicon glyphicon-th-list"></span>View added vouchers</a></li>
+        @include('service.includes.sidebar')
 
-            @unless(Config('app.url') === 'https://voucher-admin.alexandrarose.org.uk')
-            <li>{{ Session::get('message') }}</li>
-            <li>Service data endpoints</li>
-            <li><a href="data/vouchers"><span class="glyphicon glyphicon-cog"></span>Vouchers</a></li>
-            <li><a href="data/users"><span class="glyphicon glyphicon-cog"></span>Users</a></li>
-            <li><a href="data/traders"><span class="glyphicon glyphicon-cog"></span>Traders</a></li>
-            <li><a href="data/markets"><span class="glyphicon glyphicon-cog"></span>Markets</a></li>
-            <li class="danger"><a href="data/reset-data"><span class="glyphicon glyphicon-cog"></span>Reset data</a></li>
-            @endUnless
+        <div id="main-content">
 
-        </ul>
+            <h1>Rosie Admin Dashboard</h1>
+
+            <p>Welcome to the Rosie Admin Dashboard. Use the links in the sidebar to view vouchers, or to add a new batch of vouchers.</p>
+
+        </div>
 
     </div>
-
-    <div id="right">
-        This is the main content area in the admin dashboard. This is where content from each of the sidebar links will ideally load...
-    </div>
-
-</div>
 
 @endsection

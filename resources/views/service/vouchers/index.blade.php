@@ -1,9 +1,24 @@
-index
+@extends('service.layouts.app')
 
-<ul>
-@foreach ($vouchers as $voucher)
+@section('content')
+<div id="container">
 
-<li>{{ $voucher }}</li>
+    @include('service.includes.sidebar')
 
-@endforeach
-</ul>
+    <div id="main-content">
+
+      <h1>View live vouchers</h1>
+
+      <ul>
+      @foreach ($vouchers as $voucher)
+
+      <li>{{ $voucher }}</li>
+
+      @endforeach
+      </ul>
+
+    </div>
+
+</div>
+
+@endsection
