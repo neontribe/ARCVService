@@ -20,8 +20,8 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'uses' => 'Admin\VouchersController@create',
     ]);
     Route::post('vouchers', [
-        'as' =>'vouchers.store',
-        'uses' => 'Admin\VouchersController@store',
+        'as' =>'vouchers.storebatch',
+        'uses' => 'Admin\VouchersController@storeBatch',
     ]);
     Route::post('logout', [
         'as' =>'admin.logout',

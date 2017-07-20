@@ -1,11 +1,12 @@
 @extends('service.layouts.app')
 @section('content')
+
 <div id="container">
     @include('service.includes.sidebar')
     <div id="main-content">
-        <h1>
-        Add Vouchers</h2>
-        <form role="form" method="POST" action="{{ route('vouchers.storebatch') }}">
+    <h2>Add Vouchers</h2>
+
+     <form role="form" method="POST" action="{{ route('vouchers.storebatch') }}">
             {!! csrf_field() !!}
             <p>
                 <label for="sponsor_id" class="required">Sponsor</label>
