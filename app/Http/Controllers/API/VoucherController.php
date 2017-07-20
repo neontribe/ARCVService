@@ -74,7 +74,8 @@ class VoucherController extends Controller
 
         $transition = $request['transition'];
         $success_codes = [];
-        $fail_codes = [];
+        $other_duplicate_codes = [];
+        $own_duplicate_codes = [];
         $vouchers_for_payment = [];
         foreach ($vouchers as $voucher) {
             // can we?
@@ -93,8 +94,13 @@ class VoucherController extends Controller
                 }
             } else {
                 // no! add it to a list of failures.
-                // Fail for this one.
-                $fail_codes[] = $voucher->code;
+                if {
+                  // Trader has already submitted this voucher
+                  $own_duplicate_codes[] = $voucher->code;
+                } else {
+                  // Another trader has mistakenly submitted this voucher
+                  $other_duplicate_codes[] = $voucher_code;
+                }
             }
         }
 
@@ -109,7 +115,8 @@ class VoucherController extends Controller
         // We might want to annotate somehow with the type of transition here.
         // Currently we can 'collect' - submit and 'confirm' - request payment on.
         $responses['success'] = $success_codes;
-        $responses['fail'] = $fail_codes;
+        $responses['own_duplicate'] = $own_duplicate_codes;
+        $responses['other_duplicate'] = $other_duplicate_codes;
         $responses['invalid'] = $bad_codes;
         return response()->json($responses, 200);
     }
