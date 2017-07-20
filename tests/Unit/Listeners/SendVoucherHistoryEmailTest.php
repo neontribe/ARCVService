@@ -10,6 +10,7 @@ use App\Sponsor;
 use App\Trader;
 use App\User;
 use App\Voucher;
+use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -42,6 +43,8 @@ class SendVoucherHistoryEmailTest extends TestCase
 
         // Set up voucher states.
         Auth::login($this->user);
+
+
         foreach ($this->vouchers as $v) {
             $v->applyTransition('order');
             $v->applyTransition('print');
@@ -53,6 +56,8 @@ class SendVoucherHistoryEmailTest extends TestCase
 
         // Progress one to pending_payment.
         $this->vouchers[0]->applyTransition('confirm');
+        \App\VoucherState::where('voucher_id', $this->vouchers[0]->id)
+            ->update(['created_at' => Carbon::tomorrow()]);
 
         // Progress a couple to reimbursed.
         // For now they display same as pending.
@@ -89,6 +94,7 @@ class SendVoucherHistoryEmailTest extends TestCase
             ->seeEmailSubject('Voucher History Email')
             ->seeEmailContains('Hi ' . $user->name)
             ->seeEmailContains('requested a record of ' . $trader->name)
+            ->seeEmailContains("The file includes payment records from $min_date to $max_date")
         ;
     }
 }

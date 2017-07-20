@@ -181,13 +181,15 @@ class TraderController extends Controller
     }
 
     public function getMinMaxVoucherDates($vouchers) {
-        $callback = function($item) {
-            // Default to "now" if ->paymentPendedOn is not defined.
-            $pended_timestamp = Carbon::now()->timestamp;
+        $last = $vouchers[0]->created_at;
+        $callback = function($item) use (&$last) {
+            // Use the last result if ->paymentPendedOn is not defined.
+            $pended_timestamp = $last;
 
             // Grab the timestamp for min/max check.
             if($item->paymentPendedOn) {
                 $pended_timestamp = $item->paymentPendedOn->created_at->timestamp;
+                $last = $pended_timestamp;
             }
             return $pended_timestamp;
         };
