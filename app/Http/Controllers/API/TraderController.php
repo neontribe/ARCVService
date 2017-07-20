@@ -180,24 +180,12 @@ class TraderController extends Controller
     }
 
     public function getMinMaxVoucherDates($vouchers) {
-        $last = $vouchers[0]->created_at;
-        $callback = function($item) use (&$last) {
-            // Use the last result if ->paymentPendedOn is not defined.
-            $pended_timestamp = $last;
+        $sorted_vouchers = $vouchers->sortBy(function($voucher) {
+            return $voucher->paymentPendedOn->created_at->timestamp;
+        });
 
-            // Grab the timestamp for min/max check.
-            if($item->paymentPendedOn) {
-                $pended_timestamp = $item->paymentPendedOn->created_at->timestamp;
-                $last = $pended_timestamp;
-            }
-            return $pended_timestamp;
-        };
-        // Find the voucher with the earliest created_at date and convert into readable format.
-        $min = $vouchers->min($callback);
-        $max = $vouchers->max($callback);
-
-        $min_date = Carbon::createFromTimestamp($min)->format('d-m-Y');
-        $max_date = Carbon::createFromTimestamp($max)->format('d-m-Y');
+        $max_date = $sorted_vouchers[0]->paymentPendedOn->created_at->format('d-m-Y');
+        $min_date = $sorted_vouchers[count($sorted_vouchers) - 1]->paymentPendedOn->created_at->format('d-m-Y');
 
         // If max date is the same as min date return null.
         $max_date = ($min_date === $max_date) ? null : $max_date;

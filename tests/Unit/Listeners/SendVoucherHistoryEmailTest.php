@@ -44,7 +44,6 @@ class SendVoucherHistoryEmailTest extends TestCase
         // Set up voucher states.
         Auth::login($this->user);
 
-
         foreach ($this->vouchers as $v) {
             $v->applyTransition('order');
             $v->applyTransition('print');
@@ -52,18 +51,15 @@ class SendVoucherHistoryEmailTest extends TestCase
             $v->applyTransition('allocate');
             $v->trader_id = 1;
             $v->applyTransition('collect');
+            $v->applyTransition('confirm');
         }
 
-        // Progress one to pending_payment.
-        $this->vouchers[0]->applyTransition('confirm');
         \App\VoucherState::where('voucher_id', $this->vouchers[0]->id)
             ->update(['created_at' => Carbon::tomorrow()]);
 
         // Progress a couple to reimbursed.
         // For now they display same as pending.
-        $this->vouchers[1]->applyTransition('confirm');
         $this->vouchers[1]->applyTransition('payout');
-        $this->vouchers[2]->applyTransition('confirm');
         $this->vouchers[2]->applyTransition('payout');
 
         // A voucher not belonging to trader 1.
