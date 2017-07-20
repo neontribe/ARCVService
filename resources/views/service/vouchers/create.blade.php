@@ -7,6 +7,8 @@
 
         <h1>Add a batch of voucher codes</h1>
 
+        <p>Use the form below to add a new batch of vouchers. Select a sponsor code, and then enter the starting and ending voucher code numbers.</p>
+
         <form role="form" method="POST" action="{{ route('vouchers.storebatch') }}">
             {!! csrf_field() !!}
 
