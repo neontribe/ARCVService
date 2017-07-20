@@ -4,7 +4,7 @@
 <div id="container">
     @include('service.includes.sidebar')
     <div id="main-content">
-    <h2>Add Vouchers</h2>
+    <h1>Add a batch of vouchers</h1>
 
      <form role="form" method="POST" action="{{ route('vouchers.storebatch') }}">
             {!! csrf_field() !!}

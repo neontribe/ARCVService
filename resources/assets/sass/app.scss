@@ -56,13 +56,12 @@ h1 {
 }
 
 #container {
-  height: 100%;
   display: flex;
+  min-height: 100%;
 }
 
 #sidebar {
   flex: 0 0 300px;
-  height: 100%;
   font-weight: 600;
   background-color: $arc_white;
   border-right: 1px solid #ededed;
@@ -87,7 +86,7 @@ h1 {
 #main-content {
   background-color: $arc_bg;
   flex: 1;
-  padding: 2em 3em;
+  padding: 2em 4em;
 }
 
 @media (min-width: 992px) {
