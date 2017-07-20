@@ -258,7 +258,7 @@ class TraderController extends Controller
         $filename = str_slug($data['trader'] . '-vouchers-' .$time);
         $excel = Excel::create($filename, function ($excel) use ($data) {
             // Set the title
-            $excel->setTitle($data['trader'] . 'Voucher History')
+            $excel->setTitle($data['trader'] . 'Voucher Records')
                 ->setCompany($data['user'])
                 ->setDescription($data['report_title'])
             ;
