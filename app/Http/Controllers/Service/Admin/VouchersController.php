@@ -90,7 +90,7 @@ class VouchersController extends Controller
             $newVouchers[] = $v->attributesToArray();
         }
         // batch insert.
-        // Todo : "this voucher already exists" checking
+        // Todo : there's NO "this voucher already exists" checking!!
         Voucher::insert($newVouchers);
 
         $vouchers = Voucher::
