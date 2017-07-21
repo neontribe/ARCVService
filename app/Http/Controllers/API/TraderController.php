@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Events\VoucherHistoryEmailRequested;
 use App\Http\Controllers\Controller;
 use App\Trader;
+use App\Voucher;
 use Auth;
 use Carbon\Carbon;
 use DB;
@@ -157,7 +158,13 @@ class TraderController extends Controller
         $date = $request->submission_date ? $request->submission_date : null;
         $file = $this->createVoucherListFile($trader, $vouchers, $title, $date);
 
-        event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file));
+        // If all vouchers are requested attempt to get the minimum and maximum dates for the report.
+        if(is_null($date)) {
+            list($min_date, $max_date) = Voucher::getMinMaxVoucherDates($vouchers);
+            event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file, $min_date, $max_date));
+        } else {
+            event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file, $date));
+        }
 
         $response_text = trans('api.messages.email_voucher_history');
 
@@ -227,7 +234,7 @@ class TraderController extends Controller
         $filename = str_slug($data['trader'] . '-vouchers-' .$time);
         $excel = Excel::create($filename, function ($excel) use ($data) {
             // Set the title
-            $excel->setTitle($data['trader'] . 'Voucher History')
+            $excel->setTitle($data['trader'] . 'Voucher Records')
                 ->setCompany($data['user'])
                 ->setDescription($data['report_title'])
             ;

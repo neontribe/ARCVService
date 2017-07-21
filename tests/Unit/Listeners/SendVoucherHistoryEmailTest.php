@@ -10,6 +10,7 @@ use App\Sponsor;
 use App\Trader;
 use App\User;
 use App\Voucher;
+use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -42,6 +43,7 @@ class SendVoucherHistoryEmailTest extends TestCase
 
         // Set up voucher states.
         Auth::login($this->user);
+
         foreach ($this->vouchers as $v) {
             $v->applyTransition('order');
             $v->applyTransition('print');
@@ -51,8 +53,9 @@ class SendVoucherHistoryEmailTest extends TestCase
             $v->applyTransition('collect');
         }
 
-        // Progress one to pending_payment.
         $this->vouchers[0]->applyTransition('confirm');
+        VoucherState::where('voucher_id', $this->vouchers[0]->id)
+            ->update(['created_at' => Carbon::tomorrow()]);
 
         // Progress a couple to reimbursed.
         // For now they display same as pending.
@@ -60,6 +63,7 @@ class SendVoucherHistoryEmailTest extends TestCase
         $this->vouchers[1]->applyTransition('payout');
         $this->vouchers[2]->applyTransition('confirm');
         $this->vouchers[2]->applyTransition('payout');
+
 
         // A voucher not belonging to trader 1.
         $this->vouchers[9]->trader_id = 2;
@@ -71,13 +75,15 @@ class SendVoucherHistoryEmailTest extends TestCase
         // Todo this test could be split up and improved.
         $user = $this->user;
         $trader = $this->traders[0];
-        $vouchers = $trader->vouchers;
+        $vouchers = $trader->vouchersConfirmed;
         $title = 'Test Voucher History Email';
+
         Auth::login($user);
         $controller = new TraderController();
         $file = $controller->createVoucherListFile($trader, $vouchers, $title);
 
-        $event = new VoucherHistoryEmailRequested($user, $trader, $file);
+        list($min_date, $max_date) = Voucher::getMinMaxVoucherDates($vouchers);
+        $event = new VoucherHistoryEmailRequested($user, $trader, $file, $min_date, $max_date);
         $listener = new SendVoucherHistoryEmail();
         $listener->handle($event);
 
@@ -86,7 +92,8 @@ class SendVoucherHistoryEmailTest extends TestCase
             ->seeEmailTo($user->email)
             ->seeEmailSubject('Voucher History Email')
             ->seeEmailContains('Hi ' . $user->name)
-            ->seeEmailContains('requested a record of ' . $trader->name)
+            ->seeEmailContains('requested a copy of ' . $trader->name)
+            ->seeEmailContains("The file includes payment records from $min_date to $max_date")
         ;
     }
 }
