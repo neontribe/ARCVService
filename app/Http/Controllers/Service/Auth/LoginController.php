@@ -53,31 +53,32 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         // Validate the form data
-      $this->validate($request, [
-        'email'   => 'required|email',
-        'password' => 'required|min:6'
-      ]);
-      // Attempt to log the user in
-      if (Auth::guard('admin')->attempt(['email' => $request->email, 'password' => $request->password], $request->remember)) {
-          // if successful, then redirect to their intended location
-          return redirect()->intended(route('dashboard'));
-      }
+        $this->validate($request, [
+            'email' => 'required|email',
+            'password' => 'required|min:6',
+        ]);
+        // Attempt to log the user in
+        if (Auth::guard('admin')->attempt(['email' => $request->email, 'password' => $request->password],
+            $request->remember)) {
+            // if successful, then redirect to their intended location
+            return redirect()->intended(route('dashboard'));
+        }
 
-      // Throttle uses AuthenticatesUser trait's ThrottleLogins.
-      // Default 5 attempts per minute per email+IP.
-      if ($this->hasTooManyLoginAttempts($request)) {
-          $this->fireLockoutEvent($request);
-          return $this->sendLockoutResponse($request);
-      }
-      // Login has Failed - increment attempts.
-      $this->IncrementLoginAttempts($request);
+        // Throttle uses AuthenticatesUser trait's ThrottleLogins.
+        // Default 5 attempts per minute per email+IP.
+        if ($this->hasTooManyLoginAttempts($request)) {
+            $this->fireLockoutEvent($request);
+            return $this->sendLockoutResponse($request);
+        }
+        // Login has Failed - increment attempts.
+        $this->IncrementLoginAttempts($request);
         Log::info(
-          'Attempt to login with wrong credentials by '
-          . $request->email . ' on '
-          . $request->ip()
-      );
+            'Attempt to login with wrong credentials by '
+            . $request->email . ' on '
+            . $request->ip()
+        );
 
-      // if unsuccessful, then redirect back to the login with the form data
-      return redirect()->back()->withInput($request->only('email', 'remember'));
+        // if unsuccessful, then redirect back to the login with the form data
+        return redirect()->back()->withInput($request->only('email', 'remember'));
     }
 }
