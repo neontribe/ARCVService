@@ -113,13 +113,17 @@ class VoucherController extends Controller
             $this->emailVoucherPaymentRequest($trader, $vouchers_for_payment);
         }
 
+
         // We might want to annotate somehow with the type of transition here.
         // Currently we can 'collect' - submit and 'confirm' - request payment on.
         $responses['success'] = $success_codes;
         $responses['own_duplicate'] = $own_duplicate_codes;
         $responses['other_duplicate'] = $other_duplicate_codes;
         $responses['invalid'] = $bad_codes;
-        return response()->json($responses, 200);
+
+        $response = constructResponseMessage($responses);
+
+        return response()->json($response, 200);
     }
 
     /**
@@ -154,5 +158,31 @@ class VoucherController extends Controller
     public function show($code)
     {
         return response()->json(Voucher::findByCode($code));
+    }
+
+    function constructResponseMessage($responses)
+    {
+        if (count((array)$responses = 1) {
+            switch($responses) {
+                case $responses->success:
+                    return ['message' => trans('api.messages.voucher_success')];
+                    break;
+                case $responses->own_duplicate:
+                    return ['error' => trans('api.errors.voucher_own_dupe')];
+                    break;
+                case $responses->other_duplicate:
+                    return ['error' => trans('api.errors.voucher_other_dupe')];
+                    break;
+                case $responses->invalid:
+                    return ['error' => trans('api.errors.voucher_invalid')];
+                    break;
+            }
+        } else {
+            return ['message' => trans('api.messages.batch_voucher_submit',
+                'success_amount' => count((array)$responses->success),
+                'duplicate_amount' => count((array)$responses->own_duplicate) + count((array)$responses->other_duplicate),
+                'invalid_amount' => count((array)$responses->invalid)
+            )];
+        }
     }
 }
