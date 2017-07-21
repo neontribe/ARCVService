@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Log;
 use Response;
 use DB;
+use Validator;
+use Illuminate\Validation\Rule;
 
 class VouchersController extends Controller
 {
@@ -48,8 +50,51 @@ class VouchersController extends Controller
      */
     public function storeBatch(Request $request)
     {
+
+
+
+
         $new_vouchers = [];
+
+        /*
+         * Validation Logic
+         * - codes must be numbers < 8 digits
+         * - there must be a start
+         * - there must be an end
+         * - end *must* be >= start
+         * x sponsor_id must be an integer
+         * x sponsor_id must be valid
+         */
+        $sponsorIds = \App\Sponsor::all()->pluck('id')->toArray();
+
+        $voucherRules = [
+            'sponsor_id' => [
+                'required',
+                Rule::in($sponsorIds)
+            ],
+            'start' => 'required|integer|between:1,99999999',
+            'end' => [
+                'required',
+                'integer',
+                'between:1,99999999',
+                'ge_field:start'
+            ],
+        ];
+
+        $messages = [
+            'in' => 'The :atrribute must be a valid selection',
+            'ge_field' => 'The :attribute must be greater than or equal to :field'
+        ];
+
+        Validator::make($request->all(), $voucherRules , $messages)->validate();
+
+
+        if ($request['start'] > $request['end']) {
+            die("broken!");
+        }
+
         $codes = range($request['start'], $request['end']);
+
         $sponsor = Sponsor::find($request['sponsor_id'])->first();
         foreach ($codes as $c) {
             $v = new Voucher();
