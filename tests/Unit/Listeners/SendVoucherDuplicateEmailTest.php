@@ -27,8 +27,8 @@ class SendVoucherDuplicateEmailTest extends TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->trader = factory(Trader::class, 1)->create();
-        $this->voucher = factory(Voucher::class, 'requested', 1)->create();
+        $this->trader = factory(Trader::class)->create();
+        $this->voucher = factory(Voucher::class)->create();
         $this->user = factory(User::class)->create();
 
         // // Add market to trader[1];
@@ -48,14 +48,14 @@ class SendVoucherDuplicateEmailTest extends TestCase
         $title = 'Test Voucher Duplicate Email';
 
         Auth::login($user);
-        $event = new VoucherDuplicateEntered($user, $trader, $voucher);
+        $event = new VoucherDuplicateEntered($user, $trader, $this->voucher);
         $listener = new SendVoucherDuplicateEmail();
         $listener->handle($event);
 
         // We can improve this - but test basic data is correct.
         $this->seeEmailWasSent()
             ->seeEmailTo(config('mail.to_admin.address'))
-            ->seeEmailSubject('Voucher Duplicate Email')
+            ->seeEmailSubject('Voucher Duplicate Entered Email')
             ->seeEmailContains('Hi ' . config('mail.to_admin.name'))
             ->seeEmailContains($user->name . ' has tried to submit voucher')
             ->seeEmailContains($vouchercode . ' against')

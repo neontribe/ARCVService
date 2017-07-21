@@ -32,7 +32,7 @@ class SendVoucherDuplicateEmail
             ->send(new VoucherDuplicateEnteredEmail(
                 $event->user,
                 $event->trader,
-                $event->voucher,
+                $event->voucher
             ))
         ;
     }

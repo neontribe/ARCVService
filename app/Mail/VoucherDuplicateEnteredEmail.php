@@ -14,6 +14,7 @@ class VoucherDuplicateEnteredEmail extends Mailable
     public $user;
     public $trader;
     public $voucher;
+    public $vouchercode;
     public $market;
 
     /**
@@ -38,6 +39,6 @@ class VoucherDuplicateEnteredEmail extends Mailable
     {
         return $this->view('api.emails.voucher_duplicate_email')
             ->text('api.emails.voucher_duplicate_email_textonly')
-            ]);
+        ;
     }
 }
