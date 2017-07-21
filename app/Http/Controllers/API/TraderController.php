@@ -160,9 +160,9 @@ class TraderController extends Controller
         // If all vouchers are requested attempt to get the minimum and maximum dates for the report.
         if(is_null($date)) {
             list($min_date, $max_date) = $this->getMinMaxVoucherDates($vouchers);
-            event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $vouchers, $file, $min_date, $max_date));
+            event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file, $min_date, $max_date));
         } else {
-            event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $vouchers, $file, $date));
+            event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file, $date));
         }
 
         $response_text = trans('api.messages.email_voucher_history');

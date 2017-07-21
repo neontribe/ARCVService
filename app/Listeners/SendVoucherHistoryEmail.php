@@ -34,7 +34,6 @@ class SendVoucherHistoryEmail
             ->send(new VoucherHistoryEmail(
                 $event->user,
                 $event->trader,
-                $event->vouchers,
                 $event->date,
                 $event->max_date,
                 $event->file

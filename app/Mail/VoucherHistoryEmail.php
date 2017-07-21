@@ -23,11 +23,11 @@ class VoucherHistoryEmail extends Mailable
      *
      * @return void
      */
-    public function __construct($user, $trader, $vouchers, $date, $max_date, $file)
+    public function __construct($user, $trader, $date, $max_date, $file)
     {
         $this->user = $user->name;
         $this->trader = $trader->name;
-        $this->vouchers = $vouchers;
+        $this->vouchers = $trader->vouchersConfirmed;
         $this->date = $date;
         $this->max_date = $max_date;
         $this->file = $file;
