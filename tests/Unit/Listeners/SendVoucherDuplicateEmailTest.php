@@ -27,17 +27,11 @@ class SendVoucherDuplicateEmailTest extends TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->trader = factory(Trader::class)->create();
+        $this->trader = factory(Trader::class)->create(
+            ['market_id' => factory(Market::class)->create()->id]
+        );
         $this->voucher = factory(Voucher::class)->create();
         $this->user = factory(User::class)->create();
-
-        // // Add market to trader[1];
-        // // We currently require markets to be created with sponsors.
-        // // TODO In our model is nullable - so noted in Tech Debt.
-        // $this->traders[0]->market_id = factory(Market::class)->create([
-        //     'sponsor_id' => factory(Sponsor::class)->create()->id,
-        // ])->id;
-        // $this->traders[0]->save();
     }
 
     public function testVoucherDuplicateEmail()
@@ -45,6 +39,7 @@ class SendVoucherDuplicateEmailTest extends TestCase
         $user = $this->user;
         $trader = $this->trader;
         $vouchercode = $this->voucher->code;
+        $market = $this->trader->market;
         $title = 'Test Voucher Duplicate Email';
 
         Auth::login($user);
@@ -60,6 +55,7 @@ class SendVoucherDuplicateEmailTest extends TestCase
             ->seeEmailContains($user->name . ' has tried to submit voucher')
             ->seeEmailContains($vouchercode . ' against')
             ->seeEmailContains($trader->name . ' of')
+            ->seeEmailContains($market->name . '\'s account, however that voucher has already been submitted by another trader.')
         ;
     }
 }

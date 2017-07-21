@@ -8,7 +8,7 @@ Hi {{ config('mail.to_admin.name') }},
 {{ $user }} has tried to submit voucher
 {{ $vouchercode }} against
 {{ $trader }} of
-{{ $market }}'s account, however that voucher has already been submitted by another trader.
+{{ $market->name }}'s account, however that voucher has already been submitted by another trader.
 
 Thanks,
 Rose Vouchers
