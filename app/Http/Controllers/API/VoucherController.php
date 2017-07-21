@@ -168,10 +168,10 @@ class VoucherController extends Controller
                     return ['message' => trans('api.messages.voucher_success')];
                     break;
                 case $responses->own_duplicate:
-                    return ['error' => trans('api.errors.voucher_own_dupe')];
+                    return ['warning' => trans('api.errors.voucher_own_dupe') + $responses->$own_duplicate->$];
                     break;
                 case $responses->other_duplicate:
-                    return ['error' => trans('api.errors.voucher_other_dupe')];
+                    return ['warning' => trans('api.errors.voucher_other_dupe')];
                     break;
                 case $responses->invalid:
                     return ['error' => trans('api.errors.voucher_invalid')];
