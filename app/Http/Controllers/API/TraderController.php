@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Events\VoucherHistoryEmailRequested;
 use App\Http\Controllers\Controller;
 use App\Trader;
+use App\Voucher;
 use Auth;
 use Carbon\Carbon;
 use DB;
@@ -159,7 +160,7 @@ class TraderController extends Controller
 
         // If all vouchers are requested attempt to get the minimum and maximum dates for the report.
         if(is_null($date)) {
-            list($min_date, $max_date) = $this->getMinMaxVoucherDates($vouchers);
+            list($min_date, $max_date) = Voucher::getMinMaxVoucherDates($vouchers);
             event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file, $min_date, $max_date));
         } else {
             event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file, $date));
@@ -177,20 +178,6 @@ class TraderController extends Controller
         }
 
         return response()->json(['message' => $response_text], 202);
-    }
-
-    public function getMinMaxVoucherDates($vouchers) {
-        $sorted_vouchers = $vouchers->sortBy(function($voucher) {
-            return $voucher->paymentPendedOn->created_at->timestamp;
-        })->values()->all();
-
-        $min_date = $sorted_vouchers[0]->paymentPendedOn->created_at->format('d-m-Y');
-        $max_date = $sorted_vouchers[count($sorted_vouchers) - 1]->paymentPendedOn->created_at->format('d-m-Y');
-
-        // If max date is the same as min date return null.
-        $max_date = ($min_date === $max_date) ? null : $max_date;
-
-        return [$min_date, $max_date];
     }
 
     /**

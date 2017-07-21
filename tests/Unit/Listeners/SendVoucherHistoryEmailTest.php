@@ -54,7 +54,7 @@ class SendVoucherHistoryEmailTest extends TestCase
             $v->applyTransition('confirm');
         }
 
-        \App\VoucherState::where('voucher_id', $this->vouchers[0]->id)
+        VoucherState::where('voucher_id', $this->vouchers[0]->id)
             ->update(['created_at' => Carbon::tomorrow()]);
 
         // Progress a couple to reimbursed.
@@ -79,7 +79,7 @@ class SendVoucherHistoryEmailTest extends TestCase
         $controller = new TraderController();
         $file = $controller->createVoucherListFile($trader, $vouchers, $title);
 
-        list($min_date, $max_date) = $controller->getMinMaxVoucherDates($vouchers);
+        list($min_date, $max_date) = Voucher::getMinMaxVoucherDates($vouchers);
         $event = new VoucherHistoryEmailRequested($user, $trader, $file, $min_date, $max_date);
         $listener = new SendVoucherHistoryEmail();
         $listener->handle($event);
