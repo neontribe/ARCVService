@@ -95,10 +95,10 @@ class VoucherController extends Controller
             } else {
                 // These are duplicates, look at changing later
                 if ($trader->id === $voucher->trader_id) {
-                  // Trader has already submitted this voucher
+                    // Trader has already submitted this voucher
                   $own_duplicate_codes[] = $voucher->code;
                 } else {
-                  // Another trader has mistakenly submitted this voucher,
+                    // Another trader has mistakenly submitted this voucher,
                   // Or the tranision isn't valid (i.e expired state)
                   $other_duplicate_codes[] = $voucher_code;
                 }
@@ -121,7 +121,7 @@ class VoucherController extends Controller
         $responses['other_duplicate'] = $other_duplicate_codes;
         $responses['invalid'] = $bad_codes;
 
-        $response = constructResponseMessage($responses);
+        $response = $this->constructResponseMessage($responses);
 
         return response()->json($response, 200);
     }
@@ -160,28 +160,46 @@ class VoucherController extends Controller
         return response()->json(Voucher::findByCode($code));
     }
 
-    function constructResponseMessage($responses)
+    /**
+     * Helper to construct voucher validation response messages.
+     *
+     * @param Array $response
+     * @return Array $message
+     */
+    public function constructResponseMessage($responses)
     {
-        if (count((array)$responses = 1) {
-            switch($responses) {
-                case $responses->success:
+        // If there is only one voucher code being checked.
+        $total_submitted = 0;
+        $error_type = '';
+        foreach ($responses as $code) {
+            $total_submitted += count($code);
+            if (count($code) === 1) {
+                // We will only use this if there is a total of 1 voucher submitted.
+                // So no problem if 2 sets have 1 voucher in them. It is ignored.
+                $error_type = key($code);
+            }
+        }
+        if ($total_submitted === 1) {
+            switch ($error_type) {
+                case 'success':
                     return ['message' => trans('api.messages.voucher_success')];
                     break;
-                case $responses->own_duplicate:
-                    return ['warning' => trans('api.errors.voucher_own_dupe') + $responses->$own_duplicate->$];
+                case 'own_duplicate':
+                    return ['warning' => trans('api.errors.voucher_own_dupe') . $responses['own_duplicate'][0]];
                     break;
-                case $responses->other_duplicate:
+                case 'other_duplicate':
                     return ['warning' => trans('api.errors.voucher_other_dupe')];
                     break;
-                case $responses->invalid:
+                case 'invalid':
+                default:
                     return ['error' => trans('api.errors.voucher_invalid')];
                     break;
             }
         } else {
             return ['message' => trans('api.messages.batch_voucher_submit',
-                'success_amount' => count((array)$responses->success),
-                'duplicate_amount' => count((array)$responses->own_duplicate) + count((array)$responses->other_duplicate),
-                'invalid_amount' => count((array)$responses->invalid)
+                ['success_amount' => count($responses['success']),
+                'duplicate_amount' => count($responses['own_duplicate']) . count($responses['other_duplicate']),
+                'invalid_amount' => count($responses['invalid'])]
             )];
         }
     }
