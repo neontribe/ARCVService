@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Service\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+
 
 class ResetPasswordController extends Controller
 {
@@ -36,4 +38,13 @@ class ResetPasswordController extends Controller
     {
         $this->middleware('guest');
     }
+
+    // Our reset form has moved location
+    public function showResetForm(Request $request, $token = null)
+    {
+        return view('service.auth.passwords.reset')->with(
+            ['token' => $token, 'email' => $request->email]
+        );
+    }
+
 }

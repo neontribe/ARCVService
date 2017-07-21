@@ -16,16 +16,16 @@ class MarketsSeeder extends Seeder
             [
                 'name' => "Beechwood Hall",
                 'location' => "Sylvania",
-                'sponsor_id'=> 2
+                'sponsor_id'=> 1 //changed from 2 as only one sponsor for demo
             ],
             [
                 'name' => "Sea Breeze Cape",
                 'location' => "Secret Island",
-                'sponsor_id'=> 2
+                'sponsor_id'=> 1 //changed from 2 as only one sponsor for demo
             ],
             [
                 'name' => "Fruit Wagon",
-                'sponsor_id'=> 2
+                'sponsor_id'=> 1 //changed from 2 as only one sponsor for demo
             ],
             [
                 'name' => "Brick Oven Bakery",
