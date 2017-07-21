@@ -13,19 +13,20 @@ class VoucherDuplicateEnteredEmail extends Mailable
 
     public $user;
     public $trader;
-    public $vouchercode;
+    public $voucher;
     public $market;
 
     /**
      * Create a new message instance.
      */
 
-    public function __construct($user, $trader, $vouchercode)
+    public function __construct($user, $trader, $voucher)
     {
         $this->user = $user->name;
         $this->trader = $trader->name;
-        $this->vouchercode = $vouchercode;
+        $this->voucher = $voucher;
         $this->market = $trader->market;
+        $this->vouchercode = $voucher->code;
     }
 
     /**
