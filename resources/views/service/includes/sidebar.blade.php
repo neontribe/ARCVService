@@ -3,7 +3,7 @@
     <ul>
         <li>Admin Dashboard</li>
         <li><a href="{{ url('/') }}"><span class="glyphicon glyphicon-home"></span>Dashboard</a></li>
-        <li><a href="{{ url('/vouchers/create') }}"><span class="glyphicon glyphicon-plus"></span>Add vouchers</a></li>
+        <li><a href="{{ url('/vouchers/create') }}"><span class="glyphicon glyphicon-plus"></span>Add voucher codes</a></li>
         <li><a href="{{ url('/vouchers') }}"><span class="glyphicon glyphicon-th-list"></span>View live vouchers</a></li>
 
         @unless(Config('app.url') === 'https://voucher-admin.alexandrarose.org.uk')
