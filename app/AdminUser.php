@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Notifications\AdminPasswordResetNotification;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AdminUser extends Authenticatable
@@ -31,4 +32,15 @@ class AdminUser extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new AdminPasswordResetNotification($token, $this->name));
+    }
 }

@@ -104,8 +104,9 @@ return [
             'expire' => 60,
         ],
 
+        // Our Service Admin users.
         'admins' => [
-            'provider' => 'users',
+            'provider' => 'admins',
             'table' => 'password_resets',
             'expire' => 60,
         ],
