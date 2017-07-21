@@ -15,6 +15,7 @@ class SponsorsSeeder extends Seeder
         factory(App\Sponsor::class)->create($sponsor);
 
         // And 4 default factory models.
-        factory(App\Sponsor::class, 4)->create();
+        //Commented out for Demo purposes
+        //factory(App\Sponsor::class, 4)->create();
     }
 }
