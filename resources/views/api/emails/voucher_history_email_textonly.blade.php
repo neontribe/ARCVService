@@ -10,7 +10,7 @@ You've requested a copy of {{ $trader }}'s voucher payment records for your refe
 [xXx] Total Vouchers: {{ count($vouchers) }}
 [xXx] Total Value: £{{ count($vouchers) }}
 
-The attached file is best viewed through a spreadsheet program, such as Microsoft Excel or Google Sheets. If you have any problems with opening or downloading it, please email <a href="mailto:arc@neontribe.co.uk">arc@neontribe.co.uk</a>.
+The attached file is best viewed through a spreadsheet program such as Microsoft Excel, LibreOffice Calc or Google Sheets. If you have any problems with opening or downloading it, please email <a href="mailto:arc@neontribe.co.uk">arc@neontribe.co.uk</a>.
 
 Thanks,
 Rose Vouchers
