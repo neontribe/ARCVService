@@ -28,7 +28,7 @@ class VoucherPaymentRequestEmail extends Mailable
         // Sending vouchers collection in case we want more than just count in email for copy.
         $this->vouchers = $vouchers;
         $this->file = $file;
-        $this->market = $trader->market ? $trader->market->name : 'Unspecified';
+        $this->market = $trader->market ? $trader->market->name : 'no associated market';
     }
 
     /**
