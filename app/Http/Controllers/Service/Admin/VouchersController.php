@@ -11,6 +11,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Http\Request;
 use Log;
 use Response;
+use DB;
 
 class VouchersController extends Controller
 {
@@ -22,7 +23,7 @@ class VouchersController extends Controller
      */
     public function index()
     {
-        $vouchers = Voucher::all();
+        $vouchers = DB::table('vouchers')->orderBy('id', 'desc')->paginate(50);
         return view('service.vouchers.index', compact('vouchers'));
     }
 
