@@ -72,7 +72,7 @@ class SendVoucherHistoryEmailTest extends TestCase
         // Todo this test could be split up and improved.
         $user = $this->user;
         $trader = $this->traders[0];
-        $vouchers = $trader->vouchers;
+        $vouchers = $trader->vouchersConfirmed;
         $title = 'Test Voucher History Email';
 
         Auth::login($user);
