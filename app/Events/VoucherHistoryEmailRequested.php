@@ -18,7 +18,6 @@ class VoucherHistoryEmailRequested
 
     public $user;
     public $trader;
-    public $vouchers;
     public $date;
     public $max_date;
     public $file;
