@@ -3,7 +3,7 @@
 
 <div id="container">
     @include('service.includes.sidebar')
-    <div id="main-content">
+    <div id="main-content" class="add-vouchers">
 
         <h1>Add a batch of voucher codes</h1>
 

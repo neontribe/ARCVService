@@ -36,108 +36,106 @@ h1 {
   margin-bottom: 1em;
 }
 
-select {
-  border: 2px solid $arc_border;
-  background-color: $arc_white;
-  border-radius: 3px;
-  min-height: 48px;
-  line-height: 20px;
-  padding: 0 10px;
-  width: calc(100% - 23px);
-  &:focus {
-    border: 2px solid $arc_focus;
-    outline: none;
-  }
-  // get rid of pale yellow background in input fields
-  &:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0px 1000px $arc_white inset;
-  }
-}
-
-.select {
-  margin-bottom: 2em;
-}
-
-input {
-  margin-bottom: 1em;
-  border: 2px solid $arc_border;
-  border-radius: 3px;
-  &[type=text],
-  &[type=password],
-  &[type=tel] {
+.add-vouchers {
+  select {
+    border: 2px solid $arc_border;
+    background-color: $arc_white;
+    border-radius: 3px;
     min-height: 48px;
-    font-size: 1.5em;
     line-height: 20px;
     padding: 0 10px;
     width: calc(100% - 23px);
+    &:focus {
+      border: 2px solid $arc_focus;
+      outline: none;
+    }
+    // get rid of pale yellow background in input fields
+    &:-webkit-autofill {
+      -webkit-box-shadow: 0 0 0px 1000px $arc_white inset;
+    }
   }
-  &:focus {
-    border: 2px solid $arc_focus;
-    outline: none;
+  .select {
+    margin-bottom: 2em;
   }
-  // get rid of pale yellow background in input fields
-  &:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0px 1000px $arc_white inset;
+  input {
+    margin-bottom: 1em;
+    border: 2px solid $arc_border;
+    border-radius: 3px;
+    &[type=text],
+    &[type=password],
+    &[type=number],
+    &[type=tel] {
+      min-height: 48px;
+      font-size: 1.5em;
+      line-height: 20px;
+      padding: 0 10px;
+      width: calc(100% - 23px);
+    }
+    &:focus {
+      border: 2px solid $arc_focus;
+      outline: none;
+    }
+    // get rid of pale yellow background in input fields
+    &:-webkit-autofill {
+      -webkit-box-shadow: 0 0 0px 1000px $arc_white inset;
+    }
   }
-}
-
-button {
-  position: relative;
-  overflow: hidden;
-  transform: translate3d(0, 0, 0);
-  background-color: $arc_rose;
-  color: $arc_white;
-  display: block;
-  text-align: center;
-  height: 48px;
-  font-weight: bold;
-  border: 0;
-  border-radius: 3px;
-  margin-top: 1em;
-  padding: 0 3em;
-  box-shadow: 0 3px 12px -1px rgba(0, 0, 0, 0.2);
-  &:focus {
-    outline: 0;
-  }
-  &:hover {
-    background-color: $arc_hover;
-  }
-  &:after {
+  button {
+    position: relative;
+    overflow: hidden;
+    transform: translate3d(0, 0, 0);
+    background-color: $arc_rose;
+    color: $arc_white;
     display: block;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    background-image: radial-gradient(circle, #fff 10%, transparent 10%);
-    background-repeat: no-repeat;
-    background-position: 50%;
-    transform: scale(10,10);
-    opacity: 0;
-    transition: transform .5s, opacity 1s;
+    text-align: center;
+    height: 48px;
+    font-weight: bold;
+    border: 0;
+    border-radius: 3px;
+    margin-top: 1em;
+    padding: 0 3em;
+    box-shadow: 0 3px 12px -1px rgba(0, 0, 0, 0.2);
+      &:focus {
+        outline: 0;
+      }
+      &:hover {
+        background-color: $arc_hover;
+      }
+      &:after {
+        display: block;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        background-image: radial-gradient(circle, #fff 10%, transparent 10%);
+        background-repeat: no-repeat;
+        background-position: 50%;
+        transform: scale(10,10);
+        opacity: 0;
+        transition: transform .5s, opacity 1s;
+      }
+      &:active:after {
+        transform: scale(0,0);
+        opacity: .2;
+        transition: 0s;
+      }
+    }
+  // remove dotted outline/borders in Firefox
+  button:focus,
+  a:focus,
+  a:active,
+  button::-moz-focus-inner,
+  input[type="button"]::-moz-focus-inner,
+  input[type="submit"]::-moz-focus-inner {
+    outline: none;
+    border: 0;
   }
-  &:active:after {
-    transform: scale(0,0);
-    opacity: .2;
-    transition: 0s;
+  form {
+    margin-top: 2em;
+    width: 450px;
   }
-}
-
-// remove dotted outline/borders in Firefox
-button:focus,
-a:focus,
-a:active,
-button::-moz-focus-inner,
-input[type="button"]::-moz-focus-inner,
-input[type="submit"]::-moz-focus-inner {
-  outline: none;
-  border: 0;
-}
-
-form {
-  margin-top: 2em;
-  width: 450px;
 }
 
 .navbar {
