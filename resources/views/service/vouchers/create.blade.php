@@ -14,7 +14,7 @@
 
             <div class="select">
                 <label for="sponsor_id" class="required">Sponsor</label><br>
-                <select name="sponsor_id" id="sponsor_id" class="{{ $errors->has('sponsor_id') ? 'has-error' : '' }}" required>
+                <select name="sponsor_id" id="sponsor_id" class="{{ $errors->has('sponsor_id') ? 'has-error' : '' }} required" required>
                     <option value="">Please select a sponsor</option>
                     @foreach ($sponsors as $sponsor)
                     <option value="{{ $sponsor->id }}">{{ $sponsor->name }}</option>
@@ -27,14 +27,14 @@
             @endif
 
             <label for="start" class="required">Starting voucher code</label>
-            <input type="text" id="start" name="start" class="{{ $errors->has('start') ? 'error' : '' }}" required>
+            <input type="text" id="start" name="start" class="{{ $errors->has('start') ? 'error' : '' }} required" required>
 
             @if ($errors->has('start'))
             <p class="error">{!! $errors->first('start') !!}</p>
             @endif
 
             <label for="end">Ending voucher code</label>
-            <input type="text" id="end" name="end" class="{{ $errors->has('end') ? 'error' : '' }}" required>
+            <input type="text" id="end" name="end" class="{{ $errors->has('end') ? 'error' : '' }} required" required>
 
             @if ($errors->has('end'))
             <p class="error">{{ $errors->first('end') }}</p>
@@ -48,3 +48,21 @@
 </div>
 
 @endsection
+
+<script src="{{ mix('js/app.js') }}"></script>
+
+<script>
+    $(document).ready(function() {
+        $('button').attr('disabled', true);
+        $('.required').on('keyup change',function() {
+            var start = $("#start").val();
+            var end = $("#end").val();
+            var sponsor = $("#sponsor_id").val();
+            if(start != '' && end != '' && sponsor != '') {
+                $('button').attr('disabled' , false);
+            }else{
+                $('button').attr('disabled' , true);
+            }
+        });
+    });
+</script>

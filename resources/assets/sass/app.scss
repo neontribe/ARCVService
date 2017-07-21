@@ -98,9 +98,6 @@ h1 {
       &:focus {
         outline: 0;
       }
-      &:hover {
-        background-color: $arc_hover;
-      }
       &:after {
         display: block;
         position: absolute;
