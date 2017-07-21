@@ -12,21 +12,29 @@ class AdminPasswordResetNotification extends Notification
     use Queueable;
 
     /**
-     *
      * The password reset token.
      *
      * @var string
      */
     public $token;
 
+
+    /**
+     * The user's "name" field
+     *
+     * @var string
+     */
+    public $name;
+
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($token)
+    public function __construct($token, $name)
     {
         $this->token = $token;
+        $this->name = $name;
     }
 
 
@@ -51,10 +59,10 @@ class AdminPasswordResetNotification extends Notification
     {
         return (new MailMessage)
             ->subject('Password Reset Request Notification')
-            ->greeting('Hello!')
-            ->line('You are receiving this email because we received a password reset request for your account on the Rosie admin service.')
+            ->greeting('[xXx]Hello '. $this->name .' administrator,')
+            ->line('[xXx]You are receiving this email because we received a password reset request for your account on the Rosie admin service.')
             ->action('Reset Password', url(config('app.url').route('password.reset', $this->token, false)))
-            ->line('If you did not request a password reset, no further action is required.');
+            ->line('[xXx]If you did not request a password reset, no further action is required.');
     }
 
     /**

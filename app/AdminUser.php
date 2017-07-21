@@ -41,6 +41,6 @@ class AdminUser extends Authenticatable
      */
     public function sendPasswordResetNotification($token)
     {
-        $this->notify(new AdminPasswordResetNotification($token));
+        $this->notify(new AdminPasswordResetNotification($token, $this->name));
     }
 }
