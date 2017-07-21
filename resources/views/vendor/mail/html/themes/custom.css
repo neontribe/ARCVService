@@ -1,0 +1,282 @@
+/* Customised Notification Styling for arc */
+
+body, body *:not(html):not(style):not(br):not(tr):not(code) {
+    font-family: 'Rubik', sans-serif;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #f5f8fa; /*Variables $body-bg*/
+    color: #636b6f; /*Variables $text-color*/
+    height: 100%;
+    hyphens: auto;
+    line-height: 1.6; /*Variables $line-height-base*/
+    margin: 0;
+    -moz-hyphens: auto;
+    -ms-word-break: break-all;
+    width: 100% !important;
+    -webkit-hyphens: auto;
+    -webkit-text-size-adjust: none;
+    word-break: break-all;
+    word-break: break-word;
+}
+
+p,
+ul,
+ol,
+blockquote {
+    line-height: 1.4;
+    text-align: left;
+}
+
+a {
+    color: #333; /*Variables $arc-link*/
+}
+
+a:active,
+a:hover {
+    color: #a74e94 /*Variables $arc-rose*/
+    text-decoration: none;
+}
+
+a img {
+    border: none;
+}
+
+/* Typography */
+
+h1 {
+    font: 'Rubik', sans-serif; /*Variables $headings*/
+    color: #636b6f; /*Variables $text-color*/
+    font-size: 2em; /*app.css*/
+    margin-bottom: 1em; /*app.css*/
+    text-align: left;
+}
+
+h2 {
+    font: 'Rubik', sans-serif; /*Variables $headings*/
+    color: #636b6f; /*Variables $text-color*/
+    font-size: 1.8em;
+    margin-top: 0;
+    text-align: left;
+}
+
+h3 {
+    font: 'Rubik', sans-serif; /*Variables $headings*/
+    color: #636b6f; /*Variables $text-color*/
+    font-size: 1.6em;
+    font-weight: bold;
+    margin-top: 0;
+    text-align: left;
+}
+
+p {
+    font: 'Rubik', sans-serif; /*Variables $headings*/
+    color: #636b6f; /*Variables $text-color*/
+    font-size: 14px;
+    line-height: 1.6em;
+    margin-top: 0;
+    text-align: left;
+}
+
+p.sub {
+    font-size: 12px;
+}
+
+img {
+    max-width: 100%;
+}
+
+/* Layout */
+
+.wrapper {
+    background-color: #ededed; /*Variables $arc_border*/
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+}
+
+.content {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+}
+
+/* Header */
+
+.header {
+    padding: 25px 0;
+    text-align: center;
+}
+
+.header a {
+    color: #333; /*Variables $arc-link*/
+    font-size: 19px;
+    text-decoration: none;
+}
+
+/* Body */
+
+.body {
+    background-color: #f5f8fa; /*Variables $body-bg*/
+    border-bottom: 1px solid #d3e0e9; /*Variables $body-bg 10% darker*/
+    border-top: 1px solid #d3e0e9; /*Variables $body-bg 10% darker*/
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+}
+
+.inner-body {
+    background-color: #f9f9f9; /*$arc_bg*/
+    margin: 0 auto;
+    padding: 2em 4em;
+    width: 570px;
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 570px;
+}
+
+/* Subcopy */
+
+.subcopy {
+    border-top: 1px solid #d3e0e9; /*Variables $body-bg 10% darker*/
+    margin-top: 25px;
+    padding-top: 25px;
+}
+
+.subcopy p {
+    font-size: 12px;
+}
+
+/* Footer */
+
+.footer {
+    margin: 0 auto;
+    padding: 0;
+    text-align: center;
+    width: 570px;
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 570px;
+}
+
+.footer p {
+    color: #636b6f; /*Variables $text-color*/
+    font-size: 12px;
+    text-align: center;
+}
+
+/* Tables */
+
+.table table {
+    margin: 30px auto;
+    width: 100%;
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+}
+
+.table th {
+    border-bottom: 1px solid #d3e0e9; /*Variables $body-bg 10% darker*/
+    padding-bottom: 8px;
+}
+
+.table td {
+    color: #636b6f; /*Variables $text-color*/
+    font-size: 15px;
+    line-height: 18px;
+    padding: 10px 0;
+}
+
+.content-cell {
+    padding: 35px;
+}
+
+/* Buttons */
+
+.action {
+    margin: 30px auto;
+    padding: 0;
+    text-align: center;
+    width: 100%;
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+}
+
+.button {
+    border-radius: 3px;
+    box-shadow: 0 3px 12px -1px rgba(0, 0, 0, 0.2); /*button styling from app.scss*/
+    color: #white; /*Variables $arcwhite*/
+    display: inline-block;
+    text-decoration: none;
+    -webkit-text-size-adjust: none;
+}
+/*All button variatons set to $arc_rose*/
+.button-blue {
+    background-color: #a74e94;
+    border: 0;
+}
+
+.button-green {
+    background-color: #a74e94;
+    border: 0;
+}
+
+.button-red {
+    background-color: #a74e94;
+    border: 0;
+}
+
+/* Panels */
+
+.panel {
+    margin: 0 0 21px;
+}
+
+.panel-content {
+    background-color: #f9f9f9; /*$arc-bg*/
+    padding: 16px;
+}
+
+.panel-item {
+    padding: 0;
+}
+
+.panel-item p:last-of-type {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* Promotions */
+
+.promotion {
+    background-color: #f9f9f9; /*$arc-bg*/
+    border: 2px dashed #ededed; /*arc-border*/
+    margin: 0;
+    margin-bottom: 25px;
+    margin-top: 25px;
+    padding: 24px;
+    width: 100%;
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+}
+
+.promotion h1 {
+    text-align: center;
+}
+
+.promotion p {
+    font-size: 15px;
+    text-align: center;
+}
