@@ -88,17 +88,13 @@ class VouchersController extends Controller
 
         Validator::make($request->all(), $voucherRules , $messages)->validate();
 
-
-        if ($request['start'] > $request['end']) {
-            die("broken!");
-        }
-
         $codes = range($request['start'], $request['end']);
 
         $sponsor = Sponsor::find($request['sponsor_id'])->first();
+        $shortcode = $sponsor->shortcode;
         foreach ($codes as $c) {
             $v = new Voucher();
-            $v->code = $sponsor->shortcode . $c;
+            $v->code = $shortcode . $c;
             $v->sponsor_id = $request['sponsor_id'];
             $v->currentstate = 'requested';
             $v->created_at = Carbon::now();
@@ -108,5 +104,8 @@ class VouchersController extends Controller
         Voucher::insert($new_vouchers);
 
         // Todo progress vouchers to allocated?
+
+        $notificationMsg = 'Created and activated '. $shortcode.$request['start'] .' to '. $shortcode.$request['end'];
+        return redirect()->route('admin.vouchers.index')->with('notification', $notificationMsg);
     }
 }
