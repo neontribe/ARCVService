@@ -20,7 +20,7 @@ Route::post('login/refresh', [
 
 Route::post('user/lost_password', [
     'as' => 'api.user.lost_password',
-    'uses' => 'Auth\ForgotPasswordController@lostPassword'
+    'uses' => 'Auth\ForgotPasswordController@sendResetLinkEmail'
 ]);
 
 Route::post('user/lost_password/reset', [
