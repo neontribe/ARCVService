@@ -1,10 +1,14 @@
-* Voucher Payment Request History *
+* Voucher Payment Records *
 
 ==============================================
 
 Hi {{ $user }},
 
-You've requested a record of {{ $trader }}'s voucher payment history, which is attached to this email.
+You've requested a copy of {{ $trader }}'s voucher payment records, which is attached to this email.
+
+[xXx] The file includes payment records from {{ $date }}@isset($max_date) to {{ $max_date }}. @endisset
+[xXx] Total Vouchers: {{ count($vouchers) }}
+[xXx] Total Value: £{{ count($vouchers) }}
 
 If you have any problems with opening or downloading the file attached, please email <a href="mailto:arc@neontribe.co.uk">arc@neontribe.co.uk</a>.
 
