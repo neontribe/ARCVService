@@ -50,21 +50,8 @@ class VouchersController extends Controller
      */
     public function storeBatch(Request $request)
     {
+        $newVouchers = [];
 
-
-
-
-        $new_vouchers = [];
-
-        /*
-         * Validation Logic
-         * - codes must be numbers < 8 digits
-         * - there must be a start
-         * - there must be an end
-         * - end *must* be >= start
-         * x sponsor_id must be an integer
-         * x sponsor_id must be valid
-         */
         $sponsorIds = \App\Sponsor::all()->pluck('id')->toArray();
 
         $voucherRules = [
@@ -92,18 +79,32 @@ class VouchersController extends Controller
 
         $sponsor = Sponsor::find($request['sponsor_id'])->first();
         $shortcode = $sponsor->shortcode;
+        $nowTime = Carbon::now();
         foreach ($codes as $c) {
             $v = new Voucher();
             $v->code = $shortcode . $c;
             $v->sponsor_id = $request['sponsor_id'];
             $v->currentstate = 'requested';
-            $v->created_at = Carbon::now();
-            $v->updated_at = Carbon::now();
-            $new_vouchers[] = $v->attributesToArray();
+            $v->created_at = $nowTime;
+            $v->updated_at = $nowTime;
+            $newVouchers[] = $v->attributesToArray();
         }
-        Voucher::insert($new_vouchers);
+        // batch insert.
+        // Todo : "this voucher already exists" checking
+        Voucher::insert($newVouchers);
 
-        // Todo progress vouchers to allocated?
+        $vouchers = Voucher::
+            where('created_at', '=', $nowTime)
+            ->where('updated_at', '=', $nowTime)
+            ->where('currentstate', '=', 'requested')
+            ->get();
+
+        // batch progress
+        foreach ($vouchers as $voucher) {
+            $voucher->applyTransition('order');
+            $voucher->applyTransition('print');
+            // printed vouchers should now be redeemable.
+        }
 
         $notificationMsg = 'Created and activated '. $shortcode.$request['start'] .' to '. $shortcode.$request['end'];
         return redirect()->route('admin.vouchers.index')->with('notification', $notificationMsg);
