@@ -50,14 +50,14 @@ class VouchersController extends Controller
      */
     public function storeBatch(Request $request)
     {
-        $newVouchers = [];
+        $new_vouchers = [];
 
-        $sponsorIds = \App\Sponsor::all()->pluck('id')->toArray();
+        $sponsor_ids = Sponsor::all()->pluck('id')->toArray();
 
-        $voucherRules = [
+        $voucher_rules = [
             'sponsor_id' => [
                 'required',
-                Rule::in($sponsorIds)
+                Rule::in($sponsor_ids)
             ],
             'start' => 'required|integer|between:1,99999999',
             'end' => [
@@ -73,29 +73,29 @@ class VouchersController extends Controller
             'ge_field' => 'The :attribute must be greater than or equal to :field'
         ];
 
-        Validator::make($request->all(), $voucherRules , $messages)->validate();
+        Validator::make($request->all(), $voucher_rules , $messages)->validate();
 
         $codes = range($request['start'], $request['end']);
 
         $sponsor = Sponsor::find($request['sponsor_id'])->first();
         $shortcode = $sponsor->shortcode;
-        $nowTime = Carbon::now();
+        $now_time = Carbon::now();
         foreach ($codes as $c) {
             $v = new Voucher();
             $v->code = $shortcode . $c;
             $v->sponsor_id = $request['sponsor_id'];
             $v->currentstate = 'requested';
-            $v->created_at = $nowTime;
-            $v->updated_at = $nowTime;
-            $newVouchers[] = $v->attributesToArray();
+            $v->created_at = $now_time;
+            $v->updated_at = $now_time;
+            $new_vouchers[] = $v->attributesToArray();
         }
         // batch insert.
         // Todo : there's NO "this voucher already exists" checking!!
-        Voucher::insert($newVouchers);
+        Voucher::insert($new_vouchers);
 
         $vouchers = Voucher::
-            where('created_at', '=', $nowTime)
-            ->where('updated_at', '=', $nowTime)
+            where('created_at', '=', $now_time)
+            ->where('updated_at', '=', $now_time)
             ->where('currentstate', '=', 'requested')
             ->get();
 
@@ -106,7 +106,7 @@ class VouchersController extends Controller
             // printed vouchers should now be redeemable.
         }
 
-        $notificationMsg = 'Created and activated '. $shortcode.$request['start'] .' to '. $shortcode.$request['end'];
-        return redirect()->route('admin.vouchers.index')->with('notification', $notificationMsg);
+        $notification_msg = 'Created and activated '. $shortcode.$request['start'] .' to '. $shortcode.$request['end'];
+        return redirect()->route('admin.vouchers.index')->with('notification', $notification_msg);
     }
 }
