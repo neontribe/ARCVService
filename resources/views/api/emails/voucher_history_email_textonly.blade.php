@@ -4,7 +4,7 @@
 
 Hi {{ $user }},
 
-You've requested a copy of {{ $trader }}'s voucher payment records for your reference, which is attached to this email.
+You've requested a copy of {{ $trader }}'s voucher payment records for your reference; this is attached to this email.
 
 The file includes payment records from {{ $date }}@isset($max_date) to {{ $max_date }}. @endisset
 Total Vouchers: {{ count($vouchers) }}
