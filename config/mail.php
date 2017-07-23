@@ -76,7 +76,7 @@ return [
 
     'to_developer' => [
         'address' => env('MAIL_TO_DEVELOPER_TEAM', 'arc@neontribe.co.uk'),
-        'name' => env('MAIL_TO_DEVELOPER_NAME', 'Neontribe'),
+        'name' => env('MAIL_TO_DEVELOPER_NAME', 'User Support'),
     ],
 
     /*
