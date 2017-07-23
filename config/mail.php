@@ -67,6 +67,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Global default "To developer team" Address
+    |--------------------------------------------------------------------------
+    |
+    | An email address for contacting the development team
+    |
+    */
+
+    'to_developer' => [
+        'address' => env('MAIL_TO_DEVELOPER_TEAM', 'arc@neontribe.co.uk'),
+        'name' => env('MAIL_TO_DEVELOPER_NAME', 'Neontribe'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | E-Mail Encryption Protocol
     |--------------------------------------------------------------------------
     |

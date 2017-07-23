@@ -10,7 +10,7 @@ The file includes payment records from {{ $date }}@isset($max_date) to {{ $max_d
 Total Vouchers: {{ count($vouchers) }}
 Total Value: £{{ count($vouchers) }}
 
-The attached file is best viewed through a spreadsheet program such as Microsoft Excel, LibreOffice Calc or Google Sheets. If you have any problems with opening or downloading it, please email <a href="mailto:arc@neontribe.co.uk">arc@neontribe.co.uk</a>.
+The attached file is best viewed through a spreadsheet program such as Microsoft Excel, LibreOffice Calc or Google Sheets. If you have any problems with opening or downloading it, please email <a href="mailto:{{ config('mail.to_developer.address') }}">{{ config('mail.to_developer.name') }}</a>.
 
 Thanks,
 Rose Vouchers

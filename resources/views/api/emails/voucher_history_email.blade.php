@@ -13,7 +13,7 @@
         <p>Total Vouchers: {{ count($vouchers) }}</p>
         <p>Total Value: £{{ count($vouchers) }}</p>
 
-        <p>The attached file is best viewed through a spreadsheet program such as Microsoft Excel, LibreOffice Calc or Google Sheets. If you have any problems with opening or downloading it, please email <a href="mailto:arc@neontribe.co.uk">arc@neontribe.co.uk</a>.</p>
+        <p>The attached file is best viewed through a spreadsheet program such as Microsoft Excel, LibreOffice Calc or Google Sheets. If you have any problems with opening or downloading it, please email <a href="mailto:{{ config('mail.to_developer.address') }}">{{ config('mail.to_developer.name') }}</a>.</p>
 
         <p>Thanks,<br>
         Rose Vouchers</p>
