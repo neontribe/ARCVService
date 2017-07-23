@@ -3,9 +3,9 @@
 @section('content')
 
     <section role="main">
-        <h1 style="text-align: center;">Voucher Payment Request</h1>
+        <h1>Voucher Payment Request</h1>
 
-        <p>[xXx]Hi {{ config('mail.to_admin.name') }},</p>
+        <p>Hi {{ config('mail.to_admin.name') }},</p>
 
         <p> {{ $user }} has just successfully requested payment for</p>
         <p> {{ sizeOf($vouchers) }} vouchers, against</p>
@@ -17,7 +17,7 @@
         <p>The attached file is best viewed through a spreadsheet program such as Microsoft Excel, LibreOffice Calc or Google Sheets. If you have any problems with opening or downloading it, please email <a href="mailto:arc@neontribe.co.uk">arc@neontribe.co.uk</a>.</p>
 
         <p>Thanks,<br>
-        Rose Vouchers[xXx]</p>
+        Rose Vouchers</p>
     </section>
 
 @endsection

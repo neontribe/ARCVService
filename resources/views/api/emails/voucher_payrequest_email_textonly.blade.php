@@ -2,7 +2,6 @@
 
 ==============================================
 
-[xXx]
 Hi {{ config('mail.to_admin.name') }},
 
 {{ $user }} has just successfully requested payment for
@@ -16,7 +15,7 @@ The attached file is best viewed through a spreadsheet program such as Microsoft
 
 Thanks,
 Rose Vouchers
-[xXx]
+
 ==============================================
 
 Alexandra Rose Charity
