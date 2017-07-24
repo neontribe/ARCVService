@@ -60,9 +60,6 @@ class VoucherController extends Controller
         $uniqueVouchers = array_unique($request['vouchers']);
 
         // Do we want to validate codes by regex rule before we try to find them or meh?
-
-        // What response do we get for invalids here?
-        // Might be better to fetch in turn so we have response for each.
         $vouchers = Voucher::findByCodes($uniqueVouchers);
 
         // For now - get the ones not in that list - they are bad codes.
@@ -80,9 +77,7 @@ class VoucherController extends Controller
         foreach ($vouchers as $voucher) {
             // can we?
             if ($voucher->transitionAllowed($transition)) {
-                // yes! do the thing!
                 $voucher->trader_id = $trader->id;
-
                 // this saves the model too.
                 $voucher->applyTransition($transition);
                 // Success for this one.
@@ -93,33 +88,40 @@ class VoucherController extends Controller
                     $vouchers_for_payment[] = $voucher;
                 }
             } else {
-                // These are duplicates, look at changing later
+                // These are duplicates - or invalid for another reason.
+                // For now - we treat them all as 'duplicates'.
+                // Advise trader to send in for verification and payment.
                 if ($trader->id === $voucher->trader_id) {
                     // Trader has already submitted this voucher
                   $own_duplicate_codes[] = $voucher->code;
                 } else {
                     // Another trader has mistakenly submitted this voucher,
                   // Or the tranision isn't valid (i.e expired state)
-                  $other_duplicate_codes[] = $voucher_code;
+                  $other_duplicate_codes[] = $voucher->code;
                 }
             }
         }
 
-        // If there are any confirmed ones... trigger the email
-        // event paymentRequestedEmail.
+        // If there are any confirmed ones... trigger the email.
         if (sizeof($vouchers_for_payment) > 0) {
-            // Todo If the email fails for some reason, the User will not be aware.
-            // The Vouchers will be transitioned but the ARC admin will not know.
+            // Todo We need to change something...
+            // If the email fails for some reason,
+            // the User will not be aware.
+            // The Vouchers will be transitioned but the ARC admin won't know.
             $this->emailVoucherPaymentRequest($trader, $vouchers_for_payment);
         }
 
 
         // We might want to annotate somehow with the type of transition here.
-        // Currently we can 'collect' - submit and 'confirm' - request payment on.
+        // Currently we can
+        //  'collect' - submit and
+        //  'confirm' - request payment on.
         $responses['success'] = $success_codes;
         $responses['own_duplicate'] = $own_duplicate_codes;
         $responses['other_duplicate'] = $other_duplicate_codes;
-        $responses['invalid'] = $bad_codes;
+        $responses['invalid'] = $own_duplicate_codes;
+
+        Log::info($responses);
 
         $response = $this->constructResponseMessage($responses);
 
@@ -166,40 +168,54 @@ class VoucherController extends Controller
      * @param Array $response
      * @return Array $message
      */
-    public function constructResponseMessage($responses)
+    private function constructResponseMessage($responses)
     {
         // If there is only one voucher code being checked.
         $total_submitted = 0;
         $error_type = '';
-        foreach ($responses as $code) {
+        foreach ($responses as $key => $code) {
             $total_submitted += count($code);
             if (count($code) === 1) {
                 // We will only use this if there is a total of 1 voucher submitted.
                 // So no problem if 2 sets have 1 voucher in them. It is ignored.
-                $error_type = key($code);
+                $error_type = $key;
             }
         }
+        Log::info($total_submitted);
         if ($total_submitted === 1) {
+            Log::info($error_type);
             switch ($error_type) {
                 case 'success':
-                    return ['message' => trans('api.messages.voucher_success')];
+                    return [
+                        'message' => trans('api.messages.voucher_success')
+                    ];
                     break;
                 case 'own_duplicate':
-                    return ['warning' => trans('api.errors.voucher_own_dupe') . $responses['own_duplicate'][0]];
+                    return [
+                        'warning' => trans('api.errors.voucher_own_dupe')
+                        . $responses['own_duplicate'][0]
+                    ];
                     break;
                 case 'other_duplicate':
-                    return ['warning' => trans('api.errors.voucher_other_dupe')];
+                    return [
+                        'warning' => trans('api.errors.voucher_other_dupe')
+                    ];
                     break;
                 case 'invalid':
                 default:
-                    return ['error' => trans('api.errors.voucher_invalid')];
+                    return [
+                        'error' => trans('api.errors.voucher_invalid')
+                    ];
                     break;
             }
         } else {
-            return ['message' => trans('api.messages.batch_voucher_submit',
-                ['success_amount' => count($responses['success']),
-                'duplicate_amount' => count($responses['own_duplicate']) . count($responses['other_duplicate']),
-                'invalid_amount' => count($responses['invalid'])]
+            return [
+                'message' => trans('api.messages.batch_voucher_submit', [
+                    'success_amount' => count($responses['success']),
+                    'duplicate_amount' => count($responses['own_duplicate'])
+                        + count($responses['other_duplicate']),
+                    'invalid_amount' => count($responses['invalid'])
+                ]
             )];
         }
     }
