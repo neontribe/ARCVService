@@ -106,7 +106,7 @@ class VouchersController extends Controller
             // printed vouchers should now be redeemable.
         }
 
-        $notification_msg = trans('service.messages.voucher_create_success',[
+        $notification_msg = trans('service.messages.vouchers_create_success',[
             'shortcode' => $shortcode,
             'start' => $request['start'],
             'end' => $request['end'],
