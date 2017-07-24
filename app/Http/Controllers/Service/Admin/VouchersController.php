@@ -106,13 +106,14 @@ class VouchersController extends Controller
             // printed vouchers should now be redeemable.
         }
 
-        $notification_msg = 'Created and activated '
-            . $shortcode.$request['start'] . ' to ' . $shortcode
-            . $request['end']
-        ;
+        $notification_msg = trans('service.messages.voucher_create_success',[
+            'shortcode' => $shortcode,
+            'start' => $request['start'],
+            'end' => $request['end'],
+        ]);
         return redirect()
             ->route('admin.vouchers.index')
             ->with('notification', $notification_msg)
-        ;
+            ;
     }
 }
