@@ -7,7 +7,7 @@
 
         <p>Hi {{ $user }},</p>
 
-        <p>You've requested a copy of {{ $traders }}'s voucher payment records. The records are attached to this email for your reference.</p>
+        <p>You've requested a copy of {{ $trader }}'s voucher payment records. The records are attached to this email for your reference.</p>
 
         <p>The file includes payment records from {{ $date }} @isset($max_date)to {{ $max_date }}. @endisset</p>
         <p>Total Vouchers: {{ count($vouchers) }}</p>
