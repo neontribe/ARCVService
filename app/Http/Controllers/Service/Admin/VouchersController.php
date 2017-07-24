@@ -25,7 +25,7 @@ class VouchersController extends Controller
      */
     public function index()
     {
-        $vouchers = DB::table('vouchers')->orderBy('id', 'desc')->paginate(50);
+        $vouchers = Voucher::orderBy('id', 'desc')->paginate(50);
         return view('service.vouchers.index', compact('vouchers'));
     }
 
@@ -73,7 +73,7 @@ class VouchersController extends Controller
             'ge_field' => 'The :attribute must be greater than or equal to :field'
         ];
 
-        Validator::make($request->all(), $voucher_rules , $messages)->validate();
+        Validator::make($request->all(), $voucher_rules, $messages)->validate();
 
         $codes = range($request['start'], $request['end']);
 
@@ -93,11 +93,11 @@ class VouchersController extends Controller
         // Todo : there's NO "this voucher already exists" checking!!
         Voucher::insert($new_vouchers);
 
-        $vouchers = Voucher::
-            where('created_at', '=', $now_time)
+        $vouchers = Voucher::where('created_at', '=', $now_time)
             ->where('updated_at', '=', $now_time)
             ->where('currentstate', '=', 'requested')
-            ->get();
+            ->get()
+        ;
 
         // batch progress
         foreach ($vouchers as $voucher) {
@@ -106,7 +106,13 @@ class VouchersController extends Controller
             // printed vouchers should now be redeemable.
         }
 
-        $notification_msg = 'Created and activated '. $shortcode.$request['start'] .' to '. $shortcode.$request['end'];
-        return redirect()->route('admin.vouchers.index')->with('notification', $notification_msg);
+        $notification_msg = 'Created and activated '
+            . $shortcode.$request['start'] . ' to ' . $shortcode
+            . $request['end']
+        ;
+        return redirect()
+            ->route('admin.vouchers.index')
+            ->with('notification', $notification_msg)
+        ;
     }
 }
