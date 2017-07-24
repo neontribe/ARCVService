@@ -55,7 +55,7 @@ $factory->define(App\Market::class, function (Faker\Generator $faker) {
         'name' => $faker->company,
         'location' => $faker->postcode,
         'sponsor_id' => $sponsor_id, // a random sponsor
-        'payment_message' => "Placeholder Payment Message: $payment_sentence",
+        'payment_message' => "Thanks, your payment request has been accepted. $payment_sentence",
     ];
 });
 

@@ -17,29 +17,29 @@ class MarketsSeeder extends Seeder
                 'name' => "Beechwood Hall",
                 'location' => "Sylvania",
                 'sponsor_id'=> 1, //changed from 2 as only one sponsor for demo
-                'payment_message' => 'Please return your vouchers to the office.',
+                'payment_message' => 'Thanks, your payment request has been accepted. Please return your vouchers to the office.',
             ],
             [
                 'name' => "Sea Breeze Cape",
                 'location' => "Secret Island",
                 'sponsor_id'=> 1, //changed from 2 as only one sponsor for demo
-                'payment_message' => 'Please mark your vouchers with the current date and return to the office.',
+                'payment_message' => 'Thanks, your payment request has been accepted. Please mark your vouchers with the current date and return to the office.',
             ],
             [
                 'name' => "Fruit Wagon",
                 'sponsor_id'=> 1, //changed from 2 as only one sponsor for demo
-                'payment_message' => 'Please drop your vouchers off at the office.',
+                'payment_message' => 'Thanks, your payment request has been accepted. Please drop your vouchers off at the office.',
             ],
             [
                 'name' => "Brick Oven Bakery",
                 'location'=> "Cloverleaf Corners",
                 'sponsor_id' => 1,
-                'payment_message' => 'Please post your vouchers to the office.',
+                'payment_message' => 'Thanks, your payment request has been accepted. Please post your vouchers to the office.',
             ],
             [
                 'name' => "Cedar Terrace",
                 'sponsor_id' => 1,
-                'payment_message' => 'Please mark your vouchers with the stall name and return to the office.',
+                'payment_message' => 'Thanks, your payment request has been accepted. Please mark your vouchers with the stall name and return to the office.',
             ],
         ];
 
