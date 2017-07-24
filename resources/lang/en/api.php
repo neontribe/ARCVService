@@ -13,7 +13,7 @@ return [
     'errors' => [
         'invalid_credentials' => 'The user credentials were incorrect.',
         'voucher_invalid' => 'Please enter a valid voucher code.',
-        'voucher_own_dupe' => 'You have already submitted voucher code [xXx]',
-        'voucher_other_dupe' => 'It looks like this code has been used already, please double check and try again. If you are still unable to add the voucher code, don\'t worry - mark it as "unrecorded", send it in with your other vouchers and you will still be paid when we receive it. [xXx]',
+        'voucher_own_dupe' => 'You have already submitted voucher code :code.',
+        'voucher_other_dupe' => 'It looks like the code (:code) has been used already, please double check and try again. If you are still unable to add the voucher code, don\'t worry - mark it as "unrecorded", send it in with your other vouchers and you will still be paid when we receive it.',
     ]
 ];

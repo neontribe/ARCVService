@@ -11,7 +11,6 @@ use App\User;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Log;
 
 class VoucherController extends Controller
 {
@@ -121,8 +120,6 @@ class VoucherController extends Controller
         $responses['other_duplicate'] = $other_duplicate_codes;
         $responses['invalid'] = $bad_codes;
 
-        Log::info($responses);
-
         $response = $this->constructResponseMessage($responses);
 
         return response()->json($response, 200);
@@ -174,7 +171,6 @@ class VoucherController extends Controller
         $total_submitted = 0;
         $error_type = '';
         foreach ($responses as $key => $code) {
-            Log::info(count($code));
             $total_submitted += count($code);
 
             if (count($code) === 1) {
@@ -183,9 +179,7 @@ class VoucherController extends Controller
                 $error_type = $key;
             }
         }
-        Log::info($total_submitted);
         if ($total_submitted === 1) {
-            Log::info($error_type);
             switch ($error_type) {
                 case 'success':
                     return [
@@ -194,13 +188,16 @@ class VoucherController extends Controller
                     break;
                 case 'own_duplicate':
                     return [
-                        'warning' => trans('api.errors.voucher_own_dupe')
-                        . $responses['own_duplicate'][0]
+                        'warning' => trans('api.errors.voucher_own_dupe', [
+                            'code' => $responses['own_duplicate'][0]
+                        ])
                     ];
                     break;
                 case 'other_duplicate':
                     return [
-                        'warning' => trans('api.errors.voucher_other_dupe')
+                        'warning' => trans('api.errors.voucher_other_dupe', [
+                            'code' => $responses['other_duplicate'][0]
+                        ])
                     ];
                     break;
                 case 'invalid':
@@ -212,6 +209,7 @@ class VoucherController extends Controller
             }
         } else {
             return [
+                // Todo: This message needs work - but not this round.
                 'message' => trans('api.messages.batch_voucher_submit', [
                     'success_amount' => count($responses['success']),
                     'duplicate_amount' => count($responses['own_duplicate'])
