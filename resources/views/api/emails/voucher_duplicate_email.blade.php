@@ -10,7 +10,7 @@
         <p> {{ $user }} has tried to submit voucher</p>
         <p> {{ $vouchercode }} against</p>
         <p> {{ $trader }} of </p>
-        <p> {{ $market->name ?? 'no associated market' }}'s account, however that voucher has already been submitted by another trader.</p>
+        <p> {{ $market }}'s account, however that voucher has already been submitted by another trader.</p>
 
         <p>Thanks,<br>
         Rose Vouchers[xXx]</p>
