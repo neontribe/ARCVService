@@ -119,7 +119,7 @@ class VoucherController extends Controller
         $responses['success'] = $success_codes;
         $responses['own_duplicate'] = $own_duplicate_codes;
         $responses['other_duplicate'] = $other_duplicate_codes;
-        $responses['invalid'] = $own_duplicate_codes;
+        $responses['invalid'] = $bad_codes;
 
         Log::info($responses);
 
@@ -174,7 +174,9 @@ class VoucherController extends Controller
         $total_submitted = 0;
         $error_type = '';
         foreach ($responses as $key => $code) {
+            Log::info(count($code));
             $total_submitted += count($code);
+
             if (count($code) === 1) {
                 // We will only use this if there is a total of 1 voucher submitted.
                 // So no problem if 2 sets have 1 voucher in them. It is ignored.
