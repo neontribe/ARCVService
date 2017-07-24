@@ -2,7 +2,6 @@
 
 ==============================================
 
-[xXx]
 Hi {{ config('mail.to_admin.name') }},
 
 {{ $user }} has just successfully requested payment for
@@ -12,11 +11,11 @@ Hi {{ config('mail.to_admin.name') }},
 
 The details for this request are attached to this email.
 
-The attached file is best viewed through a spreadsheet program such as Microsoft Excel, LibreOffice Calc or Google Sheets. If you have any problems with opening or downloading it, please email <a href="mailto:arc@neontribe.co.uk">arc@neontribe.co.uk</a>.
+The attached file is best viewed through a spreadsheet program such as Microsoft Excel, LibreOffice Calc or Google Sheets. If you have any problems with opening or downloading it, please email <a href="mailto:{{ config('mail.to_developer.address') }}">{{ config('mail.to_developer.name') }}</a>.
 
 Thanks,
 Rose Vouchers
-[xXx]
+
 ==============================================
 
 Alexandra Rose Charity
