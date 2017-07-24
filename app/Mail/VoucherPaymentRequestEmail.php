@@ -39,6 +39,7 @@ class VoucherPaymentRequestEmail extends Mailable
     public function build()
     {
         return $this->view('api.emails.voucher_payrequest_email')
+            ->subject('Rose Voucher Payment Request')
             ->text('api.emails.voucher_payrequest_email_textonly')
             ->attach($this->file['full'], [
                 'as' => $this->file['file'],

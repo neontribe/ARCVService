@@ -76,7 +76,7 @@ class SendVoucherHistoryEmailTest extends TestCase
         $user = $this->user;
         $trader = $this->traders[0];
         $vouchers = $trader->vouchersConfirmed;
-        $title = 'Test Voucher History Email';
+        $title = 'Test Rose Voucher Payment Records';
 
         Auth::login($user);
         $controller = new TraderController();
@@ -90,7 +90,7 @@ class SendVoucherHistoryEmailTest extends TestCase
         // We can improve this - but test basic data is correct.
         $this->seeEmailWasSent()
             ->seeEmailTo($user->email)
-            ->seeEmailSubject('Voucher History Email')
+            ->seeEmailSubject('Rose Voucher Payment Records')
             ->seeEmailContains('Hi ' . $user->name)
             ->seeEmailContains('requested a copy of ' . $trader->name)
             ->seeEmailContains("The file includes payment records from $min_date to $max_date")

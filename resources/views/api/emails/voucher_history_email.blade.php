@@ -3,11 +3,11 @@
 @section('content')
 
     <section role="main">
-        <h1>Voucher Payment Records</h1>
+        <h1>Rose Voucher Payment Records</h1>
 
         <p>Hi {{ $user }},</p>
 
-        <p>You've requested a copy of {{ $trader }}'s voucher payment records for your reference; this is attached to this email.</p>
+        <p>You've requested a copy of {{ $trader }}'s voucher payment records. The records are attached to this email for your reference.</p>
 
         <p>The file includes payment records from {{ $date }} @isset($max_date)to {{ $max_date }}. @endisset</p>
         <p>Total Vouchers: {{ count($vouchers) }}</p>
