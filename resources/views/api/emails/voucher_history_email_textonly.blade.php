@@ -1,10 +1,10 @@
-* Voucher Payment Records *
+* Rose Voucher Payment Records *
 
 ==============================================
 
 Hi {{ $user }},
 
-You've requested a copy of {{ $trader }}'s voucher payment records for your reference; this is attached to this email.
+You've requested a copy of {{ $traders }}'s voucher payment records. The records are attached to this email for your reference.
 
 The file includes payment records from {{ $date }}@isset($max_date) to {{ $max_date }}. @endisset
 Total Vouchers: {{ count($vouchers) }}
