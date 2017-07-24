@@ -92,11 +92,11 @@ class VoucherController extends Controller
                 // Advise trader to send in for verification and payment.
                 if ($trader->id === $voucher->trader_id) {
                     // Trader has already submitted this voucher
-                  $own_duplicate_codes[] = $voucher->code;
+                    $own_duplicate_codes[] = $voucher->code;
                 } else {
                     // Another trader has mistakenly submitted this voucher,
-                  // Or the tranision isn't valid (i.e expired state)
-                  $other_duplicate_codes[] = $voucher->code;
+                    // Or the tranision isn't valid (i.e expired state)
+                    $other_duplicate_codes[] = $voucher->code;
                 }
             }
         }
