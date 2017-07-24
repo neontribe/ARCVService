@@ -111,6 +111,7 @@ class VouchersController extends Controller
             'start' => $request['start'],
             'end' => $request['end'],
         ]);
+
         return redirect()
             ->route('admin.vouchers.index')
             ->with('notification', $notification_msg)
