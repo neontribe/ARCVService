@@ -27,19 +27,16 @@ class SendVoucherDuplicateEmailTest extends TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->trader = factory(Trader::class)->create(
-            ['market_id' => factory(Market::class)->create()->id]
-        );
         $this->voucher = factory(Voucher::class)->create();
         $this->user = factory(User::class)->create();
     }
 
     public function testVoucherDuplicateEmail()
     {
+        $trader = factory(Trader::class)->create(['market_id' => factory(Market::class)->create()->id]);
         $user = $this->user;
-        $trader = $this->trader;
         $vouchercode = $this->voucher->code;
-        $market = $this->trader->market;
+        $market = $trader->market;
         $title = 'Test Voucher Duplicate Email';
 
         Auth::login($user);
@@ -56,6 +53,30 @@ class SendVoucherDuplicateEmailTest extends TestCase
             ->seeEmailContains($vouchercode . ' against')
             ->seeEmailContains($trader->name . ' of')
             ->seeEmailContains($market->name . '\'s account, however that voucher has already been submitted by another trader.')
+        ;
+    }
+
+    public function testVoucherDuplicateEmailNoMarket()
+    {
+        $trader = factory(Trader::class)->create();
+        $user = $this->user;
+        $vouchercode = $this->voucher->code;
+        $title = 'Test Voucher Duplicate Email';
+
+        Auth::login($user);
+        $event = new VoucherDuplicateEntered($user, $trader, $this->voucher);
+        $listener = new SendVoucherDuplicateEmail();
+        $listener->handle($event);
+
+        // We can improve this - but test basic data is correct.
+        $this->seeEmailWasSent()
+            ->seeEmailTo(config('mail.to_admin.address'))
+            ->seeEmailSubject('Voucher Duplicate Entered Email')
+            ->seeEmailContains('Hi ' . config('mail.to_admin.name'))
+            ->seeEmailContains($user->name . ' has tried to submit voucher')
+            ->seeEmailContains($vouchercode . ' against')
+            ->seeEmailContains($trader->name . ' of')
+            ->seeEmailContains('no associated market' . '\'s account, however that voucher has already been submitted by another trader.')
         ;
     }
 }

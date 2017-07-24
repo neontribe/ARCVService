@@ -26,7 +26,7 @@ class VoucherDuplicateEnteredEmail extends Mailable
         $this->user = $user->name;
         $this->trader = $trader->name;
         $this->voucher = $voucher;
-        $this->market = $trader->market ? $trader->market->name : 'no associated market';
+        $this->market = $trader->market;
         $this->vouchercode = $voucher->code;
     }
 
