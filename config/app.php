@@ -188,6 +188,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\CustomValidationProvider::class,
 
         Barryvdh\Debugbar\ServiceProvider::class, //DebugBar
         Barryvdh\Cors\ServiceProvider::class, //CORS framework
