@@ -1,8 +1,7 @@
-* Voucher Payment Request *
+* Rose Voucher Payment Request *
 
 ==============================================
 
-[xXx]
 Hi {{ config('mail.to_admin.name') }},
 
 {{ $user }} has just successfully requested payment for
@@ -12,15 +11,15 @@ Hi {{ config('mail.to_admin.name') }},
 
 The details for this request are attached to this email.
 
-If you have any problems with opening or downloading the file attached, please email <a href="mailto:arc@neontribe.co.uk">arc@neontribe.co.uk</a>.
+The attached file is best viewed through a spreadsheet program such as Microsoft Excel, LibreOffice Calc or Google Sheets. If you have any problems with opening or downloading it, please email <a href="mailto:{{ config('mail.to_developer.address') }}">{{ config('mail.to_developer.name') }}</a>.
 
 Thanks,
 Rose Vouchers
-[xXx]
+
 ==============================================
 
 Alexandra Rose Charity
 
 For more information please go to <a href="http://www.alexandrarose.org.uk/">www.alexandrarose.org.uk</a>.
 
-<a href="http://www.alexandrarose.org.uk/privacy/">Privacy Policy</a>
+<a href="{{ config('app.arc_market_url') }}/privacy-policy">Privacy Policy</a>
