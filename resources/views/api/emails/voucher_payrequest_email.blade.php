@@ -3,7 +3,7 @@
 @section('content')
 
     <section role="main">
-        <h1>Voucher Payment Request</h1>
+        <h1>Rose Voucher Payment Request</h1>
 
         <p>Hi {{ config('mail.to_admin.name') }},</p>
 

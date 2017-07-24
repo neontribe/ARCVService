@@ -1,4 +1,4 @@
-* Voucher Payment Request *
+* Rose Voucher Payment Request *
 
 ==============================================
 
