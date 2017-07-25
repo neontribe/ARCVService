@@ -9,12 +9,12 @@
 
         <p>Use the form below to add a new batch of vouchers. Select a sponsor code, and then enter the starting and ending voucher code numbers.</p>
 
-        <form role="form" method="POST" action="{{ route('vouchers.storebatch') }}">
+        <form role="form" method="POST" action="{{ route('admin.vouchers.storebatch') }}">
             {!! csrf_field() !!}
 
             <div class="select">
-                <label for="sponsor_id" class="required">Sponsor</label><br>
-                <select name="sponsor_id" id="sponsor_id" class="{{ $errors->has('sponsor_id') ? 'has-error' : '' }}">
+                <label for="sponsor_id">Sponsor</label><br>
+                <select name="sponsor_id" id="sponsor_id" class="{{ $errors->has('sponsor_id') ? 'has-error' : '' }}" required>
                     <option value="">Please select a sponsor</option>
                     @foreach ($sponsors as $sponsor)
                     <option value="{{ $sponsor->id }}">{{ $sponsor->name }}</option>
@@ -34,16 +34,17 @@
             @endif
 
             <label for="end">Ending voucher code</label>
-            <input type="text" id="end" name="end" class="{{ $errors->has('end') ? 'error' : '' }}">
+            <input type="text" id="end" name="end" class="{{ $errors->has('end') ? 'error' : '' }}" required>
 
             @if ($errors->has('end'))
             <p class="error">{{ $errors->first('end') }}</p>
             @endif
 
-            <button type="submit">Create vouchers</button>
+            <button type="submit" id="createVouchers">Create vouchers</button>
 
         </form>
 
     </div>
 </div>
+
 @endsection

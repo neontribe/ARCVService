@@ -28,7 +28,7 @@ class VoucherPaymentRequestEmail extends Mailable
         // Sending vouchers collection in case we want more than just count in email for copy.
         $this->vouchers = $vouchers;
         $this->file = $file;
-        $this->market = $trader->market;
+        $this->market = $trader->market ? $trader->market->name : 'no associated market';
     }
 
     /**
@@ -39,6 +39,7 @@ class VoucherPaymentRequestEmail extends Mailable
     public function build()
     {
         return $this->view('api.emails.voucher_payrequest_email')
+            ->subject('Rose Voucher Payment Request')
             ->text('api.emails.voucher_payrequest_email_textonly')
             ->attach($this->file['full'], [
                 'as' => $this->file['file'],

@@ -8,7 +8,10 @@
     <div id="main-content">
 
         <h1>View live vouchers</h1>
-
+        <div>
+            <p>{{ $vouchers->links() }}</p>
+            <p>Total : {{ $vouchers->total() }}</p>
+        </div>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -37,7 +40,10 @@
                   @endforeach
             </tbody>
         </table>
-
+        <div>
+            <p>{{ $vouchers->links() }} </p
+            <p>Total : {{ $vouchers->total() }}</p>
+        </div>
     </div>
 
 </div>

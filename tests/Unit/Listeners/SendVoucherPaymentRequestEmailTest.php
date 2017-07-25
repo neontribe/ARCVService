@@ -71,7 +71,7 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
         $user = $this->user;
         $trader = $this->traders[0];
         $vouchers = $trader->vouchers;
-        $title = 'Test Voucher History Email';
+        $title = 'Test Rose Voucher Payment Request';
         Auth::login($user);
         $controller = new TraderController();
         $file = $controller->createVoucherListFile($trader, $vouchers, $title);
@@ -83,7 +83,7 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
         // We can improve this - but test basic data is correct.
         $this->seeEmailWasSent()
             ->seeEmailTo(config('mail.to_admin.address'))
-            ->seeEmailSubject('Voucher Payment Request Email')
+            ->seeEmailSubject('Rose Voucher Payment Request')
             ->seeEmailContains('Hi ' . config('mail.to_admin.name'))
             ->seeEmailContains($user->name . ' has just successfully requested payment for')
             ->seeEmailContains($vouchers->count() . ' vouchers')

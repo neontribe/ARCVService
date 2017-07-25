@@ -4,6 +4,7 @@ namespace App\Events;
 
 use App\User;
 use App\Trader;
+use App\Voucher;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -12,28 +13,24 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class VoucherHistoryEmailRequested
+class VoucherDuplicateEntered
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $user;
     public $trader;
-    public $date;
-    public $max_date;
-    public $file;
+    public $voucher;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(User $user, Trader $trader, $file, $date, $max_date = null)
+    public function __construct(User $user, Trader $trader, $voucher)
     {
         $this->user = $user;
         $this->trader = $trader;
-        $this->date = $date;
-        $this->max_date = $max_date;
-        $this->file = $file;
+        $this->voucher = $voucher;
     }
 
     /**

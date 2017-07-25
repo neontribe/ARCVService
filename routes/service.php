@@ -12,15 +12,15 @@ use Carbon\Carbon;
 
 Route::group(['middleware' => 'auth:admin'], function () {
     Route::get('vouchers', [
-        'as' =>'vouchers.index',
+        'as' =>'admin.vouchers.index',
         'uses' => 'Admin\VouchersController@index',
     ]);
     Route::get('vouchers/create', [
-        'as' =>'vouchers.create',
+        'as' =>'admin.vouchers.create',
         'uses' => 'Admin\VouchersController@create',
     ]);
     Route::post('vouchers', [
-        'as' =>'vouchers.storebatch',
+        'as' =>'admin.vouchers.storebatch',
         'uses' => 'Admin\VouchersController@storeBatch',
     ]);
     Route::post('logout', [
