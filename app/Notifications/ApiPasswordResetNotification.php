@@ -7,7 +7,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class AdminPasswordResetNotification extends Notification
+class ApiPasswordResetNotification extends Notification
 {
     use Queueable;
 
@@ -60,8 +60,14 @@ class AdminPasswordResetNotification extends Notification
         return (new MailMessage)
             ->subject('Password Reset Request Notification')
             ->greeting('Hi '. $this->name)
-            ->line('You are receiving this email because we received a password reset request for your account on the Rosie Admin Service.')
-            ->action('Reset Password', url(config('app.url').route('password.reset', $this->token, false)))
+            ->line('You are receiving this email because we received a password reset request for your account on the Rosie Voucher Recorder.')
+            ->action('Reset Password',
+                url(config('app.arc_market_url')
+                    . '/change-password/'
+                    . urlencode($notifiable->getEmailForPasswordReset()) . '/'
+                    . $this->token
+                )
+            )
             ->line('If you did not request a password reset, no further action is required.');
     }
 

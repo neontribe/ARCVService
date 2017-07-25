@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Http\Request;
 
@@ -21,6 +22,16 @@ class ResetPasswordController extends Controller
     */
 
     use ResetsPasswords;
+
+    /**
+     * Get the guard to be used during password reset.
+     *
+     * @return Guard
+     */
+    protected function guard()
+    {
+        return Auth::guard('api');
+    }
 
      /*
      * Get the response for after a successful password reset.

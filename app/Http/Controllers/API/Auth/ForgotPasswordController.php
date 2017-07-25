@@ -13,6 +13,16 @@ class ForgotPasswordController extends Controller
     use SendsPasswordResetEmails;
 
     /**
+     * Get the broker to be used during password reset.
+     *
+     * @return PasswordBroker
+     */
+    protected function broker()
+    {
+        return Password::broker('users');
+    }
+
+    /**
      * Send a reset link to the given user.
      *
      * @param  \Illuminate\Http\Request  $request
