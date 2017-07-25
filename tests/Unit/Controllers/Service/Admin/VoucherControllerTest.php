@@ -5,11 +5,6 @@ namespace Tests\Unit\Controllers\Api;
 use App\AdminUser;
 use App\Market;
 use App\Voucher;
-use App\Trader;
-use App\User;
-use App\Http\Controllers\API\TraderController;
-use Auth;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
@@ -46,13 +41,11 @@ class VoucherControllerTest extends TestCase
     }
 
     public function testStoreBatchStartEndSwapped() {
-        $start = '10';
-        $end = '-1';
         $this->actingAs($this->admin_user, 'admin')
             ->post(route('admin.vouchers.storebatch'), [
                 'sponsor_id' => $this->market->sponsor_id,
-                'start' => $start,
-                'end' => $end,
+                'start' => '10',
+                'end' => '-1',
             ])
             ->assertStatus(302)
             ->assertSessionMissing('notification')
@@ -77,7 +70,6 @@ class VoucherControllerTest extends TestCase
 
     public function testStoreBatch() {
         $shortcode = $this->market->sponsor_shortcode;
-
         $start = '1';
         $end = '10';
         $notification_msg = trans('service.messages.vouchers_create_success',[
