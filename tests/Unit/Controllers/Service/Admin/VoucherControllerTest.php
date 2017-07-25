@@ -45,6 +45,36 @@ class VoucherControllerTest extends TestCase
         ;
     }
 
+    public function testStoreBatchStartEndSwapped() {
+        $start = '10';
+        $end = '-1';
+        $this->actingAs($this->admin_user, 'admin')
+            ->post(route('admin.vouchers.storebatch'), [
+                'sponsor_id' => $this->market->sponsor_id,
+                'start' => $start,
+                'end' => $end,
+            ])
+            ->assertStatus(302)
+            ->assertSessionMissing('notification')
+            ->assertSessionHasErrors([
+                'end' => 'The end must be greater than or equal to start',
+            ])
+        ;
+    }
+
+    public function testStoreBatchInvalidSponsor() {
+        $this->actingAs($this->admin_user, 'admin')
+            ->post(route('admin.vouchers.storebatch'), [
+                'sponsor_id' => $this->market->sponsor_id + 1,
+            ])
+            ->assertStatus(302)
+            ->assertSessionMissing('notification')
+            ->assertSessionHasErrors([
+                'sponsor_id' => 'The sponsor id must be a valid selection',
+            ])
+        ;
+    }
+
     public function testStoreBatch() {
         $shortcode = $this->market->sponsor_shortcode;
 
@@ -66,7 +96,10 @@ class VoucherControllerTest extends TestCase
         ;
 
         $vouchers = Voucher::findMany(range(0, 10));
-        // Asset that ten vouchers have been made.
+        // Assert that ten vouchers have been made and are in the expected state.
         $this->assertCount(10, $vouchers);
+        foreach($vouchers as $voucher) {
+            $this->assertEquals('printed', $voucher->currentstate);
+        }
     }
 }
