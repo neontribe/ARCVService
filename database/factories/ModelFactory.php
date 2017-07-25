@@ -51,11 +51,12 @@ $factory->define(App\Market::class, function (Faker\Generator $faker) {
     }
 
     $payment_sentence = $faker->sentence(12, true);
+
     return [
         'name' => $faker->company,
         'location' => $faker->postcode,
         'sponsor_id' => $sponsor_id, // a random sponsor
-        'payment_message' => "Placeholder Payment Message: $payment_sentence",
+        'payment_message' => $payment_sentence,
     ];
 });
 
