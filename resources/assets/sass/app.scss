@@ -36,6 +36,24 @@ h1 {
   margin-bottom: 1em;
 }
 
+.pagination {
+  > li {
+    &.active > span {
+      border: none;
+      background-color: $arc_rose;
+      &:hover {
+        background-color: lighten($arc_rose, 10%);
+      }
+    }
+    > a {
+      color: $arc_rose;
+      &:hover {
+        color: $arc_copy;
+      }
+    }
+  }
+}
+
 .add-vouchers {
   select {
     border: 2px solid $arc_border;
