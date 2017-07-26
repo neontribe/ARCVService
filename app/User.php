@@ -6,6 +6,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Passport\HasApiTokens;
+use App\Notifications\ApiPasswordResetNotification;
 use App\Trader;
 
 class User extends Authenticatable
@@ -51,5 +52,16 @@ class User extends Authenticatable
     public function hasTrader($trader)
     {
         return in_array($trader->id, $this->traders()->pluck('id')->toArray());
+    }
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ApiPasswordResetNotification($token, $this->name));
     }
 }
