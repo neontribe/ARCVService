@@ -68,7 +68,7 @@ class VoucherControllerTest extends TestCase
         ;
     }
 
-    public function testStoreBatch() {
+    public function testStoreBatchSuccessMsg() {
         $shortcode = $this->market->sponsor_shortcode;
         $start = '1';
         $end = '10';
@@ -86,12 +86,32 @@ class VoucherControllerTest extends TestCase
             ->assertStatus(302)
             ->assertSessionHas('notification', $notification_msg)
         ;
+    }
 
-        $vouchers = Voucher::findMany(range(0, 10));
-        // Assert that ten vouchers have been made and are in the expected state.
-        $this->assertCount(10, $vouchers);
+    public function testStoreBatch() {
+        $shortcode = $this->market->sponsor_shortcode;
+        $this->actingAs($this->admin_user, 'admin')
+            ->post(route('admin.vouchers.storebatch'), [
+                'sponsor_id' => $this->market->sponsor_id,
+                'start' => '50',
+                'end' => '61',
+            ])
+            ->assertStatus(302)
+        ;
+
+        $vouchers = Voucher::findMany(range(0, 11));
+
+        // Assert that eleven vouchers have been made and are in the expected state and land within the expected range.
+        $this->assertCount(11, $vouchers);
         foreach($vouchers as $voucher) {
             $this->assertEquals('printed', $voucher->currentstate);
+
+            // Assert that the voucher code starts with the Sponsor shortcode.
+            $this->assertStringStartsWith($shortcode, $voucher->code);
+
+            // Assert that the voucher code lands between 50 and 60 (our generated range).
+            $this->assertRegExp('/,*[5-6][0-9]/', $voucher->code);
         }
     }
+
 }
