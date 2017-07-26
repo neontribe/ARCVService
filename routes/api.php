@@ -18,6 +18,16 @@ Route::post('login/refresh', [
     'uses' => 'Auth\LoginController@refresh',
 ]);
 
+Route::post('user/lost_password', [
+    'as' => 'api.user.lost_password',
+    'uses' => 'Auth\ForgotPasswordController@sendResetLinkEmail'
+]);
+
+Route::post('user/lost_password/reset', [
+    'as' => 'api.user.reset_password',
+    'uses' => 'Auth\ResetPasswordController@reset'
+]);
+
 /** Authentication required --------------------------------------------- */
 
 Route::group(['middleware' => 'auth:api'], function () {
