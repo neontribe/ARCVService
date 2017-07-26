@@ -88,9 +88,6 @@ class VoucherControllerTest extends TestCase
         ;
     }
 
-    /**
-     * @group failing
-     */
     public function testStoreBatch() {
         $shortcode = $this->market->sponsor_shortcode;
         $this->actingAs($this->admin_user, 'admin')
