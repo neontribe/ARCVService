@@ -69,7 +69,7 @@ class VouchersController extends Controller
         ];
 
         $messages = [
-            'in' => 'The :atrribute must be a valid selection',
+            'in' => 'The :attribute must be a valid selection',
             'ge_field' => 'The :attribute must be greater than or equal to :field'
         ];
 
