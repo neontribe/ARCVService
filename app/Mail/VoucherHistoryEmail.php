@@ -28,6 +28,15 @@ class VoucherHistoryEmail extends Mailable
         $this->user = $user->name;
         $this->trader = $trader->name;
         $this->vouchers = $trader->vouchersConfirmed;
+        // Filter confirmed vouchers by the selected date.
+        if($date && !$max_date) {
+            $subset_vouchers = $trader->vouchersConfirmed->filter(function($v) use ($date) {
+                $v_date = $v->paymentPendedOn->created_at->format('d-m-Y');
+                return ($v_date === $date);
+            });
+            $this->vouchers = $subset_vouchers;
+        }
+
         $this->date = $date;
         $this->max_date = $max_date;
         $this->file = $file;
