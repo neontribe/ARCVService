@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 
-
 class ResetPasswordController extends Controller
 {
     /*
@@ -46,5 +45,4 @@ class ResetPasswordController extends Controller
             ['token' => $token, 'email' => $request->email]
         );
     }
-
 }
