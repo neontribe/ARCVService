@@ -33,12 +33,22 @@ class ResetPasswordController extends Controller
         return Auth::guard('api');
     }
 
-     /*
-     * Get the response for after a successful password reset.
+    /**
+     * Get the broker to be used during password reset.
      *
-     * @param string $response
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return \Illuminate\Contracts\Auth\PasswordBroker
      */
+    public function broker()
+    {
+        return Password::broker('users');
+    }
+
+    /*
+    * Get the response for after a successful password reset.
+    *
+    * @param string $response
+    * @return \Symfony\Component\HttpFoundation\Response
+    */
     protected function sendResetResponse($response)
     {
         return response()->json(['status' => trans($response)]);
