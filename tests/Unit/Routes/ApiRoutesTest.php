@@ -132,10 +132,7 @@ class ApiRoutesTest extends TestCase
         $this->actingAs($this->user, 'api')
             ->json('POST', route('api.voucher.transition'), $payload)
             ->assertStatus(200)
-            ->assertJsonStructure([
-                'success', 'fail', 'invalid'
-            ])
-            ->assertJson(['success' => [$code]])
+            ->assertJson(['message' => trans('api.messages.voucher_success')])
         ;
     }
 
@@ -154,14 +151,11 @@ class ApiRoutesTest extends TestCase
         $this->actingAs($this->user, 'api')
             ->json('POST', route('api.voucher.transition'), $payload)
             ->assertStatus(200)
-            ->assertJsonStructure([
-                'success', 'fail', 'invalid'
-            ])
-            ->assertJson(['invalid' => [$code]])
+            ->assertJson(['error' => trans('api.errors.voucher_invalid')])
         ;
     }
 
-    public function testCollectFailVoucherRoute()
+    public function testCollectOwnDuplicateVoucherRoute()
     {
         // Get the code already in recorded state.
         $code = $this->vouchers[1]->code;
@@ -176,12 +170,41 @@ class ApiRoutesTest extends TestCase
         $this->actingAs($this->user, 'api')
             ->json('POST', route('api.voucher.transition'), $payload)
             ->assertStatus(200)
-            ->assertJsonStructure([
-                'success', 'fail', 'invalid'
+            ->assertJson([
+                'warning'
+                => trans('api.errors.voucher_own_dupe', [
+                    'code' => $code
+                ])
             ])
-            ->assertJson(['fail' => [$code]])
         ;
     }
+
+    public function testCollectOtherDuplicateVoucherRoute()
+    {
+        // Transfer to trader 2 and get the code already in recorded state.
+        $this->vouchers[1]->trader_id = 2;
+        $this->vouchers[1]->save();
+        $code = $this->vouchers[1]->code;
+        $payload= [
+            'transition' => 'collect',
+            'trader_id' => 1,
+            'vouchers' => [
+                $code,
+            ]
+        ];
+        $this->user->traders()->sync([1]);
+        $this->actingAs($this->user, 'api')
+            ->json('POST', route('api.voucher.transition'), $payload)
+            ->assertStatus(200)
+            ->assertJson([
+                'warning'
+                => trans('api.errors.voucher_other_dupe', [
+                    'code' => $code
+                ])
+            ])
+        ;
+    }
+
 
     public function testUnauthenticatedDontCollectVoucherRoute()
     {
