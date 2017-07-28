@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ResetPasswordController extends Controller
 {
@@ -33,6 +34,8 @@ class ResetPasswordController extends Controller
         return Auth::guard('api');
     }
 
+
+
     /**
      * Get the broker to be used during password reset.
      *
@@ -40,8 +43,29 @@ class ResetPasswordController extends Controller
      */
     public function broker()
     {
+        // required to point the api at the
         return Password::broker('users');
     }
+
+    /**
+     * Reset the given user's password.
+     *
+     * @param  \Illuminate\Contracts\Auth\CanResetPassword  $user
+     * @param  string  $password
+     * @return void
+     */
+    protected function resetPassword($user, $password)
+    {
+        $user->forceFill([
+            'password' => bcrypt($password),
+            'remember_token' => Str::random(60),
+        ])->save();
+
+        // we arn't logging them in, we're redirecting them to an app page
+        // $this->guard()->login($user);
+
+    }
+
 
     /*
     * Get the response for after a successful password reset.
