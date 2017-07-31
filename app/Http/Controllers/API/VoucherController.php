@@ -9,6 +9,7 @@ use App\Trader;
 use App\Voucher;
 use App\User;
 use Auth;
+use Log;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -111,6 +112,20 @@ class VoucherController extends Controller
         }
 
 
+        $trader_name = $trader->name;
+        if(count($own_duplicate_codes) > 0) {
+            Log::info(
+                "[xXx] A User attempted to log these duplicate vouchers already claimed by $trader_name:"
+                . print_r($own_duplicate_codes, TRUE)
+            );
+        }
+        if(count($other_duplicate_codes) > 0) {
+            Log::info(
+                "[xXx] A User attempted to log these duplicate vouchers claimed by other traders:"
+                . print_r($other_duplicate_codes, TRUE)
+            );
+        }
+
         // We might want to annotate somehow with the type of transition here.
         // Currently we can
         //  'collect' - submit and
@@ -163,7 +178,7 @@ class VoucherController extends Controller
      * Helper to construct voucher validation response messages.
      *
      * @param Array $response
-     * @return Array $message
+     * @return array $message
      */
     private function constructResponseMessage($responses)
     {
@@ -208,15 +223,23 @@ class VoucherController extends Controller
                     break;
             }
         } else {
-            return [
-                // Todo: This message needs work - but not this round.
-                'message' => trans('api.messages.batch_voucher_submit', [
-                    'success_amount' => count($responses['success']),
-                    'duplicate_amount' => count($responses['own_duplicate'])
-                        + count($responses['other_duplicate']),
-                    'invalid_amount' => count($responses['invalid'])
-                ]
-            )];
+            $message_text = trans('api.messages.batch_voucher_submit', [
+                'success_amount' => count($responses['success']),
+                'duplicate_amount' => count($responses['own_duplicate'])
+                    + count($responses['other_duplicate']),
+                'invalid_amount' => count($responses['invalid'])
+            ]);
+
+            if(count($responses['other_duplicate']) > 0) {
+                $message_text .= ' ' . trans(
+                    'api.messages.batch_voucher_submit_duplicates',
+                    [
+                        'other_dupes' => implode(', ', $responses['other_duplicate']),
+                    ]
+                );
+            }
+
+            return ['message' => $message_text];
         }
     }
 }
