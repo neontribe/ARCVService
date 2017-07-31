@@ -83,7 +83,7 @@ class LoginController extends Controller
         return redirect()
             ->back()
             ->withInput($request->only('email', 'remember'))
-            ->withErrors(array('error_message' => trans('auth.failed')))
+            ->withErrors(['error_message' => trans('auth.failed')])
         ;
     }
 }
