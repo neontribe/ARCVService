@@ -61,9 +61,8 @@ class ResetPasswordController extends Controller
             'remember_token' => Str::random(60),
         ])->save();
 
-        // we arn't logging them in, we're redirecting them to an app page
+        // we aren't logging them in, we're redirecting them to an app page
         // $this->guard()->login($user);
-
     }
 
 
