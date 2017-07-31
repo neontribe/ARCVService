@@ -7,6 +7,12 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Login</div>
                 <div class="panel-body">
+                    @if ($errors->has('error_message'))
+                        <div class="alert alert-danger">
+                            <strong>{{ $errors->first('error_message') }}</strong>
+                        </div>
+                    @endif
+
                     <form class="form-horizontal" role="form" method="POST" action="{{ route('admin.login') }}">
                         {{ csrf_field() }}
 

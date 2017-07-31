@@ -78,7 +78,13 @@ class LoginController extends Controller
             . $request->ip()
         );
 
-        // if unsuccessful, then redirect back to the login with the form data
-        return redirect()->back()->withInput($request->only('email', 'remember'));
+        // If unsuccessful, then redirect back to the login with the form data
+        // along with a message indicating the problem.
+        return redirect()
+            ->back()
+            ->withInput($request->only('email', 'remember'))
+            ->withErrors(['error_message' => trans('auth.failed')])
+        ;
     }
 }
+
