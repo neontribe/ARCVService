@@ -39,7 +39,7 @@ class ForgotPasswordController extends Controller
         );
         if ($response === Password::RESET_LINK_SENT) {
             Log::info('Rosie account reset password link email sent.');
-            return response()->json(['status', trans($response)]);
+            return response()->json(['status' => trans($response)]);
         }
         // If an error was returned by the password broker, we will get this message
         // translated so we can notify a user of the problem. We'll redirect back
