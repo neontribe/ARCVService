@@ -125,7 +125,6 @@ class VoucherController extends Controller
                 "[xXx] A User attempted to log these duplicate vouchers claimed by other traders:"
                 . print_r($other_duplicate_codes, TRUE)
             );
-
             event(new VoucherDuplicateEntered(Auth::user(), $trader, $other_duplicate_codes));
         }
 
