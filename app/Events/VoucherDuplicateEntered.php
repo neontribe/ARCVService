@@ -19,18 +19,18 @@ class VoucherDuplicateEntered
 
     public $user;
     public $trader;
-    public $voucher;
+    public $vouchers;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(User $user, Trader $trader, $voucher)
+    public function __construct(User $user, Trader $trader, $vouchers)
     {
         $this->user = $user;
         $this->trader = $trader;
-        $this->voucher = $voucher;
+        $this->vouchers = $vouchers;
     }
 
     /**

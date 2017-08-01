@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Events\VoucherDuplicateEntered;
 use App\Events\VoucherPaymentRequested;
 use App\Http\Controllers\API\TraderController;
 use App\Http\Controllers\Controller;
@@ -124,6 +125,8 @@ class VoucherController extends Controller
                 "[xXx] A User attempted to log these duplicate vouchers claimed by other traders:"
                 . print_r($other_duplicate_codes, TRUE)
             );
+
+            event(new VoucherDuplicateEntered(Auth::user(), $trader, $other_duplicate_codes));
         }
 
         // We might want to annotate somehow with the type of transition here.
