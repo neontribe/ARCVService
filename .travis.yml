@@ -28,11 +28,17 @@ before_deploy:
 - chmod 600 deploy_rsa
 - ssh-add deploy_rsa
 deploy:
+  # Deploy to staging.
   provider: script
   skip_cleanup: true
   script: rsync -r --exclude storage --delete-after --quiet $TRAVIS_BUILD_DIR/* $DEPLOY_USER@$DEPLOY_IP:/var/www/$DEPLOY_DIR
   on:
     branch: 1.1/release
+  # Create production release tarball.
+  provider: script
+  script: tar -cvzf --exclude=storage $TRAVIS_TAG.tar.gz $TRAVIS_BUILD_DIR && scp $TRAVIS_TAG.tar.gz $DEPLOY_USER@$DEPLOY_IP:/home/$DEPLOY_USER/releases/
+  on:
+    tags: true
 services:
 - mysql
 env:
