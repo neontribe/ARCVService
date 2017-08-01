@@ -36,7 +36,7 @@ deploy:
     branch: 1.1/release
   # Create production release tarball.
   provider: script
-  script: tar -czf --exclude=storage $TRAVIS_TAG.tar.gz $TRAVIS_BUILD_DIR && scp $TRAVIS_TAG.tar.gz $DEPLOY_USER@$DEPLOY_IP:/home/$DEPLOY_USER/releases/service
+  script: tar -czf $TRAVIS_TAG.tar.gz --exclude=storage $TRAVIS_BUILD_DIR && scp $TRAVIS_TAG.tar.gz $DEPLOY_USER@$DEPLOY_IP:/home/$DEPLOY_USER/releases/service
   on:
     tags: true
 services:
