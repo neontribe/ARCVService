@@ -37,7 +37,7 @@ deploy:
   # Create production release tarball.
   - provider: script
     skip_cleanup: true
-    script: tar -czf $TRAVIS_TAG.tar.gz --exclude=storage --exclude=$TRAVIS_TAG.tar.gz $TRAVIS_BUILD_DIR/. && scp $TRAVIS_TAG.tar.gz $DEPLOY_USER@$DEPLOY_IP:/home/$DEPLOY_USER/releases/service
+    script: tar -czf $TRAVIS_TAG.tar.gz $TRAVIS_BUILD_DIR/ARCVService && scp $TRAVIS_TAG.tar.gz $DEPLOY_USER@$DEPLOY_IP:/home/$DEPLOY_USER/releases/service
     on:
       tags: true
 services:
