@@ -116,13 +116,13 @@ class VoucherController extends Controller
         $trader_name = $trader->name;
         if(count($own_duplicate_codes) > 0) {
             Log::info(
-                "[xXx] A User attempted to log these duplicate vouchers already claimed by $trader_name:"
+                "A User attempted to log these duplicate vouchers already claimed by $trader_name:"
                 . print_r($own_duplicate_codes, TRUE)
             );
         }
         if(count($other_duplicate_codes) > 0) {
             Log::info(
-                "[xXx] A User attempted to log these duplicate vouchers claimed by other traders:"
+                "A User attempted to log these duplicate vouchers claimed by other traders:"
                 . print_r($other_duplicate_codes, TRUE)
             );
             event(new VoucherDuplicateEntered(Auth::user(), $trader, $other_duplicate_codes));
