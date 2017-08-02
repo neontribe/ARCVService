@@ -21,13 +21,13 @@ class SendVoucherDuplicateEmailTest extends TestCase
     use MailTracking;
 
     protected $trader;
-    protected $voucher;
+    protected $vouchers;
     protected $user;
 
     protected function setUp()
     {
         parent::setUp();
-        $this->voucher = factory(Voucher::class)->create();
+        $this->vouchers = factory(Voucher::class, 'requested', 10)->create();
         $this->user = factory(User::class)->create();
     }
 
@@ -35,12 +35,11 @@ class SendVoucherDuplicateEmailTest extends TestCase
     {
         $trader = factory(Trader::class)->create(['market_id' => factory(Market::class)->create()->id]);
         $user = $this->user;
-        $vouchercode = $this->voucher->code;
         $market = $trader->market;
         $title = 'Test Voucher Duplicate Email';
-
+        $voucher_codes = $this->vouchers->pluck('code')->all();
         Auth::login($user);
-        $event = new VoucherDuplicateEntered($user, $trader, $this->voucher);
+        $event = new VoucherDuplicateEntered($user, $trader, $voucher_codes);
         $listener = new SendVoucherDuplicateEmail();
         $listener->handle($event);
 
@@ -50,7 +49,7 @@ class SendVoucherDuplicateEmailTest extends TestCase
             ->seeEmailSubject('Voucher Duplicate Entered Email')
             ->seeEmailContains('Hi ' . config('mail.to_admin.name'))
             ->seeEmailContains($user->name . ' has tried to submit voucher')
-            ->seeEmailContains($vouchercode . ' against')
+            ->seeEmailContains(implode(', ', $voucher_codes) . ' against')
             ->seeEmailContains($trader->name . ' of')
             ->seeEmailContains($market->name . '\'s account, however that voucher has already been submitted by another trader.')
         ;
@@ -60,11 +59,10 @@ class SendVoucherDuplicateEmailTest extends TestCase
     {
         $trader = factory(Trader::class)->create();
         $user = $this->user;
-        $vouchercode = $this->voucher->code;
         $title = 'Test Voucher Duplicate Email';
-
+        $voucher_codes = $this->vouchers->pluck('code')->all();
         Auth::login($user);
-        $event = new VoucherDuplicateEntered($user, $trader, $this->voucher);
+        $event = new VoucherDuplicateEntered($user, $trader, $voucher_codes);
         $listener = new SendVoucherDuplicateEmail();
         $listener->handle($event);
 
@@ -74,7 +72,7 @@ class SendVoucherDuplicateEmailTest extends TestCase
             ->seeEmailSubject('Voucher Duplicate Entered Email')
             ->seeEmailContains('Hi ' . config('mail.to_admin.name'))
             ->seeEmailContains($user->name . ' has tried to submit voucher')
-            ->seeEmailContains($vouchercode . ' against')
+            ->seeEmailContains(implode(', ', $voucher_codes) . ' against')
             ->seeEmailContains($trader->name . ' of')
             ->seeEmailContains('no associated market' . '\'s account, however that voucher has already been submitted by another trader.')
         ;

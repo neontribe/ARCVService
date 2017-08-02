@@ -5,7 +5,6 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
 class VoucherDuplicateEnteredEmail extends Mailable
 {
@@ -13,21 +12,19 @@ class VoucherDuplicateEnteredEmail extends Mailable
 
     public $user;
     public $trader;
-    public $voucher;
-    public $vouchercode;
+    public $vouchers;
     public $market;
 
     /**
      * Create a new message instance.
      */
 
-    public function __construct($user, $trader, $voucher)
+    public function __construct($user, $trader, $vouchers)
     {
         $this->user = $user->name;
         $this->trader = $trader->name;
-        $this->voucher = $voucher;
+        $this->vouchers = implode(', ', $vouchers);
         $this->market = $trader->market ? $trader->market->name : 'no associated market';
-        $this->vouchercode = $voucher->code;
     }
 
     /**

@@ -5,6 +5,7 @@ return [
     'messages' => [
         'voucher_success' => 'Voucher is valid',
         'batch_voucher_submit' => 'Thanks! Your queue has been successfully submitted. :success_amount voucher(s) accepted, :duplicate_amount duplicate(s) and :invalid_amount invalid.',
+        'batch_voucher_submit_duplicates' => 'The following vouchers are duplicates: (:other_dupes). Please don\'t worry - mark them as "already used", send them in with your other vouchers and you will still be paid when we receive them.',
         'email_voucher_history' => 'Thanks. If you don\'t receive an email with your voucher records, please try again later.',
         'email_voucher_history_date' => 'Thanks, we\'ve received your request for payment records from :date. If you don\'t receive an email with your voucher records, please try again later.',
         'voucher_payment_requested' => 'Thanks, your payment request has been accepted. :payment_request_message',

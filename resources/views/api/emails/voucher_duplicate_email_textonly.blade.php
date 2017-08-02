@@ -5,8 +5,8 @@
 [xXx]
 Hi {{ config('mail.to_admin.name') }},
 
-{{ $user }} has tried to submit voucher
-{{ $vouchercode }} against
+{{ $user }} has tried to submit voucher(s):
+{{ $vouchers }} against
 {{ $trader }} of
 {{ $market }}'s account, however that voucher has already been submitted by another trader.
 
