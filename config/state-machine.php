@@ -50,6 +50,10 @@ return [
                 'from' => ['printed','dispatched','allocated'],
                 'to' =>  'recorded',
             ],
+            'reject' => [
+                'from' => ['recorded'],
+                'to' => 'allocated',
+            ],
             'confirm' => [
                 'from' => ['recorded'],
                 'to' => 'payment_pending'
