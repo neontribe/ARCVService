@@ -15,5 +15,6 @@ return [
         'voucher_invalid' => 'That isn\'t a valid voucher code, please check the number and try again.',
         'voucher_own_dupe' => 'You have already submitted voucher code :code.',
         'voucher_other_dupe' => 'It looks like the code (:code) has been used already, please double check and try again. If you are still unable to add the voucher code, don\'t worry - mark it as "already used", send it in with your other vouchers and you will still be paid when we receive it.',
+        'voucher_failed_reject' => 'I\'m sorry, we couldn\'t undo that for you at this time. Let us know about this code when you send in your vouchers.',
     ]
 ];

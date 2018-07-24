@@ -72,10 +72,23 @@ class VoucherController extends Controller
         $success_codes = [];
         $other_duplicate_codes = [];
         $own_duplicate_codes = [];
+        $failed_rejects = [];
         $vouchers_for_payment = [];
+
         foreach ($vouchers as $voucher) {
+            // do we need to finangle the rejections?
+            if ($transition === "reject") {
+                $last_state = $voucher->history()->latest()->first()->from;
+                if (!$last_state) {
+                    $failed_rejects[] = $voucher->code;
+                    continue;
+                } else {
+                    $transition = "reject-to-" . $last_state;
+                }
+            }
             // can we?
             if ($voucher->transitionAllowed($transition)) {
+                // Some-what naive
                 $voucher->trader_id = $trader->id;
                 // this saves the model too.
                 $voucher->applyTransition($transition);
@@ -95,7 +108,7 @@ class VoucherController extends Controller
                     $own_duplicate_codes[] = $voucher->code;
                 } else {
                     // Another trader has mistakenly submitted this voucher,
-                    // Or the tranision isn't valid (i.e expired state)
+                    // Or the transition isn't valid (i.e expired state)
                     $other_duplicate_codes[] = $voucher->code;
                 }
             }
@@ -119,6 +132,7 @@ class VoucherController extends Controller
         $responses['own_duplicate'] = $own_duplicate_codes;
         $responses['other_duplicate'] = $other_duplicate_codes;
         $responses['invalid'] = $bad_codes;
+        $responses['failed_rejects'] = $failed_rejects;
 
         $response = $this->constructResponseMessage($responses);
 
@@ -197,6 +211,13 @@ class VoucherController extends Controller
                     return [
                         'warning' => trans('api.errors.voucher_other_dupe', [
                             'code' => $responses['other_duplicate'][0]
+                        ])
+                    ];
+                    break;
+                case 'failed_rejects' :
+                    return [
+                        'warning' => trans('api.errors.voucher_failed_reject', [
+                            'code' => $responses['failed_reject'][0]
                         ])
                     ];
                     break;

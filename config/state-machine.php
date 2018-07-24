@@ -50,7 +50,15 @@ return [
                 'from' => ['printed','dispatched','allocated'],
                 'to' =>  'recorded',
             ],
-            'reject' => [
+            'reject-to-printed' => [
+                'from' => ['recorded'],
+                'to' => 'printed',
+            ],
+            'reject-to-dispatched' => [
+                'from' => ['recorded'],
+                'to' => 'dispatched',
+            ],
+            'reject-to-allocated' => [
                 'from' => ['recorded'],
                 'to' => 'allocated',
             ],

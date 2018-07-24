@@ -107,9 +107,38 @@ class VoucherStateModelTest extends TestCase
         $voucher->applyTransition('order');
         $voucher->applyTransition('print');
         $voucher->applyTransition('dispatch');
+        $voucher->applyTransition('allocate');
         $voucher->applyTransition('collect');
-        $voucher->applyTransition('reject');
+        $voucher->applyTransition('reject-to-allocated');
 
         $this->assertEquals($voucher->currentstate, 'allocated');
     }
+
+    public function testARecordedVoucherCanBeRejectedBackToPrinted()
+    {
+        Auth::login($this->user);
+        $voucher = factory(Voucher::class, 'requested')->create();
+
+        $voucher->applyTransition('order');
+        $voucher->applyTransition('print');
+        $voucher->applyTransition('collect');
+        $voucher->applyTransition('reject-to-printed');
+
+        $this->assertEquals($voucher->currentstate, 'printed');
+    }
+
+    public function testARecordedVoucherCanBeRejectedBackToDispatched()
+    {
+        Auth::login($this->user);
+        $voucher = factory(Voucher::class, 'requested')->create();
+
+        $voucher->applyTransition('order');
+        $voucher->applyTransition('print');
+        $voucher->applyTransition('dispatch');
+        $voucher->applyTransition('collect');
+        $voucher->applyTransition('reject-to-dispatched');
+
+        $this->assertEquals($voucher->currentstate, 'dispatched');
+    }
+
 }
