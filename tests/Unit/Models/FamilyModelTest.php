@@ -232,42 +232,42 @@ class FamilyModelTest extends TestCase
         // Check the fields have been set
 
         // In Family1, sequence should be 1
-        $this->seeInDatabase('families', [
+        $this->assertDatabaseHas('families', [
             'id' => $family1->id,
             'initial_centre_id' => $centre1->id,
             'centre_sequence' => 1,
         ]);
 
         // In Family2, sequence should be 2
-        $this->seeInDatabase('families', [
+        $this->assertDatabaseHas('families', [
             'id' => $family2->id,
             'initial_centre_id' => $centre1->id,
             'centre_sequence' => 2,
         ]);
 
         // In Family3, sequence should be 1
-        $this->seeInDatabase('families', [
+        $this->assertDatabaseHas('families', [
             'id' => $family3->id,
             'initial_centre_id' => $centre2->id,
             'centre_sequence' => 1,
         ]);
 
         // In Family4, sequence should be 1
-        $this->seeInDatabase('families', [
+        $this->assertDatabaseHas('families', [
             'id' => $family4->id,
             'initial_centre_id' => $centre1->id,
             'centre_sequence' => 3,
         ]);
 
         // In Family5, sequence should be 2
-        $this->seeInDatabase('families', [
+        $this->assertDatabaseHas('families', [
             'id' => $family5->id,
             'initial_centre_id' => $centre2->id,
             'centre_sequence' => 2,
         ]);
 
         // In Family6, sequence should be 1
-        $this->seeInDatabase('families', [
+        $this->assertDatabaseHas('families', [
             'id' => $family6->id,
             'initial_centre_id' => $centre3->id,
             'centre_sequence' => 1,
