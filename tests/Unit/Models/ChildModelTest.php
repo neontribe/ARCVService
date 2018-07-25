@@ -45,7 +45,10 @@ class ChildModelTest extends TestCase
         $child = new Child([
             "born" => 'true',
             "dob" => Carbon::createFromDate('2017', ($school_month -1), '1')->toDateTimeString(),
+
         ]);
+
+        //dd($child);
 
         // Check his school month is app.school_month 2021
         $start_school_date = Carbon::createFromDate('2021', $school_month, '1')->toDateString();
