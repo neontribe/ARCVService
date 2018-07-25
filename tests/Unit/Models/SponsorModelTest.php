@@ -60,8 +60,8 @@ class SponsorModelTest extends TestCase
     {
         // Make a sponsor
         $sponsor = factory(Sponsor::class)->create();
-        // These should auto associate with the only Sponsor
-        $centres = factory(Centre::class, 2)->create();
+        // Is supposed to auto associate but not working since moved across from store so sponsor ID passed to centres
+        $centres = factory(Centre::class, 2)->create(['sponsor_id' => $sponsor->id]);
         $sponsor->fresh();
 
         // Check it's got centres
