@@ -132,7 +132,7 @@ class ApiRoutesTest extends TestCase
         $this->actingAs($this->user, 'api')
             ->json('POST', route('api.voucher.transition'), $payload)
             ->assertStatus(200)
-            ->assertJson(['message' => trans('api.messages.voucher_success')])
+            ->assertJson(['message' => trans('api.messages.voucher_success_add')])
         ;
     }
 
@@ -220,14 +220,14 @@ class ApiRoutesTest extends TestCase
         $this->actingAs($this->user, 'api')
             ->json('POST', route('api.voucher.transition'), $payload)
             ->assertStatus(200)
-            ->assertJson(['message' => trans('api.messages.voucher_success')])
+            ->assertJson(['message' => trans('api.messages.voucher_success_add')])
         ;
 
         $payload['transition'] = 'reject';
         $this->actingAs($this->user, 'api')
             ->json('POST', route('api.voucher.transition'), $payload)
             ->assertStatus(200)
-            ->assertJson(['message' => trans('api.messages.voucher_success')])
+            ->assertJson(['message' => trans('api.messages.voucher_success_reject')])
         ;
     }
 

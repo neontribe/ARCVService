@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\API;
 
 use App\Events\VoucherPaymentRequested;
-use App\Http\Controllers\API\TraderController;
 use App\Http\Controllers\Controller;
 use App\Trader;
 use App\Voucher;
-use App\User;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -70,30 +68,37 @@ class VoucherController extends Controller
 
         $transition = $request['transition'];
         $success_codes = [];
+        $reject_codes = [];
         $other_duplicate_codes = [];
         $own_duplicate_codes = [];
         $failed_rejects = [];
         $vouchers_for_payment = [];
 
+        /** @var Voucher $voucher */
         foreach ($vouchers as $voucher) {
             // do we need to finangle the rejections?
             if ($transition === "reject") {
-                $last_state = $voucher->history()->latest()->first()->from;
+                $last_state = $voucher->getPriorState();
                 if (!$last_state) {
-                    $failed_rejects[] = $voucher->code;
+                    $failed_rejects[] = $voucher->from;
                     continue;
-                } else {
-                    $transition = "reject-to-" . $last_state;
                 }
+                $transition = "reject-to-" . $last_state->from;
             }
             // can we?
             if ($voucher->transitionAllowed($transition)) {
                 // Some-what naive
                 $voucher->trader_id = $trader->id;
+
                 // this saves the model too.
                 $voucher->applyTransition($transition);
+
                 // Success for this one.
-                $success_codes[] = $voucher->code;
+                if ($transition == $request['transition']) {
+                    $success_codes[] = $voucher->code;
+                } else {
+                    $reject_codes[] = $voucher->code;
+                }
                 // If this is a confirm transition - add to a list
                 // for sending to ARC admin. This is a request for payment.
                 if ($transition === 'confirm') {
@@ -128,11 +133,12 @@ class VoucherController extends Controller
         // Currently we can
         //  'collect' - submit and
         //  'confirm' - request payment on.
-        $responses['success'] = $success_codes;
+        $responses['success_add'] = $success_codes;
+        $responses['success_reject'] = $reject_codes;
         $responses['own_duplicate'] = $own_duplicate_codes;
         $responses['other_duplicate'] = $other_duplicate_codes;
         $responses['invalid'] = $bad_codes;
-        $responses['failed_rejects'] = $failed_rejects;
+        $responses['failed_reject'] = $failed_rejects;
 
         $response = $this->constructResponseMessage($responses);
 
@@ -143,7 +149,7 @@ class VoucherController extends Controller
      * Email a Trader's Voucher Payment Request.
      *
      * @param Trader $trader
-     * @param Collection Voucher $vouchers
+     * @param \Illuminate\Database\Eloquent\Collection Voucher $vouchers
      * @return \Illuminate\Http\Response
      */
     public function emailVoucherPaymentRequest(Trader $trader, $vouchers)
@@ -176,8 +182,8 @@ class VoucherController extends Controller
     /**
      * Helper to construct voucher validation response messages.
      *
-     * @param Array $response
-     * @return Array $message
+     * @param array $responses
+     * @return array $message
      */
     private function constructResponseMessage($responses)
     {
@@ -195,49 +201,56 @@ class VoucherController extends Controller
         }
         if ($total_submitted === 1) {
             switch ($error_type) {
-                case 'success':
+                case 'success_add':
                     return [
-                        'message' => trans('api.messages.voucher_success')
+                        'message' => trans('api.messages.voucher_success_add'),
                     ];
                     break;
+                case 'success_reject':
+                    return [
+                        'message' => trans('api.messages.voucher_success_reject')
+                    ];
                 case 'own_duplicate':
                     return [
                         'warning' => trans('api.errors.voucher_own_dupe', [
-                            'code' => $responses['own_duplicate'][0]
-                        ])
+                            'code' => $responses['own_duplicate'][0],
+                        ]),
                     ];
                     break;
                 case 'other_duplicate':
                     return [
                         'warning' => trans('api.errors.voucher_other_dupe', [
-                            'code' => $responses['other_duplicate'][0]
-                        ])
+                            'code' => $responses['other_duplicate'][0],
+                        ]),
                     ];
                     break;
-                case 'failed_rejects' :
+                case 'failed_reject':
                     return [
                         'warning' => trans('api.errors.voucher_failed_reject', [
-                            'code' => $responses['failed_reject'][0]
-                        ])
+                            'code' => $responses['failed_reject'][0],
+                        ]),
                     ];
                     break;
                 case 'invalid':
                 default:
                     return [
-                        'error' => trans('api.errors.voucher_invalid')
+                        'error' => trans('api.errors.voucher_invalid'),
                     ];
                     break;
             }
         } else {
             return [
                 // Todo: This message needs work - but not this round.
-                'message' => trans('api.messages.batch_voucher_submit', [
+                'message' => trans(
+                    'api.messages.batch_voucher_submit',
+                    [
                     'success_amount' => count($responses['success']),
                     'duplicate_amount' => count($responses['own_duplicate'])
                         + count($responses['other_duplicate']),
-                    'invalid_amount' => count($responses['invalid'])
-                ]
-            )];
+                    'invalid_amount' => count($responses['invalid']),
+                    ]
+                ),
+            ];
         }
     }
 }
