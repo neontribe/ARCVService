@@ -3,7 +3,7 @@
 namespace Tests;
 
 use App\Centre;
-//use App\Registration;
+use App\Registration;
 use App\Sponsor;
 use App\CentreUser;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -31,17 +31,17 @@ class CentreModelTest extends TestCase
         $this->assertInstanceOf(Sponsor::class, $centre->sponsor);
     }
 
-//    /** @test */
-//    public function itCanHaveRegistrations()
-//    {
-//        $centre = factory(Centre::class)->create();
-//        $registrations = factory(Registration::class, 3)->create([
-//            'centre_id' => $centre->id,
-//        ]);
-//        $registrations = $centre->registrations;
-//        $this->assertInstanceOf(Collection::class, $registrations);
-//        $this->assertInstanceOf(Registration::class, $registrations[0]);
-//    }
+    /** @test */
+    public function itCanHaveRegistrations()
+    {
+        $centre = factory(Centre::class)->create();
+        $registrations = factory(Registration::class, 3)->create([
+            'centre_id' => $centre->id,
+        ]);
+        $registrations = $centre->registrations;
+        $this->assertInstanceOf(Collection::class, $registrations);
+        $this->assertInstanceOf(Registration::class, $registrations[0]);
+    }
 
     /** @test */
     public function itCanHaveUsers()

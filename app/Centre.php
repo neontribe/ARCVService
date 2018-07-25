@@ -23,32 +23,32 @@ class Centre extends Model
     protected $hidden = [
     ];
 
-//
-//    public function nextCentreSequence()
-//    {
-//        // Get the last family
-//        $last_family = $this->families()->orderByDesc('centre_sequence')->first();
-//
-//        // Set a default
-//        $sequence = 1;
-//
-//        // Override it if the family has a sequence.
-//        if ($last_family && $last_family->centre_sequence) {
-//            $sequence = $last_family->centre_sequence +1;
-//        }
-//
-//        return $sequence;
-//    }
 
-//    /**
-//     * Get the Registrations for this Centre
-//     *
-//     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-//     */
-//    public function registrations()
-//    {
-//        return $this->hasMany('App\Registration');
-//    }
+    public function nextCentreSequence()
+    {
+        // Get the last family
+        $last_family = $this->families()->orderByDesc('centre_sequence')->first();
+
+        // Set a default
+        $sequence = 1;
+
+        // Override it if the family has a sequence.
+        if ($last_family && $last_family->centre_sequence) {
+            $sequence = $last_family->centre_sequence +1;
+        }
+
+        return $sequence;
+    }
+
+    /**
+     * Get the Registrations for this Centre
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function registrations()
+    {
+        return $this->hasMany('App\Registration');
+    }
 
     /**
      * Get the CentreUsers who belong to this Centre
@@ -81,9 +81,9 @@ class Centre extends Model
         return $this->hasMany('App\Centre', 'sponsor_id', 'sponsor_id');
     }
 
-//    public function families()
-//    {
-//        return $this->hasMany('App\Family', 'initial_centre_id');
-//    }
+    public function families()
+    {
+        return $this->hasMany('App\Family', 'initial_centre_id');
+    }
 
 }
