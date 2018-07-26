@@ -18,6 +18,7 @@ class Sponsor extends Model
      */
     protected $fillable = [
         'name',
+        'shortcode',
     ];
 
     /**
@@ -36,5 +37,15 @@ class Sponsor extends Model
     public function vouchers()
     {
         return $this->hasMany(Voucher::class);
+    }
+
+    /**
+     * Get the Sponsor's Centres
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function centres()
+    {
+        return $this->hasMany('App\Centre');
     }
 }
