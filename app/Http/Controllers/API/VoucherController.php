@@ -88,13 +88,16 @@ class VoucherController extends Controller
             // can we?
             if ($voucher->transitionAllowed($transition)) {
                 // Some-what naive
-                $voucher->trader_id = $trader->id;
+
+                $voucher->trader_id = ($request['transition'] == 'reject')
+                    ? null
+                    : $trader->id;
 
                 // this saves the model too.
                 $voucher->applyTransition($transition);
 
                 // Success for this one.
-                if ($transition == $request['transition']) {
+                if ($request['transition'] != 'reject') {
                     $success_codes[] = $voucher->code;
                 } else {
                     $reject_codes[] = $voucher->code;
