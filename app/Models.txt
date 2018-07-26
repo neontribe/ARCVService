@@ -8,7 +8,7 @@ Users   - a source of extra system events, and process products
 
 Voucher - a state machine for tracking processes
     creditor >~ Trader  // person who should be repaid
-    redeemer >~ User    // shoudl be shunted to reports
+    redeemer >~ User    // shoul be shunted to reports
     integer::assigned   //could be a family tables.
     string::code
     string::state
@@ -27,6 +27,10 @@ Trader  -   A payable entity that collects vouchers
 Market  -   A place where business is done
     string::name
     string::location
+
+Models and relationships moved over as part of system merge
+
+
 
 
 Service notes
