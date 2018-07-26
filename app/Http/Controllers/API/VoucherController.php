@@ -247,7 +247,7 @@ class VoucherController extends Controller
                 'message' => trans(
                     'api.messages.batch_voucher_submit',
                     [
-                    'success_amount' => count($responses['success']),
+                    'success_amount' => count($responses['success_add']),
                     'duplicate_amount' => count($responses['own_duplicate'])
                         + count($responses['other_duplicate']),
                     'invalid_amount' => count($responses['invalid']),
