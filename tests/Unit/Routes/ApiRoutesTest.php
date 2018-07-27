@@ -132,7 +132,7 @@ class ApiRoutesTest extends TestCase
         $this->actingAs($this->user, 'api')
             ->json('POST', route('api.voucher.transition'), $payload)
             ->assertStatus(200)
-            ->assertJson(['message' => trans('api.messages.voucher_success')])
+            ->assertJson(['message' => trans('api.messages.voucher_success_add')])
         ;
     }
 
@@ -205,6 +205,31 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
+    public function testRejectToAllocateVoucherRoute()
+    {
+        // Get a valid allocated code.
+        $code = $this->vouchers[0]->code;
+        $payload= [
+            'transition' => 'collect',
+            'trader_id' => 1,
+            'vouchers' => [
+                $code,
+            ]
+        ];
+        $this->user->traders()->sync([1]);
+        $this->actingAs($this->user, 'api')
+            ->json('POST', route('api.voucher.transition'), $payload)
+            ->assertStatus(200)
+            ->assertJson(['message' => trans('api.messages.voucher_success_add')])
+        ;
+
+        $payload['transition'] = 'reject';
+        $this->actingAs($this->user, 'api')
+            ->json('POST', route('api.voucher.transition'), $payload)
+            ->assertStatus(200)
+            ->assertJson(['message' => trans('api.messages.voucher_success_reject')])
+        ;
+    }
 
     public function testUnauthenticatedDontCollectVoucherRoute()
     {

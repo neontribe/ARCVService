@@ -3,7 +3,8 @@
 return [
 
     'messages' => [
-        'voucher_success' => 'Voucher is valid',
+        'voucher_success_add' => 'Voucher is valid',
+        'voucher_success_reject' => 'Voucher removed',
         'batch_voucher_submit' => 'Thanks! Your queue has been successfully submitted. :success_amount voucher(s) accepted, :duplicate_amount duplicate(s) and :invalid_amount invalid.',
         'email_voucher_history' => 'Thanks. If you don\'t receive an email with your voucher records, please try again later.',
         'email_voucher_history_date' => 'Thanks, we\'ve received your request for payment records from :date. If you don\'t receive an email with your voucher records, please try again later.',
@@ -15,5 +16,6 @@ return [
         'voucher_invalid' => 'That isn\'t a valid voucher code, please check the number and try again.',
         'voucher_own_dupe' => 'You have already submitted voucher code :code.',
         'voucher_other_dupe' => 'It looks like the code (:code) has been used already, please double check and try again. If you are still unable to add the voucher code, don\'t worry - mark it as "already used", send it in with your other vouchers and you will still be paid when we receive it.',
+        'voucher_failed_reject' => 'I\'m sorry, we couldn\'t undo that for you at this time. Let us know about this code when you send in your vouchers.',
     ]
 ];

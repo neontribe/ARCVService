@@ -33,7 +33,7 @@ class StateHistoryManager
 
         $model->history()->create([
             "transition" => $event->getTransition(),
-            "from" => "", // what the state was before.
+            "from" => $event->getState(), // what the state was before.
             "to" => $sm->getState(),
             "user_id" => auth()->id(),
             "source" => "",

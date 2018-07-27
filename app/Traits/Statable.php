@@ -8,9 +8,9 @@
 
 namespace App\Traits;
 
+use Illuminate\Database\Eloquent\Model;
 use SM\Factory\FactoryInterface;
 use SM\StateMachine\StateMachine;
-use Log;
 
 /**
  * Class Statable
@@ -34,6 +34,16 @@ trait Statable
             $this->stateMachine = app(FactoryInterface::class)->get($this, self::SM_CONFIG);
         }
         return $this->stateMachine;
+    }
+
+    /**
+     * gets the prior state associated with the Stateable model.
+     *
+     * @return self::HISTORY_MODEL
+     */
+    public function getPriorState()
+    {
+        return $this->history()->get(null)->last();
     }
 
     /**
