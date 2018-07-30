@@ -11,10 +11,14 @@ class SponsorsSeeder extends Seeder
      */
     public function run()
     {
+        //create one admin sponsor
+        factory(App\Sponsor::class, 1)->create(["id" => 0]);
+
+        //create RVNT sponsor for tests
         $sponsor = ['name' => "Real Virtual Project", "shortcode" =>"RVNT"];
         factory(App\Sponsor::class)->create($sponsor);
 
-        // And 4 default factory models.
-        factory(App\Sponsor::class, 4)->create();
+        // And 5 default factory models to be able to mirror live data
+        factory(App\Sponsor::class, 5)->create();
     }
 }
