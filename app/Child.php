@@ -105,7 +105,8 @@ class Child extends Model
             $years = 5;
         }
         $school_year = $this->dob->addYears($years)->year;
-        return Carbon::createFromDate($school_year, $school_month)->startOfMonth();
+        //day needs to be set to one as carbon gets confused on 31st
+        return Carbon::createFromDate($school_year, $school_month, 1);
     }
 
     /**
