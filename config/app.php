@@ -4,6 +4,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Seed set
+    |--------------------------------------------------------------------------
+    |
+    | This value is the seed mode for the application. 'Dev' is development,
+    | 'Usability' is for the public usability testing.
+    */
+
+    'seeds' => env('APP_SEEDS', 'Dev'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Name
     |--------------------------------------------------------------------------
     |
@@ -189,13 +200,14 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\CustomValidationProvider::class,
-
+        // Extras
         Barryvdh\Debugbar\ServiceProvider::class, //DebugBar
         Barryvdh\Cors\ServiceProvider::class, //CORS framework
-        Maatwebsite\Excel\ExcelServiceProvider::class,
+        Barryvdh\DomPDF\ServiceProvider::class, //PDF Maker
+        Maatwebsite\Excel\ExcelServiceProvider::class, //Excel sheet generation
         Sebdesign\SM\ServiceProvider::class, //FSM
-        Optimus\ApiConsumer\Provider\LaravelServiceProvider::class,
-
+        Optimus\ApiConsumer\Provider\LaravelServiceProvider::class, //Passport assitance
+        TomLingham\Searchy\SearchyServiceProvider::class, //"Fuzzy" search in MySQL/MariaDB/Postgres (NOT SQLite)
     ],
 
     /*
@@ -224,7 +236,6 @@ return [
         'DB' => Illuminate\Support\Facades\DB::class,
         'Eloquent' => Illuminate\Database\Eloquent\Model::class,
         'Event' => Illuminate\Support\Facades\Event::class,
-        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
         'File' => Illuminate\Support\Facades\File::class,
         'Gate' => Illuminate\Support\Facades\Gate::class,
         'Hash' => Illuminate\Support\Facades\Hash::class,
@@ -245,11 +256,12 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-        /*
-         * Convenience Facades
-         */
+        // Extras
         'Debugbar' => Barryvdh\Debugbar\Facade::class,
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+        'PDF' => Barryvdh\DomPDF\Facade::class,
         'StateMachine' => Sebdesign\SM\Facade::class,
+        'Searchy' => TomLingham\Searchy\Facades\Searchy::class,
 
     ],
 
