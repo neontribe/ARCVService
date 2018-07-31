@@ -11,7 +11,7 @@
             {!! csrf_field() !!}
             <div class="col">
                 <div>
-                    <img src="{{ asset('assets/group-light.svg') }}" name="logo">
+                    <img src="{{ asset('store/assets/group-light.svg') }}" name="logo">
                     <h2>Adding voucher collectors</h2>
                 </div>
                 <div>
@@ -44,7 +44,7 @@
             </div>
             <div class="col">
                 <div>
-                    <img src="{{ asset('assets/pregnancy-light.svg') }}" name="logo">
+                    <img src="{{ asset('store/assets/pregnancy-light.svg') }}" name="logo">
                     <h2>Adding children or pregnancies</h2>
                 </div>
                 <div>
@@ -70,7 +70,7 @@
             </div>
             <div class="col">
                 <div>
-                    <img src="{{ asset('assets/info-light.svg') }}" name="logo">
+                    <img src="{{ asset('store/assets/info-light.svg') }}" name="logo">
                     <h2>Other information</h2>
                 </div>
                 <div>

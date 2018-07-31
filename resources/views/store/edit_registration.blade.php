@@ -13,7 +13,7 @@
             <input type="hidden" name="registration" value="{{ $registration->id }}">
             <div class="col">
                 <div>
-                    <img src="{{ asset('assets/group-light.svg') }}" name="logo">
+                    <img src="{{ asset('store/assets/group-light.svg') }}" name="logo">
                     <h2>Voucher collectors</h2>
                 </div>
                 <div>
@@ -52,7 +52,7 @@
 
             <div class="col">
                 <div>
-                    <img src="{{ asset('assets/pregnancy-light.svg') }}" name="logo">
+                    <img src="{{ asset('store/assets/pregnancy-light.svg') }}" name="logo">
                     <h2>Children or pregnancy</h2>
                 </div>
                 <div>
@@ -94,7 +94,7 @@
             </div>
             <div class="col collect">
                 <div>
-                    <img src="{{ asset('assets/info-light.svg') }}" name="logo">
+                    <img src="{{ asset('store/assets/info-light.svg') }}" name="logo">
                     <h2>This family</h2>
                 </div>
                 <div>

@@ -15,7 +15,7 @@
           </td>
           <td class="week-commencing">
             <p>Week commencing</p>
-            <img src="{{ asset('assets/date-field.svg') }}">
+            <img src="{{ asset('store/assets/date-field.svg') }}">
           </td>
         </tr>
       </table>

@@ -12,7 +12,7 @@
         </div>
     @endif
     <div class="logo">
-        <img src="{{ asset('assets/logo.png') }}" name="logo">
+        <img src="{{ asset('store/assets/logo.png') }}" name="logo">
     </div>
     @if (!Auth::guest())
         <div>

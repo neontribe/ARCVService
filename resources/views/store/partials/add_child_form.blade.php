@@ -14,7 +14,7 @@
 </div>
 
 @section('hoist-head')
-	<script src="{{ asset('js/moment-2.20.1.min.js')}}"></script>
+	<script src="{{ asset('store/js/moment-2.20.1.min.js')}}"></script>
 @endsection
 
 <script>

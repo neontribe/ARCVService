@@ -45,7 +45,7 @@
                 <button type="submit">Log In</button>
                 <div class="links">
                     <a href="{{ route('password.request') }}">Forgot Your Password?</a>
-                    <a href="/privacy_policy.html">Privacy Policy</a>
+                    <a href="/store/privacy_policy.html">Privacy Policy</a>
                 </div>
             </form>
         </div>
