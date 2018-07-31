@@ -117,7 +117,7 @@ class RegistrationController extends Controller
                 'registrations' => $registrations,
             ]
         );
-        return view('service.index_registration', $data);
+        return view('store.index_registration', $data);
     }
 
     /**
@@ -132,7 +132,7 @@ class RegistrationController extends Controller
             "user_name" => $user->name,
             "centre_name" => ($user->centre) ? $user->centre->name : null,
         ];
-        return view('service.create_registration', $data);
+        return view('store.create_registration', $data);
     }
 
     /**
@@ -161,7 +161,7 @@ class RegistrationController extends Controller
         // Grab carers copy for shift)ing without altering family->carers
         $carers = $registration->family->carers->all();
 
-        return view('service.edit_registration', array_merge(
+        return view('store.edit_registration', array_merge(
             $data,
             [
                 'registration' => $registration,
@@ -211,7 +211,7 @@ class RegistrationController extends Controller
         ];
 
         // throw at a PDF
-        $pdf = PDF::loadView('service.printables.family', $data);
+        $pdf = PDF::loadView('store.printables.family', $data);
         $pdf->setPaper('A4', 'landscape');
         return @$pdf->download($filename);
     }
@@ -271,7 +271,7 @@ class RegistrationController extends Controller
 
         // throw it at a PDF.
         $pdf = PDF::loadView(
-            'service.printables.family',
+            'store.printables.family',
             $data
         );
         $pdf->setPaper('A4', 'landscape');

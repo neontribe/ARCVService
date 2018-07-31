@@ -34,7 +34,7 @@ class CentreController extends Controller
         $filename = 'CC' . $centre->id . 'Regs_' . Carbon::now()->format('YmdHis') .'.pdf';
 
         $pdf = PDF::loadView(
-            'service.printables.families',
+            'store.printables.families',
             [
                 'sheet_title' => 'Printable Register',
                 'sheet_header' => 'Register',
