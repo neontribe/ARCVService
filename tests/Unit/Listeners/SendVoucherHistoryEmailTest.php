@@ -88,6 +88,7 @@ class SendVoucherHistoryEmailTest extends TestCase
         $listener->handle($event);
 
         // We can improve this - but test basic data is correct.
+        // uses laravel helper function e() to prevent errors from names with apostrophes
         $this->seeEmailWasSent()
             ->seeEmailTo($user->email)
             ->seeEmailSubject('Rose Voucher Payment Records')
