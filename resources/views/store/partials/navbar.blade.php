@@ -1,6 +1,6 @@
 <div class="subnav">
     <ul>
-        @if ( Request::route()->getName() != 'service.dashboard' )
+        @if ( Request::route()->getName() !== 'service.dashboard' )
           <li class="left"><a href="{{ URL::route("service.base") }}"><i class="fa fa-arrow-left" aria-hidden="true"></i>Return to main menu</a></li>
         @else
           <div class="left"></div>

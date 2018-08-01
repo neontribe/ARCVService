@@ -45,7 +45,7 @@
 @if (! empty($salutation))
 {{ $salutation }}
 @else
-Regards,<br> Rose Vouchers
+    Regards,<p>{{ config('app.name') }}</p>
 @endif
 
 {{-- Subcopy --}}

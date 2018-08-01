@@ -197,7 +197,7 @@
                     @endif
                 </div>
                 <div class="print-button">
-                    <button onclick="window.open( '{{ URL::route( "service.registration.print", ["id" => $registration->id]) }}' ); return false">
+                    <button onclick="window.open( '{{ URL::route("service.registration.print", ["id" => $registration->id]) }}'); return false">
                         Print a 4 week collection sheet for this family
                     </button>
                 </div>

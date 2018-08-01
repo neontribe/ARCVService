@@ -101,7 +101,7 @@
                             <br>{{ $reminder['entity'] }} has {{ $reminder['reason'] }}</br>
                         @endforeach
                         @foreach( $reg["family"]->getNoticeReasons() as $notices)
-                            <br> {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }} currently "{{ $notices['reason'] }}"</br>
+                            <br> {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }} currently "{{ $notices['reason'] }}"
                         @endforeach
                         @else
                             <p>No reminders for this family.</p>
