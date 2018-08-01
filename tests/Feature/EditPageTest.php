@@ -5,7 +5,7 @@ namespace Tests;
 use App\Carer;
 use App\Centre;
 use App\Child;
-use App\User;
+use App\CentreUser;
 use App\Registration;
 use Auth;
 use Carbon\Carbon;
@@ -18,11 +18,11 @@ class EditPageTest extends TestCase
 
     /**
      * @var Centre $centre
-     * @var User $user
+     * @var CentreUser $centreUser
      * @var Registration $registration
      */
     private $centre;
-    private $user;
+    private $centreUser;
     private $registration;
 
     public function setUp()
@@ -31,8 +31,8 @@ class EditPageTest extends TestCase
 
         $this->centre = factory(Centre::class)->create();
 
-        // Create a User
-        $this->user =  factory(User::class)->create([
+        // Create a CentreUser
+        $this->centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -49,7 +49,7 @@ class EditPageTest extends TestCase
     public function itShowsAPrimaryCarerInput()
     {
         $pri_carer = $this->registration->family->carers->first();
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration ]))
             ->seeElement('input[name="carer"][value="'. $pri_carer->name .'"]')
         ;
@@ -58,7 +58,7 @@ class EditPageTest extends TestCase
     /** @test */
     public function itShowsASecondaryCarerInput()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration ]))
             ->seeElement('input[name="carer_adder_input"]')
             ->seeElement('button[id="add-dob"]')
@@ -85,7 +85,7 @@ class EditPageTest extends TestCase
         $this->assertTrue($carers->count() == 3);
 
         // Find the edit page
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration ]))
         ;
         // See the names in the page
@@ -100,7 +100,7 @@ class EditPageTest extends TestCase
     /** @test */
     public function itShowsAChildInputComplex()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration ]))
             ->seeElement('input[name="dob-month"]')
             ->seeElement('input[name="dob-year"]')
@@ -125,7 +125,7 @@ class EditPageTest extends TestCase
         $this->assertTrue($children->count() == 4);
 
         // Find the edit page
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration ]))
         ;
         // See the names in the page
@@ -141,7 +141,7 @@ class EditPageTest extends TestCase
     /** @test */
     public function itShowsALogoutButton()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration ]))
             ->seeInElement('button[type=submit]', 'Log out')
         ;
@@ -150,7 +150,7 @@ class EditPageTest extends TestCase
     /** @test */
     public function itShowsAFormSaveButton()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration ]))
             ->seeInElement('button[type=submit]', 'Save Changes')
         ;
@@ -160,7 +160,7 @@ class EditPageTest extends TestCase
     public function itOnlyShowsAFoodMattersInputsToFoodMattersUsers()
     {
         // Create a FM User
-        $users[] = factory(User::class)->create([
+        $users[] = factory(CentreUser::class)->create([
             "name"  => "test FM user",
             "email" => "testufmser@example.com",
             "password" => bcrypt('test_fm_user_pass'),
@@ -168,7 +168,7 @@ class EditPageTest extends TestCase
             "role" => 'foodmatters_user',
         ]);
 
-        $users[] = factory(User::class)->create([
+        $users[] = factory(CentreUser::class)->create([
             "name"  => "test cc user",
             "email" => "testccuser@example.com",
             "password" => bcrypt('test_cc_user_pass'),
@@ -176,18 +176,18 @@ class EditPageTest extends TestCase
             "role" => 'centre_user',
         ]);
 
-        foreach ($users as $user) {
-            $this->actingAs($user)
+        foreach ($users as $centreUser) {
+            $this->actingAs($centreUser)
                 ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration ]));
-            if ($user->can('updateDiary', Registration::class) ||
-                $user->can('updateChart', Registration::class)
+            if ($centreUser->can('updateDiary', Registration::class) ||
+                $centreUser->can('updateChart', Registration::class)
             ) {
                 $this->see('Documents Received:');
-                if ($user->can('updateChart')) {
+                if ($centreUser->can('updateChart')) {
                     $this->seeElement('input[type="hidden"][name="fm_chart"]');
                     $this->seeElement('input[type="checkbox"][name="fm_chart"]');
                 }
-                if ($user->can('updateDiary')) {
+                if ($centreUser->can('updateDiary')) {
                     $this->seeElement('input[type="hidden"][name="fm_diary"]');
                     $this->seeElement('input[type="checkbox"][name="fm_diary"]');
                 }
@@ -204,8 +204,8 @@ class EditPageTest extends TestCase
     /** @test */
     public function itShowsDiaryAndChartCheckedCorrectlyAsStoredInDatabase()
     {
-        // Create a User
-        $fmuser = factory(User::class)->create([
+        // Create a CentreUser
+        $fmuser = factory(CentreUser::class)->create([
             'name' => 'test fm user',
             'email' => 'testfmuser@example.com',
             'password' => bcrypt('test_fmuser_pass'),
@@ -288,8 +288,8 @@ class EditPageTest extends TestCase
     /** @test */
     public function itShowsPrivacyStatementCheckedCorrectlyAsStoredInDatabase()
     {
-        // Create a User
-        $fmuser = factory(User::class)->create([
+        // Create a CentreUser
+        $fmuser = factory(CentreUser::class)->create([
             'name' => 'test fm user',
             'email' => 'testfmuser@example.com',
             'password' => bcrypt('test_fmuser_pass'),
@@ -340,8 +340,8 @@ class EditPageTest extends TestCase
     /** @test */
     public function itLetsAnAuthedUserUpdateDiaryOrChartState()
     {
-        // Create a User
-        $fmuser = factory(User::class)->create([
+        // Create a CetnreUser
+        $fmuser = factory(CentreUser::class)->create([
             'name' => 'test fm user',
             'email' => 'testfmuser@example.com',
             'password' => bcrypt('test_fmuser_pass'),
@@ -435,8 +435,8 @@ class EditPageTest extends TestCase
     /** @test */
     public function itLetsAnAuthedUserUpdatePrivacyStatementState()
     {
-        // Create a User
-        $fmuser = factory(User::class)->create([
+        // Create a CentreUser
+        $fmuser = factory(CentreUser::class)->create([
             'name' => 'test fm user',
             'email' => 'testfmuser@example.com',
             'password' => bcrypt('test_fmuser_pass'),
@@ -495,17 +495,17 @@ class EditPageTest extends TestCase
     /** @test */
     public function itShowsTheLoggedInUserDetails()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration->id ]))
-            ->see($this->user->name)
-            ->see($this->user->centre->name)
+            ->see($this->centreUser->name)
+            ->see($this->centreUser->centre->name)
         ;
     }
 
     /** @test */
     public function itShowsTheLeavingFormIfFamilyIsOnScheme()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.edit', $this->registration->id))
             ->see('Remove this family')
         ;
@@ -518,7 +518,7 @@ class EditPageTest extends TestCase
         $family->leaving_on = Carbon::now();
         $family->leaving_reason = config('arc.leaving_reasons')[0];
         $family->save();
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.edit', $this->registration->id))
             ->dontSee('Remove this family')
         ;
@@ -527,7 +527,7 @@ class EditPageTest extends TestCase
     /** @test */
     public function itWillRejectLeavingWithoutAReason()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.edit', $this->registration->id))
             ->press('Remove this family')
             ->press('Yes')
@@ -541,7 +541,7 @@ class EditPageTest extends TestCase
     /** @test */
     public function itWillAcceptLeavingWithAReason()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.edit', $this->registration->id))
             ->press('Remove this family')
             ->select(config('arc.leaving_reasons')[0], 'leaving_reason')
@@ -553,7 +553,7 @@ class EditPageTest extends TestCase
     /** @test */
     public function itWillNotAcceptAnInvalidLeavingReason()
     {
-        $response = $this->actingAs($this->user)
+        $response = $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.edit', $this->registration->id))
             ->press('Remove this family')
             ->call(
@@ -573,7 +573,7 @@ class EditPageTest extends TestCase
         $family->leaving_on = Carbon::now();
         $family->leaving_reason = config('arc.leaving_reasons')[0];
         $family->save();
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.edit', $this->registration->id))
             // Throws Authorization exception 403. Expecting this exception doesn't seem to help.
             // Not sure this is the desired behaviour and it makes untestable. We need to handle gracefully.
@@ -590,9 +590,9 @@ class EditPageTest extends TestCase
         // Set Carbon::now to 01/01/2018
         Carbon::setTestNow(Carbon::parse('first day of January 2018'));
 
-        // Create a centre, user and registration
+        // Create a centre, centreuser and registration
         $centre = factory(Centre::class)->create();
-        $user =  factory(User::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "tester",
             "email" => "tester@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -622,7 +622,7 @@ class EditPageTest extends TestCase
         $family->children[2]->save();
 
         // Test that entering children's DOB's gives the expected age.
-        $this->actingAs($user)
+        $this->actingAs($centreUser)
             ->visit(URL::route('service.registration.edit', [ 'id' => $family->id ]))
             ->see('<td>1 yr, 1 mo</td>')
             ->see('<td>1 yr, 0 mo</td>')
