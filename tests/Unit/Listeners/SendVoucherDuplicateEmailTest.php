@@ -45,13 +45,14 @@ class SendVoucherDuplicateEmailTest extends TestCase
         $listener->handle($event);
 
         // We can improve this - but test basic data is correct.
+        // uses laravel helper function e() to prevent errors from names with apostrophes
         $this->seeEmailWasSent()
             ->seeEmailTo(config('mail.to_admin.address'))
             ->seeEmailSubject('Voucher Duplicate Entered Email')
             ->seeEmailContains('Hi ' . config('mail.to_admin.name'))
-            ->seeEmailContains($user->name . ' has tried to submit voucher')
+            ->seeEmailContains(e($user->name) . ' has tried to submit voucher')
             ->seeEmailContains($vouchercode . ' against')
-            ->seeEmailContains($trader->name . ' of')
+            ->seeEmailContains(e($trader->name) . ' of')
             ->seeEmailContains($market->name . '\'s account, however that voucher has already been submitted by another trader.')
         ;
     }
@@ -69,13 +70,14 @@ class SendVoucherDuplicateEmailTest extends TestCase
         $listener->handle($event);
 
         // We can improve this - but test basic data is correct.
+        // uses laravel helper function e() to prevent errors from names with apostrophes
         $this->seeEmailWasSent()
             ->seeEmailTo(config('mail.to_admin.address'))
             ->seeEmailSubject('Voucher Duplicate Entered Email')
             ->seeEmailContains('Hi ' . config('mail.to_admin.name'))
-            ->seeEmailContains($user->name . ' has tried to submit voucher')
+            ->seeEmailContains(e($user->name) . ' has tried to submit voucher')
             ->seeEmailContains($vouchercode . ' against')
-            ->seeEmailContains($trader->name . ' of')
+            ->seeEmailContains(e($trader->name) . ' of')
             ->seeEmailContains('no associated market' . '\'s account, however that voucher has already been submitted by another trader.')
         ;
     }
