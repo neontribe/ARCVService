@@ -31,6 +31,6 @@ class DashboardController extends Controller
             "print_button_text" => $pref_collection ? 'Print collection sheet' : 'Print all family sheets',
             "print_route" => $print_route,
         ];
-        return view('service.dashboard', $data);
+        return view('store.dashboard', $data);
     }
 }

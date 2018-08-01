@@ -34,7 +34,7 @@ class FamilyController extends Controller
         $family->save();
         // Successful deactivation. Go back to registration/ family search listing
         return redirect()
-            ->route('service.registration.index')
+            ->route('store.registration.index')
             ->with('message', 'Family ' . $family->id . ' de-activated.');
     }
 }
