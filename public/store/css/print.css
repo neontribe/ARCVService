@@ -1,0 +1,213 @@
+@font-face {
+	font-family: 'Lato';
+	src: url('Lato/Lato-Regular.ttf') format('truetype');
+}
+
+body {
+	font-family: 'Lato', sans-serif;
+	font-size: 15px;
+}
+
+html {
+	padding: 1.5em;
+	margin: 2em 1.5em 1em 1.5em;
+}
+
+h1,
+h2,
+h3 {
+	margin: 0;
+}
+
+h1 {
+	width: 100%;
+	text-align: center;
+	margin: 1rem;
+	font-size: 25px;
+}
+
+h2 {
+	font-size: 20px;
+	margin-left: 5px;
+}
+
+h3 {
+	font-size: 15px;
+	margin-left: 5px;
+}
+
+p {
+	margin: 0;
+}
+
+th {
+	text-align: left;
+	padding: 5px;
+}
+
+th > p {
+	margin: 0;
+	font-size: 15px;
+	text-align: right;
+}
+
+th > * {
+	display: inline-block;
+}
+
+td {
+	text-align: center;
+	padding: 18px;
+}
+
+th,
+td {
+	border: 1px solid #a74e94;
+	font-weight: 400;
+	font-size: 15px;
+}
+
+.titles td {
+	padding: 5px;
+}
+
+.content .more-info {
+	border: 1px solid #fff;
+	margin-top: 10px;
+	page-break-after: always;
+	page-break-inside: avoid;
+}
+
+.content .no-page-break {
+	page-break-after: never;
+}
+
+.more-info th,
+.more-info td,
+.info th,
+.info td {
+	border: none;
+	text-align: left;
+	padding: 5px;
+}
+
+.more-info div {
+	border: 1px solid #a74e94;
+	border-radius: 10px;
+	margin: 0;
+	padding: 10px;
+	font-size: 12px;
+}
+
+.more-info h3,
+.info h3,
+.colspan i {
+	color: #a74e94;
+}
+
+.colspan {
+	vertical-align: top;
+}
+
+.vouchers {
+	font-size: 1.0rem;
+}
+
+.header {
+	display: flex;
+	justify-content: space-between;
+}
+
+.header > img {
+	height: 70px;
+}
+
+.content .info {
+	border: 1px solid #fff;
+}
+
+.info img {
+	width: 180px;
+	height: 20px;
+}
+
+.info td {
+	width: 50%;
+	padding: 0;
+	margin: 0;
+}
+
+.info.general {
+	margin-top: 30px;
+}
+
+.info.general p {
+	font-size: 12px;
+}
+
+.info.centre td {
+	width: 70%;
+}
+
+.info.centre .week-commencing {
+	width: 30%;
+}
+
+.week-commencing * {
+	display: inline-block;
+}
+
+.content {
+	width: 90%;
+	margin-left: 5%;
+}
+
+.content.families {
+	width: 100%;
+	margin: 0;
+}
+
+.content > table {
+	width: 100%;
+	border-collapse: collapse;
+	empty-cells: show;
+	border: 1px solid #a74e94;
+}
+
+.families_table th {
+	padding: 0 10px;
+	text-align: center;
+}
+
+.families_table td {
+	padding: 0.5rem;
+}
+
+.print-notes {
+	text-align: right;
+	font-size: 10px;
+}
+
+/* Table cell spacing */
+
+.sml-cell {
+	width: 1%;
+}
+
+.med-cell {
+	width: 15%;
+}
+
+.lrg-cell {
+	width: 25%;
+}
+/* Removes printout of automatic header and footer */
+@media print {
+	@page {
+		margin: 0px;
+	}
+
+	.content {
+		page-break-after: always;
+	}
+}
