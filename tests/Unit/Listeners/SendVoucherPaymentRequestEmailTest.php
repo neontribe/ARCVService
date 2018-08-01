@@ -81,13 +81,14 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
         $listener->handle($event);
 
         // We can improve this - but test basic data is correct.
+        // uses laravel helper function e() to prevent errors from names with apostrophes
         $this->seeEmailWasSent()
             ->seeEmailTo(config('mail.to_admin.address'))
             ->seeEmailSubject('Rose Voucher Payment Request')
             ->seeEmailContains('Hi ' . config('mail.to_admin.name'))
-            ->seeEmailContains($user->name . ' has just successfully requested payment for')
+            ->seeEmailContains(e($user->name) . ' has just successfully requested payment for')
             ->seeEmailContains($vouchers->count() . ' vouchers')
-            ->seeEmailContains($trader->name . ' of')
+            ->seeEmailContains(e($trader->name) . ' of')
         ;
     }
 }
