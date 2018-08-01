@@ -13,7 +13,10 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        Commands\LegacyImport::class
+        Commands\LegacyImport::class,
+        Commands\RegisterFamiliesFromFile::class,
+        Commands\AddSponsor::class,
+        Commands\AddCentre::class,
     ];
 
     /**
