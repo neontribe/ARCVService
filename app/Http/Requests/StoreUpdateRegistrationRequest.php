@@ -15,7 +15,6 @@ class StoreUpdateRegistrationRequest extends FormRequest
      */
     public function authorize()
     {
-        // Todo: replace with check that user can make this request rather than wave them through.
         // Refuse updates to off-scheme users.
         $registration = Registration::find($this->route('registration'))->first();
         return (!isset($registration->family->leaving_on));

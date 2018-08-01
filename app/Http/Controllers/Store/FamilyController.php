@@ -8,8 +8,6 @@ use Carbon\Carbon;
 use App\Registration;
 use App\Family;
 use App\Http\Controllers\Controller;
-use Log;
-use Gate;
 
 class FamilyController extends Controller
 {
@@ -25,6 +23,7 @@ class FamilyController extends Controller
     public function update(StoreUpdateRegistrationFamilyRequest $request, Registration $registration)
     {
         // get Family
+        /** @var  $family Family */
         $family = $registration->family;
 
         // Set leaving date
