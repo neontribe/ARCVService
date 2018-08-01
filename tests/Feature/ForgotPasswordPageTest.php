@@ -1,7 +1,7 @@
 <?php
 
 use App\Centre;
-use App\User;
+use App\CentreUser;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Spinen\MailAssertions\MailTracking;
 use Tests\TestCase;
@@ -14,10 +14,10 @@ class ForgotPasswordPageTest extends TestCase
 
     /**
      * @var Centre $centre
-     * @var User $user
+     * @var CentreUser $centreUser
      */
     private $centre;
-    private $user;
+    private $centreUser;
 
     public function setUp()
     {
@@ -25,8 +25,8 @@ class ForgotPasswordPageTest extends TestCase
 
         $this->centre = factory(Centre::class)->create();
 
-        // Create a User
-        $this->user =  factory(User::class)->create([
+        // Create a CentreUser
+        $this->centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
