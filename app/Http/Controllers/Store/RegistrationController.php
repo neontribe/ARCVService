@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Service;
+namespace App\Http\Controllers\Store;
 
 use App\Family;
 use App\Carer;
