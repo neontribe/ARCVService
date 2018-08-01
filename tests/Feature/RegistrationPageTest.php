@@ -2,7 +2,7 @@
 
 use App\Centre;
 use App\Registration;
-use App\User;
+use App\CentreUser;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
@@ -12,10 +12,10 @@ class RegistrationPageTest extends TestCase
 
     /**
      * @var Centre $centre
-     * @var User $user
+     * @var CentreUser $centreUser
      */
     private $centre;
-    private $user;
+    private $centreUser;
 
     public function setUp()
     {
@@ -23,8 +23,8 @@ class RegistrationPageTest extends TestCase
 
         $this->centre = factory(Centre::class)->create();
 
-        // Create a User
-        $this->user =  factory(User::class)->create([
+        // Create a CentreUser
+        $this->centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -35,7 +35,7 @@ class RegistrationPageTest extends TestCase
     /** @test */
     public function itShowsAPrimaryCarerInput()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.create'))
             ->seeElement('input[name="carer"]')
         ;
@@ -44,7 +44,7 @@ class RegistrationPageTest extends TestCase
     /** @test */
     public function itShowsASecondaryCarerInput()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.create'))
             ->seeElement('input[name="carer_adder_input"]')
             ->seeElement('button[id="add-dob"]')
@@ -54,7 +54,7 @@ class RegistrationPageTest extends TestCase
     /** @test */
     public function itShowsAChildInputComplex()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.create'))
             ->seeElement('input[name="dob-month"]')
             ->seeElement('input[name="dob-year"]')
@@ -65,7 +65,7 @@ class RegistrationPageTest extends TestCase
     /** @test */
     public function itShowsAConsentCheckbox()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.create'))
             ->seeElement('input[type=checkbox][name="consent"]')
         ;
@@ -74,7 +74,7 @@ class RegistrationPageTest extends TestCase
     /** @test */
     public function itShowsAnEligabilityRadioGroup()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.create'))
             ->seeElement('input[type=radio][id="healthy-start"][checked]')
             ->seeElement('input[type=radio][id="other"]')
@@ -84,7 +84,7 @@ class RegistrationPageTest extends TestCase
     /** @test */
     public function itShowsAFormSaveButton()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.create'))
             ->seeInElement('button[type=Submit]', 'Save Family')
         ;
@@ -93,7 +93,7 @@ class RegistrationPageTest extends TestCase
     /** @test */
     public function itShowsALogoutButton()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.create'))
             ->seeInElement('button[type=submit]', 'Log out')
         ;
@@ -102,10 +102,10 @@ class RegistrationPageTest extends TestCase
     /** @test */
     public function itShowsTheLoggedInUserDetails()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.create'))
-            ->see($this->user->name)
-            ->see($this->user->centre->name)
+            ->see($this->centreUser->name)
+            ->see($this->centreUser->centre->name)
         ;
     }
 
@@ -120,7 +120,7 @@ class RegistrationPageTest extends TestCase
 
         //Test that clicking on a (non)link throws an Error
         //and remains on the registration page.
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.create'))
             ->click('logo')
             ->seePageIs(URL::route('service.registration.create'));
@@ -132,7 +132,7 @@ class RegistrationPageTest extends TestCase
         // There are no registrations
         $this->assertEquals(0, Registration::get()->count());
 
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.create'))
             ->type('Test Carer', 'carer')
             ->check('consent')
@@ -158,7 +158,7 @@ class RegistrationPageTest extends TestCase
         // There are no registrations
         $this->assertEquals(0, Registration::get()->count());
 
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.create'))
             ->type('Test Carer', 'carer')
             ->press('Save Family')
@@ -179,7 +179,7 @@ class RegistrationPageTest extends TestCase
         // There are no registrations
         $this->assertEquals(0, Registration::get()->count());
 
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.create'))
             ->check('consent')
             ->press('Save Family')
