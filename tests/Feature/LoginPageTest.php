@@ -8,7 +8,7 @@ class LoginPageTest extends TestCase
 
     use DatabaseMigrations;
 
-    private $user = null;
+    private $centreUser = null;
     private $centre = null;
 
     public function setUp()
@@ -17,8 +17,8 @@ class LoginPageTest extends TestCase
 
         $this->centre = factory(App\Centre::class)->create();
 
-        // Create a User
-        $this->user =  factory(App\User::class)->create([
+        // Create a CentreUser
+        $this->centreUser =  factory(App\CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -40,8 +40,8 @@ class LoginPageTest extends TestCase
     public function itDoesNotShowTheLoggedInUserDetails()
     {
         $this->visit(URL::route('service.login'))
-            ->dontSee($this->user->name)
-            ->dontSee($this->user->centre->name)
+            ->dontSee($this->centreUser->name)
+            ->dontSee($this->centreUser->centre->name)
         ;
     }
 
