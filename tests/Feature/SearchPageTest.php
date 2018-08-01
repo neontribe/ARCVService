@@ -14,17 +14,17 @@ class SearchPageTest extends TestCase
         // Create some centres
         factory(App\Centre::class, 4)->create();
 
-        // Create a User
-        $user =  factory(App\User::class)->create([
+        // Create a CentreUser
+        $centreUser =  factory(App\CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
             "centre_id" => 1,
         ]);
 
-        $this->actingAs($user)
+        $this->actingAs($centreUser)
             ->visit(URL::route('service.registration.index'))
-            ->see($user->name)
+            ->see($centreUser->name)
         ;
     }
 
@@ -42,8 +42,8 @@ class SearchPageTest extends TestCase
         $centre1 = $centres->first();
         $centre2 = $centres->last();
 
-        // Create a User in Centre 1
-        $user =  factory(App\User::class)->create([
+        // Create a CentreUser in Centre 1
+        $centreUser =  factory(App\CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -61,7 +61,7 @@ class SearchPageTest extends TestCase
         ]);
 
         // Visit the page
-        $this->actingAs($user)
+        $this->actingAs($centreUser)
             ->visit(URL::route('service.registration.index'));
 
         $registrations = $registrations1->concat($registrations2);
@@ -85,8 +85,8 @@ class SearchPageTest extends TestCase
             "sponsor_id" => $sponsor->id,
         ]);
 
-        // Create a User in Centre
-        $user =  factory(App\User::class)->create([
+        // Create a CentreUser in Centre
+        $centreUser =  factory(App\CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -98,7 +98,7 @@ class SearchPageTest extends TestCase
             "centre_id" => $centre->id,
         ]);
 
-        $this->actingAs($user)
+        $this->actingAs($centreUser)
             ->visit(URL::route('service.registration.index'));
 
         // Check we can see the edit link with the registration ID in it.
@@ -126,8 +126,8 @@ class SearchPageTest extends TestCase
         $centre1 = $neighbor_centres->first();
         $centre2 = $neighbor_centres->last();
 
-        // Create a User in Centre 1
-        $user =  factory(App\User::class)->create([
+        // Create a CentreUser in Centre 1
+        $centreUser =  factory(App\CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -149,7 +149,7 @@ class SearchPageTest extends TestCase
             "centre_id" => $alien_centre->id,
         ]);
 
-        $this->actingAs($user)
+        $this->actingAs($centreUser)
             ->visit(URL::route('service.registration.index'));
 
         // Check we can see the edit link with the registration ID in it.
@@ -166,8 +166,8 @@ class SearchPageTest extends TestCase
         // Create a Centre (and, implicitly a random Sponsor)
         $centre = factory(App\Centre::class)->create();
 
-        // Create a User
-        $user =  factory(App\User::class)->create([
+        // Create a CentreUser
+        $centreUser =  factory(App\CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -183,7 +183,7 @@ class SearchPageTest extends TestCase
         $pri_carer = $registration->family->carers->first();
 
         // Spot the Registration Family's primary carer name
-        $this->actingAs($user)
+        $this->actingAs($centreUser)
             ->visit(URL::route('service.registration.index'))
             ->see($pri_carer->name);
     }
@@ -194,8 +194,8 @@ class SearchPageTest extends TestCase
         // Create a Centre
         $centre = factory(App\Centre::class)->create();
 
-        // Create a User
-        $user =  factory(App\User::class)->create([
+        // Create a CentreUser
+        $centreUser =  factory(App\CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -208,7 +208,7 @@ class SearchPageTest extends TestCase
         ]);
 
         // Spot the Registration family's RVID
-        $this->actingAs($user)
+        $this->actingAs($centreUser)
             ->visit(URL::route('service.registration.index'))
             ->see($registration->family->rvid);
     }
@@ -219,8 +219,8 @@ class SearchPageTest extends TestCase
         // Create a Centre
         $centre = factory(App\Centre::class)->create();
 
-        // Create a User
-        $user =  factory(App\User::class)->create([
+        // Create a CentreUser
+        $centreUser =  factory(App\CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -233,7 +233,7 @@ class SearchPageTest extends TestCase
         ]);
 
         // Spot the Registration family's RVID
-        $this->actingAs($user)
+        $this->actingAs($centreUser)
             ->visit(URL::route('service.registration.index'))
             ->see('<td class="center">' . $registration->family->entitlement . "</td>");
     }
@@ -249,8 +249,8 @@ class SearchPageTest extends TestCase
             "sponsor_id" => $sponsor->id,
         ]);
 
-        // Create a User in Centre
-        $user =  factory(App\User::class)->create([
+        // Create a CentreUser in Centre
+        $centreUser =  factory(App\CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -263,7 +263,7 @@ class SearchPageTest extends TestCase
         ]);
 
         // Visit search page, make sure next page link is present and works
-        $this->actingAs($user)
+        $this->actingAs($centreUser)
             ->visit(URL::route('service.registration.index'))
             ->see('<a href="' . URL::route('service.base') . '/registration?page=2' . '" rel="next">»</a>')
             ->click('»')
@@ -276,8 +276,8 @@ class SearchPageTest extends TestCase
         // Create a Centre (and, implicitly a random Sponsor)
         $centre = factory(App\Centre::class)->create();
 
-        // Create a User
-        $user =  factory(App\User::class)->create([
+        // Create a centreUser
+        $centreUser =  factory(App\CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -297,7 +297,7 @@ class SearchPageTest extends TestCase
         sort($pri_carers);
 
         // Spot the Registration Family's primary carer name
-        $this->actingAs($user)
+        $this->actingAs($centreUser)
             ->visit(URL::route('service.registration.index'));
 
         $selector = 'td.pri_carer';
@@ -311,8 +311,8 @@ class SearchPageTest extends TestCase
     {
         $centre = factory(App\Centre::class)->create();
 
-        // Create a User
-        $user =  factory(App\User::class)->create([
+        // Create a CentreUser
+        $centreUser =  factory(App\CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -324,7 +324,7 @@ class SearchPageTest extends TestCase
             "centre_id" => $centre->id,
         ]);
 
-        $this->actingAs($user)
+        $this->actingAs($centreUser)
             ->visit(URL::route('service.registration.index'))
         ;
 
@@ -339,8 +339,8 @@ class SearchPageTest extends TestCase
     {
         $centre = factory(App\Centre::class)->create();
 
-        // Create a User
-        $user =  factory(App\User::class)->create([
+        // Create a CentreUser
+        $centreUser =  factory(App\CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -354,7 +354,7 @@ class SearchPageTest extends TestCase
 
         // Spot the pagination links, expecting 2 pages.
         $selector = 'ul.pagination li';
-        $this->actingAs($user)
+        $this->actingAs($centreUser)
             ->visit(URL::route('service.registration.index'))
             ->seeInElementAtPos($selector, "«", 0)
             ->seeInElementAtPos($selector, "1", 1)
@@ -368,8 +368,8 @@ class SearchPageTest extends TestCase
     {
         $centre = factory(App\Centre::class)->create();
 
-        // Create a User
-        $user =  factory(App\User::class)->create([
+        // Create a Centre User
+        $centreUser =  factory(App\CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -387,7 +387,7 @@ class SearchPageTest extends TestCase
         $leavingFamily->leaving_reason = config('arc.leaving_reasons')[0];
         $leavingFamily->save();
 
-        $this->actingAs($user)
+        $this->actingAs($centreUser)
             ->visit(URL::route('service.registration.index'));
 
         $this->assertCount(1, $this->crawler->filter('tr.inactive'));
@@ -399,8 +399,8 @@ class SearchPageTest extends TestCase
     {
         $centre = factory(App\Centre::class)->create();
 
-        // Create a User
-        $user =  factory(App\User::class)->create([
+        // Create a CentreUser
+        $centreUser =  factory(App\CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -418,7 +418,7 @@ class SearchPageTest extends TestCase
         $leavingFamily->leaving_reason = config('arc.leaving_reasons')[0];
         $leavingFamily->save();
 
-        $this->actingAs($user)
+        $this->actingAs($centreUser)
             ->visit(URL::route('service.registration.index'));
 
         // Check the number of enabled and disabled buttons.
