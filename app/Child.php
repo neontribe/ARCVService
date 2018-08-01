@@ -160,9 +160,9 @@ class Child extends Model
 
             // Calculate notices
             $is_almost_one = ($first_birthday->isFuture() &&
-                ($today->diffInMonths($first_birthday) < 1)) ;
+                ($today->diffInMonths($first_birthday) <= 1)) ;
             $is_almost_school_age = ($first_schoolday->isFuture() &&
-                (($today->diffInMonths($first_schoolday) < 1) ? true : false));
+                (($today->diffInMonths($first_schoolday) <= 1) ? true : false));
 
             // Populate notices and credits arrays.
             ($is_almost_one) ? $notices[] = self::NOTICE_TYPES["ChildIsAlmostOne"]: false;
