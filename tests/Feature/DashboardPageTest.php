@@ -4,7 +4,7 @@ namespace Tests;
 
 use App\Centre;
 use App\Registration;
-use App\User;
+use App\CentreUser;
 use Auth;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use URL;
@@ -15,11 +15,11 @@ class DashboardPageTest extends TestCase
 
     /**
      * @var Centre $centre
-     * @var User $user
+     * @var CentreUser $centreUser
      * @var Registration $registration
      */
     private $centre;
-    private $user;
+    private $centreUser;
     private $registration;
 
     public function setUp()
@@ -28,8 +28,8 @@ class DashboardPageTest extends TestCase
 
         $this->centre = factory(Centre::class)->create();
 
-        // Create a User
-        $this->user =  factory(User::class)->create([
+        // Create a CentreUser
+        $this->centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -46,7 +46,7 @@ class DashboardPageTest extends TestCase
     public function itShowsTheExportButtonWhenUserCanExport()
     {
         // Create an FM User
-        $fmuser =  factory(User::class)->create([
+        $fmuser =  factory(CentreUser::class)->create([
             "name"  => "FM test user",
             "email" => "testfmuser@example.com",
             "password" => bcrypt('test_fmuser_pass'),
@@ -55,7 +55,7 @@ class DashboardPageTest extends TestCase
         ]);
 
         // Create a CC user
-        $ccuser =  factory(User::class)->create([
+        $ccuser =  factory(CentreUser::class)->create([
             "name"  => "CC test user",
             "email" => "testccuser@example.com",
             "password" => bcrypt('test_ccuser_pass'),
@@ -79,10 +79,10 @@ class DashboardPageTest extends TestCase
     /** @test */
     public function itShowsTheLoggedInUserDetails()
     {
-        $this->actingAs($this->user)
+        $this->actingAs($this->centreUser)
             ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration->id ]))
-            ->see($this->user->name)
-            ->see($this->user->centre->name)
+            ->see($this->centreUser->name)
+            ->see($this->centreUser->centre->name)
         ;
     }
 
@@ -92,7 +92,7 @@ class DashboardPageTest extends TestCase
         // Set centre print_pref to 'collection'.
         $this->centre->print_pref = 'collection';
         $this->centre->save();
-        $this->actingAs($this->user->fresh())
+        $this->actingAs($this->centreUser->fresh())
             ->visit(url::route('service.dashboard'))
             ->see('Print collection sheet')
             ->see(URL::route('service.centre.registrations.collection', ['id' => $this->centre->id ]))
@@ -101,7 +101,7 @@ class DashboardPageTest extends TestCase
         // Set centre print_pref to 'individual'.
         $this->centre->print_pref = 'individual';
         $this->centre->save();
-        $this->actingAs($this->user->fresh())
+        $this->actingAs($this->centreUser->fresh())
             ->visit(url::route('service.dashboard'))
             ->see('Print all family sheets')
             ->see(URL::route('service.registrations.print'))
