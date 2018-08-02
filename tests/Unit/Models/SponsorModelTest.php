@@ -47,28 +47,29 @@ class SponsorModelTest extends TestCase
         $this->assertCount(10, $this->sponsor->vouchers);
         $this->assertNotEquals($this->sponsor->vouchers, Voucher::all());
     }
+
     /** @test */
     public function itHasExpectedAttributes()
     {
-        $sponsor = factory(Sponsor::class)->make();
-        $this->assertNotNull($sponsor->name);
-        $this->assertNotNull($sponsor->shortcode);
+        $s = $this->sponsor;
+        $this->assertNotNull($s->name);
+        $this->assertNotNull($s->shortcode);
     }
 
     /** @test */
     public function itCanHaveCentres()
     {
         // Make a sponsor
-        $sponsor = factory(Sponsor::class)->create();
-        // Is supposed to auto associate but not working since moved across from store so sponsor ID passed to centres
-        $centres = factory(Centre::class, 2)->create(['sponsor_id' => $sponsor->id]);
-        $sponsor->fresh();
+        $s = $this->sponsor;
+        // Create a center, will auto associate to sponsorgit checkout
+        $centres = factory(Centre::class, 2)->create();
+        $s->fresh();
 
         // Check it's got centres
-        $this->assertNotNull($sponsor->centres);
+        $this->assertNotNull($s->centres);
 
         // Check the expected associations
-        $this->assertEquals(2, $sponsor->centres->count());
+        $this->assertEquals(2, $s->centres->count());
 
         // Check they really are the same Centres
         foreach ($centres as $index => $centre) {

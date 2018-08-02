@@ -75,17 +75,7 @@ $factory->state(App\CentreUser::class, 'withRandomCentre', function () {
 });
 
 /**
- * Basic sponsor for Market and Trader Testing
- */
-$factory->define(App\Sponsor::class, function (Faker\Generator $faker) {
-    return [
-        'name' => $faker->company,
-        'shortcode' => $faker->regexify('[A-Z]{2,5}'),
-    ];
-});
-
-/**
- * Sponsor, or Local Authority for CC Testing
+ * Sponsor for testing
  */
 $factory->define(App\Sponsor::class, function (Faker\Generator $faker) {
 
