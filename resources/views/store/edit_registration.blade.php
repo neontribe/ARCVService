@@ -204,7 +204,7 @@
             </div>
         </form>
         @if (!isset($registration->family->leaving_on) )
-        <form class="leaving" action="{{ URL::route('service.registration.family',['id' => $registration->id]) }}" method="post">
+        <form class="leaving" action="{{ URL::route('store.registration.family',['id' => $registration->id]) }}" method="post">
             {{ method_field('PUT') }}
             {!! csrf_field() !!}
             <div>

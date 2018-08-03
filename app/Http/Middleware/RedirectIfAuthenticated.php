@@ -18,10 +18,15 @@ class RedirectIfAuthenticated
     public function handle($request, Closure $next, $guard = null)
     {
         switch ($guard) {
+            case 'store':
+                if (Auth::guard($guard)->check()) {
+                    return redirect('store.base');
+                }
+                break;
             case 'admin':
             default:
                 if (Auth::guard($guard)->check()) {
-                    return redirect()->route('dashboard');
+                    return redirect()->route('admin.dashboard');
                 }
                 break;
         }

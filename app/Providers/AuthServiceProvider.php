@@ -4,7 +4,8 @@ namespace App\Providers;
 
 use App\CentreUser;
 use App\Registration;
-use App\Policies\RegistrationPolicy;
+use App\Trader;
+use App\Voucher;
 use Laravel\Passport\Passport;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -18,8 +19,9 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
-        \App\Trader::class => \App\Policies\Api\TraderPolicy::class,
-        \App\Voucher::class => \App\Policies\Api\VoucherPolicy::class,
+        Trader::class => \App\Policies\Api\TraderPolicy::class,
+        Voucher::class => \App\Policies\Api\VoucherPolicy::class,
+        CentreUser::class => \App\Policies\Store\RegistrationPolicy::class,
     ];
 
     /**
