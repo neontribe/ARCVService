@@ -15,5 +15,6 @@ return [
 
     'failed' => 'These credentials do not match our records.',
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
-
+    'exception' => 'Sorry, there was a permission problem. Please Log in.',
+    'expired' => 'Sorry, your session has timed out - has it been inactive for a bit?',
 ];
