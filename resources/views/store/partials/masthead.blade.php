@@ -6,7 +6,7 @@
                     Log out
                 </button>
             </form>
-            <form id="logout-form" action="{{ route('service.logout') }}" method="POST" style="display: none;">
+            <form id="logout-form" action="{{ route('store.logout') }}" method="POST" style="display: none;">
                 {{ csrf_field() }}
             </form>
         </div>

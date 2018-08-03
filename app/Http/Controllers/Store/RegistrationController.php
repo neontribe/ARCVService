@@ -232,7 +232,7 @@ class RegistrationController extends Controller
             Log::info('User ' . $user->id . " has no Centre");
             // Send me back to dashboard
             return redirect()
-                ->route('service.dashboard')
+                ->route('store.dashboard')
                 ->withErrors(['error_message' => 'User has no Centre']);
         }
 
@@ -346,13 +346,13 @@ class RegistrationController extends Controller
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getTraceAsString());
             // Throw it back to the user
-            return redirect()->route('service.registration.create')->withErrors('Registration failed.');
+            return redirect()->route('store.registration.create')->withErrors('Registration failed.');
         }
         // Or return the success
         Log::info('Registration ' . $registration->id . ' created by service user ' . Auth::id());
         // and go to the edit page for the new registration
         return redirect()
-            ->route('service.registration.edit', ['id' => $registration->id])
+            ->route('store.registration.edit', ['id' => $registration->id])
             ->with('message', 'Registration created.');
     }
 
@@ -450,13 +450,13 @@ class RegistrationController extends Controller
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getTraceAsString());
             // Throw it back to the user
-            return redirect()->route('service.registration.edit')->withErrors('Registration update failed.');
+            return redirect()->route('store.registration.edit')->withErrors('Registration update failed.');
         }
         // Or return the success
         Log::info('Registration ' . $registration->id . ' updated by service user ' . Auth::id());
         // and go back to edit page for the changed registration
         return redirect()
-            ->route('service.registration.edit', ['id' => $registration->id])
+            ->route('store.registration.edit', ['id' => $registration->id])
             ->with('message', 'Registration updated.');
     }
 }

@@ -39,9 +39,11 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapWebRoutes();
 
+        $this->mapDataRoutes();
+
         $this->mapServiceRoutes();
 
-        $this->mapDataRoutes();
+        $this->mapStoreRoutes();
     }
 
     /**
@@ -67,7 +69,8 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapApiRoutes()
     {
-        Route::prefix('api')
+        Route::domain(config('arc.service_domain'))
+            ->prefix('api')
             ->middleware('api')
             ->namespace($this->namespace . '\API')
             ->group(base_path('routes/api.php'));
@@ -80,7 +83,8 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapServiceRoutes()
     {
-        Route::middleware(['web'])
+        Route::domain(config('arc.service_domain'))
+            ->middleware(['web'])
             ->namespace($this->namespace . '\Service')
             ->group(base_path('routes/service.php'));
     }
@@ -92,9 +96,23 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapDataRoutes()
     {
-        Route::prefix('data')
+        Route::domain(config('arc.service_domain'))
+            ->prefix('data')
             ->middleware(['web', 'isNotProduction'])
             ->namespace($this->namespace . '\Service')
             ->group(base_path('routes/data.php'));
+    }
+
+    /**
+     * Define the "store" routes for the application.
+     *
+     * @return void
+     */
+    protected function mapStoreRoutes()
+    {
+        Route::domain(config('arc.store_domain'))
+            ->middleware(['web'])
+            ->namespace($this->namespace . '\Store')
+            ->group(base_path('routes/store.php'));
     }
 }
