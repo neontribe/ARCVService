@@ -46,8 +46,8 @@ Route::get('/', function () {
     return redirect()->route($route);
 })->name('store.base');
 
-Route::group(['middleware' => 'auth:web'], function () {
-    Route::get('/dashboard', 'DashboardController@index')->name('store.dashboard');
+Route::group(['middleware' => 'auth:store'], function () {
+    Route::get('dashboard', 'DashboardController@index')->name('store.dashboard');
 
     Route::resource('registration', 'RegistrationController', [
         'names' => [
