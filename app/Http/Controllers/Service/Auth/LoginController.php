@@ -61,7 +61,7 @@ class LoginController extends Controller
         if (Auth::guard('admin')->attempt(['email' => $request->email, 'password' => $request->password],
             $request->remember)) {
             // if successful, then redirect to their intended location
-            return redirect()->intended(route('dashboard'));
+            return redirect()->intended(route('admin.dashboard'));
         }
 
         // Throttle uses AuthenticatesUser trait's ThrottleLogins.
