@@ -1,17 +1,6 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-
-// Admin (Service) Authentication Routes...
+// Admin (Store) Authentication Routes...
 Route::get('login', [
     'as' => 'store.login',
     'uses' => 'Auth\LoginController@showLoginForm',
@@ -24,7 +13,7 @@ Route::post('logout', [
     'uses' => 'Auth\LoginController@logout',
 ]);
 
-// Admin (Service) Password Reset Routes...
+// Admin (Store) Password Reset Routes...
 Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')
     ->name('store.password.request')
 ;
@@ -36,7 +25,7 @@ Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm
 ;
 Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 
-// Service Dashboard route
+// Store Dashboard route
 // Default redirect to Service Dashboard
 
 // TODO : use of singular/plurals in route names; Mixed opinions found. discuss.

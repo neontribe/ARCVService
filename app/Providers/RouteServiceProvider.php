@@ -104,7 +104,7 @@ class RouteServiceProvider extends ServiceProvider
     }
 
     /**
-     * Define the "service" routes for the application.
+     * Define the "store" routes for the application.
      *
      * @return void
      */
