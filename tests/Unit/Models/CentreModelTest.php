@@ -50,7 +50,7 @@ class CentreModelTest extends TestCase
         $centreUsers = factory(CentreUser::class, 3)->create([
             'centre_id' => $centre->id,
         ]);
-        $centreUsers = $centre->CentreUsers;
+        $centreUsers = $centre->centreUsers;
         $this->assertInstanceOf(Collection::class, $centreUsers);
         $this->assertInstanceOf(CentreUser::class, $centreUsers[0]);
     }
