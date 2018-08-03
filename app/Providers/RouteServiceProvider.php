@@ -97,4 +97,16 @@ class RouteServiceProvider extends ServiceProvider
             ->namespace($this->namespace . '\Service')
             ->group(base_path('routes/data.php'));
     }
+
+    /**
+     * Define the "service" routes for the application.
+     *
+     * @return void
+     */
+    protected function mapStoreRoutes()
+    {
+        Route::middleware(['web'])
+            ->namespace($this->namespace . '\Store')
+            ->group(base_path('routes/store.php'));
+    }
 }
