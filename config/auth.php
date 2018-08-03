@@ -87,7 +87,7 @@ return [
 
         'store_users' => [
             'driver' => 'eloquent',
-            'model' => App\CenterUser::class,
+            'model' => App\CentreUser::class,
         ],
     ],
 
