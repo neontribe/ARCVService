@@ -4,9 +4,9 @@ use App\Centre;
 use App\CentreUser;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Spinen\MailAssertions\MailTracking;
-use Tests\TestCase;
+use Tests\StoreTestCase;
 
-class ForgotPasswordPageTest extends TestCase
+class ForgotPasswordPageTest extends StoreTestCase
 {
     use DatabaseMigrations;
     use MailTracking;
@@ -59,7 +59,7 @@ class ForgotPasswordPageTest extends TestCase
             ->press('Send Password Reset Link');
         $this->seeEmailWasSent()
             ->seeEmailSubjectEquals('Reset Password')
-            ->seeEmailContains('store.password/reset')
+            ->seeEmailContains('password/reset')
             ->seeEmailTo('testuser@example.com');
     }
 

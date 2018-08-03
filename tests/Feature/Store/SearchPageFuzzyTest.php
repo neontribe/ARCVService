@@ -1,9 +1,9 @@
 <?php
 
-use Tests\TestCase;
+use Tests\StoreTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
-class SearchPageFuzzyTest extends TestCase
+class SearchPageFuzzyTest extends StoreTestCase
 {
     use DatabaseMigrations;
 

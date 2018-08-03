@@ -1,10 +1,10 @@
 <?php
 
 use Carbon\Carbon;
-use Tests\TestCase;
+use Tests\StoreTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
-class SearchPageTest extends TestCase
+class SearchPageTest extends StoreTestCase
 {
     use DatabaseMigrations;
 

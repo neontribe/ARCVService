@@ -8,13 +8,13 @@ use App\CentreUser;
 use App\Registration;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use URL;
-use Tests\TestCase;
+use Tests\StoreTestCase;
 
-class StoreRoutesTest extends TestCase
+class StoreRoutesTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
-    /** @var CentreUser $user */
+    /** @var CentreUser $centreUser */
     private $centreUser;
 
     /** @var Centre $centre */
@@ -27,7 +27,7 @@ class StoreRoutesTest extends TestCase
         $this->centre = factory(Centre::class)->create();
 
         // Create a User
-        $this->user =  factory(CentreUser::class)->create([
+        $this->centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -44,7 +44,7 @@ class StoreRoutesTest extends TestCase
     public function testLoginGuestRoute()
     {
         Auth::logout();
-        $this->get(URL::route('service.login'))
+        $this->get(URL::route('store.login'))
             ->seePageIs(URL::route('store.login'))
             ->assertResponseStatus(200)
         ;
@@ -59,8 +59,8 @@ class StoreRoutesTest extends TestCase
     public function testForgotPasswordGuestRoute()
     {
         Auth::logout();
-        $this->get(URL::route('store.passwordrequest'))
-            ->seePageIs(URL::route('store.passwordrequest'))
+        $this->get(URL::route('store.password.request'))
+            ->seePageIs(URL::route('store.password.request'))
             ->assertResponseStatus(200)
         ;
     }

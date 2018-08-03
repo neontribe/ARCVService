@@ -4,9 +4,9 @@ use App\Centre;
 use App\CentreUser;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Tests\TestCase;
+use Tests\StoreTestCase;
 
-class ChangePasswordPageTest extends TestCase
+class ChangePasswordPageTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
@@ -42,8 +42,8 @@ class ChangePasswordPageTest extends TestCase
         $this->visit(route('store.password.reset', [ 'token' => $token ]))
             ->see('Reset Password')
             ->type($centreUser->email, 'email')
-            ->type('mynewpassword', 'store.password')
-            ->type('mynewpassword', 'store.password_confirmation')
+            ->type('mynewpassword', 'password')
+            ->type('mynewpassword', 'password_confirmation')
             ->press('Reset Password')
             ->seePageIs(route('store.dashboard'))
         ;
@@ -86,10 +86,10 @@ class ChangePasswordPageTest extends TestCase
         $this->visit(route('store.password.reset', [ 'token' => 'NotAHashedToken' ]))
             ->see('Reset Password')
             ->type($centreUser->email, 'email')
-            ->type('mynewpassword', 'store.password')
-            ->type('mynewpassword', 'store.password_confirmation')
+            ->type('mynewpassword', 'password')
+            ->type('mynewpassword', 'password_confirmation')
             ->press('Reset Password')
-            ->see(trans('store.passwords.token'));
+            ->see(trans('passwords.token'));
         ;
         // Load the centreuser again.
         $centreUser->fresh();

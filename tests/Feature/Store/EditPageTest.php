@@ -12,7 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use URL;
 
-class EditPageTest extends TestCase
+class EditPageTest extends StoreTestCase
 {
     use DatabaseMigrations;
 

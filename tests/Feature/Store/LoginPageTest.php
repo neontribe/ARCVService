@@ -1,9 +1,9 @@
 <?php
 
-use Tests\TestCase;
+use Tests\StoreTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
-class LoginPageTest extends TestCase
+class LoginPageTest extends StoreTestCase
 {
 
     use DatabaseMigrations;
@@ -82,7 +82,7 @@ class LoginPageTest extends TestCase
     {
         $this->visit(URL::route('store.login'))
             ->type('testuser@example.com', 'email')
-            ->type('test_user_pass', 'store.password')
+            ->type('test_user_pass', 'password')
             ->press('Log In')
             ->seePageIs(URL::route('store.dashboard'))
         ;
@@ -93,7 +93,7 @@ class LoginPageTest extends TestCase
     {
         $this->visit(URL::route('store.login'))
             ->type('notauser@example.com', 'email')
-            ->type('bad_user_pass', 'store.password')
+            ->type('bad_user_pass', 'password')
             ->press('Log In')
             ->seePageIs(URL::route('store.login'))
             ->see(trans('auth.failed'))
@@ -115,7 +115,7 @@ class LoginPageTest extends TestCase
     public function itRequiresAnEmailToLogin()
     {
         $this->visit(URL::route('store.login'))
-            ->type('test_user_pass', 'store.password')
+            ->type('test_user_pass', 'password')
             ->press('Log In')
             ->seePageIs(URL::route('store.login'))
             ->see(trans('validation.required', ['attribute' => "email"]));

@@ -9,7 +9,7 @@ use Auth;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use URL;
 
-class DashboardPageTest extends TestCase
+class DashboardPageTest extends StoreTestCase
 {
     use DatabaseMigrations;
 

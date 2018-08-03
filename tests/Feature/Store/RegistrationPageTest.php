@@ -3,10 +3,10 @@
 use App\Centre;
 use App\Registration;
 use App\CentreUser;
-use Tests\TestCase;
+use Tests\StoreTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
-class RegistrationPageTest extends TestCase
+class RegistrationPageTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
