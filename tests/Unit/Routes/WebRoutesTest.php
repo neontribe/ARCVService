@@ -8,14 +8,11 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 class WebRoutesTest extends TestCase
 {
     /**
-     * Verify content on dashboard.
+     * Null test,
      *
      * @return void
      */
-    public function testLoginRoute()
+    public function nullTest()
     {
-        $this->get('/login')
-            ->assertStatus(200)
-        ;
     }
 }

@@ -13,23 +13,23 @@ use Carbon\Carbon;
 // Admin (Service) Authentication Routes...
 Route::get('login', [
     'as' => 'admin.login',
-    'uses' => 'Service\Auth\LoginController@showLoginForm',
+    'uses' => 'Auth\LoginController@showLoginForm',
 ]);
-Route::post('login', 'Service\Auth\LoginController@login');
+Route::post('login', 'Auth\LoginController@login');
 
-Route::get('/', 'Service\AdminController@index')->name('admin.dashboard');
+Route::get('/', 'AdminController@index')->name('admin.dashboard');
 
 // Admin (Service) Password Reset Routes...
-Route::get('password/reset', 'Service\Auth\ForgotPasswordController@showLinkRequestForm')
+Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')
     ->name('admin.password.request')
 ;
-Route::post('password/email', 'Service\Auth\ForgotPasswordController@sendResetLinkEmail')
+Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')
     ->name('admin.password.email')
 ;
-Route::get('password/reset/{token}', 'Service\Auth\ResetPasswordController@showResetForm')
+Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')
     ->name('admin.password.reset')
 ;
-Route::post('admin.password/reset', 'Service\Auth\ResetPasswordController@reset');
+Route::post('admin.password/reset', 'Auth\ResetPasswordController@reset');
 
 Route::group(['middleware' => 'auth:admin'], function () {
     Route::get('vouchers', [
