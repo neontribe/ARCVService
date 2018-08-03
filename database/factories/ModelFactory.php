@@ -438,3 +438,12 @@ $factory->defineAs(App\Child::class, 'overSchoolAge', function (Faker\Generator 
         'dob' => $dob->toDateTimeString(),
     ];
 });
+//Note
+$factory->define(App\Note::class, function (Faker\Generator $faker){
+
+    return [
+        'content' => 'this is some note content',
+        'family_id' => 1,
+        'user_id' => 1,
+    ];
+});

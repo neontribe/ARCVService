@@ -34,9 +34,10 @@ class CentreUser extends Authenticatable
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
+    //Because of merge and refactoring User to CentreUser, FK has to be explicitly stated here
     public function notes()
     {
-        return $this->hasMany('App\Note');
+        return $this->hasMany('App\Note', 'user_id');
     }
 
     /**
