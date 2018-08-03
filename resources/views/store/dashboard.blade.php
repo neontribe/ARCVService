@@ -8,13 +8,13 @@
 
     <div class="content navigation">
         <ul>
-            <a href="{{ URL::route('service.registration.create') }}">
+            <a href="{{ URL::route('store.registration.create') }}">
                 <li>
                     <img src="{{ asset('store/assets/add-pregnancy-light.svg') }}" name="add-family">
                     Add a new family
                 </li>
             </a>
-            <a href="{{ URL::route('service.registration.index') }}">
+            <a href="{{ URL::route('store.registration.index') }}">
                 <li>
                     <img src="{{ asset('store/assets/search-light.svg') }}" name="search">
                     Search for a family
@@ -27,7 +27,7 @@
                 </li>
             </a>
             @can( 'export', App\Registration::class )
-            <a href="{{ URL::route('service.centres.registrations.summary') }}">
+            <a href="{{ URL::route('store.centres.registrations.summary') }}">
                 <li>
                     <img src="{{ asset('store/assets/export-light.svg') }}" name="export-registrations">
                     Export Registrations
