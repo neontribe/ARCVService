@@ -4,7 +4,7 @@
 
 @section('hoist-head')
     <!-- specifically to avoid login page timeout -->
-    <meta http-equiv="refresh" content="{{ (config('session.lifetime') * 60) - 30 }};url={{ route('service.login') }}" />
+    <meta http-equiv="refresh" content="{{ (config('session.lifetime') * 60) - 30 }};url={{ route('store.login') }}" />
 
     <div class="cookie-notice">
         <p>We use cookies to authenticate you so we can ensure that we give you the best experience on our website. For more information please read our <a href="/privacy_policy.html#cookie">Privacy Policy</a>.</p>
@@ -21,7 +21,7 @@
                     <strong>{{ $errors->first('error_message') }}</strong>
                 </div>
             @endif
-            <form role="form" method="POST" action="{{ route('service.login') }}">
+            <form role="form" method="POST" action="{{ route('store.login') }}">
                 {{ csrf_field() }}
                 <div>
                     <label for="email">Email Address</label>
@@ -44,7 +44,7 @@
                 </div>
                 <button type="submit">Log In</button>
                 <div class="links">
-                    <a href="{{ route('password.request') }}">Forgot Your Password?</a>
+                    <a href="{{ route('store.password.request') }}">Forgot Your Password?</a>
                     <a href="/store/privacy_policy.html">Privacy Policy</a>
                 </div>
             </form>

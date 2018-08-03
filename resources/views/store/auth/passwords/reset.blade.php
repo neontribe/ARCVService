@@ -12,7 +12,7 @@
             </div>
         @endif
 
-        <form role="form" method="POST" action="{{ route('password.request') }}">
+        <form role="form" method="POST" action="{{ route('store.password.request') }}">
             {{ csrf_field() }}
             <input type="hidden" name="token" value="{{ $token }}">
             <label for="email">Email Address</label>

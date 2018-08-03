@@ -58,12 +58,12 @@ class LoginController extends Controller
             'password' => 'required|min:6',
         ]);
         // Attempt to log the user in
-        if (Auth::guard('web')->attempt(
+        if (Auth::guard('store')->attempt(
             ['email' => $request->email, 'password' => $request->password],
             $request->remember
         )) {
             // if successful, then redirect to their intended location
-            return redirect()->intended(route('service.dashboard'));
+            return redirect()->intended(route('store.dashboard'));
         }
 
         // Throttle uses AuthenticatesUser trait's ThrottleLogins.
@@ -83,7 +83,7 @@ class LoginController extends Controller
         // If unsuccessful, then redirect back to the login with the form data
         // along with a message indicating the problem.
         return redirect()
-            ->route('service.login')
+            ->route('store.login')
             ->withInput($request->only('email', 'remember'))
             ->withErrors(['error_message' => trans('auth.failed')])
             ;
@@ -94,6 +94,6 @@ class LoginController extends Controller
         // Logout current user
         Auth::logout();
         // Boot to login page
-        return redirect()->route('service.login')->with("messages");
+        return redirect()->route('store.login')->with("messages");
     }
 }

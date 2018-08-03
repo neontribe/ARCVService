@@ -102,6 +102,6 @@ class Handler extends ExceptionHandler
         }
 
         return redirect()->guest($login)
-            ->withErrors(['error_message' => trans('store.auth.exception')]);
+            ->withErrors(['error_message' => trans('auth.exception')]);
     }
 }
