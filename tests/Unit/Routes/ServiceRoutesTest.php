@@ -18,4 +18,16 @@ class ServiceRoutesTest extends TestCase
             ->assertRedirect('/')
         ;
     }
+
+    /**
+     * Verify content on dashboard.
+     *
+     * @return void
+     */
+    public function testLoginRoute()
+    {
+        $this->get(route('admin.login'))
+            ->assertStatus(200)
+        ;
+    }
 }

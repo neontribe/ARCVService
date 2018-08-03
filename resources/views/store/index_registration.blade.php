@@ -7,7 +7,7 @@
     @include('store.partials.navbar', ['headerTitle' => 'Search for a family'])
     <div class="content search">
         <div>
-            <form action="{{ URL::route('service.registration.index') }}" method="GET" id="searchform">
+            <form action="{{ URL::route('store.registration.index') }}" method="GET" id="searchform">
                 {!! csrf_field() !!}
                 <div class="search-actions">
                     <input type="search" name="family_name" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Enter family name">
@@ -35,7 +35,7 @@
                             <td class="center">{{ $registration->family->entitlement }}</td>
                             <td class="center">{{ $registration->family->rvid }}</td>
                             <td>
-                            <button onclick="window.location.href='{{ URL::route('service.registration.edit', ['id' => $registration->id ]) }}'"
+                            <button onclick="window.location.href='{{ URL::route('store.registration.edit', ['id' => $registration->id ]) }}'"
                                 @if( isset($registration->family->leaving_on) ) disabled @endif
                             > Select</button>
                         </td>

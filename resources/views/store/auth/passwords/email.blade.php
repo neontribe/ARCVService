@@ -12,7 +12,7 @@
             </div>
         @endif
 
-        <form role="form" method="POST" action="{{ route('password.email') }}">
+        <form role="form" method="POST" action="{{ route('store.password.email') }}">
             {{ csrf_field() }}
             <label for="email">Email Address</label>
             <input id="email" class="login-input" type="email" name="email" value="{{ old('email') }}" required>

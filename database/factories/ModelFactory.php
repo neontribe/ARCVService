@@ -75,17 +75,7 @@ $factory->state(App\CentreUser::class, 'withRandomCentre', function () {
 });
 
 /**
- * Basic sponsor for Market and Trader Testing
- */
-$factory->define(App\Sponsor::class, function (Faker\Generator $faker) {
-    return [
-        'name' => $faker->company,
-        'shortcode' => $faker->regexify('[A-Z]{2,5}'),
-    ];
-});
-
-/**
- * Sponsor, or Local Authority for CC Testing
+ * Sponsor for testing
  */
 $factory->define(App\Sponsor::class, function (Faker\Generator $faker) {
 
@@ -436,5 +426,14 @@ $factory->defineAs(App\Child::class, 'overSchoolAge', function (Faker\Generator 
     return [
         'born' => $dob->isPast(),
         'dob' => $dob->toDateTimeString(),
+    ];
+});
+//Note
+$factory->define(App\Note::class, function (Faker\Generator $faker){
+
+    return [
+        'content' => 'this is some note content',
+        'family_id' => 1,
+        'user_id' => 1,
     ];
 });

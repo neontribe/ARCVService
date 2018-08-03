@@ -50,6 +50,11 @@ return [
             'driver' => 'passport',
             'provider' => 'users',
         ],
+
+        'store' => [
+            'driver' => 'session',
+            'provider' => 'store_users',
+        ],
     ],
 
     /*
@@ -79,6 +84,11 @@ return [
             'driver' => 'eloquent',
             'model' => App\AdminUser::class,
         ],
+
+        'store_users' => [
+            'driver' => 'eloquent',
+            'model' => App\CentreUser::class,
+        ],
     ],
 
     /*
@@ -107,6 +117,12 @@ return [
         // Our Service Admin users.
         'admins' => [
             'provider' => 'admins',
+            'table' => 'password_resets',
+            'expire' => 60,
+        ],
+
+        'store' => [
+            'provider' => 'store_users',
             'table' => 'password_resets',
             'expire' => 60,
         ],
