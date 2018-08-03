@@ -39,9 +39,11 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapWebRoutes();
 
+        $this->mapDataRoutes();
+
         $this->mapServiceRoutes();
 
-        $this->mapDataRoutes();
+        $this->mapStoreRoutes();
     }
 
     /**
@@ -67,7 +69,8 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapApiRoutes()
     {
-        Route::prefix('api')
+        Route::domain('arcv-service.test')
+            ->prefix('api')
             ->middleware('api')
             ->namespace($this->namespace . '\API')
             ->group(base_path('routes/api.php'));
@@ -80,7 +83,8 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapServiceRoutes()
     {
-        Route::middleware(['web'])
+        Route::domain('arcv-service.test')
+            ->middleware(['web'])
             ->namespace($this->namespace . '\Service')
             ->group(base_path('routes/service.php'));
     }
@@ -92,7 +96,8 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapDataRoutes()
     {
-        Route::prefix('data')
+        Route::domain('arcv-service.test')
+            ->prefix('data')
             ->middleware(['web', 'isNotProduction'])
             ->namespace($this->namespace . '\Service')
             ->group(base_path('routes/data.php'));
@@ -105,7 +110,8 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapStoreRoutes()
     {
-        Route::middleware(['web'])
+        Route::domain('arcv-store.test')
+            ->middleware(['web'])
             ->namespace($this->namespace . '\Store')
             ->group(base_path('routes/store.php'));
     }
