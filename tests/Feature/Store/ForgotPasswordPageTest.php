@@ -37,7 +37,7 @@ class ForgotPasswordPageTest extends TestCase
     /** @test */
     public function itHasAnEmailInput()
     {
-        $this->visit(route('password.request'))
+        $this->visit(route('store.password.request'))
             ->seeElement('input[type=email][name=email]')
         ;
     }
@@ -45,7 +45,7 @@ class ForgotPasswordPageTest extends TestCase
     /** @test */
     public function itHasASubmitButton()
     {
-        $this->visit(route('password.request'))
+        $this->visit(route('store.password.request'))
             ->seeElement('button[type=submit]')
             ->seeInElement('button[type=submit]', 'Send Password Reset Link')
         ;
@@ -54,19 +54,19 @@ class ForgotPasswordPageTest extends TestCase
     /** @test */
     public function itResetsPasswordForUserByEmailResetLink()
     {
-        $this->visit(route('password.request'))
+        $this->visit(route('store.password.request'))
             ->type('testuser@example.com', 'email')
             ->press('Send Password Reset Link');
         $this->seeEmailWasSent()
             ->seeEmailSubjectEquals('Reset Password')
-            ->seeEmailContains('password/reset')
+            ->seeEmailContains('store.password/reset')
             ->seeEmailTo('testuser@example.com');
     }
 
     /** @test */
     public function itCannotEffectRedirectWithAManipulatedRefererHeader()
     {
-        $this->visit(route('password.request'))
+        $this->visit(route('store.password.request'))
             ->see('Reset Password');
 
         $post_data = [

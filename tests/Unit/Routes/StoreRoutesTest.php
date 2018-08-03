@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use URL;
 use Tests\TestCase;
 
-class WebRoutesTest extends TestCase
+class StoreRoutesTest extends TestCase
 {
     use DatabaseMigrations;
 
@@ -36,18 +36,6 @@ class WebRoutesTest extends TestCase
     }
 
     /**
-     * Verify content on dashboard.
-     *
-     * @return void
-     */
-    public function testLoginRoute()
-    {
-        $this->get('/login')
-            ->assertStatus(200)
-        ;
-    }
-
-    /**
      * Verify login direct.
      *
      * @return void
@@ -57,7 +45,7 @@ class WebRoutesTest extends TestCase
     {
         Auth::logout();
         $this->get(URL::route('service.login'))
-            ->seePageIs(URL::route('service.login'))
+            ->seePageIs(URL::route('store.login'))
             ->assertResponseStatus(200)
         ;
     }
@@ -71,8 +59,8 @@ class WebRoutesTest extends TestCase
     public function testForgotPasswordGuestRoute()
     {
         Auth::logout();
-        $this->get(URL::route('password.request'))
-            ->seePageIs(URL::route('password.request'))
+        $this->get(URL::route('store.passwordrequest'))
+            ->seePageIs(URL::route('store.passwordrequest'))
             ->assertResponseStatus(200)
         ;
     }
@@ -80,12 +68,12 @@ class WebRoutesTest extends TestCase
     /** @test */
     public function testDashboardRouteGate()
     {
-        $route = URL::route('service.dashboard');
+        $route = URL::route('store.dashboard');
 
         Auth::logout();
         // You cannot get there logged out.
         $this->visit($route)
-            ->seePageIs(URL::route('service.login'))
+            ->seePageIs(URL::route('store.login'))
             ->assertResponseStatus(200)
         ;
         // You can get there logged in.
@@ -100,12 +88,12 @@ class WebRoutesTest extends TestCase
     public function testSearchRouteGate()
     {
 
-        $route = URL::route('service.registration.index');
+        $route = URL::route('store.registration.index');
 
         Auth::logout();
         // You cannot get there logged out.
         $this->visit($route)
-            ->seePageIs(URL::route('service.login'))
+            ->seePageIs(URL::route('store.login'))
             ->assertResponseStatus(200)
         ;
         // You can get there logged in.
@@ -125,12 +113,12 @@ class WebRoutesTest extends TestCase
             "centre_id" => $this->centre->id,
         ]);
 
-        $route = URL::route('service.registration.edit', [ 'registration' => $registration->id ]);
+        $route = URL::route('store.registration.edit', [ 'registration' => $registration->id ]);
 
         Auth::logout();
         // You cannot get there logged out.
         $this->visit($route)
-            ->seePageIs(URL::route('service.login'))
+            ->seePageIs(URL::route('store.login'))
             ->assertResponseStatus(200)
         ;
         // You can get there logged in.
@@ -149,8 +137,8 @@ class WebRoutesTest extends TestCase
             "centre_id" => $this->centre->id,
         ]);
 
-        $edit_route = URL::route('service.registration.edit', [ 'registration' => $registration->id ]);
-        $login_route = URL::route('service.login');
+        $edit_route = URL::route('store.registration.edit', [ 'registration' => $registration->id ]);
+        $login_route = URL::route('store.login');
 
         // You can get there logged in.
         $this->actingAs($this->centreUser)
@@ -199,13 +187,13 @@ class WebRoutesTest extends TestCase
             "centre_id" => $this->centre->id,
         ]);
 
-        $route = URL::route('service.centres.registrations.summary');
+        $route = URL::route('store.centres.registrations.summary');
 
         Auth::logout();
 
         // Bounce unauth'd to login
         $this->visit($route)
-            ->seePageIs(URL::route('service.login'))
+            ->seePageIs(URL::route('store.login'))
             ->assertResponseStatus(200)
         ;
 

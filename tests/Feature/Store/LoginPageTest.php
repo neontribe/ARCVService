@@ -29,7 +29,7 @@ class LoginPageTest extends TestCase
     /** @test */
     public function itShowsALoginPageWhenRouted()
     {
-        $this->visit(URL::route('service.login'))
+        $this->visit(URL::route('store.login'))
             ->assertResponseStatus(200)
             ->assertResponseOK()
             ->seeInElement('title', 'Login')
@@ -39,7 +39,7 @@ class LoginPageTest extends TestCase
     /** @test */
     public function itDoesNotShowTheLoggedInUserDetails()
     {
-        $this->visit(URL::route('service.login'))
+        $this->visit(URL::route('store.login'))
             ->dontSee($this->centreUser->name)
             ->dontSee($this->centreUser->centre->name)
         ;
@@ -48,15 +48,15 @@ class LoginPageTest extends TestCase
     /** @test */
     public function itShowsAForgotPasswordLink()
     {
-        $this->visit(URL::route('service.login'))
-            ->see('href="'. route('password.request') .'"')
+        $this->visit(URL::route('store.login'))
+            ->see('href="'. route('store.password.request') .'"')
         ;
     }
 
     /** @test */
     public function itShowsAUsernameInputBox()
     {
-        $this->visit(URL::route('service.login'))
+        $this->visit(URL::route('store.login'))
             ->seeElement('input[id=email]')
         ;
     }
@@ -64,7 +64,7 @@ class LoginPageTest extends TestCase
     /** @test */
     public function itShowsAPasswordInputBox()
     {
-        $this->visit(URL::route('service.login'))
+        $this->visit(URL::route('store.login'))
             ->seeElement('input[id=password]')
         ;
     }
@@ -72,30 +72,30 @@ class LoginPageTest extends TestCase
     /** @test */
     public function itDoesNotShowTheAuthUserMastheadWithLogoutLink()
     {
-        $this->visit(URL::route('service.login'))
-            ->dontSee('href="'. route('service.login') .'"')
+        $this->visit(URL::route('store.login'))
+            ->dontSee('href="'. route('store.login') .'"')
         ;
     }
 
     /** @test */
     public function itAllowsAValidUserToLogin()
     {
-        $this->visit(URL::route('service.login'))
+        $this->visit(URL::route('store.login'))
             ->type('testuser@example.com', 'email')
-            ->type('test_user_pass', 'password')
+            ->type('test_user_pass', 'store.password')
             ->press('Log In')
-            ->seePageIs(URL::route('service.dashboard'))
+            ->seePageIs(URL::route('store.dashboard'))
         ;
     }
 
     /** @test */
     public function itForbidsAnInvalidUserToLogin()
     {
-        $this->visit(URL::route('service.login'))
+        $this->visit(URL::route('store.login'))
             ->type('notauser@example.com', 'email')
-            ->type('bad_user_pass', 'password')
+            ->type('bad_user_pass', 'store.password')
             ->press('Log In')
-            ->seePageIs(URL::route('service.login'))
+            ->seePageIs(URL::route('store.login'))
             ->see(trans('auth.failed'))
         ;
     }
@@ -103,10 +103,10 @@ class LoginPageTest extends TestCase
     /** @test */
     public function itRequiresAPasswordToLogin()
     {
-        $this->visit(URL::route('service.login'))
+        $this->visit(URL::route('store.login'))
             ->type('testuser@example.com', 'email')
             ->press('Log In')
-            ->seePageIs(URL::route('service.login'))
+            ->seePageIs(URL::route('store.login'))
             ->see(trans('validation.required', ['attribute' => "password"]));
         ;
     }
@@ -114,10 +114,10 @@ class LoginPageTest extends TestCase
     /** @test */
     public function itRequiresAnEmailToLogin()
     {
-        $this->visit(URL::route('service.login'))
-            ->type('test_user_pass', 'password')
+        $this->visit(URL::route('store.login'))
+            ->type('test_user_pass', 'store.password')
             ->press('Log In')
-            ->seePageIs(URL::route('service.login'))
+            ->seePageIs(URL::route('store.login'))
             ->see(trans('validation.required', ['attribute' => "email"]));
         ;
     }

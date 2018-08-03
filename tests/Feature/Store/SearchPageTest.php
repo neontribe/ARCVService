@@ -23,7 +23,7 @@ class SearchPageTest extends TestCase
         ]);
 
         $this->actingAs($centreUser)
-            ->visit(URL::route('service.registration.index'))
+            ->visit(URL::route('store.registration.index'))
             ->see($centreUser->name)
         ;
     }
@@ -62,13 +62,13 @@ class SearchPageTest extends TestCase
 
         // Visit the page
         $this->actingAs($centreUser)
-            ->visit(URL::route('service.registration.index'));
+            ->visit(URL::route('store.registration.index'));
 
         $registrations = $registrations1->concat($registrations2);
 
         // Check we can see the edit link with the registration ID in it.
         foreach ($registrations as $registration) {
-            $edit_url_string = URL::route('service.registration.edit', [ 'id' => $registration->id]);
+            $edit_url_string = URL::route('store.registration.edit', [ 'id' => $registration->id]);
             $this->see($edit_url_string);
         }
     }
@@ -99,11 +99,11 @@ class SearchPageTest extends TestCase
         ]);
 
         $this->actingAs($centreUser)
-            ->visit(URL::route('service.registration.index'));
+            ->visit(URL::route('store.registration.index'));
 
         // Check we can see the edit link with the registration ID in it.
         foreach ($registrations as $registration) {
-            $edit_url_string = URL::route('service.registration.edit', [ 'id' => $registration->id]);
+            $edit_url_string = URL::route('store.registration.edit', [ 'id' => $registration->id]);
             $this->see($edit_url_string);
         }
     }
@@ -150,11 +150,11 @@ class SearchPageTest extends TestCase
         ]);
 
         $this->actingAs($centreUser)
-            ->visit(URL::route('service.registration.index'));
+            ->visit(URL::route('store.registration.index'));
 
         // Check we can see the edit link with the registration ID in it.
         foreach ($registrations3 as $registration) {
-            $edit_url_string = URL::route('service.registration.edit', [ 'id' => $registration->id]);
+            $edit_url_string = URL::route('store.registration.edit', [ 'id' => $registration->id]);
             $this->dontSee($edit_url_string);
         }
     }
@@ -184,7 +184,7 @@ class SearchPageTest extends TestCase
 
         // Spot the Registration Family's primary carer name
         $this->actingAs($centreUser)
-            ->visit(URL::route('service.registration.index'))
+            ->visit(URL::route('store.registration.index'))
             ->see($pri_carer->name);
     }
 
@@ -209,7 +209,7 @@ class SearchPageTest extends TestCase
 
         // Spot the Registration family's RVID
         $this->actingAs($centreUser)
-            ->visit(URL::route('service.registration.index'))
+            ->visit(URL::route('store.registration.index'))
             ->see($registration->family->rvid);
     }
 
@@ -234,7 +234,7 @@ class SearchPageTest extends TestCase
 
         // Spot the Registration family's RVID
         $this->actingAs($centreUser)
-            ->visit(URL::route('service.registration.index'))
+            ->visit(URL::route('store.registration.index'))
             ->see('<td class="center">' . $registration->family->entitlement . "</td>");
     }
 
@@ -264,10 +264,10 @@ class SearchPageTest extends TestCase
 
         // Visit search page, make sure next page link is present and works
         $this->actingAs($centreUser)
-            ->visit(URL::route('service.registration.index'))
-            ->see('<a href="' . URL::route('service.base') . '/registration?page=2' . '" rel="next">»</a>')
+            ->visit(URL::route('store.registration.index'))
+            ->see('<a href="' . URL::route('store.base') . '/registration?page=2' . '" rel="next">»</a>')
             ->click('»')
-            ->seePageIs(URL::route('service.base') . '/registration?page=2');
+            ->seePageIs(URL::route('store.base') . '/registration?page=2');
     }
 
     /** @test */
@@ -298,7 +298,7 @@ class SearchPageTest extends TestCase
 
         // Spot the Registration Family's primary carer name
         $this->actingAs($centreUser)
-            ->visit(URL::route('service.registration.index'));
+            ->visit(URL::route('store.registration.index'));
 
         $selector = 'td.pri_carer';
         foreach ($pri_carers as $index => $pri_carer) {
@@ -325,7 +325,7 @@ class SearchPageTest extends TestCase
         ]);
 
         $this->actingAs($centreUser)
-            ->visit(URL::route('service.registration.index'))
+            ->visit(URL::route('store.registration.index'))
         ;
 
 
@@ -355,7 +355,7 @@ class SearchPageTest extends TestCase
         // Spot the pagination links, expecting 2 pages.
         $selector = 'ul.pagination li';
         $this->actingAs($centreUser)
-            ->visit(URL::route('service.registration.index'))
+            ->visit(URL::route('store.registration.index'))
             ->seeInElementAtPos($selector, "«", 0)
             ->seeInElementAtPos($selector, "1", 1)
             ->seeInElementAtPos($selector, "2", 2)
@@ -388,7 +388,7 @@ class SearchPageTest extends TestCase
         $leavingFamily->save();
 
         $this->actingAs($centreUser)
-            ->visit(URL::route('service.registration.index'));
+            ->visit(URL::route('store.registration.index'));
 
         $this->assertCount(1, $this->crawler->filter('tr.inactive'));
         $this->assertCount(9, $this->crawler->filter('tr.active'));
@@ -419,7 +419,7 @@ class SearchPageTest extends TestCase
         $leavingFamily->save();
 
         $this->actingAs($centreUser)
-            ->visit(URL::route('service.registration.index'));
+            ->visit(URL::route('store.registration.index'));
 
         // Check the number of enabled and disabled buttons.
         $this->assertCount(1, $this->crawler->filter('tr.inactive button:disabled'));

@@ -64,15 +64,15 @@ class DashboardPageTest extends TestCase
         ]);
 
         $this->actingAs($ccuser)
-            ->visit(URL::route('service.dashboard'))
-            ->dontSee(URL::route('service.centres.registrations.summary'))
+            ->visit(URL::route('store.dashboard'))
+            ->dontSee(URL::route('store.centres.registrations.summary'))
         ;
 
         Auth::logout();
 
         $this->actingAs($fmuser)
-            ->visit(URL::route('service.dashboard'))
-            ->see(URL::route('service.centres.registrations.summary'))
+            ->visit(URL::route('store.dashboard'))
+            ->see(URL::route('store.centres.registrations.summary'))
         ;
     }
 
@@ -80,7 +80,7 @@ class DashboardPageTest extends TestCase
     public function itShowsTheLoggedInUserDetails()
     {
         $this->actingAs($this->centreUser)
-            ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration->id ]))
+            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration->id ]))
             ->see($this->centreUser->name)
             ->see($this->centreUser->centre->name)
         ;
@@ -93,18 +93,18 @@ class DashboardPageTest extends TestCase
         $this->centre->print_pref = 'collection';
         $this->centre->save();
         $this->actingAs($this->centreUser->fresh())
-            ->visit(url::route('service.dashboard'))
+            ->visit(url::route('store.dashboard'))
             ->see('Print collection sheet')
-            ->see(URL::route('service.centre.registrations.collection', ['id' => $this->centre->id ]))
+            ->see(URL::route('store.centre.registrations.collection', ['id' => $this->centre->id ]))
         ;
 
         // Set centre print_pref to 'individual'.
         $this->centre->print_pref = 'individual';
         $this->centre->save();
         $this->actingAs($this->centreUser->fresh())
-            ->visit(url::route('service.dashboard'))
+            ->visit(url::route('store.dashboard'))
             ->see('Print all family sheets')
-            ->see(URL::route('service.registrations.print'))
+            ->see(URL::route('store.registrations.print'))
         ;
     }
 }

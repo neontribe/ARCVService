@@ -50,7 +50,7 @@ class EditPageTest extends TestCase
     {
         $pri_carer = $this->registration->family->carers->first();
         $this->actingAs($this->centreUser)
-            ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
             ->seeElement('input[name="carer"][value="'. $pri_carer->name .'"]')
         ;
     }
@@ -59,7 +59,7 @@ class EditPageTest extends TestCase
     public function itShowsASecondaryCarerInput()
     {
         $this->actingAs($this->centreUser)
-            ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
             ->seeElement('input[name="carer_adder_input"]')
             ->seeElement('button[id="add-dob"]')
         ;
@@ -86,7 +86,7 @@ class EditPageTest extends TestCase
 
         // Find the edit page
         $this->actingAs($this->centreUser)
-            ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
         ;
         // See the names in the page
         foreach ($carers as $sec_carer) {
@@ -101,7 +101,7 @@ class EditPageTest extends TestCase
     public function itShowsAChildInputComplex()
     {
         $this->actingAs($this->centreUser)
-            ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
             ->seeElement('input[name="dob-month"]')
             ->seeElement('input[name="dob-year"]')
             ->seeElement('button[id="add-dob"]')
@@ -126,7 +126,7 @@ class EditPageTest extends TestCase
 
         // Find the edit page
         $this->actingAs($this->centreUser)
-            ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
         ;
         // See the names in the page
         foreach ($children as $child) {
@@ -142,7 +142,7 @@ class EditPageTest extends TestCase
     public function itShowsALogoutButton()
     {
         $this->actingAs($this->centreUser)
-            ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
             ->seeInElement('button[type=submit]', 'Log out')
         ;
     }
@@ -151,7 +151,7 @@ class EditPageTest extends TestCase
     public function itShowsAFormSaveButton()
     {
         $this->actingAs($this->centreUser)
-            ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
             ->seeInElement('button[type=submit]', 'Save Changes')
         ;
     }
@@ -178,7 +178,7 @@ class EditPageTest extends TestCase
 
         foreach ($users as $centreUser) {
             $this->actingAs($centreUser)
-                ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration ]));
+                ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]));
             if ($centreUser->can('updateDiary', Registration::class) ||
                 $centreUser->can('updateChart', Registration::class)
             ) {
@@ -244,7 +244,7 @@ class EditPageTest extends TestCase
         ]);
 
         foreach ($regs as $reg) {
-            $route = URL::route('service.registration.edit', ['id' => $reg->id]);
+            $route = URL::route('store.registration.edit', ['id' => $reg->id]);
             Auth::logout();
             $this->actingAs($fmuser)
                 ->visit($route)
@@ -312,7 +312,7 @@ class EditPageTest extends TestCase
         ]);
 
         foreach ($regs as $reg) {
-            $route = URL::route('service.registration.edit', ['id' => $reg->id]);
+            $route = URL::route('store.registration.edit', ['id' => $reg->id]);
             Auth::logout();
             $this->actingAs($fmuser)
                 ->visit($route)
@@ -380,7 +380,7 @@ class EditPageTest extends TestCase
         ]);
 
         foreach ($regs as $reg) {
-            $route = URL::route('service.registration.edit', ['id' => $reg->id]);
+            $route = URL::route('store.registration.edit', ['id' => $reg->id]);
             $this->actingAs($fmuser)
                 ->visit($route);
 
@@ -459,7 +459,7 @@ class EditPageTest extends TestCase
         ]);
 
         foreach ($regs as $reg) {
-            $route = URL::route('service.registration.edit', ['id' => $reg->id]);
+            $route = URL::route('store.registration.edit', ['id' => $reg->id]);
             $this->actingAs($fmuser)
                 ->visit($route);
 
@@ -496,7 +496,7 @@ class EditPageTest extends TestCase
     public function itShowsTheLoggedInUserDetails()
     {
         $this->actingAs($this->centreUser)
-            ->visit(URL::route('service.registration.edit', [ 'id' => $this->registration->id ]))
+            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration->id ]))
             ->see($this->centreUser->name)
             ->see($this->centreUser->centre->name)
         ;
@@ -506,7 +506,7 @@ class EditPageTest extends TestCase
     public function itShowsTheLeavingFormIfFamilyIsOnScheme()
     {
         $this->actingAs($this->centreUser)
-            ->visit(URL::route('service.registration.edit', $this->registration->id))
+            ->visit(URL::route('store.registration.edit', $this->registration->id))
             ->see('Remove this family')
         ;
     }
@@ -519,7 +519,7 @@ class EditPageTest extends TestCase
         $family->leaving_reason = config('arc.leaving_reasons')[0];
         $family->save();
         $this->actingAs($this->centreUser)
-            ->visit(URL::route('service.registration.edit', $this->registration->id))
+            ->visit(URL::route('store.registration.edit', $this->registration->id))
             ->dontSee('Remove this family')
         ;
    }
@@ -528,7 +528,7 @@ class EditPageTest extends TestCase
     public function itWillRejectLeavingWithoutAReason()
     {
         $this->actingAs($this->centreUser)
-            ->visit(URL::route('service.registration.edit', $this->registration->id))
+            ->visit(URL::route('store.registration.edit', $this->registration->id))
             ->press('Remove this family')
             ->press('Yes')
             // Still see header of leaving popup
@@ -542,11 +542,11 @@ class EditPageTest extends TestCase
     public function itWillAcceptLeavingWithAReason()
     {
         $this->actingAs($this->centreUser)
-            ->visit(URL::route('service.registration.edit', $this->registration->id))
+            ->visit(URL::route('store.registration.edit', $this->registration->id))
             ->press('Remove this family')
             ->select(config('arc.leaving_reasons')[0], 'leaving_reason')
             ->press('Yes')
-            ->seePageIs(route('service.registration.index'))
+            ->seePageIs(route('store.registration.index'))
         ;
     }
 
@@ -554,11 +554,11 @@ class EditPageTest extends TestCase
     public function itWillNotAcceptAnInvalidLeavingReason()
     {
         $response = $this->actingAs($this->centreUser)
-            ->visit(URL::route('service.registration.edit', $this->registration->id))
+            ->visit(URL::route('store.registration.edit', $this->registration->id))
             ->press('Remove this family')
             ->call(
                 'PUT',
-                route('service.registration.family', $this->registration->family->id),
+                route('store.registration.family', $this->registration->family->id),
                 ['leaving_reason' => 'Not a good one']
             )
         ;
@@ -574,7 +574,7 @@ class EditPageTest extends TestCase
         $family->leaving_reason = config('arc.leaving_reasons')[0];
         $family->save();
         $this->actingAs($this->centreUser)
-            ->visit(URL::route('service.registration.edit', $this->registration->id))
+            ->visit(URL::route('store.registration.edit', $this->registration->id))
             // Throws Authorization exception 403. Expecting this exception doesn't seem to help.
             // Not sure this is the desired behaviour and it makes untestable. We need to handle gracefully.
             //->press('Save Changes')
@@ -623,7 +623,7 @@ class EditPageTest extends TestCase
 
         // Test that entering children's DOB's gives the expected age.
         $this->actingAs($centreUser)
-            ->visit(URL::route('service.registration.edit', [ 'id' => $family->id ]))
+            ->visit(URL::route('store.registration.edit', [ 'id' => $family->id ]))
             ->see('<td>1 yr, 1 mo</td>')
             ->see('<td>1 yr, 0 mo</td>')
             ->see('<td>0 yr, 11 mo</td>')

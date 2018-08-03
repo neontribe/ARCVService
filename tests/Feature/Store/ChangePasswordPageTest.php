@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
-
 class ChangePasswordPageTest extends TestCase
 {
     use DatabaseMigrations;
@@ -40,13 +39,13 @@ class ChangePasswordPageTest extends TestCase
         $this->assertTrue(Hash::check('test_user_pass', $centreUser->password));
 
         // Se if the page exists.
-        $this->visit(route('password.reset', [ 'token' => $token ]))
+        $this->visit(route('store.password.reset', [ 'token' => $token ]))
             ->see('Reset Password')
             ->type($centreUser->email, 'email')
-            ->type('mynewpassword', 'password')
-            ->type('mynewpassword', 'password_confirmation')
+            ->type('mynewpassword', 'store.password')
+            ->type('mynewpassword', 'store.password_confirmation')
             ->press('Reset Password')
-            ->seePageIs(route('service.dashboard'))
+            ->seePageIs(route('store.dashboard'))
         ;
         // Load the centreuser again.
         $user2 = CentreUser::find($centreUser->id);
@@ -84,13 +83,13 @@ class ChangePasswordPageTest extends TestCase
         $this->assertTrue(Hash::check('test_user_pass', $centreUser->password));
 
         // Se if the page exists.
-        $this->visit(route('password.reset', [ 'token' => 'NotAHashedToken' ]))
+        $this->visit(route('store.password.reset', [ 'token' => 'NotAHashedToken' ]))
             ->see('Reset Password')
             ->type($centreUser->email, 'email')
-            ->type('mynewpassword', 'password')
-            ->type('mynewpassword', 'password_confirmation')
+            ->type('mynewpassword', 'store.password')
+            ->type('mynewpassword', 'store.password_confirmation')
             ->press('Reset Password')
-            ->see(trans('passwords.token'));
+            ->see(trans('store.passwords.token'));
         ;
         // Load the centreuser again.
         $centreUser->fresh();
