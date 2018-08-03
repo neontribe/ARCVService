@@ -21,8 +21,8 @@ class DashboardController extends Controller
         $centre_id = $centre ? $centre->id : null;
 
         $print_route = ($pref_collection) ?
-            URL::route('service.centre.registrations.collection', $centre_id) :
-            URL::route('service.registrations.print');
+            URL::route('store.centre.registrations.collection', $centre_id) :
+            URL::route('store.registrations.print');
 
         $data = [
             "user_name" => $user->name,

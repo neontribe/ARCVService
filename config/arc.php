@@ -24,4 +24,12 @@ return [
     |--------------------------------------------------------------------------
     */
     'school_month' => env('ARC_SCHOOL_MONTH', 9), // Default to September.
+
+    /*
+    |--------------------------------------------------------------------------
+    | Domains for routing
+    |--------------------------------------------------------------------------
+    */
+    'service_domain' => env('ARC_SERVICE_DOMAIN', 'arcv-service.test'),
+    'store_domain' => env('ARC_STORE_DOMAIN', 'arcv-store.test'),
 ];

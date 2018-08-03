@@ -9,6 +9,8 @@ class CentreUser extends Authenticatable
 {
     use Notifiable;
 
+    protected $guard = 'store';
+
     /**
      * The attributes that are mass assignable.
      *
