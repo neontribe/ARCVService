@@ -61,7 +61,7 @@ class SponsorModelTest extends TestCase
     {
         // Make a sponsor
         $s = $this->sponsor;
-        // Create a center, will auto associate to sponsorgit checkout
+        // Create a center, will auto associate to sponsor
         $centres = factory(Centre::class, 2)->create();
         $s->fresh();
 
