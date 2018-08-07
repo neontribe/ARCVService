@@ -190,6 +190,7 @@ class StoreRoutesTest extends StoreTestCase
         ]);
 
         $route = URL::route('store.centres.registrations.summary');
+        Log::info($route);
 
         Auth::logout();
 
@@ -209,7 +210,7 @@ class StoreRoutesTest extends StoreTestCase
 
         // See page do interesting things
         $this->actingAs($fmuser, 'store')
-            ->visit($route)
+            ->get($route)
             ->assertResponseOK()
         ;
     }
