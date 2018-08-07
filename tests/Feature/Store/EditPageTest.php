@@ -49,7 +49,7 @@ class EditPageTest extends StoreTestCase
     public function itShowsAPrimaryCarerInput()
     {
         $pri_carer = $this->registration->family->carers->first();
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
             ->seeElement('input[name="carer"][value="'. $pri_carer->name .'"]')
         ;
@@ -58,7 +58,7 @@ class EditPageTest extends StoreTestCase
     /** @test */
     public function itShowsASecondaryCarerInput()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
             ->seeElement('input[name="carer_adder_input"]')
             ->seeElement('button[id="add-dob"]')
@@ -85,7 +85,7 @@ class EditPageTest extends StoreTestCase
         $this->assertTrue($carers->count() == 3);
 
         // Find the edit page
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
         ;
         // See the names in the page
@@ -100,7 +100,7 @@ class EditPageTest extends StoreTestCase
     /** @test */
     public function itShowsAChildInputComplex()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
             ->seeElement('input[name="dob-month"]')
             ->seeElement('input[name="dob-year"]')
@@ -125,7 +125,7 @@ class EditPageTest extends StoreTestCase
         $this->assertTrue($children->count() == 4);
 
         // Find the edit page
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
         ;
         // See the names in the page
@@ -141,7 +141,7 @@ class EditPageTest extends StoreTestCase
     /** @test */
     public function itShowsALogoutButton()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
             ->seeInElement('button[type=submit]', 'Log out')
         ;
@@ -150,7 +150,7 @@ class EditPageTest extends StoreTestCase
     /** @test */
     public function itShowsAFormSaveButton()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
             ->seeInElement('button[type=submit]', 'Save Changes')
         ;
@@ -177,7 +177,7 @@ class EditPageTest extends StoreTestCase
         ]);
 
         foreach ($users as $centreUser) {
-            $this->actingAs($centreUser)
+            $this->actingAs($centreUser, 'store')
                 ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]));
             if ($centreUser->can('updateDiary', Registration::class) ||
                 $centreUser->can('updateChart', Registration::class)
@@ -246,7 +246,7 @@ class EditPageTest extends StoreTestCase
         foreach ($regs as $reg) {
             $route = URL::route('store.registration.edit', ['id' => $reg->id]);
             Auth::logout();
-            $this->actingAs($fmuser)
+            $this->actingAs($fmuser, 'store')
                 ->visit($route)
             ;
 
@@ -314,7 +314,7 @@ class EditPageTest extends StoreTestCase
         foreach ($regs as $reg) {
             $route = URL::route('store.registration.edit', ['id' => $reg->id]);
             Auth::logout();
-            $this->actingAs($fmuser)
+            $this->actingAs($fmuser, 'store')
                 ->visit($route)
             ;
 
@@ -381,7 +381,7 @@ class EditPageTest extends StoreTestCase
 
         foreach ($regs as $reg) {
             $route = URL::route('store.registration.edit', ['id' => $reg->id]);
-            $this->actingAs($fmuser)
+            $this->actingAs($fmuser, 'store')
                 ->visit($route);
 
             // Test Chart
@@ -460,7 +460,7 @@ class EditPageTest extends StoreTestCase
 
         foreach ($regs as $reg) {
             $route = URL::route('store.registration.edit', ['id' => $reg->id]);
-            $this->actingAs($fmuser)
+            $this->actingAs($fmuser, 'store')
                 ->visit($route);
 
             // Test Privacy
@@ -495,7 +495,7 @@ class EditPageTest extends StoreTestCase
     /** @test */
     public function itShowsTheLoggedInUserDetails()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration->id ]))
             ->see($this->centreUser->name)
             ->see($this->centreUser->centre->name)
@@ -505,7 +505,7 @@ class EditPageTest extends StoreTestCase
     /** @test */
     public function itShowsTheLeavingFormIfFamilyIsOnScheme()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', $this->registration->id))
             ->see('Remove this family')
         ;
@@ -518,7 +518,7 @@ class EditPageTest extends StoreTestCase
         $family->leaving_on = Carbon::now();
         $family->leaving_reason = config('arc.leaving_reasons')[0];
         $family->save();
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', $this->registration->id))
             ->dontSee('Remove this family')
         ;
@@ -527,7 +527,7 @@ class EditPageTest extends StoreTestCase
     /** @test */
     public function itWillRejectLeavingWithoutAReason()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', $this->registration->id))
             ->press('Remove this family')
             ->press('Yes')
@@ -541,7 +541,7 @@ class EditPageTest extends StoreTestCase
     /** @test */
     public function itWillAcceptLeavingWithAReason()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', $this->registration->id))
             ->press('Remove this family')
             ->select(config('arc.leaving_reasons')[0], 'leaving_reason')
@@ -553,7 +553,7 @@ class EditPageTest extends StoreTestCase
     /** @test */
     public function itWillNotAcceptAnInvalidLeavingReason()
     {
-        $response = $this->actingAs($this->centreUser)
+        $response = $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', $this->registration->id))
             ->press('Remove this family')
             ->call(
@@ -573,7 +573,7 @@ class EditPageTest extends StoreTestCase
         $family->leaving_on = Carbon::now();
         $family->leaving_reason = config('arc.leaving_reasons')[0];
         $family->save();
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', $this->registration->id))
             // Throws Authorization exception 403. Expecting this exception doesn't seem to help.
             // Not sure this is the desired behaviour and it makes untestable. We need to handle gracefully.
@@ -622,7 +622,7 @@ class EditPageTest extends StoreTestCase
         $family->children[2]->save();
 
         // Test that entering children's DOB's gives the expected age.
-        $this->actingAs($centreUser)
+        $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'id' => $family->id ]))
             ->see('<td>1 yr, 1 mo</td>')
             ->see('<td>1 yr, 0 mo</td>')

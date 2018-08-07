@@ -22,7 +22,7 @@ class SearchPageTest extends StoreTestCase
             "centre_id" => 1,
         ]);
 
-        $this->actingAs($centreUser)
+        $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
             ->see($centreUser->name)
         ;
@@ -61,7 +61,7 @@ class SearchPageTest extends StoreTestCase
         ]);
 
         // Visit the page
-        $this->actingAs($centreUser)
+        $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'));
 
         $registrations = $registrations1->concat($registrations2);
@@ -98,7 +98,7 @@ class SearchPageTest extends StoreTestCase
             "centre_id" => $centre->id,
         ]);
 
-        $this->actingAs($centreUser)
+        $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'));
 
         // Check we can see the edit link with the registration ID in it.
@@ -149,7 +149,7 @@ class SearchPageTest extends StoreTestCase
             "centre_id" => $alien_centre->id,
         ]);
 
-        $this->actingAs($centreUser)
+        $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'));
 
         // Check we can see the edit link with the registration ID in it.
@@ -183,7 +183,7 @@ class SearchPageTest extends StoreTestCase
         $pri_carer = $registration->family->carers->first();
 
         // Spot the Registration Family's primary carer name
-        $this->actingAs($centreUser)
+        $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
             ->see($pri_carer->name);
     }
@@ -208,7 +208,7 @@ class SearchPageTest extends StoreTestCase
         ]);
 
         // Spot the Registration family's RVID
-        $this->actingAs($centreUser)
+        $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
             ->see($registration->family->rvid);
     }
@@ -233,7 +233,7 @@ class SearchPageTest extends StoreTestCase
         ]);
 
         // Spot the Registration family's RVID
-        $this->actingAs($centreUser)
+        $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
             ->see('<td class="center">' . $registration->family->entitlement . "</td>");
     }
@@ -263,7 +263,7 @@ class SearchPageTest extends StoreTestCase
         ]);
 
         // Visit search page, make sure next page link is present and works
-        $this->actingAs($centreUser)
+        $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
             ->see('<a href="' . URL::route('store.base') . '/registration?page=2' . '" rel="next">»</a>')
             ->click('»')
@@ -297,7 +297,7 @@ class SearchPageTest extends StoreTestCase
         sort($pri_carers);
 
         // Spot the Registration Family's primary carer name
-        $this->actingAs($centreUser)
+        $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'));
 
         $selector = 'td.pri_carer';
@@ -324,7 +324,7 @@ class SearchPageTest extends StoreTestCase
             "centre_id" => $centre->id,
         ]);
 
-        $this->actingAs($centreUser)
+        $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
         ;
 
@@ -354,7 +354,7 @@ class SearchPageTest extends StoreTestCase
 
         // Spot the pagination links, expecting 2 pages.
         $selector = 'ul.pagination li';
-        $this->actingAs($centreUser)
+        $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
             ->seeInElementAtPos($selector, "«", 0)
             ->seeInElementAtPos($selector, "1", 1)
@@ -387,7 +387,7 @@ class SearchPageTest extends StoreTestCase
         $leavingFamily->leaving_reason = config('arc.leaving_reasons')[0];
         $leavingFamily->save();
 
-        $this->actingAs($centreUser)
+        $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'));
 
         $this->assertCount(1, $this->crawler->filter('tr.inactive'));
@@ -418,7 +418,7 @@ class SearchPageTest extends StoreTestCase
         $leavingFamily->leaving_reason = config('arc.leaving_reasons')[0];
         $leavingFamily->save();
 
-        $this->actingAs($centreUser)
+        $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'));
 
         // Check the number of enabled and disabled buttons.

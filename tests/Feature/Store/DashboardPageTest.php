@@ -63,14 +63,14 @@ class DashboardPageTest extends StoreTestCase
             "role" => "centre_user",
         ]);
 
-        $this->actingAs($ccuser)
+        $this->actingAs($ccuser, 'store')
             ->visit(URL::route('store.dashboard'))
             ->dontSee(URL::route('store.centres.registrations.summary'))
         ;
 
         Auth::logout();
 
-        $this->actingAs($fmuser)
+        $this->actingAs($fmuser, 'store')
             ->visit(URL::route('store.dashboard'))
             ->see(URL::route('store.centres.registrations.summary'))
         ;
@@ -79,7 +79,7 @@ class DashboardPageTest extends StoreTestCase
     /** @test */
     public function itShowsTheLoggedInUserDetails()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration->id ]))
             ->see($this->centreUser->name)
             ->see($this->centreUser->centre->name)
@@ -92,7 +92,7 @@ class DashboardPageTest extends StoreTestCase
         // Set centre print_pref to 'collection'.
         $this->centre->print_pref = 'collection';
         $this->centre->save();
-        $this->actingAs($this->centreUser->fresh())
+        $this->actingAs($this->centreUser->fresh(), 'store')
             ->visit(url::route('store.dashboard'))
             ->see('Print collection sheet')
             ->see(URL::route('store.centre.registrations.collection', ['id' => $this->centre->id ]))
@@ -101,7 +101,7 @@ class DashboardPageTest extends StoreTestCase
         // Set centre print_pref to 'individual'.
         $this->centre->print_pref = 'individual';
         $this->centre->save();
-        $this->actingAs($this->centreUser->fresh())
+        $this->actingAs($this->centreUser->fresh(), 'store')
             ->visit(url::route('store.dashboard'))
             ->see('Print all family sheets')
             ->see(URL::route('store.registrations.print'))

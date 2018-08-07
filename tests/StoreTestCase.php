@@ -8,6 +8,8 @@ abstract class StoreTestCase extends BaseTestCase
 {
     use CreatesApplication;
 
+    protected $baseUrl = "http://arcv-store.test";
+
     /**
      * @param $selector string Selector string to find a bunch of elements
      * @param $text string String you're looking for

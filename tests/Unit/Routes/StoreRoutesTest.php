@@ -9,6 +9,7 @@ use App\Registration;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use URL;
 use Tests\StoreTestCase;
+use Log;
 
 class StoreRoutesTest extends StoreTestCase
 {
@@ -77,7 +78,8 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseStatus(200)
         ;
         // You can get there logged in.
-        $this->actingAs($this->centreUser)
+        Log::info($this->centreUser->name);
+        $this->actingAs($this->centreUser, 'store')
             ->visit($route)
             ->seePageIs($route)
             ->assertResponseStatus(200)
@@ -97,7 +99,7 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseStatus(200)
         ;
         // You can get there logged in.
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit($route)
             ->seePageIs($route)
             ->assertResponseStatus(200)
@@ -122,7 +124,7 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseStatus(200)
         ;
         // You can get there logged in.
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit($route)
             ->seePageIs($route)
             ->assertResponseStatus(200)
@@ -141,7 +143,7 @@ class StoreRoutesTest extends StoreTestCase
         $login_route = URL::route('store.login');
 
         // You can get there logged in.
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit($edit_route)
         ;
 
@@ -198,7 +200,7 @@ class StoreRoutesTest extends StoreTestCase
         ;
 
         // Throw a 403 for auth'd but forbidden
-        $this->actingAs($ccuser)
+        $this->actingAs($ccuser, 'store')
             // need to get, because visit() bombs out with exceptions before you can check them.
             ->get($route)
             ->assertResponseStatus(403)
@@ -206,7 +208,7 @@ class StoreRoutesTest extends StoreTestCase
         Auth::logout();
 
         // See page do interesting things
-        $this->actingAs($fmuser)
+        $this->actingAs($fmuser, 'store')
             ->visit($route)
             ->assertResponseOK()
         ;

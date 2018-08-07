@@ -35,7 +35,7 @@ class RegistrationPageTest extends StoreTestCase
     /** @test */
     public function itShowsAPrimaryCarerInput()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->seeElement('input[name="carer"]')
         ;
@@ -44,7 +44,7 @@ class RegistrationPageTest extends StoreTestCase
     /** @test */
     public function itShowsASecondaryCarerInput()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->seeElement('input[name="carer_adder_input"]')
             ->seeElement('button[id="add-dob"]')
@@ -54,7 +54,7 @@ class RegistrationPageTest extends StoreTestCase
     /** @test */
     public function itShowsAChildInputComplex()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->seeElement('input[name="dob-month"]')
             ->seeElement('input[name="dob-year"]')
@@ -65,7 +65,7 @@ class RegistrationPageTest extends StoreTestCase
     /** @test */
     public function itShowsAConsentCheckbox()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->seeElement('input[type=checkbox][name="consent"]')
         ;
@@ -74,7 +74,7 @@ class RegistrationPageTest extends StoreTestCase
     /** @test */
     public function itShowsAnEligabilityRadioGroup()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->seeElement('input[type=radio][id="healthy-start"][checked]')
             ->seeElement('input[type=radio][id="other"]')
@@ -84,7 +84,7 @@ class RegistrationPageTest extends StoreTestCase
     /** @test */
     public function itShowsAFormSaveButton()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->seeInElement('button[type=Submit]', 'Save Family')
         ;
@@ -93,7 +93,7 @@ class RegistrationPageTest extends StoreTestCase
     /** @test */
     public function itShowsALogoutButton()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->seeInElement('button[type=submit]', 'Log out')
         ;
@@ -102,7 +102,7 @@ class RegistrationPageTest extends StoreTestCase
     /** @test */
     public function itShowsTheLoggedInUserDetails()
     {
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->see($this->centreUser->name)
             ->see($this->centreUser->centre->name)
@@ -120,7 +120,7 @@ class RegistrationPageTest extends StoreTestCase
 
         //Test that clicking on a (non)link throws an Error
         //and remains on the registration page.
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->click('logo')
             ->seePageIs(URL::route('store.registration.create'));
@@ -132,7 +132,7 @@ class RegistrationPageTest extends StoreTestCase
         // There are no registrations
         $this->assertEquals(0, Registration::get()->count());
 
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->type('Test Carer', 'carer')
             ->check('consent')
@@ -158,7 +158,7 @@ class RegistrationPageTest extends StoreTestCase
         // There are no registrations
         $this->assertEquals(0, Registration::get()->count());
 
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->type('Test Carer', 'carer')
             ->press('Save Family')
@@ -179,7 +179,7 @@ class RegistrationPageTest extends StoreTestCase
         // There are no registrations
         $this->assertEquals(0, Registration::get()->count());
 
-        $this->actingAs($this->centreUser)
+        $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->check('consent')
             ->press('Save Family')
