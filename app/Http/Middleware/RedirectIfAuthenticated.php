@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
+use Log;
 
 class RedirectIfAuthenticated
 {
@@ -18,19 +19,20 @@ class RedirectIfAuthenticated
     public function handle($request, Closure $next, $guard = null)
     {
         switch ($guard) {
+            // if we're authenticated and trying to get to a guest page, go to the dashboard
             case 'store':
                 if (Auth::guard($guard)->check()) {
-                    return redirect('store.base');
+                    return redirect()->route('store.dashboard');
                 }
                 break;
             case 'admin':
-            default:
                 if (Auth::guard($guard)->check()) {
                     return redirect()->route('admin.dashboard');
                 }
                 break;
+            default:
         }
-
+        // else, go to the guest page we were asked to go to.
         return $next($request);
     }
 }

@@ -7,7 +7,7 @@ use App\Registration;
 use App\Trader;
 use App\Voucher;
 use Laravel\Passport\Passport;
-use Illuminate\Support\Facades\Gate;
+use Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Carbon\Carbon;
 
@@ -21,7 +21,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Trader::class => \App\Policies\Api\TraderPolicy::class,
         Voucher::class => \App\Policies\Api\VoucherPolicy::class,
-        CentreUser::class => \App\Policies\Store\RegistrationPolicy::class,
+        Registration::class => \App\Policies\Store\RegistrationPolicy::class,
     ];
 
     /**

@@ -7,7 +7,7 @@
     @include('store.partials.navbar', ['headerTitle' => 'Check, update or print'])
 
     <div class="content check">
-        <form action="{{ URL::route("service.registration.update",['id' => $registration->id]) }}" method="post">
+        <form action="{{ URL::route("store.registration.update",['id' => $registration->id]) }}" method="post">
             {{ method_field('PUT') }}
             {!! csrf_field() !!}
             <input type="hidden" name="registration" value="{{ $registration->id }}">
@@ -197,7 +197,7 @@
                     @endif
                 </div>
                 <div class="print-button">
-                    <button onclick="window.open( '{{ URL::route("service.registration.print", ["id" => $registration->id]) }}'); return false">
+                    <button onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
                         Print a 4 week collection sheet for this family
                     </button>
                 </div>

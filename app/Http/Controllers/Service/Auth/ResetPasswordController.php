@@ -35,7 +35,7 @@ class ResetPasswordController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest');
+        $this->middleware('guest:admin');
     }
 
     // Our reset form has moved location

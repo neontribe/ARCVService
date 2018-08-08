@@ -7,7 +7,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class AdminPasswordResetNotification extends Notification
+class StorePasswordResetNotification extends Notification
 {
     use Queueable;
 
@@ -64,8 +64,8 @@ class AdminPasswordResetNotification extends Notification
             ->action(
                 'Reset Password',
                 url(
-                    config('arc.service_domain')
-                    . route('admin.password.reset', $this->token, false)
+                    config('arc.store_domain')
+                    . route('store.password.reset', $this->token, false)
                 )
             )
             ->line('If you did not request a password reset, no further action is required.');

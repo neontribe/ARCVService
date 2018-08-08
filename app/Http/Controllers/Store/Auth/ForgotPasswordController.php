@@ -29,11 +29,11 @@ class ForgotPasswordController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest');
+        $this->middleware('guest:store');
     }
 
     /**
-     * Override to use service auth view.
+     * Override to use store auth view.
      */
     public function showLinkRequestForm()
     {

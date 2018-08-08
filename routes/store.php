@@ -23,7 +23,7 @@ Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail'
 Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')
     ->name('store.password.reset')
 ;
-Route::post('password/reset', 'Auth\ResetPasswordController@reset');
+Route::post('store.password/reset', 'Auth\ResetPasswordController@reset');
 
 // Store Dashboard route
 // Default redirect to Service Dashboard
@@ -31,7 +31,8 @@ Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 // TODO : use of singular/plurals in route names; Mixed opinions found. discuss.
 
 Route::get('/', function () {
-    $route = (Auth::check()) ? 'store.dashboard' : 'store.login';
+    $route = 'store.login';
+    //$route = (Auth::guard('store')->check()) ? 'store.dashboard' : 'store.login';
     return redirect()->route($route);
 })->name('store.base');
 
