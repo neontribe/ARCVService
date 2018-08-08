@@ -63,8 +63,8 @@ class StorePasswordResetNotification extends Notification
             ->line('You are receiving this email because we received a password reset request for your account on the Rosie admin service.')
             ->action(
                 'Reset Password',
-                url(
-                    config('arc.store_domain')
+                ('http://'
+                    . config('arc.store_domain')
                     . route('store.password.reset', $this->token, false)
                 )
             )

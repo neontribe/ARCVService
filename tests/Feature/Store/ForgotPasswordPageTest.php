@@ -58,7 +58,7 @@ class ForgotPasswordPageTest extends StoreTestCase
             ->type('testuser@example.com', 'email')
             ->press('Send Password Reset Link');
         $this->seeEmailWasSent()
-            ->seeEmailSubjectEquals('Reset Password')
+            ->seeEmailSubjectEquals('Password Reset Request Notification')
             ->seeEmailContains('password/reset')
             ->seeEmailTo('testuser@example.com');
     }

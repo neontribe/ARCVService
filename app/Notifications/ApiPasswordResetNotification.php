@@ -61,8 +61,10 @@ class ApiPasswordResetNotification extends Notification
             ->subject('Password Reset Request Notification')
             ->greeting('Hi '. $this->name)
             ->line('You are receiving this email because we received a password reset request for your account on the Rosie Voucher Recorder.')
-            ->action('Reset Password',
-                url(config('app.arc_market_url')
+            ->action(
+                'Reset Password',
+                url(
+                    config('app.arc_market_url')
                     . '/change-password?'
                     . "email=" . urlencode($notifiable->getEmailForPasswordReset()) . "&"
                     . "token=" . $this->token

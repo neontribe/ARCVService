@@ -45,7 +45,7 @@ class ChangePasswordPageTest extends StoreTestCase
             ->type('mynewpassword', 'password')
             ->type('mynewpassword', 'password_confirmation')
             ->press('Reset Password')
-            ->seePageIs(route('store.dashboard'))
+            ->seePageIs(route('store.login'))
         ;
         // Load the centreuser again.
         $user2 = CentreUser::find($centreUser->id);
