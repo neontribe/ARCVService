@@ -88,12 +88,4 @@ class LoginController extends Controller
             ->withErrors(['error_message' => trans('auth.failed')])
             ;
     }
-
-    public function logout(Request $request)
-    {
-        // Logout current user
-        Auth::logout();
-        // Boot to login page
-        return redirect()->route('store.login')->with("messages");
-    }
 }

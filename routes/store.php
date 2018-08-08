@@ -31,7 +31,8 @@ Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 // TODO : use of singular/plurals in route names; Mixed opinions found. discuss.
 
 Route::get('/', function () {
-    $route = (Auth::check()) ? 'store.dashboard' : 'store.login';
+    $route = 'store.login';
+    //$route = (Auth::guard('store')->check()) ? 'store.dashboard' : 'store.login';
     return redirect()->route($route);
 })->name('store.base');
 
