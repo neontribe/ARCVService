@@ -65,7 +65,7 @@ class AdminPasswordResetNotification extends Notification
                 'Reset Password',
                 url(
                     config('arc.service_domain')
-                    . route('service.password.reset', $this->token, false)
+                    . route('admin.password.reset', $this->token, false)
                 )
             )
             ->line('If you did not request a password reset, no further action is required.');
