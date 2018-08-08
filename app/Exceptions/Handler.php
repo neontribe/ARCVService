@@ -53,7 +53,7 @@ class Handler extends ExceptionHandler
             // Note: this will also draw attention to the login form timing out.
             Auth::logout();
             return redirect()
-                ->guest(route('service.login'))
+                ->guest(route('/login'))
                 // We anticipate expiry to be the most common reason.
                 ->withErrors(['error_message' => trans('auth.expired')])
                 ;
@@ -62,11 +62,10 @@ class Handler extends ExceptionHandler
         if ($exception instanceof MethodNotAllowedHttpException) {
             // User somehow tried an HTTP verb a resource doesn't support
             // Send them somewhere safe.
-            $route = (Auth::check()) ? 'service.dashboard' : 'service.login';
             return redirect()
                 // For some reason ->withErrors() won't "take";
                 // The session gets flashed, but it doesn't survive.
-                ->route($route);
+                ->route('/');
         }
 
         return parent::render($request, $exception);

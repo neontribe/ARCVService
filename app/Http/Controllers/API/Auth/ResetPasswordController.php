@@ -43,7 +43,7 @@ class ResetPasswordController extends Controller
      */
     public function broker()
     {
-        // required to point the api at the
+        // required to point the api at the correct correct user/password table
         return Password::broker('users');
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Service\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
+use Password;
 
 class ForgotPasswordController extends Controller
 {
@@ -28,6 +29,16 @@ class ForgotPasswordController extends Controller
     public function __construct()
     {
         $this->middleware('guest:admin');
+    }
+
+    /**
+     * Get the broker to be used during password reset.
+     *
+     * @return \Illuminate\Contracts\Auth\PasswordBroker
+     */
+    protected function broker()
+    {
+        return Password::broker('admins');
     }
 
     /**

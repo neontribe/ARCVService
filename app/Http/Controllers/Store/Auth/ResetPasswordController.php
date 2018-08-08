@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Store\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use Password;
 
 class ResetPasswordController extends Controller
 {
@@ -36,6 +37,17 @@ class ResetPasswordController extends Controller
     public function __construct()
     {
         $this->middleware('guest:store');
+    }
+
+    /**
+     * Get the broker to be used during password reset.
+     *
+     * @return \Illuminate\Contracts\Auth\PasswordBroker
+     */
+    public function broker()
+    {
+        // required to point the store at the correct user/password table
+        return Password::broker('store_users');
     }
 
     // Show reset form.

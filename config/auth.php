@@ -121,7 +121,8 @@ return [
             'expire' => 60,
         ],
 
-        'store' => [
+        // Our Store Centre Users.
+        'store_users' => [
             'provider' => 'store_users',
             'table' => 'password_resets',
             'expire' => 60,
