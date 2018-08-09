@@ -61,7 +61,13 @@ class AdminPasswordResetNotification extends Notification
             ->subject('Password Reset Request Notification')
             ->greeting('Hi '. $this->name .',')
             ->line('You are receiving this email because we received a password reset request for your account on the Rosie admin service.')
-            ->action('Reset Password', url(config('app.url').route('password.reset', $this->token, false)))
+            ->action(
+                'Reset Password',
+                ('http://'
+                    . config('arc.service_domain')
+                    . route('admin.password.reset', $this->token, false)
+                )
+            )
             ->line('If you did not request a password reset, no further action is required.');
     }
 

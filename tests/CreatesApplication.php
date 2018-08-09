@@ -13,6 +13,8 @@ trait CreatesApplication
      */
     public function createApplication()
     {
+        ini_set('max_execution_time', 600);
+
         $app = require __DIR__.'/../bootstrap/app.php';
 
         $app->make(Kernel::class)->bootstrap();

@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Notifications\StorePasswordResetNotification;
 
 class CentreUser extends Authenticatable
 {
@@ -83,5 +84,16 @@ class CentreUser extends Authenticatable
     public function isRelevantCentre(Centre $centre)
     {
         return $this->relevantCentres()->contains('id', $centre->id);
+    }
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new StorePasswordResetNotification($token, $this->name));
     }
 }

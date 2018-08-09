@@ -37,7 +37,7 @@ class LoginController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest', ['except' => 'logout']);
+        $this->middleware('guest:store')->except('logout');
     }
 
     /**
@@ -87,13 +87,5 @@ class LoginController extends Controller
             ->withInput($request->only('email', 'remember'))
             ->withErrors(['error_message' => trans('auth.failed')])
             ;
-    }
-
-    public function logout(Request $request)
-    {
-        // Logout current user
-        Auth::logout();
-        // Boot to login page
-        return redirect()->route('store.login')->with("messages");
     }
 }

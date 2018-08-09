@@ -7,7 +7,7 @@
     @include('store.partials.navbar', ['headerTitle' => 'New family sign up'])
 
     <div class="content">
-        <form action="{{ URL::route("service.registration.store") }}" method="post">
+        <form action="{{ URL::route("store.registration.store") }}" method="post">
             {!! csrf_field() !!}
             <div class="col">
                 <div>

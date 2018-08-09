@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Store\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
-use Illuminate\Support\Facades\Password;
+use Password;
 
 class ForgotPasswordController extends Controller
 {
@@ -29,8 +29,19 @@ class ForgotPasswordController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest');
+        $this->middleware('guest:store');
     }
+
+    /**
+     * Get the broker to be used during password reset.
+     *
+     * @return \Illuminate\Contracts\Auth\PasswordBroker
+     */
+    protected function broker()
+    {
+        return Password::broker('store_users');
+    }
+
 
     /**
      * Override to use service auth view.

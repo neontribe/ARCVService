@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Service\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use Password;
 
 class ResetPasswordController extends Controller
 {
@@ -35,7 +36,18 @@ class ResetPasswordController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest');
+        $this->middleware('guest:admin');
+    }
+
+    /**
+     * Get the broker to be used during password reset.
+     *
+     * @return \Illuminate\Contracts\Auth\PasswordBroker
+     */
+    public function broker()
+    {
+        // required to point the service at the correct correct user/password table
+        return Password::broker('admins');
     }
 
     // Our reset form has moved location
