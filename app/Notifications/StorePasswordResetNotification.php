@@ -60,7 +60,7 @@ class StorePasswordResetNotification extends Notification
         return (new MailMessage)
             ->subject('Password Reset Request Notification')
             ->greeting('Hi '. $this->name .',')
-            ->line('You are receiving this email because we received a password reset request for your account on the Rosie admin service.')
+            ->line('You are receiving this email because we received a password reset request for your account on the Rosie Children\'s Centre service.')
             ->action(
                 'Reset Password',
                 ('http://'
