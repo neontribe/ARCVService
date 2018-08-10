@@ -1,9 +1,10 @@
 {
-    "name": "laravel/laravel",
-    "description": "The Laravel Framework.",
-    "keywords": ["framework", "laravel"],
-    "license": "MIT",
-    "type": "project",
+    "name": "neontribe/arcvservice",
+    "description": "ARCV Service",
+    "version": "1.2",
+    "keywords": [],
+    "license": "",
+    "type": "",
     "require": {
         "barryvdh/laravel-cors": "^0.9.2",
         "barryvdh/laravel-debugbar": "~2.4",
