@@ -130,7 +130,7 @@ $factory->define(App\Sponsor::class, function (Faker\Generator $faker) {
 
     return [
         'name' => $counties[$index],
-        'shortcode' => "RV" . str_pad($index, 3, "0", STR_PAD_LEFT),
+        'shortcode' => $faker->regexify('[A-Z]{4}'),
     ];
 });
 
