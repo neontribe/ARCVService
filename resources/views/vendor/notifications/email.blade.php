@@ -18,6 +18,7 @@
 
 {{-- Action Button --}}
 @isset($actionText)
+
 <?php
     switch ($level) {
         case 'success':
@@ -27,9 +28,12 @@
             $color = 'red';
             break;
         default:
-            $color = 'pink';
+            $color = 'green';
+            //we would like this to be pink but only colors accepted are blue, green and red
+            //https://laravel.com/docs/5.4/mail
     }
 ?>
+
 @component('mail::button', ['url' => $actionUrl, 'color' => $color])
 {{ $actionText }}
 @endcomponent
@@ -44,8 +48,9 @@
 {{-- Salutation --}}
 @if (! empty($salutation))
 {{ $salutation }}
-@else
-    Regards,<p>{{ config('app.name') }}</p>
+@else<p>
+    Regards, {{ config('app.name') }}
+    </p>
 @endif
 
 {{-- Subcopy --}}
