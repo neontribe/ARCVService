@@ -7,7 +7,7 @@
     <meta http-equiv="refresh" content="{{ (config('session.lifetime') * 60) - 30 }};url={{ route('store.login') }}" />
 
     <div class="cookie-notice">
-        <p>We use cookies to authenticate you so we can ensure that we give you the best experience on our website. For more information please read our <a href="/privacy_policy.html#cookie">Privacy Policy</a>.</p>
+        <p>We use cookies to authenticate you so we can ensure that we give you the best experience on our website. For more information please read our <a href="/store/privacy_policy.html#cookie">Privacy Policy</a>.</p>
         <button class="cookie-agree">Dismiss</button>
     </div>
 @endsection
