@@ -71,8 +71,8 @@ These are the languages and packages used to create ARCV Service and where avail
 
 ARCV Service 1.2
 
-Programming Language - PHP
-Framework - Laravel https://github.com/laravel/laravel 
+Programming Language - PHP\
+Framework - Laravel https://github.com/laravel/laravel\
 Licence - The Laravel framework is open-sourced software licensed under the MIT license.
 
 Third Party Packages
