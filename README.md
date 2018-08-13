@@ -76,13 +76,13 @@ Framework - Laravel https://github.com/laravel/laravel \
 Licence - The Laravel framework is open-sourced software licensed under the MIT license.
 
 Third Party Packages
-https://github.com/barryvdh/laravel-cors MIT Licence https://github.com/barryvdh/laravel-cors/blob/master/LICENSE \ 
-https://github.com/barryvdh/laravel-dompdf MIT Licence MIT license \
-https://github.com/doctrine/dbal MIT Licence https://github.com/doctrine/dbal/blob/master/LICENSE \
-https://github.com/Maatwebsite/Laravel-Excel MIT license https://laravel-excel.maatwebsite.nl/docs/3.0/getting-started/license \
-https://github.com/moontoast/math Apache Licence 2.0 https://github.com/moontoast/math/blob/master/LICENSE \
-https://github.com/esbenp/laravel-api-consumer None Stated \
-https://github.com/ramsey/uuid MIT Licence https://github.com/ramsey/uuid/blob/master/LICENSE \
-https://github.com/sebdesign/laravel-state-machine MIT Licence https://github.com/sebdesign/laravel-state-machine/blob/master/LICENSE.md \
-https://github.com/spinen/laravel-mail-assertions MIT Licence MIT license \
-https://github.com/TomLingham/Laravel-Searchy MIT Licence https://github.com/TomLingham/Laravel-Searchy/blob/master/LICENSE
+- https://github.com/barryvdh/laravel-cors MIT Licence https://github.com/barryvdh/laravel-cors/blob/master/LICENSE 
+- https://github.com/barryvdh/laravel-dompdf MIT Licence MIT license
+- https://github.com/doctrine/dbal MIT Licence https://github.com/doctrine/dbal/blob/master/LICENSE
+- https://github.com/Maatwebsite/Laravel-Excel MIT license https://laravel-excel.maatwebsite.nl/docs/3.0/getting-started/license
+- https://github.com/moontoast/math Apache Licence 2.0 https://github.com/moontoast/math/blob/master/LICENSE
+- https://github.com/esbenp/laravel-api-consumer None Stated
+- https://github.com/ramsey/uuid MIT Licence https://github.com/ramsey/uuid/blob/master/LICENSE
+- https://github.com/sebdesign/laravel-state-machine MIT Licence https://github.com/sebdesign/laravel-state-machine/blob/master/LICENSE.md
+- https://github.com/spinen/laravel-mail-assertions MIT Licence MIT license
+- https://github.com/TomLingham/Laravel-Searchy MIT Licence https://github.com/TomLingham/Laravel-Searchy/blob/master/LICENSE
