@@ -84,5 +84,5 @@ Third Party Packages
 - https://github.com/esbenp/laravel-api-consumer None Stated
 - https://github.com/ramsey/uuid MIT Licence https://github.com/ramsey/uuid/blob/master/LICENSE
 - https://github.com/sebdesign/laravel-state-machine MIT Licence https://github.com/sebdesign/laravel-state-machine/blob/master/LICENSE.md
-- https://github.com/spinen/laravel-mail-assertions MIT Licence MIT license
+- https://github.com/spinen/laravel-mail-assertions MIT Licence https://opensource.org/licenses/MIT
 - https://github.com/TomLingham/Laravel-Searchy MIT Licence https://github.com/TomLingham/Laravel-Searchy/blob/master/LICENSE
