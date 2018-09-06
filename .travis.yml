@@ -33,7 +33,7 @@ deploy:
     skip_cleanup: true
     script: rsync -r --exclude storage --delete-after --quiet $TRAVIS_BUILD_DIR/* $DEPLOY_USER@$DEPLOY_IP:/var/www/$DEPLOY_DIR
     on:
-      branch: 1.2/release
+      branch: 1.3/release
   # Create production release tarball.
   - provider: script
     skip_cleanup: true
