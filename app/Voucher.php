@@ -26,6 +26,7 @@ class Voucher extends Model
         'trader_id',
         'code',
         'currentstate', // SM_CONFIG looks at this.
+        'bundle_id',
     ];
 
     /**
@@ -36,6 +37,7 @@ class Voucher extends Model
     protected $casts = [
         'sponsor_id' => 'int',
         'trader_id' => 'int',
+        'bundle_id' => 'int',
     ];
 
     /**
