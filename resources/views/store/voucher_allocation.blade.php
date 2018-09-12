@@ -1,9 +1,12 @@
-<html>
-    <head>
-        <link rel="stylesheet" type="text/css" href="css/main.css">
-    </head>
-    <body>
-        <div class="content">
+@extends('store.layouts.service_master')
+
+@section('title', 'Voucher Collection')
+
+@section('content')
+
+    @include('store.partials.navbar', ['headerTitle' => 'Voucher Collection'])
+    
+    <div class="content">
             <div class="col">
                 <div>
                     <img src="{{ asset('assets/info-light.svg') }}">
@@ -67,5 +70,3 @@
                 </div>
             </div>
         </div>
-    </body>
-</html>
