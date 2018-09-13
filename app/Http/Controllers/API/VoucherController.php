@@ -54,7 +54,17 @@ class VoucherController extends Controller
             return response("Trader not found", 400);
         }
 
-        $uniqueVouchers = array_unique($request['vouchers']);
+        //remove spaces from voucher array values
+        $cleanedVouchers = array_map(
+            function($dirtycode) {
+                $badChars = [" ",];
+                return str_replace($badChars, "", $dirtycode);
+            },
+            $request['vouchers']
+        );
+
+        //create unique vouchers
+        $uniqueVouchers = array_unique($cleanedVouchers);
 
         // Do we want to validate codes by regex rule before we try to find them or meh?
         $vouchers = Voucher::findByCodes($uniqueVouchers);
