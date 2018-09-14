@@ -49,7 +49,7 @@
                 </div>
                 <button class="long-button">Full collection history</button>
             </div>
-            <div class="col">
+            <div class="col allocation">
                 <div>
                     <h2>Allocate Vouchers</h2>
                 </div>
@@ -77,11 +77,47 @@
                     </div>
                 </div>
                 <p>You have added # vouchers</p>
-                <button class="long-button">Go to voucher collection</button>
+                <button id="collection-button" class="long-button">Go to voucher collection</button>
                 <div id="expandable" class="collapsed">
                     <p># vouchers</p>
                 </div>
             </div>
+            <div id="collection" class="col collection-section">
+                <div>
+                    <h2>Voucher Pick Up</h2>
+                </div>
+                <div>
+                    <p>There are # vouchers waiting for the family</p>
+                </div>
+                <div>
+                    <div>
+                        <h3>Collected by Hester Johnson</h3>
+                        <button class="short-button">Change</button>
+                    </div>
+                    <div>
+                        <h3>Collected today, 20th August</h3>
+                        <button class="short-button">Change</button>
+                    </div>
+                    <div>
+                        <h3>Collected at 1st place Children's Centre</h3>
+                        <button class="short-button">Change</button>
+                    </div>
+                </div>
+                <button class="short-button">Confirm pick up</button>
+                <button class="long-button">Allocate more vouchers</button>
+            </div>
         </form>
     </div>
+
+    <script type="text/javascript">
+        $(document).ready(
+            function () {
+                $('#collection-button').click(function (e) {
+                    $('#collection').addClass('slide-in');
+                    $('.allocation').addClass('fade-back');
+                    e.preventDefault();
+                });
+            }
+        );
+    </script>
 @endsection

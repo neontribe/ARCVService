@@ -764,3 +764,27 @@ VOUCHER PAGES
   max-height: 48px;
   max-width: 48px;
 }
+
+.collection-section {
+  display: none;
+}
+
+.slide-in {
+  display: block;
+  animation-duration: 1s;
+  animation-name: slidein;
+}
+
+.fade-back {
+  display: none;
+}
+
+@keyframes slidein {
+  from {
+    transform: translateX(150%);
+  }
+  
+  to {
+    transform: translateX(0%);
+  }
+}
