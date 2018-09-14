@@ -779,6 +779,18 @@ VOUCHER PAGES
   display: none;
 }
 
+.pick-up > div {
+  display: inline-flex;
+  height: 2rem;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.pick-up button {
+  min-height: 2rem;
+  font-size: 0.75rem;
+}
+
 @keyframes slidein {
   from {
     transform: translateX(150%);

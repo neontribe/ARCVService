@@ -89,18 +89,18 @@
                 <div>
                     <p>There are # vouchers waiting for the family</p>
                 </div>
-                <div>
+                <div class="pick-up">
                     <div>
-                        <h3>Collected by Hester Johnson</h3>
-                        <button class="short-button">Change</button>
+                        <p>Collected by Hester Johnson</p>
+                        <button>Change</button>
                     </div>
                     <div>
-                        <h3>Collected today, 20th August</h3>
-                        <button class="short-button">Change</button>
+                        <p>Collected today, 20th August</p>
+                        <button>Change</button>
                     </div>
                     <div>
-                        <h3>Collected at 1st place Children's Centre</h3>
-                        <button class="short-button">Change</button>
+                        <p>Collected at 1st place Children's Centre</p>
+                        <button>Change</button>
                     </div>
                 </div>
                 <button class="short-button">Confirm pick up</button>
