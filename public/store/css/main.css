@@ -22,6 +22,10 @@ h2 {
 	margin: 0.5rem;
 }
 
+h3 {
+  margin-top: 0;
+}
+
 ul {
 	margin: 0;
 	text-align: left;
@@ -38,7 +42,7 @@ input[type="text"],
 input[type="month"],
 input[type="search"] {
 	padding: 0.5rem 0;
-	font-size: 1.5rem;
+	font-size: 1.3rem;
 	line-height: 20px;
 	width: 100%;
 	border: 2px solid #ededed;
@@ -727,4 +731,36 @@ and (max-device-width : 1024px)  {
 		max-width: 44px;
 		padding: 0;
 	}
+}
+
+/*
+
+VOUCHER PAGES
+
+*/
+
+.alongside-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.alongside-container > div,
+.alongside-container > label {
+  width: 50%;
+  margin-right: 2%;
+}
+
+.short-button {
+  width: 60%;
+  margin: 3% 20%;
+}
+
+.voucher-container {
+  margin: 1rem 7rem;
+}
+
+.add-button {
+  max-height: 48px;
+  max-width: 48px;
 }

@@ -5,21 +5,26 @@
 @section('content')
 
     @include('store.partials.navbar', ['headerTitle' => 'Voucher Collection'])
-    
+
     <div class="content">
+        <form>
             <div class="col">
                 <div>
-                    <img src="{{ asset('assets/info-light.svg') }}">
+                    <img src="{{ asset('store/assets/info-light.svg') }}">
                     <h2>This Family</h2>
                 </div>
-                <div>
-                    <h3>Main Carer:</h3>
-                    <p>Hester Johnson</p>
-                    <h3>Children:</h3>
-                    <ul>
-                        <li>2 yr, 0 mo</li>
-                        <li>Pregnancy</li>
-                    </ul>
+                <div class="alongside-container">
+                    <div>
+                        <h3>Main Carer:</h3>
+                        <p>Hester Johnson</p>
+                    </div>
+                    <div>
+                        <h3>Children:</h3>
+                        <ul>
+                            <li>2 yr, 0 mo</li>
+                            <li>Pregnancy</li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="warning">
                     <p>
@@ -27,11 +32,12 @@
                         Next month a child has a birthday, so the voucher allocation will change.
                     </p>
                 </div>
-                <button>Go to edit family</button>
+                <button class="short-button">Go to edit family</button>
+                <button class="long-button">Find another family</button>
             </div>
             <div class="col">
                 <div>
-                    <img src="{{ asset('assets/history-light.svg') }}">
+                    <img src="{{ asset('store/assets/history-light.svg') }}">
                     <h2>Collection History</h2>
                 </div>
                 <div>
@@ -44,29 +50,38 @@
                 <button class="long-button">Full collection history</button>
             </div>
             <div class="col">
-                <h2>Allocate Vouchers</h2>
                 <div>
+                    <h2>Allocate Vouchers</h2>
+                </div>
+                <div class="alongside-container">
                     <label>
                         First voucher
                         <input type="text">
                     </label>
                     <label>
                         Last voucher
-                        <input type="text">
+                        <input id="last-voucher" type="text">
                     </label>
-                </div>
-                <p>OR</p>
-                <label>
-                    Add individual vouchers
-                    <input type="text">
-                    <button class="addButton">
+                    <button class="add-button">
                         <i class="fa fa-plus" aria-hidden="true"></i>
                     </button>
-                </label>
+                </div>
+                <p class="center">OR</p>
+                <div>
+                    <label for="add-voucher-input">Add individual vouchers</label>
+                    <div class="small-button-container">
+                        <input type="text" id="add-voucher-input">
+                        <button class="addButton">
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
                 <p>You have added # vouchers</p>
                 <button class="long-button">Go to voucher collection</button>
                 <div id="expandable" class="collapsed">
                     <p># vouchers</p>
                 </div>
             </div>
-        </div>
+        </form>
+    </div>
+@endsection
