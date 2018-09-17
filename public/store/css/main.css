@@ -769,6 +769,14 @@ VOUCHER PAGES
   display: none;
 }
 
+.v-spaced {
+  margin: 2rem 0;
+}
+
+.vh-spaced {
+  margin: 2rem 1rem;
+}
+
 .slide-in {
   display: block;
   animation-duration: 1s;
@@ -780,15 +788,20 @@ VOUCHER PAGES
 }
 
 .pick-up > div {
+  align-items: baseline;
   display: inline-flex;
-  height: 2rem;
   width: 100%;
   justify-content: space-between;
 }
 
+.pick-up p {
+  width: 75%;
+}
+
 .pick-up button {
-  min-height: 2rem;
   font-size: 0.75rem;
+  height: 2rem;
+  min-height: 2rem;
 }
 
 @keyframes slidein {

@@ -27,7 +27,7 @@
                     </div>
                 </div>
                 <div class="warning">
-                    <p>
+                    <p class="v-spaced">
                         <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
                         Next month a child has a birthday, so the voucher allocation will change.
                     </p>
@@ -42,15 +42,16 @@
                 </div>
                 <div>
                     <p>This family should collect 6 vouchers per week</p>
-                    <p>Their last collection was on Thursday 2nd August</p>
+                    <p class="v-spaced">Their last collection was on Thursday 2nd August</p>
                 </div>
-                <div id="expandable" class="collapsed">
-                    <p>Brief collection history</p>
+                <div id="expandable">
+                    <a class="center">Brief collection history &#x25BC;</a>
                 </div>
                 <button class="long-button">Full collection history</button>
             </div>
             <div class="col allocation">
                 <div>
+                    <img src="{{ asset('store/assets/allocation-light.svg') }}">
                     <h2>Allocate Vouchers</h2>
                 </div>
                 <div class="alongside-container">
@@ -76,7 +77,7 @@
                         </button>
                     </div>
                 </div>
-                <p>You have added # vouchers</p>
+                <p class="center vh-spaced">You have added # vouchers</p>
                 <button id="collection-button" class="long-button">Go to voucher collection</button>
                 <div id="expandable" class="collapsed">
                     <p># vouchers</p>
@@ -84,12 +85,13 @@
             </div>
             <div id="collection" class="col collection-section">
                 <div>
+                    <img src="{{ asset('store/assets/collection-light.svg') }}">
                     <h2>Voucher Pick Up</h2>
                 </div>
                 <div>
                     <p>There are # vouchers waiting for the family</p>
                 </div>
-                <div class="pick-up">
+                <div class="pick-up vh-spaced">
                     <div>
                         <p>Collected by Hester Johnson</p>
                         <button>Change</button>
