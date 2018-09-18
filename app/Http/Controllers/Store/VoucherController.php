@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 
 class VoucherController extends Controller
 {
-  public function test()
+  public function index()
     {
         return view('store.voucher_allocation');
     }

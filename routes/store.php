@@ -91,5 +91,5 @@ Route::group(['middleware' => 'auth:store'], function () {
 
 Route::get('/voucher-allocation', [
         'as' => 'store.voucherAllocation',
-        'uses' => 'VoucherController@test',
+        'uses' => 'VoucherController@index',
     ]);
