@@ -32,6 +32,10 @@ ul {
 	list-style-type: circle;
 }
 
+li span {
+  font-size: 0.7rem;
+}
+
 form {
 	display: flex;
 	width: 100%;
@@ -499,10 +503,6 @@ REGISTER PAGE
 	margin: 1rem;
 }
 
-.col span {
-	font-size: 0.7rem;
-}
-
 .col td,
 .col .added {
 	font-size: 1rem;
@@ -593,6 +593,7 @@ EDIT PAGE
 
 .clickable-span {
 	cursor: pointer;
+  text-decoration: underline;
 }
 
 .collect #more-family-info {

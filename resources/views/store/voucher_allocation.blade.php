@@ -44,8 +44,24 @@
                     <p>This family should collect 6 vouchers per week</p>
                     <p class="v-spaced">Their last collection was on Thursday 2nd August</p>
                 </div>
-                <div id="expandable">
-                    <a class="center">Brief collection history &#x25BC;</a>
+                <div class="center">
+                    <span class="center clickable-span">Brief collection history</span>
+                    <div id="brief" class="collapsed">
+                        <table>
+                            <tr>
+                                <th>W/C</th>
+                                <th>Vouchers collected</th>
+                            </tr>
+                            <tr>
+                                <td>17/09/2018</td>
+                                <td>0</td>
+                            </tr>
+                            <tr>
+                                <td>10/09/2018</td>
+                                <td>0</td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
                 <button class="long-button">Full collection history</button>
             </div>
@@ -114,9 +130,20 @@
     <script type="text/javascript">
         $(document).ready(
             function () {
+                // Voucher collection section animations
                 $('#collection-button').click(function (e) {
                     $('#collection').addClass('slide-in');
                     $('.allocation').addClass('fade-back');
+                    e.preventDefault();
+                });
+
+                // Expander functionality for voucher history
+                $('.clickable-span').click(function (e) {
+                    if($('#brief').hasClass('collapsed')) {
+                        $('#brief').removeClass('collapsed');
+                    } else {
+                        $('#brief').addClass('collapsed');
+                    }
                     e.preventDefault();
                 });
             }
