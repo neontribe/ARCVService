@@ -39,7 +39,7 @@
                     </table>
                 </div>
                 <div>
-                    <label for="carer_adder">Add new collectors:</label>
+                    <label for="carer_adder_input">Add new collectors:</label>
                     <div id="carer_adder" class="small-button-container">
                         <input id="carer_adder_input" name="carer_adder_input" type="text" autocomplete="off"
                                autocorrect="off" spellcheck="false">

@@ -22,10 +22,18 @@ h2 {
 	margin: 0.5rem;
 }
 
+h3 {
+  margin-top: 0;
+}
+
 ul {
 	margin: 0;
 	text-align: left;
 	list-style-type: circle;
+}
+
+li span {
+  font-size: 0.7rem;
 }
 
 form {
@@ -38,7 +46,7 @@ input[type="text"],
 input[type="month"],
 input[type="search"] {
 	padding: 0.5rem 0;
-	font-size: 1.5rem;
+	font-size: 1.3rem;
 	line-height: 20px;
 	width: 100%;
 	border: 2px solid #ededed;
@@ -495,10 +503,6 @@ REGISTER PAGE
 	margin: 1rem;
 }
 
-.col span {
-	font-size: 0.7rem;
-}
-
 .col td,
 .col .added {
 	font-size: 1rem;
@@ -589,6 +593,7 @@ EDIT PAGE
 
 .clickable-span {
 	cursor: pointer;
+  text-decoration: underline;
 }
 
 .collect #more-family-info {
@@ -727,4 +732,85 @@ and (max-device-width : 1024px)  {
 		max-width: 44px;
 		padding: 0;
 	}
+}
+
+/*
+
+VOUCHER PAGES
+
+*/
+
+.alongside-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.alongside-container > div,
+.alongside-container > label {
+  width: 50%;
+  margin-right: 2%;
+}
+
+.short-button {
+  width: 60%;
+  margin: 3% 20%;
+}
+
+.voucher-container {
+  margin: 1rem 7rem;
+}
+
+.add-button {
+  max-height: 48px;
+  max-width: 48px;
+}
+
+.collection-section {
+  display: none;
+}
+
+.v-spaced {
+  margin: 2rem 0;
+}
+
+.vh-spaced {
+  margin: 2rem 1rem;
+}
+
+.slide-in {
+  display: block;
+  animation-duration: 1s;
+  animation-name: slidein;
+}
+
+.fade-back {
+  display: none;
+}
+
+.pick-up > div {
+  align-items: baseline;
+  display: inline-flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.pick-up p {
+  width: 75%;
+}
+
+.pick-up button {
+  font-size: 0.75rem;
+  height: 2rem;
+  min-height: 2rem;
+}
+
+@keyframes slidein {
+  from {
+    transform: translateX(150%);
+  }
+  
+  to {
+    transform: translateX(0%);
+  }
 }
