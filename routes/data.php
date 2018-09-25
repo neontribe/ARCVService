@@ -50,7 +50,7 @@ Route::group(['middleware' => 'auth:admin'], function () {
         file_get_contents($env_file_path)
     ));
 
-        return Redirect::route('dashboard')
+        return Redirect::route('admin.dashboard')
         ->with('message', 'Reseeded @' . Carbon::now());
     });
 });
