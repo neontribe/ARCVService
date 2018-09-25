@@ -14,6 +14,7 @@ return [
             'ordered',
             'printed',
             'dispatched',
+            'prepared', // used for creating bundles of vouchers
             'allocated', // to families
             'recorded', // submitted to shortlist
             'payment_pending', // shortlist completed
@@ -36,6 +37,22 @@ return [
             ],
             'dispatch' => [
                 'from' => ['printed'],
+                'to' => 'dispatched',
+            ],
+            'bundle' => [
+                'from' => ['printed','dispatched'],
+                'to' => 'prepared',
+            ],
+            'disburse' => [
+                'from' => ['prepared'],
+                'to' => 'allocated',
+            ],
+            'unbundle-to-printed' => [
+                'from' => ['prepared'],
+                'to' => 'printed',
+            ],
+            'unbundle-to-dispatched' => [
+                'from' => ['prepared'],
                 'to' => 'dispatched',
             ],
             'lose' => [
@@ -78,6 +95,7 @@ return [
                 'from' => ['lost','expired','reimbursed'],
                 'to' =>  'retired',
             ],
+
         ],
 
         // list of all callbacks
