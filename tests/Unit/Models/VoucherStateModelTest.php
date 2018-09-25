@@ -86,6 +86,18 @@ class VoucherStateModelTest extends TestCase
         $this->assertEquals($voucher->currentstate, 'recorded');
     }
 
+    public function testAPrintedVoucherCanBeBundled()
+    {
+        Auth::login($this->user);
+        $voucher = factory(Voucher::class, 'requested')->create();
+
+        $voucher->applyTransition('order');
+        $voucher->applyTransition('print');
+        $voucher->applyTransition('bundle');
+
+        $this->assertEquals($voucher->currentstate, 'prepared');
+    }
+
     public function testADispatchedVoucherCanBeCollected()
     {
         Auth::login($this->user);
@@ -97,6 +109,32 @@ class VoucherStateModelTest extends TestCase
         $voucher->applyTransition('collect');
 
         $this->assertEquals($voucher->currentstate, 'recorded');
+    }
+
+    public function testADispatchedVoucherCanBeBundled()
+    {
+        Auth::login($this->user);
+        $voucher = factory(Voucher::class, 'requested')->create();
+
+        $voucher->applyTransition('order');
+        $voucher->applyTransition('print');
+        $voucher->applyTransition('dispatch');
+        $voucher->applyTransition('bundle');
+
+        $this->assertEquals($voucher->currentstate, 'prepared');
+    }
+
+    public function testAPreparedVoucherCanBeDisbursed()
+    {
+        Auth::login($this->user);
+        $voucher = factory(Voucher::class, 'requested')->create();
+
+        $voucher->applyTransition('order');
+        $voucher->applyTransition('print');
+        $voucher->applyTransition('bundle');
+        $voucher->applyTransition('disburse');
+
+        $this->assertEquals($voucher->currentstate, 'allocated');
     }
 
     public function testARecordedVoucherCanBeRejectedBackToAllocated()
@@ -137,6 +175,32 @@ class VoucherStateModelTest extends TestCase
         $voucher->applyTransition('dispatch');
         $voucher->applyTransition('collect');
         $voucher->applyTransition('reject-to-dispatched');
+
+        $this->assertEquals($voucher->currentstate, 'dispatched');
+    }
+
+    public function testAPreparedVoucherCanBeUnbundledBackToPrinted()
+    {
+        Auth::login($this->user);
+        $voucher = factory(Voucher::class, 'requested')->create();
+
+        $voucher->applyTransition('order');
+        $voucher->applyTransition('print');
+        $voucher->applyTransition('bundle');
+        $voucher->applyTransition('unbundle-to-printed');
+
+        $this->assertEquals($voucher->currentstate, 'printed');
+    }
+
+    public function testAPreparedVoucherCanBeUnbundledBackToDispatched()
+    {
+        Auth::login($this->user);
+        $voucher = factory(Voucher::class, 'requested')->create();
+
+        $voucher->applyTransition('order');
+        $voucher->applyTransition('print');
+        $voucher->applyTransition('bundle');
+        $voucher->applyTransition('unbundle-to-dispatched');
 
         $this->assertEquals($voucher->currentstate, 'dispatched');
     }
