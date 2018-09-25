@@ -18,7 +18,7 @@ class CreateBundlesTable extends Migration
             $table->integer('entitlement')->unsigned(); // for recording actual entitlement when issued
             $table->integer('family_id')->unsigned(); // FK Families
             $table->integer('centre_id')->unsigned(); // FK Centres
-            $table->timestamps(); //created at amd updated at
+            $table->timestamps(); //created at and updated at
             $table->timestamp('allocated_at')->nullable();
 
             $table->foreign('family_id')
