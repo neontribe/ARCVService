@@ -199,11 +199,22 @@ $factory->define(App\Bundle::class, function (Faker\Generator $faker, $attribute
         : null
     ;
 
-    // centre_id is the centre we allocated at
-    $centre = isset($attributes['centre_id'])
-        ? App\Centre::find($attributes['centre_id'])
-        : null
-    ;
+    // $centre is the centre we created the bundle at
+    $centre = null;
+
+    // if there is one supplied, find it
+    if (isset($attributes['centre_id'])) {
+        $centre = App\Centre::find($attributes['centre_id']);
+    }
+
+    // if it's still null and we have an auth user centre, use that
+    if (!$centre) {
+        if (Auth::user() && Auth::user()->centre) {
+            $centre = Auth::user()->centre;
+        } else {
+            $centre = factory(App\Centre::class)->create();
+        }
+    }
 
     return [
         'centre_id' => $centre->id,
