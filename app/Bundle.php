@@ -13,7 +13,9 @@ class Bundle extends Model
      */
     protected $fillable = [
         'entitlement',
-        'allocated_at'
+        'allocated_at',
+        'centre_id',
+        'registration_id'
     ];
 
     protected $rules = [
@@ -55,7 +57,7 @@ class Bundle extends Model
     ];
 
     /**
-     * Return the Centre it belongs to
+     * Return the Centre it was allocated to
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -65,13 +67,13 @@ class Bundle extends Model
     }
 
     /**
-     * Get the Family this bundle is for
+     * Get the Registration this bundle is for
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function family()
+    public function registration()
     {
-        return $this->belongsTo(Family::class);
+        return $this->belongsTo(Registration::class);
     }
 
     /**

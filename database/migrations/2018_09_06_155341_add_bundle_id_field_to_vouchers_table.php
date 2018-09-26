@@ -27,7 +27,7 @@ class AddBundleIdFieldToVouchersTable extends Migration
     public function down()
     {
         Schema::table('vouchers', function (Blueprint $table) {
-            $table->dropForeign('bundles_bundle_id_foreign');
+            $table->dropForeign(['bundle_id']);
             $table->dropColumn('bundle_id');
         });
     }

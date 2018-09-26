@@ -177,6 +177,45 @@ $factory->defineAs(App\Trader::class, 'withnullable', function ($faker) use ($fa
 });
 
 /**
+ * Bundle with several vouchers
+ */
+$factory->define(App\Bundle::class, function (Faker\Generator $faker, $attributes) {
+
+    // get/make the registration
+    $registration = isset($attributes['registration_id'])
+        ? App\Registration::find($attributes['registration_id'])
+        : factory(App\Registration::class)->create();
+
+    // get/calculate and stash the entitlement
+    $entitlement = isset($attributes['entitlement'])
+        ? $attributes['entitlement']
+        : $registration->family->entitlement
+    ;
+
+    // Allocations: The factory won't fix an allocation without a centre
+    // If there's an allocated_at, set it.
+    $allocated_at = isset($attributes['allocated_at'])
+        ? $attributes['allocated_at']
+        : null
+    ;
+
+    // centre_id is the centre we allocated at
+    $centre = isset($attributes['centre_id'])
+        ? App\Centre::find($attributes['centre_id'])
+        : null
+    ;
+
+    return [
+        'centre_id' => $centre->id,
+        'registration_id' => $registration->id,
+        'entitlement' => $entitlement,
+        'allocated_at' => $allocated_at
+    ];
+});
+
+
+
+/**
  * Voucher with a random current state.
  */
 $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
