@@ -177,7 +177,7 @@ $factory->defineAs(App\Trader::class, 'withnullable', function ($faker) use ($fa
 });
 
 /**
- * Empty bundle with
+ * Empty bundle.
  */
 $factory->define(App\Bundle::class, function (Faker\Generator $faker, $attributes) {
 
@@ -228,8 +228,6 @@ $factory->define(App\Bundle::class, function (Faker\Generator $faker, $attribute
         'allocated_at' => $allocated_at
     ];
 });
-
-
 
 /**
  * Voucher with a random current state.
