@@ -177,19 +177,19 @@ $factory->defineAs(App\Trader::class, 'withnullable', function ($faker) use ($fa
 });
 
 /**
- * Bundle with several vouchers
+ * Empty bundle with
  */
 $factory->define(App\Bundle::class, function (Faker\Generator $faker, $attributes) {
 
-    // get/make the registration
-    $registration = isset($attributes['registration_id'])
-        ? App\Registration::find($attributes['registration_id'])
-        : factory(App\Registration::class)->create();
+    // get/make  registration for a family
+    $family = isset($attributes['family_id'])
+        ? App\Registration::find($attributes['family_id'])
+        : factory(App\Registration::class)->create()->family;
 
     // get/calculate and stash the entitlement
     $entitlement = isset($attributes['entitlement'])
         ? $attributes['entitlement']
-        : $registration->family->entitlement
+        : $family->entitlement
     ;
 
     // Allocations: The factory won't fix an allocation without a centre
@@ -207,18 +207,23 @@ $factory->define(App\Bundle::class, function (Faker\Generator $faker, $attribute
         $centre = App\Centre::find($attributes['centre_id']);
     }
 
-    // if it's still null and we have an auth user centre, use that
+    // if it's *still* null
     if (!$centre) {
-        if (Auth::user() && Auth::user()->centre) {
+        if (Auth::check() && Auth::user()->centre) {
+            // and we have an auth user centre, use that
             $centre = Auth::user()->centre;
+        } elseif ($family) {
+            // or grab the family's registration centre
+            $centre = App\Centre::find($family->initial_centre_id);
         } else {
+            // or, maybe make one?
             $centre = factory(App\Centre::class)->create();
         }
     }
 
     return [
         'centre_id' => $centre->id,
-        'registration_id' => $registration->id,
+        'family_id' => $family->id,
         'entitlement' => $entitlement,
         'allocated_at' => $allocated_at
     ];

@@ -15,7 +15,7 @@ class Bundle extends Model
         'entitlement',
         'allocated_at',
         'centre_id',
-        'registration_id'
+        'family_id'
     ];
 
     protected $rules = [
@@ -71,9 +71,9 @@ class Bundle extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function registration()
+    public function family()
     {
-        return $this->belongsTo(Registration::class);
+        return $this->belongsTo(Family::class);
     }
 
     /**

@@ -22,10 +22,11 @@ class BundleModelTest extends TestCase
     {
         $b = $this->bundle;
         $this->assertInstanceOf(Bundle::class, $b);
-        $this->assertInternalType('integer', $b->registration_id);
+        $this->assertInternalType('integer', $b->family_id);
         $this->assertInternalType('integer', $b->entitlement);
         $this->assertInternalType('integer', $b->centre_id);
         $this->assertNull($b->allocated_at);
+        $this->assertEmpty($b->vouchers);
     }
 
     public function testBundleCanHaveManyVouchers()

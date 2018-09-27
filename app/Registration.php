@@ -69,16 +69,6 @@ class Registration extends Model
         return $this->belongsTo('App\Centre');
     }
 
-    /**
-     * Get the Registration's Bundles
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function bundles()
-    {
-        return $this->hasMany('App\Bundle');
-    }
-
     public function getStatus()
     {
         $reminders = [];
