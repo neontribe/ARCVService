@@ -263,6 +263,7 @@ $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
  * Voucher with currentstate requested.
  */
 $factory->defineAs(App\Voucher::class, 'requested', function ($faker) use ($factory) {
+
     $voucher = $factory->raw(App\Voucher::class);
 
     return array_merge($voucher, [

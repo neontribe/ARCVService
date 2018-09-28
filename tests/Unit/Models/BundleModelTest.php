@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Auth;
 use App\Bundle;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
@@ -15,7 +16,7 @@ class BundleModelTest extends TestCase
     {
         parent::setUp();
         // create a blank factory
-        $this->bundle = factory(Bundle::class)->create();
+        $this->bundle = factory('App\Bundle')->create();
     }
 
     public function testBundleIsCreatedWithExpectedAttributes()
@@ -31,17 +32,18 @@ class BundleModelTest extends TestCase
 
     public function testBundleCanHaveManyVouchers()
     {
-    }
+        $user = factory('App\CentreUser')->create();
+        Auth::login($user);
 
-    public function testBundleCannotHaveNoVouchers()
-    {
-    }
-
-    public function testBundleBelongsToRegistration()
-    {
-    }
-
-    public function testBundleCanBeAllocated()
-    {
+        // Create three vouchers and transition to printed.
+        $vs = factory('App\Voucher', 'requested', 3)
+            ->create()
+            ->each(function ($v) {
+                $v->applyTransition('order');
+                $v->applyTransition('print');
+                $v->bundle()->associate($this->bundle);
+                $v->save();
+            });
+        $this->assertEquals($vs->count(), $this->bundle->vouchers()->count());
     }
 }
