@@ -63,16 +63,35 @@ class Voucher extends Model
         'sponsor_id' => ['numeric', 'required', 'exists:sponsors,id'],
     ];
 
+    /**
+     * The Sponsor that backs this voucher
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function sponsor()
     {
         return $this->belongsTo(Sponsor::class);
     }
 
+    /**
+     * The Trader that collected this voucher
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function trader()
     {
         return $this->belongsTo(Trader::class);
     }
 
+    /**
+     * The bundle that A CC may have collated this voucher into
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function bundle()
+    {
+        return $this->belongsTo(Bundle::class);
+    }
     /**
      * Get the most recent voucher_state change to payment_pending.
      * There should only ever be one per voucher - but most recent safer.

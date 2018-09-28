@@ -177,6 +177,59 @@ $factory->defineAs(App\Trader::class, 'withnullable', function ($faker) use ($fa
 });
 
 /**
+ * Empty bundle.
+ */
+$factory->define(App\Bundle::class, function (Faker\Generator $faker, $attributes) {
+
+    // get/make  registration for a family
+    $family = isset($attributes['family_id'])
+        ? App\Registration::find($attributes['family_id'])
+        : factory(App\Registration::class)->create()->family;
+
+    // get/calculate and stash the entitlement
+    $entitlement = isset($attributes['entitlement'])
+        ? $attributes['entitlement']
+        : $family->entitlement
+    ;
+
+    // Allocations: The factory won't fix an allocation without a centre
+    // If there's an allocated_at, set it.
+    $allocated_at = isset($attributes['allocated_at'])
+        ? $attributes['allocated_at']
+        : null
+    ;
+
+    // $centre is the centre we created the bundle at
+    $centre = null;
+
+    // if there is one supplied, find it
+    if (isset($attributes['centre_id'])) {
+        $centre = App\Centre::find($attributes['centre_id']);
+    }
+
+    // if it's *still* null
+    if (!$centre) {
+        if (Auth::check() && Auth::user()->centre) {
+            // and we have an auth user centre, use that
+            $centre = Auth::user()->centre;
+        } elseif ($family) {
+            // or grab the family's registration centre
+            $centre = App\Centre::find($family->initial_centre_id);
+        } else {
+            // or, maybe make one?
+            $centre = factory(App\Centre::class)->create();
+        }
+    }
+
+    return [
+        'centre_id' => $centre->id,
+        'family_id' => $family->id,
+        'entitlement' => $entitlement,
+        'allocated_at' => $allocated_at
+    ];
+});
+
+/**
  * Voucher with a random current state.
  */
 $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
@@ -210,6 +263,7 @@ $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
  * Voucher with currentstate requested.
  */
 $factory->defineAs(App\Voucher::class, 'requested', function ($faker) use ($factory) {
+
     $voucher = $factory->raw(App\Voucher::class);
 
     return array_merge($voucher, [
