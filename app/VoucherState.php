@@ -18,6 +18,7 @@ class VoucherState extends Model
         'transition',
         'from',
         'user_id',
+        'user_type',
         'voucher_id',
         'to',
         'source',
