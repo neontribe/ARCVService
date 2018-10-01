@@ -45,7 +45,10 @@
                     <p class="v-spaced">Their last collection was on Thursday 2nd August</p>
                 </div>
                 <div class="center">
-                    <span class="center clickable-span">Brief collection history</span>
+                    <span id="brief-toggle" class="show clickable-span">
+                      brief collection history
+                      <i class="fa fa-caret-down" aria-hidden="true"></i>
+                    </span>
                     <div id="brief" class="collapsed">
                         <table>
                             <tr>
@@ -139,10 +142,19 @@
 
                 // Expander functionality for voucher history
                 $('.clickable-span').click(function (e) {
+                    // Collapsing/Expanding content
                     if($('#brief').hasClass('collapsed')) {
                         $('#brief').removeClass('collapsed');
                     } else {
                         $('#brief').addClass('collapsed');
+                    }
+                    // Show/hide and arrow
+                    if($('#brief-toggle').hasClass('show')) {
+                        $('#brief-toggle').removeClass('show');
+                        $('#brief-toggle').addClass('hide');
+                    } else {
+                        $('#brief-toggle').removeClass('hide');
+                        $('#brief-toggle').addClass('show');
                     }
                     e.preventDefault();
                 });
