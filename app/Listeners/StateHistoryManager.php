@@ -9,7 +9,6 @@
 namespace App\Listeners;
 
 use SM\Event\TransitionEvent;
-use Log;
 
 class StateHistoryManager
 {
@@ -32,16 +31,18 @@ class StateHistoryManager
         $sm = $event->getStateMachine();
         $model = $sm->getObject();
 
-        Log::info(class_basename(auth()->user()));
+        // We need to collect the user_type (basically the classname)
+        // as we now have several with conflicting ids.
+        // Will permit accurate tidying up late.
+        $user_type = class_basename(auth()->user());
         $model->history()->create([
             "transition" => $event->getTransition(),
             "from" => $event->getState(), // what the state was before.
             "to" => $sm->getState(),
-            "user_id" => auth()->id(),
-            "user_type" => class_basename(auth()->user()),
+            "user_id" => auth()->id(), // the user ID
+            "user_type" => $user_type, // the type of user (we now have many)
             "source" => "",
         ]);
-
         $model->save();
     }
 }

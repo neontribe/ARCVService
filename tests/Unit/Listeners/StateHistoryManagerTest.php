@@ -37,9 +37,9 @@ class StateHistoryManagerTest extends TestCase
         $v = factory(Voucher::class, 'requested')->create();
         $v->applyTransition('order');
         $v->applyTransition('print');
+        $v->applyTransition('dispatch');
 
-        $state = $v->history()->get(null);
-        dd($state);
+        $state = $v->history()->get(null)->last();
         $this->assertEquals(Auth::user()->id, $state->user_id);
         $this->assertEquals(class_basename(Auth::user()), $state->user_type);
 
