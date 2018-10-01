@@ -806,17 +806,17 @@ VOUCHER PAGES
 }
 
 .hide > i {
-	-webkit-transform: rotate(180deg);
-	-moz-transform: rotate(180deg);
-	transform: rotate(180deg);
+  -webkit-transform: rotate(180deg);
+  -moz-transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 
 .show:before {
-	content: 'Show';
+  content: 'Show';
 }
 
 .hide:before {
-	content: 'Hide';
+  content: 'Hide';
 }
 
 @keyframes slidein {
