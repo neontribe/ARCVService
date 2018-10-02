@@ -59,10 +59,10 @@ input[type="text"]:disabled {
 	font-weight: 200;
 }
 
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 input[type="radio"],
@@ -273,7 +273,7 @@ input[type="text"].invalid,
 	overflow: auto;
 }
 
-/* 
+/*
 
 SUBNAV
 
@@ -340,7 +340,7 @@ COOKIE NOTICE
     padding: 0;
 }
 
-/* 
+/*
 
 LOGIN PAGE
 
@@ -407,9 +407,9 @@ LOGIN PAGE
 	margin-top: 3rem;
 }
 
-/* 
+/*
 
-DASHBOARD PAGE 
+DASHBOARD PAGE
 
 */
 
@@ -460,7 +460,7 @@ DASHBOARD PAGE
 	text-decoration: underline;
 }
 
-/* 
+/*
 
 REGISTER PAGE
 
@@ -570,7 +570,7 @@ REGISTER PAGE
 	top: 0;
 }
 
-/* 
+/*
 
 EDIT PAGE
 
@@ -641,7 +641,7 @@ EDIT PAGE
 	display: none;
 }
 
-/* 
+/*
 
 SEARCH PAGE
 
@@ -695,7 +695,7 @@ SEARCH PAGE
 	padding-right: 1rem;
 }
 
-/* 
+/*
 
 PRIVACY PAGE
 
@@ -805,11 +805,25 @@ VOUCHER PAGES
   min-height: 2rem;
 }
 
+.hide > i {
+  -webkit-transform: rotate(180deg);
+  -moz-transform: rotate(180deg);
+  transform: rotate(180deg);
+}
+
+.show:before {
+  content: 'Show';
+}
+
+.hide:before {
+  content: 'Hide';
+}
+
 @keyframes slidein {
   from {
     transform: translateX(150%);
   }
-  
+
   to {
     transform: translateX(0%);
   }
