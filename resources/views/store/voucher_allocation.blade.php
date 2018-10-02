@@ -98,9 +98,28 @@
                 </div>
                 <p class="center vh-spaced">You have added # vouchers</p>
                 <button id="collection-button" class="long-button">Go to voucher collection</button>
-                <div id="expandable" class="collapsed">
-                    <p># vouchers</p>
-                </div>
+                <div class="center">
+                  <span class="clickable-span">
+                    Vouchers added
+                    <i class="fa fa-caret-down" aria-hidden="true"></i>
+                  </span>
+                  <div id="brief" class="collapsed">
+                      <table>
+                          <tr>
+                              <th>Voucher code</th>
+                              <th>Remove</th>
+                          </tr>
+                          <tr>
+                              <td>RVNT40500959</td>
+                              <td><button><i class="fa fa-minus" aria-hidden="true"></i></button></td>
+                          </tr>
+                          <tr>
+                              <td>RVNT40500959</td>
+                              <td><button><i class="fa fa-minus" aria-hidden="true"></i></button></td>
+                          </tr>
+                      </table>
+                  </div>
+              </div>
             </div>
             <div id="collection" class="col collection-section">
                 <div>
