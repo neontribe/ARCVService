@@ -16,16 +16,21 @@ class CreateBundlesTable extends Migration
         Schema::create('bundles', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('entitlement')->unsigned(); // for recording actual entitlement when issued
-            $table->integer('family_id')->unsigned(); // FK Family
-            $table->integer('centre_id')->unsigned(); // FK Centres
+            $table->integer('registration_id')->unsigned(); // FK Registrations
+            $table->integer('allocating_centre_id')->unsigned(); // FK Centres
+            $table->integer('disbursing_centre_id')->unsigned()->nullable(); // FK Centres
+            $table->timestamp('disbursed_at')->nullable();
             $table->timestamps(); //created at and updated at
-            $table->timestamp('allocated_at')->nullable();
 
-            $table->foreign('family_id')
+            $table->foreign('registration_id')
                 ->references('id')
-                ->on('families');
+                ->on('registrations');
 
-            $table->foreign('centre_id')
+            $table->foreign('allocating_centre_id')
+                ->references('id')
+                ->on('centres');
+
+            $table->foreign('disbursing_centre_id')
                 ->references('id')
                 ->on('centres');
         });

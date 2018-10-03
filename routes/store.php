@@ -62,6 +62,14 @@ Route::group(['middleware' => 'auth:store'], function () {
         'uses' => 'FamilyController@update',
     ]);
 
+    // Bundles
+
+    // Bundle manager for a specific Registration
+    Route::get('/registrations/{registration}/bundle-manager', [
+        'as' => 'store.registration.bundle',
+        'uses' => 'BundleController@create'
+    ]);
+
     // Printables
 
     // Print a specific Family Form for User Centre (Edit page)
@@ -87,4 +95,5 @@ Route::group(['middleware' => 'auth:store'], function () {
         'as' => 'store.centres.registrations.summary',
         'uses' => 'CentreController@exportRegistrationsSummary',
     ])->middleware(['can:export,App\Registration']);
+
 });

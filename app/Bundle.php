@@ -71,9 +71,9 @@ class Bundle extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function family()
+    public function registration()
     {
-        return $this->belongsTo(Family::class);
+        return $this->belongsTo(Registration::class);
     }
 
     /**
