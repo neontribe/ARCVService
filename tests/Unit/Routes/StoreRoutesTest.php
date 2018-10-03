@@ -163,6 +163,30 @@ class StoreRoutesTest extends StoreTestCase
         ;
     }
 
+    /** @test */
+    public function testVoucherManageRouteGate()
+    {
+        // Create a random registration with our centre.
+        $registration = factory(Registration::class)->create([
+            "centre_id" => $this->centre->id,
+        ]);
+
+        $route = URL::route('store.registration.voucher-manager', [ 'registration' => $registration->id ]);
+
+        Auth::logout();
+        // You cannot get there logged out.
+        $this->visit($route)
+            ->seePageIs(URL::route('store.login'))
+            ->assertResponseStatus(200)
+        ;
+        // You can get there logged in.
+        $this->actingAs($this->centreUser, 'store')
+            ->visit($route)
+            ->seePageIs($route)
+            ->assertResponseStatus(200)
+        ;
+    }
+
     /** test */
     public function testCentreRegistrationsSummaryGate()
     {

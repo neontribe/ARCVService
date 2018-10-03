@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Store;
 
+use Auth;
 use App\Registration;
 use App\Http\Controllers\Controller;
 
@@ -27,7 +28,7 @@ class BundleController extends Controller
             "bundles" => $registration->bundles()
         ]);
 
-        return view('', $data);
+        return view('store.manage_vouchers', $data);
     }
 
     /**

@@ -65,8 +65,8 @@ Route::group(['middleware' => 'auth:store'], function () {
     // Bundles
 
     // Bundle manager for a specific Registration
-    Route::get('/registrations/{registration}/bundle-manager', [
-        'as' => 'store.registration.bundle',
+    Route::get('/registrations/{registration}/voucher-manager', [
+        'as' => 'store.registration.voucher-manager',
         'uses' => 'BundleController@create'
     ]);
 
