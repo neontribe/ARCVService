@@ -103,7 +103,7 @@
                     Vouchers added
                     <i class="fa fa-caret-down" aria-hidden="true"></i>
                   </span>
-                  <div id="brief" class="collapsed">
+                  <div id="vouchers" class="collapsed">
                       <table>
                           <tr>
                               <th>Voucher code</th>
@@ -159,24 +159,23 @@
                     e.preventDefault();
                 });
 
-                // Expander functionality for voucher history
                 $('.clickable-span').click(function (e) {
-                    // Collapsing/Expanding content
-                    if($('#brief').hasClass('collapsed')) {
-                        $('#brief').removeClass('collapsed');
-                    } else {
-                        $('#brief').addClass('collapsed');
+                  // the next sibling is the content
+                  var content = $(this).next();
+                  var isBriefToggle = $(this).is('#brief-toggle');
+
+                  if(content.hasClass('collapsed')) {
+                    content.removeClass('collapsed')
+                    if (isBriefToggle) {
+                      $(this).removeClass('show').addClass('hide');
                     }
-                    // Show/hide and arrow
-                    if($('#brief-toggle').hasClass('show')) {
-                        $('#brief-toggle').removeClass('show');
-                        $('#brief-toggle').addClass('hide');
-                    } else {
-                        $('#brief-toggle').removeClass('hide');
-                        $('#brief-toggle').addClass('show');
+                  } else {
+                    content.addClass('collapsed');
+                    if (isBriefToggle) {
+                      $(this).removeClass('hide').addClass('show')
                     }
-                    e.preventDefault();
-                });
+                  }
+                })
             }
         );
     </script>
