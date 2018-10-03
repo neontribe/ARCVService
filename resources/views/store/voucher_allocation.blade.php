@@ -112,14 +112,17 @@
                 </div>
                 <div class="pick-up vh-spaced">
                     <div>
+                        <i class="fa fa-user"></i>
                         <p>Collected by Hester Johnson</p>
                         <button>Change</button>
                     </div>
                     <div>
+                        <i class="fa fa-calendar"></i>
                         <p>Collected today, 20th August</p>
                         <button>Change</button>
                     </div>
                     <div>
+                        <i class="fa fa-home"></i>
                         <p>Collected at 1st place Children's Centre</p>
                         <button>Change</button>
                     </div>
