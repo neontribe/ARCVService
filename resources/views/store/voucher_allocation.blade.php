@@ -113,18 +113,23 @@
                 <div class="pick-up vh-spaced">
                     <div>
                         <i class="fa fa-user"></i>
-                        <p>Collected by Hester Johnson</p>
-                        <button>Change</button>
+                        <label for="collected-by">Collected by:</label>
+                        <select id="collected-by">
+                          <option value="carer-1">Hester Johnson</option>
+                        </select>
                     </div>
                     <div>
                         <i class="fa fa-calendar"></i>
-                        <p>Collected today, 20th August</p>
-                        <button>Change</button>
+                        <label for="collected-on">Collected on:</label>
+                        {{-- set value to today's date with carbon --}}
+                        <input id="collected-on" type="date">
                     </div>
                     <div>
                         <i class="fa fa-home"></i>
-                        <p>Collected at 1st place Children's Centre</p>
-                        <button>Change</button>
+                        <label for="collected-at">Collected at:</label>
+                        <select id="collected-at">
+                          <option value="center-1">First Childrens Centre</option>
+                        </select>
                     </div>
                 </div>
                 <button class="short-button">Confirm pick up</button>
