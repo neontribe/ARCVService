@@ -29,7 +29,7 @@ class BundleModelTest extends TestCase
         // a blank bundle hasn't been disbursed.
         $this->assertNull($b->disbursing_centre_id);
         $this->assertNull($b->disbursed_at);
-        // a black bundle doesn't have vouchers.
+        // a blank bundle doesn't have vouchers.
         $this->assertEmpty($b->vouchers);
     }
 

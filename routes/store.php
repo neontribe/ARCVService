@@ -64,11 +64,16 @@ Route::group(['middleware' => 'auth:store'], function () {
 
     // Bundles
 
-    // Bundle manager for a specific Registration
-    Route::get('/registrations/{registration}/voucher-manager', [
-        'as' => 'store.registration.voucher-manager',
-        'uses' => 'BundleController@create'
-    ]);
+    // Need to write this route this way to use a policy.
+    // Registration wasn't being passed through for a Gate based trick.
+
+    Route::get(
+        '/registrations/{registration}/voucher-manager',
+        'BundleController@create'
+    )
+    ->name('store.registration.voucher-manager')
+    ->middleware('can:view,registration');
+
 
     // Printables
 
