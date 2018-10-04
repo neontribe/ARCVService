@@ -144,6 +144,9 @@
         </form>
     </div>
 
+    @section('hoist-head')
+        <script src="{{ asset('store/js/jquery-ui-1.12.1/jquery-ui.min.js')}}"></script>
+    @endsection
     <script type="text/javascript">
         $(document).ready(
             function () {
@@ -172,6 +175,11 @@
                     }
                     e.preventDefault();
                 });
+
+                // Browser backup for lack of datepicker support eg. Safari
+                // Reset back to English date format
+                if ($('#collected-on')[0].type != 'date')
+                     $('#collected-on').datepicker({ dateFormat: 'dd-mm-yy' }).val();
             }
         );
     </script>
