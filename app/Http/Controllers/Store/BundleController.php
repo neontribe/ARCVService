@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Store;
 
 use Auth;
 use App\Registration;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreUpdateBundleRequest;
 use App\Http\Controllers\Controller;
 
 class BundleController extends Controller
@@ -41,8 +41,11 @@ class BundleController extends Controller
 
     /**
      * Create OR Upate a registrations current active bundle
+     *
+     * @param StoreUpdateBundleRequest $request
+     * @param Registration $registration
      */
-    public function update(Request $request, Registration $registration)
+    public function update(StoreUpdateBundleRequest $request, Registration $registration)
     {
         // validate the incoming data
         // fetch or create a current bundle for registration
