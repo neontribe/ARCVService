@@ -6,10 +6,10 @@ use Auth;
 use App\Centre;
 use App\CentreUser;
 use App\Registration;
+use App\Sponsor;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use URL;
 use Tests\StoreTestCase;
-use Log;
 
 class StoreRoutesTest extends StoreTestCase
 {
@@ -17,6 +17,12 @@ class StoreRoutesTest extends StoreTestCase
 
     /** @var CentreUser $centreUser */
     private $centreUser;
+
+    /** @var CentreUser $neighborUser */
+    private $neighborUser;
+
+    /** @var CentreUser $foreignUser */
+    private $unrelatedUser;
 
     /** @var Centre $centre */
     private $centre;
@@ -33,6 +39,24 @@ class StoreRoutesTest extends StoreTestCase
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
             "centre_id" => $this->centre->id,
+        ]);
+
+        $this->neighborUser = factory(CentreUser::class)->create([
+            "name"  => "test neighbor",
+            "email" => "testneighbor@example.com",
+            "password" => bcrypt('test_neighbor_pass'),
+            "centre_id" => factory(Centre::class)->create([
+                "sponsor_id" => $this->centre->sponsor->id
+            ])->id
+        ]);
+
+        $this->unrelatedUser = factory(CentreUser::class)->create([
+            "name"  => "test unrelated",
+            "email" => "testunrelated@example.com",
+            "password" => bcrypt('test_unrelated_pass'),
+            "centre_id" => factory(Centre::class)->create([
+                "sponsor_id" => factory(Sponsor::class)->create()->id
+            ])
         ]);
     }
 
@@ -78,7 +102,6 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseStatus(200)
         ;
         // You can get there logged in.
-        Log::info($this->centreUser->name);
         $this->actingAs($this->centreUser, 'store')
             ->visit($route)
             ->seePageIs($route)
@@ -163,6 +186,59 @@ class StoreRoutesTest extends StoreTestCase
         ;
     }
 
+    /** @test */
+    public function testVoucherManageRouteGate()
+    {
+        // Create a random registration with our centre.
+        $registration = factory(Registration::class)->create([
+            "centre_id" => $this->centre->id,
+        ]);
+
+        $route = URL::route('store.registration.voucher-manager', [ 'registration' => $registration->id ]);
+
+        Auth::logout();
+        // You cannot get there logged out.
+        $this->visit($route)
+            ->seePageIs(URL::route('store.login'))
+            ->assertResponseStatus(200)
+        ;
+
+        // You can get there logged in.
+        $this->actingAs($this->centreUser, 'store')
+            ->visit($route)
+            ->seePageIs($route)
+            ->assertResponseStatus(200)
+        ;
+
+        Auth::logout();
+        // Your neighbor can get there logged in.
+        $this->assertEquals(
+            $this->neighborUser->centre->sponsor->id,
+            $this->centreUser->centre->sponsor->id
+        );
+
+        $this->actingAs($this->neighborUser, 'store')
+            ->visit($route)
+            ->seePageIs($route)
+            ->assertResponseStatus(200)
+        ;
+
+        Auth::logout();
+        // An unrelated User cannot get there logged in.
+        $this->assertNotEquals(
+            $this->unrelatedUser->centre->sponsor->id,
+            $this->centreUser->centre->sponsor->id
+        );
+
+        try {
+            $this->actingAs($this->unrelatedUser, 'store')
+                ->visit($route)
+                ;
+        } catch (\Exception $e) {
+                $this->assertContains("Received status code [403]", $e->getMessage());
+        }
+    }
+
     /** test */
     public function testCentreRegistrationsSummaryGate()
     {
@@ -190,7 +266,6 @@ class StoreRoutesTest extends StoreTestCase
         ]);
 
         $route = URL::route('store.centres.registrations.summary');
-        Log::info($route);
 
         Auth::logout();
 

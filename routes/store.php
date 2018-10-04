@@ -62,6 +62,19 @@ Route::group(['middleware' => 'auth:store'], function () {
         'uses' => 'FamilyController@update',
     ]);
 
+    // Bundles
+
+    // Need to write this route this way to use a policy.
+    // Registration wasn't being passed through for a Gate based trick.
+
+    Route::get(
+        '/registrations/{registration}/voucher-manager',
+        'BundleController@create'
+    )
+    ->name('store.registration.voucher-manager')
+    ->middleware('can:view,registration');
+
+
     // Printables
 
     // Print a specific Family Form for User Centre (Edit page)
@@ -87,4 +100,5 @@ Route::group(['middleware' => 'auth:store'], function () {
         'as' => 'store.centres.registrations.summary',
         'uses' => 'CentreController@exportRegistrationsSummary',
     ])->middleware(['can:export,App\Registration']);
+
 });

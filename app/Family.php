@@ -272,16 +272,6 @@ class Family extends Model
     }
 
     /**
-     * Get the Family's Bundles
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function bundles()
-    {
-        return $this->hasMany('App\Bundle');
-    }
-
-    /**
      * Get the Family's intial registered Centre.
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */

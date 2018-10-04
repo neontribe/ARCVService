@@ -182,9 +182,12 @@ $factory->defineAs(App\Trader::class, 'withnullable', function ($faker) use ($fa
 $factory->define(App\Bundle::class, function (Faker\Generator $faker, $attributes) {
 
     // get/make  registration for a family
-    $family = isset($attributes['family_id'])
-        ? App\Registration::find($attributes['family_id'])
-        : factory(App\Registration::class)->create()->family;
+    $registration = isset($attributes['registration_id'])
+        ? App\Registration::find($attributes['registration_id'])
+        : factory(App\Registration::class)->create()
+    ;
+
+    $family = $registration->family;
 
     // get/calculate and stash the entitlement
     $entitlement = isset($attributes['entitlement'])
@@ -200,32 +203,31 @@ $factory->define(App\Bundle::class, function (Faker\Generator $faker, $attribute
     ;
 
     // $centre is the centre we created the bundle at
-    $centre = null;
+    $allocating_centre = null;
 
     // if there is one supplied, find it
-    if (isset($attributes['centre_id'])) {
-        $centre = App\Centre::find($attributes['centre_id']);
+    if (isset($attributes['allocating_centre_id'])) {
+        $allocating_centre = App\Centre::find($attributes['allocating_centre_id']);
     }
 
     // if it's *still* null
-    if (!$centre) {
+    if (!$allocating_centre) {
         if (Auth::check() && Auth::user()->centre) {
             // and we have an auth user centre, use that
-            $centre = Auth::user()->centre;
+            $allocating_centre = Auth::user()->centre;
         } elseif ($family) {
             // or grab the family's registration centre
-            $centre = App\Centre::find($family->initial_centre_id);
+            $allocating_centre = App\Centre::find($family->initial_centre_id);
         } else {
             // or, maybe make one?
-            $centre = factory(App\Centre::class)->create();
+            $allocating_centre = factory(App\Centre::class)->create();
         }
     }
 
     return [
-        'centre_id' => $centre->id,
-        'family_id' => $family->id,
-        'entitlement' => $entitlement,
-        'allocated_at' => $allocated_at
+        'allocating_centre_id' => $allocating_centre->id,
+        'registration_id' => $registration->id,
+        'entitlement' => $entitlement
     ];
 });
 
