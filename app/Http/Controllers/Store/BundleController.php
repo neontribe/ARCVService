@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Store;
 
 use Auth;
+use App\Bundle;
+use App\Centre;
 use App\Registration;
 use App\Http\Requests\StoreUpdateBundleRequest;
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 
 class BundleController extends Controller
 {
@@ -47,17 +50,42 @@ class BundleController extends Controller
      */
     public function update(StoreUpdateBundleRequest $request, Registration $registration)
     {
-        // validate the incoming data
-        // fetch or create a current bundle for registration
 
-        $bundle = $registration->currentBundle();
+        // fnd our bundle.
+        $bundle = (!isEmpty($request->get('bundle_id')))
+            ? (Bundle::find($request->get('bundle_id')))
+            : $registration->currentBundle();
 
-        // sync_vouchers.
-        if ($bundle->syncVouchers($request->codes)) {
-            return;
-        } else {
-            return;
-        };
+        // Find our disbersing centre (if any)
+        $disbursing_centre = (!isEmpty($request->get('disbursing_centre_id')))
+            ? (Centre::find($request->get('disbursing_centre_id')))
+            : null
+        ;
+
+        // check if we need to disburse this bundle.
+        if ($disbursing_centre) {
+            // If wwe have one, we'll be disbersing the bundle.
+            $disbursed_at = (!isEmpty($request->get('disbursed_at')))
+                ? Carbon::createFromFormat(
+                    'Y-m-d',
+                    $request->get('disbursed_at')
+                )->toDateTimeString()
+                : Carbon::now();
+
+            // TODO : need database to record carer who picked up!
+            // TODO : disberse bundle.
+            // $bundle->disburse
+        }
+
+        // clean the incoming data
+        $voucherCodes = (!isEmpty((array)$request->get('vouchers')))
+            ? Voucher::clean($voucherCodes)
+            : [];
+
+        // sync vouchers.
+        if (!isEmpty($voucherCodes)) {
+            $bundle->syncVouchers($voucherCodes);
+        }
     }
 
 }
