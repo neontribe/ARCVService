@@ -753,8 +753,8 @@ VOUCHER PAGES
 }
 
 .short-button {
-  width: 60%;
-  margin: 3% 20%;
+  width: 80%;
+  margin: 3% 10%;
 }
 
 .voucher-container {
@@ -789,20 +789,37 @@ VOUCHER PAGES
 }
 
 .pick-up > div {
-  align-items: baseline;
-  display: inline-flex;
+  display: flex;
+  margin: 1rem;
+}
+
+.pick-up > div > div {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  justify-content: space-between;
 }
 
-.pick-up p {
-  width: 75%;
+.pick-up i {
+  font-size: 2.5rem;
+  width: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 2rem;
 }
 
-.pick-up button {
-  font-size: 0.75rem;
-  height: 2rem;
-  min-height: 2rem;
+.pick-up select,
+.pick-up input {
+  width: 100%;
+  max-width: 200px;
+}
+
+.pick-up input {
+  margin-top: 0.5rem;
+  border: 1px solid #a6a6a6;
+  max-width: 180px;
+  padding: 0.5rem;
+  font-family: Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .hide > i {
