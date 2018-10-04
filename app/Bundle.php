@@ -57,6 +57,46 @@ class Bundle extends Model
     ];
 
     /**
+     * Syncs an array of voucher codes with vouchers();
+     *
+     * @param array $voucherCodes array of cleaned Voucher codes
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function syncVouchers(array $voucherCodes)
+    {
+        $self = $this;
+        $currentCodes = $this->vouchers
+            ->pluck('code')
+            ->toArray();
+
+        // Remove excess vouchers
+        $unBundleCodes = array_diff($currentCodes, $voucherCodes);
+        $this->vouchers()
+            ->whereIn('code', $unBundleCodes)
+            ->each(
+                // pass null to dissociate
+                function (Voucher $voucher) {
+                    $voucher->setBundle(null);
+                }
+            );
+
+        // Add more vouchers
+        $enBundleCodes = array_diff($voucherCodes, $currentCodes);
+        $this->vouchers()
+            ->whereIn('code', $enBundleCodes)
+            ->each(
+                // pass $this as Bundle $self
+                function (Voucher $voucher) use ($self) {
+                    $voucher->setBundle($self);
+                }
+            );
+
+        // reload and return collection.
+        return $this->vouchers->fresh();
+    }
+
+
+    /**
      * Return the Centre it was allocated to
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -85,5 +125,7 @@ class Bundle extends Model
     {
         return $this->hasMany(Voucher::class);
     }
+
+
 }
 

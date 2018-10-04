@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Store;
 
 use Auth;
 use App\Registration;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 class BundleController extends Controller
@@ -36,6 +37,24 @@ class BundleController extends Controller
      */
     public function index()
     {
+    }
+
+    /**
+     * Create OR Upate a registrations current active bundle
+     */
+    public function update(Request $request, Registration $registration)
+    {
+        // validate the incoming data
+        // fetch or create a current bundle for registration
+
+        $bundle = $registration->currentBundle();
+
+        // sync_vouchers.
+        if ($bundle->syncVouchers($request->codes)) {
+            return;
+        } else {
+            return;
+        };
     }
 
 }

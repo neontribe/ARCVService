@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Auth;
 use Illuminate\Database\Eloquent\Model;
 
 class Registration extends Model
@@ -67,6 +68,28 @@ class Registration extends Model
     public function centre()
     {
         return $this->belongsTo('App\Centre');
+    }
+
+    /**
+     * Get the first un-disbursed bundle on a Registration for any Centre.
+     * There should only be one... else make one if there are none.
+     *
+     * @return Model
+     */
+    public function currentBundle()
+    {
+        return $this->bundles()
+            ->where('disbursed_at', null)
+            ->orderBy('id', 'asc')
+            ->firstOrCreate(
+                [
+//                    "allocating_centre_id" =>  Auth::user()->centre,
+                    "registration_id" => $this->id,
+                ],
+                [
+                    "entitlement" => $this->family->entitlement,
+                ]
+            );
     }
 
     /**

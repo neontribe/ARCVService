@@ -63,6 +63,28 @@ class Voucher extends Model
         'sponsor_id' => ['numeric', 'required', 'exists:sponsors,id'],
     ];
 
+
+    /**
+     * The methos we should call to remember to transition.
+     * Could probably be turned into an event listener?
+     *
+     * @param Bundle|null $bundle the model (or not) to bind to
+     * @return bool
+     */
+    public function setBundle(Bundle $bundle = null)
+    {
+        $transition = (isset($bundle))
+            ? "bundle"
+            : "unbundle-to-" . $this->getPriorState()->from;
+
+        if ($this->transitionAllowed($transition)) {
+            $this->bundle()->associate($bundle);
+            $this->applyTransition($transition);
+            return true;
+        }
+        return false;
+    }
+
     /**
      * The Sponsor that backs this voucher
      *
