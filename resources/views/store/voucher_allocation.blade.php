@@ -131,16 +131,30 @@
                 </div>
                 <div class="pick-up vh-spaced">
                     <div>
-                        <p>Collected by Hester Johnson</p>
-                        <button>Change</button>
+                        <i class="fa fa-user"></i>
+                        <div>
+                            <label for="collected-by">Collected by:</label>
+                            <select id="collected-by">
+                                <option value="carer-1">Hester Johnson</option>
+                            </select>
+                        </div>
                     </div>
                     <div>
-                        <p>Collected today, 20th August</p>
-                        <button>Change</button>
+                        <i class="fa fa-calendar"></i>
+                        <div>
+                            <label for="collected-on">Collected on:</label>
+                            {{-- set value to today's date with carbon --}}
+                            <input id="collected-on" type="date">
+                        </div>
                     </div>
                     <div>
-                        <p>Collected at 1st place Children's Centre</p>
-                        <button>Change</button>
+                        <i class="fa fa-home"></i>
+                        <div>
+                            <label for="collected-at">Collected at:</label>
+                            <select id="collected-at">
+                              <option value="center-1">First Childrens Centre</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <button class="short-button">Confirm pick up</button>
@@ -149,6 +163,9 @@
         </form>
     </div>
 
+    @section('hoist-head')
+        <script src="{{ asset('store/js/jquery-ui-1.12.1/jquery-ui.min.js')}}"></script>
+    @endsection
     <script type="text/javascript">
         $(document).ready(
             function () {
@@ -160,22 +177,27 @@
                 });
 
                 $('.clickable-span').click(function (e) {
-                  // the next sibling is the content
-                  var content = $(this).next();
-                  var isBriefToggle = $(this).is('#brief-toggle');
+                    // the next sibling is the content
+                    var content = $(this).next();
+                    var isBriefToggle = $(this).is('#brief-toggle');
 
-                  if(content.hasClass('collapsed')) {
-                    content.removeClass('collapsed')
-                    if (isBriefToggle) {
-                      $(this).removeClass('show').addClass('hide');
+                    if(content.hasClass('collapsed')) {
+                        content.removeClass('collapsed')
+                        if (isBriefToggle) {
+                            $(this).removeClass('show').addClass('hide');
+                        }
+                    } else {
+                        content.addClass('collapsed');
+                        if (isBriefToggle) {
+                            $(this).removeClass('hide').addClass('show')
+                        }
                     }
-                  } else {
-                    content.addClass('collapsed');
-                    if (isBriefToggle) {
-                      $(this).removeClass('hide').addClass('show')
-                    }
-                  }
-                })
+                });
+
+                // Browser backup for lack of datepicker support eg. Safari
+                // Reset back to English date format
+                if ($('#collected-on')[0].type != 'date')
+                    $('#collected-on').datepicker({ dateFormat: 'dd-mm-yy' }).val();
             }
         );
     </script>
