@@ -35,11 +35,11 @@
                             <td class="center">{{ $registration->family->entitlement }}</td>
                             <td class="center">{{ $registration->family->rvid }}</td>
                             <td>
-                            <button onclick="window.location.href='{{ URL::route('store.registration.edit', ['id' => $registration->id ]) }}'"
-                                @if( isset($registration->family->leaving_on) ) disabled @endif
-                            > Select</button>
-                        </td>
-                    </tr>
+                              <button onclick="window.location.href='{{ URL::route('store.registration.edit', ['id' => $registration->id ]) }}'"
+                                  @if( isset($registration->family->leaving_on) ) disabled @endif
+                              > Select</button>
+                            </td>
+                        </tr>
                     @endif
                 @endforeach
                 </tbody>
