@@ -177,26 +177,27 @@
                 });
 
                 $('.clickable-span').click(function (e) {
-                  // the next sibling is the content
-                  var content = $(this).next();
-                  var isBriefToggle = $(this).is('#brief-toggle');
+                    // the next sibling is the content
+                    var content = $(this).next();
+                    var isBriefToggle = $(this).is('#brief-toggle');
 
-                  if(content.hasClass('collapsed')) {
-                    content.removeClass('collapsed')
-                    if (isBriefToggle) {
-                      $(this).removeClass('show').addClass('hide');
-                    }
-                  } else {
-                    content.addClass('collapsed');
-                    if (isBriefToggle) {
-                      $(this).removeClass('hide').addClass('show')
+                    if(content.hasClass('collapsed')) {
+                        content.removeClass('collapsed')
+                        if (isBriefToggle) {
+                            $(this).removeClass('show').addClass('hide');
+                        }
+                    } else {
+                        content.addClass('collapsed');
+                        if (isBriefToggle) {
+                            $(this).removeClass('hide').addClass('show')
+                        }
                     }
                 });
 
                 // Browser backup for lack of datepicker support eg. Safari
                 // Reset back to English date format
                 if ($('#collected-on')[0].type != 'date')
-                     $('#collected-on').datepicker({ dateFormat: 'dd-mm-yy' }).val();
+                    $('#collected-on').datepicker({ dateFormat: 'dd-mm-yy' }).val();
             }
         );
     </script>
