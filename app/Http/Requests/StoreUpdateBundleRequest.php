@@ -31,16 +31,6 @@ class StoreUpdateBundleRequest extends FormRequest
         $rules = [
             // MUST be one, cannot be null, cannot be duplicated.
             'vouchers.*' => 'required|distinct|string',
-
-            // Optionally present, if it is, check there's a centre.
-            'disbursing_centre_id' => 'numeric:exists:centres',
-
-            // Required with disbursing_centre_id, because
-            'bundle_id' => 'integer|required_with:disbursing_centre_id',
-
-            // Optionally present, required if the centre is set
-            // TODO : consider before_or_equal:date
-            'disbursed_at' => 'required_with:disbursing_centre_id|date_format:Y-m-d'
         ];
 
         return $rules;

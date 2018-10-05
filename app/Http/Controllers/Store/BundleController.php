@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\Store;
 
 use Auth;
-use App\Bundle;
-use App\Centre;
+use App\Voucher;
 use App\Registration;
 use App\Http\Requests\StoreUpdateBundleRequest;
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
 
 class BundleController extends Controller
 {
@@ -43,48 +41,31 @@ class BundleController extends Controller
     }
 
     /**
-     * Create OR Upate a registrations current active bundle
+     * Create OR Update a registrations current active bundle
      *
      * @param StoreUpdateBundleRequest $request
      * @param Registration $registration
      */
     public function update(StoreUpdateBundleRequest $request, Registration $registration)
     {
-
-        // fnd our bundle.
-        $bundle = (!isEmpty($request->get('bundle_id')))
-            ? (Bundle::find($request->get('bundle_id')))
-            : $registration->currentBundle();
-
-        // Find our disbersing centre (if any)
-        $disbursing_centre = (!isEmpty($request->get('disbursing_centre_id')))
-            ? (Centre::find($request->get('disbursing_centre_id')))
-            : null
-        ;
-
-        // check if we need to disburse this bundle.
-        if ($disbursing_centre) {
-            // If wwe have one, we'll be disbersing the bundle.
-            $disbursed_at = (!isEmpty($request->get('disbursed_at')))
-                ? Carbon::createFromFormat(
-                    'Y-m-d',
-                    $request->get('disbursed_at')
-                )->toDateTimeString()
-                : Carbon::now();
-
-            // TODO : need database to record carer who picked up!
-            // TODO : disberse bundle.
-            // $bundle->disburse
-        }
+        // find our bundle.
+        /** @var \App\Bundle $bundle */
+        $bundle = $registration->currentBundle();
 
         // clean the incoming data
-        $voucherCodes = (!isEmpty((array)$request->get('vouchers')))
-            ? Voucher::clean($voucherCodes)
-            : [];
+        $voucherCodes = (!isEmpty($request->get('vouchers')))
+            ? Voucher::cleanCodes((array)$request->get('vouchers'))
+            : []; // Will result in the removal of the vouchers from the bundle.
 
         // sync vouchers.
-        if (!isEmpty($voucherCodes)) {
-            $bundle->syncVouchers($voucherCodes);
+        $vouchers = $bundle->syncVouchers($voucherCodes);
+
+        // will always return a collection
+        if ($bundle->syncVouchers($voucherCodes)) {
+
+        } else {
+            //
+            return redirect()->route('store.registration.edit')->withErrors('Registration update failed.');
         }
     }
 

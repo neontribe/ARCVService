@@ -82,8 +82,9 @@ class Bundle extends Model
 
         // Add more vouchers
         $enBundleCodes = array_diff($voucherCodes, $currentCodes);
-        $this->vouchers()
-            ->whereIn('code', $enBundleCodes)
+
+        // detect vouchers NOT in database.
+        Vouchers::whereIn('code', $enBundleCodes)
             ->each(
                 // pass $this as Bundle $self
                 function (Voucher $voucher) use ($self) {

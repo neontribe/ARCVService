@@ -65,6 +65,22 @@ class Voucher extends Model
 
 
     /**
+     * Voucher can clean it's codes.
+     * @param array $codes
+     * @return array
+     */
+    public static function cleanCodes(array $codes)
+    {
+        return array_map(
+            function ($code) {
+                $badChars = [" ",];
+                return str_replace($badChars, "", $code);
+            },
+            $codes
+        );
+    }
+
+    /**
      * The methos we should call to remember to transition.
      * Could probably be turned into an event listener?
      *
