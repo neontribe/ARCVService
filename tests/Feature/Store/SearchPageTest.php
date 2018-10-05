@@ -265,9 +265,9 @@ class SearchPageTest extends StoreTestCase
         // Visit search page, make sure next page link is present and works
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
-            ->see('<a href="' . URL::route('store.base') . '/registration?page=2' . '" rel="next">»</a>')
+            ->see('<a href="' . URL::route('store.base') . '/registrations?page=2' . '" rel="next">»</a>')
             ->click('»')
-            ->seePageIs(URL::route('store.base') . '/registration?page=2');
+            ->seePageIs(URL::route('store.base') . '/registrations?page=2');
     }
 
     /** @test */

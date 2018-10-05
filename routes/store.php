@@ -39,7 +39,7 @@ Route::get('/', function () {
 Route::group(['middleware' => 'auth:store'], function () {
     Route::get('dashboard', 'DashboardController@index')->name('store.dashboard');
 
-    Route::resource('registration', 'RegistrationController', [
+    Route::resource('registrations', 'RegistrationController', [
         'names' => [
             'index' => 'store.registration.index',
             'create' => 'store.registration.create',
