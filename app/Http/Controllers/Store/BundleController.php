@@ -61,7 +61,7 @@ class BundleController extends Controller
         $vouchers = $bundle->syncVouchers($voucherCodes);
 
         // will always return a collection
-        if ($bundle->syncVouchers($voucherCodes)) {
+        if ($vouchers) {
 
         } else {
             //
