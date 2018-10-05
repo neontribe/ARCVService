@@ -22,10 +22,18 @@ h2 {
 	margin: 0.5rem;
 }
 
+h3 {
+  margin-top: 0;
+}
+
 ul {
 	margin: 0;
 	text-align: left;
 	list-style-type: circle;
+}
+
+li span {
+  font-size: 0.7rem;
 }
 
 form {
@@ -38,7 +46,7 @@ input[type="text"],
 input[type="month"],
 input[type="search"] {
 	padding: 0.5rem 0;
-	font-size: 1.5rem;
+	font-size: 1.3rem;
 	line-height: 20px;
 	width: 100%;
 	border: 2px solid #ededed;
@@ -51,10 +59,10 @@ input[type="text"]:disabled {
 	font-weight: 200;
 }
 
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 input[type="radio"],
@@ -269,7 +277,7 @@ input[type="text"].invalid,
 	overflow: auto;
 }
 
-/* 
+/*
 
 SUBNAV
 
@@ -336,7 +344,7 @@ COOKIE NOTICE
     padding: 0;
 }
 
-/* 
+/*
 
 LOGIN PAGE
 
@@ -403,9 +411,9 @@ LOGIN PAGE
 	margin-top: 3rem;
 }
 
-/* 
+/*
 
-DASHBOARD PAGE 
+DASHBOARD PAGE
 
 */
 
@@ -456,7 +464,7 @@ DASHBOARD PAGE
 	text-decoration: underline;
 }
 
-/* 
+/*
 
 REGISTER PAGE
 
@@ -497,10 +505,6 @@ REGISTER PAGE
 
 .col > div {
 	margin: 1rem;
-}
-
-.col span {
-	font-size: 0.7rem;
 }
 
 .col td,
@@ -570,7 +574,7 @@ REGISTER PAGE
 	top: 0;
 }
 
-/* 
+/*
 
 EDIT PAGE
 
@@ -593,6 +597,7 @@ EDIT PAGE
 
 .clickable-span {
 	cursor: pointer;
+  text-decoration: underline;
 }
 
 .collect #more-family-info {
@@ -640,7 +645,7 @@ EDIT PAGE
 	display: none;
 }
 
-/* 
+/*
 
 SEARCH PAGE
 
@@ -695,7 +700,7 @@ SEARCH PAGE
 	padding-right: 1rem;
 }
 
-/* 
+/*
 
 PRIVACY PAGE
 
@@ -732,4 +737,116 @@ and (max-device-width : 1024px)  {
 		max-width: 44px;
 		padding: 0;
 	}
+}
+
+/*
+
+VOUCHER PAGES
+
+*/
+
+.alongside-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.alongside-container > div,
+.alongside-container > label {
+  width: 50%;
+  margin-right: 2%;
+}
+
+.short-button {
+  width: 80%;
+  margin: 3% 10%;
+}
+
+.voucher-container {
+  margin: 1rem 7rem;
+}
+
+.add-button {
+  max-height: 48px;
+  max-width: 48px;
+}
+
+.collection-section {
+  display: none;
+}
+
+.v-spaced {
+  margin: 2rem 0;
+}
+
+.vh-spaced {
+  margin: 2rem 1rem;
+}
+
+.slide-in {
+  display: block;
+  animation-duration: 1s;
+  animation-name: slidein;
+}
+
+.fade-back {
+  display: none;
+}
+
+.pick-up > div {
+  display: flex;
+  margin: 1rem;
+}
+
+.pick-up > div > div {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.pick-up i {
+  font-size: 2.5rem;
+  width: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 2rem;
+}
+
+.pick-up select,
+.pick-up input {
+  width: 100%;
+  max-width: 200px;
+}
+
+.pick-up input {
+  margin-top: 0.5rem;
+  border: 1px solid #a6a6a6;
+  max-width: 180px;
+  padding: 0.5rem;
+  font-family: Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.hide > i {
+  -webkit-transform: rotate(180deg);
+  -moz-transform: rotate(180deg);
+  transform: rotate(180deg);
+}
+
+.show:before {
+  content: 'Show';
+}
+
+.hide:before {
+  content: 'Hide';
+}
+
+@keyframes slidein {
+  from {
+    transform: translateX(150%);
+  }
+
+  to {
+    transform: translateX(0%);
+  }
 }
