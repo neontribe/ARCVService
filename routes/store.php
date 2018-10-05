@@ -102,3 +102,8 @@ Route::group(['middleware' => 'auth:store'], function () {
     ])->middleware(['can:export,App\Registration']);
 
 });
+
+Route::get('/voucher-allocation', [
+        'as' => 'store.voucherAllocation',
+        'uses' => 'VoucherController@index',
+    ]);
