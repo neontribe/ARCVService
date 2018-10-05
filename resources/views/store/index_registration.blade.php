@@ -20,12 +20,12 @@
         <div>
             <table>
                 <thead>
-                <tr>
-                    <td>Name</td>
-                    <td class="center">Voucher Entitlement</td>
-                    <td class="center">RV-ID</td>
-                    <td></td>
-                </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td class="center">Voucher Entitlement</td>
+                        <td class="center">RV-ID</td>
+                        <td></td>
+                    </tr>
                 </thead>
                 <tbody>
                 @foreach ($registrations as $registration)
@@ -34,10 +34,17 @@
                             <td class="pri_carer">{{ $registration->family->carers->first()->name }}</td>
                             <td class="center">{{ $registration->family->entitlement }}</td>
                             <td class="center">{{ $registration->family->rvid }}</td>
-                            <td>
-                              <button onclick="window.location.href='{{ URL::route('store.registration.edit', ['id' => $registration->id ]) }}'"
-                                  @if( isset($registration->family->leaving_on) ) disabled @endif
-                              > Select</button>
+                            <td class="right">
+                                <button onclick="window.location.href='{{ URL::route("store.registration.voucher-manager", ['id' => $registration->id ]) }}'"
+                                @if( isset($registration->family->leaving_on) ) disabled @endif
+                                >
+                                    Vouchers
+                                </button>
+                                <button onclick="window.location.href='{{ URL::route('store.registration.edit', ['id' => $registration->id ]) }}'"
+                                    @if( isset($registration->family->leaving_on) ) disabled @endif
+                                >
+                                    Edit
+                                </button>
                             </td>
                         </tr>
                     @endif

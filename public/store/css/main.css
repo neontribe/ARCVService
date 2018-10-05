@@ -206,6 +206,10 @@ strong {
 	text-align: center;
 }
 
+.right {
+  text-align: right;
+}
+
 .logout-button {
 	width: 125px;
 	min-height: 35px;
@@ -655,7 +659,8 @@ SEARCH PAGE
 }
 
 .search table button {
-	width: 75px;
+	width: 6rem;
+  margin-left: 1rem;
 }
 
 .search table tr.inactive {
