@@ -28,14 +28,14 @@ class BundleController extends Controller
 
         return view('store.manage_vouchers', array_merge(
             $data,
-              [
-              "registration" => $registration,
-              "family" => $registration->family,
-              'children' => $registration->family->children,
-              "pri_carer" => array_shift($carers),
-              "bundles" => $registration->bundles()
-              ]
-            ));
+            [
+                "registration" => $registration,
+                "family" => $registration->family,
+                'children' => $registration->family->children,
+                "pri_carer" => array_shift($carers),
+                "bundles" => $registration->bundles()
+            ]
+        ));
     }
 
     /**

@@ -34,7 +34,9 @@
                         Next month a child has a birthday, so the voucher allocation will change.
                     </p>
                 </div>
-                <button class="short-button">Go to edit family</button>
+                <button class="short-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.edit", ['id' => $registration->id ]) }}'; return false;">
+                  Go to edit family
+                </button>
                 <button class="long-button">Find another family</button>
             </div>
             <div class="col">
