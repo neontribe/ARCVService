@@ -12,7 +12,8 @@ services:
             - mysql:/var/lib/mysql
         restart: always
         healthcheck:
-            test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+            # test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+            test: ["CMD", "mysql" ,"-u", "lamp", "-plamp", "-h", "localhost", "lamp", "-e", "'desc user;'"]
             interval: 20s
             retries: 10
 
@@ -32,6 +33,7 @@ services:
             - db
         entrypoint:
             - /startup.sh
+        restart: always
 
 volumes:
     mysql:
