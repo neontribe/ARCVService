@@ -92,5 +92,4 @@ class BundleController extends Controller
                 ->with('message', 'Vouchers updated.');
         }
     }
-
 }

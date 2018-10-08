@@ -105,7 +105,7 @@ class Bundle extends Model
         $self = $this;
         $errors = [];
 
-        // If we get an unhandled exception, we should halt.
+        // If we get an unhandled exception, we should halt and rollback.
         try {
             DB::transaction(function () use ($self, $voucherCodes, $errors) {
 
@@ -118,9 +118,11 @@ class Bundle extends Model
 
                 // Find the vouchers to remove.
                 $removeVouchers = $this->vouchers()->whereIn('code', $unBundleCodes)->get();
+
+                // Sync them to a null bundle
                 $removeErrors = $this->alterVouchers($removeVouchers, $unBundleCodes, null);
                 if (!isEmpty($removeErrors)) {
-                    array_merge_recursive($removeErrors, $errors);
+                    $errors = array_merge_recursive($removeErrors, $errors);
                 }
 
                 // Calculate vouchers to add
@@ -128,11 +130,13 @@ class Bundle extends Model
 
                 // Find vouchers to Add.
                 $addVouchers = Voucher::whereIn('code', $enBundleCodes)->get();
+
+                // Sync them to a specific bundle
                 $addErrors = $this->alterVouchers($addVouchers, $enBundleCodes, $self);
                 if (!isEmpty($addErrors)) {
-                    array_merge_recursive($addErrors, $errors);
+                    $errors = array_merge_recursive($addErrors, $errors);
                 }
-
+                // Whoops! errors happened.
                 if (!isEmpty($errors)) {
                     throw new \Exception("Errors during transaction");
                 };
@@ -176,7 +180,5 @@ class Bundle extends Model
     {
         return $this->hasMany(Voucher::class);
     }
-
-
 }
 

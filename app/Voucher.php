@@ -82,7 +82,7 @@ class Voucher extends Model
     }
 
     /**
-     * The methos we should call to remember to transition.
+     * The methods we should call to remember to transition.
      * Could probably be turned into an event listener?
      *
      * @param Bundle|null $bundle the model (or not) to bind to
