@@ -23,12 +23,14 @@ class BundleController extends Controller
             "centre_name" => ($user->centre) ? $user->centre->name : null,
         ];
 
-        array_merge($data, [
+        return view('store.manage_vouchers', array_merge(
+          $data,
+            [
+            "registration" => $registration,
             "family" => $registration->family(),
             "bundles" => $registration->bundles()
-        ]);
-
-        return view('store.manage_vouchers', $data);
+            ]
+          ));
     }
 
     /**
