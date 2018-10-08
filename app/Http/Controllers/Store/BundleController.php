@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Store;
 
 use Auth;
 use App\Registration;
-use App\Family;
 use App\Http\Controllers\Controller;
 
 class BundleController extends Controller
