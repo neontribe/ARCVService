@@ -1,3 +1,4 @@
+# See Docker.md for more info...
 version: '2.1'
 services:
     db:
@@ -21,7 +22,7 @@ services:
             context: .
             dockerfile: .docker/Dockerfile
         ports:
-            - "80:80"
+            - "8001:80"
             - "8000:8000"
         # If you un-comment this section you can work on local files that run in the dockers.
         # volumes:
