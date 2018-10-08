@@ -43,7 +43,7 @@
                     <h2>Collection History</h2>
                 </div>
                 <div>
-                    <p>This family should collect 6 vouchers per week</p>
+                    <p>This family should collect {{ $family->entitlement }} vouchers per week</p>
                     <p class="v-spaced">Their last collection was on Thursday 2nd August</p>
                 </div>
                 <div class="center">
