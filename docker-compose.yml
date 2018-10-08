@@ -1,0 +1,36 @@
+version: '2.1'
+services:
+    db:
+        image: mysql:5.6
+        environment:
+            MYSQL_USER: lamp
+            MYSQL_PASSWORD: lamp
+            MYSQL_DATABASE: lamp
+            MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+        volumes:
+            - mysql:/var/lib/mysql
+        restart: always
+        healthcheck:
+            test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+            interval: 20s
+            retries: 10
+
+    web:
+        image: neonkvm:5000/arc_service
+        build:
+            context: .
+            dockerfile: .docker/Dockerfile
+        ports:
+            - "80:80"
+            - "8000:8000"
+        # If you un-comment this section you can work on local files that run in the dockers.
+        # volumes:
+        #    - .:/var/www/html
+        depends_on: [ db ]
+        links:
+            - db
+        entrypoint:
+            - /startup.sh
+
+volumes:
+    mysql:
