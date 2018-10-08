@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Exception\TransitionNotAllowedException;
 use App\Traits\Statable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;

@@ -29,8 +29,8 @@ class StoreUpdateBundleRequest extends FormRequest
          * It is NOT responsible for the context validation of that data.
          */
         $rules = [
-            // MUST be one, cannot be null, cannot be duplicated.
-            'vouchers.*' => 'required|distinct|string',
+            // MAY be one, can be null, cannot be duplicated.
+            'vouchers.*' => 'nullable|distinct|string',
         ];
 
         return $rules;

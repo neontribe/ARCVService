@@ -2,7 +2,11 @@
 
 namespace App;
 
+use DB;
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Log;
+use SM\SMException;
 
 class Bundle extends Model
 {
@@ -13,7 +17,7 @@ class Bundle extends Model
      */
     protected $fillable = [
         'entitlement',
-        'allocated_at',
+        'disbursed_at',
         'centre_id',
         'family_id'
     ];
@@ -53,49 +57,95 @@ class Bundle extends Model
     protected $dates = [
         'created_at',
         'updated_at',
-        'allocated_at'  // When it was handed out.
+        'disbursed_at'  // When it was handed out.
     ];
+
+    /**
+     * Refactored function that works out if we broke anything then adds vouchers.
+     *
+     * @param Collection $vouchers
+     * @param array $codes
+     * @param Bundle|null $bundle
+     * @return array
+     */
+    private function alterVouchers(Collection $vouchers, array $codes, Bundle $bundle = null)
+    {
+        $errors = [];
+        $badCodes = array_diff($vouchers->pluck("code")->toArray(), $codes);
+
+        if (!isEmpty($badCodes)) {
+            //Stop! report the bad codes!
+            $errors["codes"] = (array_key_exists("badCodes", $errors))
+                ? array_merge($badCodes, $errors)
+                : $badCodes;
+        } else {
+            // Run all these.
+            $vouchers->each(
+                function (Voucher $voucher) use ($bundle, $errors) {
+                    try {
+                        $voucher->setBundle($bundle);
+                    } catch (SMException $e) {
+                        $errors["transitions"][] = $voucher->code;
+                        // don't rethrow!
+                    }
+                }
+            );
+        }
+        return $errors;
+    }
 
     /**
      * Syncs an array of voucher codes with vouchers();
      *
      * @param array $voucherCodes array of cleaned Voucher codes
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return array $errors Errors
      */
     public function syncVouchers(array $voucherCodes)
     {
         $self = $this;
-        $currentCodes = $this->vouchers
-            ->pluck('code')
-            ->toArray();
+        $errors = [];
 
-        // Remove excess vouchers
-        $unBundleCodes = array_diff($currentCodes, $voucherCodes);
-        $this->vouchers()
-            ->whereIn('code', $unBundleCodes)
-            ->each(
-                // pass null to dissociate
-                function (Voucher $voucher) {
-                    $voucher->setBundle(null);
+        // If we get an unhandled exception, we should halt.
+        try {
+            DB::transaction(function () use ($self, $voucherCodes, $errors) {
+
+                $currentCodes = $this->vouchers
+                    ->pluck('code')
+                    ->toArray();
+
+                // Calculate vouchers to remove.
+                $unBundleCodes = array_diff($currentCodes, $voucherCodes);
+
+                // Find the vouchers to remove.
+                $removeVouchers = $this->vouchers()->whereIn('code', $unBundleCodes)->get();
+                $removeErrors = $this->alterVouchers($removeVouchers, $unBundleCodes, null);
+                if (!isEmpty($removeErrors)) {
+                    array_merge_recursive($removeErrors, $errors);
                 }
-            );
 
-        // Add more vouchers
-        $enBundleCodes = array_diff($voucherCodes, $currentCodes);
+                // Calculate vouchers to add
+                $enBundleCodes = array_diff($voucherCodes, $currentCodes);
 
-        // detect vouchers NOT in database.
-        Vouchers::whereIn('code', $enBundleCodes)
-            ->each(
-                // pass $this as Bundle $self
-                function (Voucher $voucher) use ($self) {
-                    $voucher->setBundle($self);
+                // Find vouchers to Add.
+                $addVouchers = Voucher::whereIn('code', $enBundleCodes)->get();
+                $addErrors = $this->alterVouchers($addVouchers, $enBundleCodes, $self);
+                if (!isEmpty($addErrors)) {
+                    array_merge_recursive($addErrors, $errors);
                 }
-            );
 
-        // reload and return collection.
-        return $this->vouchers->fresh();
+                if (!isEmpty($errors)) {
+                    throw new \Exception("Errors during transaction");
+                };
+            });
+        } catch (\Throwable $e) {
+            // Log it
+            Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+            Log::error($e->getTraceAsString());
+            // Add an error notification for the caller to deal with
+            $errors["transaction"] = true;
+        }
+        return $errors;
     }
-
 
     /**
      * Return the Centre it was allocated to

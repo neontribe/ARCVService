@@ -45,6 +45,7 @@ class BundleController extends Controller
      *
      * @param StoreUpdateBundleRequest $request
      * @param Registration $registration
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(StoreUpdateBundleRequest $request, Registration $registration)
     {
@@ -58,14 +59,37 @@ class BundleController extends Controller
             : []; // Will result in the removal of the vouchers from the bundle.
 
         // sync vouchers.
-        $vouchers = $bundle->syncVouchers($voucherCodes);
+        $errors = $bundle->syncVouchers($voucherCodes);
 
-        // will always return a collection
-        if ($vouchers) {
-
+        if (!isEmpty($errors)) {
+            $messages = [];
+            // Whoops! Deal with those
+            foreach ($errors as $type => $value) {
+                switch ($type) {
+                    case "transaction":
+                        if ($value) {
+                            $messages[] = 'there was a transaction error';
+                        }
+                        break;
+                    case "transition":
+                        $message[] = "there was a problem with adding/removing some vouchers";
+                        // could list them
+                        break;
+                    case "codes":
+                        $message[] = "there was a problem with some voucher codes";
+                        // could list them
+                        break;
+                    default:
+                        $messages[] = 'there was an unknown error';
+                        break;
+                }
+            }
+            return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
+                ->with('error_message', ucfirst(join(', ', $messages) . '.'));
         } else {
-            //
-            return redirect()->route('store.registration.edit')->withErrors('Registration update failed.');
+            // Otherwise, sure, return to the new view.
+            return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
+                ->with('message', 'Vouchers updated.');
         }
     }
 
