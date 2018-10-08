@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Store;
 
 use Auth;
 use App\Registration;
+use App\Family;
 use App\Http\Controllers\Controller;
 
 class BundleController extends Controller
@@ -23,12 +24,18 @@ class BundleController extends Controller
             "centre_name" => ($user->centre) ? $user->centre->name : null,
         ];
 
-        array_merge($data, [
-            "family" => $registration->family(),
-            "bundles" => $registration->bundles()
-        ]);
+        // Grabs a copy of all carers
+        $carers = $registration->family->carers->all();
 
-        return view('store.manage_vouchers', $data);
+        return view('store.manage_vouchers', array_merge(
+            $data,
+              [
+              "registration" => $registration,
+              "family" => $registration->family(),
+              "pri_carer" => array_shift($carers),
+              "bundles" => $registration->bundles()
+              ]
+            ));
     }
 
     /**

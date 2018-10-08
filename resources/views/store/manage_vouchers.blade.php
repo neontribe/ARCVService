@@ -15,8 +15,9 @@
                 </div>
                 <div class="alongside-container">
                     <div>
+
                         <h3>Main Carer:</h3>
-                        <p>Hester Johnson</p>
+                        <p>{{ $pri_carer->name }}</p>
                     </div>
                     <div>
                         <h3>Children:</h3>
