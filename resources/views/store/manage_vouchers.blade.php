@@ -22,8 +22,9 @@
                     <div>
                         <h3>Children:</h3>
                         <ul>
-                            <li>2 yr, 0 mo</li>
-                            <li>Pregnancy</li>
+                          @foreach ( $children as $child )
+                            <li>{{ $child->getAgeString() }}</li>
+                          @endforeach
                         </ul>
                     </div>
                 </div>

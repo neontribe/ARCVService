@@ -31,7 +31,8 @@ class BundleController extends Controller
             $data,
               [
               "registration" => $registration,
-              "family" => $registration->family(),
+              "family" => $registration->family,
+              'children' => $registration->family->children,
               "pri_carer" => array_shift($carers),
               "bundles" => $registration->bundles()
               ]
