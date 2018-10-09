@@ -73,12 +73,7 @@ class Bundle extends Model
         $errors = [];
         $badCodes = array_diff($vouchers->pluck("code")->toArray(), $codes);
 
-        if (!isEmpty($badCodes)) {
-            //Stop! report the bad codes!
-            $errors["codes"] = (array_key_exists("badCodes", $errors))
-                ? array_merge($badCodes, $errors)
-                : $badCodes;
-        } else {
+        if (isEmpty($badCodes)) {
             // Run all these.
             $vouchers->each(
                 function (Voucher $voucher) use ($bundle, $errors) {
@@ -90,6 +85,9 @@ class Bundle extends Model
                     }
                 }
             );
+        } else {
+            // Stop! report the bad codes!
+            $errors["codes"] = $badCodes;
         }
         return $errors;
     }
