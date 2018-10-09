@@ -94,6 +94,8 @@ class Voucher extends Model
             ? "bundle"
             : "unbundle-to-" . $this->getPriorState()->from;
 
+        // The transitionAllowed() will chuck an SMException as well as return false if we can't transition.
+        // We'll be catching that further up the call stack.
         if ($this->transitionAllowed($transition)) {
             $this->bundle()->associate($bundle);
             $this->applyTransition($transition);
