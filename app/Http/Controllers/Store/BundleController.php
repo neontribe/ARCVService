@@ -84,7 +84,9 @@ class BundleController extends Controller
                         break;
                 }
             }
+            // Spit the basic error messages back
             return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
+                ->withInput()
                 ->with('error_message', ucfirst(join(', ', $messages) . '.'));
         } else {
             // Otherwise, sure, return to the new view.
