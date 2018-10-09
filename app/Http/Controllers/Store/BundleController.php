@@ -23,14 +23,19 @@ class BundleController extends Controller
             "centre_name" => ($user->centre) ? $user->centre->name : null,
         ];
 
+        // Grabs a copy of all carers
+        $carers = $registration->family->carers->all();
+
         return view('store.manage_vouchers', array_merge(
-          $data,
+            $data,
             [
-            "registration" => $registration,
-            "family" => $registration->family(),
-            "bundles" => $registration->bundles()
+                "registration" => $registration,
+                "family" => $registration->family,
+                'children' => $registration->family->children,
+                "pri_carer" => array_shift($carers),
+                "bundles" => $registration->bundles()
             ]
-          ));
+        ));
     }
 
     /**
