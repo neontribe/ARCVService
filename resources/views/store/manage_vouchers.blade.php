@@ -164,7 +164,7 @@
                         </div>
                     </div>
                 </div>
-                <button class="short-button">Confirm pick up</button>
+                <button class="short-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.index") }}'; return false;">Confirm pick up</button>
                 <button class="long-button">Allocate more vouchers</button>
             </div>
         </form>
