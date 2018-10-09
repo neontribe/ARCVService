@@ -29,10 +29,13 @@
                     </div>
                 </div>
                 <div class="warning">
+                    @foreach( $family->getNoticeReasons() as $notices )
                     <p class="v-spaced">
                         <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-                        Next month a child has a birthday, so the voucher allocation will change.
+                        Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
+                        is {{ $notices['reason'] }}
                     </p>
+                    @endforeach
                 </div>
                 <button class="short-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.edit", ['id' => $registration->id ]) }}'; return false;">
                   Go to edit family
@@ -45,7 +48,7 @@
                     <h2>Collection History</h2>
                 </div>
                 <div>
-                    <p>This family should collect 6 vouchers per week</p>
+                    <p>This family should collect {{ $family->entitlement }} vouchers per week</p>
                     <p class="v-spaced">Their last collection was on Thursday 2nd August</p>
                 </div>
                 <div class="center">
