@@ -16,6 +16,7 @@ class Bundle extends Model
      * @var array
      */
     protected $fillable = [
+        'registration_id',
         'entitlement',
         'disbursed_at',
         'centre_id',
@@ -73,7 +74,7 @@ class Bundle extends Model
         $errors = [];
         $badCodes = array_diff($vouchers->pluck("code")->toArray(), $codes);
 
-        if (isEmpty($badCodes)) {
+        if (empty($badCodes)) {
             // Run all these.
             $vouchers->each(
                 function (Voucher $voucher) use ($bundle, $errors) {
@@ -119,7 +120,7 @@ class Bundle extends Model
 
                 // Sync them to a null bundle
                 $removeErrors = $this->alterVouchers($removeVouchers, $unBundleCodes, null);
-                if (!isEmpty($removeErrors)) {
+                if (!empty($removeErrors)) {
                     $errors = array_merge_recursive($removeErrors, $errors);
                 }
 
@@ -131,11 +132,11 @@ class Bundle extends Model
 
                 // Sync them to a specific bundle
                 $addErrors = $this->alterVouchers($addVouchers, $enBundleCodes, $self);
-                if (!isEmpty($addErrors)) {
+                if (!empty($addErrors)) {
                     $errors = array_merge_recursive($addErrors, $errors);
                 }
                 // Whoops! errors happened.
-                if (!isEmpty($errors)) {
+                if (!empty($errors)) {
                     throw new \Exception("Errors during transaction");
                 };
             });
