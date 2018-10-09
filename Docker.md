@@ -35,7 +35,14 @@ To
 When using locally mounted files you can reset the system by stopping the containers and deleting the mysql volume and the .env file.  Assuming you are in the the directory as this file those commands will look something like this:
 
     docker-compose stop or ctrl-c if it's in the foreground
+    docker-compose rm
     docker volume rm arcvservice_mysql
     rm .env
     docker-compose up --build
 
+## Environment variables.
+
+At run time you can override environment variables. At run time by exporting the required environment variable.
+
+    export APP_SEEDS=dev
+    docker-compose up --build

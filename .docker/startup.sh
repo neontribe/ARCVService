@@ -9,11 +9,46 @@ COL_BLUE=$ESC_SEQ"34;01m"
 COL_MAGENTA=$ESC_SEQ"35;01m"
 COL_CYAN=$ESC_SEQ"36;01m"
 
-if [ ! -e /var/www/html/.env ]; then
+cat <<EOF > .env
+APP_NAME=${APP_NAME}
+APP_ENV=${APP_ENV}
+APP_KEY=base64:5/euYB2rELcumOH7lKf8aOd4aOb5GAO6J/I1ykDDIPk=
+APP_DEBUG=${APP_DEBUG}
+APP_LOG_LEVEL=${APP_LOG_LEVEL}
+APP_URL=${APP_URL}
+APP_SEEDS=${APP_SEEDS}
+
+ARC_SCHOOL_MONTH=${ARC_SCHOOL_MONTH}
+
+DB_CONNECTION=mysql
+DB_HOST=db
+DB_PORT=3306
+DB_DATABASE=lamp
+DB_USERNAME=lamp
+DB_PASSWORD=lamp
+
+BROADCAST_DRIVER=${BROADCAST_DRIVER}
+CACHE_DRIVER=${CACHE_DRIVER}
+SESSION_DRIVER=${SESSION_DRIVER}
+QUEUE_DRIVER=${QUEUE_DRIVER}
+SESSION_SECURE_COOKIE=${SESSION_SECURE_COOKIE}
+
+MAIL_DRIVER=${MAIL_DRIVER}
+MAIL_HOST=${MAIL_HOST}
+MAIL_PORT=${MAIL_PORT}
+MAIL_USERNAME=${MAIL_USERNAME}
+MAIL_PASSWORD=${MAIL_PASSWORD}
+MAIL_ENCRYPTION=${MAIL_ENCRYPTION}
+EOF
+
+set +e
+COUNT=$(mysql -u lamp -plamp -h db lamp -e 'select count(*) from users')
+DB_READY="$?"
+set -e
+if [ "$DB_READY" != 0 ]; then
     echo -e "░▀█▀░█▀█░▀█▀░▀█▀░▀█▀░█▀█░█░░░░░▀█▀░█▀█░█▀▀░▀█▀░█▀█░█░░░█░░\n░░█░░█░█░░█░░░█░░░█░░█▀█░█░░░░░░█░░█░█░▀▀█░░█░░█▀█░█░░░█░░\n░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░▀░▀░▀▀▀░░░▀▀▀░▀░▀░▀▀▀░░▀░░▀░▀░▀▀▀░▀▀▀\n"
     echo -e $COL_YELLOW"This may take some time..."$COL_RESET
     echo
-    cp .env.docker .env
     composer install --no-interaction
     php artisan key:generate
     php artisan passport:keys
