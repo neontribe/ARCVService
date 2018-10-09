@@ -74,7 +74,6 @@ Route::group(['middleware' => 'auth:store'], function () {
     ->name('store.registration.voucher-manager')
     ->middleware('can:view,registration');
 
-
     // Printables
 
     // Print a specific Family Form for User Centre (Edit page)

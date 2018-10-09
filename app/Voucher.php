@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Exception\TransitionNotAllowedException;
 use App\Traits\Statable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -62,6 +63,46 @@ class Voucher extends Model
         'currentstate' => ['required', 'in_array:voucher_state,to', 'max:24'],
         'sponsor_id' => ['numeric', 'required', 'exists:sponsors,id'],
     ];
+
+
+    /**
+     * Voucher can clean it's codes.
+     * @param array $codes
+     * @return array
+     */
+    public static function cleanCodes(array $codes)
+    {
+        return array_map(
+            function ($code) {
+                $badChars = [" ",];
+                return str_replace($badChars, "", $code);
+            },
+            $codes
+        );
+    }
+
+    /**
+     * The methods we should call to remember to transition.
+     * Could probably be turned into an event listener?
+     *
+     * @param Bundle|null $bundle the model (or not) to bind to
+     * @return bool
+     */
+    public function setBundle(Bundle $bundle = null)
+    {
+        $transition = (isset($bundle))
+            ? "bundle"
+            : "unbundle-to-" . $this->getPriorState()->from;
+
+        // The transitionAllowed() will chuck an SMException as well as return false if we can't transition.
+        // We'll be catching that further up the call stack.
+        if ($this->transitionAllowed($transition)) {
+            $this->bundle()->associate($bundle);
+            $this->applyTransition($transition);
+            return true;
+        }
+        return false;
+    }
 
     /**
      * The Sponsor that backs this voucher

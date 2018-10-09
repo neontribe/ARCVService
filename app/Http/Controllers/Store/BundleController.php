@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Store;
 
 use Auth;
+use App\Voucher;
 use App\Registration;
+use App\Http\Requests\StoreUpdateBundleRequest;
 use App\Http\Controllers\Controller;
 
 class BundleController extends Controller
@@ -45,4 +47,58 @@ class BundleController extends Controller
     {
     }
 
+    /**
+     * Create OR Update a registrations current active bundle
+     *
+     * @param StoreUpdateBundleRequest $request
+     * @param Registration $registration
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(StoreUpdateBundleRequest $request, Registration $registration)
+    {
+        // find our bundle.
+        /** @var \App\Bundle $bundle */
+        $bundle = $registration->currentBundle();
+
+        // clean the incoming data
+        $voucherCodes = (!isEmpty($request->get('vouchers')))
+            ? Voucher::cleanCodes((array)$request->get('vouchers'))
+            : []; // Will result in the removal of the vouchers from the bundle.
+
+        // sync vouchers.
+        $errors = $bundle->syncVouchers($voucherCodes);
+
+        if (!isEmpty($errors)) {
+            $messages = [];
+            // Whoops! Deal with those
+            foreach ($errors as $type => $value) {
+                switch ($type) {
+                    case "transaction":
+                        if ($value) {
+                            $messages[] = 'there was a transaction error';
+                        }
+                        break;
+                    case "transition":
+                        $message[] = "there was a problem with adding/removing some vouchers";
+                        // could list them
+                        break;
+                    case "codes":
+                        $message[] = "there was a problem with some voucher codes";
+                        // could list them
+                        break;
+                    default:
+                        $messages[] = 'there was an unknown error';
+                        break;
+                }
+            }
+            // Spit the basic error messages back
+            return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
+                ->withInput()
+                ->with('error_message', ucfirst(join(', ', $messages) . '.'));
+        } else {
+            // Otherwise, sure, return to the new view.
+            return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
+                ->with('message', 'Vouchers updated.');
+        }
+    }
 }
