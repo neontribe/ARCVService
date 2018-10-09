@@ -265,9 +265,9 @@ class SearchPageTest extends StoreTestCase
         // Visit search page, make sure next page link is present and works
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
-            ->see('<a href="' . URL::route('store.base') . '/registration?page=2' . '" rel="next">»</a>')
+            ->see('<a href="' . URL::route('store.base') . '/registrations?page=2' . '" rel="next">»</a>')
             ->click('»')
-            ->seePageIs(URL::route('store.base') . '/registration?page=2');
+            ->seePageIs(URL::route('store.base') . '/registrations?page=2');
     }
 
     /** @test */
@@ -422,9 +422,35 @@ class SearchPageTest extends StoreTestCase
             ->visit(URL::route('store.registration.index'));
 
         // Check the number of enabled and disabled buttons.
-        $this->assertCount(1, $this->crawler->filter('tr.inactive button:disabled'));
+        $this->assertCount(2, $this->crawler->filter('tr.inactive button:disabled'));
         $this->assertCount(0, $this->crawler->filter('tr.inactive button:enabled'));
         $this->assertCount(0, $this->crawler->filter('tr.active button:disabled'));
-        $this->assertCount(9, $this->crawler->filter('tr.active button:enabled'));
+        $this->assertCount(18, $this->crawler->filter('tr.active button:enabled'));
+    }
+
+    /** @test */
+    public function aVouchersButtonIsPresent()
+    {
+        // Create a Centre
+        $centre = factory(App\Centre::class)->create();
+
+        // Create a CentreUser
+        $centreUser =  factory(App\CentreUser::class)->create([
+            "name"  => "test user",
+            "email" => "testuser@example.com",
+            "password" => bcrypt('test_user_pass'),
+            "centre_id" => $centre->id,
+        ]);
+
+        // Create a random registration with our centre.
+        $registration = factory(App\Registration::class)->create([
+            "centre_id" => $centre->id,
+        ]);
+
+        // Find a vouchers button
+        $this->actingAs($centreUser, 'store')
+            ->visit(URL::route('store.registration.index'))
+            ->see('Vouchers');
+            ;
     }
 }
