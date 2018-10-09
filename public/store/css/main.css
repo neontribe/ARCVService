@@ -604,12 +604,6 @@ EDIT PAGE
 	list-style-type: none;
 }
 
-.print-button button {
-	padding: 1rem 0.5rem;
-	font-family: 'Roboto Slab', serif;
-	width: 100%;
-}
-
 .leaving {
 	height: auto;
 	padding: 0.5rem;
