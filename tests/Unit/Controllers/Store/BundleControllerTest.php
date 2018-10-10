@@ -70,7 +70,7 @@ class BundleControllerTest extends TestCase
         $this->assertEquals(count($testCodes), $currentBundle->vouchers()->count());
 
         // find the first voucher
-        $voucher = $this->registration->currentBundle()->first();
+        $voucher = $currentBundle->vouchers()->first();
 
         $delete_route = route(
             'store.registration.voucher.delete',
@@ -85,13 +85,18 @@ class BundleControllerTest extends TestCase
             ->delete($delete_route)
         ;
 
-        // Reload the registration
-        $this->registration->fresh();
-
-        Log::info($currentBundle->vouchers()->get()->toArray());
-
         // See less vouchers
         $this->assertEquals(count($testCodes) -1, $currentBundle->vouchers()->count());
-        $this->assertNull($currentBundle->vouchers()->first()->bundle_id);
+
+        // Reload the voucher
+        $voucher->fresh();
+
+        dd($voucher);
+
+        // Assert voucher is unbundled
+        $this->assertNull($voucher->bundle_id);
+
+        // Assert voucher is back to dispatched
+        $this->assertEquals('dispatched', $voucher->currentstate);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Store;
 
 use Auth;
+use App\Bundle;
 use App\Voucher;
 use App\Registration;
 use App\Http\Requests\StoreUpdateBundleRequest;
@@ -85,12 +86,13 @@ class BundleController extends Controller
 
     public function removeVoucherFromCurrentBundle(Registration $registration, Voucher $voucher)
     {
+        /** @var Bundle $bundle */
         $bundle = $registration->currentBundle();
 
         // It is attached to our bundle, right?
         if ($voucher->bundle_id == $bundle->id) {
             // Call alterVouchers with no codes, and no bundle to detransiton and remove it.
-            $errors = $bundle->alterVouchers(collect($voucher), [], null);
+            $errors = $bundle->alterVouchers(collect([$voucher]), [], null);
         } else {
             // Error it out (how did you get here?
             $errors["foreign"] = [$voucher->code];
