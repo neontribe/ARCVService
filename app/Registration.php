@@ -78,18 +78,21 @@ class Registration extends Model
      */
     public function currentBundle()
     {
-        return $this->bundles()
+        $bundle = $this->bundles()
             ->where('disbursed_at', null)
+            ->where('registration_id', $this->id)
             ->orderBy('id', 'asc')
-            ->firstOrCreate(
-                [
-//                    "allocating_centre_id" =>  Auth::user()->centre,
-                    "registration_id" => $this->id,
-                ],
-                [
-                    "entitlement" => $this->family->entitlement,
-                ]
-            );
+            ->first()
+        ;
+
+        if (!$bundle) {
+            $bundle = Bundle::create([
+                "registration_id" => $this->id,
+                "entitlement" => $this->family->entitlement
+                ]);
+        };
+
+        return $bundle;
     }
 
     /**

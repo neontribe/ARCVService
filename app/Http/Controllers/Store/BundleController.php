@@ -63,14 +63,14 @@ class BundleController extends Controller
         $bundle = $registration->currentBundle();
 
         // clean the incoming data
-        $voucherCodes = (!isEmpty($request->get('vouchers')))
+        $voucherCodes = (!empty($request->get('vouchers')))
             ? Voucher::cleanCodes((array)$request->get('vouchers'))
             : []; // Will result in the removal of the vouchers from the bundle.
 
         // sync vouchers.
         $errors = $bundle->syncVouchers($voucherCodes);
 
-        if (!isEmpty($errors)) {
+        if (!empty($errors)) {
             $messages = [];
             // Whoops! Deal with those
             foreach ($errors as $type => $value) {
