@@ -85,8 +85,6 @@ class BundleController extends Controller
 
     public function removeVoucherFromCurrentBundle(Registration $registration, Voucher $voucher)
     {
-        Log::info("registration:" . $registration->id . "|voucher:" . $voucher->id);
-
         $bundle = $registration->currentBundle();
 
         // It is attached to our bundle, right?
