@@ -7,7 +7,7 @@
     @include('store.partials.navbar', ['headerTitle' => 'Voucher Manager'])
 
     <div class="content">
-        <form>
+        <form action="{{ URL::route('store.registration.vouchers') }}" method="post"> {{ csrf_field() }} {{ method_field('put') }}>
             <div class="col">
                 <div>
                     <img src="{{ asset('store/assets/info-light.svg') }}">
