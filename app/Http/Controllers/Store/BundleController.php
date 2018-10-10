@@ -37,7 +37,8 @@ class BundleController extends Controller
                 "centre" => $registration->centre,
                 "bundles" => $registration->bundles(),
                 "carers" => $carers,
-                "pri_carer" => array_shift($carers)
+                "pri_carer" => array_shift($carers),
+                "num_vouchers" => count($registration->currentBundle()->vouchers)
             ]
         ));
     }

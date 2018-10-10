@@ -7,7 +7,7 @@
     @include('store.partials.navbar', ['headerTitle' => 'Voucher Manager'])
 
     <div class="content">
-        <form action="{{ URL::route('store.registration.vouchers') }}" method="post"> {{ csrf_field() }} {{ method_field('put') }}>
+        <form>
             <div class="col">
                 <div>
                     <img src="{{ asset('store/assets/info-light.svg') }}">
@@ -103,7 +103,7 @@
                         </button>
                     </div>
                 </div>
-                <p class="center vh-spaced">You have added # vouchers</p>
+                <p class="center vh-spaced">You have added {{ $num_vouchers }} vouchers</p>
                 <button id="collection-button" class="long-button">Go to voucher collection</button>
                 <div class="center">
                   <span class="clickable-span">
