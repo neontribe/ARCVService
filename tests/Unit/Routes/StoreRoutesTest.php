@@ -247,7 +247,7 @@ class StoreRoutesTest extends StoreTestCase
         ]);
 
         $route = URL::route('store.registration.voucher-manager', [ 'registration' => $registration->id ]);
-        $put_route = URL::route('store.registration.vouchers', [ 'registration' => $registration->id ]);
+        $put_route = URL::route('store.registration.vouchers.put', [ 'registration' => $registration->id ]);
 
         // I can call a PUT on a page as a user
         Auth::logout();
