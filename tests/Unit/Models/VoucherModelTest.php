@@ -127,6 +127,40 @@ class VoucherModelTest extends TestCase
         );
     }
 
+    public function testCleanVouchers()
+    {
+        $user = factory(User::class)->create();
+        Auth::login($user);
+
+        // Create a voucher set ready to go
+        $goodCodes = [
+            'tst0123455',
+            'tst0123456',
+            'tst0123457'
+        ];
+        foreach ($goodCodes as $goodCode) {
+            $voucher = factory(Voucher::class, 'requested')->create([
+                'code' => $goodCode
+            ]);
+            $voucher->applyTransition('order');
+            $voucher->applyTransition('print');
+            $voucher->applyTransition('dispatch');
+        }
+
+        // Mangled codes from bad input
+        $badCodes = [
+            'tst012 3455',
+            'tst 0123456',
+            'tst0123457'
+        ];
+        // Clean 'em up!
+        $cleanCodes = Voucher::cleanCodes($badCodes);
+
+        // Find 'em in the database
+        $vouchers = Voucher::findByCodes($cleanCodes);
+        $this->assertEquals(count($badCodes), $vouchers->count());
+    }
+
     public function testScopeConfirmedVouchers()
     {
         $user = factory(User::class)->create();

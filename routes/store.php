@@ -74,6 +74,14 @@ Route::group(['middleware' => 'auth:store'], function () {
     ->name('store.registration.voucher-manager')
     ->middleware('can:view,registration');
 
+    // puts (and replaces!) the currentBundle of vouchers!
+    Route::put(
+        '/registrations/{registration}/vouchers',
+        'BundleController@update'
+    )
+    ->name('store.registration.vouchers')
+    ->middleware('can:view,registration');
+
     // Printables
 
     // Print a specific Family Form for User Centre (Edit page)

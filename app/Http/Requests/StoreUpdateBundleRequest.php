@@ -14,6 +14,7 @@ class StoreUpdateBundleRequest extends FormRequest
     public function authorize()
     {
         // TODO : determine of existing registration route protection is sufficient.
+        return true;
     }
 
 

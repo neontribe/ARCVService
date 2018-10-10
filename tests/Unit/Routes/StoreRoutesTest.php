@@ -239,6 +239,59 @@ class StoreRoutesTest extends StoreTestCase
         }
     }
 
+    public function testVoucherManagerUpdateGate()
+    {
+        // Create a random registration with our centre.
+        $registration = factory(Registration::class)->create([
+            "centre_id" => $this->centre->id,
+        ]);
+
+        $route = URL::route('store.registration.voucher-manager', [ 'registration' => $registration->id ]);
+        $put_route = URL::route('store.registration.vouchers', [ 'registration' => $registration->id ]);
+
+        // I can call a PUT on a page as a user
+        Auth::logout();
+        $this->actingAs($this->centreUser, 'store')
+            ->visit($route)
+            ->call(
+                'PUT',
+                $put_route,
+                [] // should erase the vouchers.
+            );
+        $this->assertResponseStatus(302);
+
+        // I can call put on a page as a neighbor
+        Auth::logout();
+        $this->actingAs($this->neighborUser, 'store')
+            ->visit($route)
+            ->call(
+                'PUT',
+                $put_route,
+                [] // should erase the vouchers.
+            );
+        $this->assertResponseStatus(302);
+
+        Auth::logout();
+        // An unrelated User cannot get there logged in.
+        $this->assertNotEquals(
+            $this->unrelatedUser->centre->sponsor->id,
+            $this->centreUser->centre->sponsor->id
+        );
+
+        try {
+            $this->actingAs($this->unrelatedUser, 'store')
+                ->visit($route)
+                ->call(
+                    'PUT',
+                    $put_route,
+                    [] // should erase the vouchers.
+                )
+            ;
+        } catch (\Exception $e) {
+            $this->assertContains("Received status code [403]", $e->getMessage());
+        }
+    }
+
     /** test */
     public function testCentreRegistrationsSummaryGate()
     {
