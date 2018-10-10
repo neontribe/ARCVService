@@ -103,7 +103,7 @@
                         </button>
                     </div>
                 </div>
-                <p class="center vh-spaced">You have added {{ $num_vouchers }} vouchers</p>
+                <p class="center vh-spaced">You have added {{ $current_vouchers_amount }} vouchers</p>
                 <button id="collection-button" class="long-button">Go to voucher collection</button>
                 <div class="center">
                   <span class="clickable-span">
@@ -134,7 +134,7 @@
                     <h2>Voucher Pick Up</h2>
                 </div>
                 <div>
-                    <p>There are # vouchers waiting for the family</p>
+                    <p>There are {{ $current_vouchers_amount }} vouchers waiting for the family</p>
                 </div>
                 <div class="pick-up vh-spaced">
                     <div>
