@@ -152,7 +152,6 @@
                         <i class="fa fa-calendar"></i>
                         <div>
                             <label for="collected-on">Collected on:</label>
-                            {{-- set value to today's date with carbon --}}
                             <input id="collected-on" value="<?php echo date('Y-m-d');?>" type="date">
                         </div>
                     </div>
@@ -161,7 +160,8 @@
                         <div>
                             <label for="collected-at">Collected at:</label>
                             <select id="collected-at">
-                              <option value="center-1">First Childrens Centre</option>
+                                {-- Will need to be a list of all local centres eventually --}
+                                <option value="{{ $centre->id }}">{{ $centre->name }}</option>
                             </select>
                         </div>
                     </div>

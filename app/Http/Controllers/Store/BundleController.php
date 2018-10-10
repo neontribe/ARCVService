@@ -33,7 +33,8 @@ class BundleController extends Controller
             [
                 "registration" => $registration,
                 "family" => $registration->family,
-                'children' => $registration->family->children,
+                "children" => $registration->family->children,
+                "centre" => $registration->centre,
                 "bundles" => $registration->bundles(),
                 "carers" => $carers,
                 "pri_carer" => array_shift($carers)
