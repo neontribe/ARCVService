@@ -17,7 +17,7 @@ services:
             interval: 20s
             retries: 10
 
-    web:
+    arc:
         image: neonkvm:5000/arc_service
         build:
             context: .

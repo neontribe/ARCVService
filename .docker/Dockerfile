@@ -5,26 +5,26 @@ RUN apt update && apt install -y \
         bash \
         libpng-dev \
         sudo \
-        wget
-RUN wget -O /tmp/composer-setup.php https://getcomposer.org/installer
-RUN php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
-RUN docker-php-ext-install \
+        vim \
+        wget \
+        mysql-client \
+ && wget -O /tmp/composer-setup.php https://getcomposer.org/installer \
+ && php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+ && docker-php-ext-install \
         bcmath \
         gd \
-        zip
-RUN docker-php-ext-enable \
+        zip \
+ && docker-php-ext-enable \
         bcmath \
         gd \
-        zip
+        zip \
+ && docker-php-ext-install pdo pdo_mysql  \
+ && docker-php-ext-enable pdo pdo_mysql \
+ && sed -i 's#/var/www/html#/var/www/html/public#' /etc/apache2/sites-enabled/000-default.conf \
+ && a2enmod rewrite
 
-RUN docker-php-ext-install pdo pdo_mysql 
-RUN docker-php-ext-enable pdo pdo_mysql
-RUN sed -i 's#/var/www/html#/var/www/html/public#' /etc/apache2/sites-enabled/000-default.conf
-RUN a2enmod rewrite
-RUN apt install -y mysql-client
-
-COPY . /var/www/html
-RUN ln -s /var/www/html/.docker/startup.sh /startup.sh
+COPY .docker/startup.sh /startup.sh
+COPY .docker/vimrc /root/.vimrc
 
 ENV APP_NAME docker
 ENV APP_ENV local
