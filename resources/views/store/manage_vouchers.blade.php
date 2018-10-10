@@ -142,7 +142,9 @@
                         <div>
                             <label for="collected-by">Collected by:</label>
                             <select id="collected-by">
-                                <option value="carer-1">Hester Johnson</option>
+                                @foreach( $carers as $carer )
+                                    <option value="{{ $carer->id }}">{{ $carer->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -151,7 +153,7 @@
                         <div>
                             <label for="collected-on">Collected on:</label>
                             {{-- set value to today's date with carbon --}}
-                            <input id="collected-on" type="date">
+                            <input id="collected-on" value="<?php echo date('Y-m-d');?>" type="date">
                         </div>
                     </div>
                     <div>
@@ -205,6 +207,8 @@
                 // Reset back to English date format
                 if ($('#collected-on')[0].type != 'date')
                     $('#collected-on').datepicker({ dateFormat: 'dd-mm-yy' }).val();
+
+                $('#collected-on').valueAsDate = new Date();
             }
         );
     </script>
