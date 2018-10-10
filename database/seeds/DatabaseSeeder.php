@@ -40,6 +40,7 @@ class DatabaseSeeder extends Seeder
         $this->call(AdminUsersSeeder::class);
         $this->call(VouchersSeeder::class);
         $this->call(VoucherStatesSeeder::class);
+        $this->call(BundleSeeder::class);
     }
 
     /**
