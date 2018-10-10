@@ -87,7 +87,7 @@ Route::group(['middleware' => 'auth:store'], function () {
     // Removes a voucher from the current bundle
     Route::delete(
         '/registrations/{registration}/vouchers/{voucher}',
-        'BundleController@removeVoucher'
+        'BundleController@removeVoucherFromCurrentBundle'
     )
     ->name('store.registration.voucher.delete')
     ->middleware('can:view,registration');
