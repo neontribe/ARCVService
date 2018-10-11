@@ -41,7 +41,6 @@ class BundleController extends Controller
                 "carers" => $carers,
                 "pri_carer" => array_shift($carers),
                 "vouchers" => $sorted_bundle,
-                // "sorted_vouchers" => $sorted_bundle,
                 "vouchers_amount" => count($bundle)
             ]
         ));
