@@ -106,25 +106,29 @@
                 <p class="center vh-spaced">You have added {{ $vouchers_amount }} vouchers</p>
                 <button id="collection-button" class="long-button">Go to voucher collection</button>
                 <div class="center">
-                  <span class="clickable-span">
-                    Vouchers added
-                    <i class="fa fa-caret-down" aria-hidden="true"></i>
-                  </span>
-                  <div id="vouchers" class="collapsed">
-                      <table>
-                          <tr>
-                              <th>Voucher code</th>
-                              <th>Remove</th>
-                          </tr>
-                          @foreach( $vouchers as $voucher )
-                              <tr>
-                                  <td>{{ $voucher->code }}</td>
-                                  <td><button id="{{ $voucher->id }}"><i class="fa fa-minus" aria-hidden="true"></i></button></td>
-                              </tr>
-                          @endforeach
-                      </table>
-                  </div>
-              </div>
+                    <span class="clickable-span">
+                        Vouchers added
+                        <i class="fa fa-caret-down" aria-hidden="true"></i>
+                    </span>
+                    <div id="vouchers" class="collapsed">
+                        <table>
+                            <tr>
+                                <th>Voucher code</th>
+                                <th>Remove</th>
+                            </tr>
+                            @foreach( $vouchers as $voucher )
+                                <tr>
+                                    <td>{{ $voucher->code }}</td>
+                                    <td><button id="{{ $voucher->id }}"><i class="fa fa-minus" aria-hidden="true"></i></button></td>
+                                </tr>
+                                <tr>
+                                    <td>{{ $voucher->code }}</td>
+                                    <td><button id="{{ $voucher->id }}"><i class="fa fa-minus" aria-hidden="true"></i></button></td>
+                                </tr>
+                            @endforeach
+                        </table>
+                    </div>
+                </div>
             </div>
             <div id="collection" class="col collection-section">
                 <div>
