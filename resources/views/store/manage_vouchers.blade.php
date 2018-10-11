@@ -116,7 +116,7 @@
                               <th>Voucher code</th>
                               <th>Remove</th>
                           </tr>
-                          @foreach( $vouchers as $voucher)
+                          @foreach( $vouchers as $voucher )
                               <tr>
                                   <td>{{ $voucher->code }}</td>
                                   <td><button id="{{ $voucher->id }}"><i class="fa fa-minus" aria-hidden="true"></i></button></td>

@@ -29,6 +29,16 @@ class BundleController extends Controller
         $carers = $registration->family->carers->all();
         $bundle = $registration->currentBundle()->vouchers;
 
+        // // $bundlea = (array) $bundle;
+
+        // $sorted_bundle = usort( $bundle, function($a, $b)
+        // {
+        //     if ($a->code == $b->code) {
+        //         return 0;
+        //     }
+        //     return ($a->code < $b->code) ? -1 : 1;
+        // });
+
         return view('store.manage_vouchers', array_merge(
             $data,
             [
@@ -39,6 +49,7 @@ class BundleController extends Controller
                 "carers" => $carers,
                 "pri_carer" => array_shift($carers),
                 "vouchers" => $bundle,
+                // "sorted_vouchers" => $sorted_bundle,
                 "vouchers_amount" => count($bundle)
             ]
         ));
