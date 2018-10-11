@@ -69,14 +69,17 @@ class Bundle extends Model
      * @param Bundle|null $bundle
      * @return array
      */
-    private function alterVouchers(Collection $vouchers, array $codes, Bundle $bundle = null)
+    public function alterVouchers(Collection $vouchers, array $codes = [], Bundle $bundle = null)
     {
         $errors = [];
-        $badCodes = array_diff($vouchers->pluck("code")->toArray(), $codes);
+        // codes that do not appear in the vouchers (if they're broken)
+        $badCodes = array_diff($codes, $vouchers->pluck("code")->toArray());
+
 
         if (empty($badCodes)) {
             // Run all these.
             $vouchers->each(
+
                 function (Voucher $voucher) use ($bundle, $errors) {
                     try {
                         $voucher->setBundle($bundle);

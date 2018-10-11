@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Store;
 
 use Auth;
+use App\Bundle;
 use App\Voucher;
 use App\Registration;
 use App\Http\Requests\StoreUpdateBundleRequest;
@@ -71,28 +72,7 @@ class BundleController extends Controller
         $errors = $bundle->syncVouchers($voucherCodes);
 
         if (!empty($errors)) {
-            $messages = [];
-            // Whoops! Deal with those
-            foreach ($errors as $type => $value) {
-                switch ($type) {
-                    case "transaction":
-                        if ($value) {
-                            $messages[] = 'there was a transaction error';
-                        }
-                        break;
-                    case "transition":
-                        $message[] = "there was a problem with adding/removing some vouchers";
-                        // could list them
-                        break;
-                    case "codes":
-                        $message[] = "there was a problem with some voucher codes";
-                        // could list them
-                        break;
-                    default:
-                        $messages[] = 'there was an unknown error';
-                        break;
-                }
-            }
+            $messages = $this->assembleMessages($errors);
             // Spit the basic error messages back
             return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
                 ->withInput()
@@ -102,5 +82,63 @@ class BundleController extends Controller
             return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
                 ->with('message', 'Vouchers updated.');
         }
+    }
+
+    public function removeVoucherFromCurrentBundle(Registration $registration, Voucher $voucher)
+    {
+        /** @var Bundle $bundle */
+        $bundle = $registration->currentBundle();
+
+        // It is attached to our bundle, right?
+        if ($voucher->bundle_id == $bundle->id) {
+            // Call alterVouchers with no codes, and no bundle to detransiton and remove it.
+            $errors = $bundle->alterVouchers(collect([$voucher]), [], null);
+        } else {
+            // Error it out (how did you get here?
+            $errors["foreign"] = [$voucher->code];
+        }
+
+        if (!empty($errors)) {
+            $messages = $this->assembleMessages($errors);
+            // Spit the basic error messages back
+            return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
+                ->withInput()
+                ->with('error_message', join('. ', $messages) . '.');
+        } else {
+            // Otherwise, sure, return to the new view.
+            return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
+                ->with('message', 'Vouchers updated.');
+        }
+    }
+
+    /**
+     * Return messages based on errors
+     *
+     * @param $errors
+     * @return array
+     */
+    private function assembleMessages($errors)
+    {
+        $messages = [];
+        foreach ($errors as $type => $values) {
+            switch ($type) {
+                case "transaction":
+                    $messages[] = 'Database transaction problem with: ' . join(', ', $values);
+                    break;
+                case "transition":
+                    $messages[] = "Transition problem with: " . join(', ', $values);
+                    break;
+                case "codes":
+                    $messages[] = "Bad code problem with: " . join(', ', $values);
+                    break;
+                case "foreign":
+                    $messages[] = "Action denied on a foreign voucher: " . join(', ', $values);
+                    break;
+                default:
+                    $messages[] = 'There was an unknown error';
+                    break;
+            }
+        }
+        return $messages;
     }
 }
