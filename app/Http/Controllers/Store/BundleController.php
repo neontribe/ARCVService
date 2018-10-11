@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Store;
 
 use Auth;
+use App\Bundle;
 use App\Voucher;
 use App\Registration;
 use App\Http\Requests\StoreAppendBundleRequest;
@@ -75,6 +76,33 @@ class BundleController extends Controller
 
         // sync vouchers.
         $errors = $bundle->syncVouchers($voucherCodes);
+
+        if (!empty($errors)) {
+            $messages = $this->assembleMessages($errors);
+            // Spit the basic error messages back
+            return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
+                ->withInput()
+                ->with('error_message', join(', ', $messages) . '.');
+        } else {
+            // Otherwise, sure, return to the new view.
+            return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
+                ->with('message', 'Vouchers updated.');
+        }
+    }
+
+    public function removeVoucherFromCurrentBundle(Registration $registration, Voucher $voucher)
+    {
+        /** @var Bundle $bundle */
+        $bundle = $registration->currentBundle();
+
+        // It is attached to our bundle, right?
+        if ($voucher->bundle_id == $bundle->id) {
+            // Call alterVouchers with no codes, and no bundle to detransiton and remove it.
+            $errors = $bundle->alterVouchers(collect([$voucher]), [], null);
+        } else {
+            // Error it out (how did you get here?
+            $errors["foreign"] = [$voucher->code];
+        }
 
         if (!empty($errors)) {
             $messages = $this->assembleMessages($errors);
