@@ -39,7 +39,7 @@ class BundleControllerTest extends TestCase
         //  A Registration on that centre
         $this->registration = factory(Registration::class)->create([
                 'centre_id' => $this->centre->id
-            ]);
+        ]);
     }
 
     /** @test */
