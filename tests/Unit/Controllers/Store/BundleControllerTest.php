@@ -10,6 +10,7 @@ use App\Centre;
 use App\CentreUser;
 use App\Voucher;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Session;
 use Tests\StoreTestCase;
 
 class BundleControllerTest extends StoreTestCase
@@ -66,22 +67,17 @@ class BundleControllerTest extends StoreTestCase
             // start is not present
             [
                 "data" => [],
-                "outcome" => [""]
+                "outcome" => "The start field is required."
             ],
             // start is present but null
             [
                 "data" => ["start" => ''],
-                "outcome" => [""]
+                "outcome" => "The start field is required."
             ],
-            // start is not a valid voucher
+            // start is not a valid voucher code
             [
                 "data" => ["start" => 'invalidVoucher'],
-                "outcome" => [""]
-            ],
-            // start is a valid voucher
-            [
-                "data" => ["start" => 'tst0123456'],
-                "outcome" => [""]
+                "outcome" => "The selected start is invalid."
             ]
         ];
 
@@ -90,15 +86,24 @@ class BundleControllerTest extends StoreTestCase
 
         foreach ($dataSets as $set) {
             $response = $this->actingAs($this->centreUser, 'store')
+                ->visit($route)
                 ->post(
                   $post_route,
                   $set["data"]
                 )
-//                ->seePageIs($route)
-//                ->see($set["outcome"])
             ;
-            $response = $this->followRedirects($response);
-            dd($response);
+            // Dig out errors from Session
+            $response->seeInSession('errors');
+            $errors = Session::get("errors")->get("start");
+
+            // Check our specific message is present
+            $this->assertContains($set['outcome'],$errors);
+
+            // we follow that to the correct page;
+            $this->followRedirects($response)
+                ->seePageIs($route)
+                ->assertResponseStatus(200)
+            ;
         }
     }
 

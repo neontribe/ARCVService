@@ -30,9 +30,9 @@ class StoreAppendBundleRequest extends FormRequest
          */
         $rules = [
             // MUST be present, not null and string
-            'start' => 'required|string',
+            'start' => 'required|string|exists:vouchers,code',
             // MAY be present, nullable and string
-            'end' => 'nullable|string',
+            'end' => 'nullable|string|exists:vouchers,code',
         ];
 
         return $rules;
