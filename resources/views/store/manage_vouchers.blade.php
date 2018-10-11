@@ -7,7 +7,7 @@
     @include('store.partials.navbar', ['headerTitle' => 'Voucher Manager'])
 
     <div class="content">
-        <form>
+        <div class="formclass">
             <div class="col">
                 <div>
                     <img src="{{ asset('store/assets/info-light.svg') }}">
@@ -15,7 +15,6 @@
                 </div>
                 <div class="alongside-container">
                     <div>
-
                         <h3>Main Carer:</h3>
                         <p>{{ $pri_carer->name }}</p>
                     </div>
@@ -81,27 +80,28 @@
                     <h2>Allocate Vouchers</h2>
                 </div>
                 <div class="alongside-container">
-                    <label>
-                        First voucher
-                        <input type="text">
+                    <label>First voucher
+                        <input id="first-voucher" type="text" autofocus>
                     </label>
-                    <label>
-                        Last voucher
+                    <label>Last voucher
                         <input id="last-voucher" type="text">
                     </label>
-                    <button class="add-button">
-                        <i class="fa fa-plus" aria-hidden="true"></i>
-                    </button>
-                </div>
-                <p class="center">OR</p>
-                <div>
-                    <label for="add-voucher-input">Add individual vouchers</label>
-                    <div class="small-button-container">
-                        <input type="text" id="add-voucher-input">
-                        <button class="addButton">
+                    <a href="http://www.example.com">
+                        <button class="add-button">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                         </button>
-                    </div>
+                    </a>
+                </div>
+                <p class="center">OR</p>
+                <div class="single-container">
+                    <label for="add-voucher-input">Add individual vouchers
+                        <input id="add-voucher-input" type="text">
+                    </label>
+                    <a href="http://www.example.com">
+                        <button class="add-button">
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                        </button>
+                    </a>
                 </div>
                 <p class="center vh-spaced">You have added # vouchers</p>
                 <button id="collection-button" class="long-button">Go to voucher collection</button>
@@ -169,7 +169,7 @@
                 <button class="short-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.index") }}'; return false;">Confirm pick up</button>
                 <button class="long-button">Allocate more vouchers</button>
             </div>
-        </form>
+        </div>
     </div>
 
     @section('hoist-head')
@@ -182,6 +182,27 @@
                 $('#collection-button').click(function (e) {
                     $('#collection').addClass('slide-in');
                     $('.allocation').addClass('fade-back');
+                    e.preventDefault();
+                });
+
+                // Handle first in range of vouchers
+                $("#first-voucher").keypress(function(e) {
+                    // TODO: Check is valid
+                    if(e.keyCode==13){
+                        $("#last-voucher").focus();
+                    }
+                    e.preventDefault();
+                });
+
+                // Handle last in range of vouchers
+                $("#last-voucher").keypress(function(e) {
+                    // TODO: Check is valid
+                    // TODO: Check #first-voucher is filled and valid
+                        // TODO: Submit
+                    // TODO: else toggle to #first-voucher
+                    if(e.keyCode==13){
+                        $("#first-voucher").focus();
+                    }
                     e.preventDefault();
                 });
 

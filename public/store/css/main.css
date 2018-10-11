@@ -42,6 +42,12 @@ form {
 	margin: 0;
 }
 
+.formclass {
+	display: flex;
+	width: 100%;
+	margin: 0;
+}
+
 input[type="text"],
 input[type="month"],
 input[type="search"] {
@@ -597,7 +603,7 @@ EDIT PAGE
 
 .clickable-span {
 	cursor: pointer;
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 .collect #more-family-info {
@@ -743,7 +749,7 @@ VOUCHER PAGES
 }
 
 .allocation .alongside-container {
-	align-items: flex-end;
+  align-items: flex-end;
   justify-content: space-between;
 }
 
@@ -751,6 +757,15 @@ VOUCHER PAGES
 .alongside-container > label {
   width: 50%;
   margin-right: 2%;
+}
+
+.single-container {
+	display: flex;
+	align-items: flex-end;
+}
+
+.single-container > label {
+	margin-right: 2%;
 }
 
 .short-button {
