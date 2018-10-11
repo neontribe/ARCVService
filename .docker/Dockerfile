@@ -2,6 +2,7 @@ FROM php:7.0-apache
 
 RUN apt update && apt install -y \
         acl \
+        ccze \
         bash \
         libpng-dev \
         sudo \
@@ -25,6 +26,8 @@ RUN apt update && apt install -y \
 
 COPY .docker/startup.sh /startup.sh
 COPY .docker/vimrc /root/.vimrc
+COPY .docker/php.ini /usr/local/etc/php/php.ini
+RUN echo "127.0.1.1	arc.test arcv-service.test arcv-store.test" >> /etc/hosts
 
 ENV APP_NAME docker
 ENV APP_ENV local
