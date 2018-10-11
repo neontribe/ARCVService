@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Store;
 use Auth;
 use App\Voucher;
 use App\Registration;
+use App\Http\Requests\StoreAppendBundleRequest;
 use App\Http\Requests\StoreUpdateBundleRequest;
 use App\Http\Controllers\Controller;
 
@@ -47,6 +48,11 @@ class BundleController extends Controller
      */
     public function index()
     {
+    }
+
+    public function addVouchersToCurrentBundle(StoreAppendBundleRequest $request, Registration $registration)
+    {
+        $bundle = $registration->currentBundle();
     }
 
     /**
