@@ -41,19 +41,17 @@ class BundleControllerTest extends StoreTestCase
         $this->registration = factory(Registration::class)->create([
             'centre_id' => $this->centre->id
         ]);
-    }
 
-    /** @test */
-    public function testIMustSubmitAValidStartValueToAppendVouchers()
-    {
         // Make some vouchers
-        Auth::login($this->centreUser);
         // Make some vouchers to bundle.
         $testCodes = [
             'tst0123455',
             'tst0123456',
             'tst0123457'
         ];
+
+        Auth::login($this->centreUser);
+
         foreach ($testCodes as $testCode) {
             $voucher = factory(Voucher::class, 'requested')->create([
                 'code' => $testCode
@@ -63,21 +61,36 @@ class BundleControllerTest extends StoreTestCase
             $voucher->applyTransition('dispatch');
         }
 
+    }
+
+    /** @test */
+    public function testICannotSubmitInvalidValuesToAppendVouchers()
+    {
         $dataSets = [
-            // start is not present
+            // no data
             [
                 "data" => [],
-                "outcome" => "The start field is required."
+                "outcome" => ["start" => "The start field is required."]
+            ],
+            // start is not present
+            [
+                "data" => ['end' => 'tst0123457'],
+                "outcome" => ["start" => "The start field is required."]
             ],
             // start is present but null
             [
-                "data" => ["start" => ''],
-                "outcome" => "The start field is required."
+                "data" => ["start" => '', 'end' => 'tst0123457'],
+                "outcome" => ["start" => "The start field is required."]
             ],
             // start is not a valid voucher code
             [
-                "data" => ["start" => 'invalidVoucher'],
-                "outcome" => "The selected start is invalid."
+                "data" => ["start" => 'invalidVoucher', 'end' => 'tst0123457' ],
+                "outcome" => ["start" => "The selected start is invalid."]
+            ],
+            // end is not a valid voucher code
+            [
+                "data" => ["start" => 'tst0123455', 'end' => 'invalidCode' ],
+                "outcome" => ["end" => "The selected end is invalid."]
             ]
         ];
 
@@ -92,12 +105,15 @@ class BundleControllerTest extends StoreTestCase
                   $set["data"]
                 )
             ;
+            // owrk out which field we're testing.
+            $field = array_keys($set['outcome'])[0];
+
             // Dig out errors from Session
             $response->seeInSession('errors');
-            $errors = Session::get("errors")->get("start");
+            $errors = Session::get("errors")->get($field);
 
             // Check our specific message is present
-            $this->assertContains($set['outcome'],$errors);
+            $this->assertContains($set['outcome'][$field],$errors);
 
             // we follow that to the correct page;
             $this->followRedirects($response)
@@ -106,12 +122,6 @@ class BundleControllerTest extends StoreTestCase
             ;
         }
     }
-
-    /** @test */
-    public function testIMaySubmitAnEndValueToAppendVouchers()
-    {
-    }
-
 
     /** @test */
     public function testICanDeleteANamedVoucher()
