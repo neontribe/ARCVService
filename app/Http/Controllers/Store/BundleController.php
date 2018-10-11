@@ -38,8 +38,8 @@ class BundleController extends Controller
                 "centre" => $registration->centre,
                 "carers" => $carers,
                 "pri_carer" => array_shift($carers),
-                "current_vouchers" => $bundle,
-                "current_vouchers_amount" => count($bundle)
+                "vouchers" => $bundle,
+                "vouchers_amount" => count($bundle)
             ]
         ));
     }

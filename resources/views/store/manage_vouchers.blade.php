@@ -103,7 +103,7 @@
                         </button>
                     </div>
                 </div>
-                <p class="center vh-spaced">You have added {{ $current_vouchers_amount }} vouchers</p>
+                <p class="center vh-spaced">You have added {{ $vouchers_amount }} vouchers</p>
                 <button id="collection-button" class="long-button">Go to voucher collection</button>
                 <div class="center">
                   <span class="clickable-span">
@@ -116,14 +116,12 @@
                               <th>Voucher code</th>
                               <th>Remove</th>
                           </tr>
-                          <tr>
-                              <td>RVNT40500959</td>
-                              <td><button><i class="fa fa-minus" aria-hidden="true"></i></button></td>
-                          </tr>
-                          <tr>
-                              <td>RVNT40500959</td>
-                              <td><button><i class="fa fa-minus" aria-hidden="true"></i></button></td>
-                          </tr>
+                          @foreach( $vouchers as $voucher)
+                              <tr>
+                                  <td>{{ $voucher->code }}</td>
+                                  <td><button id="{{ $voucher->id }}"><i class="fa fa-minus" aria-hidden="true"></i></button></td>
+                              </tr>
+                          @endforeach
                       </table>
                   </div>
               </div>
@@ -134,7 +132,7 @@
                     <h2>Voucher Pick Up</h2>
                 </div>
                 <div>
-                    <p>There are {{ $current_vouchers_amount }} vouchers waiting for the family</p>
+                    <p>There are {{ $vouchers_amount }} vouchers waiting for the family</p>
                 </div>
                 <div class="pick-up vh-spaced">
                     <div>
