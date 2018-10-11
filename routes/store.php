@@ -67,12 +67,31 @@ Route::group(['middleware' => 'auth:store'], function () {
     // Need to write this route this way to use a policy.
     // Registration wasn't being passed through for a Gate based trick.
 
+    // TODO middleware group this lot under can:view.
+
     Route::get(
         '/registrations/{registration}/voucher-manager',
         'BundleController@create'
     )
     ->name('store.registration.voucher-manager')
     ->middleware('can:view,registration');
+
+    // PUTS (and replaces!) the currentBundle of vouchers!
+    Route::put(
+        '/registrations/{registration}/vouchers',
+        'BundleController@update'
+    )
+    ->name('store.registration.vouchers.put')
+    ->middleware('can:view,registration');
+
+    // Removes a voucher from the current bundle
+    Route::delete(
+        '/registrations/{registration}/vouchers/{voucher}',
+        'BundleController@removeVoucherFromCurrentBundle'
+    )
+    ->name('store.registration.voucher.delete')
+    ->middleware('can:view,registration');
+
 
     // Printables
 
