@@ -27,6 +27,10 @@ We suggest that you use the TLD `.test` as others, like `.app` may now be in the
  - Run tests with `phpunit`
 
 
+### Styling
+- Service styling is in `resources/assets/sass/app.scss`
+- Store styling is in `public/store/css/app.css`.
+
 ## Deployment
 
 1. Travis will build and test with every push to the repo.
