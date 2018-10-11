@@ -3,7 +3,6 @@
 
 namespace Tests\Unit\Controllers\Store;
 
-use Log;
 use Auth;
 use App\Registration;
 use App\Bundle;
@@ -80,19 +79,18 @@ class BundleControllerTest extends TestCase
             ]
         );
 
-        // hit the route with a delete request;
+        // Hit the route with a delete request;
         $this->actingAs($this->centreUser, 'store')
             ->delete($delete_route)
         ;
 
+        // refresh bundle
+        $currentBundle->refresh();
         // See less vouchers
         $this->assertEquals(count($testCodes) -1, $currentBundle->vouchers()->count());
 
-        // Reload the voucher
-        $voucher->fresh();
-
-        dd($voucher);
-
+        // Refresh the detached voucher
+        $voucher->refresh();
         // Assert voucher is unbundled
         $this->assertNull($voucher->bundle_id);
 
