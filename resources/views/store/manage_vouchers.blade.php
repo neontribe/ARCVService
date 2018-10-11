@@ -87,7 +87,7 @@
                         <input id="last-voucher" type="text">
                     </label>
                     <a href="http://www.example.com">
-                        <button class="add-button">
+                        <button id="range-add" class="add-button">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                         </button>
                     </a>
@@ -185,24 +185,51 @@
                     e.preventDefault();
                 });
 
+                var id = {!! json_encode($registration->id) !!};
+                var firstVoucher = $('#first-voucher');
+                var lastVoucher = $('#last-voucher');
+
                 // Handle first in range of vouchers
-                $("#first-voucher").keypress(function(e) {
-                    // TODO: Check is valid
+                firstVoucher.keypress(function(e) {
                     if(e.keyCode==13){
-                        $("#last-voucher").focus();
+                        console.log(id);
+                        var firstValue = firstVoucher.val();
+                        if(firstValue !== ""){
+                            lastVoucher.focus();
+                        } else {
+                            console.log("Error")
+                        }
                     }
-                    e.preventDefault();
                 });
 
                 // Handle last in range of vouchers
-                $("#last-voucher").keypress(function(e) {
-                    // TODO: Check is valid
+                lastVoucher.keypress(function(e) {
                     // TODO: Check #first-voucher is filled and valid
                         // TODO: Submit
                     // TODO: else toggle to #first-voucher
                     if(e.keyCode==13){
-                        $("#first-voucher").focus();
+                        var firstValue = firstVoucher.val();
+                        if(firstValue === "") {
+                            firstVoucher.focus();
+                            e.preventDefault();
+                            return
+                        }
+
+                        var lastValue = lastVoucher.val();
+                        if(firstValue !== "" && lastValue !== "") {
+                            console.log("Submit: " + firstValue + " " + lastValue); // POST
+                            //$.post("registrations/"+ id +"/vouchers", {start: firstValue, end: lastValue});
+                            firstVoucher.val('').focus();
+                            lastVoucher.val('');
+                        } else {
+                            console.log("Error")
+                        }
                     }
+                });
+
+                // Handle range submit button
+                $('range-add').click(function (e) {
+                    // TODO: POST start+end codes
                     e.preventDefault();
                 });
 
