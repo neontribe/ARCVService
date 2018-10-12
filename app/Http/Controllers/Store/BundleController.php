@@ -51,9 +51,25 @@ class BundleController extends Controller
     {
     }
 
+    /**
+     * Does a single voucher. WIP
+     *
+     * @param StoreAppendBundleRequest $request
+     * @param Registration $registration
+     * @return \Illuminate\Http\RedirectResponse
+     */
+
     public function addVouchersToCurrentBundle(StoreAppendBundleRequest $request, Registration $registration)
     {
+        /** @var Bundle $bundle */
         $bundle = $registration->currentBundle();
+
+        // There should always be a start. The request will fail before validation before this point if there isn't
+        $voucherCodes = Voucher::cleanCodes([$request->get('start')]);
+
+        // TODO : sequential voucher add.
+
+        return $this->redirectAfterRequest($bundle->addVouchers($voucherCodes), $registration);
     }
 
     /**
@@ -75,19 +91,7 @@ class BundleController extends Controller
             : []; // Will result in the removal of the vouchers from the bundle.
 
         // sync vouchers.
-        $errors = $bundle->syncVouchers($voucherCodes);
-
-        if (!empty($errors)) {
-            $messages = $this->assembleMessages($errors);
-            // Spit the basic error messages back
-            return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
-                ->withInput()
-                ->with('error_message', join(', ', $messages) . '.');
-        } else {
-            // Otherwise, sure, return to the new view.
-            return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
-                ->with('message', 'Vouchers updated.');
-        }
+        return $this->redirectAfterRequest($bundle->syncVouchers($voucherCodes), $registration);
     }
 
     public function removeVoucherFromCurrentBundle(Registration $registration, Voucher $voucher)
@@ -97,54 +101,51 @@ class BundleController extends Controller
 
         // It is attached to our bundle, right?
         if ($voucher->bundle_id == $bundle->id) {
-            // Call alterVouchers with no codes, and no bundle to detransiton and remove it.
+            // Call alterVouchers with no codes to check, and no bundle to detransiton and remove it.
             $errors = $bundle->alterVouchers(collect([$voucher]), [], null);
         } else {
             // Error it out (how did you get here?
             $errors["foreign"] = [$voucher->code];
         }
 
-        if (!empty($errors)) {
-            $messages = $this->assembleMessages($errors);
-            // Spit the basic error messages back
-            return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
-                ->withInput()
-                ->with('error_message', join('. ', $messages) . '.');
-        } else {
-            // Otherwise, sure, return to the new view.
-            return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
-                ->with('message', 'Vouchers updated.');
-        }
+        return $this->redirectAfterRequest($errors, $registration);
     }
 
-    /**
-     * Return messages based on errors
-     *
-     * @param $errors
-     * @return array
-     */
-    private function assembleMessages($errors)
+    public function redirectAfterRequest($errors, $registration)
     {
-        $messages = [];
-        foreach ($errors as $type => $values) {
-            switch ($type) {
-                case "transaction":
-                    $messages[] = 'Database transaction problem with: ' . join(', ', $values);
-                    break;
-                case "transition":
-                    $messages[] = "Transition problem with: " . join(', ', $values);
-                    break;
-                case "codes":
-                    $messages[] = "Bad code problem with: " . join(', ', $values);
-                    break;
-                case "foreign":
-                    $messages[] = "Action denied on a foreign voucher: " . join(', ', $values);
-                    break;
-                default:
-                    $messages[] = 'There was an unknown error';
-                    break;
+        $route = route('store.registration.voucher-manager', ['registration' => $registration->id]);
+        if (!empty($errors)) {
+            // Assemble messages
+            $messages = [];
+            foreach ($errors as $type => $values) {
+                switch ($type) {
+                    case "transaction":
+                        if ($values) {
+                            $messages[] = 'Database transaction problem.';
+                        }
+                        break;
+                    case "transition":
+                        $messages[] = "Transition problem with: " . join(', ', $values);
+                        break;
+                    case "codes":
+                        $messages[] = "Bad code problem with: " . join(', ', $values);
+                        break;
+                    case "foreign":
+                        $messages[] = "Action denied on a foreign voucher: " . join(', ', $values);
+                        break;
+                    default:
+                        $messages[] = 'There was an unknown error';
+                        break;
+                }
             }
+            // Spit the basic error messages back
+            return redirect($route)
+                ->withInput()
+                ->with('error_message', join(', ', $messages) . '.');
+        } else {
+            // Otherwise, sure, return to the new view.
+            return redirect($route)
+                ->with('message', 'Vouchers updated.');
         }
-        return $messages;
     }
 }

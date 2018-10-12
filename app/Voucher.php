@@ -2,7 +2,6 @@
 
 namespace App;
 
-use App\Exception\TransitionNotAllowedException;
 use App\Traits\Statable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -202,17 +201,18 @@ class Voucher extends Model
    *
    * @return array
    */
-  public static function getMinMaxVoucherDates(Collection $vouchers) {
-      $sorted_vouchers = $vouchers->sortBy(function($voucher) {
-          return $voucher->paymentPendedOn->created_at->timestamp;
-      })->values()->all();
+    public static function getMinMaxVoucherDates(Collection $vouchers)
+    {
+        $sorted_vouchers = $vouchers->sortBy(function ($voucher) {
+            return $voucher->paymentPendedOn->created_at->timestamp;
+        })->values()->all();
 
-      $min_date = $sorted_vouchers[0]->paymentPendedOn->created_at->format('d-m-Y');
-      $max_date = $sorted_vouchers[count($sorted_vouchers) - 1]->paymentPendedOn->created_at->format('d-m-Y');
+        $min_date = $sorted_vouchers[0]->paymentPendedOn->created_at->format('d-m-Y');
+        $max_date = $sorted_vouchers[count($sorted_vouchers) - 1]->paymentPendedOn->created_at->format('d-m-Y');
 
-      // If max date is the same as min date return null.
-      $max_date = ($min_date === $max_date) ? null : $max_date;
+        // If max date is the same as min date return null.
+        $max_date = ($min_date === $max_date) ? null : $max_date;
 
-      return [$min_date, $max_date];
-  }
+        return [$min_date, $max_date];
+    }
 }
