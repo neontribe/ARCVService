@@ -119,11 +119,15 @@
                             @foreach( $vouchers as $voucher )
                                 <tr>
                                     <td>{{ $voucher->code }}</td>
-                                    <td><button id="{{ $voucher->id }}"><i class="fa fa-minus" aria-hidden="true"></i></button></td>
-                                </tr>
-                                <tr>
-                                    <td>{{ $voucher->code }}</td>
-                                    <td><button id="{{ $voucher->id }}"><i class="fa fa-minus" aria-hidden="true"></i></button></td>
+                                    <td>
+                                        <form action="{{ URL::route('store.registration.voucher.delete', ['registration' => $registration->id, 'voucher' => $voucher->id]) }}" method="post">
+                                        {!! method_field('delete') !!}
+                                        {!! csrf_field() !!}
+                                            <button type="submit" class="remove-voucher" id="{{ $voucher->id }}">
+                                                <i class="fa fa-minus" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    </td>
                                 </tr>
                             @endforeach
                         </table>
@@ -211,6 +215,11 @@
                     $('#collected-on').datepicker({ dateFormat: 'dd-mm-yy' }).val();
 
                 $('#collected-on').valueAsDate = new Date();
+
+                // Submit delete form to remove voucher
+                $('.remove-voucher').click(function(e){
+                    $(e.target).closest('form').submit();
+                });
             }
         );
     </script>
