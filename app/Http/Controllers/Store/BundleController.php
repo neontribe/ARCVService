@@ -62,12 +62,43 @@ class BundleController extends Controller
     public function addVouchersToCurrentBundle(StoreAppendBundleRequest $request, Registration $registration)
     {
         /** @var Bundle $bundle */
+        // Get current Bundle
         $bundle = $registration->currentBundle();
 
         // There should always be a start. The request will fail before validation before this point if there isn't
-        $voucherCodes = Voucher::cleanCodes([$request->get('start')]);
+        $start_match = Voucher::splitShortcodeNumeric($request->get("start"));
 
-        // TODO : sequential voucher add.
+        // Gets the whole string match and plumbs it onto the start of the voucher codes.
+        $voucherCodes[] = $start_match[0];
+
+        // Check we have an end;
+        if (!empty($request->voucher("end"))) {
+            $end_match = Voucher::splitShortcodeNumeric($request->get("start"));
+
+            // Grab integer versions of the thing.
+            $startval = intval($start_match['number']);
+            $endval = intval($end_match['number']);
+
+            // Check for some error conditions before we generate
+            if ($start_match['shortcode'] !== $end_match['shortcode']) {
+                // Is the range all one shortcode?
+                $voucherCodes[] = $end_match[0];
+
+                return $this->redirectAfterRequest(["rangeShortcodeMismatch" => $voucherCodes], $registration);
+            } elseif ($startval > $endval) {
+                // Is the range in order?
+                $voucherCodes[] = $end_match[0];
+
+                return $this->redirectAfterRequest(["rangeOrder" => $voucherCodes], $registration);
+            } else {
+                // Generate codes!
+                for ($val = $startval+1; $val <= $endval; $val++) {
+                    // Assemble code, add to voucherCodes[]
+                    // We appear to be producing codes that are "0" str_pad on the left, to 5 characters
+                    $voucherCodes[] = $start_match['shortcode'] . str_pad($val, 5, "0", STR_PAD_LEFT);
+                }
+            }
+        };
 
         return $this->redirectAfterRequest($bundle->addVouchers($voucherCodes), $registration);
     }

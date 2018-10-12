@@ -81,6 +81,26 @@ class Voucher extends Model
     }
 
     /**
+     * Splits a voucher code up
+     *
+     * @param string $code
+     * @return array|bool
+     */
+    public static function splitShortcodeNumeric(string $code)
+    {
+        // Clean the code
+        $code = array_shift(self::cleanCodes([$code]));
+        // Init matches
+        $matches = [];
+        // split into named matche and return
+        if (preg_match('/^(?<sponsor>\D*)(?<number>\d+)$/g', $code, $matches) == 1) {
+             return $matches;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * The methods we should call to remember to transition.
      * Could probably be turned into an event listener?
      *
