@@ -42,12 +42,6 @@ form {
 	margin: 0;
 }
 
-.formclass {
-	display: flex;
-	width: 100%;
-	margin: 0;
-}
-
 input[type="text"],
 input[type="month"],
 input[type="search"] {
@@ -513,14 +507,25 @@ REGISTER PAGE
 	margin: 1rem;
 }
 
+.col > form .alongside-container,
+.col > form .single-container {
+	margin: 1rem;
+}
+
 .col td,
 .col .added {
 	font-size: 1rem;
 }
 
+.col-container {
+	display: flex;
+	width: 100%;
+	margin: 0;
+}
+
 .small-button-container {
 	display: flex;
-  justify-content: center;
+  	justify-content: center;
 }
 
 .small-button-container button {
@@ -760,8 +765,9 @@ VOUCHER PAGES
 }
 
 .single-container {
-	display: flex;
 	align-items: flex-end;
+	display: flex;
+	width: 100%;
 }
 
 .single-container > label {

@@ -7,7 +7,7 @@
     @include('store.partials.navbar', ['headerTitle' => 'Voucher Manager'])
 
     <div class="content">
-        <div class="formclass">
+        <div class="col-container">
             <div class="col">
                 <div>
                     <img src="{{ asset('store/assets/info-light.svg') }}">
@@ -79,30 +79,32 @@
                     <img src="{{ asset('store/assets/allocation-light.svg') }}">
                     <h2>Allocate Vouchers</h2>
                 </div>
-                <div class="alongside-container">
-                    <label>First voucher
-                        <input id="first-voucher" type="text" autofocus>
-                    </label>
-                    <label>Last voucher
-                        <input id="last-voucher" type="text">
-                    </label>
-                    <a href="http://www.example.com">
-                        <button id="range-add" class="add-button">
+                <form method="POST" action="{{ route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]) }}">
+                {!! csrf_field() !!}
+                    <div class="alongside-container">
+                        <label>First voucher
+                            <input id="first-voucher" name="start" type="text" autofocus>
+                        </label>
+                        <label>Last voucher
+                            <input id="last-voucher" name="end" type="text">
+                        </label>
+                        <button id="range-add" class="add-button" type="submit">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                         </button>
-                    </a>
-                </div>
+                    </div>
+                </form>
                 <p class="center">OR</p>
-                <div class="single-container">
-                    <label for="add-voucher-input">Add individual vouchers
-                        <input id="add-voucher-input" type="text">
-                    </label>
-                    <a href="http://www.example.com">
-                        <button class="add-button">
+                <form method="POST" action="{{ route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]) }}">
+                {!! csrf_field() !!}
+                    <div class="single-container">
+                        <label for="add-voucher-input">Add individual vouchers
+                            <input id="add-voucher-input" name="start" type="text">
+                        </label>
+                        <button class="add-button" type="submit>
                             <i class="fa fa-plus" aria-hidden="true"></i>
                         </button>
-                    </a>
-                </div>
+                    </div>
+                </form>
                 <p class="center vh-spaced">You have added # vouchers</p>
                 <button id="collection-button" class="long-button">Go to voucher collection</button>
                 <div class="center">
@@ -199,14 +201,12 @@
                         } else {
                             console.log("Error")
                         }
+                        e.preventDefault();
                     }
                 });
 
                 // Handle last in range of vouchers
                 lastVoucher.keypress(function(e) {
-                    // TODO: Check #first-voucher is filled and valid
-                        // TODO: Submit
-                    // TODO: else toggle to #first-voucher
                     if(e.keyCode==13){
                         var firstValue = firstVoucher.val();
                         if(firstValue === "") {
@@ -218,7 +218,6 @@
                         var lastValue = lastVoucher.val();
                         if(firstValue !== "" && lastValue !== "") {
                             console.log("Submit: " + firstValue + " " + lastValue); // POST
-                            //$.post("registrations/"+ id +"/vouchers", {start: firstValue, end: lastValue});
                             firstVoucher.val('').focus();
                             lastVoucher.val('');
                         } else {
@@ -230,7 +229,7 @@
                 // Handle range submit button
                 $('range-add').click(function (e) {
                     // TODO: POST start+end codes
-                    e.preventDefault();
+                    //e.preventDefault();
                 });
 
                 $('.clickable-span').click(function (e) {
