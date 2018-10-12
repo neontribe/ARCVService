@@ -164,6 +164,12 @@ class BundleController extends Controller
                     case "foreign":
                         $messages[] = "Action denied on a foreign voucher: " . join(', ', $values);
                         break;
+                    case "rangeOrder":
+                        $messages[] = "Start and End out of order: " . join(', ', $values);
+                        break;
+                    case "rangeShortcodeMismatchError":
+                        $messages[] = "Start and End are different Sponsors: " . join(', ', $values);
+                        break;
                     default:
                         $messages[] = 'There was an unknown error';
                         break;
