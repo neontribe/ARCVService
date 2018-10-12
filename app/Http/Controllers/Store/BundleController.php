@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Store;
 
+use Log;
 use Auth;
 use App\Bundle;
 use App\Voucher;
@@ -52,7 +53,7 @@ class BundleController extends Controller
     }
 
     /**
-     * Does a single voucher. WIP
+     * Does a single voucher.
      *
      * @param StoreAppendBundleRequest $request
      * @param Registration $registration
@@ -72,8 +73,8 @@ class BundleController extends Controller
         $voucherCodes[] = $start_match[0];
 
         // Check we have an end;
-        if (!empty($request->voucher("end"))) {
-            $end_match = Voucher::splitShortcodeNumeric($request->get("start"));
+        if (!empty($request->get("end"))) {
+            $end_match = Voucher::splitShortcodeNumeric($request->get("end"));
 
             // Grab integer versions of the thing.
             $startval = intval($start_match['number']);
@@ -94,8 +95,15 @@ class BundleController extends Controller
                 // Generate codes!
                 for ($val = $startval+1; $val <= $endval; $val++) {
                     // Assemble code, add to voucherCodes[]
-                    // We appear to be producing codes that are "0" str_pad on the left, to 5 characters
-                    $voucherCodes[] = $start_match['shortcode'] . str_pad($val, 5, "0", STR_PAD_LEFT);
+                    // We appear to be producing codes that are "0" str_pad on the left, to variable characters
+                    // We'll use the $start's numeric length as the value to pad to.
+                    $voucherCodes[] = $start_match['shortcode'] . str_pad(
+                        $val,
+                        strlen($start_match['number']),
+                        "0",
+                        STR_PAD_LEFT
+                    );
+                    Log::warning($voucherCodes);
                 }
             }
         };

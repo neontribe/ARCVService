@@ -111,7 +111,10 @@ class Bundle extends Model
         // codes may reference vouchers we can't find in the database
         // TODO: move this check further out?
 
-        $errors["codes"] = array_diff($codes, $vouchers->pluck("code")->toArray());
+        $missingCodes = array_diff($codes, $vouchers->pluck("code")->toArray());
+        if ($missingCodes) {
+            $errors["codes"] = $missingCodes;
+        }
 
         // try to Run the vouchers we know are in the DB
         $vouchers->each(
@@ -155,14 +158,6 @@ class Bundle extends Model
 
                 // Find the vouchers to remove.
                 $removeVouchers = $this->vouchers()->whereIn('code', $unBundleCodes)->get();
-
-                // Find codes that don't exist and record them for errors
-                $errors["codes"] = array_diff(
-                    $unBundleCodes,
-                    $removeVouchers
-                        ->pluck('code')
-                        ->toArray()
-                );
 
                 // Sync them to a null bundle
                 $removeErrors = $this->alterVouchers($removeVouchers, $unBundleCodes, null);

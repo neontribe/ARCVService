@@ -89,11 +89,12 @@ class Voucher extends Model
     public static function splitShortcodeNumeric(string $code)
     {
         // Clean the code
-        $code = array_shift(self::cleanCodes([$code]));
+        $clean = self::cleanCodes([$code]);
+        $code = array_shift($clean);
         // Init matches
         $matches = [];
         // split into named matche and return
-        if (preg_match('/^(?<sponsor>\D*)(?<number>\d+)$/g', $code, $matches) == 1) {
+        if (preg_match("/^(?<shortcode>\D*)(?<number>\d+)$/", $code, $matches) == 1) {
              return $matches;
         } else {
             return false;

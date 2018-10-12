@@ -3,6 +3,7 @@
 
 namespace Tests\Unit\Controllers\Store;
 
+use Log;
 use Auth;
 use App\Registration;
 use App\Bundle;
@@ -19,7 +20,7 @@ class BundleControllerTest extends StoreTestCase
 
     protected $centre;
     protected $centreUser;
-
+    protected $testCodes;
     /** @var Registration $registration */
     protected $registration;
     protected $bundle;
@@ -43,16 +44,15 @@ class BundleControllerTest extends StoreTestCase
         ]);
 
         // Make some vouchers
-        // Make some vouchers to bundle.
-        $testCodes = [
-            'tst0123455',
-            'tst0123456',
-            'tst0123457'
+        $this->testCodes = [
+            'tst09999',
+            'tst10000',
+            'tst10001'
         ];
 
         Auth::login($this->centreUser);
 
-        foreach ($testCodes as $testCode) {
+        foreach ($this->testCodes as $testCode) {
             $voucher = factory(Voucher::class, 'requested')->create([
                 'code' => $testCode
             ]);
@@ -61,6 +61,7 @@ class BundleControllerTest extends StoreTestCase
             $voucher->applyTransition('dispatch');
         }
 
+        Auth::logout();
     }
 
     /** @test */
@@ -94,18 +95,18 @@ class BundleControllerTest extends StoreTestCase
             ]
         ];
 
-        $route = route('store.registration.voucher-manager',  [ 'registration' => $this->registration->id ]);
+        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
         $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
 
         foreach ($dataSets as $set) {
             $response = $this->actingAs($this->centreUser, 'store')
                 ->visit($route)
                 ->post(
-                  $post_route,
-                  $set["data"]
+                    $post_route,
+                    $set["data"]
                 )
             ;
-            // owrk out which field we're testing.
+            // work out which field we're testing.
             $field = array_keys($set['outcome'])[0];
 
             // Dig out errors from Session
@@ -113,14 +114,66 @@ class BundleControllerTest extends StoreTestCase
             $errors = Session::get("errors")->get($field);
 
             // Check our specific message is present
-            $this->assertContains($set['outcome'][$field],$errors);
+            $this->assertContains($set['outcome'][$field], $errors);
 
             // we follow that to the correct page;
-            $this->followRedirects($response)
+            $this->followRedirects()
                 ->seePageIs($route)
                 ->assertResponseStatus(200)
             ;
         }
+    }
+
+    /** @test */
+    public function testICanAddManyVouchers()
+    {
+        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
+        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
+
+        // Add many vouchers;
+        $this->actingAs($this->centreUser, 'store')
+            ->post(
+                $post_route,
+                [
+                    'start' => $this->testCodes[0],
+                    'end' => $this->testCodes[count($this->testCodes)-1]
+                ]
+            );
+        Log::info(Session::get("error_message"));
+
+        $this->followRedirects()
+            ->seePageIs($route)
+            ->assertResponseStatus(200)
+        ;
+        /** @var Bundle $currentBundle */
+        // Get our currentBundle
+        $currentBundle = $this->registration->currentBundle();
+
+        // See that it's got many vouchers.
+        $this->assertEquals(count($this->testCodes), $currentBundle->vouchers()->count());
+    }
+
+    /** @test */
+    public function testICanAddSingleVouchers()
+    {
+        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
+        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
+
+        // Add a voucher;
+        $this->actingAs($this->centreUser, 'store')
+            ->post($post_route, ['start' => $this->testCodes[0]]);
+
+        $this->followRedirects()
+            ->seePageIs($route)
+            ->assertResponseStatus(200)
+        ;
+
+        /** @var Bundle $currentBundle */
+        // Get our currentBundle
+        $currentBundle = $this->registration->currentBundle();
+
+        // See that it's got one voucher.
+        $this->assertEquals(1, $currentBundle->vouchers()->count());
     }
 
     /** @test */
