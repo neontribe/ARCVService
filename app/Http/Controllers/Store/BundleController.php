@@ -6,6 +6,7 @@ use Auth;
 use App\Bundle;
 use App\Voucher;
 use App\Registration;
+use App\Http\Requests\StoreAppendBundleRequest;
 use App\Http\Requests\StoreUpdateBundleRequest;
 use App\Http\Controllers\Controller;
 
@@ -55,7 +56,65 @@ class BundleController extends Controller
     }
 
     /**
-     * Create OR Update a registrations current active bundle
+     * Does a single or multiple voucher.
+     *
+     * @param StoreAppendBundleRequest $request
+     * @param Registration $registration
+     * @return \Illuminate\Http\RedirectResponse
+     */
+
+    public function addVouchersToCurrentBundle(StoreAppendBundleRequest $request, Registration $registration)
+    {
+        /** @var Bundle $bundle */
+        // Get current Bundle
+        $bundle = $registration->currentBundle();
+
+        // There should always be a start. The request will fail before validation before this point if there isn't
+        $start_match = Voucher::splitShortcodeNumeric($request->get("start"));
+
+        // Gets the whole string match and plumbs it onto the start of the voucher codes.
+        $voucherCodes[] = $start_match[0];
+
+        // Check we have an end;
+        if (!empty($request->get("end"))) {
+            $end_match = Voucher::splitShortcodeNumeric($request->get("end"));
+
+            // Grab integer versions of the thing.
+            $startval = intval($start_match['number']);
+            $endval = intval($end_match['number']);
+
+            // Check for some error conditions before we generate
+            if ($start_match['shortcode'] !== $end_match['shortcode']) {
+                // Is the range all one shortcode?
+                $voucherCodes[] = $end_match[0];
+
+                return $this->redirectAfterRequest(["rangeShortcodeMismatch" => $voucherCodes], $registration);
+            } elseif ($startval > $endval) {
+                // Is the range in order?
+                $voucherCodes[] = $end_match[0];
+
+                return $this->redirectAfterRequest(["rangeOrder" => $voucherCodes], $registration);
+            } else {
+                // Generate codes!
+                for ($val = $startval+1; $val <= $endval; $val++) {
+                    // Assemble code, add to voucherCodes[]
+                    // We appear to be producing codes that are "0" str_pad on the left, to variable characters
+                    // We'll use the $start's numeric length as the value to pad to.
+                    $voucherCodes[] = $start_match['shortcode'] . str_pad(
+                        $val,
+                        strlen($start_match['number']),
+                        "0",
+                        STR_PAD_LEFT
+                    );
+                }
+            }
+        };
+
+        return $this->redirectAfterRequest($bundle->addVouchers($voucherCodes), $registration);
+    }
+
+    /**
+     * Create OR replace a registrations current active bundle
      *
      * @param StoreUpdateBundleRequest $request
      * @param Registration $registration
@@ -73,21 +132,15 @@ class BundleController extends Controller
             : []; // Will result in the removal of the vouchers from the bundle.
 
         // sync vouchers.
-        $errors = $bundle->syncVouchers($voucherCodes);
-
-        if (!empty($errors)) {
-            $messages = $this->assembleMessages($errors);
-            // Spit the basic error messages back
-            return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
-                ->withInput()
-                ->with('error_message', ucfirst(join(', ', $messages) . '.'));
-        } else {
-            // Otherwise, sure, return to the new view.
-            return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
-                ->with('message', 'Vouchers updated.');
-        }
+        return $this->redirectAfterRequest($bundle->syncVouchers($voucherCodes), $registration);
     }
 
+    /**
+     * Removes a single voucher from a bundle
+     * @param Registration $registration
+     * @param Voucher $voucher
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function removeVoucherFromCurrentBundle(Registration $registration, Voucher $voucher)
     {
         /** @var Bundle $bundle */
@@ -95,54 +148,64 @@ class BundleController extends Controller
 
         // It is attached to our bundle, right?
         if ($voucher->bundle_id == $bundle->id) {
-            // Call alterVouchers with no codes, and no bundle to detransiton and remove it.
+            // Call alterVouchers with no codes to check, and no bundle to detransiton and remove it.
             $errors = $bundle->alterVouchers(collect([$voucher]), [], null);
         } else {
             // Error it out (how did you get here?
             $errors["foreign"] = [$voucher->code];
         }
 
-        if (!empty($errors)) {
-            $messages = $this->assembleMessages($errors);
-            // Spit the basic error messages back
-            return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
-                ->withInput()
-                ->with('error_message', join('. ', $messages) . '.');
-        } else {
-            // Otherwise, sure, return to the new view.
-            return redirect()->route('store.registration.voucher-manager', ['registration' => $registration->id])
-                ->with('message', 'Vouchers updated.');
-        }
+        return $this->redirectAfterRequest($errors, $registration);
     }
 
     /**
-     * Return messages based on errors
+     * Filters and prepares errors before returning to the voucher-manager
      *
      * @param $errors
-     * @return array
+     * @param $registration
+     * @return \Illuminate\Http\RedirectResponse
      */
-    private function assembleMessages($errors)
+    public function redirectAfterRequest($errors, $registration)
     {
-        $messages = [];
-        foreach ($errors as $type => $values) {
-            switch ($type) {
-                case "transaction":
-                    $messages[] = 'Database transaction problem with: ' . join(', ', $values);
-                    break;
-                case "transition":
-                    $messages[] = "Transition problem with: " . join(', ', $values);
-                    break;
-                case "codes":
-                    $messages[] = "Bad code problem with: " . join(', ', $values);
-                    break;
-                case "foreign":
-                    $messages[] = "Action denied on a foreign voucher: " . join(', ', $values);
-                    break;
-                default:
-                    $messages[] = 'There was an unknown error';
-                    break;
+        $route = route('store.registration.voucher-manager', ['registration' => $registration->id]);
+        if (!empty($errors)) {
+            // Assemble messages
+            $messages = [];
+            foreach ($errors as $type => $values) {
+                switch ($type) {
+                    case "transaction":
+                        if ($values) {
+                            $messages[] = 'Database transaction problem.';
+                        }
+                        break;
+                    case "transition":
+                        $messages[] = "Transition problem with: " . join(', ', $values);
+                        break;
+                    case "codes":
+                        $messages[] = "Bad code problem with: " . join(', ', $values);
+                        break;
+                    case "foreign":
+                        $messages[] = "Action denied on a foreign voucher: " . join(', ', $values);
+                        break;
+                    case "rangeOrder":
+                        $messages[] = "Start and End out of order: " . join(', ', $values);
+                        break;
+                    case "rangeShortcodeMismatchError":
+                        $messages[] = "Start and End are different Sponsors: " . join(', ', $values);
+                        break;
+                    default:
+                        $messages[] = 'There was an unknown error';
+                        break;
+                }
             }
+            // Spit the basic error messages back
+            return redirect($route)
+                ->withInput()
+                ->with('error_message', join(', ', $messages) . '.');
+        } else {
+            // Otherwise, sure, return to the new view.
+            return redirect($route)
+                ->with('message', 'Vouchers updated.');
         }
-        return $messages;
     }
 }
