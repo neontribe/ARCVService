@@ -52,7 +52,7 @@ class BundleController extends Controller
     }
 
     /**
-     * Does a single voucher.
+     * Does a single or multiple voucher.
      *
      * @param StoreAppendBundleRequest $request
      * @param Registration $registration
@@ -131,6 +131,12 @@ class BundleController extends Controller
         return $this->redirectAfterRequest($bundle->syncVouchers($voucherCodes), $registration);
     }
 
+    /**
+     * Removes a single voucher from a bundle
+     * @param Registration $registration
+     * @param Voucher $voucher
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function removeVoucherFromCurrentBundle(Registration $registration, Voucher $voucher)
     {
         /** @var Bundle $bundle */
@@ -148,6 +154,13 @@ class BundleController extends Controller
         return $this->redirectAfterRequest($errors, $registration);
     }
 
+    /**
+     * Filters and prepares errors before returning to the voucher-manager
+     *
+     * @param $errors
+     * @param $registration
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function redirectAfterRequest($errors, $registration)
     {
         $route = route('store.registration.voucher-manager', ['registration' => $registration->id]);
