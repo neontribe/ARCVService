@@ -111,26 +111,26 @@
                         <i class="fa fa-caret-down" aria-hidden="true"></i>
                     </span>
                     <div id="vouchers" class="collapsed">
-                        <table>
-                            <tr>
-                                <th>Voucher code</th>
-                                <th>Remove</th>
-                            </tr>
-                            @foreach( $vouchers as $voucher )
+                        <form action="" method="POST">
+                            {!! method_field('delete') !!}
+                            {!! csrf_field() !!}
+                            <table>
                                 <tr>
-                                    <td>{{ $voucher->code }}</td>
-                                    <td>
-                                        <form action="{{ URL::route('store.registration.voucher.delete', ['registration' => $registration->id, 'voucher' => $voucher->id]) }}" method="post">
-                                        {!! method_field('delete') !!}
-                                        {!! csrf_field() !!}
-                                            <button type="submit" class="remove-voucher" id="{{ $voucher->id }}">
+                                    <th>Voucher code</th>
+                                    <th>Remove</th>
+                                </tr>
+                                @foreach( $vouchers as $voucher )
+                                    <tr>
+                                        <td>{{ $voucher->code }}</td>
+                                        <td>
+                                            <button type="submit" formaction="{{ URL::route('store.registration.voucher.delete', ['registration' => $registration->id, 'voucher' => $voucher->id]) }}" id="{{ $voucher->id }}">
                                                 <i class="fa fa-minus" aria-hidden="true"></i>
                                             </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </table>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </table>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -215,11 +215,6 @@
                     $('#collected-on').datepicker({ dateFormat: 'dd-mm-yy' }).val();
 
                 $('#collected-on').valueAsDate = new Date();
-
-                // Submit delete form to remove voucher
-                $('.remove-voucher').click(function(e){
-                    $(e.target).closest('form').submit();
-                });
             }
         );
     </script>
