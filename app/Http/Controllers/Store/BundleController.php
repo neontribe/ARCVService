@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Store;
 
-use Log;
 use Auth;
 use App\Bundle;
 use App\Voucher;
@@ -103,7 +102,6 @@ class BundleController extends Controller
                         "0",
                         STR_PAD_LEFT
                     );
-                    Log::warning($voucherCodes);
                 }
             }
         };

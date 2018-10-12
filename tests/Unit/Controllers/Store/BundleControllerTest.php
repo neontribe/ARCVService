@@ -3,7 +3,6 @@
 
 namespace Tests\Unit\Controllers\Store;
 
-use Log;
 use Auth;
 use App\Registration;
 use App\Bundle;
@@ -139,7 +138,6 @@ class BundleControllerTest extends StoreTestCase
                     'end' => $this->testCodes[count($this->testCodes)-1]
                 ]
             );
-        Log::info(Session::get("error_message"));
 
         $this->followRedirects()
             ->seePageIs($route)

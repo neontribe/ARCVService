@@ -123,7 +123,6 @@ class Bundle extends Model
                     $voucher->setBundle($bundle);
                 } catch (SMException $e) {
                     // May occur if the transition system disagrees with the transition
-                    Log::info("voucher:" . $voucher->code);
                     $errors["transitions"][] = $voucher->code;
                     // don't rethrow!
                 }
