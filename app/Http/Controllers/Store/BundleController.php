@@ -28,6 +28,9 @@ class BundleController extends Controller
 
         // Grabs a copy of all carers
         $carers = $registration->family->carers->all();
+        $bundle = $registration->currentBundle()->vouchers;
+
+        $sorted_bundle = $bundle->sortBy('code');
 
         return view('store.manage_vouchers', array_merge(
             $data,
@@ -36,9 +39,10 @@ class BundleController extends Controller
                 "family" => $registration->family,
                 "children" => $registration->family->children,
                 "centre" => $registration->centre,
-                "bundles" => $registration->bundles(),
                 "carers" => $carers,
-                "pri_carer" => array_shift($carers)
+                "pri_carer" => array_shift($carers),
+                "vouchers" => $sorted_bundle,
+                "vouchers_amount" => count($bundle)
             ]
         ));
     }

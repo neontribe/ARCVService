@@ -749,14 +749,21 @@ and (max-device-width : 1024px)  {
 VOUCHER PAGES
 
 */
-.alongside-container {
-  display: flex;
+
+/* To deal with voucher overflow */
+.allocation {
+  display: table;
 }
 
 .allocation .alongside-container {
   align-items: flex-end;
   justify-content: space-between;
 }
+
+.alongside-container {
+  display: flex;
+}
+
 
 .alongside-container > div,
 .alongside-container > label {
