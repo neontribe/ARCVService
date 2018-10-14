@@ -48,6 +48,15 @@ class DatabaseSeeder extends Seeder
      */
     public function usabilitySeeds()
     {
+        $this->call(SponsorsSeeder::class);
         $this->call(UsabilityScenarioSeeder::class);
+
+        // Needed for voucher seeder
+        $this->call(MarketsSeeder::class);
+        $this->call(TradersSeeder::class);
+
+        $this->call(VouchersSeeder::class);
+        $this->call(VoucherStatesSeeder::class);
+        $this->call(BundleSeeder::class);
     }
 }
