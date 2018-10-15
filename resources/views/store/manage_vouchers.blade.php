@@ -176,7 +176,7 @@
                     </div>
                 </div>
                 <button class="short-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.index") }}'; return false;">Confirm pick up</button>
-                <button class="long-button">Allocate more vouchers</button>
+                <button class="long-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.voucher-manager", ['id' => $registration->id ]) }}'; return false;">Allocate more vouchers</button>
             </div>
         </div>
     </div>
