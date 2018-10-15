@@ -79,7 +79,7 @@
                     <img src="{{ asset('store/assets/allocation-light.svg') }}">
                     <h2>Allocate Vouchers</h2>
                 </div>
-                <form method="POST" action="{{ route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]) }}">
+                <form method="POST" action="{{ route('store.registration.vouchers.post', [ 'registration' => $registration->id ]) }}">
                 {!! csrf_field() !!}
                     <div class="alongside-container">
                         <label>First voucher
@@ -94,13 +94,13 @@
                     </div>
                 </form>
                 <p class="center">OR</p>
-                <form method="POST" action="{{ route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]) }}">
+                <form method="POST" action="{{ route('store.registration.vouchers.post', [ 'registration' => $registration->id ]) }}">
                 {!! csrf_field() !!}
                     <div class="single-container">
                         <label for="add-voucher-input">Add individual vouchers
                             <input id="add-voucher-input" name="start" type="text">
                         </label>
-                        <button class="add-button" type="submit>
+                        <button class="add-button" type="submit">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                         </button>
                     </div>
