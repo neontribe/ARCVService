@@ -7,7 +7,7 @@
     @include('store.partials.navbar', ['headerTitle' => 'Voucher Manager'])
 
     <div class="content">
-        <form>
+        <!-- <form> -->
             <div class="col">
                 <div>
                     <img src="{{ asset('store/assets/info-light.svg') }}">
@@ -111,7 +111,7 @@
                         <i class="fa fa-caret-down" aria-hidden="true"></i>
                     </span>
                     <div id="vouchers" class="collapsed">
-                        <form action="" method="POST">
+                        <form id="unbundle" name="unbundle" action="" method="POST">
                             {!! method_field('delete') !!}
                             {!! csrf_field() !!}
                             <table>
@@ -175,7 +175,7 @@
                 <button class="short-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.index") }}'; return false;">Confirm pick up</button>
                 <button class="long-button">Allocate more vouchers</button>
             </div>
-        </form>
+        <!-- </form> -->
     </div>
 
     @section('hoist-head')
