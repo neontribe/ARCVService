@@ -9,6 +9,7 @@ use App\Registration;
 use App\Http\Requests\StoreAppendBundleRequest;
 use App\Http\Requests\StoreUpdateBundleRequest;
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 
 class BundleController extends Controller
 {
@@ -33,10 +34,26 @@ class BundleController extends Controller
 
         $sorted_bundle = $bundle->sortBy('code');
 
+        // Find the last collected bundle.
+        $lastCollectedBundle = $registration->bundles()
+            ->whereNotNull('disbursed_at')
+            ->orderBy('id', 'desc')
+            ->limit(1)
+            ->first();
+        ;
+
+        // Turn it's disbursement date into a human date.
+        $lastCollection = ($lastCollectedBundle && (!empty($lastCollectedBundle->disbursed_at)))
+            // 'disbursed_at' is auto-carbon'd by the Bundle model
+            ? $lastCollectedBundle->disbursed_at->format('l jS \of F Y')
+            : null
+        ;
+
         return view('store.manage_vouchers', array_merge(
             $data,
             [
                 "registration" => $registration,
+                "lastCollection" => $lastCollection,
                 "family" => $registration->family,
                 "children" => $registration->family->children,
                 "centre" => $registration->centre,

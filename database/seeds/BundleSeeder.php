@@ -46,28 +46,18 @@ class BundleSeeder extends Seeder
         // Ask bundle to add these vouchers.
         $bundle->addVouchers($vs1->pluck('code')->toArray());
 
-        // "Collect" it last week, by hand as the methods don't really exist, yet
-        $bundle->disbursed_at = Carbon::now()->subDays(7);
+        // "Collect" it 14 days ago, by hand as the methods don't really exist, yet
+        $bundle->disbursed_at = Carbon::now()->subDays(14);
         $bundle->save();
 
         // Again, the current bundle, should be blank as we just saved one.
         /** @var App\Bundle $bundle2 */
-        $bundle2 = $registration->currentBundle();
-
-        /** @var \Illuminate\Support\Collection $vs2 */
-        $vs2 = factory('App\Voucher', 'requested', 3)
-            ->create()
-            ->each(function (\App\Voucher $v) {
-                $v->applyTransition('order');
-                $v->applyTransition('print');
-                $v->applyTransition('dispatch');
-            });
-
-        $bundle2->addVouchers($vs2->pluck('code')->toArray());
+        $registration->currentBundle();
     }
 
     /**
-     * This is horrible and there's a better way to mke seeds, imagine.
+     * This is a seeder specific version of this function (see children)
+     *
      * @param $quantity
      * @param App\Centre $centre
      * @return \Illuminate\Support\Collection
@@ -89,10 +79,10 @@ class BundleSeeder extends Seeder
             $family->lockToCentre($centre);
             $family->save();
             $family->carers()->saveMany(factory(App\Carer::class, random_int(1, 3))->make());
-            $family->children()->saveMany(factory(\App\Child::class, random_int(0, 4))->make());
+            $family->children()->save(factory(App\Child::class, 'underSchoolAge')->make());
 
             $registrations[] = App\Registration::create(
-                 [
+                [
                     'centre_id' => $centre->id,
                     'family_id' => $family->id,
                     'eligibility' => $eligibilities[mt_rand(0, count($eligibilities) - 1)],

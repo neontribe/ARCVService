@@ -48,7 +48,11 @@
                 </div>
                 <div>
                     <p>This family should collect {{ $family->entitlement }} vouchers per week</p>
-                    <p class="v-spaced">Their last collection was on Thursday 2nd August</p>
+                    @if (!empty($lastCollection))
+                        <p class="v-spaced">Their last collection was {{ $lastCollection }}</p>
+                    @else
+                        <p class="v-spaced">This family has not collected</p>
+                    @endif
                 </div>
                 <!-- HIDDEN FOR ALPHA 
                 <div class="center">
