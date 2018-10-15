@@ -80,7 +80,7 @@
                     <img src="{{ asset('store/assets/allocation-light.svg') }}">
                     <h2>Allocate Vouchers</h2>
                 </div>
-                <form method="POST" action="{{ route('store.registration.vouchers.post', [ 'registration' => $registration->id ]) }}">
+                <form method="post" action="{{ route('store.registration.vouchers.post', [ 'registration' => $registration->id ]) }}">
                 {!! csrf_field() !!}
                     <div class="alongside-container">
                         <label>First voucher
@@ -95,7 +95,7 @@
                     </div>
                 </form>
                 <p class="center">OR</p>
-                <form method="POST" action="{{ route('store.registration.vouchers.post', [ 'registration' => $registration->id ]) }}">
+                <form method="post" action="{{ route('store.registration.vouchers.post', [ 'registration' => $registration->id ]) }}">
                 {!! csrf_field() !!}
                     <div class="single-container">
                         <label for="add-voucher-input">Add individual vouchers
@@ -190,19 +190,15 @@
                     e.preventDefault();
                 });
 
-                var id = {!! json_encode($registration->id) !!};
                 var firstVoucher = $('#first-voucher');
                 var lastVoucher = $('#last-voucher');
 
                 // Handle first in range of vouchers
                 firstVoucher.keypress(function(e) {
                     if(e.keyCode==13){
-                        console.log(id);
                         var firstValue = firstVoucher.val();
                         if(firstValue !== ""){
                             lastVoucher.focus();
-                        } else {
-                            console.log("Error")
                         }
                         e.preventDefault();
                     }
@@ -220,19 +216,10 @@
 
                         var lastValue = lastVoucher.val();
                         if(firstValue !== "" && lastValue !== "") {
-                            console.log("Submit: " + firstValue + " " + lastValue); // POST
-                            firstVoucher.val('').focus();
-                            lastVoucher.val('');
-                        } else {
-                            console.log("Error")
+                            $('#range-add').trigger('click');
+                            e.preventDefault();
                         }
                     }
-                });
-
-                // Handle range submit button
-                $('range-add').click(function (e) {
-                    // TODO: POST start+end codes
-                    //e.preventDefault();
                 });
 
                 $('.clickable-span').click(function (e) {

@@ -213,3 +213,4 @@ class Bundle extends Model
         return $this->hasMany(Voucher::class);
     }
 }
+
