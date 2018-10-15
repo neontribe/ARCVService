@@ -10,15 +10,16 @@ use App\Centre;
 use App\CentreUser;
 use App\Voucher;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Tests\TestCase;
+use Session;
+use Tests\StoreTestCase;
 
-class BundleControllerTest extends TestCase
+class BundleControllerTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
     protected $centre;
     protected $centreUser;
-
+    protected $testCodes;
     /** @var Registration $registration */
     protected $registration;
     protected $bundle;
@@ -40,6 +41,137 @@ class BundleControllerTest extends TestCase
         $this->registration = factory(Registration::class)->create([
                 'centre_id' => $this->centre->id
         ]);
+
+        // Make some vouchers
+        $this->testCodes = [
+            'tst09999',
+            'tst10000',
+            'tst10001'
+        ];
+
+        Auth::login($this->centreUser);
+
+        foreach ($this->testCodes as $testCode) {
+            $voucher = factory(Voucher::class, 'requested')->create([
+                'code' => $testCode
+            ]);
+            $voucher->applyTransition('order');
+            $voucher->applyTransition('print');
+            $voucher->applyTransition('dispatch');
+        }
+
+        Auth::logout();
+    }
+
+    /** @test */
+    public function testICannotSubmitInvalidValuesToAppendVouchers()
+    {
+        $dataSets = [
+            // no data
+            [
+                "data" => [],
+                "outcome" => ["start" => "The start field is required."]
+            ],
+            // start is not present
+            [
+                "data" => ['end' => 'tst0123457'],
+                "outcome" => ["start" => "The start field is required."]
+            ],
+            // start is present but null
+            [
+                "data" => ["start" => '', 'end' => 'tst0123457'],
+                "outcome" => ["start" => "The start field is required."]
+            ],
+            // start is not a valid voucher code
+            [
+                "data" => ["start" => 'invalidVoucher', 'end' => 'tst0123457' ],
+                "outcome" => ["start" => "The selected start is invalid."]
+            ],
+            // end is not a valid voucher code
+            [
+                "data" => ["start" => 'tst0123455', 'end' => 'invalidCode' ],
+                "outcome" => ["end" => "The selected end is invalid."]
+            ]
+        ];
+
+        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
+        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
+
+        foreach ($dataSets as $set) {
+            $response = $this->actingAs($this->centreUser, 'store')
+                ->visit($route)
+                ->post(
+                    $post_route,
+                    $set["data"]
+                )
+            ;
+            // work out which field we're testing.
+            $field = array_keys($set['outcome'])[0];
+
+            // Dig out errors from Session
+            $response->seeInSession('errors');
+            $errors = Session::get("errors")->get($field);
+
+            // Check our specific message is present
+            $this->assertContains($set['outcome'][$field], $errors);
+
+            // we follow that to the correct page;
+            $this->followRedirects()
+                ->seePageIs($route)
+                ->assertResponseStatus(200)
+            ;
+        }
+    }
+
+    /** @test */
+    public function testICanAddManyVouchers()
+    {
+        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
+        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
+
+        // Add many vouchers;
+        $this->actingAs($this->centreUser, 'store')
+            ->post(
+                $post_route,
+                [
+                    'start' => $this->testCodes[0],
+                    'end' => $this->testCodes[count($this->testCodes)-1]
+                ]
+            );
+
+        $this->followRedirects()
+            ->seePageIs($route)
+            ->assertResponseStatus(200)
+        ;
+        /** @var Bundle $currentBundle */
+        // Get our currentBundle
+        $currentBundle = $this->registration->currentBundle();
+
+        // See that it's got many vouchers.
+        $this->assertEquals(count($this->testCodes), $currentBundle->vouchers()->count());
+    }
+
+    /** @test */
+    public function testICanAddSingleVouchers()
+    {
+        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
+        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
+
+        // Add a voucher;
+        $this->actingAs($this->centreUser, 'store')
+            ->post($post_route, ['start' => $this->testCodes[0]]);
+
+        $this->followRedirects()
+            ->seePageIs($route)
+            ->assertResponseStatus(200)
+        ;
+
+        /** @var Bundle $currentBundle */
+        // Get our currentBundle
+        $currentBundle = $this->registration->currentBundle();
+
+        // See that it's got one voucher.
+        $this->assertEquals(1, $currentBundle->vouchers()->count());
     }
 
     /** @test */
