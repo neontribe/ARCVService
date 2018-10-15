@@ -7,7 +7,7 @@
     @include('store.partials.navbar', ['headerTitle' => 'Voucher Manager'])
 
     <div class="content">
-        <form>
+        <div class="col-container">
             <div class="col">
                 <div>
                     <img src="{{ asset('store/assets/info-light.svg') }}">
@@ -15,7 +15,6 @@
                 </div>
                 <div class="alongside-container">
                     <div>
-
                         <h3>Main Carer:</h3>
                         <p>{{ $pri_carer->name }}</p>
                     </div>
@@ -81,29 +80,32 @@
                     <img src="{{ asset('store/assets/allocation-light.svg') }}">
                     <h2>Allocate Vouchers</h2>
                 </div>
-                <div class="alongside-container">
-                    <label>
-                        First voucher
-                        <input type="text">
-                    </label>
-                    <label>
-                        Last voucher
-                        <input id="last-voucher" type="text">
-                    </label>
-                    <button class="add-button">
-                        <i class="fa fa-plus" aria-hidden="true"></i>
-                    </button>
-                </div>
-                <p class="center">OR</p>
-                <div>
-                    <label for="add-voucher-input">Add individual vouchers</label>
-                    <div class="small-button-container">
-                        <input type="text" id="add-voucher-input">
-                        <button class="addButton">
+                <form method="post" action="{{ route('store.registration.vouchers.post', [ 'registration' => $registration->id ]) }}">
+                {!! csrf_field() !!}
+                    <div class="alongside-container">
+                        <label>First voucher
+                            <input id="first-voucher" name="start" type="text" autofocus>
+                        </label>
+                        <label>Last voucher
+                            <input id="last-voucher" name="end" type="text">
+                        </label>
+                        <button id="range-add" class="add-button" type="submit">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                         </button>
                     </div>
-                </div>
+                </form>
+                <p class="center">OR</p>
+                <form method="post" action="{{ route('store.registration.vouchers.post', [ 'registration' => $registration->id ]) }}">
+                {!! csrf_field() !!}
+                    <div class="single-container">
+                        <label for="add-voucher-input">Add individual vouchers
+                            <input id="add-voucher-input" name="start" type="text">
+                        </label>
+                        <button class="add-button" type="submit">
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </form>
                 <p class="center vh-spaced">You have added {{ $vouchers_amount }} vouchers</p>
                 <button id="collection-button" class="long-button">Go to voucher collection</button>
                 <div class="center">
@@ -172,7 +174,7 @@
                 <button class="short-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.index") }}'; return false;">Confirm pick up</button>
                 <button class="long-button">Allocate more vouchers</button>
             </div>
-        </form>
+        </div>
     </div>
 
     @section('hoist-head')
@@ -186,6 +188,38 @@
                     $('#collection').addClass('slide-in');
                     $('.allocation').addClass('fade-back');
                     e.preventDefault();
+                });
+
+                var firstVoucher = $('#first-voucher');
+                var lastVoucher = $('#last-voucher');
+
+                // Handle first in range of vouchers
+                firstVoucher.keypress(function(e) {
+                    if(e.keyCode==13){
+                        var firstValue = firstVoucher.val();
+                        if(firstValue !== ""){
+                            lastVoucher.focus();
+                        }
+                        e.preventDefault();
+                    }
+                });
+
+                // Handle last in range of vouchers
+                lastVoucher.keypress(function(e) {
+                    if(e.keyCode==13){
+                        var firstValue = firstVoucher.val();
+                        if(firstValue === "") {
+                            firstVoucher.focus();
+                            e.preventDefault();
+                            return
+                        }
+
+                        var lastValue = lastVoucher.val();
+                        if(firstValue !== "" && lastValue !== "") {
+                            $('#range-add').trigger('click');
+                            e.preventDefault();
+                        }
+                    }
                 });
 
                 $('.clickable-span').click(function (e) {

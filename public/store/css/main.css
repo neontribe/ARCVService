@@ -507,14 +507,25 @@ REGISTER PAGE
 	margin: 1rem;
 }
 
+.col > form .alongside-container,
+.col > form .single-container {
+	margin: 1rem;
+}
+
 .col td,
 .col .added {
 	font-size: 1rem;
 }
 
+.col-container {
+	display: flex;
+	width: 100%;
+	margin: 0;
+}
+
 .small-button-container {
 	display: flex;
-  justify-content: center;
+  	justify-content: center;
 }
 
 .small-button-container button {
@@ -597,7 +608,7 @@ EDIT PAGE
 
 .clickable-span {
 	cursor: pointer;
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 .collect #more-family-info {
@@ -745,7 +756,7 @@ VOUCHER PAGES
 }
 
 .allocation .alongside-container {
-	align-items: flex-end;
+  align-items: flex-end;
   justify-content: space-between;
 }
 
@@ -758,6 +769,16 @@ VOUCHER PAGES
 .alongside-container > label {
   width: 50%;
   margin-right: 2%;
+}
+
+.single-container {
+	align-items: flex-end;
+	display: flex;
+	width: 100%;
+}
+
+.single-container > label {
+	margin-right: 2%;
 }
 
 .short-button {
