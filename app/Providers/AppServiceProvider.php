@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use Log;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
@@ -34,12 +33,11 @@ class AppServiceProvider extends ServiceProvider
                 $parameters[0]
             );
 
-            // If it's actually a number-ish thing, not, say "invalidCode" or some-such
             if (!empty($otherVal)) {
                 $other = \App\Voucher::splitShortcodeNumeric($otherVal);
-                Log::info("boom" . $val["number"] . "|" . $other["number"]);
-
-                return intval($val["number"]) > intval($other["number"]);
+                if (is_numeric($val["number"]) && is_numeric($other["number"])) {
+                    return intval($val["number"]) > intval($other["number"]);
+                }
             }
             // Else "Nope"!
             return false;
@@ -50,9 +48,22 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Validator::extend('sameSponsor', function ($attribute, $value, $parameters, $validator) {
+            // Grab the regex matched array
             $val = \App\Voucher::splitShortcodeNumeric($value);
-            $other = \App\Voucher::splitShortcodeNumeric($parameters[0]);
-            return $val['shortcode'] === $other['shortcode'];
+
+            // Grab the content of the parameter we pass the rule in a roundabout fashion
+            $otherVal = array_get(
+                $validator->getData(),
+                $parameters[0]
+            );
+
+            if (!empty($otherVal)) {
+                $other = \App\Voucher::splitShortcodeNumeric($otherVal);
+                if (is_string($val["shortcode"]) && is_string($other["shortcode"])) {
+                    return $val['shortcode'] === $other['shortcode'];
+                }
+            }
+            return false;
         });
 
         Validator::replacer('sameSponsor', function ($message, $attribute, $rule, $parameters) {

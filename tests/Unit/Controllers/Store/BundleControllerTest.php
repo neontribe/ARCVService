@@ -3,7 +3,6 @@
 
 namespace Tests\Unit\Controllers\Store;
 
-use Log;
 use Auth;
 use App\Registration;
 use App\Bundle;
@@ -101,7 +100,7 @@ class BundleControllerTest extends StoreTestCase
             // end is not higher than start
             [
                 "data" => ["start" => 'tst10001', 'end' => 'tst09999' ],
-                "outcome" => ["end" => "The end field must be greater than the the start field."]
+                "outcome" => ["end" => "The end field must be greater than the start field."]
             ],
         ];
 
@@ -122,8 +121,6 @@ class BundleControllerTest extends StoreTestCase
             // Dig out errors from Session
             $response->seeInSession('errors');
             $errors = Session::get("errors")->get($field);
-
-            Log::info(print_r($errors));
 
             // Check our specific message is present
             $this->assertContains($set['outcome'][$field], $errors);
