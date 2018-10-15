@@ -50,6 +50,7 @@
                 <p>This family should collect {{ $family->entitlement }} vouchers per week</p>
                 <p class="v-spaced">Their last collection was on Thursday 2nd August</p>
             </div>
+            <!-- HIDDEN FOR ALPHA 
             <div class="center">
                 <span id="brief-toggle" class="show clickable-span">
                   brief collection history
@@ -72,6 +73,7 @@
                     </table>
                 </div>
             </div>
+            </div> -->
             <button class="long-button">Full collection history</button>
         </div>
         <div class="col allocation">

@@ -65,6 +65,7 @@ class VouchersSeeder extends Seeder
             // Progress to printed.
             $v->applyTransition('order');
             $v->applyTransition('print');
+            $v->applyTransition('dispatch');
         }
     }
 }

@@ -92,6 +92,13 @@ Route::group(['middleware' => 'auth:store'], function () {
     ->name('store.registration.voucher.delete')
     ->middleware('can:view,registration');
 
+    Route::post(
+        '/registrations/{registration}/vouchers',
+        'BundleController@addVouchersToCurrentBundle'
+    )
+    ->name('store.registration.vouchers.post')
+    ->middleware('can:view,registration');
+
 
     // Printables
 

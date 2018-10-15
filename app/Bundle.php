@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Auth;
 use DB;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -62,6 +63,40 @@ class Bundle extends Model
     ];
 
     /**
+     * Adds voucher codes to a bundle
+     * @param $voucherCodes
+     * @return array
+     */
+    public function addVouchers($voucherCodes)
+    {
+        $self = $this;
+        $errors = [];
+
+        // Get current Codes for vouchers on the bundle (if any)
+        $currentCodes = $this->vouchers
+            ->pluck('code')
+            ->toArray();
+
+        // Calculate vouchers to add, so we don't try to add already bundled vouchers.
+        $addBundleCodes = array_diff($voucherCodes, $currentCodes);
+
+        // Find vouchers models that match codes to add.
+        $addVouchers = Voucher::whereIn('code', $addBundleCodes)->get();
+
+        // Add the voucher models to a specific bundle (this one)
+        $addErrors = $this->alterVouchers($addVouchers, $addBundleCodes, $self);
+
+        // if it threw any errors, merge those with the array.
+        if (!empty($addErrors)) {
+            $errors = array_merge_recursive($addErrors, $errors);
+        }
+
+        // an empty errors array means all good.
+        return $errors;
+    }
+
+
+    /**
      * Refactored function that works out if we broke anything then adds vouchers.
      *
      * @param Collection $vouchers
@@ -72,27 +107,28 @@ class Bundle extends Model
     public function alterVouchers(Collection $vouchers, array $codes = [], Bundle $bundle = null)
     {
         $errors = [];
-        // codes that do not appear in the vouchers (if they're broken)
-        $badCodes = array_diff($codes, $vouchers->pluck("code")->toArray());
 
+        // codes may reference vouchers we can't find in the database
+        // TODO: move this check further out?
 
-        if (empty($badCodes)) {
-            // Run all these.
-            $vouchers->each(
-
-                function (Voucher $voucher) use ($bundle, $errors) {
-                    try {
-                        $voucher->setBundle($bundle);
-                    } catch (SMException $e) {
-                        $errors["transitions"][] = $voucher->code;
-                        // don't rethrow!
-                    }
-                }
-            );
-        } else {
-            // Stop! report the bad codes!
-            $errors["codes"] = $badCodes;
+        $missingCodes = array_diff($codes, $vouchers->pluck("code")->toArray());
+        if ($missingCodes) {
+            $errors["codes"] = $missingCodes;
         }
+
+        // try to Run the vouchers we know are in the DB
+        $vouchers->each(
+            function (Voucher $voucher) use ($bundle, $errors) {
+                try {
+                    $voucher->setBundle($bundle);
+                } catch (SMException $e) {
+                    // May occur if the transition system disagrees with the transition
+                    $errors["transitions"][] = $voucher->code;
+                    // don't rethrow!
+                }
+            }
+        );
+
         return $errors;
     }
 
@@ -104,6 +140,7 @@ class Bundle extends Model
      */
     public function syncVouchers(array $voucherCodes)
     {
+
         $self = $this;
         $errors = [];
 
@@ -123,21 +160,14 @@ class Bundle extends Model
 
                 // Sync them to a null bundle
                 $removeErrors = $this->alterVouchers($removeVouchers, $unBundleCodes, null);
+
                 if (!empty($removeErrors)) {
                     $errors = array_merge_recursive($removeErrors, $errors);
                 }
 
-                // Calculate vouchers to add
-                $enBundleCodes = array_diff($voucherCodes, $currentCodes);
+                // use addVouchers to Add any vouchers.
+                $errors = array_merge_recursive($this->addVouchers($voucherCodes), $errors);
 
-                // Find vouchers to Add.
-                $addVouchers = Voucher::whereIn('code', $enBundleCodes)->get();
-
-                // Sync them to a specific bundle
-                $addErrors = $this->alterVouchers($addVouchers, $enBundleCodes, $self);
-                if (!empty($addErrors)) {
-                    $errors = array_merge_recursive($addErrors, $errors);
-                }
                 // Whoops! errors happened.
                 if (!empty($errors)) {
                     throw new \Exception("Errors during transaction");

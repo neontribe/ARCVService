@@ -197,11 +197,11 @@
                     @endif
                 </div>
                 <div>
-                    <button class="long-button" onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
-                        Print a 4 week collection sheet for this family
-                    </button>
                     <button class="short-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.voucher-manager", ['id' => $registration->id ]) }}'; return false;">
                       Go to voucher manager
+                    </button>
+                    <button class="long-button" onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
+                        Print a 4 week collection sheet for this family
                     </button>
                 </div>
             </div>
