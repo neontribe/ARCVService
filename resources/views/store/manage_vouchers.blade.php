@@ -81,7 +81,7 @@
                     <h2>Allocate Vouchers</h2>
                 </div>
                 <form method="post" action="{{ route('store.registration.vouchers.post', [ 'registration' => $registration->id ]) }}">
-                {!! csrf_field() !!}
+                    {!! csrf_field() !!}
                     <div class="alongside-container">
                         <label>First voucher
                             <input id="first-voucher" name="start" type="text" autofocus>
@@ -114,22 +114,26 @@
                         <i class="fa fa-caret-down" aria-hidden="true"></i>
                     </span>
                     <div id="vouchers" class="collapsed">
-                        <table>
-                            <tr>
-                                <th>Voucher code</th>
-                                <th>Remove</th>
-                            </tr>
-                            @foreach( $vouchers as $voucher )
+                        <form id="unbundle" name="unbundle" action="" method="POST">
+                            {!! method_field('delete') !!}
+                            {!! csrf_field() !!}
+                            <table>
                                 <tr>
-                                    <td>{{ $voucher->code }}</td>
-                                    <td><button id="{{ $voucher->id }}"><i class="fa fa-minus" aria-hidden="true"></i></button></td>
+                                    <th>Voucher code</th>
+                                    <th>Remove</th>
                                 </tr>
-                                <tr>
-                                    <td>{{ $voucher->code }}</td>
-                                    <td><button id="{{ $voucher->id }}"><i class="fa fa-minus" aria-hidden="true"></i></button></td>
-                                </tr>
-                            @endforeach
-                        </table>
+                                @foreach( $vouchers as $voucher )
+                                    <tr>
+                                        <td>{{ $voucher->code }}</td>
+                                        <td>
+                                            <button type="submit" formaction="{{ URL::route('store.registration.voucher.delete', ['registration' => $registration->id, 'voucher' => $voucher->id]) }}" id="{{ $voucher->id }}">
+                                                <i class="fa fa-minus" aria-hidden="true"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </table>
+                        </form>
                     </div>
                 </div>
             </div>
