@@ -23,23 +23,26 @@ class AppServiceProvider extends ServiceProvider
         // Recommended at https://laravel-news.com/laravel-5-4-key-too-long-error/
         Schema::defaultStringLength(191);
 
-        //Custom ARC form valdiation rules
+        //Custom ARC form valdiation rules - Incidentally, Laravel 5.5 has a much better system than this...
         Validator::extend('codeGreaterThan', function ($attribute, $value, $parameters, $validator) {
+            // Grab the regex matched array
             $val = \App\Voucher::splitShortcodeNumeric($value);
 
+            // Grab the content of the parameter we pass the rule in a roundabout fashion
             $otherVal = array_get(
                 $validator->getData(),
                 $parameters[0]
             );
 
+            // If it's actually a number-ish thing, not, say "invalidCode" or some-such
             if (!empty($otherVal)) {
                 $other = \App\Voucher::splitShortcodeNumeric($otherVal);
-                Log::info("boom" . $val["number"] . "|" . $other("number"));
+                Log::info("boom" . $val["number"] . "|" . $other["number"]);
+
                 return intval($val["number"]) > intval($other["number"]);
-            } else {
-                Log::info("boom");
-                return false;
             }
+            // Else "Nope"!
+            return false;
         });
 
         Validator::replacer('codeGreaterThan', function ($message, $attribute, $rule, $parameters) {
