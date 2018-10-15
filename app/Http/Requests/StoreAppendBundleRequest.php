@@ -31,8 +31,8 @@ class StoreAppendBundleRequest extends FormRequest
         $rules = [
             // MUST be present, not null and string
             'start' => 'required|string|exists:vouchers,code',
-            // MAY be present, nullable and string
-            'end' => 'nullable|string|exists:vouchers,code',
+            // MAY be present, nullable, string, code exists, is GT start and same sponsor as start
+            'end' => 'nullable|string|exists:vouchers,code|codeGreaterThan:start|sameSponsor:start',
         ];
 
         return $rules;

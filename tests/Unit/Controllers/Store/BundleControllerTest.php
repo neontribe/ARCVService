@@ -74,24 +74,34 @@ class BundleControllerTest extends StoreTestCase
             ],
             // start is not present
             [
-                "data" => ['end' => 'tst0123457'],
+                "data" => ['end' => 'tst10001'],
                 "outcome" => ["start" => "The start field is required."]
             ],
             // start is present but null
             [
-                "data" => ["start" => '', 'end' => 'tst0123457'],
+                "data" => ["start" => '', 'end' => 'tst10001'],
                 "outcome" => ["start" => "The start field is required."]
             ],
             // start is not a valid voucher code
             [
-                "data" => ["start" => 'invalidVoucher', 'end' => 'tst0123457' ],
+                "data" => ["start" => 'invalidVoucher', 'end' => 'tst10001' ],
                 "outcome" => ["start" => "The selected start is invalid."]
             ],
             // end is not a valid voucher code
             [
-                "data" => ["start" => 'tst0123455', 'end' => 'invalidCode' ],
+                "data" => ["start" => 'tst09999', 'end' => 'invalidCode' ],
                 "outcome" => ["end" => "The selected end is invalid."]
-            ]
+            ],
+            // end is not the same shortcode as start
+            [
+                "data" => ["start" => 'tst09999', 'end' => 'txt10000' ],
+                "outcome" => ["end" => "The end field must be the same sponsor as the start field."]
+            ],
+            // end is not higher than start
+            [
+                "data" => ["start" => 'tst10001', 'end' => 'tst09999' ],
+                "outcome" => ["end" => "The end field must be greater than the start field."]
+            ],
         ];
 
         $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);

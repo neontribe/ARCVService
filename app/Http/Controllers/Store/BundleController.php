@@ -83,30 +83,17 @@ class BundleController extends Controller
             $startval = intval($start_match['number']);
             $endval = intval($end_match['number']);
 
-            // Check for some error conditions before we generate
-            if ($start_match['shortcode'] !== $end_match['shortcode']) {
-                // Is the range all one shortcode?
-                $voucherCodes[] = $end_match[0];
-
-                return $this->redirectAfterRequest(["rangeShortcodeMismatch" => $voucherCodes], $registration);
-            } elseif ($startval > $endval) {
-                // Is the range in order?
-                $voucherCodes[] = $end_match[0];
-
-                return $this->redirectAfterRequest(["rangeOrder" => $voucherCodes], $registration);
-            } else {
-                // Generate codes!
-                for ($val = $startval+1; $val <= $endval; $val++) {
-                    // Assemble code, add to voucherCodes[]
-                    // We appear to be producing codes that are "0" str_pad on the left, to variable characters
-                    // We'll use the $start's numeric length as the value to pad to.
-                    $voucherCodes[] = $start_match['shortcode'] . str_pad(
-                        $val,
-                        strlen($start_match['number']),
-                        "0",
-                        STR_PAD_LEFT
-                    );
-                }
+            // Generate codes!
+            for ($val = $startval+1; $val <= $endval; $val++) {
+                // Assemble code, add to voucherCodes[]
+                // We appear to be producing codes that are "0" str_pad on the left, to variable characters
+                // We'll use the $start's numeric length as the value to pad to.
+                $voucherCodes[] = $start_match['shortcode'] . str_pad(
+                    $val,
+                    strlen($start_match['number']),
+                    "0",
+                    STR_PAD_LEFT
+                );
             }
         };
 
@@ -186,12 +173,6 @@ class BundleController extends Controller
                         break;
                     case "foreign":
                         $messages[] = "Action denied on a foreign voucher: " . join(', ', $values);
-                        break;
-                    case "rangeOrder":
-                        $messages[] = "Start and End out of order: " . join(', ', $values);
-                        break;
-                    case "rangeShortcodeMismatchError":
-                        $messages[] = "Start and End are different Sponsors: " . join(', ', $values);
                         break;
                     default:
                         $messages[] = 'There was an unknown error';
