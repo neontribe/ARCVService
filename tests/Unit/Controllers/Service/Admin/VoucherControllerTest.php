@@ -24,6 +24,10 @@ class VoucherControllerTest extends TestCase
     }
 
     public function testStoreBatchWithoutStartEndSponsor() {
+        echo "\n";
+        echo route('admin.vouchers.storebatch');
+        echo "\n";
+
         $this->actingAs($this->admin_user, 'admin')
             ->post(route('admin.vouchers.storebatch'), [
                 'sponsor_id' => '',

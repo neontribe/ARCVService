@@ -29,24 +29,43 @@ COPY .docker/vimrc /root/.vimrc
 COPY .docker/php.ini /usr/local/etc/php/php.ini
 RUN echo "127.0.1.1	arc.test arcv-service.test arcv-store.test" >> /etc/hosts
 
-ENV APP_NAME docker
-ENV APP_ENV local
 ENV APP_DEBUG true
+ENV APP_ENV local
 ENV APP_LOG_LEVEL debug
-ENV APP_URL http //0.0.0.0 80
-ENV APP_SEEDS Usability
+ENV APP_NAME docker
+ENV APP_SEEDS 'Dev'
+ENV APP_TIMEZONE Europe/London
+ENV APP_URL http://0.0.0.0 80
+ENV APP_VER 1.3.0
+
+ENV ARC_MARKET_URL https://voucher-staging.alexandrarose.org.uk
 ENV ARC_SCHOOL_MONTH 9
+ENV ARC_SERVICE_DOMAIN arcv-service.test
+ENV ARC_STORE_DOMAIN arcv-store.test
+
 ENV BROADCAST_DRIVER log
 ENV CACHE_DRIVER file
-ENV SESSION_DRIVER file
 ENV QUEUE_DRIVER sync
-ENV SESSION_SECURE_COOKIE true
+ENV SESSION_DRIVER file
+
+# Set this to true for production envs
+ENV SESSION_SECURE_COOKIE false
+
 ENV MAIL_DRIVER log
-ENV MAIL_HOST smtp.mailtrap.io
-ENV MAIL_PORT 2525
-ENV MAIL_USERNAME null
-ENV MAIL_PASSWORD null
 ENV MAIL_ENCRYPTION null
+ENV MAIL_FROM_ADDRESS from@example.com
+ENV MAIL_FROM_NAME 'Mailer Name'
+ENV MAIL_HOST smtp.mailtrap.io
+ENV MAIL_PASSWORD null
+ENV MAIL_PORT 2525
+ENV MAIL_TO_ADMIN_ADDRESS to@example.com
+ENV MAIL_TO_ADMIN_NAME 'Admin Name'
+ENV MAIL_TO_DEVELOPER_NAME 'User Support'
+ENV MAIL_TO_DEVELOPER_TEAM arc@neontribe.co.uk
+ENV MAIL_USERNAME null
+
+ENV PASSWORD_CLIENT 1
+ENV PASSWORD_CLIENT_SECRET secret
 
 WORKDIR /var/www/html
 ENTRYPOINT /startup.sh

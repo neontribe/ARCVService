@@ -10,15 +10,20 @@ COL_MAGENTA=$ESC_SEQ"35;01m"
 COL_CYAN=$ESC_SEQ"36;01m"
 
 cat <<EOF > .env
-APP_NAME=${APP_NAME}
+APP_DEBUG=${APP_DEBUG}
 APP_ENV=${APP_ENV}
 APP_KEY=base64:5/euYB2rELcumOH7lKf8aOd4aOb5GAO6J/I1ykDDIPk=
-APP_DEBUG=${APP_DEBUG}
 APP_LOG_LEVEL=${APP_LOG_LEVEL}
-APP_URL=${APP_URL}
+APP_NAME=${APP_NAME}
 APP_SEEDS=${APP_SEEDS}
+APP_TIMEZONE=${APP_TIMEZONE}
+APP_URL=${APP_URL}
+APP_VER=${APP_VER}
 
+ARC_MARKET_URL=${ARC_MARKET_URL}
 ARC_SCHOOL_MONTH=${ARC_SCHOOL_MONTH}
+ARC_SERVICE_DOMAIN=${ARC_SERVICE_DOMAIN}
+ARC_STORE_DOMAIN=${ARC_STORE_DOMAIN}
 
 DB_CONNECTION=mysql
 DB_HOST=db
@@ -31,6 +36,8 @@ BROADCAST_DRIVER=${BROADCAST_DRIVER}
 CACHE_DRIVER=${CACHE_DRIVER}
 SESSION_DRIVER=${SESSION_DRIVER}
 QUEUE_DRIVER=${QUEUE_DRIVER}
+
+# Set this to true for production envs
 SESSION_SECURE_COOKIE=${SESSION_SECURE_COOKIE}
 
 MAIL_DRIVER=${MAIL_DRIVER}
@@ -39,6 +46,15 @@ MAIL_PORT=${MAIL_PORT}
 MAIL_USERNAME=${MAIL_USERNAME}
 MAIL_PASSWORD=${MAIL_PASSWORD}
 MAIL_ENCRYPTION=${MAIL_ENCRYPTION}
+MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
+MAIL_FROM_NAME='${MAIL_FROM_NAME}'
+MAIL_TO_ADMIN_ADDRESS=${MAIL_TO_ADMIN_ADDRESS}
+MAIL_TO_ADMIN_NAME='${MAIL_TO_ADMIN_NAME}'
+MAIL_TO_DEVELOPER_TEAM=${MAIL_TO_DEVELOPER_TEAM}
+MAIL_TO_DEVELOPER_NAME='${MAIL_TO_DEVELOPER_NAME}'
+
+PASSWORD_CLIENT=${PASSWORD_CLIENT}
+PASSWORD_CLIENT_SECRET=${PASSWORD_CLIENT_SECRET}
 EOF
 
 set +e
@@ -57,10 +73,6 @@ if [ "$DB_READY" != 0 ]; then
     echo -e "░▀█▀░█▀█░█▀▀░▀█▀░█▀█░█░░░█░░░░░█▀▀░█▀█░█▄█░█▀█░█░░░█▀▀░▀█▀░█▀▀\n░░█░░█░█░▀▀█░░█░░█▀█░█░░░█░░░░░█░░░█░█░█░█░█▀▀░█░░░█▀▀░░█░░█▀▀\n░▀▀▀░▀░▀░▀▀▀░░▀░░▀░▀░▀▀▀░▀▀▀░░░▀▀▀░▀▀▀░▀░▀░▀░░░▀▀▀░▀▀▀░░▀░░▀▀▀\n"
 fi
 
-find storage -type d -exec chmod 775 {} +
-find storage -type f -exec chown 664 {} +
-chown -R www-data:www-data storage
-
 echo -e "░█▀▄░█▀▀░█▀█░█▀▄░█░█\n░█▀▄░█▀▀░█▀█░█░█░░█░\n░▀░▀░▀▀▀░▀░▀░▀▀░░░▀░"
-
-apachectl -D FOREGROUND
+# apachectl -D FOREGROUND
+php artisan serve --host=0.0.0.0

@@ -22,6 +22,7 @@ services:
         build:
             context: .
             dockerfile: .docker/Dockerfile
+        user: ${CURRENT_UID}
         ports:
             - "8001:80"
             - "8000:8000"
