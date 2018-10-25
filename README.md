@@ -73,7 +73,7 @@ GU9 7PT
 # Licensing and use of Third Party Applications
 These are the languages and packages used to create ARCV Service and where available the licences associated with them.
 
-ARCV Service 1.2
+ARCV Service 1.4
 
 Programming Language - PHP\
 Framework - Laravel https://github.com/laravel/laravel \
