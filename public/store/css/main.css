@@ -278,6 +278,10 @@ input[type="text"].invalid,
 	height: 80%;
 }
 
+.content > form {
+	height: 100%;
+}
+
 /*
 
 SUBNAV
@@ -593,13 +597,6 @@ EDIT PAGE
 
 */
 
-.check .col {
-	min-height: 66vh;
-	height: 100%;
-	margin-bottom: 80px;
-	padding-bottom: 10px;
-}
-
 .collect {
 	background-color: #dff2ce;
 }
@@ -610,7 +607,7 @@ EDIT PAGE
 
 .clickable-span {
 	cursor: pointer;
-    text-decoration: underline;
+	text-decoration: underline;
 }
 
 .collect #more-family-info {
