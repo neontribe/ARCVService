@@ -39,7 +39,7 @@
                 <button class="short-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.edit", ['id' => $registration->id ]) }}'; return false;">
                   Go to edit family
                 </button>
-                <button class="long-button">Find another family</button>
+                <button class="long-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.index") }}'; return false;">Find another family</button>
             </div>
             <div class="col">
                 <div>
@@ -54,7 +54,7 @@
                         <p class="v-spaced">This family has not collected</p>
                     @endif
                 </div>
-                <!-- HIDDEN FOR ALPHA 
+                <!-- HIDDEN FOR ALPHA
                 <div class="center">
                     <span id="brief-toggle" class="show clickable-span">
                       brief collection history
