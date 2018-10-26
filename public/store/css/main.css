@@ -275,7 +275,7 @@ input[type="text"].invalid,
 .content {
 	background-color: #f9f9f9;
 	overflow: auto;
-  height: 80%;
+	height: 80%;
 }
 
 /*
@@ -476,7 +476,7 @@ REGISTER PAGE
 	background: #EEEEEE;
 	margin: 1rem;
 	min-width: 25%;
-  overflow: auto;
+	overflow: auto;
 }
 
 .col > div:first-child {
@@ -521,13 +521,13 @@ REGISTER PAGE
 .col-container {
 	display: flex;
 	width: 100%;
-  height: 100%;
+	height: 100%;
 	margin: 0;
 }
 
 .small-button-container {
 	display: flex;
-  	justify-content: center;
+	justify-content: center;
 }
 
 .small-button-container button {
