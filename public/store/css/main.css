@@ -275,6 +275,11 @@ input[type="text"].invalid,
 .content {
 	background-color: #f9f9f9;
 	overflow: auto;
+	height: 80%;
+}
+
+.content > form {
+	height: 100%;
 }
 
 /*
@@ -472,10 +477,10 @@ REGISTER PAGE
 
 .col {
 	width: 100%;
-	height: 75.8vh;
 	background: #EEEEEE;
 	margin: 1rem;
 	min-width: 25%;
+	overflow: auto;
 }
 
 .col > div:first-child {
@@ -520,12 +525,13 @@ REGISTER PAGE
 .col-container {
 	display: flex;
 	width: 100%;
+	height: 100%;
 	margin: 0;
 }
 
 .small-button-container {
 	display: flex;
-  	justify-content: center;
+	justify-content: center;
 }
 
 .small-button-container button {
@@ -591,13 +597,6 @@ EDIT PAGE
 
 */
 
-.check .col {
-	min-height: 66vh;
-	height: 100%;
-	margin-bottom: 80px;
-	padding-bottom: 10px;
-}
-
 .collect {
 	background-color: #dff2ce;
 }
@@ -608,7 +607,7 @@ EDIT PAGE
 
 .clickable-span {
 	cursor: pointer;
-    text-decoration: underline;
+	text-decoration: underline;
 }
 
 #more-family-info {
@@ -755,11 +754,6 @@ and (max-device-width : 1024px)  {
 VOUCHER PAGES
 
 */
-
-/* To deal with voucher overflow */
-.allocation {
-  display: table;
-}
 
 .allocation .alongside-container {
   align-items: flex-end;
