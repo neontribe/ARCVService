@@ -611,8 +611,14 @@ EDIT PAGE
     text-decoration: underline;
 }
 
-.collect #more-family-info {
+#more-family-info {
 	list-style-type: none;
+}
+
+#more-family-info > ul {
+	list-style-type: none;
+	font-size: 0.8rem;
+	padding-left: 1.5rem;
 }
 
 .leaving {
