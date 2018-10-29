@@ -113,7 +113,7 @@
                 <p class="center vh-spaced">You have added {{ $vouchers_amount }} vouchers</p>
                 <button id="collection-button" class="long-button">Go to voucher collection</button>
                 <div class="center">
-                    <span class="clickable-span view">
+                    <span class="clickable-span view" tabindex="0">
                         <i class="fa fa-list" aria-hidden="true"></i>
                     </span>
                     <div id="vouchers" class="collapsed">
@@ -230,7 +230,7 @@
                 });
 
                 $('.clickable-span').click(function (e) {
-                    // the next sibling is the content
+                    // The next sibling is the content
                     var content = $(this).next();
 
                     if($(this).hasClass('view')) {
@@ -241,6 +241,13 @@
                         content.addClass('collapsed');
                     }
                 });
+
+                // On enter keydown, run click functionality above (for a11y tabbing)
+                $('.clickable-span').keypress(function(e){
+                  if(e.which == 13) {
+                    $('.clickable-span').click();
+                  }
+                })
 
                 // Browser backup for lack of datepicker support eg. Safari
                 // Reset back to English date format

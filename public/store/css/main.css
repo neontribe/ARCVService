@@ -765,7 +765,9 @@ VOUCHER PAGES
   font-size: 1.15rem;
 }
 
-.allocation .clickable-span:hover {
+.allocation .clickable-span:hover,
+.allocation .clickable-span:focus
+ {
   text-decoration: underline;
   color: #8B417B
 }
