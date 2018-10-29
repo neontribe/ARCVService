@@ -47,11 +47,19 @@
                     <h2>Collection History</h2>
                 </div>
                 <div>
-                    <p>This family should collect {{ $family->entitlement }} vouchers per week</p>
+                    <div class="emphasised-section">
+                        <p>This family should collect:</p>
+                        <p><b>{{ $family->entitlement }} vouchers per week</b></p>
+                    </div>
                     @if (!empty($lastCollection))
-                        <p class="v-spaced">Their last collection was {{ $lastCollection }}</p>
+                        <div class="emphasised-section">
+                            <p>Their last collection was:</p>
+                            <p><b>{{ $lastCollection }}</b></p>
+                        </div>
                     @else
-                        <p class="v-spaced">This family has not collected</p>
+                        <div class="emphasised-section">
+                            <p class="v-spaced">This family has not collected</p>
+                        </div>
                     @endif
                 </div>
                 <!-- HIDDEN FOR ALPHA

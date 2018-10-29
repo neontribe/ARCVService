@@ -26,6 +26,10 @@ h3 {
   margin-top: 0;
 }
 
+b {
+	font-weight: bold;
+}
+
 ul {
 	margin: 0;
 	text-align: left;
@@ -764,7 +768,6 @@ VOUCHER PAGES
   display: flex;
 }
 
-
 .alongside-container > div,
 .alongside-container > label {
   width: 50%;
@@ -805,6 +808,11 @@ VOUCHER PAGES
 
 .vh-spaced {
   margin: 2rem 1rem;
+}
+
+.emphasised-section {
+	font-size: 1.15rem;
+	margin-bottom: 2rem;
 }
 
 .slide-in {
