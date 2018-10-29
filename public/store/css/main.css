@@ -512,8 +512,7 @@ REGISTER PAGE
 	margin: 1rem;
 }
 
-.col td,
-.col .added {
+.col td {
 	font-size: 1rem;
 }
 
@@ -757,13 +756,23 @@ VOUCHER PAGES
 
 .allocation .alongside-container {
   align-items: flex-end;
+  display: flex;
   justify-content: space-between;
 }
 
-.alongside-container {
-  display: flex;
+.allocation .clickable-span {
+  text-decoration: none;
+  font-size: 1.15rem;
 }
 
+.allocation .clickable-span:hover {
+  text-decoration: underline;
+  color: #8B417B
+}
+
+.allocation .clickable-span i {
+  padding-right: 5px;
+}
 
 .alongside-container > div,
 .alongside-container > label {
@@ -851,18 +860,12 @@ VOUCHER PAGES
   font-family: Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-.hide > i {
-  -webkit-transform: rotate(180deg);
-  -moz-transform: rotate(180deg);
-  transform: rotate(180deg);
+.view:after {
+  content: 'View vouchers added';
 }
 
-.show:before {
-  content: 'Show';
-}
-
-.hide:before {
-  content: 'Hide';
+.hide:after {
+  content: 'Hide vouchers added';
 }
 
 @keyframes slidein {
