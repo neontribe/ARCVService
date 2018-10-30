@@ -8,11 +8,13 @@ use App\Registration;
 
 class HistoryController extends Controller
 {
-    /**
-     * Index the registration's history
-     */
     public function show(Registration $registration)
     {
-        return view('store.collection_history', ['registration' => $registration]);
+        $pri_carer = $registration->family->carers->all();
+
+        return view('store.collection_history', [
+            'registration' => $registration,
+            'pri_carer' => array_shift($pri_carer)
+        ]);
     }
 }
