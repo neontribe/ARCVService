@@ -239,4 +239,20 @@ class BundleControllerTest extends StoreTestCase
         // Assert voucher is back to dispatched
         $this->assertEquals('dispatched', $voucher->currentstate);
     }
+
+    /** @test */
+    public function testICanSyncAnArrayOfVouchers()
+    {
+        $put_route = route('store.registration.vouchers.put', ['registration' => $this->registration->id]);
+
+        // Add a set;
+        $this->actingAs($this->centreUser, 'store')
+            ->put($put_route, ['vouchers' => $this->testCodes]);
+
+        // re-sync with one missing, there is one less.
+
+        // sync without a voucher array AT ALL does nothing.
+
+        // sync with only a single empty voucher string erases the vouchers.
+    }
 }

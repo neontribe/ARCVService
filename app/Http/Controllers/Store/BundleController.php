@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Store;
 
+use Log;
 use Auth;
 use App\Bundle;
 use App\Voucher;
@@ -126,17 +127,40 @@ class BundleController extends Controller
      */
     public function update(StoreUpdateBundleRequest $request, Registration $registration)
     {
-        // find our bundle.
+
+        $inputs = $request->only([
+            "collected_at",
+            "collected_by",
+            "collected_on"
+        ]);
+
+        // refactored to NOT alter vouchers IF we don't mention them in form input.
+        if ($request->exists('vouchers')) {
+            $inputs['vouchers'] = $request->input('vouchers');
+        }
+
         /** @var \App\Bundle $bundle */
         $bundle = $registration->currentBundle();
 
-        // clean the incoming data
-        $voucherCodes = (!empty($request->get('vouchers')))
-            ? Voucher::cleanCodes((array)$request->get('vouchers'))
-            : []; // Will result in the removal of the vouchers from the bundle.
+        // Are we updating vouchers?
+        if (array_key_exists('vouchers', $inputs)) {
+            // remove null values because sync will erase them anyway.
+            $voucherCodes = array_filter(
+                $inputs['vouchers'],
+                function ($value) {
+                    return $value !== '';
+                }
+            );
 
-        // sync vouchers.
-        return $this->redirectAfterRequest($bundle->syncVouchers($voucherCodes), $registration);
+            $voucherCodes = (!empty($voucherCodes))
+                ? Voucher::cleanCodes(($voucherCodes))
+                : $voucherCodes; // Will result in the removal of the vouchers from the bundle.
+
+            // sync vouchers.
+            return $this->redirectAfterRequest($bundle->syncVouchers($voucherCodes), $registration);
+        }
+
+        // disbursing bundle code to go here.
     }
 
     /**
