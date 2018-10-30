@@ -171,7 +171,7 @@ class BundleController extends Controller
      */
     public function redirectAfterRequest($errors, $registration)
     {
-        $route = route('store.registration.voucher-manager', ['registration' => $registration->id]);
+        $route = route('store.registration.voucher-manager', ['registration' => $registration]);
         if (!empty($errors)) {
             // Assemble messages
             $messages = [];
