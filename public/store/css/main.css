@@ -915,3 +915,18 @@ VOUCHER PAGES
 	margin-left: 1rem;
 	min-width: 120px;
 }
+
+.link-button-large {
+	display: block;
+	margin: 1rem auto;
+	width: calc(100% - 2rem);
+}
+
+.disabled {
+	background-color: #AEAEAE;
+}
+
+.disabled:hover {
+	cursor: not-allowed;
+	text-decoration: none;
+}

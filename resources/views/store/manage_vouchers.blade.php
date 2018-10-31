@@ -36,10 +36,16 @@
                     </p>
                     @endforeach
                 </div>
-                <button class="short-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.edit", ['id' => $registration->id ]) }}'; return false;">
-                  Go to edit family
-                </button>
-                <button class="long-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.index") }}'; return false;">Find another family</button>
+                <a href="{{ route("store.registration.edit", ['id' => $registration->id ]) }}" class="link">
+                    <div class="link-button link-button-large">
+                        <i class="fa fa-pencil" aria-hidden="true"></i>Go to edit family
+                    </div>
+                </a>
+                <a href="{{ route("store.registration.index") }}" class="link">
+                    <div class="link-button link-button-large">
+                        <i class="fa fa-search" aria-hidden="true"></i>Find another family
+                    </div>
+                </a>
             </div>
             <div class="col">
                 <div>
