@@ -139,13 +139,13 @@ class BundleControllerTest extends StoreTestCase
         $dataSets = [
             [
                 "data" => [
-                    "collected_at" => "1", "collected_on" => "21-07-2001"
+                    "collected_at" => "1", "collected_on" => "2018-07-21"
                 ],
                 "outcome" => [ "collected_by" => "The collected by field is required when collected at / collected on is present."],
             ],
             [
                 "data" => [
-                    "collected_by" => "1", "collected_on" => "21-07-2001"
+                    "collected_by" => "1", "collected_on" => "2018-07-21"
                 ],
                 "outcome" => [ "collected_at" => "The collected at field is required when collected on / collected by is present."],
             ],
@@ -159,17 +159,17 @@ class BundleControllerTest extends StoreTestCase
                 "data" => [
                     "collected_at" => "1", "collected_on" => "invalid", "collected_by" => "1"
                 ],
-                "outcome" => [ "collected_on" => "The collected on does not match the format d-m-Y."],
+                "outcome" => [ "collected_on" => "The collected on does not match the format Y-m-d."],
             ],
             [
                 "data" => [
-                    "collected_at" => "9999", "collected_on" => "21-07-2001", "collected_by" => "1"
+                    "collected_at" => "9999", "collected_on" => "2018-07-21", "collected_by" => "1"
                 ],
                 "outcome" => [ "collected_at" => "The selected collected at is invalid."],
             ],
             [
                 "data" => [
-                    "collected_at" => "1", "collected_on" => "21-07-2001", "collected_by" => "9999"
+                    "collected_at" => "1", "collected_on" => "2018-07-21", "collected_by" => "9999"
                 ],
                 "outcome" => [ "collected_by" => "The selected collected by is invalid."],
             ],
