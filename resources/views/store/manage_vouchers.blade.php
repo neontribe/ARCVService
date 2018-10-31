@@ -157,38 +157,51 @@
                 <div>
                     <p>There are {{ $vouchers_amount }} vouchers waiting for the family</p>
                 </div>
-                <div class="pick-up vh-spaced">
-                    <div>
-                        <i class="fa fa-user"></i>
+                <form method="post"
+                      action="{{ route('store.registration.vouchers.put', [ 'registration' => $registration->id ]) }}">
+                    {!! method_field('put') !!}
+                    {!! csrf_field() !!}
+                    <div class="pick-up vh-spaced">
                         <div>
-                            <label for="collected-by">Collected by:</label>
-                            <select id="collected-by">
-                                @foreach( $carers as $carer )
-                                    <option value="{{ $carer->id }}">{{ $carer->name }}</option>
-                                @endforeach
-                            </select>
+                            <i class="fa fa-user"></i>
+                            <div>
+                                <label for="collected-by">Collected by:</label>
+                                <select id="collected-by" name="collected_by">
+                                    @foreach( $carers as $carer )
+                                        <option value="{{ $carer->id }}">{{ $carer->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <i class="fa fa-calendar"></i>
                         <div>
-                            <label for="collected-on">Collected on:</label>
-                            <input id="collected-on" value="<?php echo date('Y-m-d');?>" type="date">
+                            <i class="fa fa-calendar"></i>
+                            <div>
+                                <label for="collected-on">Collected on:</label>
+                                <input id="collected-on" name="collected_on" value="<?php echo date('Y-m-d');?>"
+                                       type="date">
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <i class="fa fa-home"></i>
                         <div>
-                            <label for="collected-at">Collected at:</label>
-                            <select id="collected-at">
-                                {-- Will need to be a list of all local centres eventually --}
-                                <option value="{{ $centre->id }}">{{ $centre->name }}</option>
-                            </select>
+                            <i class="fa fa-home"></i>
+                            <div>
+                                <label for="collected-at">Collected at:</label>
+                                <select id="collected-at" name="collected_at">
+                                    {-- Will need to be a list of all local centres eventually --}
+                                    <option value="{{ $centre->id }}">{{ $centre->name }}</option>
+                                </select>
+                            </div>
                         </div>
+
                     </div>
-                </div>
-                <button class="short-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.index") }}'; return false;">Confirm pick up</button>
-                <button class="long-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.voucher-manager", ['id' => $registration->id ]) }}'; return false;">Change allocated vouchers</button>
+                    <button class="short-button"
+                            type="submit">
+                        Confirm pick up
+                    </button>
+                    <button class="long-button"
+                            onclick="javascript:window.location.href='{{ URL::route("store.registration.voucher-manager", ['id' => $registration->id ]) }}'; return false;">
+                        Change allocated vouchers
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -264,7 +277,7 @@
                 // Browser backup for lack of datepicker support eg. Safari
                 // Reset back to English date format
                 if ($('#collected-on')[0].type != 'date')
-                    $('#collected-on').datepicker({ dateFormat: 'dd-mm-yy' }).val();
+                    $('#collected-on').datepicker({ dateFormat: 'dd-mm-yyyy' }).val();
 
                 $('#collected-on').valueAsDate = new Date();
             }
