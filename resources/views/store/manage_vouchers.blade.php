@@ -157,7 +157,7 @@
                 <div>
                     <p>There are {{ $vouchers_amount }} vouchers waiting for the family</p>
                 </div>
-                <form method="post"
+                <form method="post" name
                       action="{{ route('store.registration.vouchers.put', [ 'registration' => $registration->id ]) }}">
                     {!! method_field('put') !!}
                     {!! csrf_field() !!}
@@ -191,16 +191,15 @@
                                 </select>
                             </div>
                         </div>
-
+                        <button class="short-button"
+                                type="submit">
+                            Confirm pick up
+                        </button>
+                        <button class="long-button"
+                                onclick="javascript:window.location.href='{{ URL::route("store.registration.voucher-manager", ['id' => $registration->id ]) }}'; return false;">
+                            Change allocated vouchers
+                        </button>
                     </div>
-                    <button class="short-button"
-                            type="submit">
-                        Confirm pick up
-                    </button>
-                    <button class="long-button"
-                            onclick="javascript:window.location.href='{{ URL::route("store.registration.voucher-manager", ['id' => $registration->id ]) }}'; return false;">
-                        Change allocated vouchers
-                    </button>
                 </form>
             </div>
         </div>
