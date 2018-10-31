@@ -101,7 +101,7 @@
                 <div>
                     <p>Reminder: don't forget to complete food diary and pie chart.</p>
                 </div>
-                <button class="long-button" type="Submit">Save Family</button>
+                <button class="long-button submit" type="Submit">Save Family</button>
             </div>
         </form>
     </div>

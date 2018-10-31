@@ -90,7 +90,12 @@
                         </tbody>
                     </table>
                 </div>
-                <button class="long-button" type="submit">Save Changes</button>
+                <button class="long-button submit" type="submit">Save Changes</button>
+                <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
+                    <div class="link-button link-button-large">
+                        <i class="fa fa-users" aria-hidden="true"></i><i class="fa fa-ticket" aria-hidden="true"></i>Go to voucher manager
+                    </div>
+                </a>
             </div>
             <div class="col collect">
                 <div>
@@ -176,14 +181,9 @@
                         </div>
                     @endif
                 </div>
-                <div>
-                    <button class="short-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.voucher-manager", ['id' => $registration->id ]) }}'; return false;">
-                      Go to voucher manager
-                    </button>
                     <button class="long-button" onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
                         Print a 4 week collection sheet for this family
                     </button>
-                </div>
             </div>
         </form>
         @if (!isset($registration->family->leaving_on) )
@@ -206,7 +206,7 @@
                     </div>
                     <p>Are you sure?</p>
                     <div class="confirmation-buttons">
-                        <button type="submit">Yes</button>
+                        <button type="submit" class="submit">Yes</button>
                         <button id="cancel">Cancel</button>
                     </div>
                 </div>
