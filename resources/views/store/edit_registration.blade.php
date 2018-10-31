@@ -120,31 +120,11 @@
                             <span class="clickable-span">(more)</span>
                         </li>
                         <li class="collapsed" id="more-family-info">
+                            <p>Vouchers per week per child:</p>
                             <ul>
-                                @foreach( $family->getCreditReasons() as $credits )
-                                    <li>
-                                        <strong>
-                                            {{ $credits['reason_vouchers'] }}
-                                            {{ str_plural('voucher', $credits['reason_vouchers']) }}
-                                        </strong>
-                                        because
-                                        @if ($credits['count'] > 1)
-                                            {{ $credits['count'] }}
-                                            of the
-                                            {{ str_plural($credits['entity'], $credits['count']) }}
-                                            are
-                                        @else
-                                            @if ($credits['entity'] == 'family')
-                                                the
-                                            @else
-                                                one
-                                            @endif
-                                            {{ str_plural($credits['entity'], $credits['count']) }}
-                                            is
-                                        @endif
-                                        {{ $credits['reason'] }}
-                                    </li>
-                                @endforeach
+                              <li>Pregnancy - 3 vouchers</li>
+                              <li>Birth up to 1 year - 6 vouchers</li>
+                              <li>1 year up to school age - 3 vouchers</li>
                             </ul>
                         </li>
                     </ul>

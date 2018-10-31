@@ -29,7 +29,7 @@ We suggest that you use the TLD `.test` as others, like `.app` may now be in the
 
 ### Styling
 - Service styling is in `resources/assets/sass/app.scss`
-- Store styling is in `public/store/css/app.css`.
+- Store styling is in `public/store/css/main.css`
 
 ## Deployment
 

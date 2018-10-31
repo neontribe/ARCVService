@@ -39,7 +39,7 @@
                 <button class="short-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.edit", ['id' => $registration->id ]) }}'; return false;">
                   Go to edit family
                 </button>
-                <button class="long-button">Find another family</button>
+                <button class="long-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.index") }}'; return false;">Find another family</button>
             </div>
             <div class="col">
                 <div>
@@ -47,14 +47,22 @@
                     <h2>Collection History</h2>
                 </div>
                 <div>
-                    <p>This family should collect {{ $family->entitlement }} vouchers per week</p>
+                    <div class="emphasised-section">
+                        <p>This family should collect:</p>
+                        <p><b>{{ $family->entitlement }} vouchers per week</b></p>
+                    </div>
                     @if (!empty($lastCollection))
-                        <p class="v-spaced">Their last collection was {{ $lastCollection }}</p>
+                        <div class="emphasised-section">
+                            <p>Their last collection was:</p>
+                            <p><b>{{ $lastCollection }}</b></p>
+                        </div>
                     @else
-                        <p class="v-spaced">This family has not collected</p>
+                        <div class="emphasised-section">
+                            <p class="v-spaced">This family has not collected</p>
+                        </div>
                     @endif
                 </div>
-                <!-- HIDDEN FOR ALPHA 
+                <!-- HIDDEN FOR ALPHA
                 <div class="center">
                     <span id="brief-toggle" class="show clickable-span">
                       brief collection history
@@ -112,7 +120,7 @@
                 </form>
                 <p class="center vh-spaced">You have added {{ $vouchers_amount }} vouchers</p>
                 <button id="collection-button" class="long-button">Go to voucher collection</button>
-                <div class="center">
+                <div class="center" id="vouchers-added">
                     <span class="clickable-span view" tabindex="0">
                         <i class="fa fa-list" aria-hidden="true"></i>
                     </span>
@@ -179,7 +187,7 @@
                     </div>
                 </div>
                 <button class="short-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.index") }}'; return false;">Confirm pick up</button>
-                <button class="long-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.voucher-manager", ['id' => $registration->id ]) }}'; return false;">Allocate more vouchers</button>
+                <button class="long-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.voucher-manager", ['id' => $registration->id ]) }}'; return false;">Change allocated vouchers</button>
             </div>
         </div>
     </div>
@@ -196,6 +204,11 @@
                     $('.allocation').addClass('fade-back');
                     e.preventDefault();
                 });
+
+                var vouchersInList = $('#vouchers tr').length;
+                if(vouchersInList > 1) { // the first tr contains the table head
+                    $('#vouchers-added').addClass('pulse');
+                }
 
                 var firstVoucher = $('#first-voucher');
                 var lastVoucher = $('#last-voucher');
