@@ -885,3 +885,37 @@ VOUCHER PAGES
 	50% { transform: scale(1.1) }
 	100% { transform: scale(1) }
 }
+
+.link {
+	color: white;
+	text-decoration: none;
+}
+
+.link-button {
+	background-color: #a74e94;
+	border-radius: 3px;
+	box-shadow: 0 3px 12px -1px rgba(0,0,0,.2);
+	box-sizing: border-box;
+	color: white;
+	font-size: 1rem;
+	line-height: 48px;
+	min-height: 48px;
+	text-align: center;
+	vertical-align: top;
+}
+
+.link-button:hover {
+	text-decoration: underline;
+}
+
+.link-button i {
+	font-size: 20px;
+	padding-right: 0.5rem;
+}
+
+.link-button-small {
+	display: inline-block;
+	margin-left: 1rem;
+	min-width: 120px;
+}
+}
