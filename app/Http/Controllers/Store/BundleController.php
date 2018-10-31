@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Store;
 
-use Log;
 use Auth;
 use App\Bundle;
 use App\Voucher;
@@ -10,7 +9,6 @@ use App\Registration;
 use App\Http\Requests\StoreAppendBundleRequest;
 use App\Http\Requests\StoreUpdateBundleRequest;
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
 
 class BundleController extends Controller
 {
@@ -127,7 +125,6 @@ class BundleController extends Controller
      */
     public function update(StoreUpdateBundleRequest $request, Registration $registration)
     {
-
         $inputs = $request->only([
             "collected_at",
             "collected_by",
@@ -144,17 +141,18 @@ class BundleController extends Controller
 
         // Are we updating vouchers?
         if (array_key_exists('vouchers', $inputs)) {
-            // remove null values because sync will erase them anyway.
+            // remove empty values
+
             $voucherCodes = array_filter(
                 $inputs['vouchers'],
                 function ($value) {
-                    return $value !== '';
+                    return !empty($value);
                 }
             );
 
             $voucherCodes = (!empty($voucherCodes))
                 ? Voucher::cleanCodes(($voucherCodes))
-                : $voucherCodes; // Will result in the removal of the vouchers from the bundle.
+                : []; // Will result in the removal of the vouchers from the bundle.
 
             // sync vouchers.
             return $this->redirectAfterRequest($bundle->syncVouchers($voucherCodes), $registration);

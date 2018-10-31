@@ -245,14 +245,35 @@ class BundleControllerTest extends StoreTestCase
     {
         $put_route = route('store.registration.vouchers.put', ['registration' => $this->registration->id]);
 
-        // Add a set;
+        // sync a voucher;
+        $this->actingAs($this->centreUser, 'store')
+            ->put($put_route, ['vouchers' => [$this->testCodes[0]]]);
+
+        $currentBundle = $this->registration->currentBundle();
+        $this->assertEquals(1, $currentBundle->vouchers()->count());
+
+        // re-sync with 3 vouchers
         $this->actingAs($this->centreUser, 'store')
             ->put($put_route, ['vouchers' => $this->testCodes]);
 
-        // re-sync with one missing, there is one less.
+        $currentBundle->refresh();
+        $this->assertEquals(count($this->testCodes), $currentBundle->vouchers()->count());
 
-        // sync without a voucher array AT ALL does nothing.
+        // sync without a voucher array AT ALL - does nothing.
+        $this->actingAs($this->centreUser, 'store')
+            ->put($put_route, []);
+
+        $currentBundle->refresh();
+        $this->assertEquals(count($this->testCodes), $currentBundle->vouchers()->count());
 
         // sync with only a single empty voucher string erases the vouchers.
+        $this->assertEquals(3, $currentBundle->vouchers()->count());
+
+        $this->actingAs($this->centreUser, 'store')
+            ->put($put_route, ['vouchers' => [''] ]);
+
+        $currentBundle->refresh();
+        //dd($currentBundle->vouchers->toArray());
+        $this->assertEquals(0, $currentBundle->vouchers()->count());
     }
 }
