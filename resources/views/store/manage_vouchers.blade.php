@@ -77,7 +77,7 @@
                         </table>
                     </div>
                 </div> -->
-                <button class="long-button">Full collection history</button>
+                <button class="long-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.collection-history", ['id' => $registration->id ]) }}'; return false;">Full collection history</button>
             </div>
             <div class="col allocation">
                 <div>
