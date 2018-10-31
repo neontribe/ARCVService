@@ -35,25 +35,16 @@
                             <td class="center">{{ $registration->family->entitlement }}</td>
                             <td class="center">{{ $registration->family->rvid }}</td>
                             <td class="right">
-                                @if( !isset($registration->family->leaving_on) )
-                                <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
-                                    <div class="link-button link-button-small">
-                                        <i class="fa fa-ticket" aria-hidden="true"></i>Vouchers
-                                    </div>
-                                </a>
-                                <a href="{{ route("store.registration.edit", ['id' => $registration->id ]) }}" class="link">
-                                    <div class="link-button link-button-small">
-                                        <i class="fa fa-pencil" aria-hidden="true"></i>Edit
-                                    </div>
-                                </a>
-                                @else
-                                <div class="link-button link-button-small disabled">
-                                    <i class="fa fa-ticket" aria-hidden="true"></i>Vouchers
-                                </div>
-                                <div class="link-button link-button-small disabled">
-                                    <i class="fa fa-pencil" aria-hidden="true"></i>Edit
-                                </div>
-                                @endif
+                                <button onclick="window.location.href='{{ URL::route("store.registration.voucher-manager", ['id' => $registration->id ]) }}'"
+                                @if( isset($registration->family->leaving_on) ) disabled @endif
+                                >
+                                    Vouchers
+                                </button>
+                                <button onclick="window.location.href='{{ URL::route('store.registration.edit', ['id' => $registration->id ]) }}'"
+                                    @if( isset($registration->family->leaving_on) ) disabled @endif
+                                >
+                                    Edit
+                                </button>
                             </td>
                         </tr>
                     @endif
