@@ -821,6 +821,11 @@ VOUCHER PAGES
   animation-name: slidein;
 }
 
+.pulse {
+	animation-duration: 1s;
+	animation-name: pulse;
+}
+
 .fade-back {
   display: none;
 }
@@ -881,4 +886,10 @@ VOUCHER PAGES
   to {
     transform: translateX(0%);
   }
+}
+
+@keyframes pulse {
+	0% { transform: scale(1) }
+	50% { transform: scale(1.1) }
+	100% { transform: scale(1) }
 }

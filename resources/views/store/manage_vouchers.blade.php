@@ -120,7 +120,7 @@
                 </form>
                 <p class="center vh-spaced">You have added {{ $vouchers_amount }} vouchers</p>
                 <button id="collection-button" class="long-button">Go to voucher collection</button>
-                <div class="center">
+                <div class="center" id="vouchers-added">
                     <span class="clickable-span">
                         Vouchers added
                         <i class="fa fa-caret-down" aria-hidden="true"></i>
@@ -205,6 +205,11 @@
                     $('.allocation').addClass('fade-back');
                     e.preventDefault();
                 });
+
+                var vouchersInList = $('#vouchers tr').length;
+                if(vouchersInList > 1) { // the first tr contains the table head
+                    $('#vouchers-added').addClass('pulse');
+                }
 
                 var firstVoucher = $('#first-voucher');
                 var lastVoucher = $('#last-voucher');
