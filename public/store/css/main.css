@@ -524,7 +524,7 @@ REGISTER PAGE
 
 .small-button-container {
 	display: flex;
-  	justify-content: center;
+  justify-content: center;
 }
 
 .small-button-container button {
@@ -760,6 +760,16 @@ VOUCHER PAGES
   justify-content: space-between;
 }
 
+.alongside-container {
+  display: flex;
+}
+
+.alongside-container > div,
+.alongside-container > label {
+  width: 50%;
+  margin-right: 2%;
+}
+
 .allocation .clickable-span {
   text-decoration: none;
   font-size: 1.15rem;
@@ -769,17 +779,11 @@ VOUCHER PAGES
 .allocation .clickable-span:focus
  {
   text-decoration: underline;
-  color: #8B417B
+  color: #8B417B;
 }
 
 .allocation .clickable-span i {
   padding-right: 5px;
-}
-
-.alongside-container > div,
-.alongside-container > label {
-  width: 50%;
-  margin-right: 2%;
 }
 
 .single-container {
