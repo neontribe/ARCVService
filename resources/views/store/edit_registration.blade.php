@@ -43,7 +43,7 @@
                     <div id="carer_adder" class="small-button-container">
                         <input id="carer_adder_input" name="carer_adder_input" type="text" autocomplete="off"
                                autocorrect="off" spellcheck="false">
-                        <button id="add_collector" class="addButton">
+                        <button id="add_collector" class="add-button">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -93,7 +93,7 @@
                 <button class="long-button submit" type="submit">Save Changes</button>
                 <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
                     <div class="link-button link-button-large">
-                        <i class="fa fa-users" aria-hidden="true"></i><i class="fa fa-ticket" aria-hidden="true"></i>Go to voucher manager
+                        </i><i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
                     </div>
                 </a>
             </div>

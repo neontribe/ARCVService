@@ -582,6 +582,10 @@ REGISTER PAGE
 	min-width: 60px;
 }
 
+.add-button {
+	margin: 2px;
+}
+
 .add-dob {
 	min-height: 35px;
 	min-width: 35px;
@@ -917,7 +921,7 @@ VOUCHER PAGES
 	text-decoration: underline;
 }
 
-.link-button i {
+.button-icon {
 	font-size: 20px;
 	padding-right: 0.5rem;
 }

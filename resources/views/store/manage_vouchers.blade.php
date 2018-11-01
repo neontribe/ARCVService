@@ -38,12 +38,12 @@
                 </div>
                 <a href="{{ route("store.registration.edit", ['id' => $registration->id ]) }}" class="link">
                     <div class="link-button link-button-large">
-                        <i class="fa fa-pencil" aria-hidden="true"></i>Go to edit family
+                        <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Go to edit family
                     </div>
                 </a>
                 <a href="{{ route("store.registration.index") }}" class="link">
                     <div class="link-button link-button-large">
-                        <i class="fa fa-search" aria-hidden="true"></i>Find another family
+                        <i class="fa fa-search button-icon" aria-hidden="true"></i>Find another family
                     </div>
                 </a>
             </div>
@@ -91,7 +91,9 @@
                         </table>
                     </div>
                 </div> -->
-                <button class="long-button">Full collection history</button>
+                <button class="long-button">
+                <i class="fa fa-clipboard button-icon" aria-hidden="true"></i>Full collection history
+                </button>
             </div>
             <div class="col allocation">
                 <div>
@@ -125,7 +127,7 @@
                     </div>
                 </form>
                 <p class="center vh-spaced">You have added {{ $vouchers_amount }} vouchers</p>
-                <button id="collection-button" class="long-button">Go to voucher collection</button>
+                <button id="collection-button" class="long-button"><i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher collection</button>
                 <div class="center" id="vouchers-added">
                     <span class="clickable-span">
                         Vouchers added
@@ -193,8 +195,14 @@
                         </div>
                     </div>
                 </div>
-                <button class="short-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.index") }}'; return false;">Confirm pick up</button>
-                <button class="long-button" onclick="javascript:window.location.href='{{ URL::route("store.registration.voucher-manager", ['id' => $registration->id ]) }}'; return false;">Change allocated vouchers</button>
+                <button class="long-button submit" onclick="javascript:window.location.href='{{ URL::route("store.registration.index") }}'; return false;">
+                    Confirm pick up
+                </button>
+                <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
+                    <div class="link-button link-button-large">
+                        <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Change allocated vouchers
+                    </div>
+                </a>
             </div>
         </div>
     </div>
