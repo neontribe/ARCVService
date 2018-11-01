@@ -157,7 +157,7 @@
                 <div>
                     <p>There are {{ $vouchers_amount }} vouchers waiting for the family</p>
                 </div>
-                <form method="post" name
+                <form method="post"
                       action="{{ route('store.registration.vouchers.put', [ 'registration' => $registration->id ]) }}">
                     {!! method_field('put') !!}
                     {!! csrf_field() !!}
