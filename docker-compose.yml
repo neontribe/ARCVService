@@ -17,14 +17,19 @@ services:
             interval: 20s
             retries: 10
 
-    web:
+    arc:
         image: neonkvm:5000/arc_service
         build:
             context: .
             dockerfile: .docker/Dockerfile
+        user: ${CURRENT_UID}
         ports:
             - "8001:80"
             - "8000:8000"
+        extra_hosts:
+            - arc.test:127.0.1.1
+            - arcv-service.test:127.0.1.1
+            - arcv-store.test:127.0.1.1
         environment:
             APP_NAME: ${APP_NAME:-docker}
             APP_ENV: ${APP_ENV:-local}
