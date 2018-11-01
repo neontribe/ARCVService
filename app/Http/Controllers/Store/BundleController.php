@@ -131,7 +131,7 @@ class BundleController extends Controller
             "collected_on"
         ]);
 
-        // refactored to NOT alter vouchers IF we don't mention them in form input.
+        // If we don't mention them in form input because we are updating status of existing bundle vouchers
         if ($request->exists('vouchers')) {
             $inputs['vouchers'] = $request->input('vouchers');
         }

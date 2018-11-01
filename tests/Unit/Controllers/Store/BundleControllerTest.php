@@ -344,7 +344,6 @@ class BundleControllerTest extends StoreTestCase
             ->put($put_route, ['vouchers' => [''] ]);
 
         $currentBundle->refresh();
-        //dd($currentBundle->vouchers->toArray());
         $this->assertEquals(0, $currentBundle->vouchers()->count());
     }
 }
