@@ -754,6 +754,47 @@ and (max-device-width : 1024px)  {
 
 /*
 
+HISTORY PAGE
+
+*/
+
+.history {
+  display: inline-flex;
+  width: 100%;
+}
+
+.history > h3 {
+	width: 20%;
+	margin: 5%;
+}
+
+.history table {
+	margin: 5% 5% 0 0;
+}
+
+.history th,
+.history td {
+	font-size: 1.2rem;
+	text-align: center;
+}
+
+.history td[colspan="3"] {
+	padding: 0.5rem 2rem;
+}
+
+.history td > div {
+	display: flex;
+}
+
+.history table p {
+	width: 50%;
+	font-size: 1rem;
+	text-align: left;
+}
+
+
+/*
+
 VOUCHER PAGES
 
 */
