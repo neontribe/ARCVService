@@ -275,7 +275,7 @@ class BundleControllerTest extends StoreTestCase
             $voucher->applyTransition('order');
             $voucher->applyTransition('print');
             $voucher->applyTransition('dispatch');
-            $voucher->setBundle($currentBundle);
+            $voucher->bundle()->associate($currentBundle)->save();
         }
 
         // there should be 3 vouchers!
