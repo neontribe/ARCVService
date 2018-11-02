@@ -522,8 +522,7 @@ REGISTER PAGE
 	margin: 1rem;
 }
 
-.col td,
-.col .added {
+.col td {
 	font-size: 1rem;
 }
 
@@ -536,7 +535,7 @@ REGISTER PAGE
 
 .small-button-container {
 	display: flex;
-	justify-content: center;
+  justify-content: center;
 }
 
 .small-button-container button {
@@ -766,6 +765,7 @@ VOUCHER PAGES
 
 .allocation .alongside-container {
   align-items: flex-end;
+  display: flex;
   justify-content: space-between;
 }
 
@@ -777,6 +777,22 @@ VOUCHER PAGES
 .alongside-container > label {
   width: 50%;
   margin-right: 2%;
+}
+
+.allocation .clickable-span {
+  text-decoration: none;
+  font-size: 1.15rem;
+}
+
+.allocation .clickable-span:hover,
+.allocation .clickable-span:focus
+ {
+  text-decoration: underline;
+  color: #8B417B;
+}
+
+.allocation .clickable-span i {
+  padding-right: 5px;
 }
 
 .single-container {
@@ -835,9 +851,13 @@ VOUCHER PAGES
   display: none;
 }
 
+.pick-up {
+	width: 100%;
+}
+
 .pick-up > div {
   display: flex;
-  margin: 1rem;
+  margin: 1rem 2rem;
 }
 
 .pick-up > div > div {
@@ -869,18 +889,12 @@ VOUCHER PAGES
   font-family: Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-.hide > i {
-  -webkit-transform: rotate(180deg);
-  -moz-transform: rotate(180deg);
-  transform: rotate(180deg);
+.view:after {
+  content: 'View vouchers added';
 }
 
-.show:before {
-  content: 'Show';
-}
-
-.hide:before {
-  content: 'Hide';
+.hide:after {
+  content: 'Hide vouchers added';
 }
 
 @keyframes slidein {

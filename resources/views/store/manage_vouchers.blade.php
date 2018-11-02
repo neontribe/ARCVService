@@ -129,9 +129,8 @@
                 <p class="center vh-spaced">You have added {{ $vouchers_amount }} vouchers</p>
                 <button id="collection-button" class="long-button"><i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher collection</button>
                 <div class="center" id="vouchers-added">
-                    <span class="clickable-span">
-                        Vouchers added
-                        <i class="fa fa-caret-down" aria-hidden="true"></i>
+                    <span class="clickable-span view" tabindex="0">
+                        <i class="fa fa-list" aria-hidden="true"></i>
                     </span>
                     <div id="vouchers" class="collapsed">
                         <form id="unbundle" name="unbundle" action="" method="POST">
@@ -165,39 +164,45 @@
                 <div>
                     <p>There are {{ $vouchers_amount }} vouchers waiting for the family</p>
                 </div>
-                <div class="pick-up vh-spaced">
-                    <div>
-                        <i class="fa fa-user"></i>
+                <form method="post"
+                      action="{{ route('store.registration.vouchers.put', [ 'registration' => $registration->id ]) }}">
+                    {!! method_field('put') !!}
+                    {!! csrf_field() !!}
+                    <div class="pick-up">
                         <div>
-                            <label for="collected-by">Collected by:</label>
-                            <select id="collected-by">
-                                @foreach( $carers as $carer )
-                                    <option value="{{ $carer->id }}">{{ $carer->name }}</option>
-                                @endforeach
-                            </select>
+                            <i class="fa fa-user"></i>
+                            <div>
+                                <label for="collected-by">Collected by:</label>
+                                <select id="collected-by" name="collected_by">
+                                    @foreach( $carers as $carer )
+                                        <option value="{{ $carer->id }}">{{ $carer->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <i class="fa fa-calendar"></i>
                         <div>
-                            <label for="collected-on">Collected on:</label>
-                            <input id="collected-on" value="<?php echo date('Y-m-d');?>" type="date">
+                            <i class="fa fa-calendar"></i>
+                            <div>
+                                <label for="collected-on">Collected on:</label>
+                                <input id="collected-on" name="collected_on" value="<?php echo date('Y-m-d');?>" type="date">
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <i class="fa fa-home"></i>
                         <div>
-                            <label for="collected-at">Collected at:</label>
-                            <select id="collected-at">
-                                {-- Will need to be a list of all local centres eventually --}
-                                <option value="{{ $centre->id }}">{{ $centre->name }}</option>
-                            </select>
+                            <i class="fa fa-home"></i>
+                            <div>
+                                <label for="collected-at">Collected at:</label>
+                                <select id="collected-at" name="collected_at">
+                                    {-- Will need to be a list of all local centres eventually --}
+                                    <option value="{{ $centre->id }}">{{ $centre->name }}</option>
+                                </select>
+                            </div>
                         </div>
+                        <button class="long-button submit"
+                                type="submit">
+                            Confirm pick up
+                        </button>
                     </div>
-                </div>
-                <button class="long-button submit" onclick="javascript:window.location.href='{{ URL::route("store.registration.index") }}'; return false;">
-                    Confirm pick up
-                </button>
+                </form>
                 <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
                     <div class="link-button link-button-large">
                         <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Change allocated vouchers
@@ -258,27 +263,29 @@
                 });
 
                 $('.clickable-span').click(function (e) {
-                    // the next sibling is the content
+                    // The next sibling is the content
                     var content = $(this).next();
-                    var isBriefToggle = $(this).is('#brief-toggle');
 
-                    if(content.hasClass('collapsed')) {
-                        content.removeClass('collapsed')
-                        if (isBriefToggle) {
-                            $(this).removeClass('show').addClass('hide');
-                        }
+                    if($(this).hasClass('view')) {
+                        $(this).removeClass('view').addClass('hide');
+                        content.removeClass('collapsed');
                     } else {
+                        $(this).removeClass('hide').addClass('view');
                         content.addClass('collapsed');
-                        if (isBriefToggle) {
-                            $(this).removeClass('hide').addClass('show')
-                        }
                     }
                 });
+
+                // On enter keydown, run click functionality above (for a11y tabbing)
+                $('.clickable-span').keypress(function(e){
+                  if(e.which == 13) {
+                    $('.clickable-span').click();
+                  }
+                })
 
                 // Browser backup for lack of datepicker support eg. Safari
                 // Reset back to English date format
                 if ($('#collected-on')[0].type != 'date')
-                    $('#collected-on').datepicker({ dateFormat: 'dd-mm-yy' }).val();
+                    $('#collected-on').datepicker({ dateFormat: 'dd-mm-yyyy' }).val();
 
                 $('#collected-on').valueAsDate = new Date();
             }

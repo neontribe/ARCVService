@@ -256,7 +256,7 @@ class StoreRoutesTest extends StoreTestCase
             ->call(
                 'PUT',
                 $put_route,
-                [] // should erase the vouchers.
+                ['vouchers' => []] // should erase the vouchers.
             );
         $this->assertResponseStatus(302);
 
@@ -267,7 +267,7 @@ class StoreRoutesTest extends StoreTestCase
             ->call(
                 'PUT',
                 $put_route,
-                [] // should erase the vouchers.
+                ['vouchers' => []] // should erase the vouchers.
             );
         $this->assertResponseStatus(302);
 
