@@ -780,6 +780,7 @@ HISTORY PAGE
 
 .history td[colspan="3"] {
 	padding: 0 2rem;
+	background: #EEEEEE;
 }
 
 .history td > div {
