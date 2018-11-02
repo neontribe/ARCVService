@@ -274,12 +274,12 @@ $factory->defineAs(App\Voucher::class, 'requested', function ($faker) use ($fact
 });
 
 /**
- * Voucher with currentstate allocated.
+ * Voucher with currentstate dispatched.
  */
-$factory->defineAs(App\Voucher::class, 'allocated', function ($faker) use ($factory) {
+$factory->defineAs(App\Voucher::class, 'dispatched', function ($faker) use ($factory) {
     $voucher = $factory->raw(App\Voucher::class);
 
-    // Todo create the voucher_states on the road to allocated.
+    // Todo create the voucher_states on the road to dispatched.
     factory(App\VoucherState::class)->create();
     factory(App\VoucherState::class)->create([
         'transition' => 'print',
@@ -291,13 +291,8 @@ $factory->defineAs(App\Voucher::class, 'allocated', function ($faker) use ($fact
         'from' => 'printed',
         'to' => 'dispatched',
     ]);
-    factory(App\VoucherState::class)->create([
-        'transition' => 'allocate',
-        'from' => 'printed',
-        'to' => 'allocated',
-    ]);
     return array_merge($voucher, [
-        'currentstate' => 'allocated',
+        'currentstate' => 'dispatched',
     ]);
 });
 

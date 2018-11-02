@@ -33,7 +33,6 @@ class TraderControllerTest extends TestCase
             $v->applyTransition('order');
             $v->applyTransition('print');
             $v->applyTransition('dispatch');
-            $v->applyTransition('allocate');
             $v->trader_id = 1;
             $v->applyTransition('collect');
         }

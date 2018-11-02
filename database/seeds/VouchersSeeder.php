@@ -46,11 +46,6 @@ class VouchersSeeder extends Seeder
                 //Progress these to dispatched.
                 $rvp_vouchers[$i-60]->applyTransition('dispatch');
             }
-
-            if ($rvp_vouchers[$i-60]->id < 11) {
-                //Progress these to allocated.
-                $rvp_vouchers[$i-60]->applyTransition('allocate');
-            }
         }
 
         // Transition one voucher to recorded by trader 1.
