@@ -121,9 +121,8 @@
                 <p class="center vh-spaced">You have added {{ $vouchers_amount }} vouchers</p>
                 <button id="collection-button" class="long-button">Go to voucher collection</button>
                 <div class="center" id="vouchers-added">
-                    <span class="clickable-span">
-                        Vouchers added
-                        <i class="fa fa-caret-down" aria-hidden="true"></i>
+                    <span class="clickable-span view" tabindex="0">
+                        <i class="fa fa-list" aria-hidden="true"></i>
                     </span>
                     <div id="vouchers" class="collapsed">
                         <form id="unbundle" name="unbundle" action="" method="POST">
@@ -256,22 +255,24 @@
                 });
 
                 $('.clickable-span').click(function (e) {
-                    // the next sibling is the content
+                    // The next sibling is the content
                     var content = $(this).next();
-                    var isBriefToggle = $(this).is('#brief-toggle');
 
-                    if(content.hasClass('collapsed')) {
-                        content.removeClass('collapsed')
-                        if (isBriefToggle) {
-                            $(this).removeClass('show').addClass('hide');
-                        }
+                    if($(this).hasClass('view')) {
+                        $(this).removeClass('view').addClass('hide');
+                        content.removeClass('collapsed');
                     } else {
+                        $(this).removeClass('hide').addClass('view');
                         content.addClass('collapsed');
-                        if (isBriefToggle) {
-                            $(this).removeClass('hide').addClass('show')
-                        }
                     }
                 });
+
+                // On enter keydown, run click functionality above (for a11y tabbing)
+                $('.clickable-span').keypress(function(e){
+                  if(e.which == 13) {
+                    $('.clickable-span').click();
+                  }
+                })
 
                 // Browser backup for lack of datepicker support eg. Safari
                 // Reset back to English date format
