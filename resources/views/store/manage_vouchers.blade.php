@@ -106,7 +106,7 @@
                         </button>
                     </div>
                 </form>
-                <p class="center">OR</p>
+                <p class="center no-margin">OR</p>
                 <form method="post" action="{{ route('store.registration.vouchers.post', [ 'registration' => $registration->id ]) }}">
                 {!! csrf_field() !!}
                     <div class="single-container">
