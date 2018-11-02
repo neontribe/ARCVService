@@ -779,7 +779,7 @@ HISTORY PAGE
 }
 
 .history td[colspan="3"] {
-	padding: 0.5rem 2rem;
+	padding: 0 2rem;
 }
 
 .history td > div {
