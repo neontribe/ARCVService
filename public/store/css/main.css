@@ -26,6 +26,10 @@ h3 {
   margin-top: 0;
 }
 
+b {
+	font-weight: bold;
+}
+
 ul {
 	margin: 0;
 	text-align: left;
@@ -278,7 +282,7 @@ input[type="text"].invalid,
 	height: 80%;
 }
 
-.content > form {
+.full-height {
 	height: 100%;
 }
 
@@ -517,8 +521,7 @@ REGISTER PAGE
 	margin: 1rem;
 }
 
-.col td,
-.col .added {
+.col td {
 	font-size: 1rem;
 }
 
@@ -531,7 +534,7 @@ REGISTER PAGE
 
 .small-button-container {
 	display: flex;
-	justify-content: center;
+  justify-content: center;
 }
 
 .small-button-container button {
@@ -757,6 +760,7 @@ VOUCHER PAGES
 
 .allocation .alongside-container {
   align-items: flex-end;
+  display: flex;
   justify-content: space-between;
 }
 
@@ -764,11 +768,26 @@ VOUCHER PAGES
   display: flex;
 }
 
-
 .alongside-container > div,
 .alongside-container > label {
   width: 50%;
   margin-right: 2%;
+}
+
+.allocation .clickable-span {
+  text-decoration: none;
+  font-size: 1.15rem;
+}
+
+.allocation .clickable-span:hover,
+.allocation .clickable-span:focus
+ {
+  text-decoration: underline;
+  color: #8B417B;
+}
+
+.allocation .clickable-span i {
+  padding-right: 5px;
 }
 
 .single-container {
@@ -807,10 +826,20 @@ VOUCHER PAGES
   margin: 2rem 1rem;
 }
 
+.emphasised-section {
+	font-size: 1.15rem;
+	margin-bottom: 2rem;
+}
+
 .slide-in {
   display: block;
   animation-duration: 1s;
   animation-name: slidein;
+}
+
+.pulse {
+	animation-duration: 1s;
+	animation-name: pulse;
 }
 
 .fade-back {
@@ -851,18 +880,12 @@ VOUCHER PAGES
   font-family: Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-.hide > i {
-  -webkit-transform: rotate(180deg);
-  -moz-transform: rotate(180deg);
-  transform: rotate(180deg);
+.view:after {
+  content: 'View vouchers added';
 }
 
-.show:before {
-  content: 'Show';
-}
-
-.hide:before {
-  content: 'Hide';
+.hide:after {
+  content: 'Hide vouchers added';
 }
 
 @keyframes slidein {
@@ -873,4 +896,10 @@ VOUCHER PAGES
   to {
     transform: translateX(0%);
   }
+}
+
+@keyframes pulse {
+	0% { transform: scale(1) }
+	50% { transform: scale(1.1) }
+	100% { transform: scale(1) }
 }
