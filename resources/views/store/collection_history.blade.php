@@ -6,7 +6,7 @@
 
     @include('store.partials.navbar', ['headerTitle' => 'Full Collection History'])
 
-    <div class="content">
+    <div class="content history">
         <h3>{{ $pri_carer->name }}</h3>
         <table>
             <tr>
@@ -18,10 +18,38 @@
                 <td>22/10/2018</td>
                 <td>8</td>
                 <td>
-                    <button>Expand</button>
+                    <i class="fa fa-caret-down" aria-hidden="true"></i>
                 </td>
             </tr>
                 <td colspan=3>
+                  <p>
+                      <span>
+                          <i class="fa fa-calendar"></i>
+                          Date Collected:
+                      </span>
+                      03/03/1994
+                  </p>
+                  <p>
+                      <span>
+                          <i class="fa fa-home"></i>
+                          Collected At:
+                      <span>
+                      First Place Children's Centre
+                  </p>
+                  <p>
+                      <span>
+                          <i class="fa fa-user"></i>
+                          Collected By:
+                      </span>
+                      Mr Higgins
+                  </p>
+                  <p>
+                      <span>
+                          <i class="fa fa-users"></i>
+                          Allocated By:
+                      </span>
+                      Worker 1
+                  </p>
                 </td>
             </tr>
         </table>
