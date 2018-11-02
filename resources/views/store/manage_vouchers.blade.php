@@ -137,7 +137,7 @@
                                     <tr>
                                         <td>{{ $voucher->code }}</td>
                                         <td>
-                                            <button type="submit" formaction="{{ URL::route('store.registration.voucher.delete', ['registration' => $registration->id, 'voucher' => $voucher->id]) }}" id="{{ $voucher->id }}">
+                                            <button type="submit" class="delete-button" formaction="{{ URL::route('store.registration.voucher.delete', ['registration' => $registration->id, 'voucher' => $voucher->id]) }}" id="{{ $voucher->id }}">
                                                 <i class="fa fa-minus" aria-hidden="true"></i>
                                             </button>
                                         </td>

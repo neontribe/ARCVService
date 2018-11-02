@@ -892,6 +892,11 @@ VOUCHER PAGES
   content: 'Hide vouchers added';
 }
 
+.delete-button {
+	min-height: 34px;
+	min-width: 34px;
+}
+
 @keyframes slidein {
   from {
     transform: translateX(150%);
