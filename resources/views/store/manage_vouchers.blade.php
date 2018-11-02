@@ -118,12 +118,12 @@
                         </button>
                     </div>
                 </form>
-                <p class="center vh-spaced">You have added {{ $vouchers_amount }} vouchers</p>
                 <button id="collection-button" class="long-button">Go to voucher collection</button>
                 <div class="center" id="vouchers-added">
                     <span class="clickable-span view" tabindex="0">
                         <i class="fa fa-list" aria-hidden="true"></i>
                     </span>
+                    <span class="number-circle">{{ $vouchers_amount }}</span>
                     <div id="vouchers" class="collapsed">
                         <form id="unbundle" name="unbundle" action="" method="POST">
                             {!! method_field('delete') !!}
@@ -256,7 +256,7 @@
 
                 $('.clickable-span').click(function (e) {
                     // The next sibling is the content
-                    var content = $(this).next();
+                    var content = $('#vouchers');
 
                     if($(this).hasClass('view')) {
                         $(this).removeClass('view').addClass('hide');
