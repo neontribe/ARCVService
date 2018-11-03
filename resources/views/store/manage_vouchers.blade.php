@@ -106,7 +106,7 @@
                         </button>
                     </div>
                 </form>
-                <p class="center">OR</p>
+                <p class="center no-margin">OR</p>
                 <form method="post" action="{{ route('store.registration.vouchers.post', [ 'registration' => $registration->id ]) }}">
                 {!! csrf_field() !!}
                     <div class="single-container">
@@ -118,12 +118,12 @@
                         </button>
                     </div>
                 </form>
-                <p class="center vh-spaced">You have added {{ $vouchers_amount }} vouchers</p>
                 <button id="collection-button" class="long-button">Go to voucher collection</button>
                 <div class="center" id="vouchers-added">
                     <span class="clickable-span view" tabindex="0">
                         <i class="fa fa-list" aria-hidden="true"></i>
                     </span>
+                    <span class="number-circle">{{ $vouchers_amount }}</span>
                     <div id="vouchers" class="collapsed">
                         <form id="unbundle" name="unbundle" action="" method="POST">
                             {!! method_field('delete') !!}
@@ -137,7 +137,7 @@
                                     <tr>
                                         <td>{{ $voucher->code }}</td>
                                         <td>
-                                            <button type="submit" formaction="{{ URL::route('store.registration.voucher.delete', ['registration' => $registration->id, 'voucher' => $voucher->id]) }}" id="{{ $voucher->id }}">
+                                            <button type="submit" class="delete-button" formaction="{{ URL::route('store.registration.voucher.delete', ['registration' => $registration->id, 'voucher' => $voucher->id]) }}" id="{{ $voucher->id }}">
                                                 <i class="fa fa-minus" aria-hidden="true"></i>
                                             </button>
                                         </td>
@@ -256,7 +256,7 @@
 
                 $('.clickable-span').click(function (e) {
                     // The next sibling is the content
-                    var content = $(this).next();
+                    var content = $('#vouchers');
 
                     if($(this).hasClass('view')) {
                         $(this).removeClass('view').addClass('hide');
