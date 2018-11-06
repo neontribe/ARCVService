@@ -196,7 +196,7 @@
                     {!! csrf_field() !!}
                     <div class="full-width">
                         <button class="remove long-button" type="button">Remove this family</button>
-                        <div id="expandable" class="collapsed marginone" >
+                        <div id="expandable" class="collapsed confirm-leaving" >
                             <div class="reason">
                                 <label for="reason-for-leaving">
                                     Reason for leaving

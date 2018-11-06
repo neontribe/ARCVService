@@ -295,10 +295,6 @@ input[type="text"].invalid,
 	width: 100%;
 }
 
-.marginone {
-	margin: 1rem;
-}
-
 .link {
 	color: white;
 	text-decoration: none;
@@ -704,12 +700,15 @@ EDIT PAGE
 	padding-left: 1.5rem;
 }
 
-
 .remove {
 	background-color: #d2232a;
 }
 
-.leaving .reason > * {
+.confirm-leaving {
+	margin: 0 1rem 1rem 1rem;
+}
+
+.reason > * {
 	display: block;
 }
 
