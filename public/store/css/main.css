@@ -283,6 +283,10 @@ input[type="text"].invalid,
 	height: 80%;
 }
 
+.no-margin {
+	margin: 0;
+}
+
 .full-height {
 	height: 100%;
 }
@@ -888,6 +892,18 @@ VOUCHER PAGES
 	margin-bottom: 2rem;
 }
 
+.number-circle {
+	background-color: #a74e94;
+	border-radius: 50%;
+	color: white;
+	display: inline-block;
+	font-weight: bold;
+	height: 2.2rem;
+	line-height: 2.2rem;
+	margin-left: 0.2rem;
+	width: 2.2rem;
+}
+
 .slide-in {
   display: block;
   animation-duration: 1s;
@@ -947,6 +963,11 @@ VOUCHER PAGES
 
 .hide:after {
   content: 'Hide vouchers added';
+}
+
+.delete-button {
+	min-height: 34px;
+	min-width: 34px;
 }
 
 @keyframes slidein {
