@@ -422,10 +422,10 @@ class SearchPageTest extends StoreTestCase
             ->visit(URL::route('store.registration.index'));
 
         // Check the number of enabled and disabled buttons.
-        $this->assertCount(2, $this->crawler->filter('tr.inactive button:disabled'));
-        $this->assertCount(0, $this->crawler->filter('tr.inactive button:enabled'));
-        $this->assertCount(0, $this->crawler->filter('tr.active button:disabled'));
-        $this->assertCount(18, $this->crawler->filter('tr.active button:enabled'));
+        $this->assertCount(2, $this->crawler->filter('tr.inactive div.disabled'));
+        $this->assertCount(0, $this->crawler->filter('tr.inactive div:not(.disabled)'));
+        $this->assertCount(0, $this->crawler->filter('tr.active div.disabled'));
+        $this->assertCount(18, $this->crawler->filter('tr.active div:not(.disabled)'));
     }
 
     /** @test */

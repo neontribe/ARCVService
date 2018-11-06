@@ -138,14 +138,15 @@ select {
 
 button {
 	background-color: #a74e94;
+	border: none;
+	border-radius: 3px;
+	box-shadow:0 3px 12px -1px rgba(0,0,0,.2);
 	transform: translate3d(0, 0, 0);
 	color: white;
 	min-height: 48px;
 	min-width: 48px;
 	font-size: 1rem;
-	border-radius: 3px;
 	overflow: hidden;
-	box-shadow:0 3px 12px -1px rgba(0,0,0,.2);
 }
 
 button:disabled {
@@ -288,6 +289,58 @@ input[type="text"].invalid,
 
 .full-height {
 	height: 100%;
+}
+
+.link {
+	color: white;
+	text-decoration: none;
+}
+
+.link-button {
+	background-color: #a74e94;
+	border-radius: 3px;
+	box-shadow: 0 3px 12px -1px rgba(0,0,0,.2);
+	box-sizing: border-box;
+	color: white;
+	font-size: 1rem;
+	line-height: 48px;
+	min-height: 48px;
+	text-align: center;
+	vertical-align: top;
+}
+
+.link-button:hover {
+	text-decoration: underline;
+}
+
+.button-icon {
+	font-size: 20px;
+	padding-right: 0.5rem;
+}
+
+.link-button-small {
+	display: inline-block;
+	margin-left: 1rem;
+	min-width: 120px;
+}
+
+.link-button-large {
+	display: block;
+	margin: 1rem;
+	width: calc(100% - 2rem);
+}
+
+.disabled {
+	background-color: #AEAEAE;
+}
+
+.disabled:hover {
+	cursor: not-allowed;
+	text-decoration: none;
+}
+
+.submit {
+	background-color: #b9368b;
 }
 
 /*
@@ -561,8 +614,8 @@ REGISTER PAGE
 }
 
 .long-button {
-	width: 90%;
-	margin-left: 5%;
+	margin: 1rem;
+	width: calc(100% - 2rem);
 }
 
 .form-group {
@@ -582,6 +635,10 @@ REGISTER PAGE
 
 .form-group > #dob-year {
 	min-width: 60px;
+}
+
+.add-button {
+	margin: 2px;
 }
 
 .add-dob {
@@ -862,9 +919,13 @@ VOUCHER PAGES
   display: none;
 }
 
+.pick-up {
+	width: 100%;
+}
+
 .pick-up > div {
   display: flex;
-  margin: 1rem;
+  margin: 1rem 2rem;
 }
 
 .pick-up > div > div {

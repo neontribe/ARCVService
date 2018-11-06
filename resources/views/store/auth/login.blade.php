@@ -42,7 +42,7 @@
                     </span>
                     @endif
                 </div>
-                <button type="submit">Log In</button>
+                <button type="submit" class="submit">Log In</button>
                 <div class="links">
                     <a href="{{ route('store.password.request') }}">Forgot Your Password?</a>
                     <a href="/store/privacy_policy.html">Privacy Policy</a>
