@@ -684,18 +684,9 @@ EDIT PAGE
 	padding-left: 1.5rem;
 }
 
-.leaving {
-	height: auto;
-	padding: 0.5rem;
-	position: fixed;
-	bottom: 0;
-	background-color: #fff;
-}
 
 .remove {
 	background-color: #d2232a;
-	margin-bottom: 0.5rem;
-	width: 15.5rem
 }
 
 .leaving .reason > * {
