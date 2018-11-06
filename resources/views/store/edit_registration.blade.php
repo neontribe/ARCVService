@@ -11,11 +11,11 @@
             <form action="{{ URL::route("store.registration.update",['id' => $registration->id]) }}" method="post">
                 {{ method_field('PUT') }}
                 {!! csrf_field() !!}
-            <div class="col">
-                <div>
-                    <img src="{{ asset('store/assets/group-light.svg') }}" name="logo">
-                    <h2>Voucher collectors</h2>
-                </div>
+                <div class="col">
+                    <div>
+                        <img src="{{ asset('store/assets/group-light.svg') }}" name="logo">
+                        <h2>Voucher collectors</h2>
+                    </div>
                     <input type="hidden" name="registration" value="{{ $registration->id }}">
                     <div>
                         <label for="carer">Main carer</label>
@@ -49,7 +49,7 @@
                             </button>
                         </div>
                     </div>
-            </div>
+                </div>
 
                 <div class="col">
                     <div>
@@ -99,8 +99,9 @@
                     </a>
                 </div>
             </form>
-            </div>
-            <div class="col-container one-third">
+        </div>
+
+        <div class="col-container one-third">
             <div class="col collect">
                 <div>
                     <img src="{{ asset('store/assets/info-light.svg') }}" name="logo">
@@ -185,39 +186,38 @@
                         </div>
                     @endif
                 </div>
-                    <button class="long-button" onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
-                        Print a 4 week collection sheet for this family
-                    </button>
+                <button class="long-button" onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
+                    Print a 4 week collection sheet for this family
+                </button>
 
-                            @if (!isset($registration->family->leaving_on) )
-        <form  action="{{ URL::route('store.registration.family',['id' => $registration->id]) }}" method="post">
-            {{ method_field('PUT') }}
-            {!! csrf_field() !!}
-            <div class="full-width">
-                <button class="remove long-button" type="button">Remove this family</button>
-                <div id="expandable" class="collapsed marginone" >
-                    <div class="reason">
-                        <label for="reason-for-leaving">
-                            Reason for leaving
-                        </label>
-                        <select id="reason-for-leaving" name="leaving_reason" required>
-                            <option value="" disabled selected>Select a reason...</option>
-                            @foreach(Config::get('arc.leaving_reasons') as $reason)
-                                <option value="{{ $reason }}"> {{ $reason }}</option>
-                            @endforeach
-                        </select>
+                @if (!isset($registration->family->leaving_on) )
+                <form  action="{{ URL::route('store.registration.family',['id' => $registration->id]) }}" method="post">
+                    {{ method_field('PUT') }}
+                    {!! csrf_field() !!}
+                    <div class="full-width">
+                        <button class="remove long-button" type="button">Remove this family</button>
+                        <div id="expandable" class="collapsed marginone" >
+                            <div class="reason">
+                                <label for="reason-for-leaving">
+                                    Reason for leaving
+                                </label>
+                                <select id="reason-for-leaving" name="leaving_reason" required>
+                                    <option value="" disabled selected>Select a reason...</option>
+                                    @foreach(Config::get('arc.leaving_reasons') as $reason)
+                                        <option value="{{ $reason }}"> {{ $reason }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <p>Are you sure?</p>
+                            <div class="confirmation-buttons">
+                                <button type="submit" class="submit">Yes</button>
+                                <button id="cancel">Cancel</button>
+                            </div>
+                        </div>
                     </div>
-                    <p>Are you sure?</p>
-                    <div class="confirmation-buttons">
-                        <button type="submit" class="submit">Yes</button>
-                        <button id="cancel">Cancel</button>
-                    </div>
-                </div>
+                </form>
+                @endif
             </div>
-        </form>
-        @endif
-            </div>
-
         </div>
     </div>
 

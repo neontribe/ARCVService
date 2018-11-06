@@ -291,6 +291,14 @@ input[type="text"].invalid,
 	height: 100%;
 }
 
+.full-width {
+	width: 100%;
+}
+
+.marginone {
+	margin: 1rem;
+}
+
 .link {
 	color: white;
 	text-decoration: none;
@@ -587,6 +595,18 @@ REGISTER PAGE
 	width: 100%;
 	height: 100%;
 	margin: 0;
+}
+
+.col-container.one-third {
+	width: calc(100% / 3);
+}
+
+.col-container.two-thirds {
+	width: calc(100% / 3 * 2);
+}
+
+.flex {
+	display: flex;
 }
 
 .small-button-container {
