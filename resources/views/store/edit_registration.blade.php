@@ -6,97 +6,101 @@
 
     @include('store.partials.navbar', ['headerTitle' => 'Check, update or print'])
 
-    <div class="content check">
-        <form action="{{ URL::route("store.registration.update",['id' => $registration->id]) }}" method="post">
-            {{ method_field('PUT') }}
-            {!! csrf_field() !!}
-            <input type="hidden" name="registration" value="{{ $registration->id }}">
+    <div class="content flex">
+        <div class="col-container two-thirds">
+            <form action="{{ URL::route("store.registration.update",['id' => $registration->id]) }}" method="post">
+                {{ method_field('PUT') }}
+                {!! csrf_field() !!}
             <div class="col">
                 <div>
                     <img src="{{ asset('store/assets/group-light.svg') }}" name="logo">
                     <h2>Voucher collectors</h2>
                 </div>
-                <div>
-                    <label for="carer">Main carer</label>
-                    <span class="@if(!$errors->has('carer'))collapsed @endif invalid-error" id="carer-span">This field is required</span>
-                    <input id="carer" name="carer" class="@if($errors->has('carer'))invalid @endif" type="text" value="{{ $pri_carer->name }}" autocomplete="off"
-                           autocorrect="off" spellcheck="false">
-                </div>
-                <div>
-                    <label for="carer_adder_input">Voucher collectors</label>
-                    <table id="carer_wrapper">
-                        @foreach ( $sec_carers as $sec_carer )
-                            <tr>
-                                <td><input name="carers[]" type="hidden"
-                                           value="{{ $sec_carer->name }}">{{ $sec_carer->name }}</td>
-                                <td>
-                                    <button type="button" class="remove_field">
-                                        <i class="fa fa-minus" aria-hidden="true"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </table>
-                </div>
-                <div>
-                    <label for="carer_adder_input">Add new collectors:</label>
-                    <div id="carer_adder" class="small-button-container">
-                        <input id="carer_adder_input" name="carer_adder_input" type="text" autocomplete="off"
-                               autocorrect="off" spellcheck="false">
-                        <button id="add_collector" class="add-button">
-                            <i class="fa fa-plus" aria-hidden="true"></i>
-                        </button>
+                    <input type="hidden" name="registration" value="{{ $registration->id }}">
+                    <div>
+                        <label for="carer">Main carer</label>
+                        <span class="@if(!$errors->has('carer'))collapsed @endif invalid-error" id="carer-span">This field is required</span>
+                        <input id="carer" name="carer" class="@if($errors->has('carer'))invalid @endif" type="text" value="{{ $pri_carer->name }}" autocomplete="off"
+                            autocorrect="off" spellcheck="false">
                     </div>
-                </div>
+                    <div>
+                        <label for="carer_adder_input">Voucher collectors</label>
+                        <table id="carer_wrapper">
+                            @foreach ( $sec_carers as $sec_carer )
+                                <tr>
+                                    <td><input name="carers[]" type="hidden"
+                                            value="{{ $sec_carer->name }}">{{ $sec_carer->name }}</td>
+                                    <td>
+                                        <button type="button" class="remove_field">
+                                            <i class="fa fa-minus" aria-hidden="true"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </table>
+                    </div>
+                    <div>
+                        <label for="carer_adder_input">Add new collectors:</label>
+                        <div id="carer_adder" class="small-button-container">
+                            <input id="carer_adder_input" name="carer_adder_input" type="text" autocomplete="off"
+                                autocorrect="off" spellcheck="false">
+                            <button id="add_collector" class="add-button">
+                                <i class="fa fa-plus" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
             </div>
 
-            <div class="col">
-                <div>
-                    <img src="{{ asset('store/assets/pregnancy-light.svg') }}" name="logo">
-                    <h2>Children or pregnancy</h2>
-                </div>
-                <div>
-                    <table>
-                        <thead>
-                        <tr>
-                            <td>Age</td>
-                            <td>Month / Year</td>
-                            <td></td>
-                        </tr>
-                        </thead>
-                        <tbody id="existing_wrapper">
-                        @foreach ( $children as $child )
-                            <tr>
-                                <td>{{ $child->getAgeString() }}</td>
-                                <td>{{ $child->getDobAsString() }}</td>
-                                <td>
-                                    <input type="hidden" name="children[]"
-                                           value="{{ Carbon\Carbon::parse($child->dob)->format('Y-m') }}">
-                                    <button class="remove_date_field">
-                                        <i class="fa fa-minus" aria-hidden="true"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                <div>
-                    <label for="add-child-form">Add more children or a pregnancy:</label>
-                    @include('store.partials.add_child_form')
-                    <table>
-                        <tbody id="child_wrapper">
-
-                        </tbody>
-                    </table>
-                </div>
-                <button class="long-button submit" type="submit">Save Changes</button>
-                <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
-                    <div class="link-button link-button-large">
-                        </i><i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
+                <div class="col">
+                    <div>
+                        <img src="{{ asset('store/assets/pregnancy-light.svg') }}" name="logo">
+                        <h2>Children or pregnancy</h2>
                     </div>
-                </a>
+                    <div>
+                        <table>
+                            <thead>
+                            <tr>
+                                <td>Age</td>
+                                <td>Month / Year</td>
+                                <td></td>
+                            </tr>
+                            </thead>
+                            <tbody id="existing_wrapper">
+                            @foreach ( $children as $child )
+                                <tr>
+                                    <td>{{ $child->getAgeString() }}</td>
+                                    <td>{{ $child->getDobAsString() }}</td>
+                                    <td>
+                                        <input type="hidden" name="children[]"
+                                            value="{{ Carbon\Carbon::parse($child->dob)->format('Y-m') }}">
+                                        <button class="remove_date_field">
+                                            <i class="fa fa-minus" aria-hidden="true"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <label for="add-child-form">Add more children or a pregnancy:</label>
+                        @include('store.partials.add_child_form')
+                        <table>
+                            <tbody id="child_wrapper">
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="long-button submit" type="submit">Save Changes</button>
+                    <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
+                        <div class="link-button link-button-large">
+                            </i><i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
+                        </div>
+                    </a>
+                </div>
+            </form>
             </div>
+            <div class="col-container one-third">
             <div class="col collect">
                 <div>
                     <img src="{{ asset('store/assets/info-light.svg') }}" name="logo">
@@ -184,15 +188,14 @@
                     <button class="long-button" onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
                         Print a 4 week collection sheet for this family
                     </button>
-            </div>
-        </form>
-        @if (!isset($registration->family->leaving_on) )
-        <form class="leaving" action="{{ URL::route('store.registration.family',['id' => $registration->id]) }}" method="post">
+
+                            @if (!isset($registration->family->leaving_on) )
+        <form  action="{{ URL::route('store.registration.family',['id' => $registration->id]) }}" method="post">
             {{ method_field('PUT') }}
             {!! csrf_field() !!}
-            <div>
-                <button class="remove" type="button">Remove this family</button>
-                <div id="expandable" class="collapsed" >
+            <div class="full-width">
+                <button class="remove long-button" type="button">Remove this family</button>
+                <div id="expandable" class="collapsed marginone" >
                     <div class="reason">
                         <label for="reason-for-leaving">
                             Reason for leaving
@@ -213,6 +216,9 @@
             </div>
         </form>
         @endif
+            </div>
+
+        </div>
     </div>
 
     <script>
