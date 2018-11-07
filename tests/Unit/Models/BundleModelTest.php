@@ -2,8 +2,10 @@
 
 namespace Tests;
 
+use App\Registration;
 use Auth;
 use App\Bundle;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class BundleModelTest extends TestCase
@@ -51,5 +53,31 @@ class BundleModelTest extends TestCase
         $this->assertEquals($vs->count(), $this->bundle->vouchers()->count());
     }
 
+    /** @test */
+    public function testItCanGetOnlyDisbursedBundles()
+    {
+        // Make a registration
+        $registration = factory(Registration::class)->create();
 
+        // Grab a Faker to make some random stuff later
+        $faker = \Faker\Factory::create();
+
+        // Add a disbursed bundle history
+        $disbursedBundles = factory('App\Bundle', 4)->create([
+            'disbursed_at' => Carbon::yesterday()
+                ->startOfDay()
+                ->addHours(
+                    // Make some wiggle on those hours
+                    $faker->unique()->randomDigitNotNull()
+                )
+        ]);
+
+        // Save the bundles
+        $registration->bundles()->saveMany($disbursedBundles);
+        $registration->bundles()->save($this->bundle);
+
+        // Fresh and check the bundles
+        $registration->refresh();
+        $this->assertEquals($disbursedBundles->count(), $registration->bundles()->disbursed()->count());
+    }
 }

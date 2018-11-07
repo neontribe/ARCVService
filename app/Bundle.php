@@ -7,7 +7,6 @@ use DB;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Log;
-use SM\SMException;
 
 class Bundle extends Model
 {
@@ -235,7 +234,7 @@ class Bundle extends Model
      */
     public function scopeDisbursed($query)
     {
-        return $query->where('disbursed_at', '=', null);
+        return $query->where('disbursed_at', '!=', null);
     }
 }
 
