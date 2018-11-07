@@ -12,6 +12,7 @@ use App\Voucher;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Session;
 use Tests\StoreTestCase;
+use Carbon;
 
 class BundleControllerTest extends StoreTestCase
 {
@@ -345,5 +346,63 @@ class BundleControllerTest extends StoreTestCase
 
         $currentBundle->refresh();
         $this->assertEquals(0, $currentBundle->vouchers()->count());
+    }
+
+    /** test */
+    public function testICanDisburseABundle()
+    {
+        //setup the current bundle to be added.
+        $currentBundle = $this->registration->currentBundle();
+
+        Auth::login($this->centreUser);
+        // Make some vouchers to bundle.
+        $testCodes = [
+            'tst0123455',
+            'tst0123456',
+            'tst0123457'
+        ];
+        foreach ($testCodes as $testCode) {
+            $voucher = factory(Voucher::class, 'requested')->create([
+                'code' => $testCode
+            ]);
+            $voucher->applyTransition('order');
+            $voucher->applyTransition('print');
+            $voucher->applyTransition('dispatch');
+            $voucher->bundle()->associate($currentBundle)->save();
+        }
+
+        $route = route('store.registration.index');
+        $put_route = route('store.registration.vouchers.put', ['registration' => $this->registration->id]);
+
+        $carer = $this->registration->family->carers->first();
+        $date = Carbon\Carbon::now()->startOfDay();
+        $centre = Auth::user()->centre;
+
+        $data = [
+            "collected_at" => $centre->id,
+            "collected_by" => $carer->id,
+            "collected_on" => $date
+        ];
+
+
+        // submit data
+        $response = $this->actingAs($this->centreUser, 'store')
+            ->put($put_route, $data);
+
+        $this->followRedirects()
+            ->seePageIs($route)
+            ->assertResponseStatus(200)
+        ;
+
+        $this->registration->refresh();
+
+        $disbursedBundle = $this->registration->bundles;
+
+        die(print_r($disbursedBundle->toArray()));
+
+        $this->assertEquals($date, $disbursedBundle->disbursed_at);
+        $this->assertEquals($centre->id, $disbursedBundle->disbursing_centre_id);
+        $this->assertEquals($carer->id, $disbursedBundle->collecting_carer_id);
+        $this->assertEquals(Auth::user()->id, $disbursedBundle->disbursing_user_id);
     }
 }
