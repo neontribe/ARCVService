@@ -14,50 +14,52 @@
                 <th>Amount Collected</th>
                 <th></th>
             </tr>
-            <tr>
-                <td>22/10/2018</td>
-                <td>8</td>
-                <td>
-                    <i class="fa fa-caret-down" aria-hidden="true"></i>
-                </td>
-            </tr>
-            @foreach ($registration->bundles as $bundle)
+            @foreach ($week_commencing as $week)
                 <tr>
-                    <td colspan="3">
-                        <div>
-                            <p>
-                                <span>
-                                    <i class="fa fa-calendar"></i>
-                                    Date Collected:
-                                </span>
-                                {{ $bundle->disbursed_at }}
-                            </p>
-                            <p>
-                                <span>
-                                    <i class="fa fa-home"></i>
-                                    Collected At:
-                                <span>
-                                First Place Children's Centre
-                            </p>
-                        </div>
-                        <div>
-                            <p>
-                                <span>
-                                    <i class="fa fa-user"></i>
-                                    Collected By:
-                                </span>
-                                Mr Higgins
-                            </p>
-                            <p>
-                                <span>
-                                    <i class="fa fa-users"></i>
-                                    Allocated By:
-                                </span>
-                                Worker 1
-                            </p>
-                        </div>
+                    <td>{{ $week }}</td>
+                    <td>8</td>
+                    <td>
+                        <i class="fa fa-caret-down" aria-hidden="true"></i>
                     </td>
                 </tr>
+                @foreach ($bundles as $bundle)
+                    <tr>
+                        <td colspan="3">
+                            <div>
+                                <p>
+                                    <span>
+                                        <i class="fa fa-calendar"></i>
+                                        Date Collected:
+                                    </span>
+                                    {{ $bundle->disbursed_at }}
+                                </p>
+                                <p>
+                                    <span>
+                                        <i class="fa fa-home"></i>
+                                        Collected At:
+                                    <span>
+                                    {{ $bundle->disbursingCentre }}
+                                </p>
+                            </div>
+                            <div>
+                                <p>
+                                    <span>
+                                        <i class="fa fa-user"></i>
+                                        Collected By:
+                                    </span>
+                                    {{ $bundle->collectingCarer }}
+                                </p>
+                                <p>
+                                    <span>
+                                        <i class="fa fa-users"></i>
+                                        Allocated By:
+                                    </span>
+                                    {{ $bundle->disbursingUser }}
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
             @endforeach
         </table>
     </div>
