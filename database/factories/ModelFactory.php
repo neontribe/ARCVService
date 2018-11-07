@@ -195,37 +195,7 @@ $factory->define(App\Bundle::class, function (Faker\Generator $faker, $attribute
         : $family->entitlement
     ;
 
-    // Allocations: The factory won't fix an allocation without a centre
-    // If there's an allocated_at, set it.
-    $allocated_at = isset($attributes['allocated_at'])
-        ? $attributes['allocated_at']
-        : null
-    ;
-
-    // $centre is the centre we created the bundle at
-    $allocating_centre = null;
-
-    // if there is one supplied, find it
-    if (isset($attributes['allocating_centre_id'])) {
-        $allocating_centre = App\Centre::find($attributes['allocating_centre_id']);
-    }
-
-    // if it's *still* null
-    if (!$allocating_centre) {
-        if (Auth::check() && Auth::user()->centre) {
-            // and we have an auth user centre, use that
-            $allocating_centre = Auth::user()->centre;
-        } elseif ($family) {
-            // or grab the family's registration centre
-            $allocating_centre = App\Centre::find($family->initial_centre_id);
-        } else {
-            // or, maybe make one?
-            $allocating_centre = factory(App\Centre::class)->create();
-        }
-    }
-
     return [
-        'allocating_centre_id' => $allocating_centre->id,
         'registration_id' => $registration->id,
         'entitlement' => $entitlement
     ];

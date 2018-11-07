@@ -13,6 +13,12 @@ class AddDisbursingFieldsToBundle extends Migration
      */
     public function up()
     {
+        // We can drop the allocating_centre, it's not a thing
+        Schema::table('bundles', function (Blueprint $table) {
+            $table->dropForeign('bundles_allocating_centre_id_foreign');
+            $table->dropColumn('allocating_centre_id');
+        });
+
         Schema::table('bundles', function (Blueprint $table) {
 
             $table->integer('disbursing_user_id')
@@ -32,10 +38,6 @@ class AddDisbursingFieldsToBundle extends Migration
             $table->foreign('collecting_carer_id')
                 ->references('id')
                 ->on('carers');
-
-            // We can drop the allocating_centre, it's not a thing
-            $table->dropForeign('bundles_allocating_centre_id_foreign');
-            $table->dropColumn('allocating_centre_id');
         });
     }
 
