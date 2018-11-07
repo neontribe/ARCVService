@@ -49,4 +49,6 @@ class BundleModelTest extends TestCase
             });
         $this->assertEquals($vs->count(), $this->bundle->vouchers()->count());
     }
+
+
 }
