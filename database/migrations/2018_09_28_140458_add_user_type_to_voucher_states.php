@@ -38,7 +38,6 @@ class AddUserTypeToVoucherStates extends Migration
                 'collect',
                 'reject-to-printed',
                 'reject-to-dispatched',
-                'reject-to-allocated',
                 'confirm'
             ) 
         ");
@@ -47,12 +46,7 @@ class AddUserTypeToVoucherStates extends Migration
             UPDATE voucher_states SET user_type = 'CentreUser' 
             WHERE transition
             IN (
-                'bundle',
-                'disburse',
-                'unbundle-to-printed',
-                'unbundle-to-dispatched',
-                'lose',
-                'allocate'
+                'lose'
             ) 
         ");
     }

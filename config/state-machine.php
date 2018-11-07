@@ -14,8 +14,6 @@ return [
             'ordered',
             'printed',
             'dispatched',
-            'prepared', // used for creating bundles of vouchers
-            'allocated', // to families
             'recorded', // submitted to shortlist
             'payment_pending', // shortlist completed
             'reimbursed', // paid out
@@ -39,32 +37,12 @@ return [
                 'from' => ['printed'],
                 'to' => 'dispatched',
             ],
-            'bundle' => [
-                'from' => ['printed','dispatched'],
-                'to' => 'prepared',
-            ],
-            'disburse' => [
-                'from' => ['prepared'],
-                'to' => 'allocated',
-            ],
-            'unbundle-to-printed' => [
-                'from' => ['prepared'],
-                'to' => 'printed',
-            ],
-            'unbundle-to-dispatched' => [
-                'from' => ['prepared'],
-                'to' => 'dispatched',
-            ],
             'lose' => [
                 'from' => ['dispatched'],
                 'to' =>  'lost',
             ],
-            'allocate' => [
-                'from' => ['dispatched'],
-                'to' =>  'allocated',
-            ],
             'collect' => [
-                'from' => ['printed','dispatched','allocated'],
+                'from' => ['printed','dispatched'],
                 'to' =>  'recorded',
             ],
             'reject-to-printed' => [
@@ -75,10 +53,6 @@ return [
                 'from' => ['recorded'],
                 'to' => 'dispatched',
             ],
-            'reject-to-allocated' => [
-                'from' => ['recorded'],
-                'to' => 'allocated',
-            ],
             'confirm' => [
                 'from' => ['recorded'],
                 'to' => 'payment_pending'
@@ -88,7 +62,7 @@ return [
                 'to' =>  'reimbursed',
             ],
             'expire' => [
-                'from' => ['allocated'],
+                'from' => ['dispatched', 'printed'],
                 'to' =>  'expired',
             ],
             'retire' => [

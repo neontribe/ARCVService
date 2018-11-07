@@ -25,9 +25,10 @@ class BundleModelTest extends TestCase
         $this->assertInstanceOf(Bundle::class, $b);
         $this->assertInternalType('integer', $b->registration_id);
         $this->assertInternalType('integer', $b->entitlement);
-        $this->assertInternalType('integer', $b->allocating_centre_id);
         // a blank bundle hasn't been disbursed.
+        $this->assertNull($b->collecting_carer_id);
         $this->assertNull($b->disbursing_centre_id);
+        $this->assertNull($b->disbursing_user_id);
         $this->assertNull($b->disbursed_at);
         // a blank bundle doesn't have vouchers.
         $this->assertEmpty($b->vouchers);

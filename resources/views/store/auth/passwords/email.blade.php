@@ -22,7 +22,7 @@
                     <strong>{{ $errors->first('email') }}</strong>
                 </span>
             @endif
-            <button type="submit" class="reset-button">
+            <button type="submit" class="reset-button submit">
                 Send Password Reset Link
             </button>
         </form>

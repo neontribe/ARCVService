@@ -39,7 +39,7 @@
                 </span>
             @endif
 
-            <button type="submit" class="reset-button">
+            <button type="submit" class="reset-button submit">
                 Reset Password
             </button>
         </form>

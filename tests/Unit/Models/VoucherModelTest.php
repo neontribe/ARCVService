@@ -21,7 +21,7 @@ class VoucherModelTest extends TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->voucher = factory(Voucher::class, 'allocated')->create();
+        $this->voucher = factory(Voucher::class, 'dispatched')->create();
     }
 
     public function testAVoucherIsCreatedWithExpectedAttributes()
@@ -166,15 +166,15 @@ class VoucherModelTest extends TestCase
         $user = factory(User::class)->create();
         Auth::login($user);
 
-        // An allocated Voucher.
+        // A dispatched Voucher.
         $v1 = $this->voucher;
         // A reimbursed Voucher.
-        $v2 = factory(Voucher::class, 'allocated')->create();
+        $v2 = factory(Voucher::class, 'dispatched')->create();
         $v2->applyTransition('collect');
         $v2->applyTransition('confirm');
         $v2->applyTransition('payout');
         // A couple of Payment Pending Vouchers.
-        $v3 = factory(Voucher::class, 'allocated', 2)->create();
+        $v3 = factory(Voucher::class, 'dispatched', 2)->create();
         $v3[0]->applyTransition('collect');
         $v3[0]->applyTransition('confirm');
         $v3[1]->applyTransition('collect');
