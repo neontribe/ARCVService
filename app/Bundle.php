@@ -7,7 +7,6 @@ use DB;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Log;
-use SM\SMException;
 
 class Bundle extends Model
 {
@@ -179,16 +178,6 @@ class Bundle extends Model
     }
 
     /**
-     * Return the Centre it was allocated to
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function centre()
-    {
-        return $this->belongsTo(Centre::class);
-    }
-
-    /**
      * Get the Registration this bundle is for
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -206,6 +195,46 @@ class Bundle extends Model
     public function vouchers()
     {
         return $this->hasMany(Voucher::class);
+    }
+    /**
+     * Return the Carer it was disbursed to
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function collectingCarer()
+    {
+        return $this->belongsTo(Carer::class);
+    }
+
+    /**
+     * Return the Centre it was disbursed to
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function disbursingCentre()
+    {
+        return $this->belongsTo(Centre::class);
+    }
+
+    /**
+     * Return the CentreUser it was disbursed by
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function disbursingUser()
+    {
+        return $this->belongsTo(CentreUser::class);
+    }
+
+    /**
+     * Scope to pull only disbursed bundles
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeDisbursed($query)
+    {
+        return $query->where('disbursed_at', '!=', null);
     }
 }
 
