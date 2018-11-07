@@ -217,7 +217,7 @@ class Bundle extends Model
     }
 
     /**
-     * Return the Carer it was disbursed to
+     * Return the CentreUser it was disbursed by
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */

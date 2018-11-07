@@ -2,9 +2,10 @@
 
 namespace Tests;
 
-use App\Registration;
+
 use Auth;
 use App\Bundle;
+use App\Registration;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
