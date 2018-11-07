@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers\Store;
 
-use Auth;
 use App\Bundle;
+use App\Carer;
+use App\Centre;
 use App\Voucher;
 use App\Registration;
 use App\Http\Requests\StoreAppendBundleRequest;
 use App\Http\Requests\StoreUpdateBundleRequest;
 use App\Http\Controllers\Controller;
+use Auth;
+use Carbon\Carbon;
+use Log;
 
 class BundleController extends Controller
 {
@@ -113,7 +117,16 @@ class BundleController extends Controller
             }
         };
 
-        return $this->redirectAfterRequest($bundle->addVouchers($voucherCodes), $registration);
+        // return to page
+        $errors = $bundle->addVouchers($voucherCodes);
+
+        // Return to manager in all cases
+        $successRoute = $failRoute = route(
+            'store.registration.voucher-manager',
+            ['registration' => $registration->id]
+        );
+
+        return $this->redirectAfterRequest($errors, $successRoute, $failRoute);
     }
 
     /**
@@ -128,11 +141,17 @@ class BundleController extends Controller
         // Init for later
         $errors = [];
 
+        // Default return to manager
+        $successRoute = $failRoute = route(
+            'store.registration.voucher-manager',
+            ['registration' => $registration->id]
+        );
+
         // Filter inputs for only our interests
         $inputs = $request->only([
-            "collected_at",
-            "collected_by",
-            "collected_on"
+            'collected_at',
+            'collected_by',
+            'collected_on'
         ]);
 
         // If we don't mention them in form input because we are updating status of existing bundle vouchers
@@ -162,10 +181,49 @@ class BundleController extends Controller
             $errors[] = $bundle->syncVouchers($voucherCodes);
         }
 
-        // TODO : disbursing bundle code to go here.
+        // Check we have values on our inputs; This should have been covered in validation...
+        if (isset($inputs['collected_at']) &&
+            isset($inputs['collected_by']) &&
+            isset($inputs['collected_on'])
+        ) {
+            // Add the date;
+            $bundle->disbursed_at = Carbon::createFromFormat(
+                'Y-m-d',
+                $inputs['collected_on']
+            )->toDateTimeString();
 
-        // return to page
-        return $this->redirectAfterRequest($errors, $registration);
+            try {
+                // Find and add the carer
+                $carer = Carer::findOrFail($inputs['collected_by']);
+                $bundle->collectingCarer()->associate($carer);
+
+                // Find and add the centre
+                $centre = Centre::findOrFail($inputs['collected_at']);
+                $bundle->disbursingCentre()->associate($centre);
+
+                // Add the current user as disbursingUser.
+                $bundle->disbursingUser()->associate(Auth::user());
+
+                // Store it.
+                //$bundle->save();
+            } catch (\Exception $e) {
+                // Log that
+
+                Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+                Log::error($e->getTraceAsString());
+                $errors['transaction'] = true;
+
+                return response(print_r($bundle->toArray()), 200)
+                    ->header('Content-Type', 'text/plain');
+            }
+
+            // Return to Index as we've disbursed, and user may want to search
+            $successRoute =  route(
+                'store.registration.index'
+            );
+        }
+
+        return $this->redirectAfterRequest($errors, $successRoute, $failRoute);
     }
 
     /**
@@ -188,19 +246,25 @@ class BundleController extends Controller
             $errors["foreign"] = [$voucher->code];
         }
 
-        return $this->redirectAfterRequest($errors, $registration);
+        // Back to manager in all cases
+        $successRoute = $failRoute = route(
+            'store.registration.voucher-manager',
+            ['registration' => $registration->id]
+        );
+
+        return $this->redirectAfterRequest($errors, $successRoute, $failRoute);
     }
 
     /**
      * Filters and prepares errors before returning to the voucher-manager
      *
      * @param $errors
-     * @param $registration
+     * @param $successRoute
+     * @param $failRoute
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function redirectAfterRequest($errors, $registration)
+    public function redirectAfterRequest($errors, $successRoute, $failRoute)
     {
-        $route = route('store.registration.voucher-manager', ['registration' => $registration->id]);
         if (!empty($errors)) {
             // Assemble messages
             $messages = [];
@@ -208,7 +272,7 @@ class BundleController extends Controller
                 switch ($type) {
                     case "transaction":
                         if ($values) {
-                            $messages[] = 'Database transaction problem.';
+                            $messages[] = 'Database transaction problem';
                         }
                         break;
                     case "transition":
@@ -226,13 +290,13 @@ class BundleController extends Controller
                 }
             }
             // Spit the basic error messages back
-            return redirect($route)
+            return redirect($failRoute)
                 ->withInput()
                 ->with('error_message', join(', ', $messages) . '.');
         } else {
             // Otherwise, sure, return to the new view.
-            return redirect($route)
-                ->with('message', 'Vouchers updated.');
+            return redirect($successRoute)
+                ->with('message', 'Voucher bundle updated.');
         }
     }
 }
