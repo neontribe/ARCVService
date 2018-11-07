@@ -125,6 +125,10 @@ class BundleController extends Controller
      */
     public function update(StoreUpdateBundleRequest $request, Registration $registration)
     {
+        // Init for later
+        $errors = [];
+
+        // Filter inputs for only our interests
         $inputs = $request->only([
             "collected_at",
             "collected_by",
@@ -155,10 +159,13 @@ class BundleController extends Controller
                 : []; // Will result in the removal of the vouchers from the bundle.
 
             // sync vouchers.
-            return $this->redirectAfterRequest($bundle->syncVouchers($voucherCodes), $registration);
+            $errors[] = $bundle->syncVouchers($voucherCodes);
         }
 
-        // disbursing bundle code to go here.
+        // TODO : disbursing bundle code to go here.
+
+        // return to page
+        return $this->redirectAfterRequest($errors, $registration);
     }
 
     /**
