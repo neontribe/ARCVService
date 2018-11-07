@@ -48,7 +48,6 @@ class ApiRoutesTest extends TestCase
             $v->applyTransition('order');
             $v->applyTransition('print');
             $v->applyTransition('dispatch');
-            $v->applyTransition('allocate');
         }
         $this->vouchers[1]->trader_id = 1;
         $this->vouchers[1]->applyTransition('collect');
@@ -119,7 +118,7 @@ class ApiRoutesTest extends TestCase
 
     public function testCollectVoucherRoute()
     {
-        // Get a valid allocated code.
+        // Get a valid code.
         $code = $this->vouchers[0]->code;
         $payload= [
             'transition' => 'collect',
@@ -207,7 +206,7 @@ class ApiRoutesTest extends TestCase
 
     public function testRejectToAllocateVoucherRoute()
     {
-        // Get a valid allocated code.
+        // Get a valid code.
         $code = $this->vouchers[0]->code;
         $payload= [
             'transition' => 'collect',

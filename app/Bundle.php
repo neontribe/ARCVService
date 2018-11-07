@@ -17,11 +17,12 @@ class Bundle extends Model
      * @var array
      */
     protected $fillable = [
-        'registration_id',
         'entitlement',
+        'registration_id',
+        'collecting_carer_id',
         'disbursed_at',
-        'centre_id',
-        'family_id'
+        'disbursing_centre_id',
+        'disbursing_user_id',
     ];
 
     protected $rules = [
@@ -118,14 +119,8 @@ class Bundle extends Model
 
         // try to Run the vouchers we know are in the DB
         $vouchers->each(
-            function (Voucher $voucher) use ($bundle, $errors) {
-                try {
-                    $voucher->setBundle($bundle);
-                } catch (SMException $e) {
-                    // May occur if the transition system disagrees with the transition
-                    $errors["transitions"][] = $voucher->code;
-                    // don't rethrow!
-                }
+            function (Voucher $voucher) use ($bundle) {
+                $voucher->bundle()->associate($bundle)->save();
             }
         );
 
