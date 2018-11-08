@@ -34,7 +34,7 @@
                                     <span>
                                         <i class="fa fa-calendar"></i>
                                         Date Collected:
-                                        {{ $bundle->disbursed_at }}
+                                        {{ $bundle->disbursed_at->format('l jS F Y') }}
                                     </span>
                                 </p>
                                 <p>
