@@ -41,7 +41,7 @@
                                     <span>
                                         <i class="fa fa-home"></i>
                                         Collected At:
-                                        {{ $bundle->disbursingCentre}}
+                                        {{ $bundle->disbursingCentre->name }}
                                     <span>
                                 </p>
                             </div>
@@ -57,7 +57,7 @@
                                     <span>
                                         <i class="fa fa-users"></i>
                                         Allocated By:
-                                        {{ $bundle }}
+                                        {{ $bundle->disbursingUser->name }}
                                     </span>
                                 </p>
                             </div>

@@ -31,7 +31,7 @@ class HistoryController extends Controller
         $periodObject = new \DatePeriod(
             $disbursedBundles->last()->disbursed_at->startOfWeek(),
             CarbonInterval::week(),
-            Carbon::now()->startOfWeek()
+            Carbon::now()->endOfWeek()
         );
 
         $datesArray = [];
@@ -54,8 +54,6 @@ class HistoryController extends Controller
                 $datesArray[$week] = $bundle;
             }
         }
-
-        $this->console_log($datesArray);
 
         return view('store.collection_history', [
             'registration' => $registration,
