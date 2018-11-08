@@ -831,6 +831,7 @@ HISTORY PAGE
 
 .history table {
 	margin: 5% 5% 0 0;
+  visibility: hidden;
 }
 
 .history th,
@@ -855,15 +856,19 @@ HISTORY PAGE
 	text-align: left;
 }
 
+.history .show {
+  visibility: visible;
+}
+
 .rotate {
-    -moz-transition: all .3s linear;
-    -webkit-transition: all .3s linear;
-    transition: all .3s linear;
+  -moz-transition: all .3s linear;
+  -webkit-transition: all .3s linear;
+  transition: all .3s linear;
 }
 .rotate.up {
-    -moz-transform:rotate(180deg);
-    -webkit-transform:rotate(180deg);
-    transform:rotate(180deg);
+  -moz-transform:rotate(180deg);
+  -webkit-transform:rotate(180deg);
+  transform:rotate(180deg);
 }
 
 /*

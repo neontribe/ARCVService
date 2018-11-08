@@ -73,6 +73,7 @@
     <script type="text/javascript">
         $(document).ready(
             function () {
+                $("table").addClass("show");
                 $("td[colspan=3]").find("p").hide();
                 $("table").click(function(event) {
                     event.stopPropagation();
