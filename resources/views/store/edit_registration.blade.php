@@ -19,7 +19,7 @@
                 <div>
                     <label for="carer">Main carer</label>
                     <span class="@if(!$errors->has('carer'))collapsed @endif invalid-error" id="carer-span">This field is required</span>
-                    <input id="carer" name="carer" class="@if($errors->has('carer'))invalid @endif" type="text" value="{{ $pri_carer->name }}" autocomplete="off"
+                    <input id="carer" name="carer[{{ $pri_carer->id }}]" class="@if($errors->has('carer'))invalid @endif" type="text" value="{{ $pri_carer->name }}" autocomplete="off"
                            autocorrect="off" spellcheck="false">
                 </div>
                 <div>
@@ -27,7 +27,7 @@
                     <table id="carer_wrapper">
                         @foreach ( $sec_carers as $sec_carer )
                             <tr>
-                                <td><input name="carers[]" type="text"
+                                <td><input name="sec_carers[{{ $sec_carer->id }}]" type="text"
                                            value="{{ $sec_carer->name }}" ></td>
                                 <td>
                                     <button type="button" class="remove_field">
@@ -230,7 +230,7 @@
                     }
                     if (fields < maxFields) {
                         fields++;
-                        $(el).append('<tr><td><input name="carers[]" type="text" value="' + carer_el.val() + '" ></td><td><button type="button" class="remove_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
+                        $(el).append('<tr><td><input name="new_carers[]" type="text" value="' + carer_el.val() + '" ></td><td><button type="button" class="remove_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
                         carer_el.val('');
                     }
                 });

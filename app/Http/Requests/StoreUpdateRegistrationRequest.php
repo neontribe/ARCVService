@@ -33,9 +33,11 @@ class StoreUpdateRegistrationRequest extends FormRequest
          */
         $rules = [
             // MUST be present; MUST be a not-null string
-            'carer' => 'required|string',
+            'carer.*' => 'required|string',
             // MAY be present; MUST be a not-null string
-            'carers.*' => 'string',
+            'sec_carers.*' => 'string',
+            // MAY be present; MUST be a not-null string
+            'new_carers.*' => 'string',
             // MAY be present; MUST be a date format of '2017-07'
             'children.*' => 'date_format:Y-m',
             // MAY be null (if not present) or 0||1

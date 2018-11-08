@@ -235,7 +235,6 @@ class RegistrationController extends Controller
                 ->route('store.dashboard')
                 ->withErrors(['error_message' => 'User has no Centre']);
         }
-
         // Get the registrations this User's centre is directly responsible for
         $registrations = $centre->registrations()
             ->whereActiveFamily()
@@ -287,7 +286,6 @@ class RegistrationController extends Controller
      */
     public function store(StoreNewRegistrationRequest $request)
     {
-
         // Create Carers
         // TODO: Alter request to pre-join the array?
         $carers = array_map(
@@ -358,18 +356,51 @@ class RegistrationController extends Controller
 
     public function update(StoreUpdateRegistrationRequest $request)
     {
+        $amendedCarers = [];
+
         $user = $request->user();
 
-        // Create New Carers
-        // TODO: Alter request to pre-join the array?
-        $carers = array_map(
-            function ($carer) {
-                return new Carer(['name' => $carer]);
+        // Fetch Registration and Family
+        $registration = Registration::findOrFail($request->get('registration'));
+
+        // Update primary carer.
+        $carerInput = (array) $request->get("carer");
+        $carerKey = key($carerInput);
+        $carer = Carer::find($carerKey);
+        if ($carer->name !== $carerInput[$carer->id]) {
+            $carer->name = $carerInput[$carer->id];
+            $amendedCarers[] = $carer;
+        }
+
+        // Find secondary carers id's in the DB
+        $carersInput = (array) $request->get("sec_carers");
+        $carersKeys = $registration->family->carers->pluck("id")->toArray();
+        // remove carerKey from that;
+        if (($key = array_search($carerKey, $carersKeys)) !== false) {
+            unset($carersKeys[$key]);
+        }
+
+        // Those in the DB, not in the input can be scheduled for deletion;
+        $carersInputKeys = array_keys($carersInput);
+        $carersKeysToDelete = array_diff($carersKeys, $carersInputKeys);
+
+        // Get the secondary carers.
+        $carers = Carer::whereIn("id", $carersInputKeys);
+
+        // roll though those and amend them if necessary.
+        foreach ($carers as $carer) {
+            if ($carer->name !== $carersInput[$carer->id]) {
+                $carer->name = $carersInput[$carer->id];
+                $amendedCarers[] = $carer;
+            }
+        }
+
+        // Create mew carers
+        $newCarers = array_map(
+            function ($new_carer) {
+                return new Carer(['name' => $new_carer]);
             },
-            array_merge(
-                (array)$request->get('carer'),
-                (array)$request->get('carers')
-            )
+            (array)$request->get('new_carers')
         );
 
         // Create New Children
@@ -386,10 +417,6 @@ class RegistrationController extends Controller
             },
             (array)$request->get('children')
         );
-
-        // Fetch Registration and Family
-        $registration = Registration::findOrFail($request->get('registration'));
-
 
         // Expect only filled fm variables
         $fm = array_filter(
@@ -434,17 +461,27 @@ class RegistrationController extends Controller
 
         // Try to transact, so we can roll it back
         try {
-            DB::transaction(function () use ($registration, $family, $carers, $children) {
-                // delete the old carer's and children. messy.
-                $family->carers()->delete();
+
+            DB::transaction(function () use ($registration, $family, $amendedCarers, $newCarers, $carersKeysToDelete, $children) {
+
+                // delete the missing carers
+                Carer::whereIn('id', $carersKeysToDelete)->delete();
+
+                // delete the children. still messy.
                 $family->children()->delete();
+
                 // save the new ones!
-                $family->carers()->saveMany($carers);
+                $family->carers()->saveMany($newCarers);
                 $family->children()->saveMany($children);
+
+                // save changes to the changed names
+                collect($amendedCarers)->each(function(Carer $model) {$model->save();});
+
                 // save changes to registration.
                 $registration->save();
-                // no changes to centre, or family objects directly.
+
             });
+
         } catch (\Throwable $e) {
             // Oops! Log that
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
