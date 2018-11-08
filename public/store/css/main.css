@@ -331,7 +331,7 @@ input[type="text"].invalid,
 }
 
 .disabled {
-	background-color: #AEAEAE;
+	background-color: #DADADA;
 }
 
 .disabled:hover {
@@ -842,6 +842,7 @@ HISTORY PAGE
 .history td[colspan="3"] {
 	padding: 0 2rem;
 	background: #EEEEEE;
+  pointer-events: none;
 }
 
 .history td > div {
@@ -854,6 +855,16 @@ HISTORY PAGE
 	text-align: left;
 }
 
+.rotate {
+    -moz-transition: all .3s linear;
+    -webkit-transition: all .3s linear;
+    transition: all .3s linear;
+}
+.rotate.up {
+    -moz-transform:rotate(180deg);
+    -webkit-transform:rotate(180deg);
+    transform:rotate(180deg);
+}
 
 /*
 

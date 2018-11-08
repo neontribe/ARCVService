@@ -15,7 +15,7 @@
                 <th></th>
             </tr>
             @foreach ($bundles_by_week as $week => $bundle)
-                <tr>
+                <tr class="@if(!$bundle)disabled @endif">
                     <td>{{ $week }}</td>
                     @if ($bundle)
                         <td>{{ $bundle->vouchers->count() }}</td>
@@ -23,7 +23,9 @@
                         <td>0</td>
                     @endif
                     <td>
-                        <i class="fa fa-caret-down" aria-hidden="true"></i>
+                        @if ($bundle)
+                            <i class="fa fa-caret-down rotate" aria-hidden="true"></i>
+                        @endif
                     </td>
                 </tr>
                 @if ($bundle)
@@ -74,6 +76,7 @@
                 $("td[colspan=3]").find("p").hide();
                 $("table").click(function(event) {
                     event.stopPropagation();
+                    $(".rotate").toggleClass("up");
                     var $target = $(event.target);
                     if ( $target.closest("td").attr("colspan") > 1 ) {
                        $target.slideUp();
