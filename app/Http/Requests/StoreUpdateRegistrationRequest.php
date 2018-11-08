@@ -33,7 +33,7 @@ class StoreUpdateRegistrationRequest extends FormRequest
          */
         $rules = [
             // MUST be present; MUST be a not-null string
-            'carer.*' => 'required|string',
+            'pri_carer.*' => 'required|string',
             // MAY be present; MUST be a not-null string
             'sec_carers.*' => 'string',
             // MAY be present; MUST be a not-null string

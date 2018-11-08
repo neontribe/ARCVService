@@ -364,7 +364,7 @@ class RegistrationController extends Controller
         $registration = Registration::findOrFail($request->get('registration'));
 
         // Update primary carer.
-        $carerInput = (array) $request->get("carer");
+        $carerInput = (array) $request->get("pri_carer");
         $carerKey = key($carerInput);
         $carer = Carer::find($carerKey);
         if ($carer->name !== $carerInput[$carer->id]) {

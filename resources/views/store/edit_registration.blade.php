@@ -18,8 +18,8 @@
                 </div>
                 <div>
                     <label for="carer">Main carer</label>
-                    <span class="@if(!$errors->has('carer'))collapsed @endif invalid-error" id="carer-span">This field is required</span>
-                    <input id="carer" name="carer[{{ $pri_carer->id }}]" class="@if($errors->has('carer'))invalid @endif" type="text" value="{{ $pri_carer->name }}" autocomplete="off"
+                    <span class="@if(!$errors->has('pri_carer'))collapsed @endif invalid-error" id="carer-span">This field is required</span>
+                    <input id="carer" name="pri_carer[{{ $pri_carer->id }}]" class="@if($errors->has('pri_carer'))invalid @endif" type="text" value="{{ $pri_carer->name }}" autocomplete="off"
                            autocorrect="off" spellcheck="false">
                 </div>
                 <div>
