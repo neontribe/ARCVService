@@ -190,7 +190,7 @@ class BundleController extends Controller
             $bundle->disbursed_at = Carbon::createFromFormat(
                 'Y-m-d',
                 $inputs['collected_on']
-            )->toDateTimeString();
+            )->startOfDay()->toDateTimeString();
 
             try {
                 // Find and add the carer
@@ -205,16 +205,14 @@ class BundleController extends Controller
                 $bundle->disbursingUser()->associate(Auth::user());
 
                 // Store it.
-                //$bundle->save();
-            } catch (\Exception $e) {
-                // Log that
+                $bundle->save();
 
+            } catch (\Exception $e) {
+                // Fires if finOrFail() or save() breaks
+                // Log that error by hand
                 Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
                 Log::error($e->getTraceAsString());
                 $errors['transaction'] = true;
-
-                return response(print_r($bundle->toArray()), 200)
-                    ->header('Content-Type', 'text/plain');
             }
 
             // Return to Index as we've disbursed, and user may want to search
