@@ -14,15 +14,19 @@
                 <th>Amount Collected</th>
                 <th></th>
             </tr>
-            @foreach ($week_commencing as $week)
+            @foreach ($bundles_by_week as $week => $bundle)
                 <tr>
                     <td>{{ $week }}</td>
-                    <td>8</td>
+                    @if ($bundle)
+                        <td>{{ $bundle->vouchers->count() }}</td>
+                    @else
+                        <td>0</td>
+                    @endif
                     <td>
                         <i class="fa fa-caret-down" aria-hidden="true"></i>
                     </td>
                 </tr>
-                @foreach ($bundles as $bundle)
+                @if ($bundle)
                     <tr>
                         <td colspan="3">
                             <div>
@@ -30,15 +34,15 @@
                                     <span>
                                         <i class="fa fa-calendar"></i>
                                         Date Collected:
+                                        {{ $bundle->disbursed_at }}
                                     </span>
-                                    {{ $bundle->disbursed_at }}
                                 </p>
                                 <p>
                                     <span>
                                         <i class="fa fa-home"></i>
                                         Collected At:
+                                        {{ $bundle->disbursingCentre}}
                                     <span>
-                                    {{ $bundle->disbursingCentre }}
                                 </p>
                             </div>
                             <div>
@@ -46,20 +50,20 @@
                                     <span>
                                         <i class="fa fa-user"></i>
                                         Collected By:
+                                        {{ $bundle->collectingCarer->name }}
                                     </span>
-                                    {{ $bundle->collectingCarer }}
                                 </p>
                                 <p>
                                     <span>
                                         <i class="fa fa-users"></i>
                                         Allocated By:
+                                        {{ $bundle }}
                                     </span>
-                                    {{ $bundle->disbursingUser }}
                                 </p>
                             </div>
                         </td>
                     </tr>
-                @endforeach
+                @endif
             @endforeach
         </table>
     </div>
