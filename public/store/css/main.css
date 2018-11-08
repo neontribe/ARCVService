@@ -593,21 +593,15 @@ REGISTER PAGE
 	margin: 0;
 }
 
-.col-container.one-third {
-	width: calc(100% / 3);
-}
-
-.col-container.two-thirds {
-	width: calc(100% / 3 * 2);
-}
-
 .flex {
 	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
 }
 
 .small-button-container {
 	display: flex;
-  justify-content: center;
+  	justify-content: center;
 }
 
 .small-button-container button {
@@ -677,6 +671,14 @@ EDIT PAGE
 
 */
 
+.col.weirdcol {
+	height: 76vh;
+}
+
+.col.smallweirdcol {
+	height: 67vh;
+}
+
 .collect {
 	background-color: #dff2ce;
 }
@@ -688,6 +690,15 @@ EDIT PAGE
 .clickable-span {
 	cursor: pointer;
 	text-decoration: underline;
+}
+
+#leaving {
+	width: calc(100vw / 3 - 2rem);
+	height: 8vh;
+	position: fixed;
+	bottom: 1rem;
+	right: 1rem;
+	background-color: #eeeeee;
 }
 
 #more-family-info {
@@ -702,6 +713,7 @@ EDIT PAGE
 
 .remove {
 	background-color: #d2232a;
+	margin: 0.5rem 1rem;
 }
 
 .confirm-leaving {

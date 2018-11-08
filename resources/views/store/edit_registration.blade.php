@@ -7,11 +7,11 @@
     @include('store.partials.navbar', ['headerTitle' => 'Check, update or print'])
 
     <div class="content flex">
-        <div class="col-container two-thirds">
+
             <form action="{{ URL::route("store.registration.update",['id' => $registration->id]) }}" method="post">
                 {{ method_field('PUT') }}
                 {!! csrf_field() !!}
-                <div class="col">
+                <div class="col weirdcol">
                     <div>
                         <img src="{{ asset('store/assets/group-light.svg') }}" name="logo">
                         <h2>Voucher collectors</h2>
@@ -51,7 +51,7 @@
                     </div>
                 </div>
 
-                <div class="col">
+                <div class="col weirdcol">
                     <div>
                         <img src="{{ asset('store/assets/pregnancy-light.svg') }}" name="logo">
                         <h2>Children or pregnancy</h2>
@@ -98,11 +98,8 @@
                         </div>
                     </a>
                 </div>
-            </form>
-        </div>
 
-        <div class="col-container one-third">
-            <div class="col collect">
+            <div class="col collect smallweirdcol">
                 <div>
                     <img src="{{ asset('store/assets/info-light.svg') }}" name="logo">
                     <h2>This family</h2>
@@ -189,9 +186,10 @@
                 <button class="long-button" onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
                     Print a 4 week collection sheet for this family
                 </button>
-
-                @if (!isset($registration->family->leaving_on) )
-                <form  action="{{ URL::route('store.registration.family',['id' => $registration->id]) }}" method="post">
+            </form>
+            </div>
+            @if (!isset($registration->family->leaving_on) )
+                <form  action="{{ URL::route('store.registration.family',['id' => $registration->id]) }}" method="post" id="leaving">
                     {{ method_field('PUT') }}
                     {!! csrf_field() !!}
                     <div class="full-width">
@@ -217,8 +215,6 @@
                     </div>
                 </form>
                 @endif
-            </div>
-        </div>
     </div>
 
     <script>
