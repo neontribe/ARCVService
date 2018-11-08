@@ -34,7 +34,7 @@
                         @if(is_array(old('carers')) || (!empty(old('carers'))))
                             @foreach (old('carers') as $old_sec_carer )
                                 <tr>
-                                    <td><input name="carers[]" type="hidden" value="{{ $old_sec_carer }}">{{ $old_sec_carer }}</td>
+                                    <td><input name="carers[]" type="text" value="{{ $old_sec_carer }}" ></td>
                                     <td><button type="button" class="remove_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>
                                 </tr>
                             @endforeach
@@ -120,7 +120,7 @@
                     }
                     if (fields < maxFields) {
                         fields++;
-                        $(el).append('<tr><td><input name="carers[]" type="hidden" value="' + carer_el.val() + '" >' + carer_el.val() + '</td><td><button type="button" class="remove_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
+                        $(el).append('<tr><td><input name="carers[]" type="text" value="' + carer_el.val() + '" ></td><td><button type="button" class="remove_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
                         carer_el.val('');
                     }
                 });
