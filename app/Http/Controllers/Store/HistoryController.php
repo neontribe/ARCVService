@@ -30,14 +30,14 @@ class HistoryController extends Controller
             }
 
             $datedBundleArray = $disbursedBundles->mapWithKeys(
-                function($bundle) {
+                function ($bundle) {
                     return [
                         $bundle->disbursed_at->startOfWeek()->format('d/m/y') => $bundle
                     ];
                 }
             );
 
-            // Loop through datedBundleArray, if key matches date in
+            // Loop through $datedBundleArray, if key matches date in
             // $datesArray then assign bundle to it.
             foreach ($datedBundleArray as $week => $bundle) {
                 if (array_key_exists($week, $datesArray)) {
