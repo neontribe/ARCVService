@@ -42,13 +42,48 @@ class CentreUser extends Authenticatable
     }
 
     /**
-     * Get the CentreUser's Centre
+     * Get the CentreUser's Current Centre
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return Centre
      */
     public function centre()
     {
-        return $this->belongsTo('App\Centre');
+        // Check the session for a variable.
+        $currentCentreId = session('CentreUserCurrentCentreId');
+
+        // check it's a number
+        if (is_numeric($currentCentreId)) {
+            // check the centre is in our set
+            /** @var Centre $currentCentre */
+            $currentCentre = $this->centres()->where('id', $currentCentreId)->first();
+            if ($currentCentre) {
+                return $currentCentre;
+            }
+        }
+        // return default homeCentre if broken.
+        /** @var Centre $currentCentre */
+        $currentCentre = $this->homeCentre;
+        return $currentCentre;
+    }
+
+    /**
+     * Get the centres assigned to a user
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
+     */
+    public function centres()
+    {
+        $this->belongsToMany('App\Centre');
+    }
+
+    /**
+     * Get the Centre that's the home centre fro this user
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
+     */
+    public function homeCentre()
+    {
+        $this->belongsToMany('App\Centre')->wherePivot('homeCentre', true);
     }
 
     /**

@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateCentreUserCentrePivotTable extends Migration
+class CreateCentreCentreUserPivotTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,7 +12,7 @@ class CreateCentreUserCentrePivotTable extends Migration
      */
     public function up()
     {
-        Schema::create('centre_user_centre', function (Blueprint $table) {
+        Schema::create('centre_centre_user', function (Blueprint $table) {
             $table->integer('centre_user_id')->unsigned()->index();
             $table->foreign('centre_user_id')->references('id')->on('centre_users')->onDelete('cascade');
             $table->integer('centre_id')->unsigned()->index();
@@ -30,6 +30,6 @@ class CreateCentreUserCentrePivotTable extends Migration
      */
     public function down()
     {
-        Schema::drop('centre_user_centre');
+        Schema::drop('centre_centre_user');
     }
 }
