@@ -824,12 +824,13 @@ HISTORY PAGE
 	width: 100%;
 }
 
-.history > h3 {
-	width: 15%;
-	margin: 5%;
+.history > div {
+	width: 15rem;
+	margin: 5% 2%;
+	text-align: center;
 }
 
-.history > p {
+.history  > div > p {
 	color: red;
 	margin: 5%;
 	font-size: 1.25rem;
@@ -838,7 +839,7 @@ HISTORY PAGE
 .history table {
 	margin: 5% 5% 0 0;
 	visibility: hidden;
-	width: 65%;
+	width: 70%;
 }
 
 .history th,

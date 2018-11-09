@@ -7,7 +7,14 @@
     @include('store.partials.navbar', ['headerTitle' => 'Full Collection History'])
 
     <div class="content history">
-        <h3>{{ $pri_carer->name }}</h3>
+        <div>
+          <h3>{{ $pri_carer->name }}</h3>
+          <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
+              <div class="link-button link-button-large">
+                  </i><i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
+              </div>
+          </a>
+        </div>
         @if (!empty($bundles_by_week))
             <table>
                 <tr>

@@ -39,6 +39,7 @@ class BundleSeeder extends Seeder
             ->create()
             ->each(function (\App\Voucher $v) {
                 $v->applyTransition('order');
+               
                 $v->applyTransition('print');
                 $v->applyTransition('dispatch');
             });
@@ -48,6 +49,9 @@ class BundleSeeder extends Seeder
 
         // "Collect" it 14 days ago, by hand as the methods don't really exist, yet
         $bundle->disbursed_at = Carbon::now()->subDays(14);
+        $bundle->disbursingCentre()->associate($registration->centre);
+        $bundle->collectingCarer()->associate($pri_carer);
+        $bundle->disbursingUser()->associate(Auth::user());
         $bundle->save();
 
         // Again, the current bundle, should be blank as we just saved one.
