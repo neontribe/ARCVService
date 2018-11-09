@@ -861,6 +861,7 @@ HISTORY PAGE
 .history table p {
 	width: 50%;
 	font-size: 1rem;
+	margin: 0.5rem;
 	text-align: left;
 }
 
