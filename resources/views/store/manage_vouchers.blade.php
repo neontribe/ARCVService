@@ -126,6 +126,12 @@
                         </button>
                     </div>
                 </form>
+                <div class="error-message">
+                    <div class="error-icon-container">
+                        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                    </div>
+                    <span> {{Session::get('error_message')}}</span>
+                </div>
                 <button id="collection-button" class="long-button"><i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher collection</button>
                 <div class="center" id="vouchers-added">
                     <span class="clickable-span view" tabindex="0">
