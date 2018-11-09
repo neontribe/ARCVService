@@ -91,9 +91,12 @@
                         </table>
                     </div>
                 </div> -->
-                <button class="long-button">
-                <i class="fa fa-clipboard button-icon" aria-hidden="true"></i>Full collection history
-                </button>
+                <a href="{{ route("store.registration.collection-history", ['id' => $registration->id ]) }}" class="link">
+                    <div class="link-button link-button-large">
+                        <i class="fa fa-clock-o button-icon" aria-hidden="true"></i>
+                        Full Collection History
+                    </div>
+                </a>
             </div>
             <div class="col allocation">
                 <div>

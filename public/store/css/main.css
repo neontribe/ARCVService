@@ -331,7 +331,7 @@ input[type="text"].invalid,
 }
 
 .disabled {
-	background-color: #AEAEAE;
+	background-color: #DADADA;
 }
 
 .disabled:hover {
@@ -811,6 +811,73 @@ and (max-device-width : 1024px)  {
 		max-width: 44px;
 		padding: 0;
 	}
+}
+
+/*
+
+HISTORY PAGE
+
+*/
+
+.history {
+	display: inline-flex;
+	width: 100%;
+}
+
+.history > div {
+	width: 15rem;
+	margin: 5% 2%;
+	text-align: center;
+}
+
+.history  > div > p {
+	color: red;
+	margin: 5%;
+	font-size: 1.25rem;
+}
+
+.history table {
+	margin: 5% 5% 0 0;
+	visibility: hidden;
+	width: 70%;
+}
+
+.history th,
+.history td {
+	font-size: 1.2rem;
+	text-align: center;
+}
+
+.history td[colspan="3"] {
+	padding: 0 2rem;
+	background: #EEEEEE;
+	pointer-events: none;
+}
+
+.history td > div {
+	display: flex;
+}
+
+.history table p {
+	width: 50%;
+	font-size: 1rem;
+	margin: 0.5rem;
+	text-align: left;
+}
+
+.history .show {
+	visibility: visible;
+}
+
+.rotate {
+	-moz-transition: all .3s linear;
+	-webkit-transition: all .3s linear;
+	transition: all .3s linear;
+}
+.rotate.up {
+	-moz-transform:rotate(180deg);
+	-webkit-transform:rotate(180deg);
+	transform:rotate(180deg);
 }
 
 /*

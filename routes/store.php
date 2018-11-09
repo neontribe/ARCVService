@@ -99,6 +99,14 @@ Route::group(['middleware' => 'auth:store'], function () {
     ->name('store.registration.vouchers.post')
     ->middleware('can:view,registration');
 
+    // Fetches a registration's collection history
+    Route::get(
+        '/registrations/{registration}/collection-history',
+        'HistoryController@show'
+    )
+    ->name('store.registration.collection-history')
+    ->middleware('can:view,registration');
+
 
     // Printables
 
