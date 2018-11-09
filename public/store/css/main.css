@@ -969,13 +969,13 @@ VOUCHER PAGES
 }
 
 @keyframes slidein {
-  from {
-    transform: translateX(150%);
-  }
+	from {
+		transform: translateX(150%);
+	}
 
-  to {
-    transform: translateX(0%);
-  }
+  	to {
+    	transform: translateX(0%);
+	}
 }
 
 @keyframes pulse {
