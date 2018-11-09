@@ -46,14 +46,14 @@ class HistoryController extends Controller
             }
 
             // Reverse order to have the most recent date first.
-            $orderedDatesArray = array_reverse($datesArray);
+            $datesArray = array_reverse($datesArray);
         }
 
         return view('store.collection_history', [
             'registration' => $registration,
             'pri_carer' => array_shift($all_carers),
             'bundles' => $disbursedBundles,
-            'bundles_by_week' => $orderedDatesArray
+            'bundles_by_week' => $datesArray
         ]);
     }
 }

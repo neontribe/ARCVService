@@ -829,7 +829,7 @@ HISTORY PAGE
 	text-align: center;
 }
 
-.history  > div > p {
+.history > p {
 	color: red;
 	margin: 5%;
 	font-size: 1.25rem;
