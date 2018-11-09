@@ -31,7 +31,7 @@ class ForgotPasswordPageTest extends StoreTestCase
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
         ]);
-        $this->centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
+        $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
     }
 
     /** @test */
