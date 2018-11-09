@@ -726,10 +726,9 @@ SEARCH PAGE
 */
 
 .search {
-	padding-top: 2rem;
-	background-color: #FFF;
-	width: 80%;
-	margin-left: 10%;
+    background-color: #FFF;
+	box-sizing: border-box;
+	padding: 2rem 10% 0 10%;
 }
 
 .search table button {
