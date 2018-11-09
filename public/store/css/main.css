@@ -672,7 +672,7 @@ EDIT PAGE
 */
 
 .col.weirdcol {
-	height: 76vh;
+	height: calc(80vh - 2rem);
 }
 
 .col.smallweirdcol {

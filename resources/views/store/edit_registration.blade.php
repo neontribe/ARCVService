@@ -11,7 +11,7 @@
             <form action="{{ URL::route("store.registration.update",['id' => $registration->id]) }}" method="post">
                 {{ method_field('PUT') }}
                 {!! csrf_field() !!}
-                <div class="col weirdcol">
+                <div class="col fit-height">
                     <div>
                         <img src="{{ asset('store/assets/group-light.svg') }}" name="logo">
                         <h2>Voucher collectors</h2>
@@ -51,7 +51,7 @@
                     </div>
                 </div>
 
-                <div class="col weirdcol">
+                <div class="col fit-height">
                     <div>
                         <img src="{{ asset('store/assets/pregnancy-light.svg') }}" name="logo">
                         <h2>Children or pregnancy</h2>
@@ -99,7 +99,7 @@
                     </a>
                 </div>
 
-            <div class="col collect smallweirdcol">
+            <div class="col collect short-height">
                 <div>
                     <img src="{{ asset('store/assets/info-light.svg') }}" name="logo">
                     <h2>This family</h2>
