@@ -671,11 +671,11 @@ EDIT PAGE
 
 */
 
-.col.weirdcol {
+.col.fit-height {
 	height: calc(80vh - 2rem);
 }
 
-.col.smallweirdcol {
+.col.short-height {
 	height: 67vh;
 }
 
@@ -699,6 +699,11 @@ EDIT PAGE
 	bottom: 1rem;
 	right: 1rem;
 	background-color: #eeeeee;
+}
+
+#leaving.expanded {
+
+	
 }
 
 #more-family-info {
@@ -739,6 +744,7 @@ EDIT PAGE
 
 .collapsed {
 	display: none;
+
 }
 
 /*
