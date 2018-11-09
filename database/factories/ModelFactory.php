@@ -54,27 +54,6 @@ $factory->define(App\CentreUser::class, function (Faker\Generator $faker) {
 });
 
 /**
- * A model with a random Centre
- * Should be Registration or CentreUser
- */
-$factory->state(App\CentreUser::class, 'withRandomCentre', function () {
-
-    $centres  = App\Centre::get();
-
-    if ($centres->count() > 0) {
-        // Pick a random Centre
-        $centre = $centres[random_int(0, $centres->count()-1)];
-    } else {
-        // There should be at least one Centre
-        $centre = factory(App\Centre::class)->create();
-    }
-
-    return [
-        'centre_id' => $centre->id,
-    ];
-});
-
-/**
  * Sponsor for testing
  */
 $factory->define(App\Sponsor::class, function (Faker\Generator $faker) {
