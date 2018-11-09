@@ -18,7 +18,7 @@ class CreateCentreCentreUserPivotTable extends Migration
             $table->integer('centre_id')->unsigned()->index();
             $table->foreign('centre_id')->references('id')->on('centres')->onDelete('cascade');
             // this is a dodge don't set it false, set it null.
-            $table->boolean('homeCentre')->nullable()->unique();
+            $table->boolean('homeCentre')->nullable()->default(false);
             $table->primary(['centre_user_id', 'centre_id']);
         });
     }

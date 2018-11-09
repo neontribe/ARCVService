@@ -27,37 +27,47 @@ class StoreRoutesTest extends StoreTestCase
     /** @var Centre $centre */
     private $centre;
 
+    /** @var Centre $neighborCentre */
+    private $neighborCentre;
+
+    /** @var Centre $unrelatedCentre */
+    private $unrelatedCentre;
+
     public function setUp()
     {
         parent::setUp();
 
         $this->centre = factory(Centre::class)->create();
 
+        $this->neighborCentre = factory(Centre::class)->create([
+            "sponsor_id" => $this->centre->sponsor->id
+        ]);
+
+        $this->unrelatedCentre = factory(Centre::class)->create([
+            "sponsor_id" => factory(Sponsor::class)->create()->id
+        ]);
+
         // Create a User
-        $this->centreUser =  factory(CentreUser::class)->create([
+        $this->centreUser = factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
-            "centre_id" => $this->centre->id,
         ]);
+        $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         $this->neighborUser = factory(CentreUser::class)->create([
             "name"  => "test neighbor",
             "email" => "testneighbor@example.com",
             "password" => bcrypt('test_neighbor_pass'),
-            "centre_id" => factory(Centre::class)->create([
-                "sponsor_id" => $this->centre->sponsor->id
-            ])->id
         ]);
+        $this->neighborUser->centres()->attach($this->neighborCentre->id, ['homeCentre' => true]);
 
         $this->unrelatedUser = factory(CentreUser::class)->create([
             "name"  => "test unrelated",
             "email" => "testunrelated@example.com",
             "password" => bcrypt('test_unrelated_pass'),
-            "centre_id" => factory(Centre::class)->create([
-                "sponsor_id" => factory(Sponsor::class)->create()->id
-            ])
         ]);
+        $this->unrelatedUser->centres()->attach($this->unrelatedCentre->id, ['homeCentre' => true]);
     }
 
     /**

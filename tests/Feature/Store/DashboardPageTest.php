@@ -32,9 +32,9 @@ class DashboardPageTest extends StoreTestCase
         $this->centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-            "centre_id" => $this->centre->id,
+            "password" => bcrypt('test_user_pass')
         ]);
+        $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         // Make the centre a registration
         $this->registration = factory(Registration::class)->create([
@@ -50,18 +50,19 @@ class DashboardPageTest extends StoreTestCase
             "name"  => "FM test user",
             "email" => "testfmuser@example.com",
             "password" => bcrypt('test_fmuser_pass'),
-            "centre_id" => $this->centre->id,
             "role" => "foodmatters_user",
         ]);
+        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         // Create a CC user
         $ccuser =  factory(CentreUser::class)->create([
             "name"  => "CC test user",
             "email" => "testccuser@example.com",
             "password" => bcrypt('test_ccuser_pass'),
-            "centre_id" => $this->centre->id,
             "role" => "centre_user",
         ]);
+        $ccuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+
 
         $this->actingAs($ccuser, 'store')
             ->visit(URL::route('store.dashboard'))

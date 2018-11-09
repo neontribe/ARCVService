@@ -36,8 +36,8 @@ class EditPageTest extends StoreTestCase
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
-            "centre_id" => $this->centre->id,
         ]);
+        $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         // make centre some registrations
         $this->registration = factory(Registration::class)->create([
@@ -160,21 +160,24 @@ class EditPageTest extends StoreTestCase
     public function itOnlyShowsAFoodMattersInputsToFoodMattersUsers()
     {
         // Create a FM User
-        $users[] = factory(CentreUser::class)->create([
+        $fmuser = factory(CentreUser::class)->create([
             "name"  => "test FM user",
             "email" => "testufmser@example.com",
             "password" => bcrypt('test_fm_user_pass'),
-            "centre_id" => $this->centre->id,
             "role" => 'foodmatters_user',
         ]);
+        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+        $users[] = $fmuser;
 
-        $users[] = factory(CentreUser::class)->create([
+        $ccuser = factory(CentreUser::class)->create([
             "name"  => "test cc user",
             "email" => "testccuser@example.com",
             "password" => bcrypt('test_cc_user_pass'),
             "centre_id" => $this->centre->id,
             "role" => 'centre_user',
         ]);
+        $ccuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+        $users[] = $ccuser;
 
         foreach ($users as $centreUser) {
             $this->actingAs($centreUser, 'store')
@@ -209,9 +212,9 @@ class EditPageTest extends StoreTestCase
             'name' => 'test fm user',
             'email' => 'testfmuser@example.com',
             'password' => bcrypt('test_fmuser_pass'),
-            'centre_id' => $this->centre->id,
             'role' => 'foodmatters_user',
         ]);
+        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         $now = Carbon::now();
 
@@ -293,9 +296,9 @@ class EditPageTest extends StoreTestCase
             'name' => 'test fm user',
             'email' => 'testfmuser@example.com',
             'password' => bcrypt('test_fmuser_pass'),
-            'centre_id' => $this->centre->id,
             'role' => 'foodmatters_user',
         ]);
+        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         $now = Carbon::now();
 
@@ -345,9 +348,9 @@ class EditPageTest extends StoreTestCase
             'name' => 'test fm user',
             'email' => 'testfmuser@example.com',
             'password' => bcrypt('test_fmuser_pass'),
-            'centre_id' => $this->centre->id,
             'role' => 'foodmatters_user',
         ]);
+        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         $now = Carbon::now();
 
@@ -440,9 +443,9 @@ class EditPageTest extends StoreTestCase
             'name' => 'test fm user',
             'email' => 'testfmuser@example.com',
             'password' => bcrypt('test_fmuser_pass'),
-            'centre_id' => $this->centre->id,
             'role' => 'foodmatters_user',
         ]);
+        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         $now = Carbon::now();
 
@@ -596,8 +599,9 @@ class EditPageTest extends StoreTestCase
             "name"  => "tester",
             "email" => "tester@example.com",
             "password" => bcrypt('test_user_pass'),
-            "centre_id" => $centre->id,
         ]);
+        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
+
         $registration = factory(Registration::class)->create([
             'centre_id' => $centre->id,
         ]);

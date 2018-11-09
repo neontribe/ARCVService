@@ -21,8 +21,8 @@ class ChangePasswordPageTest extends StoreTestCase
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
-            "centre_id" => $centre->id,
         ]);
+        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // Create a token for testing.
         $token = 'abcdefabcdefabcdef';
@@ -64,8 +64,8 @@ class ChangePasswordPageTest extends StoreTestCase
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
-            "centre_id" => $centre->id,
         ]);
+        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // Create a token for testing.
         $token = 'abcdef0123456789abcdef0123456789';

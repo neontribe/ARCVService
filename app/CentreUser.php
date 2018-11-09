@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Notifications\StorePasswordResetNotification;
+use Log;
 
 class CentreUser extends Authenticatable
 {
@@ -46,7 +47,7 @@ class CentreUser extends Authenticatable
      *
      * @return Centre
      */
-    public function centre()
+    public function getCentreAttribute()
     {
         // Check the session for a variable.
         $currentCentreId = session('CentreUserCurrentCentreId');
@@ -60,9 +61,10 @@ class CentreUser extends Authenticatable
                 return $currentCentre;
             }
         }
+
         // return default homeCentre if broken.
         /** @var Centre $currentCentre */
-        $currentCentre = $this->homeCentre;
+        $currentCentre = $this->homeCentre()->first();
         return $currentCentre;
     }
 
@@ -73,7 +75,7 @@ class CentreUser extends Authenticatable
      */
     public function centres()
     {
-        $this->belongsToMany('App\Centre');
+        return $this->belongsToMany('App\Centre');
     }
 
     /**
@@ -83,7 +85,7 @@ class CentreUser extends Authenticatable
      */
     public function homeCentre()
     {
-        $this->belongsToMany('App\Centre')->wherePivot('homeCentre', true);
+        return $this->belongsToMany('App\Centre')->wherePivot('homeCentre', true);
     }
 
     /**

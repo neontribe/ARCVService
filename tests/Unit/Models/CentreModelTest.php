@@ -47,9 +47,15 @@ class CentreModelTest extends TestCase
     public function itCanHaveUsers()
     {
         $centre = factory(Centre::class)->create();
-        $centreUsers = factory(CentreUser::class, 3)->create([
-            'centre_id' => $centre->id,
-        ]);
+
+        factory(CentreUser::class, 3)
+            ->create()
+            ->each(
+                function (CentreUser $centreUser) use ($centre) {
+                    $centreUser->centres()->attach($centre);
+                }
+            );
+
         $centreUsers = $centre->centreUsers;
         $this->assertInstanceOf(Collection::class, $centreUsers);
         $this->assertInstanceOf(CentreUser::class, $centreUsers[0]);

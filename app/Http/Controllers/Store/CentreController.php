@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Store;
 
 use App\Centre;
+use App\CentreUser;
 use App\Http\Controllers\Controller;
 use App\Registration;
 use Auth;
@@ -55,6 +56,7 @@ class CentreController extends Controller
     public function exportRegistrationsSummary()
     {
         // Get User
+        /** @var CentreUser $user */
         $user = Auth::user();
 
         // Get now()
