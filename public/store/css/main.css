@@ -820,8 +820,8 @@ HISTORY PAGE
 */
 
 .history {
-  display: inline-flex;
-  width: 100%;
+	display: inline-flex;
+	width: 100%;
 }
 
 .history > h3 {
@@ -829,10 +829,16 @@ HISTORY PAGE
 	margin: 5%;
 }
 
+.history > p {
+	color: red;
+	margin: 5%;
+	font-size: 1.25rem;
+}
+
 .history table {
 	margin: 5% 5% 0 0;
-  visibility: hidden;
-  width: 65%;
+	visibility: hidden;
+	width: 65%;
 }
 
 .history th,
@@ -844,7 +850,7 @@ HISTORY PAGE
 .history td[colspan="3"] {
 	padding: 0 2rem;
 	background: #EEEEEE;
-  pointer-events: none;
+	pointer-events: none;
 }
 
 .history td > div {
@@ -858,18 +864,18 @@ HISTORY PAGE
 }
 
 .history .show {
-  visibility: visible;
+	visibility: visible;
 }
 
 .rotate {
-  -moz-transition: all .3s linear;
-  -webkit-transition: all .3s linear;
-  transition: all .3s linear;
+	-moz-transition: all .3s linear;
+	-webkit-transition: all .3s linear;
+	transition: all .3s linear;
 }
 .rotate.up {
-  -moz-transform:rotate(180deg);
-  -webkit-transform:rotate(180deg);
-  transform:rotate(180deg);
+	-moz-transform:rotate(180deg);
+	-webkit-transform:rotate(180deg);
+	transform:rotate(180deg);
 }
 
 /*

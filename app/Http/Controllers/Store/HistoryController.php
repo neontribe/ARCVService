@@ -10,50 +10,39 @@ use Carbon\CarbonInterval;
 
 class HistoryController extends Controller
 {
-
-    public function console_log( $data )
-    {
-          echo '<script>';
-          echo 'console.log('. json_encode( $data ) .')';
-          echo '</script>';
-    }
-
     public function show(Registration $registration)
     {
-
-
-
-
+        $datesArray = [];
         $all_carers = $registration->family->carers->all();
         $disbursedBundles = $registration->bundles()->disbursed()->get();
 
-        // Creates a weekly date array from first assigned voucher to today.
-        $periodObject = new \DatePeriod(
-            $disbursedBundles->last()->disbursed_at->startOfWeek(),
-            CarbonInterval::week(),
-            Carbon::now()->endOfWeek()
-        );
+        if ($disbursedBundles->count() > 0) {
+            // Creates a weekly date array from first assigned voucher to today.
+            $periodObject = new \DatePeriod(
+                $disbursedBundles->last()->disbursed_at->startOfWeek(),
+                CarbonInterval::week(),
+                Carbon::now()->endOfWeek()
+            );
 
-        $datesArray = [];
-
-        // Set the weekly date as the key of each item in $datesArray.
-        foreach ($periodObject as $carbonDate) {
-            $datesArray[$carbonDate->format('d/m/y')] = null;
-        }
-
-        $datedBundleArray = $disbursedBundles->mapWithKeys(
-            function($bundle) {
-                return [
-                    $bundle->disbursed_at->startOfWeek()->format('d/m/y') => $bundle
-                ];
+            // Set the weekly date as the key of each item in $datesArray.
+            foreach ($periodObject as $carbonDate) {
+                $datesArray[$carbonDate->format('d/m/y')] = null;
             }
-        );
 
-        // Loop through datedBundleArray, if key matches date in
-        // $datesArray then assign bundle to it.
-        foreach ($datedBundleArray as $week => $bundle) {
-            if (array_key_exists($week, $datesArray)) {
-                $datesArray[$week] = $bundle;
+            $datedBundleArray = $disbursedBundles->mapWithKeys(
+                function($bundle) {
+                    return [
+                        $bundle->disbursed_at->startOfWeek()->format('d/m/y') => $bundle
+                    ];
+                }
+            );
+
+            // Loop through datedBundleArray, if key matches date in
+            // $datesArray then assign bundle to it.
+            foreach ($datedBundleArray as $week => $bundle) {
+                if (array_key_exists($week, $datesArray)) {
+                    $datesArray[$week] = $bundle;
+                }
             }
         }
 
