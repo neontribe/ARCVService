@@ -22,12 +22,23 @@
                     @if( Auth::user()->centres->count() == 1 )
                         {{ Auth::user()->centre->name }}
                     @elseif (Auth::user()->centres->count() > 1)
-                        <form method="post" action="{{ route('store.session.put') }}">
+                        <form name="centreUserForm" method="post" action="{{ route('store.session.put') }}">
                             {!! method_field('put') !!}
                             {!! csrf_field() !!}
-                            <select name="centres">
+                            <select name="centre" onchange="document.centreUserForm.submit()">
                                 @foreach (Auth::user()->centres as $centre)
-                                    <option value="{{ $centre->id }}">{{ $centre->name }}</option>
+                                    <option
+                                            value="{{ $centre->id }}"
+                                            @if(session('CentreUserCurrentCentreId'))
+                                                @if($centre->id == session('CentreUserCurrentCentreId'))
+                                                    selected
+                                                @endif
+                                            @else
+                                                @if($centre->id == Auth::user()->centre->id)
+                                                    selected
+                                                @endif
+                                            @endif
+                                    >{{ $centre->name }}</option>
                                 @endforeach
                             </select>
                         </form>

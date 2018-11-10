@@ -79,7 +79,7 @@ class CentreUser extends Authenticatable
     }
 
     /**
-     * Get the Centre that's the home centre fro this user
+     * Get the Centre that's the home centre for this user
      *
      * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
      */
