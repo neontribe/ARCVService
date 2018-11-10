@@ -18,7 +18,11 @@ class CentreUsersSeeder extends Seeder
             "password" => bcrypt('store_pass'),
             "role" => "centre_user",
         ]);
-        $user1->centres()->attach(1, ['homeCentre' => true]);
+        $user1->centres()->attach([
+            1 => ['homeCentre' => true],
+            2 => ['homeCentre' => false],
+            3 => ['homeCentre' => false],
+        ]);
 
         $user2 = factory(App\CentreUser::class)->create([
             "name"  => "ARC FM User",
