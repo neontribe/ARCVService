@@ -41,7 +41,7 @@ Route::group(['middleware' => 'auth:store'], function () {
 
     // Route to update the CentreUser's Session
     Route::put( '/session', [
-        'as' => 'store.session',
+        'as' => 'store.session.put',
         'uses' => 'SessionController@update'
     ]);
 

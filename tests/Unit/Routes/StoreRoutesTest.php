@@ -8,6 +8,7 @@ use App\CentreUser;
 use App\Registration;
 use App\Sponsor;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Support\Collection;
 use URL;
 use Tests\StoreTestCase;
 
@@ -310,18 +311,18 @@ class StoreRoutesTest extends StoreTestCase
             "name"  => "FM test user",
             "email" => "testfmuser@example.com",
             "password" => bcrypt('test_fmuser_pass'),
-            "centre_id" => $this->centre->id,
             "role" => "foodmatters_user",
         ]);
+        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         // Create a CC user
         $ccuser =  factory(CentreUser::class)->create([
             "name"  => "CC test user",
             "email" => "testccuser@example.com",
             "password" => bcrypt('test_ccuser_pass'),
-            "centre_id" => $this->centre->id,
             "role" => "centre_user",
         ]);
+        $ccuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         // Make some registrations
         factory(Registration::class, 5)->create([
@@ -332,6 +333,7 @@ class StoreRoutesTest extends StoreTestCase
 
         Auth::logout();
 
+        // Bounce unauth'd to login
         // Bounce unauth'd to login
         $this->visit($route)
             ->seePageIs(URL::route('store.login'))
@@ -352,6 +354,38 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseOK()
         ;
     }
+
+    /** @test */
+    public function testSessionUpdateGate()
+    {
+        $route = URL::route('store.dashboard');
+        $put_route = URL::route('store.session.put');
+
+        $this->assertEquals(1, $this->centreUser->centres()->count());
+
+        // add centres
+        $centres = factory(Centre::class, 3)->create();
+        $this->centreUser->centres()->attach($centres->pluck(['id'])->toArray());
+        $this->centreUser->refresh();
+        $this->assertEquals(4, $this->centreUser->centres()->count());
+
+        // can only PUT to the route if logged in.
+        Auth::logout();
+        $this->actingAs($this->centreUser, 'store')
+            ->visit($route)
+            ->call(
+                'PUT',
+                $put_route,
+                ['centre' => $centres->last()->id] // should erase the vouchers.
+            );
+        $this->assertResponseStatus(302);
+
+        // return to prior route
+        $this->followRedirects()
+            ->seePageIs($route)
+            ->assertResponseStatus(200);
+    }
+
 
     /** @test */
     public function testRegistrationFamilyUpdateGate()
