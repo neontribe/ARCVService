@@ -2,8 +2,11 @@
 
 namespace Tests;
 
+
 use Auth;
 use App\Bundle;
+use App\Registration;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class BundleModelTest extends TestCase
@@ -25,9 +28,10 @@ class BundleModelTest extends TestCase
         $this->assertInstanceOf(Bundle::class, $b);
         $this->assertInternalType('integer', $b->registration_id);
         $this->assertInternalType('integer', $b->entitlement);
-        $this->assertInternalType('integer', $b->allocating_centre_id);
         // a blank bundle hasn't been disbursed.
+        $this->assertNull($b->collecting_carer_id);
         $this->assertNull($b->disbursing_centre_id);
+        $this->assertNull($b->disbursing_user_id);
         $this->assertNull($b->disbursed_at);
         // a blank bundle doesn't have vouchers.
         $this->assertEmpty($b->vouchers);
@@ -48,5 +52,33 @@ class BundleModelTest extends TestCase
                 $v->save();
             });
         $this->assertEquals($vs->count(), $this->bundle->vouchers()->count());
+    }
+
+    /** @test */
+    public function testItCanGetOnlyDisbursedBundles()
+    {
+        // Make a registration
+        $registration = factory(Registration::class)->create();
+
+        // Grab a Faker to make some random stuff later
+        $faker = \Faker\Factory::create();
+
+        // Add a disbursed bundle history
+        $disbursedBundles = factory('App\Bundle', 4)->create([
+            'disbursed_at' => Carbon::yesterday()
+                ->startOfDay()
+                ->addHours(
+                    // Make some wiggle on those hours
+                    $faker->unique()->randomDigitNotNull()
+                )
+        ]);
+
+        // Save the bundles
+        $registration->bundles()->saveMany($disbursedBundles);
+        $registration->bundles()->save($this->bundle);
+
+        // Fresh and check the bundles
+        $registration->refresh();
+        $this->assertEquals($disbursedBundles->count(), $registration->bundles()->disbursed()->count());
     }
 }

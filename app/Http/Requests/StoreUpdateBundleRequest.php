@@ -34,8 +34,8 @@ class StoreUpdateBundleRequest extends FormRequest
             'vouchers.*' => 'nullable|distinct|string',
             // Mutually dependent
             'collected_on' => 'required_with_all:collected_at,collected_by|date_format:Y-m-d',
-            'collected_at' => 'required_with_all:collected_on,collected_by|exists:centres',
-            'collected_by' => 'required_with_all:collected_at,collected_on|exists:carers'
+            'collected_at' => 'integer|required_with_all:collected_on,collected_by|exists:centres,id',
+            'collected_by' => 'integer|required_with_all:collected_at,collected_on|exists:carers,id'
         ];
 
         return $rules;
