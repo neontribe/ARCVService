@@ -902,21 +902,6 @@ VOUCHER PAGES
 	margin-right: 2%;
 }
 
-.allocation .clickable-span {
-	text-decoration: none;
-	font-size: 1.15rem;
-}
-
-.allocation .clickable-span:hover,
-.allocation .clickable-span:focus {
-	text-decoration: underline;
-	color: #8B417B;
-}
-
-.allocation .clickable-span i {
-	padding-right: 5px;
-}
-
 .single-container {
 	align-items: flex-end;
 	display: flex;
