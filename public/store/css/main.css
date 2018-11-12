@@ -830,12 +830,6 @@ HISTORY PAGE
 	text-align: center;
 }
 
-.history  > div > p {
-	color: red;
-	margin: 5%;
-	font-size: 1.25rem;
-}
-
 .history table {
 	margin: 5% 5% 0 0;
 	visibility: hidden;
@@ -878,6 +872,12 @@ HISTORY PAGE
 	-moz-transform:rotate(180deg);
 	-webkit-transform:rotate(180deg);
 	transform:rotate(180deg);
+}
+
+.content-warning {
+	color: #d2232a;
+	margin: 5%;
+	font-size: 1.25rem;
 }
 
 /*

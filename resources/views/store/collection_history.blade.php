@@ -77,7 +77,7 @@
                 @endforeach
             </table>
         @else
-            <p>This family has not collected.</p>
+            <p class="content-warning">This family has not collected.</p>
         @endif
     </div>
 
