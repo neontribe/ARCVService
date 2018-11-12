@@ -188,7 +188,7 @@ class BundleController extends Controller
         ) {
 
             // Check there are actual vouchers to disburse, or this is a bit.
-            if (empty($bundle->vochcers)) {
+            if (empty($bundle->vouchers)) {
 
                 $errors["empty"] = true;
 
