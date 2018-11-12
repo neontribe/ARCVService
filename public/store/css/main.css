@@ -141,12 +141,13 @@ button {
 	border: none;
 	border-radius: 3px;
 	box-shadow:0 3px 12px -1px rgba(0,0,0,.2);
-	transform: translate3d(0, 0, 0);
 	color: white;
+	font-family: Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font-size: 1rem;
 	min-height: 48px;
 	min-width: 48px;
-	font-size: 1rem;
 	overflow: hidden;
+	transform: translate3d(0, 0, 0);
 }
 
 button:disabled {
