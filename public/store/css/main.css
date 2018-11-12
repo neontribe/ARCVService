@@ -705,6 +705,12 @@ EDIT PAGE
 	height: 28vh;
 }
 
+.flex-col {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
 #more-family-info {
 	list-style-type: none;
 }

@@ -192,7 +192,7 @@
                 <form  action="{{ URL::route('store.registration.family',['id' => $registration->id]) }}" method="post" id="leaving">
                     {{ method_field('PUT') }}
                     {!! csrf_field() !!}
-                    <div class="full-width">
+                    <div class="full-width flex-col">
                         <button class="remove long-button" type="button">Remove this family</button>
                         <div id="expandable" class="collapsed confirm-leaving" >
                             <div class="reason">
