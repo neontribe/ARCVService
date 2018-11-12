@@ -170,16 +170,19 @@ class StoreRoutesTest extends StoreTestCase
             ->visit($edit_route)
         ;
 
-        $this->type("changedByTest", "carer")
+        // Need to find the pri_carer id
+        $pri_carer = $registration->family->carers->shift();
+
+        $this->type("changedByTest", "pri_carer[". $pri_carer->id ."]")
             ->press("Save Changes")
             ->seePageIs($edit_route)
             ->assertResponseStatus(200)
-            ->seeElement("input[value=changedByTest]")
+            ->seeElement("input[id=carer][value=changedByTest]")
         ;
 
         Auth::logout();
 
-        $this->type("**blanked**", "carer")
+        $this->type("**blanked**", "pri_carer[". $pri_carer->id ."]")
             ->press("Save Changes")
             ->seePageIs($login_route)
             ->assertResponseStatus(200)

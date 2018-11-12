@@ -51,7 +51,7 @@ class EditPageTest extends StoreTestCase
         $pri_carer = $this->registration->family->carers->first();
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
-            ->seeElement('input[name="carer"][value="'. $pri_carer->name .'"]')
+            ->seeElement('input[id="carer"][value="'. $pri_carer->name .'"]')
         ;
     }
 
@@ -91,7 +91,7 @@ class EditPageTest extends StoreTestCase
         // See the names in the page
         foreach ($carers as $sec_carer) {
              $this->see($sec_carer->name)
-                 ->seeElement('input[type="hidden"][value="'. $sec_carer->name .'"]')
+                 ->seeElement('input[type="text"][value="'. $sec_carer->name .'"]')
                  ;
         }
     }
@@ -282,7 +282,6 @@ class EditPageTest extends StoreTestCase
                 $this->dontSeeElement('input[name="fm_diary"][checked]');
             }
         }
-
     }
 
     /** @test */
@@ -334,7 +333,6 @@ class EditPageTest extends StoreTestCase
                 $this->dontSeeElement('input[name="fm_privacy"][checked]');
             }
         }
-
     }
 
     /** @test */
@@ -522,7 +520,7 @@ class EditPageTest extends StoreTestCase
             ->visit(URL::route('store.registration.edit', $this->registration->id))
             ->dontSee('Remove this family')
         ;
-   }
+    }
 
     /** @test */
     public function itWillRejectLeavingWithoutAReason()
@@ -629,7 +627,7 @@ class EditPageTest extends StoreTestCase
             ->see('<td>0 yr, 11 mo</td>')
             ->see('<div class="warning">');
 
-        // Set Carbon date & time back 
+        // Set Carbon date & time back
         Carbon::setTestNow();
     }
 }
