@@ -363,6 +363,10 @@ class RegistrationController extends Controller
         // Fetch Registration and Family
         $registration = Registration::findOrFail($request->get('registration'));
 
+        // NOTE: Following refactor where we needed to retain Carer ids.
+        // Possible that we might want to add flag to carer to ditinguish Main from Secondary,
+        // to simplify method below for sorting and updating carer entries.
+
         // Update primary carer.
         $carerInput = (array) $request->get("pri_carer");
         $carerKey = key($carerInput);
@@ -395,7 +399,7 @@ class RegistrationController extends Controller
             }
         }
 
-        // Create mew carers
+        // Create new carers
         $newCarers = array_map(
             function ($new_carer) {
                 return new Carer(['name' => $new_carer]);
