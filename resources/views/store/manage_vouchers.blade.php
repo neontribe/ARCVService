@@ -131,11 +131,9 @@
                 </form>
                 <button id="collection-button" class="long-button"><i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher collection</button>
                 <div class="center" id="vouchers-added">
-                    <span class="clickable-span view" tabindex="0">
-                        <i class="fa fa-list" aria-hidden="true"></i>
-                    </span>
+                    <span class="emphasised-section">Vouchers added</span>
                     <span class="number-circle">{{ $vouchers_amount }}</span>
-                    <div id="vouchers" class="collapsed">
+                    <div id="vouchers" class="@if($vouchers_amount === 0)collapsed @endif">
                         <form id="unbundle" name="unbundle" action="" method="POST">
                             {!! method_field('delete') !!}
                             {!! csrf_field() !!}
@@ -264,26 +262,6 @@
                         }
                     }
                 });
-
-                $('.clickable-span').click(function (e) {
-                    // The next sibling is the content
-                    var content = $('#vouchers');
-
-                    if($(this).hasClass('view')) {
-                        $(this).removeClass('view').addClass('hide');
-                        content.removeClass('collapsed');
-                    } else {
-                        $(this).removeClass('hide').addClass('view');
-                        content.addClass('collapsed');
-                    }
-                });
-
-                // On enter keydown, run click functionality above (for a11y tabbing)
-                $('.clickable-span').keypress(function(e){
-                  if(e.which == 13) {
-                    $('.clickable-span').click();
-                  }
-                })
 
                 // Browser backup for lack of datepicker support eg. Safari
                 // Reset back to English date format

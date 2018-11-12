@@ -1023,14 +1023,6 @@ VOUCHER PAGES
 	font-family: Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-.view:after {
-	content: 'View vouchers added';
-}
-
-.hide:after {
-	content: 'Hide vouchers added';
-}
-
 .delete-button {
 	min-height: 34px;
 	min-width: 34px;
