@@ -279,11 +279,15 @@
 
         $('.remove').click(function (e) {
             $('#expandable').removeClass('collapsed');
+            $('#leaving').addClass('expanded');
+            $(".short-height").css("height", "47vh");
             e.preventDefault();
         });
 
         $('#cancel').click(function (e) {
             $('#expandable').addClass('collapsed');
+            $('#leaving').removeClass('expanded');
+            $(".short-height").css("height", "67vh");
             e.preventDefault();
         });
 
