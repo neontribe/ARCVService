@@ -6,7 +6,16 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreUpdateSessionRequest extends FormRequest
 {
-     // NOTE: Can define authorize() if route group auth:store not sufficient.
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        // Route group ath:store should be sufficient guard.
+        return true;
+    }
 
     /**
      * Get the validation rules that apply to the request.
