@@ -9,6 +9,7 @@ use App\Bundle;
 use App\Centre;
 use App\CentreUser;
 use App\Voucher;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Session;
 use Tests\StoreTestCase;
@@ -346,5 +347,54 @@ class BundleControllerTest extends StoreTestCase
 
         $currentBundle->refresh();
         $this->assertEquals(0, $currentBundle->vouchers()->count());
+    }
+
+    /** @test */
+    public function testICannotDisburseAnEmptyBundle()
+    {
+        // Setup bundle
+        $currentBundle = $this->registration->currentBundle();
+
+        Auth::login($this->centreUser);
+
+        // There should be one currentBundle with 3 vouchers
+        $this->assertCount(1, $this->registration->bundles);
+
+        // Create a sensible place to have collected it.
+        $disbursementCentre = Auth::user()->centre->id;
+
+        // Create a sensible date to have Collected on
+        $disbursementDate = Carbon::now()->startOfWeek()->format("Y-m-d");
+
+        // Find a carer for bundle
+        $collectingCarer = $this->registration->family->carers->first()->id;
+
+        // Array all that
+        $data = [
+            "collected_at" => $disbursementCentre,
+            "collected_on" => $disbursementDate,
+            "collected_by" => $collectingCarer
+        ];
+
+        $route = route('store.registration.voucher-manager', ['registration' => $this->registration->id]);
+        $put_route = route('store.registration.vouchers.put', ['registration' => $this->registration->id]);
+
+        // Attempt to submit
+        $response = $this->actingAs($this->centreUser, 'store')
+            ->visit($route)
+            ->put(
+                $put_route,
+                $data
+            );
+
+        // Dig out errors from Session
+        $response->seeInSession('error_message');
+        $error = Session::get("error_message");
+        $this->assertRegExp('/Action denied on empty bundle/', $error);
+
+        // Check the submission was a success
+        $this->followRedirects()
+            ->seePageIs($route)
+            ->assertResponseStatus(200);
     }
 }
