@@ -334,7 +334,6 @@ class StoreRoutesTest extends StoreTestCase
         Auth::logout();
 
         // Bounce unauth'd to login
-        // Bounce unauth'd to login
         $this->visit($route)
             ->seePageIs(URL::route('store.login'))
             ->assertResponseStatus(200)
@@ -376,7 +375,7 @@ class StoreRoutesTest extends StoreTestCase
             ->call(
                 'PUT',
                 $put_route,
-                ['centre' => $centres->last()->id] // should erase the vouchers.
+                ['centre' => $centres->last()->id]
             );
         $this->assertResponseStatus(302);
 

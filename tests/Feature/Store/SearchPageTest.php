@@ -19,7 +19,6 @@ class SearchPageTest extends StoreTestCase
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
-
         ]);
         $centreUser->centres()->attach(1, ['homeCentre' => true]);
 
@@ -48,7 +47,6 @@ class SearchPageTest extends StoreTestCase
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
-            "centre_id" => $centre1->id
         ]);
         $centreUser->centres()->attach($centre1->id, ['homeCentre' => true]);
 
@@ -92,7 +90,6 @@ class SearchPageTest extends StoreTestCase
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
-            "centre_id" => $centre->id,
         ]);
         $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 

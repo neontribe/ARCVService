@@ -52,6 +52,8 @@ class CentreModelTest extends TestCase
             ->create()
             ->each(
                 function (CentreUser $centreUser) use ($centre) {
+                    // Technically we should be setting one homeCentre for each user.
+                    // Deemed unneccessary for purposes of this test at time of writing.
                     $centreUser->centres()->attach($centre);
                 }
             );

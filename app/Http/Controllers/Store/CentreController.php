@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Store;
 
 use App\Centre;
-use App\CentreUser;
 use App\Http\Controllers\Controller;
 use App\Registration;
 use Auth;
@@ -56,7 +55,6 @@ class CentreController extends Controller
     public function exportRegistrationsSummary()
     {
         // Get User
-        /** @var CentreUser $user */
         $user = Auth::user();
 
         // Get now()
@@ -144,8 +142,8 @@ class CentreController extends Controller
             // stack new row onto the array
             $rows[] = $row;
         }
-        
-        // PHP 7 feature; comparison "spaceship" opertator "<=>" : returns -1/0/1 
+
+        // PHP 7 feature; comparison "spaceship" opertator "<=>" : returns -1/0/1
         usort($rows, function ($a, $b) {
             return $a['RVID'] <=> $b['RVID'];
         });

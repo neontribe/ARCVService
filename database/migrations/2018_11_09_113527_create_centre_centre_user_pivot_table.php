@@ -17,7 +17,8 @@ class CreateCentreCentreUserPivotTable extends Migration
             $table->foreign('centre_user_id')->references('id')->on('centre_users')->onDelete('cascade');
             $table->integer('centre_id')->unsigned()->index();
             $table->foreign('centre_id')->references('id')->on('centres')->onDelete('cascade');
-            // this is a dodge don't set it false, set it null.
+            // This is a dodge don't set it false, set it null.
+            // TODO ^^ clarify this comment. Why do we need it nullable if we have default?
             $table->boolean('homeCentre')->nullable()->default(false);
             $table->primary(['centre_user_id', 'centre_id']);
         });
