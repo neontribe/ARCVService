@@ -34,8 +34,9 @@ class BundleControllerTest extends StoreTestCase
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
-            "centre_id" => $this->centre->id,
+
         ]);
+        $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         //  A Registration on that centre
         $this->registration = factory(Registration::class)->create([

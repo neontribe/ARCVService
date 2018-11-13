@@ -53,11 +53,11 @@ class Centre extends Model
     /**
      * Get the CentreUsers who belong to this Centre
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
      */
     public function centreUsers()
     {
-        return $this->hasMany('App\CentreUser');
+        return $this->belongsToMany('App\CentreUser');
     }
 
     /**

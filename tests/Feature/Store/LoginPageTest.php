@@ -22,8 +22,8 @@ class LoginPageTest extends StoreTestCase
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
-            "centre_id" => $this->centre->id,
         ]);
+        $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
     }
 
     /** @test */

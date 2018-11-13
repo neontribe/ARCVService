@@ -8,6 +8,7 @@ use App\CentreUser;
 use App\Registration;
 use App\Sponsor;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Support\Collection;
 use URL;
 use Tests\StoreTestCase;
 
@@ -27,37 +28,47 @@ class StoreRoutesTest extends StoreTestCase
     /** @var Centre $centre */
     private $centre;
 
+    /** @var Centre $neighborCentre */
+    private $neighborCentre;
+
+    /** @var Centre $unrelatedCentre */
+    private $unrelatedCentre;
+
     public function setUp()
     {
         parent::setUp();
 
         $this->centre = factory(Centre::class)->create();
 
+        $this->neighborCentre = factory(Centre::class)->create([
+            "sponsor_id" => $this->centre->sponsor->id
+        ]);
+
+        $this->unrelatedCentre = factory(Centre::class)->create([
+            "sponsor_id" => factory(Sponsor::class)->create()->id
+        ]);
+
         // Create a User
-        $this->centreUser =  factory(CentreUser::class)->create([
+        $this->centreUser = factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
-            "centre_id" => $this->centre->id,
         ]);
+        $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         $this->neighborUser = factory(CentreUser::class)->create([
             "name"  => "test neighbor",
             "email" => "testneighbor@example.com",
             "password" => bcrypt('test_neighbor_pass'),
-            "centre_id" => factory(Centre::class)->create([
-                "sponsor_id" => $this->centre->sponsor->id
-            ])->id
         ]);
+        $this->neighborUser->centres()->attach($this->neighborCentre->id, ['homeCentre' => true]);
 
         $this->unrelatedUser = factory(CentreUser::class)->create([
             "name"  => "test unrelated",
             "email" => "testunrelated@example.com",
             "password" => bcrypt('test_unrelated_pass'),
-            "centre_id" => factory(Centre::class)->create([
-                "sponsor_id" => factory(Sponsor::class)->create()->id
-            ])
         ]);
+        $this->unrelatedUser->centres()->attach($this->unrelatedCentre->id, ['homeCentre' => true]);
     }
 
     /**
@@ -303,18 +314,18 @@ class StoreRoutesTest extends StoreTestCase
             "name"  => "FM test user",
             "email" => "testfmuser@example.com",
             "password" => bcrypt('test_fmuser_pass'),
-            "centre_id" => $this->centre->id,
             "role" => "foodmatters_user",
         ]);
+        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         // Create a CC user
         $ccuser =  factory(CentreUser::class)->create([
             "name"  => "CC test user",
             "email" => "testccuser@example.com",
             "password" => bcrypt('test_ccuser_pass'),
-            "centre_id" => $this->centre->id,
             "role" => "centre_user",
         ]);
+        $ccuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         // Make some registrations
         factory(Registration::class, 5)->create([
@@ -345,6 +356,38 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseOK()
         ;
     }
+
+    /** @test */
+    public function testSessionUpdateGate()
+    {
+        $route = URL::route('store.dashboard');
+        $put_route = URL::route('store.session.put');
+
+        $this->assertEquals(1, $this->centreUser->centres()->count());
+
+        // add centres
+        $centres = factory(Centre::class, 3)->create();
+        $this->centreUser->centres()->attach($centres->pluck(['id'])->toArray());
+        $this->centreUser->refresh();
+        $this->assertEquals(4, $this->centreUser->centres()->count());
+
+        // can only PUT to the route if logged in.
+        Auth::logout();
+        $this->actingAs($this->centreUser, 'store')
+            ->visit($route)
+            ->call(
+                'PUT',
+                $put_route,
+                ['centre' => $centres->last()->id]
+            );
+        $this->assertResponseStatus(302);
+
+        // return to prior route
+        $this->followRedirects()
+            ->seePageIs($route)
+            ->assertResponseStatus(200);
+    }
+
 
     /** @test */
     public function testRegistrationFamilyUpdateGate()
