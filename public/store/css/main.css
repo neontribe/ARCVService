@@ -902,21 +902,6 @@ VOUCHER PAGES
 	margin-right: 2%;
 }
 
-.allocation .clickable-span {
-	text-decoration: none;
-	font-size: 1.15rem;
-}
-
-.allocation .clickable-span:hover,
-.allocation .clickable-span:focus {
-	text-decoration: underline;
-	color: #8B417B;
-}
-
-.allocation .clickable-span i {
-	padding-right: 5px;
-}
-
 .single-container {
 	align-items: flex-end;
 	display: flex;
@@ -1021,14 +1006,6 @@ VOUCHER PAGES
 	max-width: 180px;
 	padding: 0.5rem;
 	font-family: Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-
-.view:after {
-	content: 'View vouchers added';
-}
-
-.hide:after {
-	content: 'Hide vouchers added';
 }
 
 .delete-button {
