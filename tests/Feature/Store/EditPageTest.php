@@ -36,8 +36,8 @@ class EditPageTest extends StoreTestCase
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
-            "centre_id" => $this->centre->id,
         ]);
+        $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         // make centre some registrations
         $this->registration = factory(Registration::class)->create([
@@ -51,7 +51,7 @@ class EditPageTest extends StoreTestCase
         $pri_carer = $this->registration->family->carers->first();
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
-            ->seeElement('input[name="carer"][value="'. $pri_carer->name .'"]')
+            ->seeElement('input[id="carer"][value="'. $pri_carer->name .'"]')
         ;
     }
 
@@ -91,7 +91,7 @@ class EditPageTest extends StoreTestCase
         // See the names in the page
         foreach ($carers as $sec_carer) {
              $this->see($sec_carer->name)
-                 ->seeElement('input[type="hidden"][value="'. $sec_carer->name .'"]')
+                 ->seeElement('input[type="text"][value="'. $sec_carer->name .'"]')
                  ;
         }
     }
@@ -160,21 +160,24 @@ class EditPageTest extends StoreTestCase
     public function itOnlyShowsAFoodMattersInputsToFoodMattersUsers()
     {
         // Create a FM User
-        $users[] = factory(CentreUser::class)->create([
+        $fmuser = factory(CentreUser::class)->create([
             "name"  => "test FM user",
             "email" => "testufmser@example.com",
             "password" => bcrypt('test_fm_user_pass'),
-            "centre_id" => $this->centre->id,
             "role" => 'foodmatters_user',
         ]);
+        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+        $users[] = $fmuser;
 
-        $users[] = factory(CentreUser::class)->create([
+        $ccuser = factory(CentreUser::class)->create([
             "name"  => "test cc user",
             "email" => "testccuser@example.com",
             "password" => bcrypt('test_cc_user_pass'),
             "centre_id" => $this->centre->id,
             "role" => 'centre_user',
         ]);
+        $ccuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+        $users[] = $ccuser;
 
         foreach ($users as $centreUser) {
             $this->actingAs($centreUser, 'store')
@@ -209,9 +212,9 @@ class EditPageTest extends StoreTestCase
             'name' => 'test fm user',
             'email' => 'testfmuser@example.com',
             'password' => bcrypt('test_fmuser_pass'),
-            'centre_id' => $this->centre->id,
             'role' => 'foodmatters_user',
         ]);
+        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         $now = Carbon::now();
 
@@ -282,7 +285,6 @@ class EditPageTest extends StoreTestCase
                 $this->dontSeeElement('input[name="fm_diary"][checked]');
             }
         }
-
     }
 
     /** @test */
@@ -293,9 +295,9 @@ class EditPageTest extends StoreTestCase
             'name' => 'test fm user',
             'email' => 'testfmuser@example.com',
             'password' => bcrypt('test_fmuser_pass'),
-            'centre_id' => $this->centre->id,
             'role' => 'foodmatters_user',
         ]);
+        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         $now = Carbon::now();
 
@@ -334,7 +336,6 @@ class EditPageTest extends StoreTestCase
                 $this->dontSeeElement('input[name="fm_privacy"][checked]');
             }
         }
-
     }
 
     /** @test */
@@ -345,9 +346,9 @@ class EditPageTest extends StoreTestCase
             'name' => 'test fm user',
             'email' => 'testfmuser@example.com',
             'password' => bcrypt('test_fmuser_pass'),
-            'centre_id' => $this->centre->id,
             'role' => 'foodmatters_user',
         ]);
+        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         $now = Carbon::now();
 
@@ -440,9 +441,9 @@ class EditPageTest extends StoreTestCase
             'name' => 'test fm user',
             'email' => 'testfmuser@example.com',
             'password' => bcrypt('test_fmuser_pass'),
-            'centre_id' => $this->centre->id,
             'role' => 'foodmatters_user',
         ]);
+        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         $now = Carbon::now();
 
@@ -522,7 +523,7 @@ class EditPageTest extends StoreTestCase
             ->visit(URL::route('store.registration.edit', $this->registration->id))
             ->dontSee('Remove this family')
         ;
-   }
+    }
 
     /** @test */
     public function itWillRejectLeavingWithoutAReason()
@@ -596,8 +597,9 @@ class EditPageTest extends StoreTestCase
             "name"  => "tester",
             "email" => "tester@example.com",
             "password" => bcrypt('test_user_pass'),
-            "centre_id" => $centre->id,
         ]);
+        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
+
         $registration = factory(Registration::class)->create([
             'centre_id' => $centre->id,
         ]);
@@ -629,7 +631,7 @@ class EditPageTest extends StoreTestCase
             ->see('<td>0 yr, 11 mo</td>')
             ->see('<div class="warning">');
 
-        // Set Carbon date & time back 
+        // Set Carbon date & time back
         Carbon::setTestNow();
     }
 }

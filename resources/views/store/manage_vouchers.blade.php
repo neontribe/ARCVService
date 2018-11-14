@@ -129,7 +129,13 @@
                         </button>
                     </div>
                 </form>
-                <button id="collection-button" class="long-button"><i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher collection</button>
+                <button id="collection-button"
+                        class="long-button"
+                        @if ($vouchers_amount == 0)
+                            disabled
+                        @endif
+                >
+                    <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher collection</button>
                 <div class="center" id="vouchers-added">
                     <span class="clickable-span view" tabindex="0">
                         <i class="fa fa-list" aria-hidden="true"></i>
@@ -201,7 +207,11 @@
                             </div>
                         </div>
                         <button class="long-button submit"
-                                type="submit">
+                                type="submit"
+                                @if ($vouchers_amount == 0)
+                                    disabled
+                                @endif
+                        >
                             Confirm pick up
                         </button>
                     </div>

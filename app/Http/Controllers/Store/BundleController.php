@@ -186,39 +186,48 @@ class BundleController extends Controller
             isset($inputs['collected_by']) &&
             isset($inputs['collected_on'])
         ) {
-            // Add the date;
-            $bundle->disbursed_at = Carbon::createFromFormat(
-                'Y-m-d',
-                $inputs['collected_on']
-            )->startOfDay()->toDateTimeString();
 
-            try {
-                // Find and add the carer
-                $carer = Carer::findOrFail($inputs['collected_by']);
-                $bundle->collectingCarer()->associate($carer);
+            // Check there are actual vouchers to disburse, or this is a bit.
+            if ($bundle->vouchers->count() == 0) {
 
-                // Find and add the centre
-                $centre = Centre::findOrFail($inputs['collected_at']);
-                $bundle->disbursingCentre()->associate($centre);
+                $errors["empty"] = true;
 
-                // Add the current user as disbursingUser.
-                $bundle->disbursingUser()->associate(Auth::user());
+            } else {
 
-                // Store it.
-                $bundle->save();
+                // Add the date;
+                $bundle->disbursed_at = Carbon::createFromFormat(
+                    'Y-m-d',
+                    $inputs['collected_on']
+                )->startOfDay()->toDateTimeString();
 
-            } catch (\Exception $e) {
-                // Fires if finOrFail() or save() breaks
-                // Log that error by hand
-                Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
-                Log::error($e->getTraceAsString());
-                $errors['transaction'] = true;
+                try {
+                    // Find and add the carer
+                    $carer = Carer::findOrFail($inputs['collected_by']);
+                    $bundle->collectingCarer()->associate($carer);
+
+                    // Find and add the centre
+                    $centre = Centre::findOrFail($inputs['collected_at']);
+                    $bundle->disbursingCentre()->associate($centre);
+
+                    // Add the current user as disbursingUser.
+                    $bundle->disbursingUser()->associate(Auth::user());
+
+                    // Store it.
+                    $bundle->save();
+
+                } catch (\Exception $e) {
+                    // Fires if finOrFail() or save() breaks
+                    // Log that error by hand
+                    Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+                    Log::error($e->getTraceAsString());
+                    $errors['transaction'] = true;
+                }
+
+                // Return to Index as we've disbursed, and user may want to search
+                $successRoute = route(
+                    'store.registration.index'
+                );
             }
-
-            // Return to Index as we've disbursed, and user may want to search
-            $successRoute =  route(
-                'store.registration.index'
-            );
         }
 
         return $this->redirectAfterRequest($errors, $successRoute, $failRoute);
@@ -281,6 +290,11 @@ class BundleController extends Controller
                         break;
                     case "foreign":
                         $messages[] = "Action denied on a foreign voucher: " . join(', ', $values);
+                        break;
+                    case "empty":
+                        if ($values) {
+                            $messages[] = "Action denied on empty bundle";
+                        }
                         break;
                     default:
                         $messages[] = 'There was an unknown error';
