@@ -91,9 +91,12 @@
                         </table>
                     </div>
                 </div> -->
-                <button class="long-button">
-                <i class="fa fa-clipboard button-icon" aria-hidden="true"></i>Full collection history
-                </button>
+                <a href="{{ route("store.registration.collection-history", ['id' => $registration->id ]) }}" class="link">
+                    <div class="link-button link-button-large">
+                        <i class="fa fa-clock-o button-icon" aria-hidden="true"></i>
+                        Full Collection History
+                    </div>
+                </a>
             </div>
             <div class="col allocation">
                 <div>
@@ -132,13 +135,17 @@
                     </div>
                     <span> {{Session::get('error_message')}}</span>
                 </div>
-                <button id="collection-button" class="long-button"><i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher collection</button>
+                <button id="collection-button"
+                        class="long-button"
+                        @if ($vouchers_amount == 0)
+                            disabled
+                        @endif
+                >
+                    <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher collection</button>
                 <div class="center" id="vouchers-added">
-                    <span class="clickable-span view" tabindex="0">
-                        <i class="fa fa-list" aria-hidden="true"></i>
-                    </span>
+                    <span class="emphasised-section">Vouchers added</span>
                     <span class="number-circle">{{ $vouchers_amount }}</span>
-                    <div id="vouchers" class="collapsed">
+                    <div id="vouchers" class="@if($vouchers_amount === 0)collapsed @endif">
                         <form id="unbundle" name="unbundle" action="" method="POST">
                             {!! method_field('delete') !!}
                             {!! csrf_field() !!}
@@ -204,7 +211,11 @@
                             </div>
                         </div>
                         <button class="long-button submit"
-                                type="submit">
+                                type="submit"
+                                @if ($vouchers_amount == 0)
+                                    disabled
+                                @endif
+                        >
                             Confirm pick up
                         </button>
                     </div>
@@ -267,26 +278,6 @@
                         }
                     }
                 });
-
-                $('.clickable-span').click(function (e) {
-                    // The next sibling is the content
-                    var content = $('#vouchers');
-
-                    if($(this).hasClass('view')) {
-                        $(this).removeClass('view').addClass('hide');
-                        content.removeClass('collapsed');
-                    } else {
-                        $(this).removeClass('hide').addClass('view');
-                        content.addClass('collapsed');
-                    }
-                });
-
-                // On enter keydown, run click functionality above (for a11y tabbing)
-                $('.clickable-span').keypress(function(e){
-                  if(e.which == 13) {
-                    $('.clickable-span').click();
-                  }
-                })
 
                 // Browser backup for lack of datepicker support eg. Safari
                 // Reset back to English date format

@@ -39,6 +39,12 @@ Route::get('/', function () {
 Route::group(['middleware' => 'auth:store'], function () {
     Route::get('dashboard', 'DashboardController@index')->name('store.dashboard');
 
+    // Route to update the CentreUser's Session
+    Route::put( '/session', [
+        'as' => 'store.session.put',
+        'uses' => 'SessionController@update'
+    ]);
+
     Route::resource('registrations', 'RegistrationController', [
         'names' => [
             'index' => 'store.registration.index',
@@ -97,6 +103,14 @@ Route::group(['middleware' => 'auth:store'], function () {
         'BundleController@addVouchersToCurrentBundle'
     )
     ->name('store.registration.vouchers.post')
+    ->middleware('can:view,registration');
+
+    // Fetches a registration's collection history
+    Route::get(
+        '/registrations/{registration}/collection-history',
+        'HistoryController@show'
+    )
+    ->name('store.registration.collection-history')
     ->middleware('can:view,registration');
 
 
