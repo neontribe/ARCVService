@@ -216,6 +216,10 @@ strong {
 	text-align: right;
 }
 
+.no-wrap {
+	white-space: nowrap;
+}
+
 .logout-button {
 	width: 125px;
 	min-height: 35px;
