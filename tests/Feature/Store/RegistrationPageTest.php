@@ -165,7 +165,7 @@ class RegistrationPageTest extends StoreTestCase
             ->seePageIs(URL::route('store.registration.create'))
             ->seeInElement(
                 '#privacy-statement-span',
-                'Privacy Statement must be signed in order to complete registration'
+                'Registration form must be signed in order to complete registration'
             )
         ;
 
