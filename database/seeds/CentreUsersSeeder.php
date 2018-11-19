@@ -18,10 +18,22 @@ class CentreUsersSeeder extends Seeder
             "password" => bcrypt('store_pass'),
             "role" => "centre_user",
         ]);
+
+        // Attach an initial centre
         $user1->centres()->attach([
-            1 => ['homeCentre' => true],
-            2 => ['homeCentre' => false],
-            3 => ['homeCentre' => false],
+            1 => ['homeCentre' => true]
+        ]);
+
+        // Get the first centre's sponsor and make two more centres with the same sponsor
+        $sponsor_id = $user1->centres()->first()->sponsor()->first()->id;
+
+        $local_centre1 = factory(App\Centre::class)->create(['sponsor_id' => $sponsor_id]);
+        $local_centre2 = factory(App\Centre::class)->create(['sponsor_id' => $sponsor_id]);
+
+        // Attach the extra centres
+        $user1->centres()->attach([
+            $local_centre1->id  => ['homeCentre' => false],
+            $local_centre2->id  => ['homeCentre' => false],
         ]);
 
         $user2 = factory(App\CentreUser::class)->create([
