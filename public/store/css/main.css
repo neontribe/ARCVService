@@ -233,10 +233,6 @@ strong {
 }
 
 .logo {
-	flex-grow: 1;
-}
-
-.logo img {
 	width: 200px;
 }
 
@@ -277,15 +273,23 @@ input[type="text"].invalid,
 	justify-content: space-between;
 }
 
+.header-section {
+	flex: 1;
+}
+
 .header ul {
 	padding: 0;
-	margin: 1rem 1rem 3rem 1rem;
+	margin-right: 1rem;
 	text-align: right;
 }
 
 .header li {
 	line-height: 1.5rem;
 	list-style-type: none;
+}
+
+#centre-select {
+	justify-content: flex-end;
 }
 
 .content {
