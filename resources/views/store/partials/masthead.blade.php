@@ -1,6 +1,6 @@
 <div class="header">
     @if (!Auth::guest())
-        <div class="logout">
+        <div class="header-section">
             <form>
                 <button type="submit" value="logout" class="logout-button" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     Log out
@@ -11,18 +11,18 @@
             </form>
         </div>
     @endif
-    <div class="logo">
-        <img src="{{ asset('store/assets/logo.png') }}" name="logo">
+    <div class="header-section">
+        <img src="{{ asset('store/assets/logo.png') }}" alt="Rose Vouchers for Fruit & Veg" class="logo">
     </div>
     @if (!Auth::guest())
-        <div>
+        <div class="header-section">
             <ul>
                 <li>User: {{ Auth::user()->name }} </li>
                 <li>Centre:
                     @if( Auth::user()->centres->count() == 1 )
                         {{ Auth::user()->centre->name }}
                     @elseif (Auth::user()->centres->count() > 1)
-                        <form name="centreUserForm" method="post" action="{{ route('store.session.put') }}">
+                        <form name="centreUserForm" id="centre-select" method="post" action="{{ route('store.session.put') }}">
                             {!! method_field('put') !!}
                             {!! csrf_field() !!}
                             <select name="centre" onchange="document.centreUserForm.submit()">
