@@ -289,7 +289,11 @@ input[type="text"].invalid,
 }
 
 #centre-select {
-	justify-content: flex-end;
+	display: inline;
+}
+
+#centre-select > select {
+	width: auto;
 }
 
 .content {
