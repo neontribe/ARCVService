@@ -17,8 +17,13 @@
         <div class="login-container">
             <h2>Log In</h2>
             @if ($errors->has('error_message'))
-                <div class="alert alert-danger">
+                <div class="alert alert-warning">
                     <strong>{{ $errors->first('error_message') }}</strong>
+                </div>
+            @endif
+            @if (session('status'))
+                <div class="alert alert-info">
+                    <strong>{{ session('status') }}</strong>
                 </div>
             @endif
             <form role="form" method="POST" action="{{ route('store.login') }}">
