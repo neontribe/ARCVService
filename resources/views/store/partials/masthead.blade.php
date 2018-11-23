@@ -1,5 +1,5 @@
 <div class="header">
-    @if (!Auth::guest())
+    @if (Auth::check() && Auth::user()->centres)
         <div class="header-section">
             <form>
                 <button type="submit" value="logout" class="logout-button" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
@@ -14,7 +14,7 @@
     <div class="header-section">
         <img src="{{ asset('store/assets/logo.png') }}" alt="Rose Vouchers for Fruit & Veg" class="logo">
     </div>
-    @if (!Auth::guest())
+    @if (Auth::check() && Auth::user()->centres)
         <div class="header-section">
             <ul>
                 <li>User: {{ Auth::user()->name }} </li>
