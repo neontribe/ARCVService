@@ -40,7 +40,8 @@ class BundleController extends Controller
         // Find the last collected bundle.
         $lastCollectedBundle = $registration->bundles()
             ->whereNotNull('disbursed_at')
-            ->orderBy('id', 'desc')
+            ->whereDate('disbursed_at', '<=', Carbon::today()->toDateString())
+            ->orderBy('disbursed_at', 'desc')
             ->limit(1)
             ->first();
         ;

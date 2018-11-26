@@ -63,6 +63,12 @@ input[type="text"]:disabled {
 	font-weight: 200;
 }
 
+input[type="text"]::-ms-clear {
+	display: none;
+	height: 0;
+	width: 0;
+}
+
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
 	-webkit-appearance: none;
@@ -216,6 +222,10 @@ strong {
 	text-align: right;
 }
 
+.no-wrap {
+	white-space: nowrap;
+}
+
 .logout-button {
 	width: 125px;
 	min-height: 35px;
@@ -223,10 +233,6 @@ strong {
 }
 
 .logo {
-	flex-grow: 1;
-}
-
-.logo img {
 	width: 200px;
 }
 
@@ -267,15 +273,27 @@ input[type="text"].invalid,
 	justify-content: space-between;
 }
 
+.header-section {
+	flex: 1;
+}
+
 .header ul {
 	padding: 0;
-	margin: 1rem 1rem 3rem 1rem;
+	margin-right: 1rem;
 	text-align: right;
 }
 
 .header li {
 	line-height: 1.5rem;
 	list-style-type: none;
+}
+
+#centre-select {
+	display: inline;
+}
+
+#centre-select > select {
+	width: auto;
 }
 
 .content {

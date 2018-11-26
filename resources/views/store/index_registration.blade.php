@@ -34,7 +34,7 @@
                             <td class="pri_carer">{{ $registration->family->carers->first()->name }}</td>
                             <td class="center">{{ $registration->family->entitlement }}</td>
                             <td class="center">{{ $registration->family->rvid }}</td>
-                            <td class="right">
+                            <td class="right no-wrap">
                                 @if( !isset($registration->family->leaving_on) )
                                 <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
                                     <div class="link-button link-button-small">

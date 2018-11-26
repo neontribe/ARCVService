@@ -92,10 +92,10 @@
                     </div>
                 </div>
                 <div>
-                    <span class="@if(!$errors->has('consent'))collapsed @endif invalid-error" id="privacy-statement-span">Privacy Statement must be signed in order to complete registration</span>
+                    <span class="@if(!$errors->has('consent'))collapsed @endif invalid-error" id="privacy-statement-span">Registration form must be signed in order to complete registration</span>
                     <div class="user-control">
                         <input type="checkbox" class="styled-checkbox @if($errors->has('consent'))invalid @endif" id="privacy-statement" name="consent" @if( old('consent') ) checked @endif/>
-                        <label for="privacy-statement">Have you got the signed privacy statement for the family?</label>
+                        <label for="privacy-statement">Has the registration form been completed and signed?</label>
                     </div>
                 </div>
                 <div>

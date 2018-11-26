@@ -14,7 +14,7 @@ class HistoryController extends Controller
     {
         $datesArray = [];
         $all_carers = $registration->family->carers->all();
-        $disbursedBundles = $registration->bundles()->disbursed()->get();
+        $disbursedBundles = $registration->bundles()->disbursed()->orderBy('disbursed_at', 'desc')->get();
 
         if ($disbursedBundles->count() > 0) {
             // Creates a weekly date array from first assigned voucher to today.
