@@ -53,7 +53,7 @@ class Handler extends ExceptionHandler
             // Note: this will also draw attention to the login form timing out.
             Auth::logout();
             return redirect()
-                ->guest(route('/login'))
+                ->guest('/login')
                 // We anticipate expiry to be the most common reason.
                 ->withErrors(['error_message' => trans('auth.expired')])
                 ;
