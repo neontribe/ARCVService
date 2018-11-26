@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Store\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use Illuminate\Support\Str;
 use Password;
 
 class ResetPasswordController extends Controller
@@ -56,5 +57,23 @@ class ResetPasswordController extends Controller
         return view('store.auth.passwords.reset')->with(
             ['token' => $token, 'email' => $request->email]
         );
+    }
+
+    /**
+     * Reset the given user's password BUT unlike the base method, DON'T log them in
+     *
+     * @param  \Illuminate\Contracts\Auth\CanResetPassword  $user
+     * @param  string  $password
+     * @return void
+     */
+    protected function resetPassword($user, $password)
+    {
+        $user->forceFill([
+            'password' => bcrypt($password),
+            'remember_token' => Str::random(60),
+        ])->save();
+
+        // If we'd logged them in, then we'd end up redirected to dashboard by
+        // app/Http/Middleware/RedirectIfAuthenticated.
     }
 }
