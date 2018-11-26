@@ -25,7 +25,7 @@ class CentreUsersSeeder extends Seeder
         ]);
 
         // Get the first centre's sponsor and make two more centres with the same sponsor
-        $sponsor_id = $user1->centres()->first()->sponsor()->first()->id;
+        $sponsor_id = $user1->centres()->first()->sponsor->id;
 
         $local_centres = factory(App\Centre::class, 2)->create(['sponsor_id' => $sponsor_id]);
 
@@ -50,7 +50,7 @@ class CentreUsersSeeder extends Seeder
             "password" => bcrypt('store_pass'),
             "role" => "foodmatters_user",
         ]);
-        $user3->centres()->attach(1, ['homeCentre' => true]);
+        $user3->centres()->attach(2, ['homeCentre' => true]);
 
         // 1 faked user not associated with a random Centre
         factory(App\CentreUser::class)->create();
