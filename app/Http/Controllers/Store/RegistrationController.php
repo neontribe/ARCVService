@@ -364,7 +364,7 @@ class RegistrationController extends Controller
         $registration = Registration::findOrFail($request->get('registration'));
 
         // NOTE: Following refactor where we needed to retain Carer ids.
-        // Possible that we might want to add flag to carer to ditinguish Main from Secondary,
+        // Possible that we might want to add flag to carer to distinguish Main from Secondary,
         // to simplify method below for sorting and updating carer entries.
 
         // Update primary carer.
@@ -389,7 +389,7 @@ class RegistrationController extends Controller
         $carersKeysToDelete = array_diff($carersKeys, $carersInputKeys);
 
         // Get the secondary carers.
-        $carers = Carer::whereIn("id", $carersInputKeys);
+        $carers = Carer::whereIn("id", $carersInputKeys)->get();
 
         // roll though those and amend them if necessary.
         foreach ($carers as $carer) {
