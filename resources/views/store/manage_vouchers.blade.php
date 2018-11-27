@@ -129,21 +129,23 @@
                         </button>
                     </div>
                 </form>
-
                 @if ( count( $errors ) > 0 || Session::get('error_message'))
                 <div class="error-message">
                     <div class="error-icon-container">
                         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
                     </div>
-                    <span>
+                    <div>
+                    @if ( count( $errors ) > 0)
                     @foreach ($errors->all() as $error)
-                   {{ $error }}
+                        <p>{{ $error }}{{ Session::get('error_message') }}</p>
                     @endforeach
-                    {{Session::get('error_message')}}
-                    </span>
+                    @endif
+                    @if (Session::get('error_message'))
+                        <p>{{ $error }}{{ Session::get('error_message') }}</p>
+                    @endif
+                    </div>
                 </div>
                 @endif
-
                 <button id="collection-button"
                         class="long-button"
                         @if ($vouchers_amount == 0)
