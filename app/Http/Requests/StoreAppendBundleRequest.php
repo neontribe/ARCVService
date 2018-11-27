@@ -37,18 +37,4 @@ class StoreAppendBundleRequest extends FormRequest
 
         return $rules;
     }
-
-    /**
-     * Get the error messages for the defined validation rules.
-     *
-     * @return array
-     */
-    public function messages()
-    {
-        return [
-            'start.required' => 'The voucher code is required.',
-            'start.exists'  => 'The voucher code is invalid.',
-            'end.exists'  => 'The last voucher code is invalid.',
-        ];
-    }
 }
