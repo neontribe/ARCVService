@@ -11,8 +11,11 @@ class CentresSeeder extends Seeder
      */
     public function run()
     {
+        // fix sponsor 1.
+        factory(App\Centre::class)->create(["sponsor_id" => 1]);
+
         //random centres
-        $centres = factory(App\Centre::class, 4)->create();
+        $centres = factory(App\Centre::class, 3)->create();
 
         // Grab one and change print pref to individual and another to collection.
         $centres[0]->print_pref = 'collection';
