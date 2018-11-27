@@ -1087,12 +1087,10 @@ VOUCHER PAGES
 	margin-top: 0;
 }
 
-
-
 .error-message span {
 	line-height: 2rem;
-	flex: 0 1 auto;
-	padding-left: 0.5rem;
+	flex: 0 0 auto;
+	padding: 0 0.5rem;
 }
 
 .error-icon-container {
@@ -1100,7 +1098,7 @@ VOUCHER PAGES
     flex: 0 1 3rem;
 }
 
-.error-message i {
+.error-icon-container i {
 	line-height: 2rem;
 	text-align: center;
 	color: white;
