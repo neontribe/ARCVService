@@ -23,9 +23,6 @@ class CentresSeeder extends Seeder
         $centres[1]->print_pref = 'individual';
         $centres[1]->save();
 
-
-
-
         // 3 centres attached to sponsors with IDs to mirror live data
         factory(App\Centre::class)->create(["sponsor_id" => 3]);
         factory(App\Centre::class)->create(["sponsor_id" => 4]);
