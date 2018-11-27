@@ -1,5 +1,6 @@
 <?php
 
+use App\CentreUser;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
@@ -17,11 +18,11 @@ class CreateCentreCentreUserPivotTable extends Migration
             $table->foreign('centre_user_id')->references('id')->on('centre_users')->onDelete('cascade');
             $table->integer('centre_id')->unsigned()->index();
             $table->foreign('centre_id')->references('id')->on('centres')->onDelete('cascade');
-            // This is a dodge don't set it false, set it null.
-            // TODO ^^ clarify this comment. Why do we need it nullable if we have default?
-            $table->boolean('homeCentre')->nullable()->default(false);
+            $table->boolean('homeCentre')->default(false);
             $table->primary(['centre_user_id', 'centre_id']);
         });
+
+        $this->migrateRelationships();
     }
 
     /**
@@ -32,5 +33,20 @@ class CreateCentreCentreUserPivotTable extends Migration
     public function down()
     {
         Schema::drop('centre_centre_user');
+    }
+
+    /**
+     * Updates the relationships for all pre-existing CentreUsers to use this pivot.
+     */
+    public function migrateRelationships()
+    {
+        // Find CentreUsers with a Centre
+        $centreUsers = CentreUser::whereNotNull('centre_id');
+
+        /** @var CentreUser $centreUser */
+        foreach ($centreUsers as $centreUser) {
+            $centreUser->centres()->attach($centreUser->centre_id, ['homeCentre' => true]);
+            $centreUser->save();
+        }
     }
 }
