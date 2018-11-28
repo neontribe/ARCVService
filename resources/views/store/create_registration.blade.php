@@ -16,8 +16,8 @@
                 </div>
                 <div>
                     <label for="carer">Main carer's full name</label>
-                    <span class="@if(!$errors->has('carer'))collapsed @endif invalid-error" id="carer-span">This field is required</span>
                     <input id="carer" name="carer" class="@if($errors->has('carer'))invalid @endif" type="text" autocomplete="off" autocorrect="off" spellcheck="false" value="{{ old('carer') }}">
+                    <span class="@if(!$errors->has('carer'))collapsed @endif invalid-error" id="carer-span">This field is required</span>
                 </div>
                 <div>
                     <label for="carer_adder_input">Other people who can collect <span>(optional)</span></label>
@@ -92,10 +92,10 @@
                     </div>
                 </div>
                 <div>
-                    <span class="@if(!$errors->has('consent'))collapsed @endif invalid-error" id="privacy-statement-span">Registration form must be signed in order to complete registration</span>
                     <div class="user-control">
                         <input type="checkbox" class="styled-checkbox @if($errors->has('consent'))invalid @endif" id="privacy-statement" name="consent" @if( old('consent') ) checked @endif/>
                         <label for="privacy-statement">Has the registration form been completed and signed?</label>
+                        <span class="@if(!$errors->has('consent'))collapsed @endif invalid-error" id="privacy-statement-span">Registration form must be signed in order to complete registration</span>
                     </div>
                 </div>
                 <div>
