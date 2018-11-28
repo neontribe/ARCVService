@@ -1004,6 +1004,33 @@ VOUCHER PAGES
 	width: 2.2rem;
 }
 
+.col .error-message {
+	align-items: stretch;
+	background-color: #f3c3c3;
+	display: flex;
+	margin-top: 0;
+	min-height: 2rem;
+}
+
+.error-message p {
+	flex: 0 0 auto;
+	line-height: 2rem;
+	margin: 0;
+	padding: 0 0.5rem;
+}
+
+.error-icon-container {
+	background-color: red;
+    flex: 0 1 3rem;
+}
+
+.error-icon-container i {
+	color: white;
+	line-height: 2rem;
+	text-align: center;
+	width: 100%;
+}
+
 .slide-in {
 	display: block;
 	animation-duration: 1s;
