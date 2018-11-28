@@ -61,11 +61,10 @@ class Handler extends ExceptionHandler
 
         if ($exception instanceof MethodNotAllowedHttpException) {
             // User somehow tried an HTTP verb a resource doesn't support
-            // Send them somewhere safe.
-            return redirect()
+            // Send them somewhere safe. '' is the "/" equivalent.
+            return redirect('');
                 // For some reason ->withErrors() won't "take";
                 // The session gets flashed, but it doesn't survive.
-                ->route('/');
         }
 
         return parent::render($request, $exception);
