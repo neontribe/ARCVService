@@ -121,12 +121,12 @@ class Bundle extends Model
             // Passing a pointer to $errors using "&", so we can change it, inside the loop.
             // Otherwise the variable is immutable.
             function (Voucher $voucher) use ($bundle, &$errors) {
-                // Check the voucher isn't disbursed, because we can't change those.
+                // Check if the voucher is disbursed, because we can't change those.
                 if ($voucher->bundle && $voucher->bundle->disbursed_at !== null) {
                     // Throw it into an error.
                     $errors["codes"][] = $voucher->code;
                 } else {
-                    // Change it's bundle
+                    // Change its bundle
                     $voucher->bundle()->associate($bundle)->save();
                 }
             }

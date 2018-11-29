@@ -120,7 +120,7 @@ class BundleModelTest extends TestCase
         // See it has the vouchers still
         $this->assertEquals(3, $disbursedBundle->vouchers()->count());
 
-        // NOW ,try to add the vouchers to our empty bundle, stealing them
+        // NOW, try to add the vouchers to our empty bundle, stealing them
         $errors = $this->bundle->alterVouchers($vs, [], $this->bundle);
 
         // See errors.
