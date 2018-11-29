@@ -14,6 +14,7 @@ class BundleModelTest extends TestCase
 
     use DatabaseMigrations;
 
+    /** @var Bundle bundle */
     protected $bundle;
     protected function setUp()
     {
@@ -80,5 +81,56 @@ class BundleModelTest extends TestCase
         // Fresh and check the bundles
         $registration->refresh();
         $this->assertEquals($disbursedBundles->count(), $registration->bundles()->disbursed()->count());
+    }
+
+    /** @test */
+    public function testItCannotAlterTheBundleToIncludeADisbursedVoucher()
+    {
+        $user = factory('App\CentreUser')->create();
+        Auth::login($user);
+
+        // Make a bundle
+        /** @var Bundle $disbursedBundle */
+        $disbursedBundle = factory(Bundle::class)->create();
+
+        // Make some vouchers and add those to it.
+        $vs = factory('App\Voucher', 'requested', 3)
+            ->create()
+            ->each(function ($v) use ($disbursedBundle) {
+                $v->applyTransition('order');
+                $v->applyTransition('print');
+                $v->applyTransition('dispatch');
+                $v->bundle()->associate($disbursedBundle);
+                $v->save();
+            });
+
+        // Disburse it
+        $disbursedBundle->disbursed_at = Carbon::now()->startOfDay();
+
+        // See there are vouchers
+        $this->assertEquals(3, $disbursedBundle->vouchers()->count());
+
+        // Try to remove its vouchers by setting them to null
+        $errors = $disbursedBundle->alterVouchers($vs, [], null);
+
+        // See errors
+        $this->assertArrayHasKey("codes", $errors);
+        $this->assertArraySubset($vs->pluck("code")->toArray(), $errors["codes"]);
+
+        // See it has the vouchers still
+        $this->assertEquals(3, $disbursedBundle->vouchers()->count());
+
+        // NOW, try to add the vouchers to our empty bundle, stealing them
+        $errors = $this->bundle->alterVouchers($vs, [], $this->bundle);
+
+        // See errors.
+        $this->assertArrayHasKey("codes", $errors);
+        $this->assertArraySubset($vs->pluck("code")->toArray(), $errors["codes"]);
+
+        // See it has the vouchers still.
+        $this->assertEquals(3, $disbursedBundle->vouchers()->count());
+
+        // See the new bundle is still empty.
+        $this->assertEquals(0, $this->bundle->vouchers()->count());
     }
 }
