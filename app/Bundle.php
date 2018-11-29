@@ -118,11 +118,13 @@ class Bundle extends Model
 
         // Try to run the vouchers we know are in the DB
         $vouchers->each(
-            function (Voucher $voucher) use ($bundle, $errors) {
+            // Passing a pointer to $errors using "&", so we can change it, inside the loop.
+            // Otherwise the variable is immutable.
+            function (Voucher $voucher) use ($bundle, &$errors) {
                 // Check the voucher isn't disbursed, because we can't change those.
                 if ($voucher->bundle && $voucher->bundle->disbursed_at !== null) {
                     // Throw it into an error.
-                    $errors["codes"] = $voucher->code;
+                    $errors["codes"][] = $voucher->code;
                 } else {
                     // Change it's bundle
                     $voucher->bundle()->associate($bundle)->save();
