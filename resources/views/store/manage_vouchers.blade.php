@@ -68,29 +68,6 @@
                         </div>
                     @endif
                 </div>
-                <!-- HIDDEN FOR ALPHA
-                <div class="center">
-                    <span id="brief-toggle" class="show clickable-span">
-                      brief collection history
-                      <i class="fa fa-caret-down" aria-hidden="true"></i>
-                    </span>
-                    <div id="brief" class="collapsed">
-                        <table>
-                            <tr>
-                                <th>W/C</th>
-                                <th>Vouchers collected</th>
-                            </tr>
-                            <tr>
-                                <td>17/09/2018</td>
-                                <td>0</td>
-                            </tr>
-                            <tr>
-                                <td>10/09/2018</td>
-                                <td>0</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div> -->
                 <a href="{{ route("store.registration.collection-history", ['id' => $registration->id ]) }}" class="link">
                     <div class="link-button link-button-large">
                         <i class="fa fa-clock-o button-icon" aria-hidden="true"></i>
@@ -219,11 +196,8 @@
                         <div>
                             <i class="fa fa-home"></i>
                             <div>
-                                <label for="collected-at">Collected at:</label>
-                                <select id="collected-at" name="collected_at">
-                                    {-- Will need to be a list of all local centres eventually --}
-                                    <option value="{{ $centre->id }}">{{ $centre->name }}</option>
-                                </select>
+                                <label for="collected-at">Collected at: {{ $centre->name }}</label>
+                                <input type="hidden" id="collected-at" name="collected_at" value="{{ $centre->id }}" />
                             </div>
                         </div>
                         <button class="long-button submit"

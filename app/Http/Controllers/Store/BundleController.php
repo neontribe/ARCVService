@@ -60,7 +60,7 @@ class BundleController extends Controller
                 "lastCollection" => $lastCollection,
                 "family" => $registration->family,
                 "children" => $registration->family->children,
-                "centre" => $registration->centre,
+                "centre" => Auth::user()->centre,
                 "carers" => $carers,
                 "pri_carer" => array_shift($carers),
                 "vouchers" => $sorted_bundle,
