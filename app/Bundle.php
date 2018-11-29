@@ -116,10 +116,17 @@ class Bundle extends Model
             $errors["codes"] = $missingCodes;
         }
 
-        // try to Run the vouchers we know are in the DB
+        // Try to run the vouchers we know are in the DB
         $vouchers->each(
-            function (Voucher $voucher) use ($bundle) {
-                $voucher->bundle()->associate($bundle)->save();
+            function (Voucher $voucher) use ($bundle, $errors) {
+                // Check the voucher isn't disbursed, because we can't change those.
+                if ($voucher->bundle && $voucher->bundle->disbursed_at !== null) {
+                    // Throw it into an error.
+                    $errors["codes"] = $voucher->code;
+                } else {
+                    // Change it's bundle
+                    $voucher->bundle()->associate($bundle)->save();
+                }
             }
         );
 
