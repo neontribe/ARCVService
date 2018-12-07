@@ -117,13 +117,13 @@ class TraderController extends Controller
      */
     public function showVoucherHistory(Trader $trader)
     {
+        // TODO: this is still a stopgap; find a way to subselect/pivot in one go not per voucher at the DB layer.
         $vouchers = $trader->vouchersConfirmed;
 
         $data = [];
         $vouchers->each(function ($v) use (&$data) {
             $history = $v->history()->pluck('created_at', 'to')->toArray();
             if (array_key_exists('payment_pending', $history)) {
-
                 $pended_day = $history['payment_pending']->format('d-m-Y');
 
                 $data[$pended_day][] = [
