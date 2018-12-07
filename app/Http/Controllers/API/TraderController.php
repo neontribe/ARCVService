@@ -118,27 +118,34 @@ class TraderController extends Controller
     public function showVoucherHistory(Trader $trader)
     {
         $vouchers = $trader->vouchersConfirmed;
-        $voucher_history = [];
-        foreach ($vouchers as $v) {
-            // If this voucher has been confirmed.
-            if ($v->paymentPendedOn) {
-                $pended_day = $v->paymentPendedOn->created_at->format('d-m-Y');
-                // Group by the created at date on the payment_pending state.
+
+        $data = [];
+        $vouchers->each(function ($v) use (&$data) {
+            $history = $v->history()->pluck('created_at', 'to')->toArray();
+            if (array_key_exists('payment_pending', $history)) {
+
+                $pended_day = $history['payment_pending']->format('d-m-Y');
+
                 $data[$pended_day][] = [
                     'code' => $v->code,
-                    'recorded_on' => $v->recordedOn->created_at->format('d-m-Y'),
-                    'reimbursed_on' => $v->reimbursedOn
-                        ? $v->reimbursedOn->created_at->format('d-m-Y')
+                    'recorded_on' => (array_key_exists('recorded', $history))
+                        ? $history["recorded"]->format('d-m-Y')
                         : ''
                     ,
+                    'reimbursed_on' => (array_key_exists('reimbursed', $history))
+                        ? $history["reimbursed"]->format('d-m-Y')
+                        : ''
                 ];
-                foreach ($data as $pended_day => $vouchers) {
-                    $voucher_history[$pended_day] = [
-                        'pended_on' => $pended_day,
-                        'vouchers' => $vouchers,
-                    ];
-                }
             }
+        });
+
+        $voucher_history = [];
+
+        foreach ($data as $pended_day => $vs) {
+            $voucher_history[$pended_day] = [
+                'pended_on' => $pended_day,
+                'vouchers' => $vs,
+            ];
         }
 
         return response()->json(array_values($voucher_history), 200);
