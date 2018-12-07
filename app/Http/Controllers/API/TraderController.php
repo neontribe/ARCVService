@@ -142,6 +142,7 @@ class TraderController extends Controller
         $voucher_history = [];
 
         foreach ($data as $pended_day => $vs) {
+            // TODO : is the client using this ordering? We could avoid the uksort by using ISO dates from Carbon
             $voucher_history[$pended_day] = [
                 'pended_on' => $pended_day,
                 'vouchers' => $vs,
