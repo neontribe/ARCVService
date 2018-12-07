@@ -148,6 +148,10 @@ class TraderController extends Controller
             ];
         }
 
+        uksort($voucher_history, function ($a, $b) {
+            return strtotime($b) - strtotime($a);
+        });
+
         return response()->json(array_values($voucher_history), 200);
     }
 
