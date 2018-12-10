@@ -4,6 +4,7 @@ namespace App;
 
 use DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Trader extends Model
@@ -72,18 +73,16 @@ class Trader extends Model
 
     /**
      * Vouchers submitted by this trader that have a given status.
-     *
-     * @param String $status
-     *
-     * @return Collection App\Voucher
+     * @param null $status
+     * @return \Illuminate\Support\Collection
      */
     public function vouchersWithStatus($status = null)
     {
-        if (empty($status)) {
-            // Get all the trader's assigned vouchers.
-            // Use values() to reset array keys after sort.
-            $vouchers = $this->vouchers->sortByDesc('updated_at')->values()->all();
-        } else {
+        /** @var HasMany $q */
+        // Reminder; $q is going to be a builder object.
+        $q = $this->vouchers();
+
+        if (!empty($status)) {
             // Get the vouchers with given status, mapped to these states.
             switch ($status) {
                 case "unpaid":
@@ -96,19 +95,19 @@ class Trader extends Model
                     $stateCondition = null;
                     break;
             }
-            // get all the vouchers that have a state record of $stateCondition
-            $statedVoucherIDs = DB::table('vouchers')
+            // Get all the trader's vouchers that have a state record of $stateCondition
+            // Narrow down results to only distinct Ids
+            $statedVoucherIDs = DB::table('vouchers')->select('vouchers.id')->distinct()
                 ->leftJoin('voucher_states', 'vouchers.id', '=', 'voucher_states.voucher_id')
-                ->leftJoin('traders', 'vouchers.trader_id', '=', 'traders.id')
+                ->where('vouchers.trader_id', '=', $this->id)
                 ->where('voucher_states.to', $stateCondition)
-                ->pluck('vouchers.id')->toArray();
+                ->pluck('id')->toArray();
+
             // subtract them from the collected ones
-            $vouchers = $this->vouchers
-                ->sortByDesc('updated_at')
-                ->values()
-                ->whereNotIn('id', $statedVoucherIDs);
+            $q = $q->whereNotIn('id', $statedVoucherIDs);
         }
 
-        return $vouchers;
+        // Finally, return our vouchers.
+        return $q->orderBy('updated_at', 'desc')->get();
     }
 }
