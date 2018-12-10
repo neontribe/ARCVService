@@ -64,14 +64,17 @@ class CentreController extends Controller
         $centres = $user->relevantCentres();
 
         // get registrations
-        $registrations = Registration::whereIn('centre_id', $centres->pluck('id')->all())
+        $registrations = Registration::whereIn(
+            'centre_id',
+            $centres->pluck('id')->all()
+        )
             ->with(['centre','family.children','family.carers'])
             ->get();
 
         // set blank rows for laravel-excel
         $rows = [];
 
-        // Looks like larevel-excel can't auto-generate headers
+        // Looks like Laravel-PHPExcel can't auto-generate headers
         // by collating all the row keys and normalising.
         // So we have to do it by hand.
 
@@ -81,6 +84,12 @@ class CentreController extends Controller
 
         // Per registration...
         foreach ($registrations as $reg) {
+            $lastCollection = $reg->bundles()
+                ->where('disbursed_at', 'not', null)
+                ->orderBy('created_at', 'asc')
+                ->orderBy('id', 'asc')
+                ->first();
+
             $row = [
                 // TODO: null objects when DB is duff: try/catch findOrFail() in the relationship?
                 "RVID" => ($reg->family) ? $reg->family->rvid : 'Family not found',
@@ -90,6 +99,7 @@ class CentreController extends Controller
                 "Food Diary Received" => (!is_null($reg->fm_diary_on)) ? $reg->fm_diary_on->format('d/m/Y') : null,
                 "Privacy Statement Received" => (!is_null($reg->fm_privacy_on)) ? $reg->fm_privacy_on->format('d/m/Y') : null,
                 "Entitlement" => $reg->family->entitlement,
+                "Last Collection" => ($lastCollection) ? $lastCollection->format('d/m/Y') : null
             ];
 
             // Per child dependent things
