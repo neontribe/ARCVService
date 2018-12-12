@@ -424,7 +424,8 @@ class RegistrationController extends Controller
 
         // Expect only filled fm variables
         $fm = array_filter(
-            $request->only('fm_chart', 'fm_diary', 'fm_privacy'),
+            $request->only('fm_privacy'),
+            // Previously: $request->only('fm_chart', 'fm_diary', 'fm_privacy'),
             function ($value) {
                 // Remove any null or empty responses;
                 return (isset($value) || ($value !== ''));
@@ -434,6 +435,7 @@ class RegistrationController extends Controller
         // Grab the date
         $now = Carbon::now();
 
+        /*
         // Check permissions
         if ($user->can('updateChart', $registration)) {
             // explicitly catch 0 or 1 responses
@@ -451,6 +453,7 @@ class RegistrationController extends Controller
             // Log the attempt
             Log::info('Registration ' . $registration->id . ' update for Diary denied for service user ' . $user->id);
         }
+        */
 
         // Check permissions
         if ($user->can('updatePrivacy', $registration)) {
