@@ -13,7 +13,7 @@ class StateToken extends Model
      * @var array
      */
     protected $fillable = [
-        'token'
+        'uuid'
     ];
 
     /**
