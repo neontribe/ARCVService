@@ -320,7 +320,7 @@ class RegistrationController extends Controller
         $registration = new Registration([
             'consented_on' => Carbon::now(),
             'eligibility' => $request->get('eligibility'),
-            // diary, chart and privacy are not saved right now.
+            // diary, chart and privacy/registration form are not saved right now.
         ]);
 
         // Duplicate families are fine at this point.
@@ -461,7 +461,7 @@ class RegistrationController extends Controller
             $registration->fm_privacy_on = ($fm['fm_privacy']) ? $now : null;
         } else {
             // Log the attempt
-            Log::info('Registration ' . $registration->id . ' update for Privacy denied for service user ' . $user->id);
+            Log::info('Registration ' . $registration->id . ' update for Registration Form denied for service user ' . $user->id);
         }
 
         $family = $registration->family;
