@@ -320,7 +320,7 @@ class RegistrationController extends Controller
         $registration = new Registration([
             'consented_on' => Carbon::now(),
             'eligibility' => $request->get('eligibility'),
-            // diary, chart and privacy are not saved right now.
+            // diary, chart and privacy/registration form are not saved right now.
         ]);
 
         // Duplicate families are fine at this point.
@@ -424,7 +424,8 @@ class RegistrationController extends Controller
 
         // Expect only filled fm variables
         $fm = array_filter(
-            $request->only('fm_chart', 'fm_diary', 'fm_privacy'),
+            $request->only('fm_privacy'),
+            // Previously: $request->only('fm_chart', 'fm_diary', 'fm_privacy'),
             function ($value) {
                 // Remove any null or empty responses;
                 return (isset($value) || ($value !== ''));
@@ -434,6 +435,7 @@ class RegistrationController extends Controller
         // Grab the date
         $now = Carbon::now();
 
+        /*
         // Check permissions
         if ($user->can('updateChart', $registration)) {
             // explicitly catch 0 or 1 responses
@@ -451,6 +453,7 @@ class RegistrationController extends Controller
             // Log the attempt
             Log::info('Registration ' . $registration->id . ' update for Diary denied for service user ' . $user->id);
         }
+        */
 
         // Check permissions
         if ($user->can('updatePrivacy', $registration)) {
@@ -458,7 +461,7 @@ class RegistrationController extends Controller
             $registration->fm_privacy_on = ($fm['fm_privacy']) ? $now : null;
         } else {
             // Log the attempt
-            Log::info('Registration ' . $registration->id . ' update for Privacy denied for service user ' . $user->id);
+            Log::info('Registration ' . $registration->id . ' update for Registration Form denied for service user ' . $user->id);
         }
 
         $family = $registration->family;

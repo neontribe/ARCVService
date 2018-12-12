@@ -98,9 +98,9 @@
                         <span class="@if(!$errors->has('consent'))collapsed @endif invalid-error" id="privacy-statement-span">Registration form must be signed in order to complete registration</span>
                     </div>
                 </div>
-                <div>
+                {{-- <div>
                     <p>Reminder: don't forget to complete food diary and pie chart.</p>
-                </div>
+                </div> --}}
                 <button class="long-button submit" type="Submit">Save Family</button>
             </div>
         </form>

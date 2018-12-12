@@ -86,9 +86,9 @@ class CentreController extends Controller
                 "RVID" => ($reg->family) ? $reg->family->rvid : 'Family not found',
                 "Centre" => ($reg->centre) ? $reg->centre->name : 'Centre not found',
                 "Primary Carer" => ($reg->family->carers->first()) ? $reg->family->carers->first()->name : null,
-                "Food Chart Received" => (!is_null($reg->fm_chart_on)) ? $reg->fm_chart_on->format('d/m/Y') : null,
-                "Food Diary Received" => (!is_null($reg->fm_diary_on)) ? $reg->fm_diary_on->format('d/m/Y') : null,
-                "Privacy Statement Received" => (!is_null($reg->fm_privacy_on)) ? $reg->fm_privacy_on->format('d/m/Y') : null,
+                // "Food Chart Received" => (!is_null($reg->fm_chart_on)) ? $reg->fm_chart_on->format('d/m/Y') : null,
+                // "Food Diary Received" => (!is_null($reg->fm_diary_on)) ? $reg->fm_diary_on->format('d/m/Y') : null,
+                "Registration Form Received" => (!is_null($reg->fm_privacy_on)) ? $reg->fm_privacy_on->format('d/m/Y') : null,
                 "Entitlement" => $reg->family->entitlement,
             ];
 
