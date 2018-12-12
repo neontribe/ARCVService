@@ -156,53 +156,53 @@ class EditPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itOnlyShowsAFoodMattersInputsToFoodMattersUsers()
-    {
-        // Create a FM User
-        $fmuser = factory(CentreUser::class)->create([
-            "name"  => "test FM user",
-            "email" => "testufmser@example.com",
-            "password" => bcrypt('test_fm_user_pass'),
-            "role" => 'foodmatters_user',
-        ]);
-        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
-        $users[] = $fmuser;
+    // /** @test */
+    // public function itOnlyShowsAFoodMattersInputsToFoodMattersUsers()
+    // {
+    //     // Create a FM User
+    //     $fmuser = factory(CentreUser::class)->create([
+    //         "name"  => "test FM user",
+    //         "email" => "testufmser@example.com",
+    //         "password" => bcrypt('test_fm_user_pass'),
+    //         "role" => 'foodmatters_user',
+    //     ]);
+    //     $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+    //     $users[] = $fmuser;
 
-        $ccuser = factory(CentreUser::class)->create([
-            "name"  => "test cc user",
-            "email" => "testccuser@example.com",
-            "password" => bcrypt('test_cc_user_pass'),
-            "centre_id" => $this->centre->id,
-            "role" => 'centre_user',
-        ]);
-        $ccuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
-        $users[] = $ccuser;
+    //     $ccuser = factory(CentreUser::class)->create([
+    //         "name"  => "test cc user",
+    //         "email" => "testccuser@example.com",
+    //         "password" => bcrypt('test_cc_user_pass'),
+    //         "centre_id" => $this->centre->id,
+    //         "role" => 'centre_user',
+    //     ]);
+    //     $ccuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+    //     $users[] = $ccuser;
 
-        foreach ($users as $centreUser) {
-            $this->actingAs($centreUser, 'store')
-                ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]));
-            if ($centreUser->can('updateDiary', Registration::class) ||
-                $centreUser->can('updateChart', Registration::class)
-            ) {
-                $this->see('Documents Received:');
-                if ($centreUser->can('updateChart')) {
-                    $this->seeElement('input[type="hidden"][name="fm_chart"]');
-                    $this->seeElement('input[type="checkbox"][name="fm_chart"]');
-                }
-                if ($centreUser->can('updateDiary')) {
-                    $this->seeElement('input[type="hidden"][name="fm_diary"]');
-                    $this->seeElement('input[type="checkbox"][name="fm_diary"]');
-                }
-            } else {
-                $this->dontSee('Documents Received:');
-                $this->dontSeeElement('input[type="hidden"][name="fm_chart"]');
-                $this->dontSeeElement('input[type="checkbox"][name="fm_chart"]');
-                $this->dontSeeElement('input[type="hidden"][name="fm_diary"]');
-                $this->dontSeeElement('input[type="checkbox"][name="fm_diary"]');
-            }
-        }
-    }
+    //     foreach ($users as $centreUser) {
+    //         $this->actingAs($centreUser, 'store')
+    //             ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]));
+    //         if ($centreUser->can('updateDiary', Registration::class) ||
+    //             $centreUser->can('updateChart', Registration::class)
+    //         ) {
+    //             $this->see('Documents Received:');
+    //             if ($centreUser->can('updateChart')) {
+    //                 $this->seeElement('input[type="hidden"][name="fm_chart"]');
+    //                 $this->seeElement('input[type="checkbox"][name="fm_chart"]');
+    //             }
+    //             if ($centreUser->can('updateDiary')) {
+    //                 $this->seeElement('input[type="hidden"][name="fm_diary"]');
+    //                 $this->seeElement('input[type="checkbox"][name="fm_diary"]');
+    //             }
+    //         } else {
+    //             $this->dontSee('Documents Received:');
+    //             $this->dontSeeElement('input[type="hidden"][name="fm_chart"]');
+    //             $this->dontSeeElement('input[type="checkbox"][name="fm_chart"]');
+    //             $this->dontSeeElement('input[type="hidden"][name="fm_diary"]');
+    //             $this->dontSeeElement('input[type="checkbox"][name="fm_diary"]');
+    //         }
+    //     }
+    // }
 
     /** @test */
     public function itShowsPrivacyStatementCheckedCorrectlyAsStoredInDatabase()

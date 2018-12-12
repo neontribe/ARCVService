@@ -50,7 +50,7 @@
         <tr>
           <td valign="top">
             <h3><i class="fa fa-question-circle" aria-hidden="true"></i> Hints &amp; Tips</h3>
-            <p>Have you completed the food diary and pie chart for all your families?</p>
+            {{-- <p>Have you completed the food diary and pie chart for all your families?</p> --}}
             <p>Have you sent privacy statements for all your families?</p>
             <p>When did you last chat to them about how they're finding shopping at the market?</p>
           </td>
