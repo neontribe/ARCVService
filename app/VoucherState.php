@@ -22,6 +22,7 @@ class VoucherState extends Model
         'voucher_id',
         'to',
         'source',
+        'state_token_id',
     ];
 
     /**
@@ -40,5 +41,10 @@ class VoucherState extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function token()
+    {
+        return $this->belongsTo(StateToken::class);
     }
 }
