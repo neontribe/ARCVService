@@ -12,7 +12,9 @@ If you dont already have Docker, get it from the docker repo:
     
     https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-using-the-repository
     
-If you are on elementaryOS you need to replace ```$(lsb_release -cs) \``` in step 4 with ```xenial \```
+If you are on elementaryOS you need to replace ```$(lsb_release -cs) \``` in step 4 with ```xenial \``` 
+    
+(https://elementaryos.stackexchange.com/questions/11844/installing-docker-on-elementary-os-loki)
     
 Then to install docker-composer you need to use the instructions in the docker-compose repo
     
