@@ -54,6 +54,8 @@ input[type="search"] {
 	line-height: 20px;
 	width: 100%;
 	border: 2px solid #ededed;
+	box-sizing: border-box;
+	margin: 2px 0;
 	font-family: 'Roboto Slab', serif;
 }
 
@@ -1004,7 +1006,7 @@ VOUCHER PAGES
 	width: 2.2rem;
 }
 
-.col .error-message {
+.col .alert-message {
 	align-items: stretch;
 	background-color: #f3c3c3;
 	display: flex;
@@ -1012,19 +1014,35 @@ VOUCHER PAGES
 	min-height: 2rem;
 }
 
-.error-message p {
+.alert-message.error {
+	background-color: #f3c3c3;
+}
+
+.alert-message.warning {
+	background-color: #e5c97e;
+}
+
+.alert-message p {
+	color: #000000;
 	flex: 0 0 auto;
 	line-height: 2rem;
 	margin: 0;
 	padding: 0 0.5rem;
 }
 
-.error-icon-container {
-	background-color: red;
-    flex: 0 1 3rem;
+.icon-container {
+    flex: 0 0 3rem;
 }
 
-.error-icon-container i {
+.icon-container.error {
+	background-color: #d2232a;
+}
+
+.icon-container.warning {
+    background-color: #e8B00c;
+}
+
+.icon-container i {
 	color: white;
 	line-height: 2rem;
 	text-align: center;

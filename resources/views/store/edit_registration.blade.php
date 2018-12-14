@@ -136,7 +136,22 @@
                         </li>
                     </ul>
                 </div>
-                <p>Their RV-ID is: <strong>{{ $family->rvid }}</strong></p>
+                <div>
+                    <p class="v-spaced">Their RV-ID is: <strong>{{ $family->rvid }}</strong></p>
+                </div>
+                <div class="alert-message warning">
+                    <div class="icon-container warning">
+                        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        @foreach( $family->getNoticeReasons() as $notices )
+                    <p class="v-spaced">
+                        Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
+                        is {{ $notices['reason'] }}
+                    </p>
+                    @endforeach
+                    </div>
+                </div>
                 <div class="warning">
                     @foreach( $family->getNoticeReasons() as $notices )
                         <p><i class="fa fa-exclamation-circle" aria-hidden="true"></i>
