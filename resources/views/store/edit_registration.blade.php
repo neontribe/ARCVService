@@ -153,10 +153,10 @@
                             @endforeach
                         @endif
                     @endif
-                    @if ( (Auth::user()->can('updateChart', App\Registration::class)) || (Auth::user()->can('updateDiary', App\Registration::class)) || (Auth::user()->can('updatePrivacy', App\Registration::class)) )
+                    @if ( (Auth::user()->can('updatePrivacy', App\Registration::class)) )
                         <div>
                             <h2>Documents Received:</h2>
-                            @can( 'updateChart', App\Registration::class )
+                            {{-- @can( 'updateChart', App\Registration::class )
                                 <div class="user-control">
                                     <input type="hidden" name="fm_chart" value="0">
                                     <input type="checkbox" class="styled-checkbox" id="update-chart" name="fm_chart" value="1"
@@ -171,13 +171,13 @@
                                         @if( old('fm_diary') || isset($registration->fm_diary_on) ) checked @endif/>
                                     <label for="update-diary">Diary</label>
                                 </div>
-                            @endcan
+                            @endcan --}}
                             @can( 'updatePrivacy', App\Registration::class )
                                 <div class="user-control">
                                     <input type="hidden" name="fm_privacy" value="0">
                                     <input type="checkbox" class="styled-checkbox" id="update-privacy" name="fm_privacy" value="1"
                                         @if( old('fm_privacy') || isset($registration->fm_privacy_on) ) checked @endif/>
-                                    <label for="update-privacy">Privacy Statement</label>
+                                    <label for="update-privacy">Registration Form</label>
                                 </div>
                             @endcan
                         </div>

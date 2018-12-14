@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Registration extends Model
 {
     const REMINDER_TYPES = [
-        'FoodDiaryNeeded' => ['reason' => 'Food Diary|not been received'],
-        'FoodChartNeeded' => ['reason' => 'Pie Chart|not been received'],
-        'PrivacyStatementNeeded' => ['reason' => 'Privacy Statement|not been received'],
+        // 'FoodDiaryNeeded' => ['reason' => 'Food Diary|not been received'],
+        // 'FoodChartNeeded' => ['reason' => 'Pie Chart|not been received'],
+        'PrivacyStatementNeeded' => ['reason' => 'Registration Form|not been received'],
     ];
 
     /**
@@ -109,12 +109,12 @@ class Registration extends Model
     {
         $reminders = [];
 
-        if (!$this->fm_chart_on) {
-            $reminders[] = self::REMINDER_TYPES['FoodChartNeeded'];
-        }
-        if (!$this->fm_diary_on) {
-            $reminders[] = self::REMINDER_TYPES['FoodDiaryNeeded'];
-        }
+        // if (!$this->fm_chart_on) {
+        //     $reminders[] = self::REMINDER_TYPES['FoodChartNeeded'];
+        // }
+        // if (!$this->fm_diary_on) {
+        //     $reminders[] = self::REMINDER_TYPES['FoodDiaryNeeded'];
+        // }
         if (!$this->fm_privacy_on) {
             $reminders[] = self::REMINDER_TYPES['PrivacyStatementNeeded'];
         }

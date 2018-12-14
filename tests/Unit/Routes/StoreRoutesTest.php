@@ -352,6 +352,7 @@ class StoreRoutesTest extends StoreTestCase
 
         // See page do interesting things
         $this->actingAs($fmuser, 'store')
+            ->visit(URL::route('store.dashboard'))
             ->get($route)
             ->assertResponseOK()
         ;

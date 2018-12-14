@@ -156,136 +156,136 @@ class EditPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itOnlyShowsAFoodMattersInputsToFoodMattersUsers()
-    {
-        // Create a FM User
-        $fmuser = factory(CentreUser::class)->create([
-            "name"  => "test FM user",
-            "email" => "testufmser@example.com",
-            "password" => bcrypt('test_fm_user_pass'),
-            "role" => 'foodmatters_user',
-        ]);
-        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
-        $users[] = $fmuser;
+    // /** @test */
+    // public function itOnlyShowsAFoodMattersInputsToFoodMattersUsers()
+    // {
+    //     // Create a FM User
+    //     $fmuser = factory(CentreUser::class)->create([
+    //         "name"  => "test FM user",
+    //         "email" => "testufmser@example.com",
+    //         "password" => bcrypt('test_fm_user_pass'),
+    //         "role" => 'foodmatters_user',
+    //     ]);
+    //     $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+    //     $users[] = $fmuser;
 
-        $ccuser = factory(CentreUser::class)->create([
-            "name"  => "test cc user",
-            "email" => "testccuser@example.com",
-            "password" => bcrypt('test_cc_user_pass'),
-            "centre_id" => $this->centre->id,
-            "role" => 'centre_user',
-        ]);
-        $ccuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
-        $users[] = $ccuser;
+    //     $ccuser = factory(CentreUser::class)->create([
+    //         "name"  => "test cc user",
+    //         "email" => "testccuser@example.com",
+    //         "password" => bcrypt('test_cc_user_pass'),
+    //         "centre_id" => $this->centre->id,
+    //         "role" => 'centre_user',
+    //     ]);
+    //     $ccuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+    //     $users[] = $ccuser;
 
-        foreach ($users as $centreUser) {
-            $this->actingAs($centreUser, 'store')
-                ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]));
-            if ($centreUser->can('updateDiary', Registration::class) ||
-                $centreUser->can('updateChart', Registration::class)
-            ) {
-                $this->see('Documents Received:');
-                if ($centreUser->can('updateChart')) {
-                    $this->seeElement('input[type="hidden"][name="fm_chart"]');
-                    $this->seeElement('input[type="checkbox"][name="fm_chart"]');
-                }
-                if ($centreUser->can('updateDiary')) {
-                    $this->seeElement('input[type="hidden"][name="fm_diary"]');
-                    $this->seeElement('input[type="checkbox"][name="fm_diary"]');
-                }
-            } else {
-                $this->dontSee('Documents Received:');
-                $this->dontSeeElement('input[type="hidden"][name="fm_chart"]');
-                $this->dontSeeElement('input[type="checkbox"][name="fm_chart"]');
-                $this->dontSeeElement('input[type="hidden"][name="fm_diary"]');
-                $this->dontSeeElement('input[type="checkbox"][name="fm_diary"]');
-            }
-        }
-    }
+    //     foreach ($users as $centreUser) {
+    //         $this->actingAs($centreUser, 'store')
+    //             ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]));
+    //         if ($centreUser->can('updateDiary', Registration::class) ||
+    //             $centreUser->can('updateChart', Registration::class)
+    //         ) {
+    //             $this->see('Documents Received:');
+    //             if ($centreUser->can('updateChart')) {
+    //                 $this->seeElement('input[type="hidden"][name="fm_chart"]');
+    //                 $this->seeElement('input[type="checkbox"][name="fm_chart"]');
+    //             }
+    //             if ($centreUser->can('updateDiary')) {
+    //                 $this->seeElement('input[type="hidden"][name="fm_diary"]');
+    //                 $this->seeElement('input[type="checkbox"][name="fm_diary"]');
+    //             }
+    //         } else {
+    //             $this->dontSee('Documents Received:');
+    //             $this->dontSeeElement('input[type="hidden"][name="fm_chart"]');
+    //             $this->dontSeeElement('input[type="checkbox"][name="fm_chart"]');
+    //             $this->dontSeeElement('input[type="hidden"][name="fm_diary"]');
+    //             $this->dontSeeElement('input[type="checkbox"][name="fm_diary"]');
+    //         }
+    //     }
+    // }
 
-    /** @test */
-    public function itShowsDiaryAndChartCheckedCorrectlyAsStoredInDatabase()
-    {
-        // Create a CentreUser
-        $fmuser = factory(CentreUser::class)->create([
-            'name' => 'test fm user',
-            'email' => 'testfmuser@example.com',
-            'password' => bcrypt('test_fmuser_pass'),
-            'role' => 'foodmatters_user',
-        ]);
-        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+    // /** @test */
+    // public function itShowsDiaryAndChartCheckedCorrectlyAsStoredInDatabase()
+    // {
+    //     // Create a CentreUser
+    //     $fmuser = factory(CentreUser::class)->create([
+    //         'name' => 'test fm user',
+    //         'email' => 'testfmuser@example.com',
+    //         'password' => bcrypt('test_fmuser_pass'),
+    //         'role' => 'foodmatters_user',
+    //     ]);
+    //     $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
-        $now = Carbon::now();
+    //     $now = Carbon::now();
 
-        // make no docs registration
-        $regs[] = factory(Registration::class)->create([
-            'centre_id' => $this->centre->id,
-            'fm_diary_on' => null,
-            'fm_chart_on' => null,
-        ]);
+    //     // make no docs registration
+    //     $regs[] = factory(Registration::class)->create([
+    //         'centre_id' => $this->centre->id,
+    //         'fm_diary_on' => null,
+    //         'fm_chart_on' => null,
+    //     ]);
 
-        // make chart only registration
-        $regs[] = factory(Registration::class)->create([
-            'centre_id' => $this->centre->id,
-            'fm_diary_on' => $now,
-            'fm_chart_on' => null,
-        ]);
+    //     // make chart only registration
+    //     $regs[] = factory(Registration::class)->create([
+    //         'centre_id' => $this->centre->id,
+    //         'fm_diary_on' => $now,
+    //         'fm_chart_on' => null,
+    //     ]);
 
-        // make diary only registration
-        $regs[] = factory(Registration::class)->create([
-            'centre_id' => $this->centre->id,
-            'fm_diary_on' => null,
-            'fm_chart_on' => $now,
-        ]);
+    //     // make diary only registration
+    //     $regs[] = factory(Registration::class)->create([
+    //         'centre_id' => $this->centre->id,
+    //         'fm_diary_on' => null,
+    //         'fm_chart_on' => $now,
+    //     ]);
 
-        // make both docs registration
-        $regs[] = factory(Registration::class)->create([
-            'centre_id' => $this->centre->id,
-            'fm_diary_on' => $now,
-            'fm_chart_on' => $now,
-        ]);
+    //     // make both docs registration
+    //     $regs[] = factory(Registration::class)->create([
+    //         'centre_id' => $this->centre->id,
+    //         'fm_diary_on' => $now,
+    //         'fm_chart_on' => $now,
+    //     ]);
 
-        foreach ($regs as $reg) {
-            $route = URL::route('store.registration.edit', ['id' => $reg->id]);
-            Auth::logout();
-            $this->actingAs($fmuser, 'store')
-                ->visit($route)
-            ;
+    //     foreach ($regs as $reg) {
+    //         $route = URL::route('store.registration.edit', ['id' => $reg->id]);
+    //         Auth::logout();
+    //         $this->actingAs($fmuser, 'store')
+    //             ->visit($route)
+    //         ;
 
-            // Test Chart
-            if ($reg->fm_chart_on !== null) {
-                $this->seeInDatabase(
-                    'registrations',
-                    ['id' => $reg->id, 'fm_chart_on' => $now]
-                );
-                $this->seeElement('input[name="fm_chart"][checked]');
-            } else {
-                $this->seeInDatabase(
-                    'registrations',
-                    [ 'id' => $reg->id, 'fm_chart_on' => null ]
-                );
-                $this->seeElement('input[name="fm_chart"]:not(:checked)');
-                $this->dontSeeElement('input[name="fm_chart"][checked]');
-            }
+    //         // Test Chart
+    //         if ($reg->fm_chart_on !== null) {
+    //             $this->seeInDatabase(
+    //                 'registrations',
+    //                 ['id' => $reg->id, 'fm_chart_on' => $now]
+    //             );
+    //             $this->seeElement('input[name="fm_chart"][checked]');
+    //         } else {
+    //             $this->seeInDatabase(
+    //                 'registrations',
+    //                 [ 'id' => $reg->id, 'fm_chart_on' => null ]
+    //             );
+    //             $this->seeElement('input[name="fm_chart"]:not(:checked)');
+    //             $this->dontSeeElement('input[name="fm_chart"][checked]');
+    //         }
 
-            // Test Diary;
-            if ($reg->fm_diary_on !== null) {
-                $this->seeInDatabase(
-                    'registrations',
-                    ['id' => $reg->id, 'fm_diary_on' => $now]
-                );
-                $this->seeElement('input[name="fm_diary"][checked]');
-            } else {
-                $this->seeInDatabase(
-                    'registrations',
-                    [ 'id' =>  $reg->id, 'fm_diary_on' => null ]
-                );
-                $this->seeElement('input[name="fm_diary"]:not(:checked)');
-                $this->dontSeeElement('input[name="fm_diary"][checked]');
-            }
-        }
-    }
+    //         // Test Diary;
+    //         if ($reg->fm_diary_on !== null) {
+    //             $this->seeInDatabase(
+    //                 'registrations',
+    //                 ['id' => $reg->id, 'fm_diary_on' => $now]
+    //             );
+    //             $this->seeElement('input[name="fm_diary"][checked]');
+    //         } else {
+    //             $this->seeInDatabase(
+    //                 'registrations',
+    //                 [ 'id' =>  $reg->id, 'fm_diary_on' => null ]
+    //             );
+    //             $this->seeElement('input[name="fm_diary"]:not(:checked)');
+    //             $this->dontSeeElement('input[name="fm_diary"][checked]');
+    //         }
+    //     }
+    // }
 
     /** @test */
     public function itShowsPrivacyStatementCheckedCorrectlyAsStoredInDatabase()
@@ -338,100 +338,100 @@ class EditPageTest extends StoreTestCase
         }
     }
 
-    /** @test */
-    public function itLetsAnAuthedUserUpdateDiaryOrChartState()
-    {
-        // Create a CetnreUser
-        $fmuser = factory(CentreUser::class)->create([
-            'name' => 'test fm user',
-            'email' => 'testfmuser@example.com',
-            'password' => bcrypt('test_fmuser_pass'),
-            'role' => 'foodmatters_user',
-        ]);
-        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+    // /** @test */
+    // public function itLetsAnAuthedUserUpdateDiaryOrChartState()
+    // {
+    //     // Create a CetnreUser
+    //     $fmuser = factory(CentreUser::class)->create([
+    //         'name' => 'test fm user',
+    //         'email' => 'testfmuser@example.com',
+    //         'password' => bcrypt('test_fmuser_pass'),
+    //         'role' => 'foodmatters_user',
+    //     ]);
+    //     $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
-        $now = Carbon::now();
+    //     $now = Carbon::now();
 
-        // make no docs registration
-        $regs[] = factory(Registration::class)->create([
-            'centre_id' => $this->centre->id,
-            'fm_diary_on' => null,
-            'fm_chart_on' => null,
-        ]);
+    //     // make no docs registration
+    //     $regs[] = factory(Registration::class)->create([
+    //         'centre_id' => $this->centre->id,
+    //         'fm_diary_on' => null,
+    //         'fm_chart_on' => null,
+    //     ]);
 
-        // make chart only registration
-        $regs[] = factory(Registration::class)->create([
-            'centre_id' => $this->centre->id,
-            'fm_diary_on' => $now,
-            'fm_chart_on' => null,
-        ]);
+    //     // make chart only registration
+    //     $regs[] = factory(Registration::class)->create([
+    //         'centre_id' => $this->centre->id,
+    //         'fm_diary_on' => $now,
+    //         'fm_chart_on' => null,
+    //     ]);
 
-        // make diary only registration
-        $regs[] = factory(Registration::class)->create([
-            'centre_id' => $this->centre->id,
-            'fm_diary_on' => null,
-            'fm_chart_on' => $now,
-        ]);
+    //     // make diary only registration
+    //     $regs[] = factory(Registration::class)->create([
+    //         'centre_id' => $this->centre->id,
+    //         'fm_diary_on' => null,
+    //         'fm_chart_on' => $now,
+    //     ]);
 
-        // make both docs registration
-        $regs[] = factory(Registration::class)->create([
-            'centre_id' => $this->centre->id,
-            'fm_diary_on' => $now,
-            'fm_chart_on' => $now,
-        ]);
+    //     // make both docs registration
+    //     $regs[] = factory(Registration::class)->create([
+    //         'centre_id' => $this->centre->id,
+    //         'fm_diary_on' => $now,
+    //         'fm_chart_on' => $now,
+    //     ]);
 
-        foreach ($regs as $reg) {
-            $route = URL::route('store.registration.edit', ['id' => $reg->id]);
-            $this->actingAs($fmuser, 'store')
-                ->visit($route);
+    //     foreach ($regs as $reg) {
+    //         $route = URL::route('store.registration.edit', ['id' => $reg->id]);
+    //         $this->actingAs($fmuser, 'store')
+    //             ->visit($route);
 
-            // Test Chart
-            if ($reg->fm_chart_on !== null) {
-                $this->check('fm_chart');
-            } else {
-                $this->uncheck('fm_chart');
-            }
+    //         // Test Chart
+    //         if ($reg->fm_chart_on !== null) {
+    //             $this->check('fm_chart');
+    //         } else {
+    //             $this->uncheck('fm_chart');
+    //         }
 
-            // Test Diary;
-            if ($reg->fm_diary_on !== null) {
-                $this->check('fm_diary');
-            } else {
-                $this->uncheck('fm_diary');
-            }
+    //         // Test Diary;
+    //         if ($reg->fm_diary_on !== null) {
+    //             $this->check('fm_diary');
+    //         } else {
+    //             $this->uncheck('fm_diary');
+    //         }
 
-            // We get back to edit page
-            $this->press('Save Changes')
-                ->seeStatusCode(200)
-                ->seePageIs($route)
-            ;
+    //         // We get back to edit page
+    //         $this->press('Save Changes')
+    //             ->seeStatusCode(200)
+    //             ->seePageIs($route)
+    //         ;
 
-            // Check the data has changed
-            if ($reg->fm_chart_on !== null) {
-                // Just chec it is no longer null. Using Carbon time caused frequent intermittant failure.
-                $this->dontSeeInDatabase(
-                    'registrations',
-                    [ 'id' => $reg->id, 'fm_chart_on' => null ]
-                );
-            } else {
-                $this->seeInDatabase(
-                    'registrations',
-                    [ 'id' => $reg->id, 'fm_chart_on' => null ]
-                );
-            }
+    //         // Check the data has changed
+    //         if ($reg->fm_chart_on !== null) {
+    //             // Just chec it is no longer null. Using Carbon time caused frequent intermittant failure.
+    //             $this->dontSeeInDatabase(
+    //                 'registrations',
+    //                 [ 'id' => $reg->id, 'fm_chart_on' => null ]
+    //             );
+    //         } else {
+    //             $this->seeInDatabase(
+    //                 'registrations',
+    //                 [ 'id' => $reg->id, 'fm_chart_on' => null ]
+    //             );
+    //         }
 
-            if ($reg->fm_diary_on !== null) {
-                $this->dontSeeInDatabase(
-                    'registrations',
-                    [ 'id' => $reg->id, 'fm_diary_on' => null ]
-                );
-            } else {
-                $this->seeInDatabase(
-                    'registrations',
-                    [ 'id' => $reg->id, 'fm_diary_on' => null ]
-                );
-            }
-        }
-    }
+    //         if ($reg->fm_diary_on !== null) {
+    //             $this->dontSeeInDatabase(
+    //                 'registrations',
+    //                 [ 'id' => $reg->id, 'fm_diary_on' => null ]
+    //             );
+    //         } else {
+    //             $this->seeInDatabase(
+    //                 'registrations',
+    //                 [ 'id' => $reg->id, 'fm_diary_on' => null ]
+    //             );
+    //         }
+    //     }
+    // }
 
     /** @test */
     public function itLetsAnAuthedUserUpdatePrivacyStatementState()
