@@ -2,8 +2,11 @@
 
 namespace App;
 
+use Carbon\Carbon;
+use DB;
 use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;
+use Log;
 
 class StateToken extends Model
 {
@@ -30,25 +33,47 @@ class StateToken extends Model
      */
     public function __construct(array $attributes = [])
     {
-        // Intercept and make a Uuid
-        $attributes["uuid"] = empty($attributes["uuid"])
-            ? self::generateUnusedToken()
-            : $attributes["uuid"]
-        ;
+        parent::__construct($attributes);
 
-        // Send that up the chain.
-        parent::__construct($attributes = []);
+        if (empty($attributes["uuid"])) {
+            $this->uuid = $this->generateUnusedToken();
+        }
     }
 
-    public static function generateUnusedToken()
+    /**
+     * Makes and checks for an unused token
+     * TODO make this static?
+     * @return string
+    */
+    public function generateUnusedToken()
     {
         do {
             // TODO: Deal with possibility uuid4() may throw an exception of it's own?
-            // TODO: Also, potential infinite loop; i mean, it *shouldn't* happen, right...?
-            // We could throw an exception if iterations > 10, and handle elsewhere
-            $candidate = Uuid::uuid4()->toString();
-        } while (self::where('uuid', '=', $candidate)->exists());
+            try {
+                $candidate = Uuid::uuid4()->toString();
+            } catch (\Exception $e) {
+                // Uuid4() throws exceptions, apparently! Log that and die, I guess?
+                Log::warning($e->getMessage());
+                abort(500, $e->getMessage());
+            }
+            // Check if it's in use.
+            $usedToken = DB::table($this->getTable())
+                ->where('uuid', $candidate)
+                ->exists();
+        } while ($usedToken === true);
+
         return $candidate;
+    }
+
+    /**
+     * Tidies Tokens of a certain age.
+     * @param int $age
+     * @return bool|null
+     */
+    public static function tidy($age = 30)
+    {
+        $expireDate = Carbon::today()->subDays($age)->format('Y-m-d H:i:s');
+        return self::where('created_at', '<', $expireDate)->delete();
     }
 
     /**

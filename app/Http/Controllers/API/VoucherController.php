@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Events\VoucherPaymentRequested;
 use App\Http\Controllers\Controller;
+use App\StateToken;
 use App\Trader;
 use App\Voucher;
 use Auth;
@@ -34,6 +35,7 @@ class VoucherController extends Controller
         }
         */
 
+        // TODO : Tidy these checks into a FormRequest for API requests.
         // Get out - no transition specified.
         if (!$request['transition']) {
             return response("No transition", 400);
@@ -55,13 +57,7 @@ class VoucherController extends Controller
         }
 
         //remove spaces from voucher array values
-        $cleanedVouchers = array_map(
-            function($dirtycode) {
-                $badChars = [" ",];
-                return str_replace($badChars, "", $dirtycode);
-            },
-            $request['vouchers']
-        );
+        $cleanedVouchers = Voucher::cleanCodes($request['vouchers']);
 
         //create unique vouchers
         $uniqueVouchers = array_unique($cleanedVouchers);
@@ -84,7 +80,17 @@ class VoucherController extends Controller
         $failed_rejects = [];
         $vouchers_for_payment = [];
 
+        if ($transition = 'confirm') {
+            // Tidy the StateTokens
+            StateToken::tidy();
+
+            // We'll need a StateToken for Later
+            $stateToken = new StateToken();
+            $stateToken->save();
+        }
+
         /** @var Voucher $voucher */
+        // TODO: Unsquirrel this ginormo-function.
         foreach ($vouchers as $voucher) {
             // do we need to finangle the rejections?
             if ($transition === "reject") {
@@ -106,6 +112,7 @@ class VoucherController extends Controller
                 // this saves the model too.
                 $voucher->applyTransition($transition);
 
+
                 // Success for this one.
                 if ($request['transition'] != 'reject') {
                     $success_codes[] = $voucher->code;
@@ -114,8 +121,14 @@ class VoucherController extends Controller
                 }
                 // If this is a confirm transition - add to a list
                 // for sending to ARC admin. This is a request for payment.
-                if ($transition === 'confirm') {
+                if ($transition === 'confirm' && $stateToken) {
                     $vouchers_for_payment[] = $voucher;
+
+                    $voucher->getPriorState()
+                        ->token()
+                        ->associate($stateToken)
+                        ->save()
+                    ;
                 }
             } else {
                 // These are duplicates - or invalid for another reason.
@@ -134,18 +147,11 @@ class VoucherController extends Controller
 
         // If there are any confirmed ones... trigger the email.
         if (sizeof($vouchers_for_payment) > 0) {
-            // Todo We need to change something...
-            // If the email fails for some reason,
-            // the User will not be aware.
-            // The Vouchers will be transitioned but the ARC admin won't know.
+            // This email*could* fail; However, ARC admin will eventually be able to see a list of voucher states.
             $this->emailVoucherPaymentRequest($trader, $vouchers_for_payment);
         }
 
-
-        // We might want to annotate somehow with the type of transition here.
-        // Currently we can
-        //  'collect' - submit and
-        //  'confirm' - request payment on.
+        // Collate the codes by category.
         $responses['success_add'] = $success_codes;
         $responses['success_reject'] = $reject_codes;
         $responses['own_duplicate'] = $own_duplicate_codes;
