@@ -152,13 +152,6 @@
                     @endforeach
                     </div>
                 </div>
-                <div class="warning">
-                    @foreach( $family->getNoticeReasons() as $notices )
-                        <p><i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-                            Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
-                            currently "{{ $notices['reason'] }}"</p>
-                    @endforeach
-                </div>
                 <div class="attention">
                     @if ( (Auth::user()->cannot('updateChart', App\Registration::class)) || (Auth::user()->cannot('updateDiary', App\Registration::class)) || (Auth::user()->cannot('updatePrivacy', App\Registration::class)))
                         @if ( count($registration->getReminderReasons()) > 0 )
