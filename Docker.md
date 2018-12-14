@@ -6,7 +6,7 @@ To use this install docker-composer:
 
     apt intall docker.io docker-compose
     
-If you are getitng an error to do with the docker composer version, you may need to try another way
+If you are getting an error to do with the docker composer version, you may need to try another way
     
 If you dont already have Docker, get it from the docker repo:
     
