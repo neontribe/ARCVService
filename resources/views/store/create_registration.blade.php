@@ -19,7 +19,7 @@
                     <input id="carer" name="carer" class="@if($errors->has('carer'))invalid @endif" type="text" autocomplete="off" autocorrect="off" spellcheck="false" value="{{ old('carer') }}">
                 </div>
                 @if ( $errors->has('carer') )
-                <div class="alert-message error">
+                <div class="alert-message error" id="carer-alert">
                     <div class="icon-container error">
                         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
                     </div>
@@ -105,7 +105,7 @@
                     <label for="privacy-statement">Has the registration form been completed and signed?</label>
                 </div>
                 @if ( $errors->has('consent') )
-                <div class="alert-message error">
+                <div class="alert-message error" id="registration-alert">
                     <div class="icon-container error">
                         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
                     </div>
