@@ -53,15 +53,15 @@ input[type="search"] {
 	font-size: 1.3rem;
 	line-height: 20px;
 	width: 100%;
-	border: 2px solid #ededed;
+	border: 2px solid #ffffff;
 	box-sizing: border-box;
 	margin: 2px 0;
 	font-family: 'Roboto Slab', serif;
 }
 
 input[type="text"]:disabled {
-	background: #ECECEC;
-	border: 1px solid #ECECEC;
+	background: #ececec;
+	border: 1px solid #ececec;
 	font-weight: 200;
 }
 
@@ -92,10 +92,10 @@ input[type=radio]+label,
 input[type="radio"]+label:before,
 .styled-checkbox+label:before {
 	content: "";
-	background: #fff;
+	background: #ffffff;
 	width: 34px;
 	height: 34px;
-	border: 1px solid #ECECEC;
+	border: 1px solid #ececec;
 	position: absolute;
 	left: 0;
 	cursor: pointer;
@@ -159,7 +159,7 @@ button {
 }
 
 button:disabled {
-	background-color: #AEAEAE;
+	background-color: #aeaeae;
 	color: #f9f9f9;
 }
 
@@ -173,7 +173,7 @@ button:after,
 	top: 0;
 	left: 0;
 	pointer-events: none;
-	background-image: radial-gradient(circle, #fff 10%, transparent 10%);
+	background-image: radial-gradient(circle, #ffffff 10%, transparent 10%);
 	background-repeat: no-repeat;
 	background-position: 50%;
 	transform: scale(10,10);
@@ -356,7 +356,7 @@ input[type="text"].invalid,
 }
 
 .disabled {
-	background-color: #DADADA;
+	background-color: #dadada;
 }
 
 .disabled:hover {
@@ -421,7 +421,7 @@ COOKIE NOTICE
 	display: flex;
 	justify-content: space-evenly;
 	align-items: center;
-	background-color: #EEEEEE;
+	background-color: #eeeeee;
 	padding: 10px;
 	font-size: 0.9rem;
 }
@@ -563,14 +563,14 @@ REGISTER PAGE
 
 .col {
 	width: 100%;
-	background: #EEEEEE;
+	background: #eeeeee;
 	margin: 1rem;
 	min-width: 25%;
 	overflow: auto;
 }
 
 .col > div:first-child {
-	background-color: #63C669;
+	background-color: #63c669;
 	margin: 0;
 	color: white;
 	min-height: 60px;
@@ -760,7 +760,7 @@ EDIT PAGE
 }
 
 .confirmation-buttons button:nth-child(2) {
-	background-color: #000;
+	background-color: #000000;
 }
 
 #expandable p {
@@ -778,7 +778,7 @@ SEARCH PAGE
 */
 
 .search {
-	background-color: #FFF;
+	background-color: #ffffff;
 	box-sizing: border-box;
 	padding: 2rem 10% 0 10%;
 }
@@ -895,7 +895,7 @@ HISTORY PAGE
 
 .history td[colspan="3"] {
 	padding: 0 2rem;
-	background: #EEEEEE;
+	background: #eeeeee;
 	pointer-events: none;
 }
 
@@ -1008,7 +1008,6 @@ VOUCHER PAGES
 
 .col .alert-message {
 	align-items: stretch;
-	background-color: #f3c3c3;
 	display: flex;
 	margin-top: 0;
 	min-height: 2rem;
