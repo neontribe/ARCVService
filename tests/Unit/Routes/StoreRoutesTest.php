@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Routes;
 
+use App\StateToken;
 use Auth;
 use App\Centre;
 use App\CentreUser;
@@ -393,5 +394,25 @@ class StoreRoutesTest extends StoreTestCase
     /** @test */
     public function testRegistrationFamilyUpdateGate()
     {
+    }
+
+    /** @test */
+    public function testPaymentRequestRoute()
+    {
+        // Don't need to be logged in.
+        Auth::logout();
+
+        $stateToken = factory(StateToken::class)->create([
+            'uuid' => "12345678-1234-1234-1234-1234567890ab"
+        ]);
+
+        // Make a route url with the uuid.
+        $route = URL::route('store.payment-request.show', ['paymentUuid' => $stateToken->uuid]);
+
+        // Get the page with a correct Uuid
+        $this->get($route)
+            ->seePageIs($route)
+            ->assertResponseStatus(200)
+        ;
     }
 }
