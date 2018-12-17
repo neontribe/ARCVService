@@ -11,11 +11,6 @@ class StateTokenModelTest extends TestCase
 {
     use DatabaseMigrations;
 
-    protected function setUp()
-    {
-        parent::setUp();
-    }
-
     /** @test */
     public function testItCanGenerateAPaymentUUID()
     {
