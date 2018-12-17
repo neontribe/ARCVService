@@ -80,7 +80,7 @@ class VoucherController extends Controller
         $failed_rejects = [];
         $vouchers_for_payment = [];
 
-        if ($transition = 'confirm') {
+        if ($transition == 'confirm') {
             // Tidy the StateTokens
             StateToken::tidy();
 
@@ -124,8 +124,9 @@ class VoucherController extends Controller
                 if ($transition === 'confirm' && $stateToken) {
                     $vouchers_for_payment[] = $voucher;
 
+                    // Fetch the last transition and add the state
                     $voucher->getPriorState()
-                        ->token()
+                        ->stateToken()
                         ->associate($stateToken)
                         ->save()
                     ;
