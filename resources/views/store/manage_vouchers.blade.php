@@ -27,6 +27,7 @@
                         </ul>
                     </div>
                 </div>
+                @if ( !empty($family->getNoticeReasons()) )
                 <div class="alert-message warning">
                     <div class="icon-container warning">
                         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
@@ -40,6 +41,7 @@
                         @endforeach
                     </div>
                 </div>
+                @endif
                 <a href="{{ route("store.registration.edit", ['id' => $registration->id ]) }}" class="link">
                     <div class="link-button link-button-large">
                         <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Go to edit family
