@@ -33,11 +33,11 @@
                     </div>
                     <div>
                         @foreach( $family->getNoticeReasons() as $notices )
-                    <p class="v-spaced">
-                        Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
-                        is {{ $notices['reason'] }}
-                    </p>
-                    @endforeach
+                            <p class="v-spaced">
+                                Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
+                                is {{ $notices['reason'] }}
+                            </p>
+                        @endforeach
                     </div>
                 </div>
                 <a href="{{ route("store.registration.edit", ['id' => $registration->id ]) }}" class="link">
