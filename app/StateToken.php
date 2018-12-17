@@ -33,19 +33,26 @@ class StateToken extends Model
      */
     public function __construct(array $attributes = [])
     {
+        // If empty or used, replace with a uuid
         parent::__construct($attributes);
 
-        if (empty($attributes["uuid"])) {
-            $this->uuid = $this->generateUnusedToken();
+        // if it exists and is used
+        if (array_key_exists('uuid', $attributes)) {
+            if (self::isUsedToken($attributes['uuid'])) {
+                $this->uuid = self::generateUnusedToken();
+            }
+        } else {
+            // If it doesn't exist, make one too.
+            $this->uuid = self::generateUnusedToken();
         }
     }
 
     /**
      * Makes and checks for an unused token
-     * TODO make this static?
+     *
      * @return string
     */
-    public function generateUnusedToken()
+    public static function generateUnusedToken()
     {
         do {
             // TODO: Deal with possibility uuid4() may throw an exception of it's own?
@@ -57,9 +64,7 @@ class StateToken extends Model
                 abort(500, $e->getMessage());
             }
             // Check if it's in use.
-            $usedToken = DB::table($this->getTable())
-                ->where('uuid', $candidate)
-                ->exists();
+            $usedToken = self::isUsedToken($candidate);
         } while ($usedToken === true);
 
         return $candidate;
@@ -74,6 +79,19 @@ class StateToken extends Model
     {
         $expireDate = Carbon::today()->subDays($age)->format('Y-m-d H:i:s');
         return self::where('created_at', '<', $expireDate)->delete();
+    }
+
+    /**
+     * Checks a UUID has been used
+     * @param $candidate
+     * @return bool
+     */
+    public static function isUsedToken($candidate)
+    {
+        $tableName = 'state_tokens';
+        return DB::table($tableName)
+            ->where('uuid', $candidate)
+            ->exists();
     }
 
     /**
