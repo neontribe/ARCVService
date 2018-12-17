@@ -136,14 +136,24 @@
                         </li>
                     </ul>
                 </div>
-                <p>Their RV-ID is: <strong>{{ $family->rvid }}</strong></p>
-                <div class="warning">
-                    @foreach( $family->getNoticeReasons() as $notices )
-                        <p><i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-                            Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
-                            currently "{{ $notices['reason'] }}"</p>
-                    @endforeach
+                <div>
+                    <p class="v-spaced">Their RV-ID is: <strong>{{ $family->rvid }}</strong></p>
                 </div>
+                @if ( !empty($family->getNoticeReasons()) )
+                <div class="alert-message warning">
+                    <div class="icon-container warning">
+                        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        @foreach( $family->getNoticeReasons() as $notices )
+                            <p class="v-spaced">
+                                Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
+                                currently "{{ $notices['reason'] }}"</p>
+                            </p>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
                 <div class="attention">
                     @if ( (Auth::user()->cannot('updateChart', App\Registration::class)) || (Auth::user()->cannot('updateDiary', App\Registration::class)) || (Auth::user()->cannot('updatePrivacy', App\Registration::class)))
                         @if ( count($registration->getReminderReasons()) > 0 )
