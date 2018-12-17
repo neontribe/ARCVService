@@ -7,6 +7,8 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use SM\SMException;
 use App\Voucher;
+use App\VoucherState;
+use App\StateToken;
 use App\User;
 use Auth;
 
@@ -124,5 +126,31 @@ class VoucherStateModelTest extends TestCase
         $voucher->applyTransition('reject-to-dispatched');
 
         $this->assertEquals($voucher->currentstate, 'dispatched');
+    }
+
+    public function testAVoucherMayHaveAStateToken()
+    {
+        // Make a voucher
+        Auth::login($this->user);
+        $voucher = factory(Voucher::class, 'requested')->create();
+        $voucher->applyTransition('order');
+        $voucher->applyTransition('print');
+        $voucher->applyTransition('dispatch');
+        $voucher->applyTransition('collect');
+        $voucher->applyTransition('confirm');
+
+        // See it's state doesn't, by default get a state token
+        /** @var VoucherState $state */
+        $state = $voucher->history->last();
+        $this->assertTrue(empty($state->token));
+
+        $stateToken = new StateToken();
+        $stateToken->uuid = "aStringOfCharacters";
+        $stateToken->save();
+        // Create and associate one
+        $state->token()->associate($stateToken);
+        // See that it has one
+        $this->assertFalse(empty($state->token));
+        $this->assertEquals("aStringOfCharacters", $state->token->uuid);
     }
 }
