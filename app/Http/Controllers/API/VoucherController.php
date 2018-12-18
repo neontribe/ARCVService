@@ -111,7 +111,6 @@ class VoucherController extends Controller
                 // this saves the model too.
                 $voucher->applyTransition($transition);
 
-
                 // Success for this one.
                 if ($request['transition'] != 'reject') {
                     $success_codes[] = $voucher->code;
