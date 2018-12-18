@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Events\VoucherPaymentRequested;
 use App\Http\Controllers\Controller;
+use App\StateToken;
 use App\Trader;
 use App\Voucher;
 use Auth;
@@ -138,7 +139,7 @@ class VoucherController extends Controller
             // If the email fails for some reason,
             // the User will not be aware.
             // The Vouchers will be transitioned but the ARC admin won't know.
-            $this->emailVoucherPaymentRequest($trader, $vouchers_for_payment);
+            $this->emailVoucherPaymentRequest($trader, $stateToken, $vouchers_for_payment);
         }
 
 
@@ -162,10 +163,11 @@ class VoucherController extends Controller
      * Email a Trader's Voucher Payment Request.
      *
      * @param Trader $trader
+     * @param StateToken $stateToken
      * @param \Illuminate\Database\Eloquent\Collection Voucher $vouchers
      * @return \Illuminate\Http\Response
      */
-    public function emailVoucherPaymentRequest(Trader $trader, $vouchers)
+    public function emailVoucherPaymentRequest(Trader $trader, StateToken $stateToken, $vouchers)
     {
         $title = 'A report containing voucher payment request for '
             . $trader->name . '.'
@@ -175,7 +177,7 @@ class VoucherController extends Controller
         // Todo factor excel/csv create functions out into service.
         $traderController = new TraderController();
         $file = $traderController->createVoucherListFile($trader, $vouchers, $title, $date);
-        event(new VoucherPaymentRequested(Auth::user(), $trader, $vouchers, $file));
+        event(new VoucherPaymentRequested(Auth::user(), $trader, $stateToken, $vouchers, $file));
 
         // Todo not sure this is being delivered to the frontend.
         return response()->json(['message' => trans('api.messages.voucher_payment_requested')], 202);

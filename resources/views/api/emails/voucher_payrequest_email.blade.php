@@ -16,6 +16,16 @@
 
         <p>The attached file is best viewed through a spreadsheet program such as Microsoft Excel, LibreOffice Calc or Google Sheets. If you have any problems with opening or downloading it, please email <a href="mailto:{{ config('mail.to_developer.address') }}">{{ config('mail.to_developer.name') }}</a>.</p>
 
+        {{-- Action Button --}}
+        @component('mail::button', ['url' => $actionUrl, 'color' => 'blue'])
+            {{ $actionText }}
+        @endcomponent
+
+        @component('mail::subcopy')
+            If you’re having trouble clicking the "{{ $actionText }}" button, copy and paste the URL below
+            into your web browser: [{{ $actionUrl }}]({{ $actionUrl }})
+        @endcomponent
+
         <p>Thanks,<br>
         Rose Vouchers</p>
     </section>

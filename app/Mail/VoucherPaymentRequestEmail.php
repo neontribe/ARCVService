@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use URL;
 
 class VoucherPaymentRequestEmail extends Mailable
 {
@@ -21,7 +22,7 @@ class VoucherPaymentRequestEmail extends Mailable
      * Create a new message instance.
      */
 
-    public function __construct($user, $trader, $vouchers, $file)
+    public function __construct($user, $trader, $stateToken, $vouchers, $file)
     {
         $this->user = $user->name;
         $this->trader = $trader->name;
@@ -29,6 +30,8 @@ class VoucherPaymentRequestEmail extends Mailable
         $this->vouchers = $vouchers;
         $this->file = $file;
         $this->market = $trader->market ? $trader->market->name : 'no associated market';
+        $this->actionText = "Pay Request";
+        $this->actionUrl = URL::route('store.payment-request.show', ['paymentUuid' => $stateToken->uuid]);
     }
 
     /**
