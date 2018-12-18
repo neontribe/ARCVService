@@ -437,3 +437,11 @@ $factory->define(App\Note::class, function (Faker\Generator $faker){
         'user_id' => 1,
     ];
 });
+
+// StateToken - pretty empty, it generates it's own UUID
+$factory->define(
+    App\StateToken::class,
+    function () {
+        return [];
+    }
+);

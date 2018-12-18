@@ -27,15 +27,21 @@
                         </ul>
                     </div>
                 </div>
-                <div class="warning">
-                    @foreach( $family->getNoticeReasons() as $notices )
-                    <p class="v-spaced">
-                        <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-                        Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
-                        is {{ $notices['reason'] }}
-                    </p>
-                    @endforeach
+                @if ( !empty($family->getNoticeReasons()) )
+                <div class="alert-message warning">
+                    <div class="icon-container warning">
+                        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        @foreach( $family->getNoticeReasons() as $notices )
+                            <p class="v-spaced">
+                                Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
+                                is {{ $notices['reason'] }}
+                            </p>
+                        @endforeach
+                    </div>
                 </div>
+                @endif
                 <a href="{{ route("store.registration.edit", ['id' => $registration->id ]) }}" class="link">
                     <div class="link-button link-button-large">
                         <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Go to edit family
@@ -107,8 +113,8 @@
                     </div>
                 </form>
                 @if ( count( $errors ) > 0)
-                <div class="error-message">
-                    <div class="error-icon-container">
+                <div class="alert-message error">
+                    <div class="icon-container error">
                         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
                     </div>
                     <div>
@@ -118,9 +124,9 @@
                     </div>
                 </div>
                 @endif
-                @if (Session::get('error_message'))
-                <div class="error-message">
-                    <div class="error-icon-container">
+                @if (Session::get('error_message error'))
+                <div class="alert-message">
+                    <div class="icon-container error">
                         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
                     </div>
                     <div>
