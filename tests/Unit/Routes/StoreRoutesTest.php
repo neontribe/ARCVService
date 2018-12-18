@@ -430,7 +430,7 @@ class StoreRoutesTest extends StoreTestCase
         $route_update = URL::route('store.payment-request.update', ['paymentUuid' => $stateToken->uuid]);
         $route_show = URL::route('store.payment-request.show', ['paymentUuid' => $stateToken->uuid]);
 
-        // PUT the page with a correct Uuid - other thn that it doesn't "need" any request params or body.
+        // PUT the page with a correct Uuid - other than that it doesn't "need" any request params or body.
         $this->put($route_update)
             ->seePageIs($route_show)
             ->assertResponseStatus(200)
