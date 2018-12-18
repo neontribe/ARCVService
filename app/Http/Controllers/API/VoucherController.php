@@ -85,8 +85,7 @@ class VoucherController extends Controller
             StateToken::tidy();
 
             // We'll need a StateToken for Later
-            $stateToken = new StateToken();
-            $stateToken->save();
+            $stateToken = factory(StateToken::class)->create();
         }
 
         /** @var Voucher $voucher */

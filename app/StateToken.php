@@ -28,26 +28,6 @@ class StateToken extends Model
     ];
 
     /**
-     * StateToken constructor. Always end up with a UUID
-     * @param array $attributes
-     */
-    public function __construct(array $attributes = [])
-    {
-        // If empty or used, replace with a uuid
-        parent::__construct($attributes);
-
-        // if it exists and is used
-        if (array_key_exists('uuid', $attributes)) {
-            if (self::isUsedToken($attributes['uuid'])) {
-                $this->uuid = self::generateUnusedToken();
-            }
-        } else {
-            // If it doesn't exist, make one too.
-            $this->uuid = self::generateUnusedToken();
-        }
-    }
-
-    /**
      * Makes and checks for an unused token
      *
      * @return string

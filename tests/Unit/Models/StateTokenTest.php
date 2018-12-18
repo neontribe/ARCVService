@@ -15,13 +15,14 @@ class StateTokenModelTest extends TestCase
     public function testItCanGenerateAPaymentUUID()
     {
         // Create a StateToken
-        $token = new StateToken();
+        $token = factory(StateToken::class)->create();
+
         // Check it has a UUID that is valid;
         $this->assertTrue(Uuid::isValid($token->uuid));
 
         // Generate a new token with a specified value
-        $uuid = $token->generateUnusedToken();
-        $specifiedToken = new StateToken(['uuid' => $uuid]);
+        $uuid = StateToken::generateUnusedToken();
+        $specifiedToken = factory(StateToken::class)->make(['uuid' => $uuid]);
         $specifiedToken->save();
 
         // See that saved correctly
@@ -29,15 +30,19 @@ class StateTokenModelTest extends TestCase
         $this->assertEquals($uuid, $specifiedToken->uuid);
     }
 
-    /** @test */
-    public function testItCanCheckTheUUIDisUnique()
+    /** @test
+     * @expectedException \Illuminate\Database\QueryException
+     * @expectedExceptionMessage Integrity constraint violation: 19 UNIQUE constraint failed: state_tokens.uuid
+     */
+    public function testItCannotSaveADuplicateUUID()
     {
-        // Create a StateToken
-        $token = new StateToken();
-        $token->save();
+        // Create a StateToken, should make a random, unique uuid
+        $token = factory(StateToken::class)->create();
+
         // Try to create a new token with the same value
-        $token2 = new StateToken(['uuid' => $token->uuid]);
-        // See that it is different
-        $this->assertNotEquals($token->uuid, $token2->uuid);
+        // This will throw the above QueryException with the message substring specified
+        $token2 = factory(StateToken::class)->create(['uuid' => $token->uuid]);
+
+        $this->assertFalse($token2);
     }
 }
