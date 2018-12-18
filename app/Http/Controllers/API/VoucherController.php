@@ -80,7 +80,7 @@ class VoucherController extends Controller
         $failed_rejects = [];
         $vouchers_for_payment = [];
 
-        if ($transition == 'confirm') {
+        if ($transition === 'confirm') {
             // Tidy the StateTokens
             StateToken::tidy();
 
