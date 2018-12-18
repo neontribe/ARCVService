@@ -17,8 +17,17 @@
                 <div>
                     <label for="carer">Main carer's full name</label>
                     <input id="carer" name="carer" class="@if($errors->has('carer'))invalid @endif" type="text" autocomplete="off" autocorrect="off" spellcheck="false" value="{{ old('carer') }}">
-                    <span class="@if(!$errors->has('carer'))collapsed @endif invalid-error" id="carer-span">This field is required</span>
                 </div>
+                @if ( $errors->has('carer') )
+                <div class="alert-message error" id="carer-alert">
+                    <div class="icon-container error">
+                        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        <p>This field is required</p>
+                    </div>
+                </div>
+                @endif
                 <div>
                     <label for="carer_adder_input">Other people who can collect <span>(optional)</span></label>
                     <div id="carer_adder" class="small-button-container">
@@ -91,13 +100,20 @@
                         <label for="other">Other Local Criteria</label>
                     </div>
                 </div>
-                <div>
-                    <div class="user-control">
-                        <input type="checkbox" class="styled-checkbox @if($errors->has('consent'))invalid @endif" id="privacy-statement" name="consent" @if( old('consent') ) checked @endif/>
-                        <label for="privacy-statement">Has the registration form been completed and signed?</label>
-                        <span class="@if(!$errors->has('consent'))collapsed @endif invalid-error" id="privacy-statement-span">Registration form must be signed in order to complete registration</span>
+                <div class="user-control">
+                    <input type="checkbox" class="styled-checkbox @if($errors->has('consent'))invalid @endif" id="privacy-statement" name="consent" @if( old('consent') ) checked @endif/>
+                    <label for="privacy-statement">Has the registration form been completed and signed?</label>
+                </div>
+                @if ( $errors->has('consent') )
+                <div class="alert-message error" id="registration-alert">
+                    <div class="icon-container error">
+                        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        <p>Registration form must be signed in order to complete registration</p>
                     </div>
                 </div>
+                @endif
                 {{-- <div>
                     <p>Reminder: don't forget to complete food diary and pie chart.</p>
                 </div> --}}

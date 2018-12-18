@@ -163,10 +163,8 @@ class RegistrationPageTest extends StoreTestCase
             ->type('Test Carer', 'carer')
             ->press('Save Family')
             ->seePageIs(URL::route('store.registration.create'))
-            ->seeInElement(
-                '#privacy-statement-span',
-                'Registration form must be signed in order to complete registration'
-            )
+            ->seeElement('#registration-alert')
+            ->see('Registration form must be signed in order to complete registration')
         ;
 
         // There is still not a Registration.
@@ -184,10 +182,8 @@ class RegistrationPageTest extends StoreTestCase
             ->check('consent')
             ->press('Save Family')
             ->seePageIs(URL::route('store.registration.create'))
-            ->seeInElement(
-                '#carer-span',
-                'This field is required'
-            )
+            ->seeElement('#carer-alert')
+            ->see('This field is required')
         ;
 
         // There is still not a Registration.

@@ -5,6 +5,23 @@
 To use this install docker-composer:
 
     apt intall docker.io docker-compose
+    
+If you are getting an error to do with the docker composer version, you may need to try another way
+    
+If you dont already have Docker, get it from the docker repo:
+    
+    https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-using-the-repository
+    
+If you are on elementaryOS you need to replace ```$(lsb_release -cs) \``` in step 4 with ```xenial \``` 
+    
+(https://elementaryos.stackexchange.com/questions/11844/installing-docker-on-elementary-os-loki)
+    
+Then to install docker-composer you need to use the instructions in the docker-compose repo
+    
+    https://github.com/docker/compose/releases
+    
+If you find that when you do docker-compose --version it says ```bash: /usr/bin/docker-compose: No such file or directory```
+    but usr/bin is in your path you may just need to restart your session for it to refresh.
 
 You will need to fix your local DNS to point arcv-service.test and arcv-store.test to point to localhost and then run:
 
