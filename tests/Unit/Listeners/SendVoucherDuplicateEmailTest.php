@@ -53,7 +53,7 @@ class SendVoucherDuplicateEmailTest extends TestCase
             ->seeEmailContains(e($user->name) . ' has tried to submit voucher')
             ->seeEmailContains($vouchercode . ' against')
             ->seeEmailContains(e($trader->name) . ' of')
-            ->seeEmailContains($market->name . '\'s account, however that voucher has already been submitted by another trader.')
+            ->seeEmailContains(e($market->name). '\'s account, however that voucher has already been submitted by another trader.')
         ;
     }
 
