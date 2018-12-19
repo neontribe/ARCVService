@@ -589,9 +589,9 @@ class EditPageTest extends StoreTestCase
     public function childrensDOBsGiveExpectedAge()
     {
         // Set Carbon::now to 01/01/2018
-        Carbon::setTestNow(Carbon::parse('first day of January 2018'));
+        Carbon::setTestNow(Carbon::parse('first day of January 2018')->startOfDay());
 
-        // Create a centre, centreuser and registration
+        // Create a Centre, CentreUser and Registration
         $centre = factory(Centre::class)->create();
         $centreUser =  factory(CentreUser::class)->create([
             "name"  => "tester",
@@ -604,8 +604,9 @@ class EditPageTest extends StoreTestCase
             'centre_id' => $centre->id,
         ]);
 
-        // Amend the first family to add 3 children.
+        // Amend the first family to have 3 children.
         $family = $registration->family;
+        $family->children()->delete();
 
         $family->children()
             ->saveMany(
@@ -616,11 +617,11 @@ class EditPageTest extends StoreTestCase
         ;
 
         // Amend 3 children's DOB to be 11, 12 + 13 months old.
-        $family->children[0]->dob = "2016-12-01 00:00:00";
+        $family->children[0]->dob = Carbon::now()->subMonths(13)->startOfMonth()->startOfDay();
         $family->children[0]->save();
-        $family->children[1]->dob = "2017-01-01 00:00:00";
+        $family->children[1]->dob = Carbon::now()->subMonths(12)->startOfMonth()->startOfDay();
         $family->children[1]->save();
-        $family->children[2]->dob = "2017-02-01 00:00:00";
+        $family->children[2]->dob = Carbon::now()->subMonths(11)->startOfMonth()->startOfDay();
         $family->children[2]->save();
 
         // Test that entering children's DOB's gives the expected age.
@@ -629,7 +630,7 @@ class EditPageTest extends StoreTestCase
             ->see('<td>1 yr, 1 mo</td>')
             ->see('<td>1 yr, 0 mo</td>')
             ->see('<td>0 yr, 11 mo</td>')
-            ->see('<div class="alert-message warning">');
+        ;
 
         // Set Carbon date & time back
         Carbon::setTestNow();
