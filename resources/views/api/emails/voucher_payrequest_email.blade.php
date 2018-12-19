@@ -16,16 +16,34 @@
 
         <p>The attached file is best viewed through a spreadsheet program such as Microsoft Excel, LibreOffice Calc or Google Sheets. If you have any problems with opening or downloading it, please email <a href="mailto:{{ config('mail.to_developer.address') }}">{{ config('mail.to_developer.name') }}</a>.</p>
 
-        {{-- Action Button --}}
-        @component('mail::button', ['url' => $actionUrl, 'color' => 'blue'])
-            {{ $actionText }}
-        @endcomponent
-
-        @component('mail::subcopy')
-            If you’re having trouble clicking the "{{ $actionText }}" button, copy and paste the URL below
-            into your web browser: [{{ $actionUrl }}]({{ $actionUrl }})
-        @endcomponent
-
+        {{-- Action Button, sadly copied from template as couldn't get it to work using `@component` --}}
+        <table class="action" align="center" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+                <td align="center">
+                    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td align="center">
+                                <table border="0" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td>
+                                            <a href="{{ $actionUrl }}" class="button button-blue" target="_blank">{{ $actionText }}</a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        <table class="subcopy" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+                <td>
+                    If you’re having trouble clicking the "{{ $actionText }}" button, copy and paste the URL below
+                    into your web browser: [{{ $actionUrl }}]({{ $actionUrl }})
+                </td>
+            </tr>
+        </table>
         <p>Thanks,<br>
         Rose Vouchers</p>
     </section>
