@@ -171,7 +171,7 @@ class Voucher extends Model
 
     /**
      * Limit Vouchers to ones that have been confirmed for payment.
-     * This will include both pending and reimbersed vouchers.
+     * This will include both pending and reimbursed vouchers.
      *
      * @return query $query
      */

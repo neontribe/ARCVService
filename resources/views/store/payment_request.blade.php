@@ -1,17 +1,16 @@
 @extends('store.layouts.service_master')
 
-@section('title', 'Voucher Manager')
+@section('title', 'Payment Request')
 
 @section('content')
 
-    @include('store.partials.navbar', ['headerTitle' => 'Payment Request'])
-
     <div class="content history payment">
         <div class="info">
-          <h3>*Trader Name*</h3>
+        <h1>Payment Request</h1>
+        <h2>{{ $trader }}<h2>
         </div>
         {{-- TODO: if uuid is valid && not expired --}}
-        @if (!empty($bundles_by_week))
+        @if (true)
             <table>
                 <tr>
                     <th>Voucher Code</th>
@@ -19,10 +18,10 @@
                     <th>Date Paid</th>
                 </tr>
                 {{-- TODO: foreach voucher of same uuid --}}
-                @foreach ($bundles_by_week as $week => $bundle)
-                    <tr class="@if(!$bundle)disabled @endif">
+                @foreach ($voucher_codes as $voucher)
+                    <tr>
                         <td>
-                            RVNT0050
+                            {{ $voucher }}
                         </td>
                         <td>
                             {{-- TO DO: get status from uuid --}}
@@ -36,18 +35,18 @@
                 @endforeach
             </table>
             <div class="confirms">
-            <a href="#" class="">
+                <a href="#" class="">
                     Cancel
                 </a>
-            <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
-                <div class="link-button link-button-large">
-                    </i><i class="fa fa-money button-icon" aria-hidden="true"></i>Pay Vouchers
-                </div>
-            </a>
+                <a href="#" class="link">
+                    <div class="link-button link-button-large">
+                        </i><i class="fa fa-money button-icon" aria-hidden="true"></i>Pay Vouchers
+                    </div>
+                </a>
             </div>
         @else
             <p class="content-warning centre">This payment request is invalid, or has expired.</p>
         @endif
     </div>
-s
+
 @endsection

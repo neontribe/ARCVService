@@ -23,8 +23,14 @@ class PaymentController extends Controller
      */
     public function show($paymentUuid)
     {
-        return response($paymentUuid, 200)
-            ->header('Content-Type', 'text/plain');
+
+        $trader = "Mike's Excellent Courgettes";
+        $voucher_codes = [ 'RVNT001', 'RVNT002', 'RVNT003', 'RVNT001', 'RVNT002', 'RVNT003', 'RVNT001', 'RVNT002', 'RVNT003', 'RVNT001', 'RVNT002', 'RVNT003', 'RVNT001', 'RVNT002', 'RVNT003', 'RVNT001', 'RVNT002', 'RVNT003', 'RVNT001', 'RVNT002', 'RVNT003', 'RVNT001', 'RVNT002', 'RVNT003', 'RVNT001', 'RVNT002', 'RVNT003' ];
+
+        return view('store.payment_request', [
+            'trader' => $trader,
+            'voucher_codes' => $voucher_codes,
+        ]);
     }
 
     /** Pay a specific payment request by link

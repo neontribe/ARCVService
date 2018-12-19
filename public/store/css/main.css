@@ -1122,32 +1122,35 @@ VOUCHER PAGES
 	100% { transform: scale(1) }
 }
 
-.payment.history {
-	display: block;
-	flex-wrap: wrap;
+.payment {
+	height: 88%;
 }
 
-.payment.history table {
+.payment {
+	display: block;
+}
+
+.payment.content table {
 	margin: 1rem auto;
 	visibility: visible;
 	width: 70%;
 }
 
-.payment.history th {
+.payment.content th {
 	width: 33%;
 }
 
-.payment.history span {
+.payment.content span {
 	background-color: #dff2ce;
 	padding: 5px;
 	border-radius: 3px;
 }
 
-.payment.history > div {
+.payment.content > div {
 	width: auto;
 }
 
-.payment.history > .info > h3 {
+.payment.content > .info > h3 {
 	margin: auto;
 }
 
