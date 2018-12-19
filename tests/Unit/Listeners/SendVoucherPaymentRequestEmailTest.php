@@ -12,10 +12,10 @@ use App\Trader;
 use App\User;
 use App\Voucher;
 use Auth;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Spinen\MailAssertions\MailTracking;
 use Tests\TestCase;
+use URL;
 
 class SendVoucherPaymentRequestEmailTest extends TestCase
 {
@@ -82,6 +82,9 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
         $listener = new SendVoucherPaymentRequestEmail();
         $listener->handle($event);
 
+        // Make the route to check
+        $route = URL::route('store.payment-request.show', $stateToken->uuid);
+
         // We can improve this - but test basic data is correct.
         // uses laravel helper function e() to prevent errors from names with apostrophes
         $this->seeEmailWasSent()
@@ -91,6 +94,10 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
             ->seeEmailContains(e($user->name) . ' has just successfully requested payment for')
             ->seeEmailContains($vouchers->count() . ' vouchers')
             ->seeEmailContains(e($trader->name) . ' of')
+            // Has button?
+            ->seeEmailContains('<a href="' . $route . '" class="button button-blue" target="_blank">Pay Request</a>')
+            // Has link?
+            ->seeEmailContains('[' . $route . '](' . $route . ')')
         ;
     }
 }
