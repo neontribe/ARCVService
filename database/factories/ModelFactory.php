@@ -441,7 +441,16 @@ $factory->define(App\Note::class, function (Faker\Generator $faker){
 // StateToken - pretty empty, it generates it's own UUID
 $factory->define(
     App\StateToken::class,
-    function () {
-        return [];
+    function (Faker\Generator $faker, $attributes) {
+
+        // Create a default UUID if you havn't got one.
+        $uuid = (empty($attributes['uuid']))
+            ? App\StateToken::generateUnusedToken()
+            : $attributes['uuid'];
+
+        return
+            [
+              'uuid' => $uuid
+            ];
     }
 );

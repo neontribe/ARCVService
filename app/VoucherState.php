@@ -43,7 +43,7 @@ class VoucherState extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function token()
+    public function stateToken()
     {
         return $this->belongsTo(StateToken::class);
     }
