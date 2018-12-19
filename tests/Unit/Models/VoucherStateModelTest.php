@@ -142,15 +142,15 @@ class VoucherStateModelTest extends TestCase
         // See it's state doesn't, by default get a state token
         /** @var VoucherState $state */
         $state = $voucher->history->last();
-        $this->assertTrue(empty($state->token));
+        $this->assertTrue(empty($state->stateToken));
 
         $stateToken = new StateToken();
         $stateToken->uuid = "aStringOfCharacters";
         $stateToken->save();
         // Create and associate one
-        $state->token()->associate($stateToken);
+        $state->stateToken()->associate($stateToken);
         // See that it has one
-        $this->assertFalse(empty($state->token));
-        $this->assertEquals("aStringOfCharacters", $state->token->uuid);
+        $this->assertFalse(empty($state->stateToken));
+        $this->assertEquals("aStringOfCharacters", $state->stateToken->uuid);
     }
 }
