@@ -7,14 +7,15 @@ use App\Http\Controllers\API\TraderController;
 use App\Listeners\SendVoucherPaymentRequestEmail;
 use App\Market;
 use App\Sponsor;
+use App\StateToken;
 use App\Trader;
 use App\User;
 use App\Voucher;
 use Auth;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Spinen\MailAssertions\MailTracking;
 use Tests\TestCase;
+use URL;
 
 class SendVoucherPaymentRequestEmailTest extends TestCase
 {
@@ -23,6 +24,7 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
 
     protected $traders;
     protected $vouchers;
+    protected $stateToken;
     protected $user;
 
     protected function setUp()
@@ -42,6 +44,10 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
 
         // Set up voucher states.
         Auth::login($this->user);
+
+        // Make a stateToken
+        $this->stateToken = factory(StateToken::class)->create();
+
         foreach ($this->vouchers as $v) {
             $v->applyTransition('order');
             $v->applyTransition('print');
@@ -49,20 +55,6 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
             $v->trader_id = 1;
             $v->applyTransition('collect');
         }
-
-        // Progress one to pending_payment.
-        $this->vouchers[0]->applyTransition('confirm');
-
-        // Progress a couple to reimbursed.
-        // For now they display same as pending.
-        $this->vouchers[1]->applyTransition('confirm');
-        $this->vouchers[1]->applyTransition('payout');
-        $this->vouchers[2]->applyTransition('confirm');
-        $this->vouchers[2]->applyTransition('payout');
-
-        // A voucher not belonging to trader 1.
-        $this->vouchers[9]->trader_id = 2;
-        $this->vouchers[9]->save();
     }
 
     public function testRequestVoucherPayment()
@@ -70,14 +62,28 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
         $user = $this->user;
         $trader = $this->traders[0];
         $vouchers = $trader->vouchers;
+        $stateToken = $this->stateToken;
+
+        // confirm the vouchers.
+        $vouchers->each(function ($v) use ($stateToken) {
+            $v->applyTransition('confirm');
+            $v->getPriorState()
+            ->stateToken()
+            ->associate($stateToken)
+            ->save();
+        });
+
         $title = 'Test Rose Voucher Payment Request';
         Auth::login($user);
         $controller = new TraderController();
         $file = $controller->createVoucherListFile($trader, $vouchers, $title);
 
-        $event = new VoucherPaymentRequested($user, $trader, $vouchers, $file);
+        $event = new VoucherPaymentRequested($user, $trader, $stateToken, $vouchers, $file);
         $listener = new SendVoucherPaymentRequestEmail();
         $listener->handle($event);
+
+        // Make the route to check
+        $route = URL::route('store.payment-request.show', $stateToken->uuid);
 
         // We can improve this - but test basic data is correct.
         // uses laravel helper function e() to prevent errors from names with apostrophes
@@ -88,6 +94,10 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
             ->seeEmailContains(e($user->name) . ' has just successfully requested payment for')
             ->seeEmailContains($vouchers->count() . ' vouchers')
             ->seeEmailContains(e($trader->name) . ' of')
+            // Has button?
+            ->seeEmailContains('<a href="' . $route . '" class="button button-blue" target="_blank">Pay Request</a>')
+            // Has link?
+            ->seeEmailContains('[' . $route . '](' . $route . ')')
         ;
     }
 }

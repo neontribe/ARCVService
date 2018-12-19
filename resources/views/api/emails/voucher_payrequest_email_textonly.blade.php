@@ -13,6 +13,11 @@ The details for this request are attached to this email.
 
 The attached file is best viewed through a spreadsheet program such as Microsoft Excel, LibreOffice Calc or Google Sheets. If you have any problems with opening or downloading it, please email <a href="mailto:{{ config('mail.to_developer.address') }}">{{ config('mail.to_developer.name') }}</a>.
 
+To register this request as paid, copy and paste the URL below
+into your web browser and follow the directions there :
+
+{{ $actionUrl }}
+
 Thanks,
 Rose Vouchers
 

@@ -147,7 +147,7 @@ class VoucherController extends Controller
         // If there are any confirmed ones... trigger the email.
         if (sizeof($vouchers_for_payment) > 0) {
             // This email*could* fail; However, ARC admin will eventually be able to see a list of voucher states.
-            $this->emailVoucherPaymentRequest($trader, $vouchers_for_payment);
+            $this->emailVoucherPaymentRequest($trader, $stateToken, $vouchers_for_payment);
         }
 
         // Collate the codes by category.
@@ -167,10 +167,11 @@ class VoucherController extends Controller
      * Email a Trader's Voucher Payment Request.
      *
      * @param Trader $trader
+     * @param StateToken $stateToken
      * @param \Illuminate\Database\Eloquent\Collection Voucher $vouchers
      * @return \Illuminate\Http\Response
      */
-    public function emailVoucherPaymentRequest(Trader $trader, $vouchers)
+    public function emailVoucherPaymentRequest(Trader $trader, StateToken $stateToken, $vouchers)
     {
         $title = 'A report containing voucher payment request for '
             . $trader->name . '.'
@@ -180,7 +181,7 @@ class VoucherController extends Controller
         // Todo factor excel/csv create functions out into service.
         $traderController = new TraderController();
         $file = $traderController->createVoucherListFile($trader, $vouchers, $title, $date);
-        event(new VoucherPaymentRequested(Auth::user(), $trader, $vouchers, $file));
+        event(new VoucherPaymentRequested(Auth::user(), $trader, $stateToken, $vouchers, $file));
 
         // Todo not sure this is being delivered to the frontend.
         return response()->json(['message' => trans('api.messages.voucher_payment_requested')], 202);
