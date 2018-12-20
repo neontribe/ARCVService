@@ -3,10 +3,13 @@
 namespace Tests;
 
 
+use App\Carer;
+use App\Family;
 use Auth;
 use App\Bundle;
 use App\Registration;
 use Carbon\Carbon;
+use ClassesWithParents\G;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class BundleModelTest extends TestCase
@@ -36,6 +39,45 @@ class BundleModelTest extends TestCase
         $this->assertNull($b->disbursed_at);
         // a blank bundle doesn't have vouchers.
         $this->assertEmpty($b->vouchers);
+    }
+
+    public function testPopulatedBundleIsCreatedWithExpectedAttributes()
+    {
+        $centre = factory('App\Centre')->create();
+        $user = factory('App\CentreUser')->create(['centre_id'=>$centre->id]);
+        Auth::login($user);
+
+        // family and carer needed to collect the bundle
+
+        $family = factory(Family::class)->create(['initial_centre_id'=>$user->centre_id]);
+        $carer = factory(Carer::class)->create(['name'=>'Bob','family_id'=>$family->id]);
+
+        //create three vouchers and transition to collected.
+        $vs = factory('App\Voucher', 'requested', 3)
+            ->create()
+            ->each(function ($v) {
+                $v->applyTransition('order');
+                $v->applyTransition('print');
+                $v->applyTransition('dispatch');
+                $v->applyTransition('collect');
+                $v->bundle()->associate($this->bundle);
+                $v->save();
+            });
+        //just to check we have the expected number of vouchers before continuing
+        $this->assertEquals($vs->count(), $this->bundle->vouchers()->count());
+
+        $disbursedBundle = $this->bundle;
+
+        $disbursedBundle->disbursed_at = Carbon::now()->startOfDay();
+        $disbursedBundle->collecting_carer_id = $carer->id;
+        $disbursedBundle->disbursing_centre_id = $family->initial_centre_id;
+        $disbursedBundle->disbursing_user_id = $user->id;
+
+        $this->assertInternalType('integer', $disbursedBundle->collecting_carer_id);
+        $this->assertInternalType('integer', $disbursedBundle->disbursing_centre_id);
+        $this->assertInternalType('integer', $disbursedBundle->disbursing_user_id);
+        $this->assertInstanceOf(Carbon::class, $disbursedBundle->disbursed_at);
+        $this->assertNotEmpty($disbursedBundle->vouchers);
     }
 
     public function testBundleCanHaveManyVouchers()
