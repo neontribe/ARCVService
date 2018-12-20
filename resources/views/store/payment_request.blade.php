@@ -4,48 +4,63 @@
 
 @section('content')
 
-    <div class="content history payment">
-        <div class="info">
+    <div class="content payment">
         <h1>Payment Request</h1>
-        <h2>{{ $trader }}<h2>
-        </div>
-        {{-- TODO: if uuid is valid && not expired --}}
-        @if (true)
+        @if ( $state_token !== null )
+            <h2 class="center"> {{ $trader }} </h2>
             <table>
                 <tr>
-                    <th>Voucher Code</th>
-                    <th>Status</th>
-                    <th>Date Paid</th>
+                    <th>
+                        Voucher Code
+                    </th>
+                    <th>
+                        Status
+                    </th>
+                    <th>
+                        {{-- TODO: conditionally toggle this between Date Paid, Date Requested or Date if there's a mix --}}
+                        Date
+                    </th>
                 </tr>
-                {{-- TODO: foreach voucher of same uuid --}}
-                @foreach ($voucher_codes as $voucher)
+                @foreach ( $vouchers as $voucher )
                     <tr>
                         <td>
-                            {{ $voucher }}
+                            {{ $voucher->code }}
                         </td>
-                        <td>
-                            {{-- TO DO: get status from uuid --}}
-                            <span>Paid</span>
-                        </td>
-                        <td>
-                            {{-- get date of request from uuid --}}
-                            18/12/2018
-                        </td>
+                        @if ( $voucher->currentstate === "payment_pending" )
+                            <td>
+                                <span class="status requested">Requested</span>
+                            </td>
+                            <td>
+                                {{ \Carbon\Carbon::parse($voucher->paymentPendedOn()->created_at)->format('d/m/Y') }}
+                            </td>
+                        @elseif ( $voucher->currentstate === "reimbursed" )
+                            <td>
+                                <span class="status paid">Paid</span>
+                            </td>
+                            <td>
+                                {{ \Carbon\Carbon::parse($voucher->reimbursedOn()->created_at)->format('d/m/Y') }}
+                            </td>
+                        @else
+                            {{-- We shouldn't encounter this state, but display the state in case we do --}}
+                            <td>
+                                <span> {{ $voucher->currentstate }} </span>
+                            </td>
+                            <td>
+                                -
+                            </td>
+                        @endif
                     </tr>
                 @endforeach
             </table>
-            <div class="confirms">
-                <a href="#" class="">
-                    Cancel
-                </a>
-                <a href="#" class="link">
-                    <div class="link-button link-button-large">
-                        </i><i class="fa fa-money button-icon" aria-hidden="true"></i>Pay Vouchers
-                    </div>
-                </a>
-            </div>
+            @if ( $number_to_pay > 0 )
+                <form action="{{ route('store.payment-request.update', ['id' => $state_token->uuid ]) }}" method="PUT">
+                    <button class="submit" type="Submit">
+                    </i><i class="fa fa-money button-icon" aria-hidden="true"></i>Pay <b>{{ $number_to_pay }}</b> Vouchers
+                    </button>
+                </form>
+            @endif
         @else
-            <p class="content-warning centre">This payment request is invalid, or has expired.</p>
+            <p class="content-warning center">This payment request is invalid, or has expired.</p>
         @endif
     </div>
 

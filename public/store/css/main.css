@@ -933,6 +933,49 @@ HISTORY PAGE
 
 /*
 
+PAYMENT PAGE
+
+*/
+
+.payment {
+	height: 88%;
+}
+
+.payment.content table {
+	margin: 3rem auto;
+	visibility: visible;
+	width: 70%;
+}
+
+.payment th {
+	width: 33.3%;
+}
+
+.payment td {
+	font-size: 1.2rem;
+	text-align: center;
+}
+
+.payment button {
+	margin: auto;
+    padding: 0 2rem;
+}
+
+.status {
+	padding: 5px;
+	border-radius: 3px;
+}
+
+.requested {
+	background-color: #f8c28b;
+}
+
+.paid {
+	background-color: #dff2ce;
+}
+
+/*
+
 VOUCHER PAGES
 
 */
@@ -1120,51 +1163,4 @@ VOUCHER PAGES
 	0% { transform: scale(1) }
 	50% { transform: scale(1.1) }
 	100% { transform: scale(1) }
-}
-
-.payment {
-	height: 88%;
-}
-
-.payment {
-	display: block;
-}
-
-.payment.content table {
-	margin: 1rem auto;
-	visibility: visible;
-	width: 70%;
-}
-
-.payment.content th {
-	width: 33%;
-}
-
-.payment.content span {
-	background-color: #dff2ce;
-	padding: 5px;
-	border-radius: 3px;
-}
-
-.payment.content > div {
-	width: auto;
-}
-
-.payment.content > .info > h3 {
-	margin: auto;
-}
-
-.confirms {
-	display: flex;
-	justify-content: center;
-}
-
-.confirms > a {
-	width: 20%;
-	color: black;
-	line-height: 80px;
-}
-
-.confirms > div {
-	width: 20%;
 }
