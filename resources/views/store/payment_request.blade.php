@@ -54,6 +54,7 @@
             </table>
             @if ( $number_to_pay > 0 )
                 <form action="{{ route('store.payment-request.update', ['id' => $state_token->uuid ]) }}" method="PUT">
+                    {!! csrf_field() !!}
                     <button class="submit" type="Submit">
                     </i><i class="fa fa-money button-icon" aria-hidden="true"></i>Pay <b>{{ $number_to_pay }}</b> Vouchers
                     </button>
