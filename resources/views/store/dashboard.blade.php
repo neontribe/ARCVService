@@ -33,8 +33,7 @@
                     Export Registrations
                 </li>
             </a>
-            {{-- <a href="{{ URL::route('store.vouchers.mvl.export') }}"> --}}
-            <a href="">
+            <a href="{{ URL::route('store.vouchers.mvl.export') }}">
                 <li>
                     <img src="{{ asset('store/assets/export-light.svg') }}" name="export-registrations">
                     Export Voucher Log
