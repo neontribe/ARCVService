@@ -935,6 +935,49 @@ HISTORY PAGE
 
 /*
 
+PAYMENT PAGE
+
+*/
+
+.payment {
+	height: 88%;
+}
+
+.payment.content table {
+	margin: 3rem auto;
+	visibility: visible;
+	width: 70%;
+}
+
+.payment th {
+	width: 33.3%;
+}
+
+.payment td {
+	font-size: 1.2rem;
+	text-align: center;
+}
+
+.payment button {
+	margin: auto;
+	padding: 0 2rem;
+}
+
+.status {
+	padding: 5px;
+	border-radius: 3px;
+}
+
+.requested {
+	background-color: #f8c28b;
+}
+
+.paid {
+	background-color: #dff2ce;
+}
+
+/*
+
 VOUCHER PAGES
 
 */

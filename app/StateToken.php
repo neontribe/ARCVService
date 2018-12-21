@@ -79,7 +79,7 @@ class StateToken extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function voucherSates()
+    public function voucherStates()
     {
         return $this->hasMany(VoucherState::class);
     }
