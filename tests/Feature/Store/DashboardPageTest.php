@@ -43,7 +43,7 @@ class DashboardPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function itShowsTheExportButtonWhenUserCanExport()
+    public function itShowsTheExportButtonsWhenUserCanExport()
     {
         // Create an FM User
         $fmuser =  factory(CentreUser::class)->create([
@@ -67,6 +67,7 @@ class DashboardPageTest extends StoreTestCase
         $this->actingAs($ccuser, 'store')
             ->visit(URL::route('store.dashboard'))
             ->dontSee(URL::route('store.centres.registrations.summary'))
+            ->dontSee(URL::route('store.vouchers.mvl.export'))
         ;
 
         Auth::logout();
@@ -74,6 +75,7 @@ class DashboardPageTest extends StoreTestCase
         $this->actingAs($fmuser, 'store')
             ->visit(URL::route('store.dashboard'))
             ->see(URL::route('store.centres.registrations.summary'))
+            ->see(URL::route('store.vouchers.mvl.export'))
         ;
     }
 

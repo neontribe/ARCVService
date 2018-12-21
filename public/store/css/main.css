@@ -514,9 +514,11 @@ DASHBOARD PAGE
 
 .navigation ul {
 	display: inline-flex;
+	flex-wrap: wrap;
+	font-size: 1.2rem;
+	justify-content: center;
 	padding: 0;
 	width: 100%;
-	font-size: 1.2rem;
 }
 
 .navigation li {
@@ -547,8 +549,8 @@ DASHBOARD PAGE
 
 .navigation a {
 	color: white;
+	flex: 0 0 33.3%;
 	text-decoration: none;
-	width: 50%;
 }
 
 .navigation a:hover {
