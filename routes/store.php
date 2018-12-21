@@ -159,4 +159,10 @@ Route::group(['middleware' => 'auth:store'], function () {
         'uses' => 'CentreController@exportRegistrationsSummary',
     ])->middleware(['can:export,App\Registration']);
 
+    // ALL vouchers and extra details, in a format suitable for the MVL sheets.
+    // As this includes participant ID access, it has "can:export registrations".
+    Route::get('/vouchers/master-log', [
+        'as' => 'store.vouchers.mvl.export',
+        'uses' => 'VoucherController@exportMasterVoucherLog',
+    ])->middleware(['can:export,App\Registration']);
 });
