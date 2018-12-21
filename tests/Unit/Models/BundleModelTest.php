@@ -9,7 +9,6 @@ use Auth;
 use App\Bundle;
 use App\Registration;
 use Carbon\Carbon;
-use ClassesWithParents\G;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class BundleModelTest extends TestCase
