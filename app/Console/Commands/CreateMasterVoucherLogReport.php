@@ -8,8 +8,10 @@ use Excel;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Console\Command;
 use Log;
+use Maatwebsite\Excel\Classes\LaravelExcelWorksheet;
 use Maatwebsite\Excel\Exceptions\LaravelExcelException;
 use Maatwebsite\Excel\Writers\LaravelExcelWriter;
+use Sponsor;
 
 class CreateMasterVoucherLogReport extends Command
 {
@@ -109,8 +111,10 @@ FROM vouchers
       LEFT JOIN registrations on bundles.registration_id = registrations.id
       LEFT JOIN families ON registrations.family_id = families.id
       LEFT JOIN centres ON families.initial_centre_id = centres.id
+        
       # Need to join the Primary Carer here; Primary Carers are only relevant via bundles.
       LEFT JOIN (
+        
         # We need the *first*, by self join grouping (classic technique, so SQLite can cope)
         SELECT t1.name, t1.family_id
         FROM carers t1
@@ -161,14 +165,17 @@ EOD;
                 'Dispatch Date',
                 'Disbursed Date',
                 'RVID',
+                'Participant',
                 'Payment Request Date',
                 'Trader Name',
                 'Retail Outlet',
                 'Reimbursed Date'
             ];
 
-            // Cast each element to proper array, not stdObjects as returned by DB::select()
+            // We're going to run this monster *once* and then split it into files.
+            // We could run it once per sponsor; consider that if it becomes super-unwieldy.
             $rows = array_map(
+                // Cast each element to proper array, not stdObjects as returned by DB::select()
                 function ($value) {
                     return (array)$value;
                 },
@@ -187,7 +194,7 @@ EOD;
                     $excel->setCreator(env('APP_NAME'));
                     $excel->setKeywords([]);
 
-                    // Produce entire sheet.
+                    // First, produce entire sheet.
                     $excel->sheet(
                         'All Data',
                         function ($sheet) use ($rows, $headers) {
@@ -197,28 +204,67 @@ EOD;
                             $sheet->fromArray($rows, null, 'A2', false, false);
                         }
                     );
+
+                    // Split up the rows into separate areas.
+                    $areas = [];
+                    foreach ($rows as $rowindex => $rowFields) {
+                        $area = $rowFields['Area'];
+                        if (!isset($areas[$area])) {
+                            // Not met this area before? Add it to our list!
+                            $areas[$area] = [];
+                        }
+                        // We're going to use "&" references to avoid memory issues - Hang on to your hat.
+                        $areas[$area][] = &$rowFields;
+                    }
+
+                    // Make sheets for each.
+                    foreach ($areas as $area => $areaRows) {
+                        $excel->sheet(
+                            $area,
+                            function ($sheet) use ($areaRows, $headers) {
+                                // Format page
+                                $sheet->setOrientation('landscape');
+                                $sheet->row(1, $headers);
+                                $sheet->fromArray($areaRows, null, 'A2', false, false);
+                            }
+                        );
+                    }
+
                 }
             );
-
-            try {
-                $excelDoc->ext = 'csv';
-                $fileContents = $excelDoc->string('csv'); // Throws Exception
-                $filename = $this->filename .
-                    "." .
-                    $excelDoc->ext .
-                    ".enc";
-                Storage::disk('enc')->put($filename, encrypt($fileContents));
-            } catch (LaravelExcelException $e) {
-                // Tell someone about that?
-                Log::error($e->getMessage());
-                // Unexpected outcome
-                $exitCode = 1;
-            }
+            // write a file, and see if it borks.
+            $exitCode = ($this->writeOutput($excelDoc))
+                ? 0
+                : 1
+            ;
         }
         // Set 0, above for expected outcomes
         exit($exitCode);
     }
 
+    /**
+     * Encrypts and stashes files.
+     * @param LaravelExcelWriter $excelDoc
+     * @return bool
+     */
+    public function writeOutput(LaravelExcelWriter $excelDoc)
+    {
+        try {
+            $excelDoc->ext = 'ods';
+            $fileContents = $excelDoc->string('ods'); // Throws Exception
+            $filename = $this->filename .
+                "." .
+                $excelDoc->ext
+            ;
+            //Storage::disk('enc')->put($filename . ".enc", encrypt($fileContents));
+            Storage::disk('enc')->put($filename, $fileContents);
+        } catch (\Exception $e) {
+            // Could be Storage or LaravelExcelWriterException related
+            Log::error($e->getMessage());
+            return false;
+        }
+        return true;
+    }
     /**
      * Warn the user before they execute.
      *
