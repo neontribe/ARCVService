@@ -4,8 +4,11 @@ namespace App\Console\Commands;
 
 use Carbon\Carbon;
 use DB;
-use Maatwebsite\Excel\Excel;
+use Illuminate\Support\Facades\Storage;
+use Log;
 use Illuminate\Console\Command;
+use Maatwebsite\Excel\Excel;
+use Maatwebsite\Excel\Exceptions\LaravelExcelException;
 use Maatwebsite\Excel\Writers\LaravelExcelWriter;
 
 class CreateMasterVoucherLogReport extends Command
@@ -133,6 +136,9 @@ EOD;
         $this->filename = (empty($this->option('filename')))
             ?: $this->option('filename');
 
+        // default exit code.
+        $exitCode = 0;
+
         // Pause or carry on
         if ($this->option('force') || $this->warnUser()) {
             // Run the query
@@ -181,9 +187,22 @@ EOD;
                 }
             );
 
-            $excelDoc->ext = 'xls';
-            // TODO : build an ecryoted fileystem provider, and use it.
+            try {
+                $excelDoc->ext = 'csv';
+                $fileContents = encrypt($excelDoc->string('csv')); // throws Exception
+                $filename = $this->filename . "."
+                    .$excelDoc->ext .
+                    ".enc";
+                Storage::disk('enc')->put($filename, $fileContents);
+            } catch (LaravelExcelException $e) {
+                // Tell someone about that?
+                Log::error($e->getMessage());
+                // Unexpected outcome
+                $exitCode = 1;
+            }
         }
+        // Set 0, above for expected outcomes
+        exit($exitCode);
     }
 
     /**

@@ -48,6 +48,13 @@ return [
             'root' => storage_path('app'),
         ],
 
+        // For "encrypted" files
+        'enc' => [
+            'driver' => 'local',
+            'root' => storage_path('app/enc'),
+            'visibility' => 'private',
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
