@@ -4,10 +4,10 @@ namespace App\Console\Commands;
 
 use Carbon\Carbon;
 use DB;
+use Excel;
 use Illuminate\Support\Facades\Storage;
-use Log;
 use Illuminate\Console\Command;
-use Maatwebsite\Excel\Excel;
+use Log;
 use Maatwebsite\Excel\Exceptions\LaravelExcelException;
 use Maatwebsite\Excel\Writers\LaravelExcelWriter;
 
@@ -41,16 +41,16 @@ class CreateMasterVoucherLogReport extends Command
      * The report's query template
      * TODO: refactor this as eloquent lookups when it's finalised.
      *      This will eventually help with the fact we'll need to chunk data too.
-     * @var string
+     * @var string $report
      */
     private $report = <<<EOD
 SELECT
   sponsors.name AS 'Area',
   vouchers.code AS 'Voucher Code',
   dispatch_date AS 'Dispatch Date',
-  # bundles.disbursed_at as 'disbursed date',
   disbursed_at AS 'Disbursed Date',
   rvid AS 'RVID',
+  pri_carer_name AS 'Participant',
   payment_request_date AS 'Payment Request Date',
   trader_name AS 'Trader Name',
   market_name AS 'Retail Outlet',
@@ -98,18 +98,29 @@ FROM vouchers
   ) AS reimburse_query
     ON reimburse_query.voucher_id = vouchers.id
 
-  # Get fields we need to calculate RVID
+  # Get fields relevant to bundles (pri_carer/RVID/disbursed_at)
   LEFT JOIN (
     SELECT bundles.id,
            bundles.disbursed_at AS disbursed_at,
            # LPAD will truncate values over 4 characters (or 9999 rvids).
-           CONCAT(centres.prefix, LPAD(families.centre_sequence, 4, 0)) AS rvid
-
+           CONCAT(centres.prefix, LPAD(families.centre_sequence, 4, 0)) AS rvid,
+           pri_carer_query.name as pri_carer_name
     FROM bundles
       LEFT JOIN registrations on bundles.registration_id = registrations.id
       LEFT JOIN families ON registrations.family_id = families.id
-      # Need to join the primary carer here
       LEFT JOIN centres ON families.initial_centre_id = centres.id
+      # Need to join the Primary Carer here; Primary Carers are only relevant via bundles.
+      LEFT JOIN (
+        # We need the *first*, by self join grouping (classic technique, so SQLite can cope)
+        SELECT t1.name, t1.family_id
+        FROM carers t1
+        INNER JOIN (
+          SELECT MIN(id) as id
+          FROM carers t3
+          GROUP BY t3.family_id
+        ) t2 ON t2.id = t1.id 
+      ) AS pri_carer_query
+        ON families.id = pri_carer_query.family_id
   ) AS rvid_query
     ON rvid_query.id = vouchers.bundle_id
 ;
@@ -134,7 +145,8 @@ EOD;
     {
         // Set filename
         $this->filename = (empty($this->option('filename')))
-            ?: $this->option('filename');
+            ? $this->filename
+            : $this->option('filename');
 
         // default exit code.
         $exitCode = 0;
@@ -155,7 +167,13 @@ EOD;
                 'Reimbursed Date'
             ];
 
-            $rows = DB::select($this->report);
+            // Cast each element to proper array, not stdObjects as returned by DB::select()
+            $rows = array_map(
+                function ($value) {
+                    return (array)$value;
+                },
+                DB::select($this->report)
+            );
             $now = Carbon::now();
 
             /** @var LaravelExcelWriter $excelDoc */
@@ -176,11 +194,6 @@ EOD;
                             // Format page
                             $sheet->setOrientation('landscape');
                             $sheet->row(1, $headers);
-                            $letters = range('A', 'Z');
-                            $sheet->cells('A1:' . $letters[count($headers)-1] .'1', function ($cells) {
-                                $cells->setBackground('#9ACD32')
-                                    ->setFontWeight('bold');
-                            });
                             $sheet->fromArray($rows, null, 'A2', false, false);
                         }
                     );
@@ -189,11 +202,12 @@ EOD;
 
             try {
                 $excelDoc->ext = 'csv';
-                $fileContents = encrypt($excelDoc->string('csv')); // throws Exception
-                $filename = $this->filename . "."
-                    .$excelDoc->ext .
+                $fileContents = $excelDoc->string('csv'); // Throws Exception
+                $filename = $this->filename .
+                    "." .
+                    $excelDoc->ext .
                     ".enc";
-                Storage::disk('enc')->put($filename, $fileContents);
+                Storage::disk('enc')->put($filename, encrypt($fileContents));
             } catch (LaravelExcelException $e) {
                 // Tell someone about that?
                 Log::error($e->getMessage());
