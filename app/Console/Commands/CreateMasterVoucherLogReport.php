@@ -16,19 +16,19 @@ class CreateMasterVoucherLogReport extends Command
     /**
      * The name and signature of the console command.
      *
-     * @var string
+     * @var string $signature
      */
     protected $signature = 'arc:createMVLReport 
                             {--force : Execute without confirmation, eg for automation}
                             {--no-zip : Don\'t wrap files in a single archive}
-                            {--plain : Don\'t Encrypt contents of files}
+                            {--plain : Don\'t encrypt contents of files}
                             '
     ;
 
     /**
      * The console command description.
      *
-     * @var string
+     * @var string $description
      */
     protected $description = 'Creates, encrypts and stores the MVL report under in /storage';
 
