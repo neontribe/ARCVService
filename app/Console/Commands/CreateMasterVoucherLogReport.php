@@ -8,10 +8,8 @@ use Excel;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Console\Command;
 use Log;
-use Maatwebsite\Excel\Classes\LaravelExcelWorksheet;
-use Maatwebsite\Excel\Exceptions\LaravelExcelException;
 use Maatwebsite\Excel\Writers\LaravelExcelWriter;
-use Sponsor;
+use ZipArchive;
 
 class CreateMasterVoucherLogReport extends Command
 {
@@ -22,7 +20,9 @@ class CreateMasterVoucherLogReport extends Command
      */
     protected $signature = 'arc:createMVLReport 
                             {--force : Execute without confirmation, eg for automation}
-                            {--filename= : Filename, default: MVLReport}'
+                            {--no-zip : Don\'t wrap files in a single archive}
+                            {--plain : Don\'t Encrypt contents of files}
+                            '
     ;
 
     /**
@@ -33,11 +33,33 @@ class CreateMasterVoucherLogReport extends Command
     protected $description = 'Creates, encrypts and stores the MVL report under in /storage';
 
     /**
-     * Filename for output;
-     *
-     * @var array|string
+     * The default disk we want;
+     * @var string $disk
      */
-    private $filename = 'MVLReport';
+    private $disk = 'enc';
+
+    /**
+     * The default archive name
+     * @var string $archiveName
+     */
+    private $archiveName = "MVLReport.zip";
+
+    /**
+     * The sheet headers
+     * @var array $headers
+     */
+    private $headers = [
+        'Area',
+        'Voucher Code',
+        'Dispatch Date',
+        'Disbursed Date',
+        'RVID',
+        'Participant',
+        'Payment Request Date',
+        'Trader Name',
+        'Retail Outlet',
+        'Reimbursed Date'
+    ];
 
     /**
      * The report's query template
@@ -147,31 +169,8 @@ EOD;
      */
     public function handle()
     {
-        // Set filename
-        $this->filename = (empty($this->option('filename')))
-            ? $this->filename
-            : $this->option('filename');
-
-        // default exit code.
-        $exitCode = 0;
-
-        // Pause or carry on
+        // Assess permission to continue
         if ($this->option('force') || $this->warnUser()) {
-            // Run the query
-
-            $headers = [
-                'Area',
-                'Voucher Code',
-                'Dispatch Date',
-                'Disbursed Date',
-                'RVID',
-                'Participant',
-                'Payment Request Date',
-                'Trader Name',
-                'Retail Outlet',
-                'Reimbursed Date'
-            ];
-
             // We're going to run this monster *once* and then split it into files.
             // We could run it once per sponsor; consider that if it becomes super-unwieldy.
             $rows = array_map(
@@ -181,90 +180,126 @@ EOD;
                 },
                 DB::select($this->report)
             );
-            $now = Carbon::now();
 
-            /** @var LaravelExcelWriter $excelDoc */
-            $excelDoc = Excel::create(
-                $this->filename,
-                function ($excel) use ($rows, $headers, $now) {
-                    $excel->setTitle('Master Voucher Log');
-                    $excel->setDescription('MVL generated at:' . $now->format('Y-m-d H:i:s'));
-                    $excel->setManager('ARC');
-                    $excel->setCompany(env('APP_URL'));
-                    $excel->setCreator(env('APP_NAME'));
-                    $excel->setKeywords([]);
-
-                    // First, produce entire sheet.
-                    $excel->sheet(
-                        'All Data',
-                        function ($sheet) use ($rows, $headers) {
-                            // Format page
-                            $sheet->setOrientation('landscape');
-                            $sheet->row(1, $headers);
-                            $sheet->fromArray($rows, null, 'A2', false, false);
-                        }
-                    );
-
-                    // Split up the rows into separate areas.
-                    $areas = [];
-                    foreach ($rows as $rowindex => $rowFields) {
-                        $area = $rowFields['Area'];
-                        if (!isset($areas[$area])) {
-                            // Not met this area before? Add it to our list!
-                            $areas[$area] = [];
-                        }
-                        // We're going to use "&" references to avoid memory issues - Hang on to your hat.
-                        $areas[$area][] = &$rowFields;
-                    }
-
-                    // Make sheets for each.
-                    foreach ($areas as $area => $areaRows) {
-                        $excel->sheet(
-                            $area,
-                            function ($sheet) use ($areaRows, $headers) {
-                                // Format page
-                                $sheet->setOrientation('landscape');
-                                $sheet->row(1, $headers);
-                                $sheet->fromArray($areaRows, null, 'A2', false, false);
-                            }
-                        );
-                    }
-
-                }
-            );
-            // write a file, and see if it borks.
-            $exitCode = ($this->writeOutput($excelDoc))
-                ? 0
-                : 1
+            // Set the disk
+            $this->disk = ($this->option('plain'))
+                ? 'local'
+                : 'enc'
             ;
+
+            // Make a zip archive, or not.
+            if (!$this->option('no-zip')) {
+                // Setup an archive
+                $za = new ZipArchive();
+                $storagePath = Storage::disk()->getAdapter()->getPathPrefix();
+                // Open the file for writing at the correct location
+                $za->open($storagePath . '/' . $this->archiveName, ZipArchive::CREATE);
+            } else {
+                $za = null;
+            }
+
+            // Create and write a sheet for all data.
+            $excelDoc = $this->createWorkSheet('ALL', $rows);
+            $this->writeOutput($excelDoc, $za);
+
+            // Split up the rows into separate areas.
+            $areas = [];
+            // We're going to use "&" references to avoid memory issues - Hang on to your hat.
+            foreach ($rows as $rowindex => &$rowFields) {
+                $area = $rowFields['Area'];
+                if (!isset($areas[$area])) {
+                    // Not met this Area before? Add it to our list!
+                    $areas[$area] = [];
+                }
+                $areas[$area][] = &$rowFields;
+            }
+
+            // Make sheets for each area and write them
+            foreach ($areas as $area => $areaRows) {
+                $excelDoc = $this->createWorkSheet($area, $areaRows);
+                $this->writeOutput($excelDoc, $za);
+            }
+
+            if ($za) {
+                $za->close();
+            }
         }
         // Set 0, above for expected outcomes
-        exit($exitCode);
+        exit(0);
     }
 
     /**
      * Encrypts and stashes files.
      * @param LaravelExcelWriter $excelDoc
+     * @param ZipArchive|null $za
      * @return bool
      */
-    public function writeOutput(LaravelExcelWriter $excelDoc)
+    public function writeOutput(LaravelExcelWriter $excelDoc, ZipArchive $za = null)
     {
         try {
-            $excelDoc->ext = 'ods';
-            $fileContents = $excelDoc->string('ods'); // Throws Exception
-            $filename = $this->filename .
+            $excelDoc->ext = 'csv';
+            $fileContents = $excelDoc->string($excelDoc->ext); // Throws Exception
+            $filename = preg_replace('/\s+/', '_', $excelDoc->getSheet()->getTitle()) .
                 "." .
-                $excelDoc->ext
+                $excelDoc->ext;
+
+            // If we're per-file encrypting, fiddle the files
+            if (!$this->option('plain')) {
+                $fileContents = encrypt($fileContents);
+                $filename .= '.enc';
+            }
+
+            ($za)
+                ? $za->addFromString($filename, $fileContents)
+                : Storage::disk($this->disk)->put($filename, $fileContents)
             ;
-            //Storage::disk('enc')->put($filename . ".enc", encrypt($fileContents));
-            Storage::disk('enc')->put($filename, $fileContents);
         } catch (\Exception $e) {
             // Could be Storage or LaravelExcelWriterException related
             Log::error($e->getMessage());
-            return false;
+            Log::error(class_basename($this) . ": Failed to write file for '" . $excelDoc->getTitle() ."'");
+            exit(1);
         }
         return true;
     }
+
+    /**
+     * Creates an excel file from an array of data.
+     * @param $name
+     * @param $rows
+     * @param $headers
+     * @return LaravelExcelWriter
+     */
+
+    public function createWorkSheet($name, $rows)
+    {
+        $now = Carbon::now();
+
+        /** @var LaravelExcelWriter $excelDoc */
+        $excelDoc = Excel::create(
+            preg_replace('/\s+/', '_', $name),
+            function ($excel) use ($name, $rows, $now) {
+                $excel->setTitle('MVL - ' . $name);
+                $excel->setDescription('generated at:' . $now->format('Y-m-d H:i:s'));
+                $excel->setManager('ARC');
+                $excel->setCompany(env('APP_URL'));
+                $excel->setCreator(env('APP_NAME'));
+                $excel->setKeywords([]);
+
+                // First, produce entire sheet.
+                $excel->sheet(
+                    $name,
+                    function ($sheet) use ($rows) {
+                        // Format page
+                        $sheet->setOrientation('landscape');
+                        $sheet->row(1, $this->headers);
+                        $sheet->fromArray($rows, null, 'A2', false, false);
+                    }
+                );
+            }
+        );
+        return $excelDoc;
+    }
+
     /**
      * Warn the user before they execute.
      *
