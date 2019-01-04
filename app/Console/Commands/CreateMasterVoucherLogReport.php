@@ -33,19 +33,22 @@ class CreateMasterVoucherLogReport extends Command
     protected $description = 'Creates, encrypts and stores the MVL report under in /storage';
 
     /**
-     * The default disk we want;
+     * The default disk we want.
+     *
      * @var string $disk
      */
     private $disk = 'enc';
 
     /**
-     * The default archive name
+     * The default archive name.
+     *
      * @var string $archiveName
      */
     private $archiveName = "MVLReport.zip";
 
     /**
-     * The sheet headers
+     * The sheet headers.
+     *
      * @var array $headers
      */
     private $headers = [
@@ -63,6 +66,7 @@ class CreateMasterVoucherLogReport extends Command
 
     /**
      * The report's query template
+     *
      * TODO: refactor this as eloquent lookups when it's finalised.
      *      This will eventually help with the fact we'll need to chunk data too.
      * @var string $report
@@ -153,16 +157,6 @@ FROM vouchers
 EOD;
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      *
      * @return mixed
@@ -230,6 +224,7 @@ EOD;
 
     /**
      * Encrypts and stashes files.
+     *
      * @param LaravelExcelWriter $excelDoc
      * @param ZipArchive|null $za
      * @return bool
@@ -264,9 +259,9 @@ EOD;
 
     /**
      * Creates an excel file from an array of data.
+     *
      * @param $name
      * @param $rows
-     * @param $headers
      * @return LaravelExcelWriter
      */
 
