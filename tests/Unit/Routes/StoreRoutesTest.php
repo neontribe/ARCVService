@@ -390,10 +390,13 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseStatus(200);
     }
 
-
     /** @test */
     public function testRegistrationFamilyUpdateGate()
     {
+        // TODO complete or discard
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+        );
     }
 
     /** @test */
