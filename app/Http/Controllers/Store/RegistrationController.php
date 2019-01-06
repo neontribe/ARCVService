@@ -424,7 +424,7 @@ class RegistrationController extends Controller
 
         // Expect only filled fm variables
         $fm = array_filter(
-            $request->only('fm_privacy'),
+            $request->all('fm_privacy'),
             // Previously: $request->only('fm_chart', 'fm_diary', 'fm_privacy'),
             function ($value) {
                 // Remove any null or empty responses;
