@@ -19,17 +19,17 @@
         "optimus/api-consumer": "0.2.*",
         "ramsey/uuid": "^3.6",
         "sebdesign/laravel-state-machine": "^1.1",
-        "spinen/laravel-mail-assertions": "^0.2.0",
+        "spinen/laravel-mail-assertions": "^0.3.0",
         "tom-lingham/searchy": "2.*"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.4",
         "fzaninotto/faker": "~1.4",
-        "flip/whoops": "~2.0",
+        "filp/whoops": "~2.0",
         "laracasts/generators": "^1.1.4",
         "laravel/browser-kit-testing": "2.*",
         "mockery/mockery": "0.9.*",
-        "phpunit/phpunit": "~6.0",
+        "phpunit/phpunit": "~6.0"
     },
     "autoload": {
         "classmap": [
