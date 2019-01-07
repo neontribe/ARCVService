@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Store;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\AdminUser;
 use App\StateToken;
 use App\Trader;
+use Auth;
 
 class PaymentController extends Controller
 {
@@ -25,7 +27,7 @@ class PaymentController extends Controller
      */
     public function show($paymentUuid)
     {
-        // For later
+        // Initialise
         $vouchers = [];
         $trader = "trader";
         $number_to_pay = 0;
@@ -71,8 +73,63 @@ class PaymentController extends Controller
      */
     public function update($paymentUuid)
     {
+        // Initialise
+        $vouchers = [];
+        $trader = "trader";
+        $number_to_pay = 0;
+
+        // Login to transition vouchers
+        $emailaddress = config('mail.to_admin.address');
+        $user = AdminUser::where('email', $emailaddress)->first();
+        if (!$user) {
+            $user = factory(AdminUser::class)->create(['name' => 'New Admin']);
+        };
+        Auth::login($user);
+
+        // Find the StateToken of a given uuid
+        $state_token = StateToken::where('uuid', $paymentUuid)->first();
+        if ($state_token !== null) {
+
+            // Get the VoucherStates with this StateToken
+            $voucher_states = $state_token
+                ->voucherStates()
+                ->get();
+
+            // Get the voucher codes of states TODO - better
+            foreach ($voucher_states as $voucher_state) {
+                $voucher = $voucher_state
+                    ->voucher()
+                    ->first();
+
+                $vouchers[] = $voucher;
+            }
+
+            // Transition the vouchers
+            foreach ($vouchers as $v) {
+                $v->applyTransition('payout');
+            }
+
+            // Count the payable vouchers
+            $number_to_pay = collect($vouchers)
+                ->where('currentstate', 'payment_pending')
+                ->count();
+
+            // Get the trader's name
+            if(!empty($vouchers)) {
+                $trader = Trader::find($vouchers{0}->trader_id)->name;
+            }
+
+        }
+
+        // Logout, so we can see the page
+        Auth::logout();
+
         // voucher transition to paid
-        return response($paymentUuid, 200)
-            ->header('Content-Type', 'text/plain');
+        return view('store.payment_request', [
+            'state_token' => $state_token,
+            'vouchers' => $vouchers,
+            'trader' => $trader,
+            'number_to_pay' => $number_to_pay,
+        ]);
     }
 }
