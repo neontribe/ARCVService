@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
         Commands\RegisterFamiliesFromFile::class,
         Commands\AddSponsor::class,
         Commands\AddCentre::class,
+        Commands\CreateMasterVoucherLogReport::class,
     ];
 
     /**
@@ -27,8 +28,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        $schedule->command('arc:createMVLReport --force')
+            ->dailyAt('02:00')
+            ->withoutOverlapping()
+            ;
     }
 
     /**
