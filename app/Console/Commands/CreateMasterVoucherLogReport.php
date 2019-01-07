@@ -52,16 +52,18 @@ class CreateMasterVoucherLogReport extends Command
      * @var array $headers
      */
     private $headers = [
-        'Area',
-        'Voucher Code',
-        'Dispatch Date',
-        'Disbursed Date',
-        'RVID',
-        'Participant',
-        'Payment Request Date',
-        'Trader Name',
+        'Voucher Number',
+        'Distributed to',
+        'Date Issued',
+        'Part ID',
+        'Part Name',
         'Retail Outlet',
-        'Reimbursed Date'
+        'Date Received for Reimbursement',
+        'Dispatch Date',
+        'Area',
+        'Trader Name',
+        'Reimbursed Date',
+        'Disbursing Centre'
     ];
 
     /**
@@ -73,16 +75,19 @@ class CreateMasterVoucherLogReport extends Command
      */
     private $report = <<<EOD
 SELECT
-  sponsors.name AS 'Area',
-  vouchers.code AS 'Voucher Code',
-  dispatch_date AS 'Dispatch Date',
-  disbursed_at AS 'Disbursed Date',
-  rvid AS 'RVID',
-  pri_carer_name AS 'Participant',
-  payment_request_date AS 'Payment Request Date',
-  trader_name AS 'Trader Name',
+  vouchers.code AS 'Voucher Number',
+  # To be determined, we don't know this yet.
+  '' AS 'Distributed to',
+  disbursed_at AS 'Date Issued',
+  rvid AS 'Part ID',
+  pri_carer_name AS 'Part Name',
   market_name AS 'Retail Outlet',
-  reimbursed_date AS 'Reimbursed Date'
+  payment_request_date AS 'Date Received for Reimbursement',
+  dispatch_date AS 'Dispatch Date',  
+  sponsors.name AS 'Area',
+  trader_name AS 'Trader Name',
+  reimbursed_date AS 'Reimbursed Date',
+  disbursing_centre AS 'Disbursing Centre'
 
 FROM vouchers
 
@@ -130,13 +135,15 @@ FROM vouchers
   LEFT JOIN (
     SELECT bundles.id,
            bundles.disbursed_at AS disbursed_at,
+           cb.name as disbursing_centre,
            # LPAD will truncate values over 4 characters (or 9999 rvids).
-           CONCAT(centres.prefix, LPAD(families.centre_sequence, 4, 0)) AS rvid,
+           CONCAT(cf.prefix, LPAD(families.centre_sequence, 4, 0)) AS rvid,
            pri_carer_query.name as pri_carer_name
     FROM bundles
       LEFT JOIN registrations on bundles.registration_id = registrations.id
       LEFT JOIN families ON registrations.family_id = families.id
-      LEFT JOIN centres ON families.initial_centre_id = centres.id
+      LEFT JOIN centres cf ON families.initial_centre_id = cf.id
+      LEFT JOIN centres cb ON bundles.disbursing_centre_id = cb.id
         
       # Need to join the Primary Carer here; Primary Carers are only relevant via bundles.
       LEFT JOIN (
@@ -185,7 +192,7 @@ EOD;
             if (!$this->option('no-zip')) {
                 // Setup an archive
                 $za = new ZipArchive();
-                $storagePath = Storage::disk()->getAdapter()->getPathPrefix();
+                $storagePath = Storage::disk($this->disk)->getAdapter()->getPathPrefix();
                 // Open the file for writing at the correct location
                 $za->open($storagePath . '/' . $this->archiveName, ZipArchive::CREATE);
             } else {
