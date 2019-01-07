@@ -37,14 +37,14 @@ class CreateMasterVoucherLogReport extends Command
      *
      * @var string $disk
      */
-    private $disk = 'enc';
+    private $disk = '';
 
     /**
      * The default archive name.
      *
      * @var string $archiveName
      */
-    private $archiveName = "MVLReport.zip";
+    private $archiveName = '';
 
     /**
      * The sheet headers.
@@ -162,6 +162,17 @@ FROM vouchers
     ON rvid_query.id = vouchers.bundle_id
 ;
 EOD;
+
+    /**
+     * CreateMasterVoucherLogReport constructor.
+     * Sets some defaults
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->archiveName = config('arc.mvl_filename');
+        $this->disk = config('arc.mvl_disk');
+    }
 
     /**
      * Execute the console command.

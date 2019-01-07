@@ -11,18 +11,14 @@ use ZipStream\ZipStream;
 
 class VoucherController extends Controller
 {
-    // Dont let people change these without good reason (path attacks)!
-    private static $disk = 'enc';
-    private static $archiveName = 'MVLReport.zip';
-
     // This belongs here because it's largely about arranging vouchers
     public function exportMasterVoucherLog()
     {
         $dashboard_route = URL::route('store.dashboard');
 
         // Setup the Storage dir
-        $disk = Storage::disk(self::$disk);
-        $archiveName = self::$archiveName;
+        $disk = Storage::disk(config('arc.mvl_disk'));
+        $archiveName = config('arc.mvl_filename');
 
         // Check it's there.
         if (!$disk->exists($archiveName)) {
@@ -100,12 +96,13 @@ class VoucherController extends Controller
             $unpackedFiles[$destName] = $contents;
         }
 
-        // Use ZipStream to throw the files as a zip **without touching the disk**
+        // Use ZipStream to throw the files at the client as a zip **without touching the disk**
         return response()->stream(function () use ($unpackedFiles, $archiveName) {
             $zip = new ZipStream($archiveName, [
                 'content_type' => 'application/octet-stream'
             ]);
 
+            // Iterate over our files and stream each to the other end.
             foreach ($unpackedFiles as $filename => $contents) {
                 // No compression to start with.
                 $zip->addFile($filename, $contents, [], "store");
