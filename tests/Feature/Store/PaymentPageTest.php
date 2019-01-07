@@ -66,25 +66,45 @@ class PaymentPageTest extends StoreTestCase
     /** @test */
     public function itShowsPaymentRequestDetailsOnlyForValidPaymentUUIDs()
     {
-        $this->markTestIncomplete(
-            'This test has not been implemented yet.'
-          );
+        // We can only reach the payment page when logged out
+        Auth::logout();
+
+        // A real uuid will display the data table
+        $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-real-uuid' ]))
+            ->seeElement('table')
+            ->see('Voucher Code')
+            ->see('Status')
+            ->see('Date')
+        ;
     }
 
     /** @test */
     public function itShowsPayButtonWhenOnlyPaymentIsUnpaid()
     {
-        $this->markTestIncomplete(
-            'This test has not been implemented yet.'
-          );
+        // We can only reach the payment page when logged out
+        Auth::logout();
+
+        // A real uuid will display the data table
+        $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-real-uuid' ]))
+            ->seeElement('button[type="submit"]')
+            ->see('Pay')
+        ;
     }
 
     /** @test */
     public function itShowsPayemntDetailsOnlyWhenPaymentIsPaid()
     {
-        $this->markTestIncomplete(
-            'This test has not been implemented yet.'
-          );
+        // Transition the voucher to paid
+        $this->voucher->applyTransition('payout');
+
+        // We can only reach the payment page when logged out
+        Auth::logout();
+
+        // We should no longer see the payment button, but see paid status
+        $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-real-uuid' ]))
+            ->dontSeeElement('button[type="submit"]')
+            ->seeInelement('span[class="status paid"]', 'Paid')
+        ;
     }
 
 }
