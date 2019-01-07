@@ -10,12 +10,13 @@ use App\StateToken;
 use App\User;
 use App\Trader;
 use Auth;
+use URL;
+
 
 class PaymentPageTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
-    public function setUp()
     protected function setUp()
     {
         parent::setUp();
@@ -49,9 +50,14 @@ class PaymentPageTest extends StoreTestCase
     /** @test */
     public function itShowsAnErrorWhenPaymentLinkBad()
     {
-        $this->markTestIncomplete(
-            'This test has not been implemented yet.'
-          );
+        // We can only reach the payment page when logged out
+        Auth::logout();
+
+        // A poorly formed uuid should show the page, but with an error message in place of the voucher table
+        $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-made-up-uuid' ]))
+            ->seeInElement('p[class="content-warning center"]', 'This payment request is invalid, or has expired.')
+            ->dontSeeElement('table')
+        ;
     }
 
     /** @test */
