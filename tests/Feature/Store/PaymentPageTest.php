@@ -17,6 +17,9 @@ class PaymentPageTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
+    protected $voucher;
+    protected $user;
+
     protected function setUp()
     {
         parent::setUp();
@@ -25,24 +28,24 @@ class PaymentPageTest extends StoreTestCase
         Auth::login($this->user);
 
         // Create a voucher and a trader with some info
-        $voucher = factory(Voucher::class, 'requested')->create();
+        $this->voucher = factory(Voucher::class, 'requested')->create();
         $trader = factory(Trader::class, 'withnullable')->create();
-        $voucher->code = 'TEST12345';
-        $voucher->trader_id = $trader->id;
-        $voucher->save();
+        $this->voucher->code = 'TEST12345';
+        $this->voucher->trader_id = $trader->id;
+        $this->voucher->save();
 
         // Transition to PaymentPending
-        $voucher->applyTransition('order');
-        $voucher->applyTransition('print');
-        $voucher->applyTransition('dispatch');
-        $voucher->applyTransition('collect');
-        $voucher->applyTransition('confirm');
+        $this->voucher->applyTransition('order');
+        $this->voucher->applyTransition('print');
+        $this->voucher->applyTransition('dispatch');
+        $this->voucher->applyTransition('collect');
+        $this->voucher->applyTransition('confirm');
 
         $stateToken = new StateToken();
         $stateToken->uuid = "a-real-uuid";
         $stateToken->save();
 
-        $vs = $voucher->history->last();
+        $vs = $this->voucher->history->last();
         $vs->stateToken()->associate($stateToken);
         $vs->save();
     }
