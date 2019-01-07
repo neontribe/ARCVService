@@ -74,18 +74,23 @@ class VoucherController extends Controller
         for ($i = 0; $i < $storedZip->numFiles; $i++) {
             // Get the file's name
             $sourceName = $storedZip->getNameIndex($i);
-            // Open the stream
+
+            // Open the stream for that file
             $fileStream = $storedZip->getStream($sourceName);
             if (!$fileStream) {
                 Log::error("ZipArchive cannot read compressed item '" . $sourceName . "'' by stream");
                 continue;
             }
-            // Get the file contents to memory
+
+            // Get the file contents to memory. Bit of a farce but i don't want to extract to a temp file
             $contents = '';
             while (!feof($fileStream)) {
                 $contents .= fread($fileStream, 8192);
             }
+            // Shut that off
             fclose($fileStream);
+
+            // Post-process the file
             if (pathinfo($sourceName, PATHINFO_EXTENSION)  == 'enc') {
                 $contents = decrypt($contents);
                 $destName = pathinfo($sourceName, PATHINFO_FILENAME);
@@ -102,8 +107,11 @@ class VoucherController extends Controller
             ]);
 
             foreach ($unpackedFiles as $filename => $contents) {
-                $zip->addFile($filename, $contents);
+                // No compression to start with.
+                $zip->addFile($filename, $contents, [], "store");
             }
+
+            $zip->finish();
         });
     }
 }
