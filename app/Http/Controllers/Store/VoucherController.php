@@ -5,38 +5,37 @@ namespace App\Http\Controllers\Store;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use Log;
-use phpseclib\System\SSH\Agent\Identity;
+use URL;
 use ZipArchive;
+use ZipStream\ZipStream;
 
 class VoucherController extends Controller
 {
+    // Dont let people change these without good reason (path attacks)!
+    private static $disk = 'enc';
+    private static $archiveName = 'MVLReport.zip';
+
     // This belongs here because it's largely about arranging vouchers
     public function exportMasterVoucherLog()
     {
+        $dashboard_route = URL::route('store.dashboard');
 
-        $fileAsString = $this->fetchArchive();
+        // Setup the Storage dir
+        $disk = Storage::disk(self::$disk);
+        $archiveName = self::$archiveName;
 
-        return response('', 200);
-    }
-
-    /**
-     * Recovers the archive from storage decrypts the data and re-zips it, returning the zip as a file
-     * @param string $archiveName The name of the archive to find
-     * @param string $disk The place we should look
-     * @return string|Bool
-     */
-    public static function fetchArchive($disk = 'enc', $archiveName = 'MVLReport.zip')
-    {
-        //Check it's there.
-        if (!Storage::disk($disk)->exists($archiveName)) {
-            return false;
+        // Check it's there.
+        if (!$disk->exists($archiveName)) {
+            // Return to dashboard with an error that indicates we don't have a file.
+            return redirect($dashboard_route)
+                ->with('error_message', "Sorry, couldn't find a current export. Please check the exporter ran on schedule");
         }
 
         // Open and test archive.
         $storedZip = new ZipArchive();
 
         // ZipArchive likes a fully qualified path.
-        $check = $storedZip->open(Storage::disk($disk)->path($archiveName), ZipArchive::CHECKCONS);
+        $check = $storedZip->open($disk->path($archiveName), ZipArchive::CHECKCONS);
 
         if ($check !== true) {
             switch ($check) {
@@ -58,16 +57,17 @@ class VoucherController extends Controller
                 // Leading `.` as url() gives a leading `/` and the storage is not off root
                 "ZipArchive cannot open archive at '." .
                 // Using url() to prevent revealing the disk tree
-                Storage::disk($disk)->url('$archiveName') .
+                $disk->url('$archiveName') .
                 "' as : " .
                 $message
             );
 
-            return false;
+            // go back to dashboard with a
+            return redirect($dashboard_route)
+                ->with('error_message', "Sorry, the export file was unreadable. Please contact support.");
         }
 
-        // Open a new file in memory for output;
-        $zaOut = new ZipArchive();
+        $unpackedFiles = [];
 
         // Iterate through files in the zip.
         // TODO : Change to $zip->count() if we move to PHP 7.2
@@ -77,12 +77,13 @@ class VoucherController extends Controller
             // Open the stream
             $fileStream = $storedZip->getStream($sourceName);
             if (!$fileStream) {
-                Log::error("ZipArchive cannot read compressed item by stream");
+                Log::error("ZipArchive cannot read compressed item '" . $sourceName . "'' by stream");
+                continue;
             }
             // Get the file contents to memory
             $contents = '';
             while (!feof($fileStream)) {
-                $contents = fread($fileStream, 8192);
+                $contents .= fread($fileStream, 8192);
             }
             fclose($fileStream);
             if (pathinfo($sourceName, PATHINFO_EXTENSION)  == 'enc') {
@@ -91,8 +92,18 @@ class VoucherController extends Controller
             } else {
                 $destName = $sourceName;
             }
+            $unpackedFiles[$destName] = $contents;
         }
 
-        return $zaString;
+        // Use ZipStream to throw the files as a zip **without touching the disk**
+        return response()->stream(function () use ($unpackedFiles, $archiveName) {
+            $zip = new ZipStream($archiveName, [
+                'content_type' => 'application/octet-stream'
+            ]);
+
+            foreach ($unpackedFiles as $filename => $contents) {
+                $zip->addFile($filename, $contents);
+            }
+        });
     }
 }
