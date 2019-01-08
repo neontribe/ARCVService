@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Store;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\AdminUser;
 use App\StateToken;
 use App\Trader;
-use Auth;
 
 class PaymentController extends Controller
 {
