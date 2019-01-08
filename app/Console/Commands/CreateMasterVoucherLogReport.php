@@ -76,6 +76,7 @@ class CreateMasterVoucherLogReport extends Command
     private $report = <<<EOD
 SELECT
   vouchers.code AS 'Voucher Number',
+  # To be determined, we don't know this yet.
   '' AS 'Distributed to',
   disbursed_at AS 'Date Issued',
   rvid AS 'Part ID',
@@ -90,8 +91,10 @@ SELECT
 
 FROM vouchers
 
+  # Join for each voucher\'s sponsor name
   LEFT JOIN sponsors ON vouchers.sponsor_id = sponsors.id
 
+  # Get our trader and market names.
   LEFT JOIN (
     SELECT traders.id,
            traders.name AS trader_name,
@@ -101,6 +104,7 @@ FROM vouchers
   ) AS markets_query
     ON markets_query.id = vouchers.trader_id
 
+  # Pivot dispatched date
   LEFT JOIN (
     SELECT voucher_states.voucher_id,
            voucher_states.created_at AS dispatch_date
@@ -109,6 +113,7 @@ FROM vouchers
   ) AS dispatch_query
     ON dispatch_query.voucher_id = vouchers.id
 
+  # Pivot payment_request date
   LEFT JOIN (
     SELECT voucher_states.voucher_id,
            voucher_states.created_at AS payment_request_date
@@ -117,6 +122,7 @@ FROM vouchers
   ) AS payment_request_query
     ON payment_request_query.voucher_id = vouchers.id
 
+  # Pivot reimbursed date
   LEFT JOIN (
     SELECT voucher_states.voucher_id,
            voucher_states.created_at AS reimbursed_date
@@ -125,10 +131,12 @@ FROM vouchers
   ) AS reimburse_query
     ON reimburse_query.voucher_id = vouchers.id
 
+  # Get fields relevant to bundles (pri_carer/RVID/disbursed_at)
   LEFT JOIN (
     SELECT bundles.id,
            bundles.disbursed_at AS disbursed_at,
            cb.name as disbursing_centre,
+           # LPAD will truncate values over 4 characters (or 9999 rvids).
            CONCAT(cf.prefix, LPAD(families.centre_sequence, 4, 0)) AS rvid,
            pri_carer_query.name as pri_carer_name
     FROM bundles
@@ -137,8 +145,10 @@ FROM vouchers
       LEFT JOIN centres cf ON families.initial_centre_id = cf.id
       LEFT JOIN centres cb ON bundles.disbursing_centre_id = cb.id
         
+      # Need to join the Primary Carer here; Primary Carers are only relevant via bundles.
       LEFT JOIN (
         
+        # We need the *first*, by self join grouping (classic technique, so SQLite can cope)
         SELECT t1.name, t1.family_id
         FROM carers t1
         INNER JOIN (
