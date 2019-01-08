@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Store;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Log;
 use URL;
@@ -96,19 +97,39 @@ class VoucherController extends Controller
             $unpackedFiles[$destName] = $contents;
         }
 
-        // Use ZipStream to throw the files at the client as a zip **without touching the disk**
-        return response()->stream(function () use ($unpackedFiles, $archiveName) {
-            $zip = new ZipStream($archiveName, [
-                'content_type' => 'application/octet-stream'
-            ]);
+        // Create a memory stream for it
+        $memStream = fopen("php://memory", 'w+');
 
-            // Iterate over our files and stream each to the other end.
-            foreach ($unpackedFiles as $filename => $contents) {
-                // No compression to start with.
-                $zip->addFile($filename, $contents, [], "store");
-            }
+        // Create the zip file there
+        $zip = new ZipStream($archiveName, [
+            ZipStream::OPTION_SEND_HTTP_HEADERS => false,
+            ZipStream::OPTION_OUTPUT_STREAM => $memStream,
+        ]);
 
-            $zip->finish();
-        });
+        // Iterate over our files and stream each to the other end.
+        foreach ($unpackedFiles as $filename => $contents) {
+            // No compression to start with.
+            $zip->addFile($filename, $contents, [], "store");
+        }
+
+        // Finish the Zip
+        $zip->finish();
+
+        // Grab the file from the memory stream
+        rewind($memStream);
+        $data = stream_get_contents($memStream);
+
+        // Delete the memory stream
+        fclose($memStream);
+
+        // Throw it back at the user.
+        return response($data, 200, [
+            'Content-Type' => 'application/x-zip',
+            'Content-Disposition' => 'attachment; filename="' . $archiveName. '"',
+            'Expires' => Carbon::createFromTimestamp(0)->format('D, d M Y H:i:s'),
+            'Last-Modified' => Carbon::now()->format('D, d M Y H:i:s'),
+            'Cache-Control' => 'private, no-cache',
+            'Pragma' => 'no-cache',
+        ]);
     }
 }
