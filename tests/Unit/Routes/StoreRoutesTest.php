@@ -436,4 +436,56 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseStatus(200)
         ;
     }
+
+    /** @test */
+    public function testMVLRouteGuard()
+    {
+        // Create an FM User
+        $fmuser =  factory(CentreUser::class)->create([
+            "name"  => "FM test user",
+            "email" => "testfmuser@example.com",
+            "password" => bcrypt('test_fmuser_pass'),
+            "role" => "foodmatters_user",
+        ]);
+        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+
+        // Create a CC user
+        $ccuser =  factory(CentreUser::class)->create([
+            "name"  => "CC test user",
+            "email" => "testccuser@example.com",
+            "password" => bcrypt('test_ccuser_pass'),
+            "role" => "centre_user",
+        ]);
+        $ccuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+
+        // Make some registrations
+        factory(Registration::class, 5)->create([
+            "centre_id" => $this->centre->id,
+        ]);
+
+        $route = URL::route('store.vouchers.mvl.export');
+
+        Auth::logout();
+
+        // Bounce unauth'd to login
+        $this->visit($route)
+            ->seePageIs(URL::route('store.login'))
+            ->assertResponseStatus(200)
+        ;
+
+        // Throw a 403 for auth'd but forbidden
+        $this->actingAs($ccuser, 'store')
+            // need to get, because visit() bombs out with exceptions before you can check them.
+            ->get($route)
+            ->assertResponseStatus(403)
+        ;
+        Auth::logout();
+
+        // See page permit FM User to get from the dashboard.
+        $this->actingAs($fmuser, 'store')
+            ->visit(URL::route('store.dashboard'))
+            ->get($route)
+            ->assertResponseOK()
+        ;
+    }
 }
