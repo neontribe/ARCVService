@@ -6,7 +6,6 @@ use App\Centre;
 use App\CentreUser;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Session;
 use Storage;
 use Tests\StoreTestCase;
