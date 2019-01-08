@@ -97,7 +97,7 @@ EOD;
         $za = new ZipArchive();
         $storagePath = $this->disk->getAdapter()->getPathPrefix();
         $za->open($storagePath . '/' . $this->archiveName, ZipArchive::CREATE);
-        $za->addFromString('encrypted.txt', encrypt($sourceContent));
+        $za->addFromString('encrypted.txt.enc', encrypt($sourceContent));
         $za->addFromString('plain.txt', $sourceContent);
         $za->close();
 
@@ -132,6 +132,7 @@ EOD;
             $filename = $zip->getNameIndex($i);
 
             // Check it's one of ours
+            // the encrypted.txt.enc will have been renamed on download.
             $this->assertContains($filename, ["encrypted.txt", "plain.txt"]);
 
             // Get the file contents to memory.
