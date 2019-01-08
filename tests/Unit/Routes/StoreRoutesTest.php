@@ -486,11 +486,11 @@ class StoreRoutesTest extends StoreTestCase
         $this->actingAs($fmuser, 'store')
             ->visit($dashboard_route)
             ->get($route)
-            // It's going to 302 if there's a problem finding/reading the file (which isn't there).
+            // It's going to 302->200 if there's a problem finding/reading the file (which isn't there).
             // However, we need to know that it *can* hit the right route
+            // Tests for *what gets returned are elsewhere.
             ->followRedirects()
             ->assertResponseOK()
-            ->seePageIs($dashboard_route)
         ;
     }
 }
