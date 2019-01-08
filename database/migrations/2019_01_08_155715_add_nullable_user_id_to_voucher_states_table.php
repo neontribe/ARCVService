@@ -22,7 +22,7 @@ class AddNullableUserIdToVoucherStatesTable extends Migration
             $table->string('user_type')
                 ->nullable()
                 ->after('user_id')
-                ->change();;
+                ->change();
         });
     }
 
