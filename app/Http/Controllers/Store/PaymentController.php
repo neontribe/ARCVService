@@ -53,7 +53,7 @@ class PaymentController extends Controller
 
             // Get the trader's name
             if(!empty($vouchers)) {
-                $trader = Trader::find($vouchers{0}->trader_id)->name;
+                $trader = Trader::find($vouchers[0]->trader_id)->name;
             }
         }
 
@@ -106,7 +106,7 @@ class PaymentController extends Controller
 
             // Get the trader's name
             if(!empty($vouchers)) {
-                $trader = Trader::find($vouchers{0}->trader_id)->name;
+                $trader = Trader::find($vouchers[0]->trader_id)->name;
             }
 
         }
