@@ -101,7 +101,7 @@ class VoucherController extends Controller
         $memStream = fopen("php://memory", 'w+');
 
         // Create the zip file there
-        $zip = new ZipStream($archiveName, [
+        $zip = new ZipStream(null, [
             ZipStream::OPTION_SEND_HTTP_HEADERS => false,
             ZipStream::OPTION_OUTPUT_STREAM => $memStream,
         ]);

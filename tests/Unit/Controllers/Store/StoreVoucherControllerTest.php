@@ -15,11 +15,6 @@ use ZipArchive;
 
 class StoreVoucherControllerTest extends StoreTestCase
 {
-    /**
-    * dangerous, but required to prevent phpunit using serialise functions between processes.
-    * @backupGlobals disabled
-    */
-
     use DatabaseMigrations;
 
     /** @var Centre $centre */
@@ -68,6 +63,11 @@ class StoreVoucherControllerTest extends StoreTestCase
             "role" => "foodmatters_user"
         ]);
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+
+        // Remove any file to start with
+        if ($this->disk->exists($this->archiveName)) {
+            $this->disk->delete($this->archiveName);
+        }
     }
 
     public function tearDown()
@@ -81,9 +81,6 @@ class StoreVoucherControllerTest extends StoreTestCase
 
     /**
      * @test
-     * Required to capture output buffer when PHPUnit has already pushed headers.
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
      *
      */
     public function testItCanDecryptAStoredZip()
@@ -97,7 +94,6 @@ A modest, sharp gentle freeze
 by the tornado
 [https://www.poem-generator.org.uk/?i=m4xaa9c]
 EOD;
-
         $za = new ZipArchive();
         $storagePath = $this->disk->getAdapter()->getPathPrefix();
         $za->open($storagePath . '/' . $this->archiveName, ZipArchive::CREATE);
@@ -108,19 +104,13 @@ EOD;
         $this->assertTrue($this->disk->exists($this->archiveName));
 
         // Fetch the route; should return a streamed zip.
-        /** @var StreamedResponse $strmResponse */
-        $strmResponse = $this->actingAs($this->centreUser, 'store')
+        $response = $this->actingAs($this->centreUser, 'store')
             ->visit($this->dashboard_route)
             ->get($this->export_route)
             ->response
         ;
 
-        ob_start();
-        // executes the ZipStream function
-        $strmResponse->sendContent();
-        $content = ob_get_contents();
-
-        die($content);
+        $content = $response->getContent();
 
         // Test the content.
         // Save it to a temp file first, because ZipArchive is dumb about files, rather than streams.
@@ -128,8 +118,6 @@ EOD;
         fwrite($fp, $content);
         $stream = stream_get_meta_data($fp);
         $tmpFilename = $stream['uri'];
-
-        dd($tmpFilename);
 
         // Open the temp filename
         $zip = new ZipArchive();
@@ -144,7 +132,7 @@ EOD;
             $filename = $zip->getNameIndex($i);
 
             // Check it's one of ours
-            $this->assertContains($filename, ["encrypted.txt", "decrypted.txt"]);
+            $this->assertContains($filename, ["encrypted.txt", "plain.txt"]);
 
             // Get the file contents to memory.
             $fileStream = $zip->getStream($filename);
