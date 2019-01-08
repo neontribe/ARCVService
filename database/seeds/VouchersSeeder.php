@@ -32,25 +32,45 @@ class VouchersSeeder extends Seeder
         $size = sizeOf($rvp_vouchers);
         // Assign the codes that match the paper.
         for ($i=60; $i<$size+60; $i++) {
-            $rvp_vouchers[$i-60]->code = 'RVNT123455'.$i;
-            $rvp_vouchers[$i-60]->sponsor_id = $rvp->id;
-            $rvp_vouchers[$i-60]->save();
+            $k = $i-60;
+            $rvp_vouchers[$k]->code = 'RVNT123455'.$i;
+            $rvp_vouchers[$k]->sponsor_id = $rvp->id;
+            $rvp_vouchers[$k]->save();
 
-            if ($rvp_vouchers[$i-60]->id < 32) {
+            if ($rvp_vouchers[$k]->id < 32) {
                 //Progress these to printed.
-                $rvp_vouchers[$i-60]->applyTransition('order');
-                $rvp_vouchers[$i-60]->applyTransition('print');
+                $rvp_vouchers[$k]->applyTransition('order');
+                $rvp_vouchers[$k]->applyTransition('print');
             }
 
-            if ($rvp_vouchers[$i-60]->id < 22) {
+            if ($rvp_vouchers[$k]->id < 22) {
                 //Progress these to dispatched.
-                $rvp_vouchers[$i-60]->applyTransition('dispatch');
+                $rvp_vouchers[$k]->applyTransition('dispatch');
             }
+
         }
 
         // Transition one voucher to recorded by trader 1.
         $rvp_vouchers[1]->trader_id = 1;
         $rvp_vouchers[1]->applyTransition('collect');
+
+        // Progress a few vouchers to reimbursed and create test payment link.
+        // Should be 6 vouchers RVNT12345570-75.
+        // Generate a state token - for payout of a few of them.
+        $token = factory(App\StateToken::class)->create([
+            'uuid' => 'notarealuuid',
+        ]);
+        for ($i=10; $i<16; $i++) {
+            // Trader 3 chosen because 1 might be used for specific other stuff.
+            $rvp_vouchers[$i]->trader_id = 3;
+            $rvp_vouchers[$i]->applyTransition('collect');
+            $rvp_vouchers[$i]->applyTransition('confirm');
+            $rvp_vouchers[$i]->getPriorState()->stateToken()->associate($token);
+            $rvp_vouchers[$i]->save();
+            if ($i > 13) {
+                $rvp_vouchers[$i]->applyTransition('payout');
+            }
+        }
 
         // 4 digit printed vouchers for trial.
         $rvnt4 = factory(App\Voucher::class, 'requested', 100)->create();
@@ -62,5 +82,6 @@ class VouchersSeeder extends Seeder
             $v->applyTransition('print');
             $v->applyTransition('dispatch');
         }
+
     }
 }
