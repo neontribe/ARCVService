@@ -57,18 +57,24 @@ class VouchersSeeder extends Seeder
         // Progress a few vouchers to reimbursed and create test payment link.
         // Should be 6 vouchers RVNT12345570-75.
         // Generate a state token - for payout of a few of them.
-        $token = factory(App\StateToken::class)->create([
-            'uuid' => 'notarealuuid',
+        $paidtoken = factory(App\StateToken::class)->create([
+            'uuid' => 'auuidforpaidvouchers',
+        ]);
+        $pendingtoken = factory(App\StateToken::class)->create([
+            'uuid' => 'auuidforpendingvouchers',
         ]);
         for ($i=10; $i<16; $i++) {
             // Trader 3 chosen because 1 might be used for specific other stuff.
             $rvp_vouchers[$i]->trader_id = 3;
             $rvp_vouchers[$i]->applyTransition('collect');
             $rvp_vouchers[$i]->applyTransition('confirm');
-            $rvp_vouchers[$i]->getPriorState()->stateToken()->associate($token);
-            $rvp_vouchers[$i]->save();
             if ($i > 13) {
+                $rvp_vouchers[$i]->getPriorState()->stateToken()->associate($paidtoken)->save();
+                // If it matters that these had the state token, progress in seperate loop.
+                // In fact - might be able to simplify by manually assigning token id to record.
                 $rvp_vouchers[$i]->applyTransition('payout');
+            } else {
+              $rvp_vouchers[$i]->getPriorState()->stateToken()->associate($pendingtoken)->save();
             }
         }
 
