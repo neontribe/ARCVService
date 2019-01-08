@@ -23,7 +23,7 @@ class VoucherController extends Controller
      */
     public function transition(Request $request)
     {
-        /* expecting a body of type application/josn; a collect transition looks like
+        /* expecting a body of type application/json; a collect transition looks like
         {
             "trader_id" : 1,
             "transition" : "collect"

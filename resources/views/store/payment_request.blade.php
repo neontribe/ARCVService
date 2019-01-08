@@ -31,14 +31,14 @@
                                 <span class="status requested">Requested</span>
                             </td>
                             <td>
-                                {{ \Carbon\Carbon::parse($voucher->paymentPendedOn()->created_at)->format('d/m/Y') }}
+                                {{ \Carbon\Carbon::parse($voucher->paymentPendedOn()->first()->created_at)->format('d/m/Y') }}
                             </td>
                         @elseif ( $voucher->currentstate === "reimbursed" )
                             <td>
                                 <span class="status paid">Paid</span>
                             </td>
                             <td>
-                                {{ \Carbon\Carbon::parse($voucher->reimbursedOn()->created_at)->format('d/m/Y') }}
+                                {{ \Carbon\Carbon::parse($voucher->reimbursedOn()->first()->created_at)->format('d/m/Y') }}
                             </td>
                         @else
                             {{-- We shouldn't encounter this state, but display the state in case we do --}}
@@ -56,7 +56,7 @@
                 <form action="{{ route('store.payment-request.update', ['id' => $state_token->uuid ]) }}" method="POST">
                     {{ method_field('PUT') }}
                     {!! csrf_field() !!}
-                    <button class="submit" type="Submit">
+                    <button class="submit" type="submit">
                     </i><i class="fa fa-money button-icon" aria-hidden="true"></i>Pay <b>{{ $number_to_pay }}</b> Vouchers
                     </button>
                 </form>
