@@ -32,4 +32,13 @@ return [
     */
     'service_domain' => env('ARC_SERVICE_DOMAIN', 'arcv-service.test'),
     'store_domain' => env('ARC_STORE_DOMAIN', 'arcv-store.test'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Master Voucher Log
+    |--------------------------------------------------------------------------
+    */
+    'mvl_filename' => env('ARC_MVL_FILENAME', 'MVLReport.zip'),
+    'mvl_disk' => env('ARC_MVL_DISK', 'enc'),
+
 ];

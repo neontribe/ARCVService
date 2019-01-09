@@ -37,14 +37,14 @@ class CreateMasterVoucherLogReport extends Command
      *
      * @var string $disk
      */
-    private $disk = 'enc';
+    private $disk = '';
 
     /**
      * The default archive name.
      *
      * @var string $archiveName
      */
-    private $archiveName = "MVLReport.zip";
+    private $archiveName = '';
 
     /**
      * The sheet headers.
@@ -164,6 +164,17 @@ FROM vouchers
 EOD;
 
     /**
+     * CreateMasterVoucherLogReport constructor.
+     * Sets some defaults
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->archiveName = config('arc.mvl_filename');
+        $this->disk = config('arc.mvl_disk');
+    }
+
+    /**
      * Execute the console command.
      *
      * @return mixed
@@ -174,6 +185,7 @@ EOD;
         if ($this->option('force') || $this->warnUser()) {
             // We're going to run this monster *once* and then split it into files.
             // We could run it once per sponsor; consider that if it becomes super-unwieldy.
+
             $rows = array_map(
                 // Cast each element to proper array, not stdObjects as returned by DB::select()
                 function ($value) {
