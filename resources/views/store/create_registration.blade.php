@@ -99,10 +99,10 @@
                         />
                         <label for="other">Other Local Criteria</label>
                     </div>
-                </div>
-                <div class="user-control">
-                    <input type="checkbox" class="styled-checkbox @if($errors->has('consent'))invalid @endif" id="privacy-statement" name="consent" @if( old('consent') ) checked @endif/>
-                    <label for="privacy-statement">Has the registration form been completed and signed?</label>
+                    <div class="user-control">
+                        <input type="checkbox" class="styled-checkbox @if($errors->has('consent'))invalid @endif" id="privacy-statement" name="consent" @if( old('consent') ) checked @endif/>
+                        <label for="privacy-statement">Has the registration form been completed and signed?</label>
+                    </div>
                 </div>
                 @if ( $errors->has('consent') )
                 <div class="alert-message error" id="registration-alert">
