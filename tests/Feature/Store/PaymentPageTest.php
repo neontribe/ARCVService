@@ -7,9 +7,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use App\Voucher;
 use App\VoucherState;
 use App\StateToken;
-use App\User;
 use App\Trader;
-use Auth;
 use URL;
 
 
@@ -18,14 +16,10 @@ class PaymentPageTest extends StoreTestCase
     use DatabaseMigrations;
 
     protected $voucher;
-    protected $user;
 
     protected function setUp()
     {
         parent::setUp();
-        // Login to advance voucher
-        $this->user = factory(User::class)->create();
-        Auth::login($this->user);
 
         // Create a voucher and a trader with some info
         $this->voucher = factory(Voucher::class, 'requested')->create();
@@ -53,9 +47,6 @@ class PaymentPageTest extends StoreTestCase
     /** @test */
     public function itShowsAnErrorWhenPaymentLinkBad()
     {
-        // We can only reach the payment page when logged out
-        Auth::logout();
-
         // A poorly formed uuid should show the page, but with an error message in place of the voucher table
         $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-made-up-uuid' ]))
             ->seeInElement('p[class="content-warning center"]', 'This payment request is invalid, or has expired.')
@@ -66,9 +57,6 @@ class PaymentPageTest extends StoreTestCase
     /** @test */
     public function itShowsPaymentRequestDetailsOnlyForValidPaymentUUIDs()
     {
-        // We can only reach the payment page when logged out
-        Auth::logout();
-
         // A real uuid will display the data table
         $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-real-uuid' ]))
             ->seeElement('table')
@@ -81,9 +69,6 @@ class PaymentPageTest extends StoreTestCase
     /** @test */
     public function itShowsPayButtonWhenOnlyPaymentIsUnpaid()
     {
-        // We can only reach the payment page when logged out
-        Auth::logout();
-
         // A real uuid will display the data table
         $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-real-uuid' ]))
             ->seeElement('button[type="submit"]')
@@ -96,9 +81,6 @@ class PaymentPageTest extends StoreTestCase
     {
         // Transition the voucher to paid
         $this->voucher->applyTransition('payout');
-
-        // We can only reach the payment page when logged out
-        Auth::logout();
 
         // We should no longer see the payment button, but see paid status
         $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-real-uuid' ]))
