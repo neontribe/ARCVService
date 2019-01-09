@@ -64,28 +64,53 @@ class PaymentPageTest extends StoreTestCase
             ->see('Status')
             ->see('Date')
         ;
+
+        // A made up uuid uuid will not display the data table
+        $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-made-up-uuid' ]))
+            ->dontseeElement('table')
+            ->dontsee('Voucher Code')
+            ->dontsee('Status')
+            ->dontsee('Date')
+        ;
     }
 
     /** @test */
     public function itShowsPayButtonWhenOnlyPaymentIsUnpaid()
     {
-        // A real uuid will display the data table
+        // A real unpaid uuid will display the pay button
         $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-real-uuid' ]))
-            ->seeElement('button[type="submit"]')
-            ->see('Pay')
+            ->seeInElement('button[type="submit"]', 'Pay')
+        ;
+
+        // Transition the voucher to paid
+        $this->voucher->applyTransition('payout');
+
+        // A real paid uuid will not display the pay button
+        $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-real-uuid' ]))
+            ->dontSeeInElement('button[type="submit"]', 'Pay')
         ;
     }
 
     /** @test */
-    public function itShowsPayemntDetailsOnlyWhenPaymentIsPaid()
+    public function itShowsTheCorrectVoucherStatus()
     {
+        // A made up uuid will display no statuses
+        $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-made-up-uuid' ]))
+            ->dontSeeInElement('span[class="status requested"]', 'Requested')
+            ->dontSeeInElement('span[class="status paid"]', 'Paid')
+        ;
+
+        // A real unpaid uuid will display requested status
+        $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-real-uuid' ]))
+            ->seeInElement('span[class="status requested"]', 'Requested')
+        ;
+
         // Transition the voucher to paid
         $this->voucher->applyTransition('payout');
 
-        // We should no longer see the payment button, but see paid status
+        // A real paid uuid will display paid status
         $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-real-uuid' ]))
-            ->dontSeeElement('button[type="submit"]')
-            ->seeInelement('span[class="status paid"]', 'Paid')
+            ->seeInElement('span[class="status paid"]', 'Paid')
         ;
     }
 
