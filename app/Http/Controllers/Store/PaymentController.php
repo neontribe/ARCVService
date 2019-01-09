@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Store;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\AdminUser;
 use App\StateToken;
 use App\Trader;
-use Auth;
 
 class PaymentController extends Controller
 {
@@ -55,7 +53,7 @@ class PaymentController extends Controller
 
             // Get the trader's name
             if(!empty($vouchers)) {
-                $trader = Trader::find($vouchers{0}->trader_id)->name;
+                $trader = Trader::find($vouchers[0]->trader_id)->name;
             }
         }
 
@@ -77,14 +75,6 @@ class PaymentController extends Controller
         $vouchers = [];
         $trader = "trader";
         $number_to_pay = 0;
-
-        // Login to transition vouchers
-        $emailaddress = config('mail.to_admin.address');
-        $user = AdminUser::where('email', $emailaddress)->first();
-        if (!$user) {
-            $user = factory(AdminUser::class)->create(['name' => 'New Admin']);
-        };
-        Auth::login($user);
 
         // Find the StateToken of a given uuid
         $state_token = StateToken::where('uuid', $paymentUuid)->first();
@@ -116,13 +106,10 @@ class PaymentController extends Controller
 
             // Get the trader's name
             if(!empty($vouchers)) {
-                $trader = Trader::find($vouchers{0}->trader_id)->name;
+                $trader = Trader::find($vouchers[0]->trader_id)->name;
             }
 
         }
-
-        // Logout, so we can see the page
-        Auth::logout();
 
         // voucher transition to paid
         return view('store.payment_request', [
