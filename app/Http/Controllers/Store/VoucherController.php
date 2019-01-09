@@ -54,7 +54,7 @@ class VoucherController extends Controller
                 // Leading `.` as url() gives a leading `/` and the storage is not off root
                 "ZipArchive cannot open archive at '." .
                 // Using url() to prevent revealing the disk tree
-                $disk->url('$archiveName') .
+                $disk->url($archiveName) .
                 "' as : " .
                 $message
             );
