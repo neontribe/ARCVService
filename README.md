@@ -19,6 +19,22 @@ ARCV Service is the service portal and API for ARCV Market.
 
 We suggest that you use the TLD `.test` as others, like `.app` may now be in the public domain and you will experience difficulty with respect to browser behavior over HTTP/HTTPS.
 
+## Setting up reporting
+
+This project can run reports at set times using the Artisan scheduler. This requires some means of periodic triggering. Add to crontab the following:
+
+`*/20 * * * * /usr/bin/php /var/www/{path_to_install}/artisan schedule:run >> /dev/null 2>&1`
+
+We will also need a directory at `storage/app/enc` set to `chmod 770` permissions for {appropriate_user}:{webserver_group}
+
+where
+
+- {path_to_install} with the deploy location.
+- {appropriate_user} with an appropriately qualified local user
+- {webserver_group} with the webserver's group.
+
+It also requires PHP's `zip` extension installed and enabled.
+
 ### To use the Reset data buttton on the dashboard:
  - chown `env` to the console user and web user group e.g. `chown neontribe:www-data .env`
  - And `chmod 775 .env`
@@ -56,7 +72,7 @@ Under contract for
 
 Alexandra Rose Charity (registered in England and Wales #00279157) 
 
-As such, unless otherwise specified in the appropriate component source, associated file or compiled asset, files in this project repository are Copyright &copy; (2017), Alexandra Rose Charity. All rights reserved.
+As such, unless otherwise specified in the appropriate component source, associated file or compiled asset, files in this project repository are Copyright &copy; (2019), Alexandra Rose Charity. All rights reserved.
 
 If you wish to discuss copyright or licensing issues, please contact:
 
