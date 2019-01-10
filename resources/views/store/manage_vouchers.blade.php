@@ -246,14 +246,18 @@
                 var firstVoucher = $('#first-voucher');
                 var lastVoucher = $('#last-voucher');
 
+                var delay = 200 ;
+
                 // Handle first in range of vouchers
                 firstVoucher.keypress(function(e) {
                     if(e.keyCode==13){
-                        var firstValue = firstVoucher.val();
-                        if(firstValue !== ""){
-                            lastVoucher.focus();
-                        }
                         e.preventDefault();
+                        window.setTimeout(function() {
+                            var firstValue = firstVoucher.val();
+                            if(firstValue !== ""){
+                                lastVoucher.focus();
+                            }
+                        }, delay);
                     }
                 });
 
