@@ -26,7 +26,7 @@
                                 <table border="0" cellpadding="0" cellspacing="0">
                                     <tr>
                                         <td>
-                                            <a href="{{ $actionUrl }}" class="button button-blue" target="_blank" >{{ $actionText }}</a>
+                                            <a href="{{ $actionUrl }}" class="button button-pink" target="_blank">{{ $actionText }}</a>
                                         </td>
                                     </tr>
                                 </table>
