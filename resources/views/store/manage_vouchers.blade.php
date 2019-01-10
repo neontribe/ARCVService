@@ -246,7 +246,7 @@
                 var firstVoucher = $('#first-voucher');
                 var lastVoucher = $('#last-voucher');
 
-                var delay = 200 ;
+                var delay = 200;
 
                 // Handle first in range of vouchers
                 firstVoucher.keypress(function(e) {
