@@ -9,6 +9,24 @@
                 font-family: 'Open Sans', 'Lucida Grande', sans-serif;
                 font-size: 16px;
             }
+
+            .button {
+                border-radius: 3px;
+                box-shadow: 0 2px 3px rgba(0, 0, 0, 0.16);
+                color: #FFF;
+                display: inline-block;
+                text-decoration: none;
+                -webkit-text-size-adjust: none;
+            }
+
+            .button-pink {
+                background-color: #a74e94;
+                border-top: 10px solid #a74e94;
+                border-right: 18px solid #a74e94;
+                border-bottom: 10px solid #a74e94;
+                border-left: 18px solid #a74e94;
+            }
+
         </style>
     </head>
     <body>
