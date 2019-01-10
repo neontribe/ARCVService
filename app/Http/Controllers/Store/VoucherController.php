@@ -122,10 +122,16 @@ class VoucherController extends Controller
         // Delete the memory stream
         fclose($memStream);
 
+        // Inject the original file last_modified into the d/l file name.
+        $filename =  pathinfo($archiveName, PATHINFO_BASENAME) .
+            "_" . strftime('%Y-%m-%d_%H%M', $disk->lastModified($archiveName)) .
+            "." . pathinfo($archiveName, PATHINFO_EXTENSION)
+        ;
+
         // Throw it back at the user.
         return response($data, 200, [
             'Content-Type' => 'application/x-zip',
-            'Content-Disposition' => 'attachment; filename="' . $archiveName. '"',
+            'Content-Disposition' => 'attachment; filename="'. $filename .'"',
             'Expires' => Carbon::createFromTimestamp(0)->format('D, d M Y H:i:s'),
             'Last-Modified' => Carbon::now()->format('D, d M Y H:i:s'),
             'Cache-Control' => 'private, no-cache',
