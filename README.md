@@ -33,6 +33,7 @@ where
 - {appropriate_user} with an appropriately qualified local user
 - {webserver_group} with the webserver's group.
 
+It also requires PHP's `zip` extension installed and enabled.
 
 ### To use the Reset data buttton on the dashboard:
  - chown `env` to the console user and web user group e.g. `chown neontribe:www-data .env`
