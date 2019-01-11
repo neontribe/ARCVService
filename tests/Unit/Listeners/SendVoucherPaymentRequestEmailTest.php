@@ -123,9 +123,9 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
             ->seeEmailContains($vouchers->count() . ' vouchers')
             ->seeEmailContains(e($trader->name) . ' of')
             // Has button?
-            ->seeEmailContains('<a href="' . $route . '" class="button button-blue" target="_blank">Pay Request</a>')
+            ->seeEmailContains('<a href="' . $route . '" class="button button-pink" target="_blank">Pay Request</a>')
             // Has link?
-            ->seeEmailContains('[' . $route . '](' . $route . ')')
+            ->seeEmailContains('<br>' . $route)
         ;
     }
 }
