@@ -250,13 +250,15 @@
 
                 var delay = 200;
 
+                // For each input field, we listen for the carriage return added to the end of a code by a scanner
+                // We delay the following action to prevent premature scanner input
+
                 // Handle first in a range of vouchers
                 firstVoucher.keypress(function(e) {
                     if(e.keyCode==13){
                         e.preventDefault();
                         window.setTimeout(function() {
-                            var firstValue = firstVoucher.val();
-                            if(firstValue !== ""){
+                            if(firstVoucher.val() !== ""){
                                 lastVoucher.focus();
                             }
                         }, delay);
@@ -266,18 +268,18 @@
                 // Handle last in a range of vouchers
                 lastVoucher.keypress(function(e) {
                     if(e.keyCode==13){
-                        var firstValue = firstVoucher.val();
-                        if(firstValue === "") {
-                            firstVoucher.focus();
-                            e.preventDefault();
-                            return
-                        }
+                        e.preventDefault();
 
-                        var lastValue = lastVoucher.val();
-                        if(firstValue !== "" && lastValue !== "") {
-                            $('#range-add').trigger('click');
-                            e.preventDefault();
-                        }
+                        window.setTimeout(function() {
+                            if(firstVoucher.val() === "") {
+                                firstVoucher.focus();
+                                return
+                            }
+
+                            if(firstVoucher.val() !== "" && lastVoucher.val() !== "") {
+                                $('#range-add').trigger('click');
+                            }
+                        }, delay);
                     }
                 });
 
