@@ -104,10 +104,10 @@
                 <form method="post" action="{{ route('store.registration.vouchers.post', [ 'registration' => $registration->id ]) }}">
                 {!! csrf_field() !!}
                     <div class="single-container">
-                        <label for="add-voucher-input">Add individual vouchers
-                            <input id="add-voucher-input" name="start" type="text">
+                        <label for="single-voucher">Add individual vouchers
+                            <input id="single-voucher" name="start" type="text">
                         </label>
-                        <button class="add-button" type="submit">
+                        <button id="single-add" class="add-button" type="submit">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -243,12 +243,14 @@
                     $('#vouchers-added').addClass('pulse');
                 }
 
+                // Allocate voucher input elements
                 var firstVoucher = $('#first-voucher');
                 var lastVoucher = $('#last-voucher');
+                var singleVoucher = $('#single-voucher');
 
                 var delay = 200;
 
-                // Handle first in range of vouchers
+                // Handle first in a range of vouchers
                 firstVoucher.keypress(function(e) {
                     if(e.keyCode==13){
                         e.preventDefault();
@@ -261,7 +263,7 @@
                     }
                 });
 
-                // Handle last in range of vouchers
+                // Handle last in a range of vouchers
                 lastVoucher.keypress(function(e) {
                     if(e.keyCode==13){
                         var firstValue = firstVoucher.val();
@@ -276,6 +278,16 @@
                             $('#range-add').trigger('click');
                             e.preventDefault();
                         }
+                    }
+                });
+
+                // Handle a single voucher
+                singleVoucher.keypress(function(e) {
+                    if(e.keyCode==13){
+                        e.preventDefault();
+                        window.setTimeout(function() {
+                            $('#single-add').trigger('click');
+                        }, delay);
                     }
                 });
 
