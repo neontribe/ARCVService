@@ -269,14 +269,12 @@
                 lastVoucher.keypress(function(e) {
                     if(e.keyCode==13){
                         e.preventDefault();
-
                         window.setTimeout(function() {
                             if(firstVoucher.val() === "") {
                                 firstVoucher.focus();
                                 return
                             }
-
-                            if(firstVoucher.val() !== "" && lastVoucher.val() !== "") {
+                            if(lastVoucher.val() !== "") {
                                 $('#range-add').trigger('click');
                             }
                         }, delay);
