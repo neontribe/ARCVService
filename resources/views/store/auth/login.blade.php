@@ -50,7 +50,7 @@
                 <button type="submit" class="submit">Log In</button>
                 <div class="links">
                     <a href="{{ route('store.password.request') }}">Forgot Your Password?</a>
-                    <a href="/store/privacy_policy.html">Privacy Policy</a>
+                    <a href="https://www.alexandrarose.org.uk/Handlers/Download.ashx?IDMF=e15ec914-aac7-4afe-a9a2-be911ccf1a4e">Privacy Policy</a>
                 </div>
             </form>
         </div>

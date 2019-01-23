@@ -18,7 +18,7 @@
         <div class="footer" style="margin-top: 40px; font-size: 13px; color: #999;">
             <p>&copy; Alexandra Rose Charity</p>
             <p>For more information please go to <a href="http://www.alexandrarose.org.uk/" role="link">www.alexandrarose.org.uk</a>.</p>
-            <p><a href="{{ route('store.base') }}/privacy-policy" role="link">Privacy Policy</a></p>
+            <p><a href="https://www.alexandrarose.org.uk/Handlers/Download.ashx?IDMF=e15ec914-aac7-4afe-a9a2-be911ccf1a4e" role="link">Privacy Policy</a></p>
         </div>
 
     </body>
