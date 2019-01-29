@@ -397,4 +397,32 @@ class BundleControllerTest extends StoreTestCase
             ->seePageIs($route)
             ->assertResponseStatus(200);
     }
+
+    /** @test */
+    public function itCanAcceptAndCleanVouchersWithSpacesIn()
+    {
+        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
+        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
+
+        // Create a voucherCode with a space in from the test list
+        $voucherCode = $this->testCodes[0];
+        $randPos = rand(0, strlen($voucherCode));
+        $voucherCode = substr_replace($voucherCode, " ", $randPos, 0);
+
+        // Add a voucher;
+        $this->actingAs($this->centreUser, 'store')
+            ->post($post_route, ['start' => $voucherCode]);
+
+        $this->followRedirects()
+            ->seePageIs($route)
+            ->assertResponseStatus(200)
+        ;
+
+        /** @var Bundle $currentBundle */
+        // Get our currentBundle
+        $currentBundle = $this->registration->currentBundle();
+
+        // See that it's got one voucher.
+        $this->assertEquals(1, $currentBundle->vouchers()->count());
+    }
 }
