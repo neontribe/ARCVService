@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Voucher;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreAppendBundleRequest extends FormRequest
@@ -36,5 +37,22 @@ class StoreAppendBundleRequest extends FormRequest
         ];
 
         return $rules;
+    }
+
+    protected function prepareForValidation()
+    {
+        // get the input and remove null/empty values.
+        // TODO: 5.5 upgrade will need to change this to 'all' with params.
+        $input = array_filter(
+            $this->only(['start', 'end']),
+            'strlen'
+        );
+
+        foreach ($input as $key => $value) {
+            $clean = Voucher::cleanCodes((array)$value);
+            $input[$key] = array_shift($clean);
+        }
+        // replace old input with new input
+        $this->replace($input);
     }
 }
