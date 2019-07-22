@@ -21,7 +21,7 @@
                 </li>
             </a>
             @if (auth::user()->role != 'foodmatters_user')
-            <a href="{{ $print_route }}" target="_blank" >
+            <a href="{{ $print_route }}" target="_blank" rel="noopener noreferrer">
                 <li>
                     <img src="{{ asset('store/assets/print-light.svg') }}" name="print-registrations">
                     {{ $print_button_text }}
