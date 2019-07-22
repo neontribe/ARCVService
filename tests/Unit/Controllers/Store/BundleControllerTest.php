@@ -1,16 +1,16 @@
 <?php
 
-
 namespace Tests\Unit\Controllers\Store;
 
-use Auth;
 use App\Registration;
 use App\Bundle;
 use App\Centre;
 use App\CentreUser;
 use App\Voucher;
+use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use phpDocumentor\Reflection\Types\Null_;
 use Session;
 use Tests\StoreTestCase;
 
@@ -424,5 +424,52 @@ class BundleControllerTest extends StoreTestCase
 
         // See that it's got one voucher.
         $this->assertEquals(1, $currentBundle->vouchers()->count());
+    }
+
+    /** @test */
+    public function itHasSparseFormDataCleanedBeforeProcessing()
+    {
+        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
+        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
+
+        $data_null_end = [
+            'start' => $this->testCodes[0],
+            'end' => null
+        ];
+
+        $data_blank_end = [
+            'start' => $this->testCodes[1],
+            'end' => ''
+        ];
+
+        // Add null end voucher;
+        $this->actingAs($this->centreUser, 'store')
+            ->post(
+                $post_route,
+                $data_null_end
+            );
+
+        // Expect to see last record is testCode[0]
+        $last_voucher = $this->registration
+            ->currentBundle()
+            ->vouchers()
+            ->orderByDesc('id')
+            ->first();
+        $this->assertEquals($this->testCodes[0], $last_voucher->code);
+
+        // Add empty string end vouchers;
+        $this->actingAs($this->centreUser, 'store')
+            ->post(
+                $post_route,
+                $data_blank_end
+            );
+
+        // Expect to see last record is testCode[1]
+        $last_voucher = $this->registration
+            ->currentBundle()
+            ->vouchers()
+            ->orderByDesc('id')
+            ->first();
+        $this->assertEquals($this->testCodes[1], $last_voucher->code);
     }
 }

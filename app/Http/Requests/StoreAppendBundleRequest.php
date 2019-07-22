@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Voucher;
+use Illuminate\Foundation\Http\FormRequest;
 
 class StoreAppendBundleRequest extends FormRequest
 {
