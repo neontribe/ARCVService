@@ -121,4 +121,13 @@ class LoginPageTest extends StoreTestCase
             ->see(trans('validation.required', ['attribute' => "email"]));
         ;
     }
+
+    public function itShowsACookieWarning()
+    {
+        $this->visit(URL::route('store.login'))
+            ->see('cookie.agree')
+            ->see(config('arc.links.privacy_policy'))
+            ->see('cookie-warning')
+            ;
+    }
 }
