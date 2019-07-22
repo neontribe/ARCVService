@@ -20,12 +20,14 @@
                     Search for a family
                 </li>
             </a>
-            <a href="{{ $print_route }}" target="_blank" >
+            @if (auth::user()->role != 'foodmatters_user')
+            <a href="{{ $print_route }}" target="_blank" rel="noopener noreferrer">
                 <li>
                     <img src="{{ asset('store/assets/print-light.svg') }}" name="print-registrations">
                     {{ $print_button_text }}
                 </li>
             </a>
+            @endif
             @can( 'export', App\Registration::class )
             <a href="{{ URL::route('store.centres.registrations.summary') }}">
                 <li>

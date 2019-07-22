@@ -16,10 +16,12 @@ class DashboardPageTest extends StoreTestCase
     /**
      * @var Centre $centre
      * @var CentreUser $centreUser
+     * @var CentreUser $fmUser
      * @var Registration $registration
      */
     private $centre;
     private $centreUser;
+    private $fmUser;
     private $registration;
 
     public function setUp()
@@ -30,11 +32,20 @@ class DashboardPageTest extends StoreTestCase
 
         // Create a CentreUser
         $this->centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass')
+            "name"  => "CC test user",
+            "email" => "testccuser@example.com",
+            "password" => bcrypt('test_ccuser_pass'),
+            "role" => "centre_user",
         ]);
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+
+        $this->fmUser = factory(CentreUser::class)->create([
+            "name"  => "FM test user",
+            "email" => "testfmuser@example.com",
+            "password" => bcrypt('test_fmuser_pass'),
+            "role" => "foodmatters_user",
+        ]);
+        $this->fmUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         // Make the centre a registration
         $this->registration = factory(Registration::class)->create([
@@ -43,31 +54,19 @@ class DashboardPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function itShowsTheExportButtonsWhenUserCanExport()
+    public function itShowsTheExportButtonsAccordingToUserRole()
     {
-        // Create an FM User
-        $fmuser =  factory(CentreUser::class)->create([
-            "name"  => "FM test user",
-            "email" => "testfmuser@example.com",
-            "password" => bcrypt('test_fmuser_pass'),
-            "role" => "foodmatters_user",
-        ]);
-        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+        // Get FM User
+        $fmuser = $this->fmUser;
 
-        // Create a CC user
-        $ccuser =  factory(CentreUser::class)->create([
-            "name"  => "CC test user",
-            "email" => "testccuser@example.com",
-            "password" => bcrypt('test_ccuser_pass'),
-            "role" => "centre_user",
-        ]);
-        $ccuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
-
+        // Get CC user
+        $ccuser = $this->centreUser;
 
         $this->actingAs($ccuser, 'store')
             ->visit(URL::route('store.dashboard'))
             ->dontSee(URL::route('store.centres.registrations.summary'))
             ->dontSee(URL::route('store.vouchers.mvl.export'))
+            ->see("print-registrations")
         ;
 
         Auth::logout();
@@ -76,6 +75,7 @@ class DashboardPageTest extends StoreTestCase
             ->visit(URL::route('store.dashboard'))
             ->see(URL::route('store.centres.registrations.summary'))
             ->see(URL::route('store.vouchers.mvl.export'))
+            ->dontSee("print-registrations")
         ;
     }
 
