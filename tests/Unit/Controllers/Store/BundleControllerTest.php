@@ -257,6 +257,61 @@ class BundleControllerTest extends StoreTestCase
         $this->assertEquals(1, $currentBundle->vouchers()->count());
     }
 
+
+    /** @test */
+    public function testICanDeleteTheCurrentBundle()
+    {
+        /** @var Bundle $currentBundle */
+        $currentBundle = $this->registration->currentBundle();
+
+        Auth::login($this->centreUser);
+        // Make some vouchers to bundle.
+        $testCodes = [
+            'tst0123455',
+            'tst0123456',
+            'tst0123457'
+        ];
+        foreach ($testCodes as $testCode) {
+            $voucher = factory(Voucher::class, 'requested')->create([
+                'code' => $testCode
+            ]);
+            $voucher->applyTransition('order');
+            $voucher->applyTransition('print');
+            $voucher->applyTransition('dispatch');
+            $voucher->bundle()->associate($currentBundle)->save();
+        }
+
+        // there should be 3 vouchers!
+        $this->assertEquals(count($testCodes), $currentBundle->vouchers()->count());
+
+        // Stash vouchers for test later
+        //$vouchers = $currentBundle->vouchers()->get();
+
+        $delete_route = route(
+            'store.registration.vouchers.delete',
+            [
+                'registration' => $this->registration->id,
+            ]
+        );
+
+        // Hit the route with a delete request;
+        $this->actingAs($this->centreUser, 'store')
+            ->delete($delete_route)
+        ;
+
+        // refresh bundle
+        $currentBundle->refresh();
+        // See less vouchers
+        $this->assertEquals(0, $currentBundle->vouchers()->count());
+
+        //Check all vouchers have NULL bundle_id
+
+        $vouchers = Voucher::whereIn('code', $testCodes)->get();
+        foreach ($vouchers as $v) {
+            $this->assertNull($v->bundle_id);
+        }
+    }
+
     /** @test */
     public function testICanDeleteANamedVoucher()
     {
