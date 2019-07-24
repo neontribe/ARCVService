@@ -92,7 +92,8 @@ class BundleController extends Controller
 
         // Count vouchers and check them
         $numVouchers = count($voucherCodes);
-        if (!$numVouchers > config('arc.bundle_max_voucher_append')) {
+
+        if ($numVouchers <= config('arc.bundle_max_voucher_append')) {
             // Get current Bundle
             /** @var Bundle $bundle */
             $bundle = $registration->currentBundle();

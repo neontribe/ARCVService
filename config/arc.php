@@ -55,6 +55,6 @@ return [
     | Maximum number of vouchers that can be appended to a bundle at once.
     |--------------------------------------------------------------------------
     */
-    'bundle_max_voucher_append' =>  env('ARC_STORE_MAX_VOUCHER_APPEND', 100),
+    'bundle_max_voucher_append' => env('ARC_STORE_BUNDLE_MAX_VOUCHER_APPEND', 100),
 
 ];
