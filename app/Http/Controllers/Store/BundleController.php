@@ -12,6 +12,7 @@ use App\Http\Requests\StoreUpdateBundleRequest;
 use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
+use Exception;
 use Log;
 
 class BundleController extends Controller
@@ -86,40 +87,20 @@ class BundleController extends Controller
 
     public function addVouchersToCurrentBundle(StoreAppendBundleRequest $request, Registration $registration)
     {
-        /** @var Bundle $bundle */
-        // Get current Bundle
-        $bundle = $registration->currentBundle();
+        // Generate code range from given values (may be only 1)
+        $voucherCodes = Voucher::generateCodeRange($request->get("start"), $request->get("end"));
 
-        // There should always be a start. The request will fail before validation before this point if there isn't
-        $start_match = Voucher::splitShortcodeNumeric($request->get("start"));
-
-        // Gets the whole string match and plumbs it onto the start of the voucher codes.
-        $voucherCodes[] = $start_match[0];
-
-        // Check we have an end;
-        if (!empty($request->get("end"))) {
-            $end_match = Voucher::splitShortcodeNumeric($request->get("end"));
-
-            // Grab integer versions of the thing.
-            $startval = intval($start_match['number']);
-            $endval = intval($end_match['number']);
-
-            // Generate codes!
-            for ($val = $startval+1; $val <= $endval; $val++) {
-                // Assemble code, add to voucherCodes[]
-                // We appear to be producing codes that are "0" str_pad on the left, to variable characters
-                // We'll use the $start's numeric length as the value to pad to.
-                $voucherCodes[] = $start_match['shortcode'] . str_pad(
-                    $val,
-                    strlen($start_match['number']),
-                    "0",
-                    STR_PAD_LEFT
-                );
-            }
-        };
-
-        // return to page
-        $errors = $bundle->addVouchers($voucherCodes);
+        // Count vouchers and check them
+        $numVouchers = count($voucherCodes);
+        if (!$numVouchers > config('arc.bundle_max_voucher_append')) {
+            // Get current Bundle
+            /** @var Bundle $bundle */
+            $bundle = $registration->currentBundle();
+            // try to add the vouchers.
+            $errors = $bundle->addVouchers($voucherCodes);
+        } else {
+            $errors = [ 'append' => $numVouchers ];
+        }
 
         // Return to manager in all cases
         $successRoute = $failRoute = route(
@@ -187,14 +168,10 @@ class BundleController extends Controller
             isset($inputs['collected_by']) &&
             isset($inputs['collected_on'])
         ) {
-
             // Check there are actual vouchers to disburse, or this is a bit.
             if ($bundle->vouchers->count() == 0) {
-
                 $errors["empty"] = true;
-
             } else {
-
                 // Add the date;
                 $bundle->disbursed_at = Carbon::createFromFormat(
                     'Y-m-d',
@@ -216,7 +193,7 @@ class BundleController extends Controller
                     // Store it.
                     $bundle->save();
 
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     // Fires if finOrFail() or save() breaks
                     // Log that error by hand
                     Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
@@ -321,6 +298,11 @@ class BundleController extends Controller
                     case "empty":
                         if ($values) {
                             $messages[] = "Action denied on empty bundle";
+                        }
+                        break;
+                    case "append":
+                        if ($values) {
+                            $messages[] = "Failed adding more than ". config('arc.bundle_max_voucher_append') ." vouchers";
                         }
                         break;
                     default:
