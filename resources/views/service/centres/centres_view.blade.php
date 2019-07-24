@@ -7,7 +7,7 @@
 
     <div id="main-content">
         <h1>Children's Centres</h1>
-        <table>
+        <table class="table table-striped">
             <thead>
                 <tr>
                     <th>Name</th>
@@ -18,10 +18,12 @@
             </thead>
             <tbody>
                 @foreach ($centres as $centre)
-                    <tr>{{ $centre->name }}</tr>
-                    <tr>{{ $centre->rvid }}</tr>
-                    <tr>{{ $centre->sponsor }}</tr>
-                    <tr>{{ $centre->form }}</tr>
+                    <tr>
+                        <td>{{ $centre->name }}</td>
+                        <td>{{ $centre->prefix }}</td>
+                        <td>{{ $centre->sponsor->name }}</td>
+                        <td>{{ $centre->print_pref }}</td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>

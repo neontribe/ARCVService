@@ -1,7 +1,10 @@
 <?php
 
+namespace App\Http\Controllers\Service\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Centre;
+use App\Sponsor;
 
 class CentresController extends Controller
 {
@@ -13,7 +16,14 @@ class CentresController extends Controller
      */
     public function index()
     {
-        $centres = Centre::orderBy('id', 'desc')->paginate(50);
-        return view('service.centres.centres_view', compact('centres'));
+        $centres = Centre::get();
+        $sponsors = Sponsor::get();
+
+        $data = [
+          "centres" => $centres,
+          "sponsors" => $sponsors
+        ];
+
+        return view('service.centres.centres_view', $data);
     }
 }
