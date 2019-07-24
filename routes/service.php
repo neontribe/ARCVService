@@ -40,6 +40,10 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.vouchers.create',
         'uses' => 'Admin\VouchersController@create',
     ]);
+    Route::get('workers', [
+        'as' =>'admin.workers.workers_view',
+        'uses' => 'Admin\WorkersController@index',
+    ]);
     Route::post('vouchers', [
         'as' =>'admin.vouchers.storebatch',
         'uses' => 'Admin\VouchersController@storeBatch',
