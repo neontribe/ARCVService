@@ -11,7 +11,7 @@
             <div class="col">
                 <div>
                     <img src="{{ asset('store/assets/info-light.svg') }}">
-                    <h2>This Family</h2>
+                    <h2 id='this-family'>This Family</h2>
                 </div>
                 <div class="alongside-container">
                     <div>
@@ -42,12 +42,12 @@
                     </div>
                 </div>
                 @endif
-                <a href="{{ route("store.registration.edit", ['id' => $registration->id ]) }}" class="link">
+                <a href="{{ route("store.registration.edit", ['id' => $registration->id ]) }}" class="link" id='edit-family-link'>
                     <div class="link-button link-button-large">
                         <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Go to edit family
                     </div>
                 </a>
-                <a href="{{ route("store.registration.index") }}" class="link">
+                <a href="{{ route("store.registration.index") }}" class="link" id='find-another-family-link'>
                     <div class="link-button link-button-large">
                         <i class="fa fa-search button-icon" aria-hidden="true"></i>Find another family
                     </div>
@@ -56,7 +56,7 @@
             <div class="col">
                 <div>
                     <img src="{{ asset('store/assets/history-light.svg') }}">
-                    <h2>Collection History</h2>
+                    <h2 id='collection-history'>Collection History</h2>
                 </div>
                 <div>
                     <div class="emphasised-section">
@@ -74,7 +74,7 @@
                         </div>
                     @endif
                 </div>
-                <a href="{{ route("store.registration.collection-history", ['id' => $registration->id ]) }}" class="link">
+                <a href="{{ route("store.registration.collection-history", ['id' => $registration->id ]) }}" class="link" id='full-collection-link'>
                     <div class="link-button link-button-large">
                         <i class="fa fa-clock-o button-icon" aria-hidden="true"></i>
                         Full Collection History
@@ -84,7 +84,7 @@
             <div class="col allocation">
                 <div>
                     <img src="{{ asset('store/assets/allocation-light.svg') }}">
-                    <h2>Allocate Vouchers</h2>
+                    <h2 id='allocate-vouchers'>Allocate Vouchers</h2>
                 </div>
                 <form method="post" action="{{ route('store.registration.vouchers.post', [ 'registration' => $registration->id ]) }}">
                     {!! csrf_field() !!}
@@ -95,7 +95,7 @@
                         <label>Last voucher
                             <input id="last-voucher" name="end" type="text">
                         </label>
-                        <button id="range-add" class="add-button" type="submit">
+                        <button id="range-add" class="add-button" type="submit" name="range-add">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -107,7 +107,7 @@
                         <label for="single-voucher">Add individual vouchers
                             <input id="single-voucher" name="start" type="text">
                         </label>
-                        <button id="single-add" class="add-button" type="submit">
+                        <button id="single-add" class="add-button" type="submit" name="add-button">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -148,7 +148,7 @@
                         <form id="unbundle-all" name="unbundle-all" action="" method="POST">
                             {!! method_field('delete') !!}
                             {!! csrf_field() !!}
-                            <button type="submit" class="delete-button" formaction="{{ URL::route('store.registration.vouchers.delete', ['registration' => $registration->id ]) }}" >
+                            <button type="submit" class="delete-button" formaction="{{ URL::route('store.registration.vouchers.delete', ['registration' => $registration->id ]) }}" name="delete-all-button" id="delete-all-button">
                                 <i class="fa fa-trash" aria-hidden="true"></i>
                             </button>
                         </form>
@@ -166,7 +166,7 @@
                                     <tr>
                                         <td>{{ $voucher->code }}</td>
                                         <td>
-                                            <button type="submit" class="delete-button" formaction="{{ URL::route('store.registration.voucher.delete', ['registration' => $registration->id, 'voucher' => $voucher->id]) }}" id="{{ $voucher->id }}">
+                                            <button type="submit" class="delete-button" name="delete-button" formaction="{{ URL::route('store.registration.voucher.delete', ['registration' => $registration->id, 'voucher' => $voucher->id]) }}" id="{{ $voucher->id }}">
                                                 <i class="fa fa-minus" aria-hidden="true"></i>
                                             </button>
                                         </td>
