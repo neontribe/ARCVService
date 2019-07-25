@@ -81,9 +81,6 @@ class VoucherController extends Controller
         $vouchers_for_payment = [];
 
         if ($transition === 'confirm') {
-            // Tidy the StateTokens
-            StateToken::tidy();
-
             // We'll need a StateToken for Later
             $stateToken = factory(StateToken::class)->create();
         }
