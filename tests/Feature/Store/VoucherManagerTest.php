@@ -79,7 +79,7 @@ class VoucherManagerTest extends StoreTestCase
      *
      * @test
      */
-    public function testThreeColumnsAreVisibe()
+    public function testThreeColumnsAreVisible()
     {
         // Check we can see the this family div
         // Check we can see the Collection History div
