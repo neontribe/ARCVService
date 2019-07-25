@@ -84,7 +84,7 @@ class LoginController extends Controller
         // along with a message indicating the problem.
         return redirect()
             ->route('store.login')
-            ->withInput($request->only('email', 'remember'))
+            ->withInput($request->all(['email', 'remember']))
             ->withErrors(['error_message' => trans('auth.failed')])
             ;
     }

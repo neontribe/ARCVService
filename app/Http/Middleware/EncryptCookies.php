@@ -14,4 +14,13 @@ class EncryptCookies extends BaseEncrypter
     protected $except = [
         //
     ];
+
+    /**
+     * Indicates if cookies should be serialized.
+     * This was default off in 5.5.42 - if a bad actor has the app_key they can spoof cookies
+     * We are re-enabling it.
+     *
+     * @var bool
+     */
+    protected static $serialize = true;
 }
