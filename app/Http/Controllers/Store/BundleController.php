@@ -235,6 +235,32 @@ class BundleController extends Controller
     }
 
     /**
+     * Function to remove all vouchers from a bundle
+     *
+     * @param Registration $registration
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function removeAllVouchersFromCurrentBundle(Registration $registration)
+    {
+        /** @var Bundle $bundle */
+        $bundle = $registration->currentBundle();
+
+        // Get all the voucjhers for this bundle
+        $vouchers = $bundle->vouchers()->get();
+
+        // Call alterVouchers with no codes to check, and no bundle to detransiton and remove it.
+        $errors = $bundle->alterVouchers($vouchers, [], null);
+
+        // Back to manager in all cases
+        $successRoute = $failRoute = route(
+            'store.registration.voucher-manager',
+            ['registration' => $registration->id]
+        );
+
+        return $this->redirectAfterRequest($errors, $successRoute, $failRoute);
+    }
+
+    /**
      * Removes a single voucher from a bundle
      * @param Registration $registration
      * @param Voucher $voucher

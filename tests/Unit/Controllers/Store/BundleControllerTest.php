@@ -1,16 +1,16 @@
 <?php
 
-
 namespace Tests\Unit\Controllers\Store;
 
-use Auth;
 use App\Registration;
 use App\Bundle;
 use App\Centre;
 use App\CentreUser;
 use App\Voucher;
+use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use phpDocumentor\Reflection\Types\Null_;
 use Session;
 use Tests\StoreTestCase;
 
@@ -257,6 +257,61 @@ class BundleControllerTest extends StoreTestCase
         $this->assertEquals(1, $currentBundle->vouchers()->count());
     }
 
+
+    /** @test */
+    public function testICanDeleteTheCurrentBundle()
+    {
+        /** @var Bundle $currentBundle */
+        $currentBundle = $this->registration->currentBundle();
+
+        Auth::login($this->centreUser);
+        // Make some vouchers to bundle.
+        $testCodes = [
+            'tst0123455',
+            'tst0123456',
+            'tst0123457'
+        ];
+        foreach ($testCodes as $testCode) {
+            $voucher = factory(Voucher::class, 'requested')->create([
+                'code' => $testCode
+            ]);
+            $voucher->applyTransition('order');
+            $voucher->applyTransition('print');
+            $voucher->applyTransition('dispatch');
+            $voucher->bundle()->associate($currentBundle)->save();
+        }
+
+        // there should be 3 vouchers!
+        $this->assertEquals(count($testCodes), $currentBundle->vouchers()->count());
+
+        // Stash vouchers for test later
+        //$vouchers = $currentBundle->vouchers()->get();
+
+        $delete_route = route(
+            'store.registration.vouchers.delete',
+            [
+                'registration' => $this->registration->id,
+            ]
+        );
+
+        // Hit the route with a delete request;
+        $this->actingAs($this->centreUser, 'store')
+            ->delete($delete_route)
+        ;
+
+        // refresh bundle
+        $currentBundle->refresh();
+        // See less vouchers
+        $this->assertEquals(0, $currentBundle->vouchers()->count());
+
+        //Check all vouchers have NULL bundle_id
+
+        $vouchers = Voucher::whereIn('code', $testCodes)->get();
+        foreach ($vouchers as $v) {
+            $this->assertNull($v->bundle_id);
+        }
+    }
+
     /** @test */
     public function testICanDeleteANamedVoucher()
     {
@@ -396,5 +451,80 @@ class BundleControllerTest extends StoreTestCase
         $this->followRedirects()
             ->seePageIs($route)
             ->assertResponseStatus(200);
+    }
+
+    /** @test */
+    public function itCanAcceptAndCleanVouchersWithSpacesIn()
+    {
+        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
+        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
+
+        // Create a voucherCode with a space in from the test list
+        $voucherCode = $this->testCodes[0];
+        $randPos = rand(0, strlen($voucherCode));
+        $voucherCode = substr_replace($voucherCode, " ", $randPos, 0);
+
+        // Add a voucher;
+        $this->actingAs($this->centreUser, 'store')
+            ->post($post_route, ['start' => $voucherCode]);
+
+        $this->followRedirects()
+            ->seePageIs($route)
+            ->assertResponseStatus(200)
+        ;
+
+        /** @var Bundle $currentBundle */
+        // Get our currentBundle
+        $currentBundle = $this->registration->currentBundle();
+
+        // See that it's got one voucher.
+        $this->assertEquals(1, $currentBundle->vouchers()->count());
+    }
+
+    /** @test */
+    public function itHasSparseFormDataCleanedBeforeProcessing()
+    {
+        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
+        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
+
+        $data_null_end = [
+            'start' => $this->testCodes[0],
+            'end' => null
+        ];
+
+        $data_blank_end = [
+            'start' => $this->testCodes[1],
+            'end' => ''
+        ];
+
+        // Add null end voucher;
+        $this->actingAs($this->centreUser, 'store')
+            ->post(
+                $post_route,
+                $data_null_end
+            );
+
+        // Expect to see last record is testCode[0]
+        $last_voucher = $this->registration
+            ->currentBundle()
+            ->vouchers()
+            ->orderByDesc('id')
+            ->first();
+        $this->assertEquals($this->testCodes[0], $last_voucher->code);
+
+        // Add empty string end vouchers;
+        $this->actingAs($this->centreUser, 'store')
+            ->post(
+                $post_route,
+                $data_blank_end
+            );
+
+        // Expect to see last record is testCode[1]
+        $last_voucher = $this->registration
+            ->currentBundle()
+            ->vouchers()
+            ->orderByDesc('id')
+            ->first();
+        $this->assertEquals($this->testCodes[1], $last_voucher->code);
     }
 }

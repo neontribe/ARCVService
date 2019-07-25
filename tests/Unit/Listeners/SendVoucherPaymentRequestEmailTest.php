@@ -14,6 +14,7 @@ use App\Voucher;
 use Auth;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Spinen\MailAssertions\MailTracking;
+use Swift_Message;
 use Tests\TestCase;
 use URL;
 
@@ -57,6 +58,32 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
         }
     }
 
+    /**
+     * Custom function to assert that the email wasn't addresses to a recipient
+     * @param $recipient
+     * @param Swift_Message|null $message
+     * @return $this
+     */
+    protected function seeEmailNotToCcBcc($recipient, Swift_Message $message = null)
+    {
+        $fail_message = "The last email sent was sent to $recipient.";
+
+        // Not in the To
+        $this->assertArrayNotHasKey($recipient, (array)$this->getEmail($message)
+            ->getTo(), $fail_message);
+
+        // Not in the Cc
+        $this->assertArrayNotHasKey($recipient, (array)$this->getEmail($message)
+            ->getCc(), $fail_message);
+
+        // Not in the Bcc
+        $this->assertArrayNotHasKey($recipient, (array)$this->getEmail($message)
+            ->getBcc(), $fail_message);
+
+        return $this;
+    }
+
+    /** @test */
     public function testRequestVoucherPayment()
     {
         $user = $this->user;
@@ -89,15 +116,16 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
         // uses laravel helper function e() to prevent errors from names with apostrophes
         $this->seeEmailWasSent()
             ->seeEmailTo(config('mail.to_admin.address'))
+            ->seeEmailNotToCcBcc($user->email)
             ->seeEmailSubject('Rose Voucher Payment Request')
             ->seeEmailContains('Hi ' . config('mail.to_admin.name'))
             ->seeEmailContains(e($user->name) . ' has just successfully requested payment for')
             ->seeEmailContains($vouchers->count() . ' vouchers')
             ->seeEmailContains(e($trader->name) . ' of')
             // Has button?
-            ->seeEmailContains('<a href="' . $route . '" class="button button-blue" target="_blank">Pay Request</a>')
+            ->seeEmailContains('<a href="' . $route . '" class="button button-pink" target="_blank">Pay Request</a>')
             // Has link?
-            ->seeEmailContains('[' . $route . '](' . $route . ')')
+            ->seeEmailContains('<br>' . $route)
         ;
     }
 }

@@ -11,7 +11,7 @@
             <div class="col">
                 <div>
                     <img src="{{ asset('store/assets/info-light.svg') }}">
-                    <h2>This Family</h2>
+                    <h2 id='this-family'>This Family</h2>
                 </div>
                 <div class="alongside-container">
                     <div>
@@ -42,12 +42,12 @@
                     </div>
                 </div>
                 @endif
-                <a href="{{ route("store.registration.edit", ['id' => $registration->id ]) }}" class="link">
+                <a href="{{ route("store.registration.edit", ['id' => $registration->id ]) }}" class="link" id='edit-family-link'>
                     <div class="link-button link-button-large">
                         <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Go to edit family
                     </div>
                 </a>
-                <a href="{{ route("store.registration.index") }}" class="link">
+                <a href="{{ route("store.registration.index") }}" class="link" id='find-another-family-link'>
                     <div class="link-button link-button-large">
                         <i class="fa fa-search button-icon" aria-hidden="true"></i>Find another family
                     </div>
@@ -56,7 +56,7 @@
             <div class="col">
                 <div>
                     <img src="{{ asset('store/assets/history-light.svg') }}">
-                    <h2>Collection History</h2>
+                    <h2 id='collection-history'>Collection History</h2>
                 </div>
                 <div>
                     <div class="emphasised-section">
@@ -74,7 +74,7 @@
                         </div>
                     @endif
                 </div>
-                <a href="{{ route("store.registration.collection-history", ['id' => $registration->id ]) }}" class="link">
+                <a href="{{ route("store.registration.collection-history", ['id' => $registration->id ]) }}" class="link" id='full-collection-link'>
                     <div class="link-button link-button-large">
                         <i class="fa fa-clock-o button-icon" aria-hidden="true"></i>
                         Full Collection History
@@ -84,7 +84,7 @@
             <div class="col allocation">
                 <div>
                     <img src="{{ asset('store/assets/allocation-light.svg') }}">
-                    <h2>Allocate Vouchers</h2>
+                    <h2 id='allocate-vouchers'>Allocate Vouchers</h2>
                 </div>
                 <form method="post" action="{{ route('store.registration.vouchers.post', [ 'registration' => $registration->id ]) }}">
                     {!! csrf_field() !!}
@@ -95,7 +95,7 @@
                         <label>Last voucher
                             <input id="last-voucher" name="end" type="text">
                         </label>
-                        <button id="range-add" class="add-button" type="submit">
+                        <button id="range-add" class="add-button" type="submit" name="range-add">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -104,10 +104,10 @@
                 <form method="post" action="{{ route('store.registration.vouchers.post', [ 'registration' => $registration->id ]) }}">
                 {!! csrf_field() !!}
                     <div class="single-container">
-                        <label for="add-voucher-input">Add individual vouchers
-                            <input id="add-voucher-input" name="start" type="text">
+                        <label for="single-voucher">Add individual vouchers
+                            <input id="single-voucher" name="start" type="text">
                         </label>
-                        <button class="add-button" type="submit">
+                        <button id="single-add" class="add-button" type="submit" name="add-button">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -144,6 +144,15 @@
                 <div class="center" id="vouchers-added">
                     <span class="emphasised-section">Vouchers added</span>
                     <span class="number-circle">{{ $vouchers_amount }}</span>
+                    <span class="@if($vouchers_amount === 0)collapsed @endif">
+                        <form id="unbundle-all" name="unbundle-all" action="" method="POST">
+                            {!! method_field('delete') !!}
+                            {!! csrf_field() !!}
+                            <button type="submit" class="delete-button" formaction="{{ URL::route('store.registration.vouchers.delete', ['registration' => $registration->id ]) }}" name="delete-all-button" id="delete-all-button">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                            </button>
+                        </form>
+                    </span>
                     <div id="vouchers" class="@if($vouchers_amount === 0)collapsed @endif">
                         <form id="unbundle" name="unbundle" action="" method="POST">
                             {!! method_field('delete') !!}
@@ -157,7 +166,7 @@
                                     <tr>
                                         <td>{{ $voucher->code }}</td>
                                         <td>
-                                            <button type="submit" class="delete-button" formaction="{{ URL::route('store.registration.voucher.delete', ['registration' => $registration->id, 'voucher' => $voucher->id]) }}" id="{{ $voucher->id }}">
+                                            <button type="submit" class="delete-button" name="delete-button" formaction="{{ URL::route('store.registration.voucher.delete', ['registration' => $registration->id, 'voucher' => $voucher->id]) }}" id="{{ $voucher->id }}">
                                                 <i class="fa fa-minus" aria-hidden="true"></i>
                                             </button>
                                         </td>
@@ -243,35 +252,51 @@
                     $('#vouchers-added').addClass('pulse');
                 }
 
+                // Allocate voucher input elements
                 var firstVoucher = $('#first-voucher');
                 var lastVoucher = $('#last-voucher');
+                var singleVoucher = $('#single-voucher');
 
-                // Handle first in range of vouchers
+                var delay = 200;
+
+                // For each input field, we listen for the carriage return added to the end of a code by a scanner
+                // We delay the following action to prevent premature scanner input
+
+                // Handle first in a range of vouchers
                 firstVoucher.keypress(function(e) {
                     if(e.keyCode==13){
-                        var firstValue = firstVoucher.val();
-                        if(firstValue !== ""){
-                            lastVoucher.focus();
-                        }
                         e.preventDefault();
+                        window.setTimeout(function() {
+                            if(firstVoucher.val() !== ""){
+                                lastVoucher.focus();
+                            }
+                        }, delay);
                     }
                 });
 
-                // Handle last in range of vouchers
+                // Handle last in a range of vouchers
                 lastVoucher.keypress(function(e) {
                     if(e.keyCode==13){
-                        var firstValue = firstVoucher.val();
-                        if(firstValue === "") {
-                            firstVoucher.focus();
-                            e.preventDefault();
-                            return
-                        }
+                        e.preventDefault();
+                        window.setTimeout(function() {
+                            if(firstVoucher.val() === "") {
+                                firstVoucher.focus();
+                                return
+                            }
+                            if(lastVoucher.val() !== "") {
+                                $('#range-add').trigger('click');
+                            }
+                        }, delay);
+                    }
+                });
 
-                        var lastValue = lastVoucher.val();
-                        if(firstValue !== "" && lastValue !== "") {
-                            $('#range-add').trigger('click');
-                            e.preventDefault();
-                        }
+                // Handle a single voucher
+                singleVoucher.keypress(function(e) {
+                    if(e.keyCode==13){
+                        e.preventDefault();
+                        window.setTimeout(function() {
+                            $('#single-add').trigger('click');
+                        }, delay);
                     }
                 });
 

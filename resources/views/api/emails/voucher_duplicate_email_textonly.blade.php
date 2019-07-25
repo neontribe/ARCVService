@@ -2,7 +2,6 @@
 
 ==============================================
 
-[xXx]
 Hi {{ config('mail.to_admin.name') }},
 
 {{ $user }} has tried to submit voucher
@@ -12,7 +11,6 @@ Hi {{ config('mail.to_admin.name') }},
 
 Thanks,
 Rose Vouchers
-[xXx]
 ==============================================
 
 Alexandra Rose Charity

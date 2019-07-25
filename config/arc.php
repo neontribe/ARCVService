@@ -32,4 +32,22 @@ return [
     */
     'service_domain' => env('ARC_SERVICE_DOMAIN', 'arcv-service.test'),
     'store_domain' => env('ARC_STORE_DOMAIN', 'arcv-store.test'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Master Voucher Log
+    |--------------------------------------------------------------------------
+    */
+    'mvl_filename' => env('ARC_MVL_FILENAME', 'MVLReport.zip'),
+    'mvl_disk' => env('ARC_MVL_DISK', 'enc'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Links
+    |--------------------------------------------------------------------------
+    */
+    'links' => [
+        'privacy_policy' => 'https://www.alexandrarose.org.uk/Handlers/Download.ashx?IDMF=e15ec914-aac7-4afe-a9a2-be911ccf1a4e',
+    ],
+
 ];

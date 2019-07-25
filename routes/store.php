@@ -117,6 +117,14 @@ Route::group(['middleware' => 'auth:store'], function () {
     ->name('store.registration.voucher.delete')
     ->middleware('can:view,registration');
 
+    // Removes all the vouchers in the current bundle
+    Route::delete(
+        '/registrations/{registration}/vouchers',
+        'BundleController@removeAllVouchersFromCurrentBundle'
+    )
+        ->name('store.registration.vouchers.delete')
+        ->middleware('can:view,registration');
+
     Route::post(
         '/registrations/{registration}/vouchers',
         'BundleController@addVouchersToCurrentBundle'
