@@ -41,7 +41,7 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'uses' => 'Admin\VouchersController@create',
     ]);
     Route::get('centres', [
-        'as' =>'admin.centres.centres_view',
+        'as' =>'admin.centres.index',
         'uses' => 'Admin\CentresController@index',
     ]);
     Route::post('vouchers', [

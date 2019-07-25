@@ -17,6 +17,6 @@ class CentresController extends Controller
     {
         $centres = Centre::get();
 
-        return view('service.centres.centres_view', compact('centres'));
+        return view('service.centres.index', compact('centres'));
     }
 }
