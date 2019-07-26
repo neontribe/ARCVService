@@ -118,12 +118,15 @@ class Child extends Model
      *
      * These can be used in voucher multipliers
      *
+     * @param Carbon|bool $offsetDate The date to compare the DOB to.
      * @return array
      */
 
-    public function getStatus()
+    public function getStatus($offsetDate = false)
     {
-        $today = Carbon::today();
+        if (!$offsetDate) {
+            $offsetDate = Carbon::today();
+        }
 
         $notices = [];
         $credits = [];
@@ -150,19 +153,20 @@ class Child extends Model
         } else {
             // Setup dates
             /** @var Carbon $first_birthday */
-            $first_birthday = $this->dob->addYears(1);
+            $first_birthday = $this->dob->endOfMonth()->addYears(1);
             $first_schoolday = $this->calcSchoolStart();
 
             // Calculate credits
-            $is_born = $today->greaterThanOrEqualTo($this->dob);
-            $is_one = $today->greaterThanOrEqualTo($first_birthday);
-            $is_school_age = $today->greaterThanOrEqualTo($first_schoolday);
+            $is_born = $offsetDate->greaterThanOrEqualTo($this->dob);
+            // Round up today to end of month (https://trello.com/b/2sgIDGYo/arc-dev)
+            $is_one = $offsetDate->greaterThanOrEqualTo($first_birthday);
+            $is_school_age = $offsetDate->greaterThanOrEqualTo($first_schoolday);
 
             // Calculate notices
             $is_almost_one = ($first_birthday->isFuture() &&
-                ($today->diffInMonths($first_birthday) <= 1)) ;
+                ($offsetDate->diffInMonths($first_birthday) <= 1)) ;
             $is_almost_school_age = ($first_schoolday->isFuture() &&
-                (($today->diffInMonths($first_schoolday) <= 1) ? true : false));
+                (($offsetDate->diffInMonths($first_schoolday) <= 1) ? true : false));
 
             // Populate notices and credits arrays.
             ($is_almost_one) ? $notices[] = self::NOTICE_TYPES["ChildIsAlmostOne"]: false;
