@@ -21,8 +21,14 @@
                     <tr>
                         <td>{{ $worker->name }}</td>
                         <td>{{ $worker->email }}</td>
-                        <td>{{ $worker->homeCentre }}</td>
-                        <td>{{ $worker->centres }}</td>
+                        <td>{{ $worker->homeCentre->first()['name'] }}</td>
+                        <td>
+                            <ul class="table-list">
+                                @foreach ($worker->centres as $centre)
+                                    <li>{{ $centre->name }}</li>
+                                @endforeach
+                            </ul>     
+                        </td>
                     </tr>
                 @endforeach
             </tbody>

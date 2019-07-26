@@ -220,6 +220,12 @@ h1 {
   padding: 2em 4em;
 }
 
+.table-list {
+  margin: 0;
+  list-style: none;
+  padding: 0;
+}
+
 @media (min-width: 992px) {
   .container.login {
     width: 970px;
