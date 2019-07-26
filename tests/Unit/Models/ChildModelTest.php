@@ -176,8 +176,8 @@ class ChildModelTest extends TestCase
         $status = $child->getStatus(Carbon::create(2001, 4, 30, 0, 0, 0, 'Europe/London'));
         $this->assertEquals(6, array_sum(array_column($status['credits'], "vouchers")));
 
-        // Test vouchers if today is the 1st May 2001 / Check is in school => 3 vouchers
-        $status = $child->getStatus(Carbon::create(2001, 5, 1, 0, 0, 0, 'Europe/London'));
+        // Test vouchers if today is the 5st May 2001 / Check is in school => 3 vouchers
+        $status = $child->getStatus(Carbon::create(2001, 5, 5, 0, 0, 0, 'Europe/London'));
         $this->assertEquals(3, array_sum(array_column($status['credits'], "vouchers")));
     }
 }
