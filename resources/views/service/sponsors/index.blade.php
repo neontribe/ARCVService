@@ -11,7 +11,7 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>RVID Prefix</th>
+                    <th>Voucher Prefix</th>
                 </tr>
             </thead>
             <tbody>
