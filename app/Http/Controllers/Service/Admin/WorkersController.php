@@ -17,6 +17,6 @@ class WorkersController extends Controller
     {
         $workers = CentreUser::get();
 
-        return view('service.workers.workers_view', compact('workers'));
+        return view('service.workers.index', compact('workers'));
     }
 }
