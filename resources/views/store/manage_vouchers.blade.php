@@ -145,11 +145,11 @@
                     <span class="emphasised-section">Vouchers added</span>
                     <span class="number-circle">{{ $vouchers_amount }}</span>
                     <div class="@if($vouchers_amount === 0)collapsed @endif">
-                        <form id="unbundle-all" name="unbundle-all" action="" method="POST">
+                        <form id="unbundle-all" name="unbundle-all" action="" method="POST" class="delete-button remove-all-container">
                             {!! method_field('delete') !!}
                             {!! csrf_field() !!}
-                            <button type="submit" class="delete-button" formaction="{{ URL::route('store.registration.vouchers.delete', ['registration' => $registration->id ]) }}" name="delete-all-button" id="delete-all-button">
-                                <i class="fa fa-trash" aria-hidden="true"></i> Remove all added vouchers
+                            <button type="submit" formaction="{{ URL::route('store.registration.vouchers.delete', ['registration' => $registration->id ]) }}" name="delete-all-button" id="delete-all-button">
+                                <i class="fa fa-trash" aria-hidden="true"></i>  Remove all added vouchers
                             </button>
                         </form>
                     </div>
