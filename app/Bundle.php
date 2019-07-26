@@ -4,9 +4,11 @@ namespace App;
 
 use Auth;
 use DB;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Log;
+use Throwable;
 
 class Bundle extends Model
 {
@@ -143,13 +145,11 @@ class Bundle extends Model
      */
     public function syncVouchers(array $voucherCodes)
     {
-
-        $self = $this;
         $errors = [];
 
         // If we get an unhandled exception, we should halt and rollback.
         try {
-            DB::transaction(function () use ($self, $voucherCodes, $errors) {
+            DB::transaction(function () use ($voucherCodes, $errors) {
 
                 $currentCodes = $this->vouchers
                     ->pluck('code')
@@ -173,10 +173,10 @@ class Bundle extends Model
 
                 // Whoops! errors happened.
                 if (!empty($errors)) {
-                    throw new \Exception("Errors during transaction");
+                    throw new Exception("Errors during transaction");
                 };
             });
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log it
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getTraceAsString());
