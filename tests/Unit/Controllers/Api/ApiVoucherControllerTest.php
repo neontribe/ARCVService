@@ -103,13 +103,13 @@ class ApiVoucherControllerTest extends TestCase
             ->json('POST', $route, $data)
             ->assertStatus(200)
         ;
-        // oldVoucher Should no still have a token;
+        // $oldVoucher should still have a token;
         $oldVoucherStateToken = $oldVoucher
             ->getPriorState()
             ->stateToken()->first();
         $this->assertNotNull($oldVoucherStateToken);
 
-        // There should still be only 2 tokens
+        // There should still be exactly 2 tokens
         $this->assertEquals(2, StateToken::all()->count());
     }
 
