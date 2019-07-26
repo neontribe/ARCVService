@@ -24,7 +24,7 @@
                         <td>{{ $worker->homeCentre->first()['name'] }}</td>
                         <td>
                             <ul class="table-list">
-                                @foreach ($worker->centres as $centre)
+                                @foreach ($worker->centres->slice(1) as $centre)
                                     <li>{{ $centre->name }}</li>
                                 @endforeach
                             </ul>     

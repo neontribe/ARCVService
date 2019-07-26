@@ -6,7 +6,7 @@
         <li><a href="{{ url('/vouchers/create') }}"><span class="glyphicon glyphicon-plus"></span>Add voucher codes</a></li>
         <li><a href="{{ url('/vouchers') }}"><span class="glyphicon glyphicon-th-list"></span>View live vouchers</a></li>
         <li><a href="{{ url('/workers') }}"><span class="glyphicon glyphicon-th-list"></span>View workers</a></li>
-        <li><a href="{{ url('/centres') }}"><span class="glyphicon glyphicon-th-list"></span>View Children's Centres</a></li>
+        <li><a href="{{ url('/centres') }}"><span class="glyphicon glyphicon-th-list"></span>View children's centres</a></li>
 
         @unless(Config('app.url') === 'https://voucher-admin.alexandrarose.org.uk')
         <li>{{ Session::get('message') }}</li>
