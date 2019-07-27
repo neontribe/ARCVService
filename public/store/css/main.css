@@ -687,6 +687,15 @@ REGISTER PAGE
 	top: 0;
 }
 
+.remove-all-container {
+	justify-content: center;
+	margin: 1.25rem 0;
+}
+
+.remove-all-container i {
+	padding: 0 0.5rem;
+}
+
 /*
 
 EDIT PAGE
