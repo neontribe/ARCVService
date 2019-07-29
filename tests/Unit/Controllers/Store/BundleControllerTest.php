@@ -235,6 +235,63 @@ class BundleControllerTest extends StoreTestCase
     }
 
     /** @test */
+    public function testICannotAddTooManyVouchersToABundle()
+    {
+        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
+        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
+
+        // Get the maxAdd value currently 101;
+        $overMaxAdd = config('arc.bundle_max_voucher_append')+1;
+
+        // Make the range 1-101,
+        $startCode = "BIG00001";
+        $endCode = "BIG" . str_pad($overMaxAdd, 5, "0", STR_PAD_LEFT);
+        $bigRange = Voucher::generateCodeRange($startCode, $endCode);
+        $this->assertEquals($overMaxAdd, count($bigRange));
+
+        // Create the vouchers for the range;
+        Auth::login($this->centreUser);
+        foreach ($bigRange as $testCode) {
+            $voucher = factory(Voucher::class, 'requested')->create([
+                'code' => $testCode
+            ]);
+            $voucher->applyTransition('order');
+            $voucher->applyTransition('print');
+            $voucher->applyTransition('dispatch');
+        }
+        Auth::logout();
+
+        // Attempt to bind the vouchers to the bundle
+        $response = $this->actingAs($this->centreUser, 'store')
+            ->post(
+                $post_route,
+                [
+                    'start' => $startCode,
+                    'end' => $endCode,
+                ]
+            );
+
+        // Dig out errors from Session
+        $response->seeInSession('error_message');
+        $error = Session::get("error_message");
+        $this->assertRegExp('/Failed adding more than ' . config('arc.bundle_max_voucher_append') .' vouchers/', $error);
+
+        // see we're redirected back
+        $this->followRedirects()
+            ->seePageIs($route)
+            ->assertResponseStatus(200)
+        ;
+
+        // See we have no vouchers added.
+        /** @var Bundle $currentBundle */
+        // Get our currentBundle
+        $currentBundle = $this->registration->currentBundle();
+
+        // See that it's got no vouchers.
+        $this->assertEquals(0, $currentBundle->vouchers()->count());
+    }
+
+    /** @test */
     public function testICanAddSingleVouchers()
     {
         $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);

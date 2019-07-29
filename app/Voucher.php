@@ -81,6 +81,45 @@ class Voucher extends Model
     }
 
     /**
+     * Will generate a code range from start to end in the start range
+     *
+     * @param string $start voucher code to start with
+     * @param string $end voucher code to end with
+     * @return array
+     */
+    public static function generateCodeRange($start, $end = "")
+    {
+        // There should always be a start. The request will fail before validation before this point if there isn't
+        $startMatch = self::splitShortcodeNumeric($start);
+
+        // Gets the whole string match and plumbs it onto the start of the voucher codes.
+        $voucherCodes[] = $startMatch[0];
+
+        // Make a range if there's an End value
+        if (!empty($end)) {
+            $endMatch = self::splitShortcodeNumeric($end);
+
+            // Grab integer versions of each thing.
+            $startVal = intval($startMatch['number']);
+            $endVal = intval($endMatch['number']);
+
+            // Generate codes!
+            for ($val = $startVal + 1; $val <= $endVal; $val++) {
+                // Assemble code, add to voucherCodes[]
+                // We appear to be producing codes that are "0" str_pad on the left, to variable characters
+                // We'll use the $start's numeric length as the value to pad to.
+                $voucherCodes[] = $startMatch['shortcode'] . str_pad(
+                    $val,
+                    strlen($startMatch['number']),
+                    "0",
+                    STR_PAD_LEFT
+                );
+            }
+        }
+        return $voucherCodes;
+    }
+
+    /**
      * Splits a voucher code up
      *
      * @param string $code
