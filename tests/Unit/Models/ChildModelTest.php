@@ -144,4 +144,40 @@ class ChildModelTest extends TestCase
         $this->assertNotContains(Child::NOTICE_TYPES['ChildIsAlmostOne'], $notices);
         $this->assertContains(Child::NOTICE_TYPES['ChildIsAlmostSchoolAge'], $notices);
     }
+
+
+    /** @test */
+    public function roundingUpAgeToEndOfMonth()
+    {
+        // Create a child with a DOB of 12th April 2000
+        $dob = Carbon::create(2000, 4, 12, 0, 0, 0, 'Europe/London');
+        $child = new Child([
+            'born' => true,
+            'dob' => $dob,
+        ]);
+
+        // Test vouchers if today is the 1st April 2001 / Check is under school age => 3 vouchers
+        $status = $child->getStatus(Carbon::create(2001, 4, 1, 0, 0, 0, 'Europe/London'));
+        $this->assertEquals(6, array_sum(array_column($status['credits'], "vouchers")));
+
+        // Test vouchers if today is the 11th April 2001 / Check is under school age => 3 vouchers
+        $status = $child->getStatus(Carbon::create(2001, 4, 11, 0, 0, 0, 'Europe/London'));
+        $this->assertEquals(6, array_sum(array_column($status['credits'], "vouchers")));
+
+        // Test vouchers if today is the 12th April 2001 / Check is under school age => 3 vouchers
+        $status = $child->getStatus(Carbon::create(2001, 4, 12, 0, 0, 0, 'Europe/London'));
+        $this->assertEquals(6, array_sum(array_column($status['credits'], "vouchers")));
+
+        // Test vouchers if today is the 13th April 2001 / Check is under school age => 3 vouchers
+        $status = $child->getStatus(Carbon::create(2001, 4, 13, 0, 0, 0, 'Europe/London'));
+        $this->assertEquals(6, array_sum(array_column($status['credits'], "vouchers")));
+
+        // Test vouchers if today is the 31st April 2001 / Check is under school age => 3 vouchers
+        $status = $child->getStatus(Carbon::create(2001, 4, 30, 0, 0, 0, 'Europe/London'));
+        $this->assertEquals(6, array_sum(array_column($status['credits'], "vouchers")));
+
+        // Test vouchers if today is the 5st May 2001 / Check is in school => 3 vouchers
+        $status = $child->getStatus(Carbon::create(2001, 5, 5, 0, 0, 0, 'Europe/London'));
+        $this->assertEquals(3, array_sum(array_column($status['credits'], "vouchers")));
+    }
 }
