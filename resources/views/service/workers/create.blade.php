@@ -19,7 +19,7 @@
                 </div>
                 <div>
                     <label for="email" class="required">Email Address</label>
-                    <input type="email" id="email" email="email" class="{{ $errors->has('email') ? 'error' : '' }}" required>
+                    <input type="email" id="email" name="email" class="{{ $errors->has('email') ? 'error' : '' }}" required>
                 </div>
                 <div class="select">
                     <label for="worker_centre">Home Centre</label>

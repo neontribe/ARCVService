@@ -11,7 +11,7 @@ class WorkersController extends Controller
     /**
      * Display a listing of Workers.
      *
-     * @return json
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function index()
     {
@@ -23,7 +23,7 @@ class WorkersController extends Controller
      /**
      * Show the form for creating new Workers.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function create()
     {
