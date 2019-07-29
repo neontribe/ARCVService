@@ -198,6 +198,7 @@ h1 {
   }
   .horizontal-container {
     display: flex;
+    flex-wrap: wrap;
   
     > div {
       display: flex;
