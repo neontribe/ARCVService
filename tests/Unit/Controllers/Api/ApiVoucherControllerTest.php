@@ -43,8 +43,10 @@ class ApiVoucherControllerTest extends TestCase
     }
 
     /** @test */
-    public function testItTidiesOldTokensOnConfirmTransitions()
+    public function testItNeverTidiesOldTokensOnConfirmTransitions()
     {
+        // test inverted because we used to do "confirm" tidying, now we don't
+
         // Shift a voucher off to be our oldVoucher.
         $oldVoucher = $this->vouchers->shift();
 
@@ -101,14 +103,14 @@ class ApiVoucherControllerTest extends TestCase
             ->json('POST', $route, $data)
             ->assertStatus(200)
         ;
-        // oldVoucher Should no longer have a token;
+        // $oldVoucher should still have a token;
         $oldVoucherStateToken = $oldVoucher
             ->getPriorState()
             ->stateToken()->first();
-        $this->assertNull($oldVoucherStateToken);
+        $this->assertNotNull($oldVoucherStateToken);
 
-        // There should be only 1 token for the second batch
-        $this->assertEquals(1, StateToken::all()->count());
+        // There should still be exactly 2 tokens
+        $this->assertEquals(2, StateToken::all()->count());
     }
 
     /** @test */

@@ -51,17 +51,6 @@ class StateToken extends Model
     }
 
     /**
-     * Tidies Tokens of a certain age.
-     * @param int $age
-     * @return bool|null
-     */
-    public static function tidy($age = 30)
-    {
-        $expireDate = Carbon::today()->subDays($age)->format('Y-m-d H:i:s');
-        return self::where('created_at', '<', $expireDate)->delete();
-    }
-
-    /**
      * Checks a UUID has been used
      * @param $candidate
      * @return bool
