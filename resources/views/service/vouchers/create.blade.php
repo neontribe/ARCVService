@@ -13,7 +13,7 @@
             {!! csrf_field() !!}
 
             <div class="select">
-                <label for="sponsor_id">Sponsor</label><br>
+                <label for="sponsor_id">Sponsor</label>
                 <select name="sponsor_id" id="sponsor_id" class="{{ $errors->has('sponsor_id') ? 'has-error' : '' }}" required>
                     <option value="">Please select a sponsor</option>
                     @foreach ($sponsors as $sponsor)
@@ -39,7 +39,7 @@
                 <label for="end">Ending voucher code</label>
                 <input type="text" id="end" name="end" class="{{ $errors->has('end') ? 'error' : '' }}" required>
             </div>
-            
+
             @if ($errors->has('end'))
             <p class="error">{{ $errors->first('end') }}</p>
             @endif

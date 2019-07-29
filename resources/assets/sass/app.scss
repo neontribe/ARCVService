@@ -145,7 +145,6 @@ h1 {
     font-weight: bold;
     border: 0;
     border-radius: 3px;
-    margin: 1rem 0 0 1rem;
     padding: 0 3em;
     box-shadow: 0 3px 12px -1px rgba(0, 0, 0, 0.2);
       &:focus {
@@ -190,7 +189,11 @@ h1 {
     width: 450px;
 
     select {
-      width: calc(100% - 23px);
+      width: 100%;
+    }
+    div {
+      display: flex;
+      flex-direction: column;
     }
   }
   .horizontal-container {
@@ -199,7 +202,7 @@ h1 {
     > div {
       display: flex;
       flex-direction: column;
-      margin: 1rem;
+      margin-right: 2rem;
       width: 26rem;
     }
   }
