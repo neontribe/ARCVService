@@ -19,4 +19,20 @@ class WorkersController extends Controller
 
         return view('service.workers.index', compact('workers'));
     }
+
+     /**
+     * Show the form for creating new Workers.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        // WE NEED LIST OF CENTRES
+
+        // ALSO NEIGHBOURING CENTRES TO THE SELECTED ONE - IF WE WANT TO BE CLEVER
+        // IF NOT - FULL LIST OF CENTRES
+        return view('service.workers.create');
+    }
+
+   
 }

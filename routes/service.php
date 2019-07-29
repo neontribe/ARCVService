@@ -44,6 +44,10 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.workers.index',
         'uses' => 'Admin\WorkersController@index',
     ]);
+    Route::get('workers/create', [
+        'as' =>'admin.workers.create',
+        'uses' => 'Admin\WorkersController@create',
+    ]);
     Route::get('centres', [
         'as' =>'admin.centres.index',
         'uses' => 'Admin\CentresController@index',
