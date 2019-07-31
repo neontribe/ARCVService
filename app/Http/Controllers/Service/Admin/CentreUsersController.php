@@ -6,8 +6,7 @@ use App\Http\Controllers\Controller;
 use App\CentreUser;
 use App\Http\Requests\AdminNewCentreUserRequest;
 
-// Actually, CentreUsersController, consider renaming.
-class WorkersController extends Controller
+class CentreUsersController extends Controller
 {
     /**
      * Display a listing of Workers.
