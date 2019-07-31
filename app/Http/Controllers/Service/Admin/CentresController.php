@@ -34,7 +34,11 @@ class CentresController extends Controller
         try {
             /** @var Centre $centre */
             $centre = Centre::findOrFail($id);
-            $neighbors = $centre->neighbors()->pluck('name', 'id');
+            $neighbors = $centre
+                ->neighbors()
+                ->whereKeyNot($id)
+                ->get(['name', 'id'])
+            ;
         } catch (ModelNotFoundException $e) {
             $neighbors = collect([]);
         }

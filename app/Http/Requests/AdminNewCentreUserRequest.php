@@ -40,7 +40,7 @@ class AdminNewCentreUserRequest extends FormRequest
                 'integer',
                 'exists:centres,id',
                 // Return array, empty or with alternative_centres and test it
-                Rule::notIn(\Request::all('alternative_centres'))
+                Rule::notIn((array) \Request::all('alternative_centres'))
             ],
                 // MAY be present, MUST be integers, distinct
             'alternative_centres.*' => 'integer|distinct',

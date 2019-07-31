@@ -29,27 +29,53 @@
                         @endforeach
                     </select>
                 </div>
-
-                <div class="checkboxes">
-                    <label for="alternative_centres">Set Neighbours as Alternatives</label>
-                    {{-- WIRE THIS UP CORRECTLY FROM CONTROLLER --}}
-                    {{-- @foreach ($relevantCentres as $centre)
-                        <div>
-                            <input type="checkbox" id="{{ $centre->name }}" name="{{ $centre->name }}">
-                            <label for="{{ $centre->name }}">{{ $centre->name }}</label>
-                        </div>
-                    @endforeach --}}
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="Example1" name="Example1">
-                        <label for="Example1">Example1</label>
+                <div id="alternatives" class="hidden">
+                    <p><strong>Set Neighbours as Alternatives</strong></p>
+                    <div id="centres" class="checkboxes">
                     </div>
                 </div>
             </div>
             <button type="submit" id="createWorker">Add worker</button>
         </form>
+
         <script>
+            function buildCheckboxes(data) {
+                if (data.length > 0) {
+                    var boxes = $.map(data, function(obj) {
+                        return  '<div class="checkbox-group">' +
+                            '<input type="checkbox" id="neighbor-' +obj.id+ '" name="alternative_centres[]" value="' +obj.id+ '" >' +
+                            '<label for="neighbor-' +obj.id+ '">' +obj.name+ '</label>' +
+                            '</div>';
+                    });
+                    return boxes.join('');
+                }
+                return '<div><p>This centre has no neighbors.</p></div>';
+            }
 
-
+            $(document).ready(
+                function () {
+                    $('#worker_centre').change(function () {
+                        $('#alternatives').removeClass('hidden');
+                        var centreId = parseInt($('#worker_centre').val());
+                        // It's probably a number
+                        if (!isNaN(centreId)) {
+                            $.get('/centres/' + centreId + '/neighbors')
+                                .then(
+                                    function (result) {
+                                        // success; show the data
+                                        $('#centres')
+                                            .html(buildCheckboxes(result));
+                                    },
+                                    function () {
+                                        // failure; show an error message
+                                        $('#centres')
+                                            .html('<div><p>Sorry, there has been an error.</p></div>');
+                                    }
+                                );
+                        }
+                    });
+                }
+            );
         </script>
     </div>
 </div>

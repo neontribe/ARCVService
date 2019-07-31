@@ -19,7 +19,6 @@ class CentreUsersController extends Controller
     public function index()
     {
         $workers = CentreUser::get();
-
         return view('service.centreusers.index', compact('workers'));
     }
 
@@ -30,8 +29,7 @@ class CentreUsersController extends Controller
      */
     public function create()
     {
-        $centres = Centre::pluck(['name', 'id']);
-
+        $centres = Centre::get(['name','id']);
         return view('service.centreusers.create', compact('centres'));
     }
 
