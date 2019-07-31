@@ -3,17 +3,17 @@
 
 <div id="container">
     @include('service.includes.sidebar')
-    <div id="main-content" class="add-vouchers">
+    <div id="main-content">
 
         <h1>Add a batch of voucher codes</h1>
 
         <p>Use the form below to add a new batch of vouchers. Select a sponsor code, and then enter the starting and ending voucher code numbers.</p>
 
-        <form role="form" method="POST" action="{{ route('admin.vouchers.storebatch') }}">
+        <form role="form" method="POST" action="{{ route('admin.vouchers.storebatch') }}" class="styled-form add-vouchers">
             {!! csrf_field() !!}
 
             <div class="select">
-                <label for="sponsor_id">Sponsor</label><br>
+                <label for="sponsor_id">Sponsor</label>
                 <select name="sponsor_id" id="sponsor_id" class="{{ $errors->has('sponsor_id') ? 'has-error' : '' }}" required>
                     <option value="">Please select a sponsor</option>
                     @foreach ($sponsors as $sponsor)
@@ -26,15 +26,19 @@
             <p class="error">{{ $errors->first('sponsor_id') }}</p>
             @endif
 
-            <label for="start" class="required">Starting voucher code</label>
-            <input type="text" id="start" name="start" class="{{ $errors->has('start') ? 'error' : '' }}" required>
+            <div>
+                <label for="start" class="required">Starting voucher code</label>
+                <input type="text" id="start" name="start" class="{{ $errors->has('start') ? 'error' : '' }}" required>
+            </div>
 
             @if ($errors->has('start'))
             <p class="error">{!! $errors->first('start') !!}</p>
             @endif
 
-            <label for="end">Ending voucher code</label>
-            <input type="text" id="end" name="end" class="{{ $errors->has('end') ? 'error' : '' }}" required>
+            <div>
+                <label for="end">Ending voucher code</label>
+                <input type="text" id="end" name="end" class="{{ $errors->has('end') ? 'error' : '' }}" required>
+            </div>
 
             @if ($errors->has('end'))
             <p class="error">{{ $errors->first('end') }}</p>

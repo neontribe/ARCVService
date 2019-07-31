@@ -40,9 +40,21 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.vouchers.create',
         'uses' => 'Admin\VouchersController@create',
     ]);
+    Route::get('workers', [
+        'as' =>'admin.workers.index',
+        'uses' => 'Admin\WorkersController@index',
+    ]);
+    Route::get('workers/create', [
+        'as' =>'admin.workers.create',
+        'uses' => 'Admin\WorkersController@create',
+    ]);
     Route::get('centres', [
         'as' =>'admin.centres.index',
         'uses' => 'Admin\CentresController@index',
+    ]);
+    Route::get('sponsors', [
+        'as' =>'admin.sponsors.index',
+        'uses' => 'Admin\SponsorsController@index',
     ]);
     Route::post('vouchers', [
         'as' =>'admin.vouchers.storebatch',

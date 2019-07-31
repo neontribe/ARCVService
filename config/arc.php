@@ -50,4 +50,11 @@ return [
         'privacy_policy' => 'https://www.alexandrarose.org.uk/Handlers/Download.ashx?IDMF=e15ec914-aac7-4afe-a9a2-be911ccf1a4e',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Maximum number of vouchers that can be appended to a bundle at once.
+    |--------------------------------------------------------------------------
+    */
+    'bundle_max_voucher_append' => env('ARC_STORE_BUNDLE_MAX_VOUCHER_APPEND', 100),
+
 ];
