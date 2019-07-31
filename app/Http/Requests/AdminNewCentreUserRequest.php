@@ -40,12 +40,23 @@ class AdminNewCentreUserRequest extends FormRequest
                 'integer',
                 'exists:centres,id',
                 // Return array, empty or with alternative_centres and test it
-                Rule::notIn((array) \Request::all('alternative_centres'))
+                Rule::notIn(SELF::joinAlternatives())
             ],
                 // MAY be present, MUST be integers, distinct
             'alternative_centres.*' => 'integer|distinct|exists:centres,id',
         ];
 
         return $rules;
+    }
+
+    /**
+     * Utility function to make the alternative centres into an array.
+     * Gets round an array to string problem the notIn rule has.
+     *
+     * @return string
+     */
+    private static function joinAlternatives()
+    {
+        return '[' . join(',', \Request::all('alternative_centres')) . ']';
     }
 }
