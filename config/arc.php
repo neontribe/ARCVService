@@ -63,8 +63,8 @@ return [
     |--------------------------------------------------------------------------
     */
     'print_preferences' => [
-        'individual',
-        'collection'
+        'collection',
+        'individual'
     ],
 
 ];

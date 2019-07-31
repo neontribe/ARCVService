@@ -15,7 +15,7 @@ class UsabilityScenarioSeeder extends Seeder
         $centre1 = factory(App\Centre::class)->create([
             'name' => 'FM Centre',
             'prefix' => 'FMAT',
-            'print_pref' => 'collection',
+            'print_pref' => config('arc.print_preferences.0'),
         ]);
 
         // Create Centre 2
@@ -23,7 +23,7 @@ class UsabilityScenarioSeeder extends Seeder
         $centre2 = factory(App\Centre::class)->create([
             'name' => 'Collection Centre',
             'prefix' => 'COLL',
-            'print_pref' => 'collection',
+            'print_pref' => config('arc.print_preferences.0'),
 
         ]);
 
@@ -32,7 +32,7 @@ class UsabilityScenarioSeeder extends Seeder
         $centre3 = factory(App\Centre::class)->create([
             'name' => 'Individual Centre',
             'prefix' => 'INDY',
-            'print_pref' => 'individual',
+            'print_pref' => config('arc.print_preferences.1'),
         ]);
 
         factory(App\CentreUser::class)->create([

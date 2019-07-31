@@ -93,7 +93,7 @@ class DashboardPageTest extends StoreTestCase
     public function itShowsThePrintButtonWithReleventTextForPrintPref()
     {
         // Set centre print_pref to 'collection'.
-        $this->centre->print_pref = 'collection';
+        $this->centre->print_pref = config('arc.print_preferences.0');
         $this->centre->save();
         $this->actingAs($this->centreUser->fresh(), 'store')
             ->visit(url::route('store.dashboard'))
@@ -102,7 +102,7 @@ class DashboardPageTest extends StoreTestCase
         ;
 
         // Set centre print_pref to 'individual'.
-        $this->centre->print_pref = 'individual';
+        $this->centre->print_pref = config('arc.print_preferences.1');
         $this->centre->save();
         $this->actingAs($this->centreUser->fresh(), 'store')
             ->visit(url::route('store.dashboard'))
