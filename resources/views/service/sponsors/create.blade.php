@@ -19,7 +19,7 @@
                 </div>
                 <div>
                     <label for="voucher_prefix" class="required">Voucher Prefix</label>
-                    <input type="voucher_prefix" id="voucher_prefix" name="voucher_prefix" class="{{ $errors->has('voucher_prefix') ? 'error' : '' }}" required>
+                    <input type="text" id="voucher_prefix" name="voucher_prefix" class="{{ $errors->has('voucher_prefix') ? 'error ' : '' }}uppercase" required>
                 </div>
             </div>
             <button type="submit" id="createSponsor">Save</button>
