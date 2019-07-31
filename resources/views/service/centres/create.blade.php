@@ -34,7 +34,9 @@
                     <label for="form">Form</label>
                     <select name="form" id="form" class="{{ $errors->has('form') ? 'error' : '' }}" required>
                         <option value="">Choose one</option>
-
+                        @foreach (config('arc.print_preferences') as $preference)
+                            <option value="{{ $preference }}">{{ $preference }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>
