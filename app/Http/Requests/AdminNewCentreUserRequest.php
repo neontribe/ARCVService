@@ -43,7 +43,7 @@ class AdminNewCentreUserRequest extends FormRequest
                 Rule::notIn((array) \Request::all('alternative_centres'))
             ],
                 // MAY be present, MUST be integers, distinct
-            'alternative_centres.*' => 'integer|distinct',
+            'alternative_centres.*' => 'integer|distinct|exists:centres,id',
         ];
 
         return $rules;

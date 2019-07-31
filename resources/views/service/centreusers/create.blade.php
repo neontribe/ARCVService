@@ -9,7 +9,7 @@
 
         <p>Use the form below to add a new worker. Add their name, email address, home centre and any alternative neighbouring centres they may work from.</p>
 
-        <form role="form" class="styled-form" method="POST" action="{{ route('admin.workers.store') }}">
+        <form role="form" class="styled-form" method="POST" action="{{ route('admin.centreusers.store') }}">
             {!! csrf_field() !!}
             <div class="horizontal-container">
                 <div>

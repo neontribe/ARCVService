@@ -48,15 +48,15 @@ Route::group(['middleware' => 'auth:admin'], function () {
 
     // Worker Management
     Route::get('workers', [
-        'as' =>'admin.workers.index',
+        'as' =>'admin.centreusers.index',
         'uses' => 'Admin\CentreUsersController@index',
     ]);
     Route::get('workers/create', [
-        'as' =>'admin.workers.create',
+        'as' =>'admin.centreusers.create',
         'uses' => 'Admin\CentreUsersController@create',
     ]);
     Route::post('workers', [
-        'as' =>'admin.workers.store',
+        'as' =>'admin.centreusers.store',
         'uses' => 'Admin\CentreUsersController@store',
     ]);
 
