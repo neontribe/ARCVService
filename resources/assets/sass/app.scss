@@ -54,15 +54,16 @@ h1 {
   }
 }
 
-.add-vouchers {
+.styled-form {
+  margin-top: 2em;
+
   select {
     border: 2px solid $arc_border;
     background-color: $arc_white;
     border-radius: 3px;
-    min-height: 48px;
+    height: 48px;
     line-height: 20px;
     padding: 0 10px;
-    width: calc(100% - 23px);
     &:focus {
       border: 2px solid $arc_focus;
       outline: none;
@@ -75,6 +76,40 @@ h1 {
   .select {
     margin-bottom: 2em;
   }
+  .checkbox-group {
+    position: relative;
+    padding-left: 55px;
+    margin: 0.5rem 0 2rem 0;
+    min-height: 10px;
+    
+    > input {
+      cursor: pointer;
+      opacity: 0;
+
+      &:checked+label:after {
+        content: "✔";
+        position: absolute;
+        top: 6px;
+        left: 12px;
+        border: 0;
+      }
+    }
+    > label {
+      cursor: pointer;
+      margin-left: -20px;
+
+      &:before {
+        content: "";
+        background: #ffffff;
+        width: 34px;
+        height: 34px;
+        border: 1px solid #ececec;
+        position: absolute;
+        left: 0;
+        cursor: pointer;
+      }
+    }
+  }
   input {
     margin-bottom: 1em;
     border: 2px solid $arc_border;
@@ -82,12 +117,12 @@ h1 {
     &[type=text],
     &[type=password],
     &[type=number],
-    &[type=tel] {
+    &[type=tel],
+    &[type=email] {
       min-height: 48px;
       font-size: 1.5em;
       line-height: 20px;
       padding: 0 10px;
-      width: calc(100% - 23px);
     }
     &:focus {
       border: 2px solid $arc_focus;
@@ -110,7 +145,6 @@ h1 {
     font-weight: bold;
     border: 0;
     border-radius: 3px;
-    margin-top: 1em;
     padding: 0 3em;
     box-shadow: 0 3px 12px -1px rgba(0, 0, 0, 0.2);
       &:focus {
@@ -151,9 +185,27 @@ h1 {
     outline: none;
     border: 0;
   }
-  form {
-    margin-top: 2em;
+  &.add-vouchers {
     width: 450px;
+
+    select {
+      width: 100%;
+    }
+    div {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+  .horizontal-container {
+    display: flex;
+    flex-wrap: wrap;
+  
+    > div {
+      display: flex;
+      flex-direction: column;
+      margin-right: 2rem;
+      width: 26rem;
+    }
   }
 }
 
