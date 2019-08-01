@@ -42,9 +42,7 @@
                                     </div>
                                 </a>
                                 <a href="{{ route("store.registration.edit", ['id' => $registration->id ]) }}" class="link">
-                                    <div class="link-button link-button-small">
-                                        <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Edit
-                                    </div>
+                                    <div class="link-button link-button-small">Edit</div>
                                 </a>
                                 @else
                                 <div class="link-button link-button-small disabled">
