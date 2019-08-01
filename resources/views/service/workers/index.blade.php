@@ -31,7 +31,7 @@
                             </ul>     
                         </td>
                         <td>
-                            <a href="{{ route("admin.workers.edit") }}" class="link">
+                            <a href="{{ route("admin.workers.edit", ['id' => $worker->id ]) }}" class="link">
                                 <div class="link-button link-button-small">
                                     <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Edit
                                 </div>

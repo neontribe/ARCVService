@@ -34,5 +34,11 @@ class WorkersController extends Controller
         return view('service.workers.create');
     }
 
+    public function edit($id)
+    {
+        $worker = CentreUser::where('id', '=', $id);
+
+        return view('service.workers.create', compact('worker'));
+    }
    
 }

@@ -48,7 +48,7 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.workers.create',
         'uses' => 'Admin\WorkersController@create',
     ]);
-    Route::get('workers/edit', [
+    Route::get('workers/edit/{id}', [
         'as' =>'admin.workers.edit',
         'uses' => 'Admin\WorkersController@create',
     ]);
