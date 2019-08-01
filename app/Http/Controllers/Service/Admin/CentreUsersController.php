@@ -51,7 +51,7 @@ class CentreUsersController extends Controller
 
                 // Set Home Centre
                 $centre_id = $request->input('worker_centre');
-                $c->centres()->attach([$centre_id => ['homeCentre' => true]]);
+                $c->centres()->attach($centre_id, ['homeCentre' => true]);
 
                 if ($request->has('alternative_centres.*')) {
                     $alt_ids = $request->input('alternative_centres.*');
