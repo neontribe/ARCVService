@@ -60,6 +60,10 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.sponsors.index',
         'uses' => 'Admin\SponsorsController@index',
     ]);
+    Route::get('sponsors/create', [
+        'as' =>'admin.sponsors.create',
+        'uses' => 'Admin\SponsorsController@create',
+    ]);
     Route::post('vouchers', [
         'as' =>'admin.vouchers.storebatch',
         'uses' => 'Admin\VouchersController@storeBatch',

@@ -42,9 +42,8 @@ class StoreAppendBundleRequest extends FormRequest
     protected function prepareForValidation()
     {
         // get the input and remove null/empty values.
-        // TODO: 5.5 upgrade will need to change this to 'all' with params.
         $input = array_filter(
-            $this->only(['start', 'end']),
+            $this->all(['start', 'end']),
             'strlen'
         );
 

@@ -2,13 +2,11 @@
 ## About ARC Voucher Service/API
 ARCV Service is the service portal and API for ARCV Market.
 
-[![Build Status](https://travis-ci.org/neontribe/ARCVMarket.svg?branch=0.2/release)](https://travis-ci.org/neontribe/ARCVMarket.svg?branch=master)
-
 ## Installation of Development instance
 
 1. Clone the repo
 2. Create a database and user (homestead, sqlite or mysql)
-3. If not using [Homestead](https://laravel.com/docs/5.4/homestead) or Valet - you will need to configure permissions on `storage` and `bootstrap/cache`. See [Laravel 5.4 Installation](https://laravel.com/docs/5.4#installation) for more info.
+3. If not using [Homestead](https://laravel.com/docs/5.5/homestead) or Valet - you will need to configure permissions on `storage` and `bootstrap/cache`. See [Laravel 5.5 Installation](https://laravel.com/docs/5.5#installation) for more info.
 4. Copy `.env.example` to `.env` and edit to local settings
 5. `composer install`
 6. `php artisan key:generate`
@@ -44,7 +42,10 @@ It also requires PHP's `zip` extension installed and enabled.
 
 
 ### Styling
+#### Service 
 - Service styling is in `resources/assets/sass/app.scss`
+- Service is compiled from Sass with `npm run prod`
+#### Store
 - Store styling is in `public/store/css/main.css`
 
 ## Deployment
@@ -89,7 +90,7 @@ GU9 7PT
 # Licensing and use of Third Party Applications
 These are the languages and packages used to create ARCV Service and where available the licences associated with them.
 
-ARCV Service 1.5
+ARCV Service 1.6
 
 Programming Language - PHP\
 Framework - Laravel https://github.com/laravel/laravel \

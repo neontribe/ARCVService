@@ -564,7 +564,7 @@ class EditPageTest extends StoreTestCase
             )
         ;
         $this->assertResponseStatus(302);
-        $this->assertEquals('The given data failed to pass validation.', $response->exception->getMessage());
+        $this->assertEquals('The given data was invalid.', $response->exception->getMessage());
     }
 
     /** @test */
