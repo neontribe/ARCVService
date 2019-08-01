@@ -22,7 +22,7 @@ Route::get('/', 'AdminController@index')->name('admin.dashboard');
 // Admin (Service) Password Reset Routes...
 Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')
     ->name('admin.password.request')
-;.
+;
 Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')
     ->name('admin.password.email')
 ;
