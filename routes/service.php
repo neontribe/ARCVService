@@ -50,7 +50,7 @@ Route::group(['middleware' => 'auth:admin'], function () {
     ]);
     Route::get('workers/edit/{id}', [
         'as' =>'admin.workers.edit',
-        'uses' => 'Admin\WorkersController@create',
+        'uses' => 'Admin\WorkersController@edit',
     ]);
     Route::get('centres', [
         'as' =>'admin.centres.index',
@@ -67,5 +67,9 @@ Route::group(['middleware' => 'auth:admin'], function () {
     Route::post('logout', [
         'as' =>'admin.logout',
         'uses' => 'Auth\LoginController@logout',
+    ]);
+    Route::put('workers/{id}', [
+        'as' =>'admin.workers.update',
+        'uses' => 'Admin\WorkersController@update',
     ]);
 });
