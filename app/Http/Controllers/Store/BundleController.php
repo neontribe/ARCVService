@@ -131,7 +131,7 @@ class BundleController extends Controller
         );
 
         // Filter inputs for only our interests
-        $inputs = $request->only([
+        $inputs = $request->all([
             'collected_at',
             'collected_by',
             'collected_on'

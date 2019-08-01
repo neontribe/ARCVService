@@ -10,7 +10,7 @@ class SessionController extends Controller
     public function update(StoreUpdateSessionRequest $request)
     {
         // Get centreId
-        $input = $request->only(['centre']);
+        $input = $request->all(['centre']);
 
         // Set session
         session(['CentreUserCurrentCentreId' => $input['centre']]);
