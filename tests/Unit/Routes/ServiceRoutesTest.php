@@ -2,13 +2,14 @@
 
 namespace Tests\Unit\Routes;
 
-use Config;
 use App\AdminUser;
-use App\CentreUser;
+use App\Centre;
+use Auth;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Tests\TestCase;
+// Base on this for laravel browser kit testing.
+use Tests\StoreTestCase;
 
-class ServiceRoutesTest extends TestCase
+class ServiceRoutesTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
@@ -30,13 +31,13 @@ class ServiceRoutesTest extends TestCase
     ];
 
     private $adminUser;
-    private $centreUser;
+    private $centre;
 
     public function setUp()
     {
         parent::setUp();
         $this->adminUser = factory(AdminUser::class)->create();
-        $this->centreUser = factory(CentreUser::class)->create();
+        $this->centre = factory(Centre::class)->create();
     }
 
     /** @test */
@@ -44,7 +45,8 @@ class ServiceRoutesTest extends TestCase
     {
         $this->actingAs($this->adminUser, 'admin')
             ->post(route('admin.logout'))
-            ->assertRedirect('/')
+            ->followRedirects()
+            ->seeRouteIs('admin.login')
         ;
     }
 
@@ -52,20 +54,38 @@ class ServiceRoutesTest extends TestCase
     public function testServiceLoginPageRoute()
     {
         $this->get(route('admin.login'))
-            ->assertStatus(200)
+            ->assertResponseStatus(200)
         ;
     }
 
     /** @test */
     public function testRouteGates()
     {
+        $loginRoute = route('admin.login');
+
         foreach ($this->authAdminRoutes as $method => $routes) {
             foreach ($routes as $route => $params) {
-                $response = $this->actingAs($this->adminUser)
+                // Check an unauth'd user can't get there
+                Auth::logout();
+                $response = $this
+                    ->makeRequest($method, route($route, $params))
+                    ->followRedirects()
+                    ->response;
+                // Expecting 403 or return to "/login"
+                $this->assertTrue(
+                    $response->isForbidden()
+                    || $this->currentUri === $loginRoute
+                );
+
+                // Check an auth'd user can get there.
+                $response = $this->actingAs($this->adminUser, 'admin')
+                    ->followRedirects()
                     ->call($method, route($route, $params))
                 ;
+                // And it's not 403, 404, 500, or a redirect-to-login.
                 $this->assertFalse($response->isNotFound());
                 $this->assertFalse($response->isForbidden());
+                $this->assertFalse($this->currentUri === $loginRoute);
                 $this->assertFalse($response->isServerError());
                 $this->assertTrue(
                     $response->isOK()
