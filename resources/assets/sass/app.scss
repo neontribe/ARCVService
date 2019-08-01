@@ -132,6 +132,10 @@ h1 {
     &:-webkit-autofill {
       -webkit-box-shadow: 0 0 0px 1000px $arc_white inset;
     }
+    // Uppercases all text within input - e.g. voucher prefix
+    &.uppercase {
+      text-transform: uppercase;
+    }
   }
   button {
     position: relative;

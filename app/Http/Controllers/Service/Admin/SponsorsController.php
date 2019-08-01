@@ -19,4 +19,15 @@ class SponsorsController extends Controller
 
         return view('service.sponsors.index', compact('sponsors'));
     }
+
+      /**
+     * Show the form for creating new Sponsors.
+     *
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function create()
+    {
+        // I DONT THINK WE REALLY NEED ANYTHING ELSE.
+        return view('service.sponsors.create');
+    }
 }
