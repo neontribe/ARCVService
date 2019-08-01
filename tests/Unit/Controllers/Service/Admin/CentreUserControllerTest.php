@@ -2,7 +2,9 @@
 
 namespace Tests\Unit\Controllers\Service\Admin;
 
+use App\AdminUser;
 use App\Centre;
+use App\CentreUser;
 use App\Http\Requests\AdminNewCentreUserRequest;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Validation\Validator;
@@ -138,13 +140,22 @@ class CentreUserControllerTest extends StoreTestCase
                     'alternative_centres' => [2,3,4]
                 ]
             ],
-            'requestShouldPassWhenItHasInValidAlternatives' => [
+            'requestShouldPassWhenItHasAlternativesThatAreNotValidCentres' => [
                 'passed' => false,
                 'data' => [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 1,
                     'alternative_centres' => [2,3,5]
+                ]
+            ],
+            'requestShouldFailWhenAlternativesAreNotIntegers' => [
+                'passed' => false,
+                'data' => [
+                    'name' => 'bobby testee',
+                    'email' => 'bobby@test.co.uk',
+                    'worker_centre' => 1,
+                    'alternative_centres' => ["not an integer", "me neither"]
                 ]
             ],
             'requestShouldFailWhenCentreIsInAlternatives' => [
@@ -159,4 +170,35 @@ class CentreUserControllerTest extends StoreTestCase
         ];
     }
 
+    /** @test */
+    public function testICanStoreACentreUser()
+    {
+        $adminUser = factory(AdminUser::class)->create();
+
+        $data = [
+            'name' => 'bobby testee',
+            'email' => 'bobby@test.co.uk',
+            'worker_centre' => $this->centre->id,
+            'alternative_centres.*' => $this->altCentres->pluck('id')->all()
+        ];
+
+        $this->actingAs($adminUser, 'admin')
+            ->post(
+                route('admin.centreusers.store'),
+                $data
+            )
+            ->followRedirects()
+            ->assertResponseOk()
+            ->seePageIs(route('admin.centreusers.index'))
+            ->see($data["name"])
+            ->see($data["email"])
+        ;
+        // find the user
+        $cu = CentreUser::where('email', $data['email'])->first();
+        $this->assertNotNull($cu);
+        // Check the neighbors
+        $this->assertEquals(4, $cu->relevantCentres()->count());
+        // Check the homeCentre
+        $this->assertEquals($data['worker_centre'], $cu->homeCentre()->first()->id);
+    }
 }
