@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Log;
 
 class AdminNewCentreUserRequest extends FormRequest
 {
@@ -20,10 +21,10 @@ class AdminNewCentreUserRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
+     * @param null|array $test_alternatives
      * @return array
      */
-    public function rules()
+    public function rules($test_alternatives = null)
     {
         /*
          * These rules validate that the form data is well-formed.
@@ -40,23 +41,28 @@ class AdminNewCentreUserRequest extends FormRequest
                 'integer',
                 'exists:centres,id',
                 // Return array, empty or with alternative_centres and test it
-                Rule::notIn(SELF::joinAlternatives())
+                Rule::notIn(self::getAlternatives($test_alternatives))
             ],
-                // MAY be present, MUST be integers, distinct
+            // MAY be present, MUST be integers, distinct
             'alternative_centres.*' => 'integer|distinct|exists:centres,id',
         ];
-
         return $rules;
     }
 
     /**
      * Utility function to make the alternative centres into an array.
      * Gets round an array to string problem the notIn rule has.
-     *
-     * @return string
+     * @param null|array $test_alternatives
+     * @return array
      */
-    private static function joinAlternatives()
+    private static function getAlternatives($test_alternatives)
     {
-        return '[' . join(',', \Request::all('alternative_centres')) . ']';
+        return (
+            !is_null($test_alternatives) &&
+            is_array($test_alternatives)
+        )
+            ? $test_alternatives
+            : \Request::all('alternative_centres')
+        ;
     }
 }
