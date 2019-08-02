@@ -43,13 +43,13 @@
                 if (data.length > 0) {
                     var boxes = $.map(data, function(obj) {
                         return  '<div class="checkbox-group">' +
-                            '<input type="checkbox" id="neighbor-' +obj.id+ '" name="alternative_centres[]" value="' +obj.id+ '" >' +
-                            '<label for="neighbor-' +obj.id+ '">' +obj.name+ '</label>' +
+                            '<input type="checkbox" id="neighbour-' +obj.id+ '" name="alternative_centres[]" value="' +obj.id+ '" >' +
+                            '<label for="neighbour-' +obj.id+ '">' +obj.name+ '</label>' +
                             '</div>';
                     });
                     return boxes.join('');
                 }
-                return '<div><p>This centre has no neighbors.</p></div>';
+                return '<div><p>This centre has no neighbours.</p></div>';
             }
 
             $(document).ready(
@@ -59,7 +59,7 @@
                         var centreId = parseInt($('#worker_centre').val());
                         // It's probably a number
                         if (!isNaN(centreId)) {
-                            $.get('/centres/' + centreId + '/neighbors')
+                            $.get('/centres/' + centreId + '/neighbours')
                                 .then(
                                     function (result) {
                                         // success; show the data

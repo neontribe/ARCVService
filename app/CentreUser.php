@@ -102,9 +102,9 @@ class CentreUser extends Authenticatable
                 $centres = Centre::all();
                 break;
             case "centre_user":
-                // If we have one, get our centre's neighbors
+                // If we have one, get our centre's neighbours
                 if (!is_null($this->centre)) {
-                    $centres = $this->centre->neighbors;
+                    $centres = $this->centre->neighbours;
                 }
                 break;
         }

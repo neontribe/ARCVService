@@ -24,24 +24,24 @@ class CentresController extends Controller
     }
 
     /**
-     * Return a json list of neighbor names and IDs
+     * Return a json list of neighbour names and IDs
      *
      * @param $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getNeighborsAsJson($id)
+    public function getNeighboursAsJson($id)
     {
         try {
             /** @var Centre $centre */
             $centre = Centre::findOrFail($id);
-            $neighbors = $centre
-                ->neighbors()
+            $neighbours = $centre
+                ->neighbours()
                 ->whereKeyNot($id)
                 ->get(['name', 'id'])
             ;
         } catch (ModelNotFoundException $e) {
-            $neighbors = collect([]);
+            $neighbours = collect([]);
         }
-        return response()->json($neighbors);
+        return response()->json($neighbours);
     }
 }

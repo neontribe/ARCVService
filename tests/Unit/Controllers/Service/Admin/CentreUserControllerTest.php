@@ -196,7 +196,7 @@ class CentreUserControllerTest extends StoreTestCase
         // find the user
         $cu = CentreUser::where('email', $data['email'])->first();
         $this->assertNotNull($cu);
-        // Check the neighbors
+        // Check the neighbours
         $this->assertEquals(4, $cu->relevantCentres()->count());
         // Check the homeCentre
         $this->assertEquals($data['worker_centre'], $cu->homeCentre()->first()->id);
