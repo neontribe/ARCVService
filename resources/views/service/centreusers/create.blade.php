@@ -59,7 +59,7 @@
                         var centreId = parseInt($('#worker_centre').val());
                         // It's probably a number
                         if (!isNaN(centreId)) {
-                            $.get('/centres/' + centreId + '/neighbours')
+                            $.getJSON('/centres/' + centreId + '/neighbours')
                                 .then(
                                     function (result) {
                                         // success; show the data
