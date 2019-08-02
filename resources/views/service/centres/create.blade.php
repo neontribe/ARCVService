@@ -5,9 +5,9 @@
     @include('service.includes.sidebar')
     <div id="main-content">
 
-        <h1>Add a sponsor</h1>
+        <h1>Add a Children's Centre</h1>
 
-        <p>Use the form below to add a new sponsor. Add their name and voucher prefix.</p>
+        <p>Use the form below to add a new children's centre. Add their name, voucher prefix, area and form.</p>
 
         <!-- ADD NEW POST ROUTE HERE eg. method="POST" action="{{ route('admin.vouchers.storebatch') }}" -->
         <form role="form" class="styled-form">
@@ -22,7 +22,7 @@
                     <input type="text" id="voucher_prefix" name="voucher_prefix" class="{{ $errors->has('voucher_prefix') ? 'error ' : '' }}uppercase" required>
                 </div>
                 <div class="select">
-                    <label for="sponsor">Sponsor</label>
+                    <label for="sponsor">Area</label>
                     <select name="sponsor" id="sponsor" class="{{ $errors->has('sponsor') ? 'error' : '' }}" required>
                         <option value="">Choose one</option>
                         @foreach ($sponsors as $sponsor)
@@ -34,9 +34,9 @@
                     <label for="form">Form</label>
                     <select name="form" id="form" class="{{ $errors->has('form') ? 'error' : '' }}" required>
                         <option value="">Choose one</option>
-                        @foreach (config('arc.print_preferences') as $preference)
-                            <option value="{{ $preference }}">{{ $preference }}</option>
-                        @endforeach
+                        {{-- TODO: get from config --}}
+                        <option value="collection">collection</option>
+                        <option value="individual">individual</option>
                     </select>
                 </div>
             </div>
