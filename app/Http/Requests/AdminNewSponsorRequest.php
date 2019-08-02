@@ -20,10 +20,9 @@ class AdminNewSponsorRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     * @param null|array $test_alternatives
      * @return array
      */
-    public function rules($test_alternatives = null)
+    public function rules()
     {
         /*
          * These rules validate that the form data is well-formed.
