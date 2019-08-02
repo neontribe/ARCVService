@@ -19,7 +19,7 @@ class CentreModelTest extends TestCase
         $centre = factory(Centre::class)->make();
         $this->assertNotNull($centre->name);
         $this->assertNotNull($centre->sponsor_id);
-        $this->assertContains($centre->print_pref, ['collection', 'individual']);
+        $this->assertContains($centre->print_pref, config('arc.print_preferences'));
     }
 
     /** @test */

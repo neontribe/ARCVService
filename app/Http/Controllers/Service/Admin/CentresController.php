@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\View\View;
+use App\Sponsor;
 
 class CentresController extends Controller
 {
@@ -21,6 +22,18 @@ class CentresController extends Controller
         $centres = Centre::get();
 
         return view('service.centres.index', compact('centres'));
+    }
+
+    /**
+     * Show the form for creating new Centres.
+     *
+     * @return Factory|View
+     */
+    public function create()
+    {
+        $sponsors = Sponsor::get();
+
+        return view('service.centres.create', compact('sponsors'));
     }
 
     /**

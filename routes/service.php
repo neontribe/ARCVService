@@ -65,7 +65,10 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.centres.index',
         'uses' => 'Admin\CentresController@index',
     ]);
-
+    Route::get('centres/create', [
+        'as' =>'admin.centres.create',
+        'uses' => 'Admin\CentresController@create',
+    ]);
     Route::get('centres/{id}/neighbours', [
         'as' => 'admin.centre_neighbours.index',
         'uses' => 'Admin\CentresController@getNeighboursAsJson'
@@ -76,12 +79,11 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.sponsors.index',
         'uses' => 'Admin\SponsorsController@index',
     ]);
-  
     Route::get('sponsors/create', [
         'as' =>'admin.sponsors.create',
         'uses' => 'Admin\SponsorsController@create',
     ]);
-  
+
     Route::post('logout', [
         'as' =>'admin.logout',
         'uses' => 'Auth\LoginController@logout',
