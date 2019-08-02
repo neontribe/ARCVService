@@ -20,8 +20,8 @@ class StoreRoutesTest extends StoreTestCase
     /** @var CentreUser $centreUser */
     private $centreUser;
 
-    /** @var CentreUser $neighborUser */
-    private $neighborUser;
+    /** @var CentreUser $neighbourUser */
+    private $neighbourUser;
 
     /** @var CentreUser $foreignUser */
     private $unrelatedUser;
@@ -29,8 +29,8 @@ class StoreRoutesTest extends StoreTestCase
     /** @var Centre $centre */
     private $centre;
 
-    /** @var Centre $neighborCentre */
-    private $neighborCentre;
+    /** @var Centre $neighbourCentre */
+    private $neighbourCentre;
 
     /** @var Centre $unrelatedCentre */
     private $unrelatedCentre;
@@ -41,7 +41,7 @@ class StoreRoutesTest extends StoreTestCase
 
         $this->centre = factory(Centre::class)->create();
 
-        $this->neighborCentre = factory(Centre::class)->create([
+        $this->neighbourCentre = factory(Centre::class)->create([
             "sponsor_id" => $this->centre->sponsor->id
         ]);
 
@@ -57,12 +57,12 @@ class StoreRoutesTest extends StoreTestCase
         ]);
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
-        $this->neighborUser = factory(CentreUser::class)->create([
-            "name"  => "test neighbor",
-            "email" => "testneighbor@example.com",
-            "password" => bcrypt('test_neighbor_pass'),
+        $this->neighbourUser = factory(CentreUser::class)->create([
+            "name"  => "test neighbour",
+            "email" => "testneighbour@example.com",
+            "password" => bcrypt('test_neighbour_pass'),
         ]);
-        $this->neighborUser->centres()->attach($this->neighborCentre->id, ['homeCentre' => true]);
+        $this->neighbourUser->centres()->attach($this->neighbourCentre->id, ['homeCentre' => true]);
 
         $this->unrelatedUser = factory(CentreUser::class)->create([
             "name"  => "test unrelated",
@@ -226,13 +226,13 @@ class StoreRoutesTest extends StoreTestCase
         ;
 
         Auth::logout();
-        // Your neighbor can get there logged in.
+        // Your neighbour can get there logged in.
         $this->assertEquals(
-            $this->neighborUser->centre->sponsor->id,
+            $this->neighbourUser->centre->sponsor->id,
             $this->centreUser->centre->sponsor->id
         );
 
-        $this->actingAs($this->neighborUser, 'store')
+        $this->actingAs($this->neighbourUser, 'store')
             ->visit($route)
             ->seePageIs($route)
             ->assertResponseStatus(200)
@@ -275,9 +275,9 @@ class StoreRoutesTest extends StoreTestCase
             );
         $this->assertResponseStatus(302);
 
-        // I can call put on a page as a neighbor
+        // I can call put on a page as a neighbour
         Auth::logout();
-        $this->actingAs($this->neighborUser, 'store')
+        $this->actingAs($this->neighbourUser, 'store')
             ->visit($route)
             ->call(
                 'PUT',

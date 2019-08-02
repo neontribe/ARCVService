@@ -24,7 +24,7 @@ class RegistrationController extends Controller
      * List all the Registrations (search-ably)
      *
      * This is a con. It only lists the registrations available to a User's CC's Sponsor
-     * This means a User can see the Registrations in his 'neighbor' CCs under a Sponsor
+     * This means a User can see the Registrations in his 'neighbour' CCs under a Sponsor
      *
      * Also, the view contains the search functionality.
      */
@@ -39,7 +39,7 @@ class RegistrationController extends Controller
         ];
 
         // Slightly roundabout method of getting the permitted centres to poll
-        $neighbor_centre_ids = $user
+        $neighbour_centre_ids = $user
             ->relevantCentres()
             ->pluck('id')
             ->toArray();
@@ -76,8 +76,8 @@ class RegistrationController extends Controller
 
         //find the registrations
         $q = Registration::query();
-        if (!empty($neighbor_centre_ids)) {
-            $q = $q->whereIn('centre_id', $neighbor_centre_ids);
+        if (!empty($neighbour_centre_ids)) {
+            $q = $q->whereIn('centre_id', $neighbour_centre_ids);
         }
         if (!empty($filtered_family_ids)) {
             $q = $q->whereIn('family_id', $filtered_family_ids)

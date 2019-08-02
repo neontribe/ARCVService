@@ -29,7 +29,7 @@ class SearchPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function itShowsRegistrationsFromNeighborCentres()
+    public function itShowsRegistrationsFromNeighbourCentres()
     {
         // Create a single Sponsor
         $sponsor = factory(App\Sponsor::class)->create();
@@ -115,7 +115,7 @@ class SearchPageTest extends StoreTestCase
         $sponsor = factory(App\Sponsor::class)->create();
 
         // Create centres
-        $neighbor_centres = factory(App\Centre::class, 2)->create([
+        $neighbour_centres = factory(App\Centre::class, 2)->create([
             "sponsor_id" => $sponsor->id,
         ]);
 
@@ -123,8 +123,8 @@ class SearchPageTest extends StoreTestCase
             "sponsor_id" => factory(App\Sponsor::class)->create()->id,
         ]);
 
-        $centre1 = $neighbor_centres->first();
-        $centre2 = $neighbor_centres->last();
+        $centre1 = $neighbour_centres->first();
+        $centre2 = $neighbour_centres->last();
 
         // Create a CentreUser in Centre 1
         $centreUser =  factory(App\CentreUser::class)->create([

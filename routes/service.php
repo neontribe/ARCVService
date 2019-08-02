@@ -32,6 +32,7 @@ Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm
 Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 
 Route::group(['middleware' => 'auth:admin'], function () {
+    // Voucher Management
     Route::get('vouchers', [
         'as' =>'admin.vouchers.index',
         'uses' => 'Admin\VouchersController@index',
@@ -40,30 +41,53 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.vouchers.create',
         'uses' => 'Admin\VouchersController@create',
     ]);
-    Route::get('workers', [
-        'as' =>'admin.workers.index',
-        'uses' => 'Admin\WorkersController@index',
-    ]);
-    Route::get('workers/create', [
-        'as' =>'admin.workers.create',
-        'uses' => 'Admin\WorkersController@create',
-    ]);
-    Route::get('workers/edit/{id}', [
-        'as' =>'admin.workers.edit',
-        'uses' => 'Admin\WorkersController@edit',
-    ]);
-    Route::get('centres', [
-        'as' =>'admin.centres.index',
-        'uses' => 'Admin\CentresController@index',
-    ]);
-    Route::get('sponsors', [
-        'as' =>'admin.sponsors.index',
-        'uses' => 'Admin\SponsorsController@index',
-    ]);
     Route::post('vouchers', [
         'as' =>'admin.vouchers.storebatch',
         'uses' => 'Admin\VouchersController@storeBatch',
     ]);
+
+    // Worker Management
+    Route::get('workers', [
+        'as' =>'admin.centreusers.index',
+        'uses' => 'Admin\CentreUsersController@index',
+    ]);
+    Route::get('workers/create', [
+        'as' =>'admin.centreusers.create',
+        'uses' => 'Admin\CentreUsersController@create',
+    ]);
+    Route::post('workers', [
+        'as' =>'admin.centreusers.store',
+        'uses' => 'Admin\CentreUsersController@store',
+    ]);
+    Route::get('workers/edit/{id}', [
+        'as' =>'admin.centreusers.edit',
+        'uses' => 'Admin\CentreUsersController@edit',
+    ]);
+    
+    // Centre Management
+    Route::get('centres', [
+        'as' =>'admin.centres.index',
+        'uses' => 'Admin\CentresController@index',
+    ]);
+    Route::get('centres/create', [
+        'as' =>'admin.centres.create',
+        'uses' => 'Admin\CentresController@create',
+    ]);
+    Route::get('centres/{id}/neighbours', [
+        'as' => 'admin.centre_neighbours.index',
+        'uses' => 'Admin\CentresController@getNeighboursAsJson'
+    ]);
+
+    // Sponsor Management
+    Route::get('sponsors', [
+        'as' =>'admin.sponsors.index',
+        'uses' => 'Admin\SponsorsController@index',
+    ]);
+    Route::get('sponsors/create', [
+        'as' =>'admin.sponsors.create',
+        'uses' => 'Admin\SponsorsController@create',
+    ]);
+
     Route::post('logout', [
         'as' =>'admin.logout',
         'uses' => 'Auth\LoginController@logout',

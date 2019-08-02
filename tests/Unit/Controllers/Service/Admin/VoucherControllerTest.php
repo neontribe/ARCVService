@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Controllers\Api;
+namespace Tests\Unit\Controllers\Service\Admin;
 
 use App\AdminUser;
 use App\Market;

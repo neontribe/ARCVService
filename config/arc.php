@@ -57,4 +57,14 @@ return [
     */
     'bundle_max_voucher_append' => env('ARC_STORE_BUNDLE_MAX_VOUCHER_APPEND', 100),
 
+     /*
+    |--------------------------------------------------------------------------
+    | Preferences for a centre to print collection sheet.
+    |--------------------------------------------------------------------------
+    */
+    'print_preferences' => [
+        'collection',
+        'individual'
+    ],
+
 ];

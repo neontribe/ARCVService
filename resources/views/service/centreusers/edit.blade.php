@@ -5,9 +5,9 @@
     @include('service.includes.sidebar')
     <div id="main-content">
 
-        <h1>Add a worker</h1>
+        <h1>Edit a Children's Centre Worker</h1>
 
-        <p>Use the form below to add a new worker. Add their name, email address, home centre and any alternative neighbouring centres they may work from.</p>
+        <p>Use the form below to amend a Children's Centre Worker's details.</p>
 
         <!-- ADD NEW POST ROUTE HERE eg. method="POST" action="{{ route('admin.vouchers.storebatch') }}" -->
         <form role="form" class="styled-form">
@@ -24,9 +24,8 @@
                 <div class="select">
                     <label for="worker_centre">Home Centre</label>
                     <select name="worker_centre" id="worker_centre" class="{{ $errors->has('worker_centre') ? 'error' : '' }}" required>
-                        <option >hello</option>
+                        <option value="{{ $worker->homeCentre[0]->name }}">{{ $worker->homeCentre[0]->name }}</option>
                     </select>
-                    <p>{{ $worker->homeCentre }}</p>
                 </div>
 
                 <div class="checkboxes">

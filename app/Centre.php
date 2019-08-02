@@ -76,7 +76,7 @@ class Centre extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function neighbors()
+    public function neighbours()
     {
         return $this->hasMany('App\Centre', 'sponsor_id', 'sponsor_id');
     }

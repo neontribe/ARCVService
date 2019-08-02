@@ -10,7 +10,6 @@ use App\Voucher;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use phpDocumentor\Reflection\Types\Null_;
 use Session;
 use Tests\StoreTestCase;
 
