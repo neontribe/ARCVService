@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Log;
+use Request;
 
 class AdminNewCentreUserRequest extends FormRequest
 {
@@ -33,7 +33,7 @@ class AdminNewCentreUserRequest extends FormRequest
         $rules = [
             // MUST be present, not null and string
             'name' => 'required|string',
-            // MUST be present, not null, email, code exists
+            // MUST be present, not null, email
             'email' => 'required|email',
             // MUST be present, not null, integer, id exists in table, not in alternative_centres.
             'worker_centre' => [
@@ -43,7 +43,7 @@ class AdminNewCentreUserRequest extends FormRequest
                 // Return array, empty or with alternative_centres and test it
                 Rule::notIn(self::getAlternatives($test_alternatives))
             ],
-            // MAY be present, MUST be integers, distinct
+            // MAY be present, MUST be integers, distinct, id exists in table
             'alternative_centres.*' => 'integer|distinct|exists:centres,id',
         ];
         return $rules;
@@ -62,7 +62,7 @@ class AdminNewCentreUserRequest extends FormRequest
             is_array($test_alternatives)
         )
             ? $test_alternatives
-            : \Request::all('alternative_centres')
+            : Request::all('alternative_centres')
         ;
     }
 }

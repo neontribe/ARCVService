@@ -55,7 +55,7 @@ class CentreUsersController extends Controller
 
                 if ($request->has('alternative_centres.*')) {
                     $alt_ids = $request->input('alternative_centres.*');
-                    // Defaults to homeCentre = false;
+                    // Pivot table defaults to `homeCentre` = false, don't need to set it;
                     $c->centres()->attach($alt_ids);
                 }
                 return $c;
