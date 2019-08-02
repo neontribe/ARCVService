@@ -31,11 +31,12 @@
                     </select>
                 </div>
 
+                {{-- We need to port over JQuery from create and account for home centre change --}}
                 <div class="checkboxes">
                     <label for="alternative_centres">Set Neighbours as Alternatives</label>
                     @foreach ($worker->relevantCentres() as $centre)
                         <div class="checkbox-group">
-                            <input type="checkbox" id="{{ $centre->name }}" name="{{ $centre->name }}">
+                            <input type="checkbox" id="{{ $centre->name }}" name="{{ $centre->name }}" @if( in_array($centre->name, $centreNames) ) checked @endif>
                             <label for="{{ $centre->name }}">{{ $centre->name }}</label>
                         </div>
                     @endforeach

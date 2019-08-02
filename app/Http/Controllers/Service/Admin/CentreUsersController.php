@@ -41,12 +41,14 @@ class CentreUsersController extends Controller
         $worker = CentreUser::findOrFail($id);
         $homeCentreId = $worker->homeCentre[0]->pivot->centre_id;
         $centre = Centre::findOrFail($homeCentreId);
+        $centreNames = $worker->centres->slice(1)->pluck('name')->all();
 
         $data = [
             "worker" => $worker,
             "neighbours" => $centre->neighbours()
                 ->whereKeyNot($homeCentreId)
-                ->get()
+                ->get(),
+            "centreNames" => $centreNames,
         ];
 
         return view('service.centreusers.edit', $data);
