@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Service\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Sponsor;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\View\View;
 
 class SponsorsController extends Controller
 {
@@ -11,7 +13,7 @@ class SponsorsController extends Controller
     /**
      * Display a listing of Sponsors.
      *
-     * @return json
+     * @return Factory|View
      */
     public function index()
     {
@@ -23,11 +25,15 @@ class SponsorsController extends Controller
       /**
      * Show the form for creating new Sponsors.
      *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Factory|View
      */
     public function create()
     {
-        // I DONT THINK WE REALLY NEED ANYTHING ELSE.
         return view('service.sponsors.create');
+    }
+
+    public function store(AdminNewSponsorRequest $request)
+    {
+
     }
 }

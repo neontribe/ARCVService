@@ -83,6 +83,10 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.sponsors.create',
         'uses' => 'Admin\SponsorsController@create',
     ]);
+    Route::get('sponsors/store', [
+        'as' =>'admin.sponsors.store',
+        'uses' => 'Admin\SponsorsController@store',
+    ]);
 
     Route::post('logout', [
         'as' =>'admin.logout',
