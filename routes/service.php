@@ -83,7 +83,7 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.sponsors.create',
         'uses' => 'Admin\SponsorsController@create',
     ]);
-    Route::get('sponsors/store', [
+    Route::post('sponsors', [
         'as' =>'admin.sponsors.store',
         'uses' => 'Admin\SponsorsController@store',
     ]);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Service\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdminNewSponsorRequest;
 use App\Sponsor;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\View\View;
@@ -34,6 +35,6 @@ class SponsorsController extends Controller
 
     public function store(AdminNewSponsorRequest $request)
     {
-
+        return view('service.sponsors.index');
     }
 }
