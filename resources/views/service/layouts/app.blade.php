@@ -13,6 +13,8 @@
     <!-- Styles -->
     <style>@import url('https://fonts.googleapis.com/css?family=Roboto');</style>
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <!-- Scripts, so jquery/bootstrap are available -->
+    <script src="{{ asset('js/app.js') }}"></script>
 </head>
 <body>
     <div id="app">
@@ -73,8 +75,5 @@
 
         @yield('content')
     </div>
-
-    <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>

@@ -32,6 +32,7 @@ Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm
 Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 
 Route::group(['middleware' => 'auth:admin'], function () {
+    // Voucher Management
     Route::get('vouchers', [
         'as' =>'admin.vouchers.index',
         'uses' => 'Admin\VouchersController@index',
@@ -40,14 +41,26 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.vouchers.create',
         'uses' => 'Admin\VouchersController@create',
     ]);
+    Route::post('vouchers', [
+        'as' =>'admin.vouchers.storebatch',
+        'uses' => 'Admin\VouchersController@storeBatch',
+    ]);
+
+    // Worker Management
     Route::get('workers', [
-        'as' =>'admin.workers.index',
-        'uses' => 'Admin\WorkersController@index',
+        'as' =>'admin.centreusers.index',
+        'uses' => 'Admin\CentreUsersController@index',
     ]);
     Route::get('workers/create', [
-        'as' =>'admin.workers.create',
-        'uses' => 'Admin\WorkersController@create',
+        'as' =>'admin.centreusers.create',
+        'uses' => 'Admin\CentreUsersController@create',
     ]);
+    Route::post('workers', [
+        'as' =>'admin.centreusers.store',
+        'uses' => 'Admin\CentreUsersController@store',
+    ]);
+
+    // Centre Management
     Route::get('centres', [
         'as' =>'admin.centres.index',
         'uses' => 'Admin\CentresController@index',
@@ -56,6 +69,12 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.centres.create',
         'uses' => 'Admin\CentresController@create',
     ]);
+    Route::get('centres/{id}/neighbours', [
+        'as' => 'admin.centre_neighbours.index',
+        'uses' => 'Admin\CentresController@getNeighboursAsJson'
+    ]);
+
+    // Sponsor Management
     Route::get('sponsors', [
         'as' =>'admin.sponsors.index',
         'uses' => 'Admin\SponsorsController@index',
@@ -64,10 +83,7 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.sponsors.create',
         'uses' => 'Admin\SponsorsController@create',
     ]);
-    Route::post('vouchers', [
-        'as' =>'admin.vouchers.storebatch',
-        'uses' => 'Admin\VouchersController@storeBatch',
-    ]);
+
     Route::post('logout', [
         'as' =>'admin.logout',
         'uses' => 'Auth\LoginController@logout',
