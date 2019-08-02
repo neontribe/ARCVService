@@ -25,6 +25,9 @@
                     <label for="worker_centre">Home Centre</label>
                     <select name="worker_centre" id="worker_centre" class="{{ $errors->has('worker_centre') ? 'error' : '' }}" required>
                         <option value="{{ $worker->homeCentre[0]->name }}">{{ $worker->homeCentre[0]->name }}</option>
+                        @foreach ($neighbours as $neighbour)
+                            <option value="{{ $neighbour->name }}">{{ $neighbour->name }}</option>
+                        @endforeach
                     </select>
                 </div>
 

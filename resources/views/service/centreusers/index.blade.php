@@ -12,7 +12,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Email Address</th>
-                    <th>Home Centres</th>
+                    <th>Home Centre</th>
                     <th>Alternative Centres</th>
                     <th>Edit</th>
                 </tr>

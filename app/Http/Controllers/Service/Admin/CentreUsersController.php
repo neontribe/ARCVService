@@ -39,10 +39,14 @@ class CentreUsersController extends Controller
     public function edit($id)
     {
         $worker = CentreUser::findOrFail($id);
+        $homeCentreId = $worker->homeCentre[0]->pivot->centre_id;
+        $centre = Centre::findOrFail($homeCentreId);
 
         $data = [
             "worker" => $worker,
-            "homeCentreNeighbours" => $worker->homeCentre[0]->neighbours(),
+            "neighbours" => $centre->neighbours()
+                ->whereKeyNot($homeCentreId)
+                ->get()
         ];
 
         return view('service.centreusers.edit', $data);
