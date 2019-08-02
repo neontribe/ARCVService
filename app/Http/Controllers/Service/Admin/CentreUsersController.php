@@ -40,7 +40,12 @@ class CentreUsersController extends Controller
     {
         $worker = CentreUser::findOrFail($id);
 
-        return view('service.workers.edit', compact('worker'));
+        $data = [
+            "worker" => $worker,
+            "homeCentreNeighbours" => $worker->homeCentre[0]->neighbours(),
+        ];
+
+        return view('service.centreusers.edit', $data);
     }
     
     public function update($id)
