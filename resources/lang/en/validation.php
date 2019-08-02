@@ -89,6 +89,7 @@ return [
     // ARC specific
     'code_greater_than'    => 'The :attribute field must be greater than the :other field.',
     'same_sponsor'         => 'The :attribute field must be the same sponsor as the :other field.',
+    'not_exists'           => 'The :attribute field already exists.',
 
     /*
     |--------------------------------------------------------------------------

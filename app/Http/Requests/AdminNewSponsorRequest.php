@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Request;
+use App\Rules\NotExistsRule;
 
 class AdminNewSponsorRequest extends FormRequest
 {
@@ -33,7 +33,11 @@ class AdminNewSponsorRequest extends FormRequest
             // MUST be present, not null and string
             'name' => 'required|string',
             // MUST be present, not null, string and not used already.
-            'voucher_prefix' => 'required|string',
+            'voucher_prefix' => [
+                'required',
+                'string',
+                new NotExistsRule('sponsors', 'shortcode'),
+            ]
         ];
         return $rules;
     }
