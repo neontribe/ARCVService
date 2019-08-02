@@ -6,6 +6,7 @@ use App\Centre;
 use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 use App\Sponsor;
 
@@ -40,7 +41,7 @@ class CentresController extends Controller
      * Return a json list of neighbour names and IDs
      *
      * @param $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function getNeighboursAsJson($id)
     {
