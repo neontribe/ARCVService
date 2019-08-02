@@ -52,6 +52,10 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.centres.index',
         'uses' => 'Admin\CentresController@index',
     ]);
+    Route::get('centres/create', [
+        'as' =>'admin.centres.create',
+        'uses' => 'Admin\CentresController@create',
+    ]);
     Route::get('sponsors', [
         'as' =>'admin.sponsors.index',
         'uses' => 'Admin\SponsorsController@index',
