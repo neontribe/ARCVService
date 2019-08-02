@@ -18,8 +18,8 @@
                     <input type="text" id="name" name="name" class="{{ $errors->has('name') ? 'error' : '' }}" required>
                 </div>
                 <div>
-                    <label for="rvid" class="required">RVID</label>
-                    <input type="text" id="rvid" name="rvid" class="{{ $errors->has('voucher_prefix') ? 'error ' : '' }}uppercase" required>
+                    <label for="voucher_prefix" class="required">Voucher Prefix</label>
+                    <input type="text" id="voucher_prefix" name="voucher_prefix" class="{{ $errors->has('voucher_prefix') ? 'error ' : '' }}uppercase" required>
                 </div>
                 <div class="select">
                     <label for="sponsor">Sponsor</label>
