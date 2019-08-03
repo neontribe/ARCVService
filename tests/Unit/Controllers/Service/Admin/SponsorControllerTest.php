@@ -114,7 +114,7 @@ class SponsorControllerTest extends StoreTestCase
         // Set some data
         $data = [
             'name' => 'Test-shire Sponsor',
-            'shortcode' => 'TSTSR',
+            'voucher_prefix' => 'TSTSR',
         ];
 
         // Check can add a Sponsor
@@ -127,12 +127,41 @@ class SponsorControllerTest extends StoreTestCase
             ->assertResponseOk()
             ->seePageIs(route('admin.sponsors.index'))
             ->see($data["name"])
-            ->see($data["shortcode"]);
+            ->see($data["voucher_prefix"])
+        ;
 
         // Find the Sponsor
-        $sponsor = Sponsor::where('shortcode', $data['shortcode'])
-            ->where('name', $data['name'])
-            ->first();
-        $this->assertNotNull($sponsor);
+        $this->seeInDatabase('sponsors', [
+            'name' => $data["name"],
+            'shortcode' => $data['voucher_prefix']
+        ]);
     }
+
+    /** @test */
+    public function testItRedirectsBackOnError()
+    {
+        $adminUser = factory(AdminUser::class)->create();
+
+        // Send some bad data
+        $badData = [
+            'name' => 'Test-shire Sponsor',
+            'voucher_prefix' => 'EXIST',
+        ];
+        // Check can add a Sponsor
+        $this->actingAs($adminUser, 'admin')
+            ->visit(route('admin.sponsors.create'))
+            ->post(
+                route('admin.sponsors.store'),
+                $badData
+            )
+            ->assertRedirectedTo(route('admin.sponsors.create'))
+        ;
+        // Find the Sponsor
+        $this->dontSeeInDatabase('sponsors', [
+            'name' => $badData["name"],
+            'shortcode' => $badData['voucher_prefix']
+        ]);
+    }
+
+
 }
