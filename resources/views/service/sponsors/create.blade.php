@@ -5,9 +5,9 @@
     @include('service.includes.sidebar')
     <div id="main-content">
 
-        <h1>Add a sponsor</h1>
+        <h1>Add an area</h1>
 
-        <p>Use the form below to add a new sponsor. Add their name and voucher prefix.</p>
+        <p>Use the form below to add a new area. Add their name and voucher prefix.</p>
 
         <!-- ADD NEW POST ROUTE HERE eg. method="POST" action="{{ route('admin.vouchers.storebatch') }}" -->
         <form role="form" class="styled-form">

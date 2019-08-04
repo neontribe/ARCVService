@@ -17,7 +17,7 @@
                 <li>View vouchers, or to add a new batch of vouchers</li>
                 <li>View, add and edit workers (using the 'View workers' link)</li>
                 <li>View and add centres</li>
-                <li>View and add sponsors</li>
+                <li>View and add areas</li>
             </ul>
         </div>
 

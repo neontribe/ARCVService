@@ -19,7 +19,7 @@
                     <th>Trader ID</th>
                     <th>Voucher code</th>
                     <th>Status</th>
-                    <th>Sponsor ID</th>
+                    <th>Area ID</th>
                     <th>Created at</th>
                     <th>Updated at</th>
                     <th>Deleted at</th>

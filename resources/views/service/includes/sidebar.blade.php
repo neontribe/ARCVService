@@ -9,8 +9,8 @@
         <li><a href="{{ url('/workers/create') }}"><span class="glyphicon glyphicon-plus"></span>Add workers</a></li>
         <li><a href="{{ url('/centres') }}"><span class="glyphicon glyphicon-th-list"></span>View children's centres</a></li>
         <li><a href="{{ url('/centres/create') }}"><span class="glyphicon glyphicon-plus"></span>Add children's centres</a></li>
-        <li><a href="{{ url('/sponsors') }}"><span class="glyphicon glyphicon-th-list"></span>View sponsors</a></li>
-        <li><a href="{{ url('/sponsors/create') }}"><span class="glyphicon glyphicon-plus"></span>Add sponsors</a></li>
+        <li><a href="{{ url('/sponsors') }}"><span class="glyphicon glyphicon-th-list"></span>View areas</a></li>
+        <li><a href="{{ url('/sponsors/create') }}"><span class="glyphicon glyphicon-plus"></span>Add areas</a></li>
 
         @unless(Config('app.url') === 'https://voucher-admin.alexandrarose.org.uk')
         <li>{{ Session::get('message') }}</li>

@@ -7,15 +7,15 @@
 
         <h1>Add a batch of voucher codes</h1>
 
-        <p>Use the form below to add a new batch of vouchers. Select a sponsor code, and then enter the starting and ending voucher code numbers.</p>
+        <p>Use the form below to add a new batch of vouchers. Select an area, and then enter the starting and ending voucher code numbers.</p>
 
         <form role="form" method="POST" action="{{ route('admin.vouchers.storebatch') }}" class="styled-form add-vouchers">
             {!! csrf_field() !!}
 
             <div class="select">
-                <label for="sponsor_id">Sponsor</label>
+                <label for="sponsor_id">Area</label>
                 <select name="sponsor_id" id="sponsor_id" class="{{ $errors->has('sponsor_id') ? 'has-error' : '' }}" required>
-                    <option value="">Please select a sponsor</option>
+                    <option value="">Please select an area</option>
                     @foreach ($sponsors as $sponsor)
                     <option value="{{ $sponsor->id }}">{{ $sponsor->name }}</option>
                     @endforeach

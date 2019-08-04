@@ -12,7 +12,7 @@
                 <tr>
                     <th>Name</th>
                     <th>RVID Prefix</th>
-                    <th>Sponsor</th>
+                    <th>Area</th>
                     <th>Form</th>
                 </tr>
             </thead>
