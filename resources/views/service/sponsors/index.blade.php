@@ -6,7 +6,7 @@
     @include('service.includes.sidebar')
 
     <div id="main-content">
-        <h1>Sponsors</h1>
+        <h1>Areas</h1>
         <table class="table table-striped">
             <thead>
                 <tr>
