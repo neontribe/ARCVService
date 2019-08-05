@@ -24,26 +24,72 @@
                 <div class="select">
                     <label for="worker_centre">Home Centre</label>
                     <select name="worker_centre" id="worker_centre" class="{{ $errors->has('worker_centre') ? 'error' : '' }}" required>
-                        <option value="{{ $worker->homeCentre[0]->name }}">{{ $worker->homeCentre[0]->name }}</option>
-                        @foreach ($neighbours as $neighbour)
-                            <option value="{{ $neighbour->name }}">{{ $neighbour->name }}</option>
+                        @foreach($centresBySponsor as $sponsor)
+                        <optgroup label="{{ $sponsor->name }}">
+                            @foreach ($sponsor->centres as $centre)
+                                <option value="{{ $centre->id }}"
+                                        @if($centre->selected === "home")
+                                        SELECTED
+                                        @endif
+                                        data-workercentre="{{ $centre->selected }}"
+                                >
+                                    {{ $centre->name }}
+                                </option>
+                            @endforeach
+                        </optgroup>
                         @endforeach
                     </select>
                 </div>
-
-                {{-- We need to port over JQuery from create and account for home centre change --}}
                 <div class="checkboxes">
                     <label for="alternative_centres">Set Neighbours as Alternatives</label>
-                    @foreach ($worker->relevantCentres() as $centre)
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="{{ $centre->name }}" name="{{ $centre->name }}" @if( in_array($centre->name, $centreNames) ) checked @endif>
-                            <label for="{{ $centre->name }}">{{ $centre->name }}</label>
+                    <div id="alternatives" class="hidden">
+                        <p><strong>Set Neighbours as Alternatives</strong></p>
+                        <div id="centres" class="checkboxes">
                         </div>
-                    @endforeach
+                    </div>
                 </div>
             </div>
             <button type="submit" id="createWorker">Add worker</button>
         </form>
+        <script>
+            function buildCheckboxes(data) {
+                if (data.length > 0) {
+                    var boxes = $.map(data, function(obj) {
+                        return  '<div class="checkbox-group">' +
+                            '<input type="checkbox" id="neighbour-' +obj.id+ '" name="alternative_centres[]" value="' +obj.id+ '" >' +
+                            '<label for="neighbour-' +obj.id+ '">' +obj.name+ '</label>' +
+                            '</div>';
+                    });
+                    return boxes.join('');
+                }
+                return '<div><p>This centre has no neighbours.</p></div>';
+            }
+
+            $(document).ready(
+                function () {
+                    $('#worker_centre').change(function () {
+                        $('#alternatives').removeClass('hidden');
+                        var centreId = parseInt($('#worker_centre').val());
+                        // It's probably a number
+                        if (!isNaN(centreId)) {
+                            $.getJSON('/centres/' + centreId + '/neighbours')
+                                .then(
+                                    function (result) {
+                                        // success; show the data
+                                        $('#centres')
+                                            .html(buildCheckboxes(result));
+                                    },
+                                    function () {
+                                        // failure; show an error message
+                                        $('#centres')
+                                            .html('<div><p>Sorry, there has been an error.</p></div>');
+                                    }
+                                );
+                        }
+                    });
+                }
+            );
+        </script>
     </div>
 </div>
 

@@ -92,8 +92,4 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.logout',
         'uses' => 'Auth\LoginController@logout',
     ]);
-    Route::put('workers/{id}', [
-        'as' =>'admin.workers.update',
-        'uses' => 'Admin\WorkersController@update',
-    ]);
 });
