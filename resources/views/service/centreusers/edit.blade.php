@@ -31,7 +31,9 @@
                                         @if($centre->selected === "home")
                                         SELECTED
                                         @endif
-                                        data-workercentre="{{ $centre->selected }}"
+                                        @if($centre->selected !== false)
+                                            data-workercentre="{{ $centre->selected }}"
+                                        @endif
                                 >
                                     {{ $centre->name }}
                                 </option>
@@ -42,7 +44,7 @@
                 </div>
                 <div class="checkboxes">
                     <label for="alternative_centres">Set Neighbours as Alternatives</label>
-                    <div id="alternatives" class="hidden">
+                    <div id="alternatives">
                         <p><strong>Set Neighbours as Alternatives</strong></p>
                         <div id="centres" class="checkboxes">
                         </div>
@@ -55,36 +57,72 @@
             function buildCheckboxes(data) {
                 if (data.length > 0) {
                     var boxes = $.map(data, function(obj) {
-                        return  '<div class="checkbox-group">' +
-                            '<input type="checkbox" id="neighbour-' +obj.id+ '" name="alternative_centres[]" value="' +obj.id+ '" >' +
-                            '<label for="neighbour-' +obj.id+ '">' +obj.name+ '</label>' +
-                            '</div>';
+                        var div = $('<div class="checkbox-group">');
+
+                        // Make an input
+                        var input = $('<input>')
+                            .attr({
+                            type    : 'checkbox',
+                            name    : 'alternate_centres[]',
+                            value   : obj.id,
+                            id      : 'neighbour-' +obj.id,
+                            checked : !!(obj.selected)
+                        }).appendTo(div);
+
+                        input.click(function() {
+                            ;
+                        });
+
+                        // Make a label
+                        $('<label>').attr({
+                           for  : 'neighbour-' +obj.id
+                        }).text(obj.name).appendTo(div);
+
+                        // Return the div as a string
+                        return div;
                     });
-                    return boxes.join('');
+                    return boxes;
                 }
-                return '<div><p>This centre has no neighbours.</p></div>';
+                return $('<div><p>This centre has no neighbours.</p></div>');
             }
 
             $(document).ready(
+                // show the boxes
                 function () {
                     $('#worker_centre').change(function () {
                         $('#alternatives').removeClass('hidden');
-                        var centreId = parseInt($('#worker_centre').val());
+                        var centreSelect = $('#worker_centre');
+                        var prevCentre = $("option[data-workercentre='home']");
+
+                        // If new one is an alternate, set alternate on old one
+                        if (centreSelect.find(':selected').attr('data-workercentre')) {
+                            prevCentre.attr('data-workercentre', 'alternate');
+                        } else {
+                            // else remove attribute (unselected)
+                            prevCentre.removeAttr('data-workercentre');
+                        }
+
+                        // Setup data
+                        var data = $("#worker_centre")
+                            .find(':selected')
+                            .siblings()
+                            .map(function(index,centre) {
+                                return {
+                                    id : centre.value,
+                                    name : centre.text,
+                                    selected : $(centre).attr('data-workercentre')
+                                }
+                            });
+
+                        // Get the centreID
+                        var centreId = parseInt(centreSelect.val());
+
                         // It's probably a number
                         if (!isNaN(centreId)) {
-                            $.getJSON('/centres/' + centreId + '/neighbours')
-                                .then(
-                                    function (result) {
-                                        // success; show the data
-                                        $('#centres')
-                                            .html(buildCheckboxes(result));
-                                    },
-                                    function () {
-                                        // failure; show an error message
-                                        $('#centres')
-                                            .html('<div><p>Sorry, there has been an error.</p></div>');
-                                    }
-                                );
+                            $('#centres').children().remove();
+                            $.each(buildCheckboxes(data), function(i, box){
+                                box.appendTo('#centres');
+                            });
                         }
                     });
                 }
