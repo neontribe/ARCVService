@@ -26,6 +26,8 @@ class AdminNewCentreUserRequest extends FormRequest
      */
     public function rules($test_alternatives = null)
     {
+        // grab the route param id any, could be null
+        $id = $this->route('id');
         /*
          * These rules validate that the form data is well-formed.
          * It is NOT responsible for the context validation of that data.
@@ -33,8 +35,12 @@ class AdminNewCentreUserRequest extends FormRequest
         $rules = [
             // MUST be present, not null and string
             'name' => 'required|string',
-            // MUST be present, not null, email
-            'email' => 'required|email',
+            // MUST be present, not null, email, unique in
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('centre_users')->ignore($id)
+            ],
             // MUST be present, not null, integer, id exists in table, not in alternative_centres.
             'worker_centre' => [
                 'required',

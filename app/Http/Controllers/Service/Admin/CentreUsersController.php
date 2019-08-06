@@ -24,7 +24,6 @@ class CentreUsersController extends Controller
     public function index()
     {
         $workers = CentreUser::get();
-        die(print_r($workers->toArray()));
         return view('service.centreusers.index', compact('workers'));
     }
 
