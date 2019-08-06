@@ -124,10 +124,7 @@
                 //setup a change method
                     $('#worker_centre').change(function () {
                         var newCentre = $('#worker_centre').find(':selected');
-                        console.log(newCentre.prop('outerHTML'));
                         var prevCentre = $('#worker_centre').find("option[data-workercentre='home']");
-                        console.log(prevCentre.prop('outerHTML'));
-
                         // If new one is an alternate, set alternate on old one
                         if (newCentre.attr('data-workercentre') === 'alternate') {
                             prevCentre.attr('data-workercentre', 'alternate');
