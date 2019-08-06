@@ -12,8 +12,9 @@
                 <tr>
                     <th>Name</th>
                     <th>Email Address</th>
-                    <th>Home Centres</th>
+                    <th>Home Centre</th>
                     <th>Alternative Centres</th>
+                    <th>Edit</th>
                 </tr>
             </thead>
             <tbody>
@@ -28,6 +29,13 @@
                                     <li>{{ $centre->name }}</li>
                                 @endforeach
                             </ul>     
+                        </td>
+                        <td>
+                            <a href="{{ route('admin.centreusers.edit', ['id' => $worker->id ]) }}" class="link">
+                                <div class="link-button link-button-small">
+                                    <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Edit
+                                </div>
+                            </a>
                         </td>
                     </tr>
                 @endforeach

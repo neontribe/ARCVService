@@ -6,10 +6,11 @@ use App\Centre;
 use App\CentreUser;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminNewCentreUserRequest;
+use App\Sponsor;
 use DB;
-use Log;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\View\View;
+use Log;
 use Ramsey\Uuid\Uuid;
 
 class CentreUsersController extends Controller
@@ -26,7 +27,7 @@ class CentreUsersController extends Controller
     }
 
      /**
-     * Show the form for creating new Workers.
+     * Show the form for creating new CentreUsers
      *
      * @return Factory|View
      */
@@ -34,6 +35,54 @@ class CentreUsersController extends Controller
     {
         $centres = Centre::get(['name','id']);
         return view('service.centreusers.create', compact('centres'));
+    }
+
+    /**
+     * Show the form for editing a CentreUser
+     *
+     * @param $id
+     * @return Factory|View
+     */
+    public function edit($id)
+    {
+        // Find the worker or throw a 500
+        $worker = CentreUser::findOrFail($id);
+
+        // Get the homeCentreId
+        $homeCentreId = $worker->homeCentre->first()->id;
+
+        // Work out current worker-centre selections
+        $workerCentres = [
+            "home" => $homeCentreId,
+            "alternates" => $worker
+                ->centres()
+                ->whereKeyNot($homeCentreId)
+                ->pluck('id')
+                ->all()
+        ];
+
+        // Saucy eager loading to get sponsors and their centres
+        $centresBySponsor = Sponsor::with(['centres:sponsor_id,id,name'])
+            ->get(['id', 'name'])
+            // Set some flags on those.
+            ->each(function ($sponsor) use ($workerCentres) {
+                $sponsor->centres->each(function ($centre) use ($workerCentres) {
+                    if ($centre->id ===  $workerCentres["home"]) {
+                        $centre->selected = "home";
+                    } elseif (in_array($centre->id, $workerCentres["alternates"])) {
+                        $centre->selected = "alternate";
+                    } else {
+                        $centre->selected = false;
+                    }
+                });
+            });
+
+        return view('service.centreusers.edit', compact('worker', 'centresBySponsor'));
+    }
+    
+    public function update($id)
+    {
+        //TBFI
     }
 
     public function store(AdminNewCentreUserRequest $request)
