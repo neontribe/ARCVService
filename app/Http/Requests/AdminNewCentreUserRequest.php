@@ -51,18 +51,19 @@ class AdminNewCentreUserRequest extends FormRequest
 
     /**
      * Utility function to make the alternative centres into an array.
-     * Gets round an array to string problem the notIn rule has.
+     * Permits us to intercept when testing.
      * @param null|array $test_alternatives
-     * @return array
+     * @return string
      */
     private static function getAlternatives($test_alternatives)
     {
-        return (
+        $alternatives = (
             !is_null($test_alternatives) &&
             is_array($test_alternatives)
         )
             ? $test_alternatives
-            : Request::all('alternative_centres')
+            : Request::input('alternative_centres.*');
         ;
+        return $alternatives;
     }
 }

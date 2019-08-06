@@ -77,7 +77,7 @@
                         $('<input>')
                             .attr({
                                 type    : 'checkbox',
-                                name    : 'alternate_centres[]',
+                                name    : 'alternative_centres[]',
                                 value   : obj.id,
                                 id      : 'neighbour-' +obj.id
                             })
