@@ -22,6 +22,15 @@ class CentreUser extends Authenticatable
     ];
 
     /**
+     * Calculated attributes
+     *
+     * @var array
+     */
+    protected $appends = [
+        'homeCentre'
+    ];
+
+    /**
      * The attributes that should be hidden for arrays.
      *
      * @var array
@@ -63,7 +72,7 @@ class CentreUser extends Authenticatable
 
         // return default homeCentre if broken.
         /** @var Centre $currentCentre */
-        $currentCentre = $this->homeCentre()->first();
+        $currentCentre = $this->homeCentre;
         return $currentCentre;
     }
 
@@ -78,11 +87,22 @@ class CentreUser extends Authenticatable
     }
 
     /**
-     * Get the Centre that's the home centre for this user
+     * Gets the first homeCentre, makes it an attribute.
+     *
+     * @return Centre
+     */
+    public function getHomeCentreAttribute()
+    {
+        return $this->homeCentres()->first();
+    }
+
+    /**
+     * Get the home centres for this user
+     * Alas, we lack a belongsToThrough method to this is a collections.
      *
      * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
      */
-    public function homeCentre()
+    protected function homeCentres()
     {
         return $this->belongsToMany('App\Centre')->wherePivot('homeCentre', true);
     }

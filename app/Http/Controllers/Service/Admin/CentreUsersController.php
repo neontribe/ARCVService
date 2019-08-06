@@ -24,6 +24,7 @@ class CentreUsersController extends Controller
     public function index()
     {
         $workers = CentreUser::get();
+        die(print_r($workers->toArray()));
         return view('service.centreusers.index', compact('workers'));
     }
 
@@ -50,7 +51,7 @@ class CentreUsersController extends Controller
         $worker = CentreUser::findOrFail($id);
 
         // Get the homeCentreId
-        $homeCentreId = $worker->homeCentre()->first()->id;
+        $homeCentreId = $worker->homeCentre->id;
 
         // Work out current worker-centre selections
         $workerCentres = [

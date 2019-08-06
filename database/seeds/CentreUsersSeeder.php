@@ -52,9 +52,6 @@ class CentreUsersSeeder extends Seeder
         ]);
         $user3->centres()->attach(2, ['homeCentre' => true]);
 
-        // 1 faked user not associated with a random Centre
-        factory(App\CentreUser::class)->create();
-
         // 3 faked users associated with random Centres
         factory(App\CentreUser::class, 3)
             ->create()

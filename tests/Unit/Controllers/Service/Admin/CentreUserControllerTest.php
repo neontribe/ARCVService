@@ -199,6 +199,6 @@ class CentreUserControllerTest extends StoreTestCase
         // Check the neighbours
         $this->assertEquals(4, $cu->relevantCentres()->count());
         // Check the homeCentre
-        $this->assertEquals($data['worker_centre'], $cu->homeCentre()->first()->id);
+        $this->assertEquals($data['worker_centre'], $cu->homeCentre->id);
     }
 }
