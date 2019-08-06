@@ -80,9 +80,52 @@ class CentreUsersController extends Controller
         return view('service.centreusers.edit', compact('worker', 'centresBySponsor'));
     }
     
-    public function update($id)
+    public function update(AdminNewCentreUserRequest $request, $id)
     {
-        //TBFI
+        try {
+            $centreUser = DB::transaction(function () use ($request, $id) {
+
+                // Update a CentreUser;
+                $c = CentreUser::findOrFail($id);
+
+                // Update the system
+                $c->fill([
+                    'name' => $request->input('name'),
+                    'email' => $request->input('email'),
+                ]);
+                $c->save();
+
+                // Grab the new home centre
+                $homeCentre_id = $request->input('worker_centre');
+
+                // Create the minimum sized array for syncing
+                $centre_ids = [ $homeCentre_id => ['homeCentre' => true] ];
+
+                // Batch up all the centre ids
+                if ($request->has('alternative_centres.*')) {
+                    $centre_ids = $request->input('alternative_centres.*');
+                    foreach ($centre_ids as $centre_id) {
+                        // set the key/value for sync
+                        $centre_ids[$centre_id] = [ $centre_id => ['homeCentre' => false]];
+                    }
+                }
+
+                // Sync them, detaching old one and updating pivots.
+                $c->centres()->sync($centre_ids);
+                return $c;
+            });
+        } catch (\Exception $e) {
+            // Oops! Log that
+            Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+            Log::error($e->getTraceAsString());
+            // Throw it back to the user
+            return redirect()
+                ->route('admin.centreusers.edit', ['id' => $id ])
+                ->withErrors('Update failed - DB Error.');
+        }
+        return redirect()
+            ->route('admin.centreusers.index')
+            ->with('message', 'Worker ' . $centreUser->name . ' updated');
     }
 
     public function store(AdminNewCentreUserRequest $request)
