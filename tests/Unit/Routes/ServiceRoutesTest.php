@@ -4,6 +4,7 @@ namespace Tests\Unit\Routes;
 
 use App\AdminUser;
 use App\Centre;
+use App\CentreUser;
 use Auth;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 // Base on this for laravel browser kit testing.
@@ -20,6 +21,7 @@ class ServiceRoutesTest extends StoreTestCase
             'admin.vouchers.create' => [],
             'admin.centreusers.index' => [],
             'admin.centreusers.create' => [],
+            'admin.centreusers.edit' => ['id' => 1],
             'admin.centres.index' => [],
             'admin.centre_neighbours.index' => ['id' => 1],
             'admin.sponsors.index' => []
@@ -28,16 +30,23 @@ class ServiceRoutesTest extends StoreTestCase
             'admin.vouchers.storebatch' => [],
             'admin.centreusers.store' => [],
         ],
+        'PUT' => [
+            'admin.centreusers.update' => ['id' => 1],
+        ]
     ];
 
     private $adminUser;
-    private $centre;
+    private $centreUser;
 
     public function setUp()
     {
         parent::setUp();
         $this->adminUser = factory(AdminUser::class)->create();
-        $this->centre = factory(Centre::class)->create();
+        $centres = factory(Centre::class, 3)->create();
+        $this->centreUser = factory(CentreUser::class)->create();
+        // Map centres on.
+        $this->centreUser->centres()->sync([$centres->shift()->id => ['homeCentre' => true]]);
+        $this->centreUser->centres()->sync($centres->pluck('id')->all(), false);
     }
 
     /** @test */

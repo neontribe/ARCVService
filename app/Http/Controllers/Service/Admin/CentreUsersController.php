@@ -49,7 +49,7 @@ class CentreUsersController extends Controller
         $worker = CentreUser::findOrFail($id);
 
         // Get the homeCentreId
-        $homeCentreId = $worker->homeCentre->first()->id;
+        $homeCentreId = $worker->homeCentre()->first()->id;
 
         // Work out current worker-centre selections
         $workerCentres = [

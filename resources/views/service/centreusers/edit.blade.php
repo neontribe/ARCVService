@@ -9,8 +9,8 @@
 
         <p>Use the form below to amend a Children's Centre Worker's details.</p>
 
-        <!-- ADD NEW POST ROUTE HERE eg. method="POST" action="{{ route('admin.vouchers.storebatch') }}" -->
-        <form role="form" class="styled-form">
+        <form role="form" class="styled-form" method="POST" action="{{ route('admin.centreusers.update', ['id' => $worker->id]) }}">
+            {!! method_field('PUT') !!}
             {!! csrf_field() !!}
             <div class="horizontal-container">
                 <div>
@@ -45,12 +45,11 @@
                 <div class="checkboxes">
                     <div id="alternatives">
                         <p><strong>Set Neighbours as Alternatives</strong></p>
-                        <div id="centres" class="checkboxes">
-                        </div>
+                        <div id="centres" class="checkboxes"></div>
                     </div>
                 </div>
             </div>
-            <button type="submit" id="createWorker">Add worker</button>
+            <button type="submit" id="updateWorker">Update worker</button>
         </form>
         <script>
             function buildCheckboxes() {

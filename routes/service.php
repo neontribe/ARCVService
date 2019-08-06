@@ -63,7 +63,7 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.centreusers.update',
         'uses' => 'Admin\CentreUsersController@update',
     ]);
-    Route::get('workers/edit/{id}', [
+    Route::get('workers/{id}/edit', [
         'as' =>'admin.centreusers.edit',
         'uses' => 'Admin\CentreUsersController@edit',
     ]);
