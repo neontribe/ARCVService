@@ -43,7 +43,6 @@
                     </select>
                 </div>
                 <div class="checkboxes">
-                    <label for="alternative_centres">Set Neighbours as Alternatives</label>
                     <div id="alternatives">
                         <p><strong>Set Neighbours as Alternatives</strong></p>
                         <div id="centres" class="checkboxes">
@@ -54,79 +53,96 @@
             <button type="submit" id="createWorker">Add worker</button>
         </form>
         <script>
-            function buildCheckboxes(data) {
+            function buildCheckboxes() {
+                // Setup data for checkboxes
+                var data = $("#worker_centre")
+                    .find(':selected')
+                    .siblings()
+                    .map(function(index,centre) {
+                        return {
+                            id : centre.value,
+                            name : centre.text,
+                            selected : $(centre).attr('data-workercentre')
+                        }
+                    });
+
+                // Set the default
+                var boxes =[$('<div><p>This centre has no neighbours.</p></div>')];
+
+                // Iterate data to see if we need to change that
                 if (data.length > 0) {
-                    var boxes = $.map(data, function(obj) {
+                    boxes = $.map(data, function(obj) {
                         var div = $('<div class="checkbox-group">');
 
                         // Make an input
-                        var input = $('<input>')
+                        $('<input>')
                             .attr({
-                            type    : 'checkbox',
-                            name    : 'alternate_centres[]',
-                            value   : obj.id,
-                            id      : 'neighbour-' +obj.id,
-                            checked : !!(obj.selected)
-                        }).appendTo(div);
+                                type    : 'checkbox',
+                                name    : 'alternate_centres[]',
+                                value   : obj.id,
+                                id      : 'neighbour-' +obj.id
+                            })
+                            .prop('checked', !!(obj.selected))
+                            .change(updateModel)
+                            .appendTo(div);
 
-                        input.click(function() {
-                            ;
-                        });
-
-                        // Make a label
+                        // Make a label for it
                         $('<label>').attr({
-                           for  : 'neighbour-' +obj.id
-                        }).text(obj.name).appendTo(div);
+                                for  : 'neighbour-' +obj.id
+                            })
+                            .text(obj.name)
+                            .appendTo(div);
 
-                        // Return the div as a string
+                        // Return the div
                         return div;
                     });
-                    return boxes;
                 }
-                return $('<div><p>This centre has no neighbours.</p></div>');
+                // build checkboxes
+                $('#centres').children().remove();
+                $.each(boxes, function(i, box){
+                    box.appendTo('#centres');
+                });
             }
 
+            // This updates our "model", select-option elements decorates with data-* items.
+            function updateModel(e) {
+                // Find the centre equiv to the checkbox what we changed.
+                var centre = $('#worker_centre').find('option[value="' + e.target.value + '"]');
+                $(e.target).prop('checked')
+                    //if it's checked, set to 'alternate'
+                    ? centre.attr('data-workercentre', 'alternate')
+                    //if it's not checked, remove attribute
+                    : centre.removeAttr('data-workercentre')
+                ;
+                // rebuild the checkboxes.
+                buildCheckboxes();
+            }
+
+            // Start the page
             $(document).ready(
-                // show the boxes
                 function () {
+                //setup a change method
                     $('#worker_centre').change(function () {
-                        $('#alternatives').removeClass('hidden');
-                        var centreSelect = $('#worker_centre');
-                        var prevCentre = $("option[data-workercentre='home']");
+                        var newCentre = $('#worker_centre').find(':selected');
+                        console.log(newCentre.prop('outerHTML'));
+                        var prevCentre = $('#worker_centre').find("option[data-workercentre='home']");
+                        console.log(prevCentre.prop('outerHTML'));
 
                         // If new one is an alternate, set alternate on old one
-                        if (centreSelect.find(':selected').attr('data-workercentre')) {
+                        if (newCentre.attr('data-workercentre') === 'alternate') {
                             prevCentre.attr('data-workercentre', 'alternate');
                         } else {
-                            // else remove attribute (unselected)
+                            // else remove attribute (deselect) from old
                             prevCentre.removeAttr('data-workercentre');
                         }
-
-                        // Setup data
-                        var data = $("#worker_centre")
-                            .find(':selected')
-                            .siblings()
-                            .map(function(index,centre) {
-                                return {
-                                    id : centre.value,
-                                    name : centre.text,
-                                    selected : $(centre).attr('data-workercentre')
-                                }
-                            });
-
-                        // Get the centreID
-                        var centreId = parseInt(centreSelect.val());
-
-                        // It's probably a number
-                        if (!isNaN(centreId)) {
-                            $('#centres').children().remove();
-                            $.each(buildCheckboxes(data), function(i, box){
-                                box.appendTo('#centres');
-                            });
-                        }
+                        // Set the new one to be home
+                        newCentre.attr('data-workercentre', 'home');
+                        // rebuild checkboxes for new centre
+                        buildCheckboxes();
                     });
-                }
-            );
+                    // show the boxes when we load
+                    buildCheckboxes();
+                });
         </script>
     </div>
 </div>
