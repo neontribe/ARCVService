@@ -29,7 +29,7 @@
                             @foreach ($sponsor->centres as $centre)
                                 <option value="{{ $centre->id }}"
                                         @if($centre->selected === "home")
-                                        SELECTED
+                                        selected
                                         @endif
                                         @if($centre->selected !== false)
                                             data-workercentre="{{ $centre->selected }}"
