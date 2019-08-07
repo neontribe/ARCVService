@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Service\Admin;
 use App\Centre;
 use App\CentreUser;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AdminNewCentreUserRequest;
+use App\Http\Requests\AdminCentreUserRequest;
 use App\Sponsor;
 use DB;
 use Exception;
@@ -81,7 +81,7 @@ class CentreUsersController extends Controller
         return view('service.centreusers.edit', compact('worker', 'centresBySponsor'));
     }
     
-    public function update(AdminNewCentreUserRequest $request, $id)
+    public function update(AdminCentreUserRequest $request, $id)
     {
         try {
             $centreUser = DB::transaction(function () use ($request, $id) {
@@ -115,7 +115,7 @@ class CentreUsersController extends Controller
             ->with('message', 'Worker ' . $centreUser->name . ' updated');
     }
 
-    public function store(AdminNewCentreUserRequest $request)
+    public function store(AdminCentreUserRequest $request)
     {
         try {
             $centreUser = DB::transaction(function () use ($request) {
