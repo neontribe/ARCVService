@@ -58,4 +58,9 @@ class CentresController extends Controller
         }
         return response()->json($neighbours);
     }
+
+    public function store()
+    {
+        // TBFI
+    }
 }

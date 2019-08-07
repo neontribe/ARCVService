@@ -31,6 +31,7 @@ class ServiceRoutesTest extends StoreTestCase
         'POST' => [
             'admin.vouchers.storebatch' => [],
             'admin.centreusers.store' => [],
+            'admin.centres.store' => [],
         ],
         'PUT' => [
             'admin.centreusers.update' => ['id' => 1],
