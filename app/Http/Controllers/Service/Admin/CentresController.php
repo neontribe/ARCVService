@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Service\Admin;
 use App\Centre;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminNewCentreRequest;
+use Auth;
 use DB;
 use Exception;
 use Illuminate\Contracts\View\Factory;
@@ -74,17 +75,14 @@ class CentresController extends Controller
         try {
             $centre = DB::transaction(function () use ($request) {
 
-                // Check the sponsor exists
-                $s = Sponsor::findOrFail($request->input('sponsor'));
-
                 // Create a Centre
                 $c = new Centre([
                     'name' => $request->input('name'),
                     'prefix' => $request->input('rvid_prefix'),
-                    'print_pref' => $request->input('print_pref')
+                    'print_pref' => $request->input('print_pref'),
+                    'sponsor_id' => $request->input('sponsor')
                 ]);
                 $c->save();
-                $c->sponsor()->associate($s);
 
                 return $c;
             });
@@ -93,7 +91,9 @@ class CentresController extends Controller
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getTraceAsString());
             // Throw it back to the user
-            return redirect()->route('admin.centres.create')->withErrors('Creation failed - DB Error.');
+            return redirect()
+                ->route('admin.centres.create')
+                ->withErrors('Creation failed - DB Error.');
         }
         return redirect()
             ->route('admin.centres.index')
