@@ -112,28 +112,8 @@
                         </button>
                     </div>
                 </form>
-                @if ( count( $errors ) > 0)
-                <div class="alert-message error">
-                    <div class="icon-container error">
-                        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                    </div>
-                    <div>
-                        @foreach ($errors->all() as $error)
-                            <p>{{ $error }}{{ Session::get('error_message') }}</p>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-                @if (Session::get('error_message error'))
-                <div class="alert-message">
-                    <div class="icon-container error">
-                        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                    </div>
-                    <div>
-                        <p>{{ Session::get('error_message') }}</p>
-                    </div>
-                </div>
-                @endif
+                @includeWhen( $errors->count() > 0, 'store.partials.errors', ['error_array' => $errors->all()])
+                @includeWhen( Session::get('error_message'), 'store.partials.errors', ['error_array' => [Session::get('error_message')]])
                 <button id="collection-button"
                         class="long-button"
                         @if ($vouchers_amount == 0)
