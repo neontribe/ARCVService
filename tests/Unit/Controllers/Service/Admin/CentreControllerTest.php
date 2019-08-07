@@ -35,7 +35,7 @@ class CentreControllerTest extends StoreTestCase
         $this->data = [
             'name' => $this->faker->city,
             'sponsor' => $this->sponsor->id,
-            'rvid_prefix' => $this->faker->lexify(str_repeat('?', rand(1, 5))),
+            'rvid_prefix' => strtoupper($this->faker->lexify(str_repeat('?', rand(1, 5)))),
             'print_pref' => array_random(config('arc.print_preferences'))
         ];
     }

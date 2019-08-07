@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\FormRequests;
 
+use App\Centre;
 use App\Http\Requests\AdminNewCentreRequest;
 use App\Sponsor;
-use Faker\Factory;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Validation\Validator;
 use Tests\StoreTestCase;
@@ -16,14 +16,20 @@ class AdminNewCentreRequestTest extends StoreTestCase
     /** @var Validator */
     private $validator;
 
-    /** @var array */
+    /** @var array $print_prefs */
     private $print_prefs;
+
+    /** @var Centre $existingCentre */
+    private $existingCentre;
 
     public function setUp()
     {
         parent::setUp();
         $this->validator = app()->get('validator');
         $this->print_prefs = array_random(config('arc.print_preferences'));
+        $this->existingCentre = factory(Centre::class)->create([
+           'prefix' => 'EXISTS',
+        ]);
         factory(Sponsor::class)->create();
     }
 
@@ -115,7 +121,7 @@ class AdminNewCentreRequestTest extends StoreTestCase
                 'passed' => false,
                 'data' => [
                     'name' => 'Test Centre',
-                    'sponsor' => 2,
+                    'sponsor' => 999,
                     'rvid_prefix' => 'TSTCT',
                     'print_pref' => $prefs
                 ]
@@ -153,6 +159,15 @@ class AdminNewCentreRequestTest extends StoreTestCase
                     'sponsor' => 1,
                     'rvid_prefix' => 'ABCDEF',
                     'print_pref' => $prefs
+                ]
+            ],
+            'requestShouldFailWhenRvidExists' => [
+                'passed' => false,
+                'data' => [
+                    'name' => 'Test Centre',
+                    'sponsor' => 1,
+                    'rvid_prefix' => 'EXISTS',
+                    'print_pref' => 'not even slightly a print pref'
                 ]
             ],
             'requestShouldFailWhenPrintPrefIsMissing' => [

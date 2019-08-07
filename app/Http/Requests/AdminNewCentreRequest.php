@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Rules\NotExistsRule;
 
 class AdminNewCentreRequest extends FormRequest
 {
@@ -30,8 +31,13 @@ class AdminNewCentreRequest extends FormRequest
             'name' => 'required|string',
             // MUST be present, integer, in table
             'sponsor' => 'required|integer|exists:sponsors,id',
-            // MUST be present, string, 1-5 characters
-            'rvid_prefix' => 'required|string|between:1,5',
+            // MUST be present, string, 1-5 characters and not in use
+            'rvid_prefix' => [
+                'required',
+                'string',
+                'between:1,5',
+                new NotExistsRule('centres', 'prefix'),
+            ],
             // MUST be present, in print_prefs
             'print_pref' => [
                 'required',

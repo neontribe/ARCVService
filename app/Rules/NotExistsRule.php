@@ -37,7 +37,7 @@ class NotExistsRule implements Rule
             : $this->parameters[1];
 
         return DB::table($tableName)
-            ->where($columnName, $value)
+            ->where($columnName, 'like', $value)
             ->doesntExist();
     }
 
