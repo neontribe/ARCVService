@@ -145,7 +145,6 @@ class CentreUsersController extends Controller
                 // Sync those;
                 $this->syncCentres($request, $cu);
 
-                // Pop the centre out.
                 return $cu;
             });
         } catch (Exception $e) {

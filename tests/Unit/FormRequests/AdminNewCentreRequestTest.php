@@ -63,6 +63,7 @@ class AdminNewCentreRequestTest extends StoreTestCase
      */
     public function storeValidationProvider()
     {
+        // We need to do this as this provider gets made before laravel normally gets out of bed.
         $this->createApplication();
         $prefs = array_random(config('arc.print_preferences'));
 
