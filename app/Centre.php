@@ -23,18 +23,6 @@ class Centre extends Model
     protected $hidden = [
     ];
 
-    /**
-     * Set the prefix.
-     *
-     * @param  string  $value
-     * @return void
-     */
-    public function setPrefixAttribute($value)
-    {
-        $this->attributes['prefix'] = strtoupper($value);
-    }
-
-
     public function nextCentreSequence()
     {
         // Get the last family

@@ -45,4 +45,17 @@ class AdminNewCentreRequest extends FormRequest
             ]
         ];
     }
+
+    /**
+     * Prep input for validation
+     */
+    public function prepareForValidation()
+    {
+        if ($this->has('rvid_prefix')) {
+            $this->merge(
+                // In this system, we're want it uppercase
+                ['rvid_prefix' => strtoupper($this->input('rvid_prefix'))]
+            );
+        }
+    }
 }

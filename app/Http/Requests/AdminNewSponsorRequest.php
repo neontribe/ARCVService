@@ -40,4 +40,17 @@ class AdminNewSponsorRequest extends FormRequest
         ];
         return $rules;
     }
+
+    /**
+     * Prep input for validation
+     */
+    public function prepareForValidation()
+    {
+        if ($this->has('voucher_prefix')) {
+            $this->merge(
+                // In this system, we're want it uppercase
+                ['voucher_prefix' => strtoupper($this->input('voucher_prefix'))]
+            );
+        }
+    }
 }
