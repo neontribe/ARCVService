@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Request;
 
-class AdminNewCentreUserRequest extends FormRequest
+class AdminCentreUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,6 +26,8 @@ class AdminNewCentreUserRequest extends FormRequest
      */
     public function rules($test_alternatives = null)
     {
+        // grab the route param id any, could be null
+        $id = $this->route('id');
         /*
          * These rules validate that the form data is well-formed.
          * It is NOT responsible for the context validation of that data.
@@ -33,8 +35,12 @@ class AdminNewCentreUserRequest extends FormRequest
         $rules = [
             // MUST be present, not null and string
             'name' => 'required|string',
-            // MUST be present, not null, email
-            'email' => 'required|email',
+            // MUST be present, not null, email, unique in
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('centre_users')->ignore($id)
+            ],
             // MUST be present, not null, integer, id exists in table, not in alternative_centres.
             'worker_centre' => [
                 'required',
@@ -51,18 +57,19 @@ class AdminNewCentreUserRequest extends FormRequest
 
     /**
      * Utility function to make the alternative centres into an array.
-     * Gets round an array to string problem the notIn rule has.
+     * Permits us to intercept when testing.
      * @param null|array $test_alternatives
-     * @return array
+     * @return string
      */
     private static function getAlternatives($test_alternatives)
     {
-        return (
+        $alternatives = (
             !is_null($test_alternatives) &&
             is_array($test_alternatives)
         )
             ? $test_alternatives
-            : Request::all('alternative_centres')
+            : Request::input('alternative_centres.*');
         ;
+        return $alternatives;
     }
 }

@@ -45,18 +45,15 @@ class CentreUsersSeeder extends Seeder
 
         // ARC admin is an fmuser in centre 2, which has individual forms on the dashboard.
         $user3 = factory(App\CentreUser::class)->create([
-            "name"  => "ARC Admin User",
-            "email" => "arc+admin@neontribe.co.uk",
+            "name"  => "ARC fmuser2",
+            "email" => "arc+fmuser2@neontribe.co.uk",
             "password" => bcrypt('store_pass'),
             "role" => "foodmatters_user",
         ]);
         $user3->centres()->attach(2, ['homeCentre' => true]);
 
-        // 1 faked user not associated with a random Centre
-        factory(App\CentreUser::class)->create();
-
-        // 3 faked users associated with random Centres
-        factory(App\CentreUser::class, 3)
+        // 4 faked users associated with random Centres
+        factory(App\CentreUser::class, 4)
             ->create()
             ->each(function ($centreUser) {
                 $centres  = App\Centre::get();

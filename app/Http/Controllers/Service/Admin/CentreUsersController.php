@@ -5,9 +5,10 @@ namespace App\Http\Controllers\Service\Admin;
 use App\Centre;
 use App\CentreUser;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AdminNewCentreUserRequest;
+use App\Http\Requests\AdminCentreUserRequest;
 use App\Sponsor;
 use DB;
+use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\View\View;
 use Log;
@@ -49,7 +50,7 @@ class CentreUsersController extends Controller
         $worker = CentreUser::findOrFail($id);
 
         // Get the homeCentreId
-        $homeCentreId = $worker->homeCentre->first()->id;
+        $homeCentreId = $worker->homeCentre->id;
 
         // Work out current worker-centre selections
         $workerCentres = [
@@ -80,36 +81,60 @@ class CentreUsersController extends Controller
         return view('service.centreusers.edit', compact('worker', 'centresBySponsor'));
     }
     
-    public function update($id)
+    public function update(AdminCentreUserRequest $request, $id)
     {
-        //TBFI
+        try {
+            $centreUser = DB::transaction(function () use ($request, $id) {
+
+                // Update a CentreUser;
+                $cu = CentreUser::findOrFail($id);
+
+                // Update the system
+                $cu->fill([
+                    'name' => $request->input('name'),
+                    'email' => $request->input('email'),
+                ]);
+                $cu->save();
+
+                // Sync those;
+                $this->syncCentres($request, $cu);
+
+                return $cu;
+            });
+        } catch (Exception $e) {
+            // Oops! Log that
+            Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+            Log::error($e->getTraceAsString());
+            // Throw it back to the user
+            return redirect()
+                ->route('admin.centreusers.edit', ['id' => $id ])
+                ->withErrors('Update failed - DB Error.');
+        }
+        return redirect()
+            ->route('admin.centreusers.index')
+            ->with('message', 'Worker ' . $centreUser->name . ' updated');
     }
 
-    public function store(AdminNewCentreUserRequest $request)
+    public function store(AdminCentreUserRequest $request)
     {
         try {
             $centreUser = DB::transaction(function () use ($request) {
                 // Create a CentreUser;
-                $c = new CentreUser([
+                $cu = new CentreUser([
                     'name' => $request->input('name'),
                     'email' => $request->input('email'),
                     // Set random password
                     'password' => bcrypt(Uuid::uuid4()->toString())
                 ]);
-                $c->save();
+                $cu->save();
 
-                // Set Home Centre
-                $centre_id = $request->input('worker_centre');
-                $c->centres()->attach($centre_id, ['homeCentre' => true]);
+                // Sync those;
+                $this->syncCentres($request, $cu);
 
-                if ($request->has('alternative_centres.*')) {
-                    $alt_ids = $request->input('alternative_centres.*');
-                    // Pivot table defaults to `homeCentre` = false, don't need to set it;
-                    $c->centres()->attach($alt_ids);
-                }
-                return $c;
+                // Pop the centre out.
+                return $cu;
             });
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Oops! Log that
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getTraceAsString());
@@ -119,5 +144,32 @@ class CentreUsersController extends Controller
         return redirect()
             ->route('admin.centreusers.index')
             ->with('message', 'Worker ' . $centreUser->name . ' created');
+    }
+
+    /**
+     * Code deduplication;
+     * @param $request
+     * @param CentreUser $cu
+     * @return array
+     */
+    private function syncCentres($request, CentreUser $cu)
+    {
+        // Set Home Centre
+        $homeCentre_id = $request->input('worker_centre');
+
+        // Create the minimum sized array for syncing
+        $centre_ids = [];
+        $centre_ids[$homeCentre_id] = ['homeCentre' => true];
+
+        // Batch up all the centre ids
+        if ($request->has('alternative_centres')) {
+            $alt_ids = $request->input('alternative_centres.*');
+            foreach ($alt_ids as $id) {
+                // set the key/value for sync
+                $centre_ids[$id] = ['homeCentre' => false];
+            }
+        }
+        // Sync them setting pivots.
+        return $cu->centres()->sync($centre_ids);
     }
 }

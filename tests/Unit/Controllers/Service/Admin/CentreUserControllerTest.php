@@ -5,200 +5,100 @@ namespace Tests\Unit\Controllers\Service\Admin;
 use App\AdminUser;
 use App\Centre;
 use App\CentreUser;
-use App\Http\Requests\AdminNewCentreUserRequest;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Validation\Validator;
+use Illuminate\Support\Collection;
 use Tests\StoreTestCase;
 
 class CentreUserControllerTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
-    /** @var Validator */
-    private $validator;
+    /** @var AdminUser $adminUser */
+    private $adminUser;
 
+    /** @var Centre $centre */
     private $centre;
 
+    /** @var Collection $altCentres */
     private $altCentres;
+
+    /** @var array $data */
+    private $data;
 
     public function setUp()
     {
         parent::setUp();
-        $this->validator = app()->get('validator');
+        $this->adminUser = factory(AdminUser::class)->create();
         $this->centre = factory(Centre::class)->create([]);
         $this->altCentres = factory(Centre::class, 3)->create([]);
-    }
-
-    /**
-     * General validator
-     * @param $mockedRequestData
-     * @param $rules
-     * @return mixed
-     */
-    protected function validate($mockedRequestData, $rules)
-    {
-        return $this->validator
-            ->make($mockedRequestData, $rules)
-            ->passes();
-    }
-
-    /**
-     * @test
-     * @dataProvider storeValidationProvider
-     * @param bool $shouldPass
-     * @param array $mockedRequestData
-     */
-    public function testICannotSubmitInvalidValues($shouldPass, $mockedRequestData)
-    {
-        $alternatives = (isset($mockedRequestData['alternative_centres']))
-            ? $mockedRequestData['alternative_centres']
-            : null;
-
-        // Copy the rules out of the FormRequest.
-        $rules = (new AdminNewCentreUserRequest())->rules($alternatives);
-
-        $this->assertEquals(
-            $shouldPass,
-            $this->validate($mockedRequestData, $rules)
-        );
-    }
-
-    /**
-     * must return hardcoded values
-     * @return array
-     */
-    public function storeValidationProvider()
-    {
-        return [
-            'requestShouldSucceedWhenRequiredDataIsProvided' => [
-                'passed' => true,
-                'data' => [
-                    'name' => 'bobby testee',
-                    'email' => 'bobby@test.co.uk',
-                    'worker_centre' => 1
-                ]
-            ],
-            'requestShouldFailWhenNameIsMissing' => [
-                'passed' => false,
-                'data' => [
-                    'email' => 'bobby@test.co.uk',
-                    'worker_centre' => 1
-                ]
-            ],
-            'requestShouldFailWhenNameIsNotString' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 1,
-                    'email' => 'bobby@test.co.uk',
-                    'worker_centre' => 1
-                ]
-            ],
-            'requestShouldFailWhenEmailIsMissing' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'bobby testee',
-                    'worker_centre' => 1
-                ]
-            ],
-            'requestShouldFailWhenEmailIsInvalid' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'bobby testee',
-                    'email' => 'notAnEmail',
-                    'worker_centre' => 1
-                ]
-            ],
-            'requestShouldFailWhenCentreIsMissing' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'bobby testee',
-                    'email' => 'bobby@test.co.uk'
-                ]
-            ],
-            'requestShouldFailWhenCentreIsInvalid' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'bobby testee',
-                    'email' => 'bobby@test.co.uk',
-                    'worker_centre' => 100
-                ]
-            ],
-            'requestShouldFailWhenCentreIsNotInteger' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'bobby testee',
-                    'email' => 'bobby@test.co.uk',
-                    'worker_centre' => "not an integer"
-                ]
-            ],
-            'requestShouldPassWhenItHasValidAlternatives' => [
-                'passed' => true,
-                'data' => [
-                    'name' => 'bobby testee',
-                    'email' => 'bobby@test.co.uk',
-                    'worker_centre' => 1,
-                    'alternative_centres' => [2,3,4]
-                ]
-            ],
-            'requestShouldPassWhenItHasAlternativesThatAreNotValidCentres' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'bobby testee',
-                    'email' => 'bobby@test.co.uk',
-                    'worker_centre' => 1,
-                    'alternative_centres' => [2,3,5]
-                ]
-            ],
-            'requestShouldFailWhenAlternativesAreNotIntegers' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'bobby testee',
-                    'email' => 'bobby@test.co.uk',
-                    'worker_centre' => 1,
-                    'alternative_centres' => ["not an integer", "me neither"]
-                ]
-            ],
-            'requestShouldFailWhenCentreIsInAlternatives' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'bobby testee',
-                    'email' => 'bobby@test.co.uk',
-                    'worker_centre' => 1,
-                    'alternative_centres' => [1,3,4]
-                ]
-            ],
+        $this->data = [
+            'name' => 'bobby testee',
+            'email' => 'bobby@test.co.uk',
+            'worker_centre' => $this->centre->id,
+            'alternative_centres.*' => $this->altCentres->pluck('id')->all()
         ];
     }
 
     /** @test */
     public function testICanStoreACentreUser()
     {
-        $adminUser = factory(AdminUser::class)->create();
-
-        $data = [
-            'name' => 'bobby testee',
-            'email' => 'bobby@test.co.uk',
-            'worker_centre' => $this->centre->id,
-            'alternative_centres.*' => $this->altCentres->pluck('id')->all()
-        ];
-
-        $this->actingAs($adminUser, 'admin')
+        $this->actingAs($this->adminUser, 'admin')
             ->post(
                 route('admin.centreusers.store'),
-                $data
+                $this->data
             )
             ->followRedirects()
             ->assertResponseOk()
             ->seePageIs(route('admin.centreusers.index'))
-            ->see($data["name"])
-            ->see($data["email"])
+            ->see($this->data["name"])
+            ->see($this->data["email"])
         ;
         // find the user
-        $cu = CentreUser::where('email', $data['email'])->first();
+        $cu = CentreUser::where('email', $this->data['email'])->first();
         $this->assertNotNull($cu);
         // Check the neighbours
         $this->assertEquals(4, $cu->relevantCentres()->count());
         // Check the homeCentre
-        $this->assertEquals($data['worker_centre'], $cu->homeCentre()->first()->id);
+        $this->assertEquals($this->data['worker_centre'], $cu->homeCentre->id);
+    }
+
+    /** @test */
+    public function testItCanUpdateACentreUser()
+    {
+        // Make a CentreUser from the data with 1 homeCentre.
+        $cu = factory(CentreUser::class)->create([
+            'name' => "testman",
+            'email' => "testman@test.co.uk",
+        ]);
+        $cu->centres()->attach($this->altCentres->last()->id, ['homeCentre' => true]);
+
+        $this->seeInDatabase('centre_users', [
+            'name' => "testman",
+            'email' => "testman@test.co.uk",
+        ]);
+        // Check that worked.
+        $this->assertCount(1, $cu->centres);
+        $this->assertEquals($this->altCentres->last()->id, $cu->homeCentre->id);
+
+        // Totally update the name, email and centre config from the $data!
+        $this->actingAs($this->adminUser, 'admin')
+            ->post(
+                route('admin.centreusers.store'),
+                $this->data
+            )
+            ->followRedirects()
+            ->assertResponseOk()
+            ->seePageIs(route('admin.centreusers.index'))
+            ->see($this->data["name"])
+            ->see($this->data["email"])
+        ;
+        ;
+        // find the user
+        $cu = CentreUser::where('email', $this->data['email'])->first();
+        $this->assertNotNull($cu);
+        // Check the neighbours
+        $this->assertEquals(4, $cu->relevantCentres()->count());
+        // Check the homeCentre
+        $this->assertEquals($this->data['worker_centre'], $cu->homeCentre->id);
     }
 }

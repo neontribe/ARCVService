@@ -42,7 +42,7 @@ class CentreUserModelTest extends TestCase
         $cu = $this->centreUser;
         // Has no centres;
         $this->assertEmpty($cu->centres);
-        $this->assertEquals(0, $cu->homeCentre()->count());
+        $this->assertNull($cu->homeCentre);
 
         // Make one, set it to Home
         $centre = factory(Centre::class)->create();
@@ -51,7 +51,7 @@ class CentreUserModelTest extends TestCase
         // There is one
         $this->assertEquals(1, $cu->centres()->count());
         // It is the homeCentre
-        $this->assertEquals($centre->id, $cu->homeCentre()->first()->id);
+        $this->assertEquals($centre->id, $cu->homeCentre->id);
     }
 
     /** @test */

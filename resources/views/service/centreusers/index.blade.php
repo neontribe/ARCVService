@@ -22,11 +22,13 @@
                     <tr>
                         <td>{{ $worker->name }}</td>
                         <td>{{ $worker->email }}</td>
-                        <td>{{ $worker->homeCentre->first()['name'] }}</td>
+                        <td>{{ $worker->homeCentre->name }}</td>
                         <td>
                             <ul class="table-list">
-                                @foreach ($worker->centres->slice(1) as $centre)
+                                @foreach ($worker->centres as $centre)
+                                    @if ($centre->id !== $worker->homeCentre->id)
                                     <li>{{ $centre->name }}</li>
+                                    @endif
                                 @endforeach
                             </ul>     
                         </td>
