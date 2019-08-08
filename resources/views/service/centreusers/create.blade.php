@@ -12,7 +12,7 @@
         <form role="form" class="styled-form" method="POST" action="{{ route('admin.centreusers.store') }}">
             {!! csrf_field() !!}
             <div class="horizontal-container">
-                <input>
+                <div>
                     <label for="name" class="required">Name</label>
                     <input type="text" id="name" name="name" class="{{ $errors->has('name') ? 'error' : '' }}" required >
                     @if($errors->has('name')) <label for="name" class="alert-danger">{{ implode("<br>", $errors->get('name')) }}</label> @endif
