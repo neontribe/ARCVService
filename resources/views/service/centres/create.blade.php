@@ -36,7 +36,6 @@
                     <label for="print_pref">Printed Form</label>
                     <select name="print_pref" id="print_pref" class="{{ $errors->has('print_pref') ? 'error' : '' }}" required>
                         <option value="" disabled selected>Choose one</option>
-                        {{-- TODO: get from config --}}
                         @foreach (config('arc.print_preferences') as $pref)
                             <option value="{{ $pref }}">{{ $pref }}</option>
                         @endforeach
