@@ -12,7 +12,7 @@ class Centre extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'prefix'
+        'name', 'prefix', 'print_pref', 'sponsor_id'
     ];
 
     /**
@@ -22,7 +22,6 @@ class Centre extends Model
      */
     protected $hidden = [
     ];
-
 
     public function nextCentreSequence()
     {

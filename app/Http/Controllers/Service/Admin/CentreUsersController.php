@@ -10,6 +10,7 @@ use App\Sponsor;
 use DB;
 use Exception;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Log;
 use Ramsey\Uuid\Uuid;
@@ -80,7 +81,14 @@ class CentreUsersController extends Controller
 
         return view('service.centreusers.edit', compact('worker', 'centresBySponsor'));
     }
-    
+
+    /**
+     * Update a CentreUser from a form
+     * @param AdminCentreUserRequest $request
+     * @param $id
+     * @return RedirectResponse
+     * @throws \Throwable
+     */
     public function update(AdminCentreUserRequest $request, $id)
     {
         try {
@@ -115,6 +123,12 @@ class CentreUsersController extends Controller
             ->with('message', 'Worker ' . $centreUser->name . ' updated');
     }
 
+    /**
+     * Create a CentreUser from a form
+     * @param AdminCentreUserRequest $request
+     * @return RedirectResponse
+     * @throws \Throwable
+     */
     public function store(AdminCentreUserRequest $request)
     {
         try {
@@ -131,7 +145,6 @@ class CentreUsersController extends Controller
                 // Sync those;
                 $this->syncCentres($request, $cu);
 
-                // Pop the centre out.
                 return $cu;
             });
         } catch (Exception $e) {

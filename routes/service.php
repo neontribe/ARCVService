@@ -81,6 +81,10 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.centre_neighbours.index',
         'uses' => 'Admin\CentresController@getNeighboursAsJson'
     ]);
+    Route::post('centres', [
+        'as' =>'admin.centres.store',
+        'uses' => 'Admin\CentresController@store',
+    ]);
 
     // Sponsor Management
     Route::get('sponsors', [

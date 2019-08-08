@@ -7,6 +7,7 @@ use App\Http\Requests\AdminNewSponsorRequest;
 use App\Sponsor;
 use Auth;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Log;
 
@@ -38,7 +39,7 @@ class SponsorsController extends Controller
      * Store a Sponsor
      *
      * @param AdminNewSponsorRequest $request
-     * @return \Illuminate\Http\RedirectResponse#
+     * @return RedirectResponse
      */
     public function store(AdminNewSponsorRequest $request)
     {
