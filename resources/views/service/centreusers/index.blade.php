@@ -7,6 +7,11 @@
 
     <div id="main-content">
         <h1>Workers</h1>
+        @if (Session::get('message'))
+            <div class="alert alert-success">
+                {{ Session::get('message') }}
+            </div>
+        @endif
         <table class="table table-striped">
             <thead>
                 <tr>
