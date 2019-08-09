@@ -14,6 +14,7 @@ class ConfigServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // TODO this could be neater, and less hard-coded.
         $config = app('config');
         // Set the cookie name
         switch (Request::getHost()) {
@@ -24,7 +25,7 @@ class ConfigServiceProvider extends ServiceProvider
                 $host = "arcv-store";
                 break;
             default:
-                $host = null;
+                $host = 'laravel_session';
         }
         $config->set('session.cookie', $host . "_session");
     }
