@@ -7,9 +7,6 @@ use Illuminate\Support\ServiceProvider;
 
 class ConfigServiceProvider extends ServiceProvider
 {
-
-    /
-    private $config;
     /**
      * Bootstrap the application services.
      *
@@ -17,9 +14,19 @@ class ConfigServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->config = app('config');
-        $this->config->set('session.domain', );
-        $this->config->set('session.cookie', );
+        $config = app('config');
+        // Set the cookie name
+        switch (Request::getHost()) {
+            case ($config->get('arc.service_domain')):
+                $host = "arcv-service";
+                break;
+            case ($config->get('arc.store_domain')):
+                $host = "arcv-store";
+                break;
+            default:
+                $host = null;
+        }
+        $config->set('session.cookie', $host . "_session");
     }
 
     /**
@@ -30,18 +37,5 @@ class ConfigServiceProvider extends ServiceProvider
     public function register()
     {
         //
-    }
-
-    private function getAppNameByHost()
-    {
-        switch (Request::getHost()) {
-            case $this->config('arc.service_domain'):
-                return "arcv_service";
-                break;
-            case $this->config('arc.store_domain'):
-                break;
-            default :
-                abort(500);
-        }
     }
 }
