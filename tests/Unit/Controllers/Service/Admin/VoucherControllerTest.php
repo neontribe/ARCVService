@@ -45,12 +45,12 @@ class VoucherControllerTest extends TestCase
             ->post(route('admin.vouchers.storebatch'), [
                 'sponsor_id' => $this->market->sponsor_id,
                 'start' => '10',
-                'end' => '-1',
+                'end' => '1',
             ])
             ->assertStatus(302)
             ->assertSessionMissing('notification')
             ->assertSessionHasErrors([
-                'end' => 'The end must be greater than or equal to start',
+                'end' => 'The end must be greater than or equal to start.',
             ])
         ;
     }
@@ -63,7 +63,7 @@ class VoucherControllerTest extends TestCase
             ->assertStatus(302)
             ->assertSessionMissing('notification')
             ->assertSessionHasErrors([
-                'sponsor_id' => 'The sponsor id must be a valid selection',
+                'sponsor_id' => 'The selected sponsor id is invalid.',
             ])
         ;
     }

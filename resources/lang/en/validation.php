@@ -90,6 +90,7 @@ return [
     'code_greater_than'    => 'The :attribute field must be greater than the :other field.',
     'same_sponsor'         => 'The :attribute field must be the same sponsor as the :other field.',
     'not_exists'           => 'The :attribute field already exists.',
+    'ge_field'             => 'The :attribute must be greater than or equal to :field.',
 
     /*
     |--------------------------------------------------------------------------
@@ -101,7 +102,6 @@ return [
     | specify a specific custom language line for a given attribute rule.
     |
     */
-
     'custom' => [
         'attribute-name' => [
             'rule-name' => 'custom-message',

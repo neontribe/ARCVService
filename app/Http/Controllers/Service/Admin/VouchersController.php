@@ -3,25 +3,20 @@
 namespace App\Http\Controllers\Service\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdminNewVoucherRequest;
 use App\Sponsor;
 use App\Voucher;
-use Auth;
 use Carbon\Carbon;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Http\Request;
-use Log;
-use Response;
-use DB;
-use Validator;
-use Illuminate\Validation\Rule;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class VouchersController extends Controller
 {
-
     /**
      * Display a listing of Vouchers.
      *
-     * @return json
+     * @return Factory|View
      */
     public function index()
     {
@@ -32,7 +27,7 @@ class VouchersController extends Controller
     /**
      * Show the form for creating new Vouchers.
      *
-     * @return \Illuminate\Http\Response
+     * @return Factory|View
      */
     public function create()
     {
@@ -45,69 +40,48 @@ class VouchersController extends Controller
     /**
      * Store Voucher range.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param AdminNewVoucherRequest $request
+     * @return RedirectResponse
      */
-    public function storeBatch(Request $request)
+    public function storeBatch(AdminNewVoucherRequest $request)
     {
+        $codes = range($request->input('start'), $request->input('end'));
+
+        $sponsor = Sponsor::findOrFail($request->input('sponsor_id'));
+
         $new_vouchers = [];
 
-        $sponsor_ids = Sponsor::all()->pluck('id')->toArray();
-
-        $voucher_rules = [
-            'sponsor_id' => [
-                'required',
-                Rule::in($sponsor_ids)
-            ],
-            'start' => 'required|integer|between:1,99999999',
-            'end' => [
-                'required',
-                'integer',
-                'between:1,99999999',
-                'ge_field:start'
-            ],
-        ];
-
-        $messages = [
-            'in' => 'The :attribute must be a valid selection',
-            'ge_field' => 'The :attribute must be greater than or equal to :field'
-        ];
-
-        Validator::make($request->all(), $voucher_rules, $messages)->validate();
-
-        $codes = range($request['start'], $request['end']);
-
-        $sponsor = Sponsor::find($request['sponsor_id'])->first();
-        $shortcode = $sponsor->shortcode;
         $now_time = Carbon::now();
         foreach ($codes as $c) {
             $v = new Voucher();
-            $v->code = $shortcode . $c;
-            $v->sponsor_id = $request['sponsor_id'];
+            $v->code = $sponsor->shortcode . $c;
+            $v->sponsor_id = $sponsor->id;
             $v->currentstate = 'requested';
             $v->created_at = $now_time;
             $v->updated_at = $now_time;
             $new_vouchers[] = $v->attributesToArray();
         }
-        // batch insert.
+        // batch insert raw vouchers.
         // Todo : there's NO "this voucher already exists" checking!!
         Voucher::insert($new_vouchers);
 
-        $vouchers = Voucher::where('created_at', '=', $now_time)
+        Voucher::where('created_at', '=', $now_time)
             ->where('updated_at', '=', $now_time)
             ->where('currentstate', '=', 'requested')
-            ->get()
+            ->chunk(1000, function ($vouchers) {
+                foreach ($vouchers as $voucher) {
+                    $voucher->applyTransition('order');
+                    $voucher->applyTransition('print');
+                    // printed vouchers should now be redeemable.
+                }
+            })
         ;
 
         // batch progress
-        foreach ($vouchers as $voucher) {
-            $voucher->applyTransition('order');
-            $voucher->applyTransition('print');
-            // printed vouchers should now be redeemable.
-        }
 
-        $notification_msg = trans('service.messages.vouchers_create_success',[
-            'shortcode' => $shortcode,
+
+        $notification_msg = trans('service.messages.vouchers_create_success', [
+            'shortcode' => $sponsor->shortcode,
             'start' => $request['start'],
             'end' => $request['end'],
         ]);

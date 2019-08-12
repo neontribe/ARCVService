@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Voucher;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Validator;
 
@@ -14,6 +15,11 @@ class CustomValidationProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Custom ARC form validation rules - Incidentally, Laravel 5.5 has a much better system than this...
+
+        /**
+         * Is the supplied numeric field greater than the target numeric field
+         */
         Validator::extend('ge_field', function ($attribute, $value, $parameters, $validator) {
             $data = $validator->getData();
             $ref_field = $parameters[0];
@@ -24,6 +30,59 @@ class CustomValidationProvider extends ServiceProvider
 
         Validator::replacer('ge_field', function ($message, $attribute, $rule, $parameters) {
             return str_replace(':field', $parameters[0], $message);
+        });
+
+        /**
+         * Is the supplied voucher code value greater than the the target voucher code value
+         */
+        Validator::extend('codeGreaterThan', function ($attribute, $value, $parameters, $validator) {
+            // Grab the regex matched array
+            $val = Voucher::splitShortcodeNumeric($value);
+
+            // Grab the content of the parameter we pass the rule in a roundabout fashion
+            $otherVal = array_get(
+                $validator->getData(),
+                $parameters[0]
+            );
+
+            if (!empty($otherVal)) {
+                $other = Voucher::splitShortcodeNumeric($otherVal);
+                if (is_numeric($val["number"]) && is_numeric($other["number"])) {
+                    return intval($val["number"]) > intval($other["number"]);
+                }
+            }
+            // Else "Nope"!
+            return false;
+        });
+
+        Validator::replacer('codeGreaterThan', function ($message, $attribute, $rule, $parameters) {
+            return str_replace(':other', $parameters[0], $message);
+        });
+
+        /**
+         * Is the supplied voucher value the same sponsor as the target value
+         */
+        Validator::extend('sameSponsor', function ($attribute, $value, $parameters, $validator) {
+            // Grab the regex matched array
+            $val = Voucher::splitShortcodeNumeric($value);
+
+            // Grab the content of the parameter we pass the rule in a roundabout fashion
+            $otherVal = array_get(
+                $validator->getData(),
+                $parameters[0]
+            );
+
+            if (!empty($otherVal)) {
+                $other = Voucher::splitShortcodeNumeric($otherVal);
+                if (is_string($val["shortcode"]) && is_string($other["shortcode"])) {
+                    return $val['shortcode'] === $other['shortcode'];
+                }
+            }
+            return false;
+        });
+
+        Validator::replacer('sameSponsor', function ($message, $attribute, $rule, $parameters) {
+            return str_replace(':other', $parameters[0], $message);
         });
     }
 
