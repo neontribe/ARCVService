@@ -122,6 +122,8 @@ return [
     |
     */
 
+
+    // This is overridden in ConfigServiceProvider depending on domain.
     'cookie' => 'laravel_session',
 
     /*
