@@ -55,9 +55,9 @@ class VoucherManagerTest extends StoreTestCase
 
         // Make some vouchers
         $this->testCodes = [
-            'tst09999',
-            'tst10000',
-            'tst10001'
+            'TST09999',
+            'TST10000',
+            'TST10001'
         ];
 
         Auth::login($this->fmUser);
@@ -117,14 +117,14 @@ class VoucherManagerTest extends StoreTestCase
     {
         // check we can bulk add vouchers
         $this->actingAs($this->fmUser, 'store')
-        ->visit(URL::route('store.registration.voucher-manager', [ 'id' => $this->registration ]))
-        ->type('tst09999', 'start')
-        ->type('tst10001', 'end')
-        ->press('range-add')
-        ->seePageIs(URL::route('store.registration.voucher-manager', [ 'id' => $this->registration ]))
-        ->see('tst09999')
-        ->see('tst10000')
-        ->see('tst10001')
+            ->visit(URL::route('store.registration.voucher-manager', [ 'id' => $this->registration ]))
+            ->type('tst09999', 'start')
+            ->type('tst10001', 'end')
+            ->press('range-add')
+            ->seePageIs(URL::route('store.registration.voucher-manager', [ 'id' => $this->registration ]))
+            ->see('TST09999')
+            ->see('TST10000')
+            ->see('TST10001')
         ;
         // Three vouchers and the delete all button.
         $this->assertEquals(4, count($this->crawler->filter('.delete-button')));
@@ -139,11 +139,11 @@ class VoucherManagerTest extends StoreTestCase
     {
         // check we can add a single voucher
         $this->actingAs($this->fmUser, 'store')
-        ->visit(URL::route('store.registration.voucher-manager', [ 'id' => $this->registration ]))
-        ->type('tst09999', 'start')
-        ->press('add-button')
-        ->seePageIs(URL::route('store.registration.voucher-manager', [ 'id' => $this->registration ]))
-        ->see('tst09999')
+            ->visit(URL::route('store.registration.voucher-manager', [ 'id' => $this->registration ]))
+            ->type('tst09999', 'start')
+            ->press('add-button')
+            ->seePageIs(URL::route('store.registration.voucher-manager', [ 'id' => $this->registration ]))
+            ->see('TST09999')
         ;
         // One voucher and the delete all button.
         $this->assertEquals(2, count($this->crawler->filter('.delete-button')));

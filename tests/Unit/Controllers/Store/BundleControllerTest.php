@@ -45,9 +45,9 @@ class BundleControllerTest extends StoreTestCase
 
         // Make some vouchers
         $this->testCodes = [
-            'tst09999',
-            'tst10000',
-            'tst10001'
+            'TST09999',
+            'TST10000',
+            'TST10001'
         ];
 
         Auth::login($this->centreUser);
@@ -323,9 +323,9 @@ class BundleControllerTest extends StoreTestCase
         Auth::login($this->centreUser);
         // Make some vouchers to bundle.
         $testCodes = [
-            'tst0123455',
-            'tst0123456',
-            'tst0123457'
+            'TST0123455',
+            'TST0123456',
+            'TST0123457'
         ];
         foreach ($testCodes as $testCode) {
             $voucher = factory(Voucher::class, 'requested')->create([
@@ -377,9 +377,9 @@ class BundleControllerTest extends StoreTestCase
         Auth::login($this->centreUser);
         // Make some vouchers to bundle.
         $testCodes = [
-            'tst0123455',
-            'tst0123456',
-            'tst0123457'
+            'TST0123455',
+            'TST0123456',
+            'TST0123457'
         ];
         foreach ($testCodes as $testCode) {
             $voucher = factory(Voucher::class, 'requested')->create([
