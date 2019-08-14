@@ -91,7 +91,8 @@ class VouchersController extends Controller
                 $v = new Voucher();
                 $v->code = $sponsor->shortcode . $c;
                 $v->sponsor_id = $sponsor->id;
-                $v->currentstate = 'requested';
+                // Set straight to printed; we're faking the process for speed.
+                $v->currentstate = 'printed';
                 $v->created_at = $now_time;
                 $v->updated_at = $now_time;
                 $new_vouchers[] = $v->attributesToArray();
