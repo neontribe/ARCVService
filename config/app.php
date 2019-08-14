@@ -207,7 +207,6 @@ return [
         Barryvdh\Debugbar\ServiceProvider::class, //DebugBar
         Barryvdh\Cors\ServiceProvider::class, //CORS framework
         Barryvdh\DomPDF\ServiceProvider::class, //PDF Maker
-        Barryvdh\Queue\AsyncServiceProvider::class, // Async "queue" (it's really a "run-in-background" service)
         Maatwebsite\Excel\ExcelServiceProvider::class, //Excel sheet generation
         Sebdesign\SM\ServiceProvider::class, //FSM
         Optimus\ApiConsumer\Provider\LaravelServiceProvider::class, //Passport assistance
