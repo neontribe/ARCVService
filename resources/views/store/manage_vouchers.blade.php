@@ -2,6 +2,10 @@
 
 @section('title', 'Voucher Manager')
 
+@section('hoist-head')
+    <script src="{{ asset('store/js/jquery-ui-1.12.1/jquery-ui.min.js')}}"></script>
+@endsection
+
 @section('content')
 
     @include('store.partials.navbar', ['headerTitle' => 'Voucher Manager'])
@@ -90,10 +94,10 @@
                     {!! csrf_field() !!}
                     <div class="alongside-container">
                         <label>First voucher
-                            <input id="first-voucher" name="start" type="text" autofocus>
+                            <input id="first-voucher" name="start" type="text" autofocus class="uppercase">
                         </label>
                         <label>Last voucher
-                            <input id="last-voucher" name="end" type="text">
+                            <input id="last-voucher" name="end" type="text" class="uppercase">
                         </label>
                         <button id="range-add" class="add-button" type="submit" name="range-add">
                             <i class="fa fa-plus" aria-hidden="true"></i>
@@ -105,7 +109,7 @@
                 {!! csrf_field() !!}
                     <div class="single-container">
                         <label for="single-voucher">Add individual vouchers
-                            <input id="single-voucher" name="start" type="text">
+                            <input id="single-voucher" name="start" type="text" class="uppercase">
                         </label>
                         <button id="single-add" class="add-button" type="submit" name="add-button">
                             <i class="fa fa-plus" aria-hidden="true"></i>
@@ -214,9 +218,6 @@
         </div>
     </div>
 
-    @section('hoist-head')
-        <script src="{{ asset('store/js/jquery-ui-1.12.1/jquery-ui.min.js')}}"></script>
-    @endsection
     <script type="text/javascript">
         $(document).ready(
             function () {
@@ -244,7 +245,7 @@
 
                 // Handle first in a range of vouchers
                 firstVoucher.keypress(function(e) {
-                    if(e.keyCode==13){
+                    if(e.keyCode===13){
                         e.preventDefault();
                         window.setTimeout(function() {
                             if(firstVoucher.val() !== ""){
@@ -256,7 +257,7 @@
 
                 // Handle last in a range of vouchers
                 lastVoucher.keypress(function(e) {
-                    if(e.keyCode==13){
+                    if(e.keyCode===13){
                         e.preventDefault();
                         window.setTimeout(function() {
                             if(firstVoucher.val() === "") {
@@ -272,7 +273,7 @@
 
                 // Handle a single voucher
                 singleVoucher.keypress(function(e) {
-                    if(e.keyCode==13){
+                    if(e.keyCode===13){
                         e.preventDefault();
                         window.setTimeout(function() {
                             $('#single-add').trigger('click');
@@ -282,10 +283,11 @@
 
                 // Browser backup for lack of datepicker support eg. Safari
                 // Reset back to English date format
-                if ($('#collected-on')[0].type != 'date')
-                    $('#collected-on').datepicker({ dateFormat: 'dd-mm-yyyy' }).val();
-
-                $('#collected-on').valueAsDate = new Date();
+                var collectedOn = $('#collected-on');
+                if (collectedOn[0].type !== 'date') {
+                    collectedOn.datepicker({dateFormat: 'dd-mm-yyyy'}).val();
+                }
+                collectedOn.valueAsDate = new Date();
             }
         );
     </script>

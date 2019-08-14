@@ -49,7 +49,7 @@ class StoreAppendBundleRequest extends FormRequest
 
         foreach ($input as $key => $value) {
             $clean = Voucher::cleanCodes((array)$value);
-            $input[$key] = array_shift($clean);
+            $input[$key] = strtoupper((array_shift($clean)));
         }
         // replace old input with new input
         $this->replace($input);
