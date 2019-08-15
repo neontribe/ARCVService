@@ -56,7 +56,7 @@ class VoucherController extends Controller
             return response("Trader not found", 400);
         }
 
-        //remove spaces from voucher array values
+        //cleanup the codes
         $cleanedVouchers = Voucher::cleanCodes($request['vouchers']);
 
         //create unique vouchers

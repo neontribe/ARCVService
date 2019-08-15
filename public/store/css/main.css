@@ -46,6 +46,10 @@ form {
 	margin: 0;
 }
 
+input.uppercase {
+	text-transform:uppercase
+}
+
 input[type="text"],
 input[type="month"],
 input[type="search"] {
