@@ -201,13 +201,16 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\CustomValidationProvider::class,
-        // Extras
+
+        /*
+         * Extra packages
+         */
         Barryvdh\Debugbar\ServiceProvider::class, //DebugBar
         Barryvdh\Cors\ServiceProvider::class, //CORS framework
         Barryvdh\DomPDF\ServiceProvider::class, //PDF Maker
         Maatwebsite\Excel\ExcelServiceProvider::class, //Excel sheet generation
         Sebdesign\SM\ServiceProvider::class, //FSM
-        Optimus\ApiConsumer\Provider\LaravelServiceProvider::class, //Passport assitance
+        Optimus\ApiConsumer\Provider\LaravelServiceProvider::class, //Passport assistance
         TomLingham\Searchy\SearchyServiceProvider::class, //"Fuzzy" search in MySQL/MariaDB/Postgres (NOT SQLite)
     ],
 
