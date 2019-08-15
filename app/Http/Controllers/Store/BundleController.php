@@ -288,13 +288,16 @@ class BundleController extends Controller
                         }
                         break;
                     case "transition":
-                        $messages[] = "Transition problem with: " . join(', ', $values);
+                        $messages[] = "Voucher state change problem with: " . join(', ', $values);
                         break;
                     case "codes":
-                        $messages[] = "Bad code problem with: " . join(', ', $values);
+                        $messages[] = "These codes are invalid: " . join(', ', $values);
+                        break;
+                    case "disbursed":
+                        $messages[] = "These vouchers have been given out: " . join(', ', $values);
                         break;
                     case "foreign":
-                        $messages[] = "Action denied on a foreign voucher: " . join(', ', $values);
+                        $messages[] = "Action denied on a different bundle: " . join(', ', $values);
                         break;
                     case "empty":
                         if ($values) {
