@@ -4,9 +4,6 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
-use Laracasts\Generators\GeneratorsServiceProvider;
-use Laravel\Dusk\DuskServiceProvider;
-use Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,10 +26,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        if ($this->app->environment() !== 'production') {
-            $this->app->register(IdeHelperServiceProvider::class);
-            $this->app->register(GeneratorsServiceProvider::class);
-            $this->app->register(DuskServiceProvider::class);
-        }
+        // manual registration of non-auto-discovered packages
     }
 }

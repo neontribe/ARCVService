@@ -188,8 +188,9 @@ return [
         /*
          * Package Service Providers...
          */
-        Laravel\Tinker\TinkerServiceProvider::class,
-        Laravel\Passport\PassportServiceProvider::class,
+        // Auto-discovery on
+        // Laravel\Tinker\TinkerServiceProvider::class,
+        // Laravel\Passport\PassportServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -205,13 +206,14 @@ return [
         /*
          * Extra packages
          */
-        Barryvdh\Debugbar\ServiceProvider::class, //DebugBar
-        Barryvdh\Cors\ServiceProvider::class, //CORS framework
-        Barryvdh\DomPDF\ServiceProvider::class, //PDF Maker
-        Maatwebsite\Excel\ExcelServiceProvider::class, //Excel sheet generation
-        Sebdesign\SM\ServiceProvider::class, //FSM
-        Optimus\ApiConsumer\Provider\LaravelServiceProvider::class, //Passport assistance
-        TomLingham\Searchy\SearchyServiceProvider::class, //"Fuzzy" search in MySQL/MariaDB/Postgres (NOT SQLite)
+        // Auto-discovery on
+        // Barryvdh\Debugbar\ServiceProvider::class, //DebugBar
+        // Barryvdh\Cors\ServiceProvider::class, //CORS framework
+        // Barryvdh\DomPDF\ServiceProvider::class, //PDF Maker
+        // Maatwebsite\Excel\ExcelServiceProvider::class, //Excel sheet generation
+        // Sebdesign\SM\ServiceProvider::class, //FSM
+        // Optimus\ApiConsumer\Provider\LaravelServiceProvider::class, //Passport assistance
+        // TomLingham\Searchy\SearchyServiceProvider::class, //"Fuzzy" search in MySQL/MariaDB/Postgres (NOT SQLite)
     ],
 
     /*
@@ -266,7 +268,6 @@ return [
         'PDF' => Barryvdh\DomPDF\Facade::class,
         'StateMachine' => Sebdesign\SM\Facade::class,
         'Searchy' => TomLingham\Searchy\Facades\Searchy::class,
-
     ],
 
 ];
