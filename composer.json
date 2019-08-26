@@ -1,17 +1,17 @@
 {
     "name": "neontribe/arcvservice",
     "description": "ARCV Service",
-    "version": "1.7-dev",
+    "version": "1.7.0-dev",
     "keywords": [],
     "license": "",
     "type": "project",
     "require": {
-        "barryvdh/laravel-cors": "^0.9.2",
-        "barryvdh/laravel-debugbar": "~2.4",
+        "barryvdh/laravel-cors": "^0.11",
+        "barryvdh/laravel-debugbar": "^3.2",
         "barryvdh/laravel-dompdf": "^0.8.1",
         "doctrine/dbal": "^2.5",
         "laravel/framework": "5.5.*",
-        "laravel/passport": "^3.0",
+        "laravel/passport": "^4.0",
         "laravel/tinker": "~1.0",
         "maatwebsite/excel": "^2.1",
         "maennchen/zipstream-php": "0.5.2",
@@ -19,25 +19,18 @@
         "optimus/api-consumer": "0.2.*",
         "ramsey/uuid": "^3.6",
         "sebdesign/laravel-state-machine": "^1.1",
-        "spinen/laravel-mail-assertions": "^0.3.0",
+        "symfony/event-dispatcher" : "4.2.11",
         "tom-lingham/searchy": "2.*"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.4",
         "fzaninotto/faker": "~1.4",
         "filp/whoops": "~2.0",
-        "laravel/dusk": "^2.0",
         "laracasts/generators": "^1.1.4",
-        "laravel/browser-kit-testing": "2.*",
+        "laravel/browser-kit-testing": "3.*",
         "mockery/mockery": "~1.0",
-        "phpunit/phpunit": "~6.0"
-    },
-    "extra": {
-        "laravel": {
-            "dont-discover": [
-                "laravel/dusk"
-            ]
-        }
+        "phpunit/phpunit": "~6.0",
+        "spinen/laravel-mail-assertions": "^0.3.0"
     },
     "autoload": {
         "classmap": [
@@ -78,7 +71,7 @@
         "sort-packages": true,
         "optimize-autoloader": true,
         "platform": {
-            "php" : "7.0.22"
+            "php" : "7.2"
         }
     }
 }
