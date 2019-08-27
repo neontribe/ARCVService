@@ -434,35 +434,6 @@ class RegistrationController extends Controller
         // Grab the date
         $now = Carbon::now();
 
-        /*
-        // Check permissions
-        if ($user->can('updateChart', $registration)) {
-            // explicitly catch 0 or 1 responses
-            $registration->fm_chart_on = ($fm['fm_chart']) ? $now : null;
-        } else {
-            // Log the attempt
-            Log::info('Registration ' . $registration->id . ' update for Chart denied for service user ' . $user->id);
-        }
-
-        // Check permissions
-        if ($user->can('updateDiary', $registration)) {
-            // explicitly catch 0 or 1 responses
-            $registration->fm_diary_on = ($fm['fm_diary']) ? $now : null;
-        } else {
-            // Log the attempt
-            Log::info('Registration ' . $registration->id . ' update for Diary denied for service user ' . $user->id);
-        }
-        */
-
-        // Check permissions
-        if ($user->can('updatePrivacy', $registration)) {
-            // explicitly catch 0 or 1 responses
-            $registration->fm_privacy_on = ($fm['fm_privacy']) ? $now : null;
-        } else {
-            // Log the attempt
-            Log::info('Registration ' . $registration->id . ' update for Registration Form denied for service user ' . $user->id);
-        }
-
         $family = $registration->family;
 
         // Try to transact, so we can roll it back
