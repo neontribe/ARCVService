@@ -163,27 +163,6 @@
                             @endforeach
                         @endif
                     @endif
-                    @if ( (Auth::user()->can('updatePrivacy', App\Registration::class)) )
-                        <div>
-                            <h2>Documents Received:</h2>
-                            {{-- @can( 'updateChart', App\Registration::class )
-                                <div class="user-control">
-                                    <input type="hidden" name="fm_chart" value="0">
-                                    <input type="checkbox" class="styled-checkbox" id="update-chart" name="fm_chart" value="1"
-                                        @if( old('fm_chart') || isset($registration->fm_chart_on) ) checked @endif/>
-                                    <label for="update-chart">Chart</label>
-                                </div>
-                            @endcan
-                            @can( 'updateDiary', App\Registration::class )
-                                <div class="user-control">
-                                    <input type="hidden" name="fm_diary" value="0">
-                                    <input type="checkbox" class="styled-checkbox" id="update-diary" name="fm_diary" value="1"
-                                        @if( old('fm_diary') || isset($registration->fm_diary_on) ) checked @endif/>
-                                    <label for="update-diary">Diary</label>
-                                </div>
-                            @endcan --}}
-                        </div>
-                    @endif
                 </div>
                 <button class="long-button" onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
                     Print a 4 week collection sheet for this family
