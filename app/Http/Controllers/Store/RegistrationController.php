@@ -203,7 +203,6 @@ class RegistrationController extends Controller
         ];
 
         $data['regs'][] = [
-            'reminders' => $registration->getReminderReasons(),
             'centre' => $registration->centre,
             'family' => $registration->family,
             'pri_carer' => $registration->family->pri_carer,
@@ -259,7 +258,6 @@ class RegistrationController extends Controller
         // Stack the registration batch into the data
         foreach ($registrations as $registration) {
             $data['regs'][] = [
-                'reminders' => $registration->getReminderReasons(),
                 'centre' => $centre,
                 'family' => $registration->family,
                 'pri_carer' => $registration->family->pri_carer,
@@ -319,8 +317,7 @@ class RegistrationController extends Controller
         // Create Registration
         $registration = new Registration([
             'consented_on' => Carbon::now(),
-            'eligibility' => $request->get('eligibility'),
-            // diary, chart and privacy/registration form are not saved right now.
+            'eligibility' => $request->get('eligibility')
         ]);
 
         // Duplicate families are fine at this point.
@@ -420,15 +417,6 @@ class RegistrationController extends Controller
                 ]);
             },
             (array)$request->get('children')
-        );
-
-        // Expect only filled fm variables
-        $fm = array_filter(
-            $request->all('fm_privacy'),
-            function ($value) {
-                // Remove any null or empty responses;
-                return (isset($value) || ($value !== ''));
-            }
         );
 
         // Grab the date

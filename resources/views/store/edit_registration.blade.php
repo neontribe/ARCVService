@@ -154,16 +154,6 @@
                     </div>
                 </div>
                 @endif
-                <div class="attention">
-                    @if ( (Auth::user()->cannot('updateChart', App\Registration::class)) || (Auth::user()->cannot('updateDiary', App\Registration::class)) || (Auth::user()->cannot('updatePrivacy', App\Registration::class)))
-                        @if ( count($registration->getReminderReasons()) > 0 )
-                            <h3><i class="fa fa-exclamation-circle" aria-hidden="true"></i> Reminder</h3>
-                            @foreach ( $registration->getReminderReasons() as $reminder )
-                                <p>{{ $reminder['entity'] }} has {{ $reminder['reason'] }}</p>
-                            @endforeach
-                        @endif
-                    @endif
-                </div>
                 <button class="long-button" onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
                     Print a 4 week collection sheet for this family
                 </button>
