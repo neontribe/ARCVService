@@ -182,14 +182,6 @@
                                     <label for="update-diary">Diary</label>
                                 </div>
                             @endcan --}}
-                            @can( 'updatePrivacy', App\Registration::class )
-                                <div class="user-control">
-                                    <input type="hidden" name="fm_privacy" value="0">
-                                    <input type="checkbox" class="styled-checkbox" id="update-privacy" name="fm_privacy" value="1"
-                                        @if( old('fm_privacy') || isset($registration->fm_privacy_on) ) checked @endif/>
-                                    <label for="update-privacy">Registration Form</label>
-                                </div>
-                            @endcan
                         </div>
                     @endif
                 </div>
