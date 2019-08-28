@@ -102,14 +102,20 @@ EOD;
 
         $this->assertTrue($this->disk->exists($this->archiveName));
 
-        // Fetch the route; should return a streamed zip.
+        // Fetch the route; should return a zip that may be streamed.
         $response = $this->actingAs($this->centreUser, 'store')
             ->visit($this->dashboard_route)
             ->get($this->export_route)
             ->response
         ;
 
-        $content = $response->getContent();
+        // Get our response's content, using the more complicated approach required by `StreamedResponse`, as file
+        // content is gradually streamed as opposed to sent instantly.
+        // https://stackoverflow.com/a/18277789
+        ob_start(); // capture streamed response in output buffer
+        $response->sendContent(); // complete streaming
+        $content = ob_get_contents(); // capture streamed output
+        ob_end_clean(); // turn off and empty output buffer
 
         // Test the content.
         // Save it to a temp file first, because ZipArchive is dumb about files, rather than streams.
