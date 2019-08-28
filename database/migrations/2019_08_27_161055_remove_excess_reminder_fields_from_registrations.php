@@ -13,11 +13,16 @@ class RemoveExcessReminderFieldsFromRegistrations extends Migration
      */
     public function up()
     {
+        // Cannot bulk drop multiple tables with SQLite (tests).
         Schema::table('registrations', function($table) {
             $table->dropColumn('fm_chart_on');
+        });
+        Schema::table('registrations', function($table) {
             $table->dropColumn('fm_diary_on');
+        });
+        Schema::table('registrations', function($table) {
             $table->dropColumn('fm_privacy_on');
-         });
+        });
     }
 
     /**
