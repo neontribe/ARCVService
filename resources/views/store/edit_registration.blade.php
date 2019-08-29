@@ -154,45 +154,6 @@
                     </div>
                 </div>
                 @endif
-                <div class="attention">
-                    @if ( (Auth::user()->cannot('updateChart', App\Registration::class)) || (Auth::user()->cannot('updateDiary', App\Registration::class)) || (Auth::user()->cannot('updatePrivacy', App\Registration::class)))
-                        @if ( count($registration->getReminderReasons()) > 0 )
-                            <h3><i class="fa fa-exclamation-circle" aria-hidden="true"></i> Reminder</h3>
-                            @foreach ( $registration->getReminderReasons() as $reminder )
-                                <p>{{ $reminder['entity'] }} has {{ $reminder['reason'] }}</p>
-                            @endforeach
-                        @endif
-                    @endif
-                    @if ( (Auth::user()->can('updatePrivacy', App\Registration::class)) )
-                        <div>
-                            <h2>Documents Received:</h2>
-                            {{-- @can( 'updateChart', App\Registration::class )
-                                <div class="user-control">
-                                    <input type="hidden" name="fm_chart" value="0">
-                                    <input type="checkbox" class="styled-checkbox" id="update-chart" name="fm_chart" value="1"
-                                        @if( old('fm_chart') || isset($registration->fm_chart_on) ) checked @endif/>
-                                    <label for="update-chart">Chart</label>
-                                </div>
-                            @endcan
-                            @can( 'updateDiary', App\Registration::class )
-                                <div class="user-control">
-                                    <input type="hidden" name="fm_diary" value="0">
-                                    <input type="checkbox" class="styled-checkbox" id="update-diary" name="fm_diary" value="1"
-                                        @if( old('fm_diary') || isset($registration->fm_diary_on) ) checked @endif/>
-                                    <label for="update-diary">Diary</label>
-                                </div>
-                            @endcan --}}
-                            @can( 'updatePrivacy', App\Registration::class )
-                                <div class="user-control">
-                                    <input type="hidden" name="fm_privacy" value="0">
-                                    <input type="checkbox" class="styled-checkbox" id="update-privacy" name="fm_privacy" value="1"
-                                        @if( old('fm_privacy') || isset($registration->fm_privacy_on) ) checked @endif/>
-                                    <label for="update-privacy">Registration Form</label>
-                                </div>
-                            @endcan
-                        </div>
-                    @endif
-                </div>
                 <button class="long-button" onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
                     Print a 4 week collection sheet for this family
                 </button>

@@ -114,9 +114,6 @@
                     </div>
                 </div>
                 @endif
-                {{-- <div>
-                    <p>Reminder: don't forget to complete food diary and pie chart.</p>
-                </div> --}}
                 <button class="long-button submit" type="Submit">Save Family</button>
             </div>
         </form>
