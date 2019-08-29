@@ -93,6 +93,18 @@
                     </ul>
                     <p>Their RV-ID is: <strong>{{ $reg["family"]->rvid }}</strong></p>
                 </td>
+                <td>
+                    <div>
+                        <h3><i class="fa fa-exclamation-circle" aria-hidden="true"></i> Reminder</h3>
+                        @if ( count($reg["family"]->getNoticeReasons()) > 0 )
+                            @foreach( $reg["family"]->getNoticeReasons() as $notices)
+                                <br> {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }} currently "{{ $notices['reason'] }}"
+                            @endforeach
+                        @else
+                            <p>No reminders for this family.</p>
+                        @endif
+                    </div>
+                </td>
             </tr>
         </table>
     </div>
