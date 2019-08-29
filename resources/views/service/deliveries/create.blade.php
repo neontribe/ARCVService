@@ -9,7 +9,7 @@
 
         <p>Use the form below to mark a batch of vouchers as being sent. Add the centre they're being sent to, start and end voucher codes of the batch and the date they're being sent.</p>
 
-        <form role="form" class="styled-form" method="POST" action="{{ route('admin.voucherssend.create') }}">
+        <form role="form" class="styled-form">
             {!! csrf_field() !!}
             <div class="horizontal-container">
                 <div class="select">
