@@ -189,7 +189,9 @@ class Family extends Model
     public function getEligibleChildrenCountAttribute()
     {
         return $this->children->reduce(function ($count, $child) {
-            $count += ($child->getStatus()['eligibility'] == "Eligible") ? 1 : 0;
+            $count += !empty($child->getStatus()['credits'])
+                ? 1
+                : 0 ;
             return $count;
         });
     }

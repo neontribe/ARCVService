@@ -14,12 +14,14 @@ class Child extends Model
         'ChildIsAlmostBorn' => ['reason' => 'child|almost born'],
         'ChildIsOverDue' => ['reason' => 'child|over due date'],
         'ChildIsAlmostSchoolAge' => ['reason' => 'child|almost school age'],
+        'ChildIsAlmostTwelve' => ['reason' => 'child|almost 12 years old']
     ];
 
     // This has a | in the reason field because we want to carry the entity with it.
     const CREDIT_TYPES = [
         'ChildIsUnderOne' => ['reason' => 'child|under 1 year old', 'vouchers' => 3],
         'ChildIsUnderSchoolAge' => ['reason' => 'child|under school age', 'vouchers' => 3],
+        'ChildIsSchoolAgeToTwelve' => ['reason', 'child|almost 12 years old' => 3]
     ];
 
     /**
@@ -68,9 +70,9 @@ class Child extends Model
 
         if ($this->dob->isFuture()) {
             return "P";
-        } else if ($currentDate == $startOfMonth){
+        } else if ($currentDate == $startOfMonth) {
             // Return 2nd of month as on the first of every month
-            // Carbon treats it as the previous month and returns 
+            // Carbon treats it as the previous month and returns
             // A month less than it should be.
             return $this->dob->diff($currentDatePlusOne)->format($format);
         } else {
@@ -136,51 +138,41 @@ class Child extends Model
         if (!$this->born) {
             // Regardless of age, if you are unborn, you count as a pregnancy and get not credits
             // Even positive ages! This is a process thing
-
             $eligibility = "Pregnancy";
-
-            // Calculate notices
-            /*
-             * Remove these Notices for beta;
-             * TODO: consider way to re-implement so they only show on Web, not print.
-            $is_almost_born = ($today->diffInMonths($this->dob) < 1) && ($this->dob->isFuture());
-            $is_overdue = ($today->diffInMonths($this->dob) > 1) && ($this->dob->isPast());
-
-            // Add notices
-            ($is_almost_born) ? $notices[] = self::NOTICE_TYPES['ChildIsAlmostBorn'] : false;
-            ($is_overdue) ? $notices[] = self::NOTICE_TYPES['ChildIsOverDue'] : false;
-            */
         } else {
             // Setup dates
-            /** @var Carbon $first_birthday */
+            /** @var Carbon $first_birthday, $twelfth_birthday */
             $first_birthday = $this->dob->endOfMonth()->addYears(1);
             $first_schoolday = $this->calcSchoolStart();
+            $twelfth_birthday = $this->dob->endOfMonth()->addYears(12);
 
             // Calculate credits
             $is_born = $offsetDate->greaterThanOrEqualTo($this->dob);
             // Round up today to end of month (https://trello.com/b/2sgIDGYo/arc-dev)
             $is_one = $offsetDate->greaterThanOrEqualTo($first_birthday);
             $is_school_age = $offsetDate->greaterThanOrEqualTo($first_schoolday);
+            $is_twelve = $offsetDate->greaterThanOrEqualTo($twelfth_birthday);
 
             // Calculate notices
             $is_almost_one = ($first_birthday->isFuture() &&
-                ($offsetDate->diffInMonths($first_birthday) <= 1)) ;
+                ($offsetDate->diffInMonths($first_birthday) <= 1));
+
             $is_almost_school_age = ($first_schoolday->isFuture() &&
                 (($offsetDate->diffInMonths($first_schoolday) <= 1) ? true : false));
 
+            $is_almost_twelve = ($twelfth_birthday->isFuture() &&
+                (($offsetDate->diffInMonths($twelfth_birthday) <= 1) ? true : false));
+
+
             // Populate notices and credits arrays.
+            ($is_almost_twelve) ? $notices[] = self::NOTICE_TYPES["ChildIsAlmostTwelve"]: false;
             ($is_almost_one) ? $notices[] = self::NOTICE_TYPES["ChildIsAlmostOne"]: false;
             ($is_almost_school_age) ? $notices[] = self::NOTICE_TYPES['ChildIsAlmostSchoolAge']: false;
             (!$is_one && $is_born) ? $credits[] = self::CREDIT_TYPES["ChildIsUnderOne"]: false;
             (!$is_school_age && $is_born) ? $credits[] = self::CREDIT_TYPES["ChildIsUnderSchoolAge"] : false;
-
-            if (!empty($credits)) {
-                $eligibility = 'Eligible';
-            }
         }
 
         return [
-            'eligibility' => $eligibility,
             'notices' => $notices,
             'credits' => $credits,
             'vouchers' => array_sum(array_column($credits, "vouchers")),
