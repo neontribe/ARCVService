@@ -16,8 +16,11 @@
                     <label for="centre" class="required">Centre</label>
                     <select name="centre" id="centre" class="{{ $errors->has('centre') ? 'error' : '' }}" required>
                         <option value="">Choose one</option>
-                        @foreach ($centres as $centre)
-                            <option value="{{ $centre->id }}">{{ $centre->name }}</option>
+                        @foreach ($sponsors as $sponsor)
+                            <optgroup label="{{$sponsor->name}}">
+                            @foreach ($sponsor->centres as $centre)
+                                <option value="{{ $centre->id }}">{{ $centre->name }}</option>
+                            @endforeach
                         @endforeach
                     </select>
                     @if($errors->has('name')) <label for="name" class="alert-danger">{{ implode("<br>", $errors->get('name')) }}</label> @endif

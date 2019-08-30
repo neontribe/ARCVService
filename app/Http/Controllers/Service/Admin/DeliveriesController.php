@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Service\Admin;
 use App\Http\Controllers\Controller;
-use App\Centre;
+use App\Sponsor;
 
 class DeliveriesController extends Controller
 {
@@ -24,8 +24,8 @@ class DeliveriesController extends Controller
      */
     public function create()
     {
-        $centres = Centre::get();
+        $sponsors = Sponsor::get();
 
-        return view('service.deliveries.create', compact('centres'));
+        return view('service.deliveries.create', compact('sponsors'));
     }
 }
