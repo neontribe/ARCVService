@@ -8305,7 +8305,7 @@ h1 {
   background-color: white;
   border-radius: 3px;
   height: 48px;
-  font-size: 1.5em;
+  font-size: 1.25em;
   line-height: 20px;
   padding: 0 10px;
 }
@@ -8372,7 +8372,7 @@ h1 {
 .styled-form input[type=email],
 .styled-form input[type=date] {
   min-height: 48px;
-  font-size: 1.5em;
+  font-size: 1.25em;
   line-height: 20px;
   padding: 0 10px;
 }

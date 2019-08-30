@@ -28,4 +28,9 @@ class DeliveriesController extends Controller
 
         return view('service.deliveries.create', compact('sponsors'));
     }
+
+    public function store()
+    {
+        print_r('yay');
+    }
 }

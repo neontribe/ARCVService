@@ -9,7 +9,7 @@
 
         <p>Use the form below to mark a batch of vouchers as being sent. Add the centre they're being sent to, start and end voucher codes of the batch and the date they're being sent.</p>
 
-        <form role="form" class="styled-form">
+        <form role="form" class="styled-form" method="POST" action="{{ route('admin.deliveries.store') }}">
             {!! csrf_field() !!}
             <div class="horizontal-container">
                 <div class="select">
@@ -23,7 +23,7 @@
                             @endforeach
                         @endforeach
                     </select>
-                    @if($errors->has('name')) <label for="name" class="alert-danger">{{ implode("<br>", $errors->get('name')) }}</label> @endif
+                    @if($errors->has('centre')) <label for="centre" class="alert-danger">{{ implode("<br>", $errors->get('centre')) }}</label> @endif
                 </div>
                 <div>
                     <label for="voucher-start" class="required">Start Voucher</label>
@@ -43,46 +43,6 @@
             </div>
             <button type="submit" id="createWorker">Add worker</button>
         </form>
-
-        <script>
-            function buildCheckboxes(data) {
-                if (data.length > 0) {
-                    var boxes = $.map(data, function(obj) {
-                        return  '<div class="checkbox-group">' +
-                            '<input type="checkbox" id="neighbour-' +obj.id+ '" name="alternative_centres[]" value="' +obj.id+ '" >' +
-                            '<label for="neighbour-' +obj.id+ '">' +obj.name+ '</label>' +
-                            '</div>';
-                    });
-                    return boxes.join('');
-                }
-                return '<div><p>This centre has no neighbours.</p></div>';
-            }
-
-            $(document).ready(
-                function () {
-                    $('#worker_centre').change(function () {
-                        $('#alternatives').removeClass('hidden');
-                        var centreId = parseInt($('#worker_centre').val());
-                        // It's probably a number
-                        if (!isNaN(centreId)) {
-                            $.getJSON('/centres/' + centreId + '/neighbours')
-                                .then(
-                                    function (result) {
-                                        // success; show the data
-                                        $('#centres')
-                                            .html(buildCheckboxes(result));
-                                    },
-                                    function () {
-                                        // failure; show an error message
-                                        $('#centres')
-                                            .html('<div><p>Sorry, there has been an error.</p></div>');
-                                    }
-                                );
-                        }
-                    });
-                }
-            );
-        </script>
     </div>
 </div>
 
