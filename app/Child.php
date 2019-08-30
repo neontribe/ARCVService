@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Child extends Model
 {
-
     // This has a | in the reason field because we want to carry the entity with it.
     const NOTICE_TYPES = [
         'ChildIsAlmostOne' => ['reason' => 'child|almost 1 year old'],
@@ -21,7 +20,7 @@ class Child extends Model
     const CREDIT_TYPES = [
         'ChildIsUnderOne' => ['reason' => 'child|under 1 year old', 'vouchers' => 3],
         'ChildIsUnderSchoolAge' => ['reason' => 'child|under school age', 'vouchers' => 3],
-        'ChildIsSchoolAgeToTwelve' => ['reason', 'child|almost 12 years old' => 3]
+        'ChildIsUnderTwelve' => ['reason', 'child|almost 12 years old' => 3]
     ];
 
     /**
@@ -146,8 +145,9 @@ class Child extends Model
             $first_schoolday = $this->calcSchoolStart();
             $twelfth_birthday = $this->dob->endOfMonth()->addYears(12);
 
-            // Calculate credits
+            // Calculate creditable attributes
             $is_born = $offsetDate->greaterThanOrEqualTo($this->dob);
+
             // Round up today to end of month (https://trello.com/b/2sgIDGYo/arc-dev)
             $is_one = $offsetDate->greaterThanOrEqualTo($first_birthday);
             $is_school_age = $offsetDate->greaterThanOrEqualTo($first_schoolday);
@@ -164,15 +164,19 @@ class Child extends Model
                 (($offsetDate->diffInMonths($twelfth_birthday) <= 1) ? true : false));
 
 
-            // Populate notices and credits arrays.
+            // Populate notices
             ($is_almost_twelve) ? $notices[] = self::NOTICE_TYPES["ChildIsAlmostTwelve"]: false;
             ($is_almost_one) ? $notices[] = self::NOTICE_TYPES["ChildIsAlmostOne"]: false;
             ($is_almost_school_age) ? $notices[] = self::NOTICE_TYPES['ChildIsAlmostSchoolAge']: false;
+
+            // Populate credits
             (!$is_one && $is_born) ? $credits[] = self::CREDIT_TYPES["ChildIsUnderOne"]: false;
             (!$is_school_age && $is_born) ? $credits[] = self::CREDIT_TYPES["ChildIsUnderSchoolAge"] : false;
+            (!$is_twelve && $is_born) ? $credits[] = self::CREDIT_TYPES["ChildIsUnderSchoolAge"] : false;
         }
 
         return [
+            'eligibility' => $eligibility,
             'notices' => $notices,
             'credits' => $credits,
             'vouchers' => array_sum(array_column($credits, "vouchers")),

@@ -183,6 +183,7 @@ class Family extends Model
 
     /**
      * Attribute that gets the number of eligible children
+     * If this is 0, then they're not eligible.
      *
      * @return integer|null
      */
