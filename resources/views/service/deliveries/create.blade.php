@@ -27,12 +27,12 @@
                 </div>
                 <div>
                     <label for="voucher-start" class="required">Start Voucher</label>
-                    <input type="text" id="voucher-start" name="voucher-start" class="{{ $errors->has('voucher-start') ? 'error' : '' }}" required >
+                    <input type="text" id="voucher-start" name="voucher-start" class="{{ $errors->has('voucher-start') ? 'error' : '' }} uppercase" required >
                     @if($errors->has('voucher-start')) <label for="voucher-start" class="alert-danger">{{ implode("<br>", $errors->get('voucher-start')) }}</label> @endif
                 </div>
                 <div>
                     <label for="voucher-end" class="required">End Voucher</label>
-                    <input type="text" id="voucher-end" name="voucher-end" class="{{ $errors->has('voucher-end') ? 'error' : '' }}" required >
+                    <input type="text" id="voucher-end" name="voucher-end" class="{{ $errors->has('voucher-end') ? 'error' : '' }} uppercase" required >
                     @if($errors->has('voucher-end')) <label for="voucher-end" class="alert-danger">{{ implode("<br>", $errors->get('voucher-end')) }}</label> @endif
                 </div>
                 <div>
