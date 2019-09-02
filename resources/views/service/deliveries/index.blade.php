@@ -15,17 +15,17 @@
         <table class="table table-striped sortable">
             <thead>
                 <tr>
-                    <th>Voucher Range<button onClick="orderByRange()"><span class="glyphicon glyphicon-chevron-down"></span></button></th>
-                    <th>Centre</th>
-                    <th>Date Sent</th>
+                    <th>Voucher Range<button onClick="orderAscending('range')"><span class="glyphicon glyphicon-chevron-down"></span></button></th>
+                    <th>Centre<button onClick="orderAscending('centre')"><span class="glyphicon glyphicon-chevron-down"></span></button></th>
+                    <th>Date Sent<button onClick="orderAscending('date')"><span class="glyphicon glyphicon-chevron-down"></span></button></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($deliveries as $delivery)
                     <tr>
                         <td class="range {{ $loop->index}}">{{ $delivery->range }}</td>
-                        <td>{{ $delivery->centre }}</td>
-                        <td>{{ $delivery->date }}</td>
+                        <td class="centre {{ $loop->index}}">{{ $delivery->centre }}</td>
+                        <td class="date {{ $loop->index}}">{{ $delivery->date }}</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -33,20 +33,30 @@
     </div>
     <script>
 
-            function orderByRange() {
-                // Create array of each range
-                var deliveriesArr = [];
-                $('.range').each(function(index, element){ 
-                    deliveriesArr.push(element.innerHTML);
+            function orderAscending(column) {
+                // Create array of each item in column
+                var Arr = [];
+                const colClass = '.' + column;
+
+                $(colClass).each(function(index, element){ 
+                    Arr.push(element.innerHTML);
                 });
 
                 // Order array alphabetically
-                var sortedDeliveriesArr = deliveriesArr.sort();
+                var sortedArr = Arr.sort();
 
-                // Replace them with each id="range"
-                sortedDeliveriesArr.forEach(function(item, index) {
-                    const existingEl = '.range.' + index;
-                    const newEl = '<td class="range ' + index + '">' + item + '</td>';
+                // Replace existing table elements with newly ordered ones
+                sortedArr.forEach(function(item, index) {
+
+                    // Replace existing elements using index and add new index to sibling
+                    const existingEl = colClass + '.' + index;
+                    const newEl = '<td class="' + column + ' ' + index + '">' + item + '</td>';
+
+                    // Traverse siblings
+
+                    // target current siblings
+                    elSiblings = $(existingEl).siblings();
+                    $(elSiblings).replaceWith
                     $(existingEl).replaceWith(newEl);
                 });
             };
