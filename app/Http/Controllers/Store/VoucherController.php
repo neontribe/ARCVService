@@ -39,8 +39,14 @@ class VoucherController extends Controller
         $file = fopen($disk->path($archiveName), 'r');
         $header = fread($file, SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES);
 
-        // Initialise the decryption stream with its initial header. For more documentation, SecretStreamWrapper.
-        $stream = sodium_crypto_secretstream_xchacha20poly1305_init_pull($header, SecretStreamWrapper::getKey());
+        try {
+            // Initialise the decryption stream with its initial header. For more documentation, SecretStreamWrapper.
+            $stream = sodium_crypto_secretstream_xchacha20poly1305_init_pull($header, SecretStreamWrapper::getKey());
+        } catch (\SodiumException $e) {
+            // TODO : This error copy needs some UI.
+            return redirect(URL::route('store.dashboard'))
+                ->with('error_message', "Sorry, the export file was unreadable. Please contact support.");
+        }
 
         // We want to only keep a small buffer in memory at any time, so our response will be streamed.
         return new StreamedResponse(function () use ($file, &$stream) {
