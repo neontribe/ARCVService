@@ -15,7 +15,7 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Voucher Range</th>
+                    <th>Voucher Range<button onClick="orderByRange()"><span class="glyphicon glyphicon-chevron-down"></span></button></th>
                     <th>Centre</th>
                     <th>Date Sent</th>
                 </tr>
@@ -23,7 +23,7 @@
             <tbody>
                 @foreach ($deliveries as $delivery)
                     <tr>
-                        <td>{{ $delivery->range }}</td>
+                        <td class="range {{ $loop->index}}">{{ $delivery->range }}</td>
                         <td>{{ $delivery->centre }}</td>
                         <td>{{ $delivery->date }}</td>
                     </tr>
@@ -31,7 +31,27 @@
             </tbody>
         </table>
     </div>
+    <script>
 
+            function orderByRange() {
+                // Create array of each range
+                var deliveriesArr = [];
+                $('.range').each(function(index, element){ 
+                    deliveriesArr.push(element.innerHTML);
+                });
+
+                // Order array alphabetically
+                var sortedDeliveriesArr = deliveriesArr.sort();
+
+                // Replace them with each id="range"
+                sortedDeliveriesArr.forEach(function(item, index) {
+                    const existingEl = '.range.' + index;
+                    const newEl = '<td class="range ' + index + '">' + item + '</td>';
+                    $(existingEl).replaceWith(newEl);
+                });
+            };
+
+    </script>
 </div>
 
 @endsection

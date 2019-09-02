@@ -19,14 +19,14 @@ class DeliveriesController extends Controller
                 "date" => "20-08-2019"
            ],
            (object)[
-            "range" => "KIL0075 - KIL0056",
-            "centre" => "Kilmarnochshire CC",
-            "date" => "20-08-2019"
+                "range" => "BRO0032 - BRO0033",
+                "centre" => "Bromptonshire CC",
+                "date" => "22-08-2019"
             ],
             (object)[
-            "range" => "KIL0075 - KIL0056",
-            "centre" => "Kilmarnochshire CC",
-            "date" => "20-08-2019"
+                "range" => "SVE0075 - SVE0056",
+                "centre" => "Svelteshire CC",
+                "date" => "21-08-2019"
             ]
         ]);
         
