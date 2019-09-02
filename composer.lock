@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1e28c63c7f600ae2bc5710cdd5b2806f",
+    "content-hash": "5e489cfda2ec4d6d2d44485d1c749417",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -243,6 +243,58 @@
                 "pdf"
             ],
             "time": "2019-02-26T18:07:43+00:00"
+        },
+        {
+            "name": "chalcedonyt/laravel-specification",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/chalcedonyt/laravel-specification.git",
+                "reference": "2f9ac005c05157abc381482c4689059b2731fd71"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/chalcedonyt/laravel-specification/zipball/2f9ac005c05157abc381482c4689059b2731fd71",
+                "reference": "2f9ac005c05157abc381482c4689059b2731fd71",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "~5.1",
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "4.*"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Chalcedonyt\\Specification\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tim Teoh",
+                    "role": "Developer",
+                    "email": "chalcedonyt@gmail.com"
+                }
+            ],
+            "description": "Implementation of the specification pattern",
+            "homepage": "https://github.com/chalcedonyt/laravel-specification",
+            "keywords": [
+                "laravel",
+                "specification",
+                "specification pattern"
+            ],
+            "time": "2018-08-06T09:42:49+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -6071,18 +6123,18 @@
             "authors": [
                 {
                     "name": "Arne Blankerts",
-                    "email": "arne@blankerts.de",
-                    "role": "Developer"
+                    "role": "Developer",
+                    "email": "arne@blankerts.de"
                 },
                 {
                     "name": "Sebastian Heuer",
-                    "email": "sebastian@phpeople.de",
-                    "role": "Developer"
+                    "role": "Developer",
+                    "email": "sebastian@phpeople.de"
                 },
                 {
                     "name": "Sebastian Bergmann",
-                    "email": "sebastian@phpunit.de",
-                    "role": "Developer"
+                    "role": "Developer",
+                    "email": "sebastian@phpunit.de"
                 }
             ],
             "description": "Component for reading phar.io manifest information from a PHP Archive (PHAR)",
@@ -6448,8 +6500,8 @@
             "authors": [
                 {
                     "name": "Sebastian Bergmann",
-                    "email": "sb@sebastian-bergmann.de",
-                    "role": "lead"
+                    "role": "lead",
+                    "email": "sb@sebastian-bergmann.de"
                 }
             ],
             "description": "FilterIterator implementation that filters files based on a list of suffixes.",
@@ -6539,8 +6591,8 @@
             "authors": [
                 {
                     "name": "Sebastian Bergmann",
-                    "email": "sb@sebastian-bergmann.de",
-                    "role": "lead"
+                    "role": "lead",
+                    "email": "sb@sebastian-bergmann.de"
                 }
             ],
             "description": "Utility class for timing",
