@@ -44,6 +44,7 @@ It also requires PHP's `zip` extension installed and enabled.
 ### Styling
 #### Service 
 - Service styling is in `resources/assets/sass/app.scss`
+- When amending the styles in development, run `npm run watch` to watch for changes
 - Service is compiled from Sass with `npm run prod`
 #### Store
 - Store styling is in `public/store/css/main.css`
