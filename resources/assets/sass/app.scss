@@ -293,6 +293,13 @@ h1 {
   padding: 0;
 }
 
+.sortable.table {
+  button {
+    background: transparent;
+    border: 0;
+    float: right;
+  }
+}
 @media (min-width: 992px) {
   .container.login {
     width: 970px;

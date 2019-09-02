@@ -12,7 +12,7 @@
                 {{ Session::get('message') }}
             </div>
         @endif
-        <table class="table table-striped">
+        <table class="table table-striped sortable">
             <thead>
                 <tr>
                     <th>Voucher Range<button onClick="orderByRange()"><span class="glyphicon glyphicon-chevron-down"></span></button></th>
