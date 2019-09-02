@@ -296,8 +296,8 @@ class BundleController extends Controller
                     case "disbursed":
                         $messages[] = "These vouchers have been given out: " . join(', ', $values);
                         break;
-                    case "foreign":
-                        $messages[] = "Action denied on a different bundle: " . join(', ', $values);
+                    case "bundled":
+                        $messages[] = "These vouchers are already in a bundle: " . join(', ', $values);
                         break;
                     case "empty":
                         if ($values) {
