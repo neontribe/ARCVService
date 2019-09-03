@@ -42,7 +42,7 @@ class DeliveriesController extends Controller
         ]);
         
         return view('service.deliveries.index', compact('deliveries'));
-    };
+    }
   
     /**
      * Show the form for sending batches of vouchers.
