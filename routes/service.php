@@ -109,5 +109,12 @@ Route::group(['middleware' => 'auth:admin'], function () {
     Route::get('deliveries', [
         'as' =>'admin.deliveries.index',
         'uses' => 'Admin\DeliveriesController@index',
+    Route::get('deliveries/create', [
+        'as' =>'admin.deliveries.create',
+        'uses' => 'Admin\DeliveriesController@create',
+    ]);
+    Route::post('deliveries/store', [
+        'as' =>'admin.deliveries.store',
+        'uses' => 'Admin\DeliveriesController@store',
     ]);
 });

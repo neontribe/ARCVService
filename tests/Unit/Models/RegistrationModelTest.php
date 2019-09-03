@@ -27,26 +27,6 @@ class RegistrationModelTest extends TestCase
     }
 
     /** @test */
-    public function itCanGetReminders()
-    {
-        // Setup a registration with random family and centre
-        $registration = factory(Registration::class)->make();
-
-        $reminders = $registration->getStatus();
-        $this->assertContains(Registration::REMINDER_TYPES['PrivacyStatementNeeded'], $reminders);
-
-        // $registration->fm_diary_on = Carbon::now()->startOfMonth();
-        // $reminders = $registration->getStatus();
-        // $this->assertNotContains(Registration::REMINDER_TYPES['FoodDiaryNeeded'], $reminders);
-        // $this->assertContains(Registration::REMINDER_TYPES['FoodChartNeeded'], $reminders);
-
-        // $registration->fm_chart_on = Carbon::now()->startOfMonth();
-        // $reminders = $registration->getStatus();
-        // $this->assertNotContains(Registration::REMINDER_TYPES['FoodDiaryNeeded'], $reminders);
-        // $this->assertNotContains(Registration::REMINDER_TYPES['FoodChartNeeded'], $reminders);
-    }
-
-    /** @test */
     public function itCanReturnRegistrationsOnlyForActiveFamilies()
     {
         // Create a centre

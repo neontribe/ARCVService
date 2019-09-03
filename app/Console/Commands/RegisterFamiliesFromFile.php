@@ -103,9 +103,6 @@ class RegisterFamiliesFromFile extends Command
                     $signup_date = Carbon::createFromFormat('Y-m-d', $row->signup_date)->startOfDay();
 
                     $registration = new Registration([
-                        'fm_chart_on' => ($row->pie_chart == "Y") ? $signup_date : null,
-                        'fm_diary_on' => ($row->diary == "Y") ? $signup_date : null,
-                        'fm_privacy_on' => ($row->privacy == "Y") ? $signup_date : null,
                         'consented_on' => $signup_date,
                         'eligibility' => 'other',
                     ]);
