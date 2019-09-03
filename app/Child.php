@@ -20,7 +20,7 @@ class Child extends Model
     const CREDIT_TYPES = [
         'ChildIsUnderOne' => ['reason' => 'child|under 1 year old', 'vouchers' => 3],
         'ChildIsUnderSchoolAge' => ['reason' => 'child|under school age', 'vouchers' => 3],
-        'ChildIsUnderTwelve' => ['reason', 'child|almost 12 years old' => 3]
+        'ChildIsUnderTwelve' => ['reason' => 'child|almost 12 years old', 'vouchers' => 3]
     ];
 
     /**
@@ -123,63 +123,57 @@ class Child extends Model
      * @return array
      */
 
-    public function getStatus($offsetDate = false)
+    public function getStatus($offsetDate = null)
     {
-        if (!$offsetDate) {
-            $offsetDate = Carbon::today();
-        }
-
         $notices = [];
         $credits = [];
 
-        $eligibility = "Ineligible";
+        $rules = [
+            'notices' => [
+                new Services\VoucherEvaluator\Evaluations\ChildIsUnBorn($offsetDate),
+                new Services\VoucherEvaluator\Evaluations\ChildIsAlmostBorn($offsetDate),
+                new Services\VoucherEvaluator\Evaluations\ChildIsAlmostOne($offsetDate),
+                new Services\VoucherEvaluator\Evaluations\ChildIsAlmostSchoolAge($offsetDate)
+            ],
+            'credits' => [
+                new Services\VoucherEvaluator\Evaluations\ChildIsUnderOne($offsetDate, 3),
+                new Services\VoucherEvaluator\Evaluations\ChildIsUnderSchoolAge($offsetDate, 3)
+            ]
+        ];
+
+        foreach ($rules['notices'] as $rule) {
+            $outcome = $rule->test($this);
+            if ($outcome) {
+                $notices[] = ['reason' => $outcome::SUBJECT."|".$outcome::REASON];
+            }
+        }
+
+        foreach ($rules['credits'] as $rule) {
+            $outcome = $rule->test($this);
+            if ($outcome) {
+                $credits[] = [
+                    'reason' => $outcome::SUBJECT."|".$outcome::REASON,
+                    'credits' => $outcome->value
+                ];
+            }
+        }
+
+        $entitlement = array_sum(array_column($credits, "credits"));
 
         if (!$this->born) {
-            // Regardless of age, if you are unborn, you count as a pregnancy and get not credits
-            // Even positive ages! This is a process thing
             $eligibility = "Pregnancy";
         } else {
-            // Setup dates
-            /** @var Carbon $first_birthday, $twelfth_birthday */
-            $first_birthday = $this->dob->endOfMonth()->addYears(1);
-            $first_schoolday = $this->calcSchoolStart();
-            $twelfth_birthday = $this->dob->endOfMonth()->addYears(12);
-
-            // Calculate creditable attributes
-            $is_born = $offsetDate->greaterThanOrEqualTo($this->dob);
-
-            // Round up today to end of month (https://trello.com/b/2sgIDGYo/arc-dev)
-            $is_one = $offsetDate->greaterThanOrEqualTo($first_birthday);
-            $is_school_age = $offsetDate->greaterThanOrEqualTo($first_schoolday);
-            $is_twelve = $offsetDate->greaterThanOrEqualTo($twelfth_birthday);
-
-            // Calculate notices
-            $is_almost_one = ($first_birthday->isFuture() &&
-                ($offsetDate->diffInMonths($first_birthday) <= 1));
-
-            $is_almost_school_age = ($first_schoolday->isFuture() &&
-                (($offsetDate->diffInMonths($first_schoolday) <= 1) ? true : false));
-
-            $is_almost_twelve = ($twelfth_birthday->isFuture() &&
-                (($offsetDate->diffInMonths($twelfth_birthday) <= 1) ? true : false));
-
-
-            // Populate notices
-            ($is_almost_twelve) ? $notices[] = self::NOTICE_TYPES["ChildIsAlmostTwelve"]: false;
-            ($is_almost_one) ? $notices[] = self::NOTICE_TYPES["ChildIsAlmostOne"]: false;
-            ($is_almost_school_age) ? $notices[] = self::NOTICE_TYPES['ChildIsAlmostSchoolAge']: false;
-
-            // Populate credits
-            (!$is_one && $is_born) ? $credits[] = self::CREDIT_TYPES["ChildIsUnderOne"]: false;
-            (!$is_school_age && $is_born) ? $credits[] = self::CREDIT_TYPES["ChildIsUnderSchoolAge"] : false;
-            (!$is_twelve && $is_born) ? $credits[] = self::CREDIT_TYPES["ChildIsUnderSchoolAge"] : false;
+            $eligibility = ($entitlement > 0)
+                ? "Eligible"
+                : "Ineligible"
+            ;
         }
 
         return [
             'eligibility' => $eligibility,
             'notices' => $notices,
             'credits' => $credits,
-            'vouchers' => array_sum(array_column($credits, "vouchers")),
+            'vouchers' => $entitlement
             ];
     }
 
