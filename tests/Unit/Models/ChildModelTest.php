@@ -73,7 +73,7 @@ class ChildModelTest extends TestCase
         $this->assertEquals(2, count($credits));
 
         // Check the correct credit type is applied.
-        $this->assertContains(Child::CREDIT_TYPES['ChildIsUnderOne'], $credits);
+        $this->assertContains("Child|under one", $credits);
         $this->assertContains(Child::CREDIT_TYPES['ChildIsUnderSchoolAge'], $credits);
         $this->assertEquals(6, $child->entitlement);
     }

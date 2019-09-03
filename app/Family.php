@@ -7,12 +7,6 @@ use Log;
 
 class Family extends Model
 {
-
-    // This has a | in the reason field because we want to carry the entity with it.
-    const CREDIT_TYPES = [
-        'FamilyIsPregnant' => ['reason' => 'Family|pregnant', 'credits' => 3],
-    ];
-
     /**
      * The attributes that are mass assignable.
      *
@@ -91,7 +85,7 @@ class Family extends Model
             $outcome = $rule->test($this);
             if ($outcome) {
                 $credits[] = [
-                    'reason' => basename($outcome::SUBJECT)."|".$outcome::REASON,
+                    'reason' => class_basename($outcome::SUBJECT)."|".$outcome::REASON,
                     'credits' => $outcome->value
                 ];
             }

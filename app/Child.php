@@ -150,9 +150,9 @@ class Child extends Model
 
         foreach ($rules['credits'] as $rule) {
             $outcome = $rule->test($this);
-            if ($outcome) {
+            if ($outcome !== null) {
                 $credits[] = [
-                    'reason' => basename($outcome::SUBJECT)."|".$outcome::REASON,
+                    'reason' => class_basename($outcome::SUBJECT)."|".$outcome::REASON,
                     'credits' => $outcome->value
                 ];
             }

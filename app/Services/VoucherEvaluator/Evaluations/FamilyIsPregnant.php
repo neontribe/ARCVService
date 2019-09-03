@@ -17,7 +17,7 @@ class FamilyIsPregnant extends BaseFamilyEvaluation
     {
         parent::test($candidate);
 
-        ($candidate->expecting)
+        return ($candidate->expecting)
             ? $this->success()
             : $this->fail()
         ;

@@ -8,7 +8,7 @@ use Carbon\Carbon;
 abstract class AbstractEvaluation implements IEvaluation
 {
     /** @var integer $value */
-    protected $value;
+    public $value;
 
     /** @var Carbon $offsetDate */
     protected $offsetDate;
@@ -25,6 +25,7 @@ abstract class AbstractEvaluation implements IEvaluation
 
     protected function success()
     {
+        //die(print_r(get_class($this)));
         return $this;
     }
 

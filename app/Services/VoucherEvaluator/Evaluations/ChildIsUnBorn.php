@@ -22,7 +22,7 @@ class ChildIsUnBorn extends BaseChildEvaluation
     {
         parent::test($candidate);
 
-        ($this->specification->isSatisfiedBy($candidate))
+        return ($this->specification->isSatisfiedBy($candidate))
             ? $this->success()
             : $this->fail()
         ;
