@@ -9,18 +9,18 @@ class Child extends Model
 {
     // This has a | in the reason field because we want to carry the entity with it.
     const NOTICE_TYPES = [
-        'ChildIsAlmostOne' => ['reason' => 'child|almost 1 year old'],
-        'ChildIsAlmostBorn' => ['reason' => 'child|almost born'],
-        'ChildIsOverDue' => ['reason' => 'child|over due date'],
-        'ChildIsAlmostSchoolAge' => ['reason' => 'child|almost school age'],
-        'ChildIsAlmostTwelve' => ['reason' => 'child|almost 12 years old']
+        'ChildIsAlmostOne' => ['reason' => 'Child|almost 1 year old'],
+        'ChildIsAlmostBorn' => ['reason' => 'Child|almost born'],
+        'ChildIsOverDue' => ['reason' => 'Child|over due date'],
+        'ChildIsAlmostSchoolAge' => ['reason' => 'Child|almost school age'],
+        'ChildIsAlmostTwelve' => ['reason' => 'Child|almost 12 years old']
     ];
 
     // This has a | in the reason field because we want to carry the entity with it.
     const CREDIT_TYPES = [
-        'ChildIsUnderOne' => ['reason' => 'child|under 1 year old', 'vouchers' => 3],
-        'ChildIsUnderSchoolAge' => ['reason' => 'child|under school age', 'vouchers' => 3],
-        'ChildIsUnderTwelve' => ['reason' => 'child|almost 12 years old', 'vouchers' => 3]
+        'ChildIsUnderOne' => ['reason' => 'Child|under 1 year old', 'vouchers' => 3],
+        'ChildIsUnderSchoolAge' => ['reason' => 'Child|under school age', 'vouchers' => 3],
+        'ChildIsUnderTwelve' => ['reason' => 'Child|under 12 years old', 'vouchers' => 3]
     ];
 
     /**
@@ -152,7 +152,7 @@ class Child extends Model
             $outcome = $rule->test($this);
             if ($outcome) {
                 $credits[] = [
-                    'reason' => $outcome::SUBJECT."|".$outcome::REASON,
+                    'reason' => basename($outcome::SUBJECT)."|".$outcome::REASON,
                     'credits' => $outcome->value
                 ];
             }

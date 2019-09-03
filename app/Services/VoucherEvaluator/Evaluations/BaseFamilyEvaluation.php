@@ -2,12 +2,12 @@
 
 namespace App\Services\VoucherEvaluator\Evaluations;
 
-use App\Child;
+use App\Family;
 use InvalidArgumentException;
 
-class BaseChildEvaluation extends AbstractEvaluation
+class BaseFamilyEvaluation extends AbstractEvaluation
 {
-    const SUBJECT = Child::class;
+    const SUBJECT = Family::class;
 
     public function test($candidate)
     {

@@ -10,7 +10,7 @@ use Chalcedonyt\Specification\NotSpec;
 
 class ChildIsAlmostBorn extends BaseChildEvaluation
 {
-    const REASON = 'is due';
+    const REASON = 'almost born';
     private $specification;
 
     public function __construct(Carbon $offsetDate = null, $value = 3)

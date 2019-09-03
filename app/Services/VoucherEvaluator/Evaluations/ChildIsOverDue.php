@@ -10,7 +10,7 @@ use Chalcedonyt\Specification\NotSpec;
 
 class ChildIsOverDue extends BaseChildEvaluation
 {
-    const REASON = 'is overdue';
+    const REASON = 'over due date';
     private $specification;
 
     public function __construct(Carbon $offsetDate = null, $value = 3)

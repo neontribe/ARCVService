@@ -9,7 +9,7 @@ use Chalcedonyt\Specification\AndSpec;
 
 class ChildIsAlmostSchoolAge extends BaseChildEvaluation
 {
-    const REASON = 'is almost school age';
+    const REASON = 'almost school age';
     private $specification;
 
     public function __construct(Carbon $offsetDate = null, $value = null)

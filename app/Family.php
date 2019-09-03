@@ -10,7 +10,7 @@ class Family extends Model
 
     // This has a | in the reason field because we want to carry the entity with it.
     const CREDIT_TYPES = [
-        'FamilyIsPregnant' => ['reason' => 'family|pregnant', 'vouchers' => 3],
+        'FamilyIsPregnant' => ['reason' => 'Family|pregnant', 'credits' => 3],
     ];
 
     /**
@@ -73,14 +73,36 @@ class Family extends Model
             $credits = array_merge($credits, $child_status['credits']);
         }
 
-        if ($this->expecting) {
-            $credits[] = self::CREDIT_TYPES['FamilyIsPregnant'];
+        $rules = [
+            'notices' => [],
+            'credits' => [
+                new Services\VoucherEvaluator\Evaluations\FamilyIsPregnant(null, 3)
+            ]
+        ];
+
+        foreach ($rules['notices'] as $rule) {
+            $outcome = $rule->test($this);
+            if ($outcome) {
+                $notices[] = ['reason' => $outcome::SUBJECT."|".$outcome::REASON];
+            }
         }
+
+        foreach ($rules['credits'] as $rule) {
+            $outcome = $rule->test($this);
+            if ($outcome) {
+                $credits[] = [
+                    'reason' => basename($outcome::SUBJECT)."|".$outcome::REASON,
+                    'credits' => $outcome->value
+                ];
+            }
+        }
+
+        $entitlement =  array_sum(array_column($credits, 'credits'));
 
         return [
             'credits' => $credits,
             'notices' => $notices,
-            'vouchers' => array_sum(array_column($credits, "vouchers")),
+            'vouchers' => $entitlement
         ];
     }
 
@@ -161,7 +183,6 @@ class Family extends Model
      */
     public function getEntitlementAttribute()
     {
-        // TODO: continue to resist urge to use a rules engine or a specification pattern
         return $this->getStatus()['vouchers'];
     }
 
