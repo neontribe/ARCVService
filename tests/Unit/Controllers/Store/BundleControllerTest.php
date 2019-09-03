@@ -270,10 +270,12 @@ class BundleControllerTest extends StoreTestCase
                 ]
             );
 
-        // Dig out errors from Session
-        $response->seeInSession('error_message');
-        $error = Session::get("error_message");
-        $this->assertRegExp('/Failed adding more than ' . config('arc.bundle_max_voucher_append') .' vouchers/', $error);
+        // Confirm that we have supplied the appropriate error message to the session
+        $response->seeInSession('error_messages');
+        $this->assertTrue($this->hasMatchingErrorMessage(
+            Session::get('error_messages'),
+            '/Failed adding more than ' . config('arc.bundle_max_voucher_append') . ' vouchers/'
+        ));
 
         // see we're redirected back
         $this->followRedirects()
@@ -498,10 +500,12 @@ class BundleControllerTest extends StoreTestCase
                 $data
             );
 
-        // Dig out errors from Session
-        $response->seeInSession('error_message');
-        $error = Session::get("error_message");
-        $this->assertRegExp('/Action denied on empty bundle/', $error);
+        // Confirm that we have supplied the appropriate error message to the session
+        $response->seeInSession('error_messages');
+        $this->assertTrue($this->hasMatchingErrorMessage(
+            Session::get('error_messages'),
+            '/Action denied on empty bundle/'
+        ));
 
         // Check the submission was a success
         $this->followRedirects()
@@ -582,5 +586,23 @@ class BundleControllerTest extends StoreTestCase
             ->orderByDesc('id')
             ->first();
         $this->assertEquals($this->testCodes[1], $last_voucher->code);
+    }
+
+    /**
+     * Search the session's array of error messages for one that matches our regular expression.
+     *
+     * @param (string|array)[] $errorMessages array
+     * @param string $regex
+     * @return bool whether a matching message was found or not
+     */
+    private function hasMatchingErrorMessage($errorMessages, $regex) {
+        foreach ($errorMessages as $error) {
+            // If the error message is an array describing some HTML, extract the text, otherwise use as a string directly.
+            $string = is_array($error) && array_key_exists('html', $error) ? $error['html'] : $error;
+            if (preg_match($regex, $string)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
