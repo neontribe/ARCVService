@@ -22,45 +22,19 @@
             </thead>
             <tbody>
                 @foreach ($deliveries as $delivery)
-                    <tr>
-                        <td class="range {{ $loop->index}}">{{ $delivery->range }}</td>
-                        <td class="centre {{ $loop->index}}">{{ $delivery->centre }}</td>
-                        <td class="date {{ $loop->index}}">{{ $delivery->date }}</td>
+                    <tr class="{{ $loop->index}}">
+                        <td class="range">{{ $delivery->range }}</td>
+                        <td class="centre">{{ $delivery->centre }}</td>
+                        <td class="date">{{ $delivery->date }}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
     <script>
-
-            function orderAscending(column) {
-                // Create array of each item in column
-                var Arr = [];
-                const colClass = '.' + column;
-
-                $(colClass).each(function(index, element){ 
-                    Arr.push(element.innerHTML);
-                });
-
-                // Order array alphabetically
-                var sortedArr = Arr.sort();
-
-                // Replace existing table elements with newly ordered ones
-                sortedArr.forEach(function(item, index) {
-
-                    // Replace existing elements using index and add new index to sibling
-                    const existingEl = colClass + '.' + index;
-                    const newEl = '<td class="' + column + ' ' + index + '">' + item + '</td>';
-
-                    // Traverse siblings
-
-                    // target current siblings
-                    elSiblings = $(existingEl).siblings();
-                    $(elSiblings).replaceWith
-                    $(existingEl).replaceWith(newEl);
-                });
-            };
-
+        function orderAscending(column) {
+            console.log(column);
+        };
     </script>
 </div>
 

@@ -27,7 +27,17 @@ class DeliveriesController extends Controller
                 "range" => "SVE0075 - SVE0056",
                 "centre" => "Svelteshire CC",
                 "date" => "21-08-2019"
-            ]
+            ],
+            (object)[
+                "range" => "DRO0023 - DRO0054",
+                "centre" => "Droptonshire CC",
+                "date" => "29-08-2019"
+            ],
+            (object)[
+                "range" => "DRO0013 - DRO0024",
+                "centre" => "Droptonshire CC",
+                "date" => "20-08-2019"
+            ],
         ]);
         
         $sponsors = Sponsor::get();
