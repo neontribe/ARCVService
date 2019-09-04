@@ -296,8 +296,37 @@ class BundleController extends Controller
                     case "disbursed":
                         $messages[] = "These vouchers have been given out: " . join(', ', $values);
                         break;
-                    case "foreign":
-                        $messages[] = "Action denied on a different bundle: " . join(', ', $values);
+                    case "bundled":
+                        // Some vouchers were allocated to a family already. Partition these based on whether the user
+                        // has permission to remove them from the current family, so we can make a nice interactive
+                        // error message.
+
+                        $relevant = array();
+                        $inaccessible = array();
+
+                        foreach ($values as $voucher) {
+                            $registration = $voucher->bundle->registration;
+
+                            if (Auth::user()->isRelevantCentre($registration->centre)) {
+                                // The user can deallocate the voucher from its current family at this route.
+                                $route = route(
+                                    'store.registration.voucher-manager',
+                                    ['registration' => $registration->id]
+                                );
+
+                                $relevant[] = "<a href=\"$route\">" . e($voucher->code) . '</a>';
+                            } else {
+                                // The user does not have permission to remove the voucher's current allocation.
+                                $inaccessible[] = $voucher->code;
+                            }
+                        }
+
+                        // Generate error messages where vouchers of the sort existed, using unescaped HTML where necessary.
+                        $relevant && $messages[] = array(
+                            'html' => "These vouchers are currently allocated to a different family: " . join(', ', $relevant)
+                        );
+                        $inaccessible && $messages[] = "These vouchers are allocated to a family in a centre you can't access: " . join(', ', $inaccessible);
+
                         break;
                     case "empty":
                         if ($values) {
@@ -317,7 +346,7 @@ class BundleController extends Controller
             // Spit the basic error messages back
             return redirect($failRoute)
                 ->withInput()
-                ->with('error_message', join(', ', $messages) . '.');
+                ->with('error_messages', $messages);
         } else {
             // Otherwise, sure, return to the new view.
             return redirect($successRoute)

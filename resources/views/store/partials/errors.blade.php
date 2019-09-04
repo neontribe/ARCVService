@@ -4,7 +4,13 @@
     </div>
     <div>
         @foreach ($error_array as $error_text)
-            <p>{{ $error_text }}</p>
+            @if (is_array($error_text) && array_key_exists('html', $error_text))
+                {{-- Errors specified as pure-HTML will be embedded unsanitised --}}
+                <p>{!! $error_text['html'] !!}</p>
+            @else
+                {{-- All other strings will be protected against injection --}}
+                <p>{{ $error_text }}</p>
+            @endif
         @endforeach
     </div>
 </div>
