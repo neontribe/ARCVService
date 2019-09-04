@@ -7,22 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Child extends Model
 {
-    // This has a | in the reason field because we want to carry the entity with it.
-    const NOTICE_TYPES = [
-        'ChildIsAlmostOne' => ['reason' => 'Child|almost 1 year old'],
-        'ChildIsAlmostBorn' => ['reason' => 'Child|almost born'],
-        'ChildIsOverDue' => ['reason' => 'Child|over due date'],
-        'ChildIsAlmostSchoolAge' => ['reason' => 'Child|almost school age'],
-        'ChildIsAlmostTwelve' => ['reason' => 'Child|almost 12 years old']
-    ];
-
-    // This has a | in the reason field because we want to carry the entity with it.
-    const CREDIT_TYPES = [
-        'ChildIsUnderOne' => ['reason' => 'Child|under 1 year old', 'vouchers' => 3],
-        'ChildIsUnderSchoolAge' => ['reason' => 'Child|under school age', 'vouchers' => 3],
-        'ChildIsUnderTwelve' => ['reason' => 'Child|under 12 years old', 'vouchers' => 3]
-    ];
-
     /**
      * The attributes that are mass assignable.
      *
@@ -144,7 +128,7 @@ class Child extends Model
         foreach ($rules['notices'] as $rule) {
             $outcome = $rule->test($this);
             if ($outcome) {
-                $notices[] = ['reason' => $outcome::SUBJECT."|".$outcome::REASON];
+                $notices[] = ['reason' => class_basename($outcome::SUBJECT)."|".$outcome::REASON];
             }
         }
 
@@ -153,12 +137,12 @@ class Child extends Model
             if ($outcome !== null) {
                 $credits[] = [
                     'reason' => class_basename($outcome::SUBJECT)."|".$outcome::REASON,
-                    'credits' => $outcome->value
+                    'value' => $outcome->value
                 ];
             }
         }
 
-        $entitlement = array_sum(array_column($credits, "credits"));
+        $entitlement = array_sum(array_column($credits, "value"));
 
         if (!$this->born) {
             $eligibility = "Pregnancy";
@@ -173,7 +157,7 @@ class Child extends Model
             'eligibility' => $eligibility,
             'notices' => $notices,
             'credits' => $credits,
-            'vouchers' => $entitlement
+            'entitlement' => $entitlement
             ];
     }
 
@@ -194,7 +178,7 @@ class Child extends Model
      */
     public function getEntitlementAttribute()
     {
-        return $this->getStatus()['vouchers'];
+        return $this->getStatus()['entitlement'];
     }
 
     /**

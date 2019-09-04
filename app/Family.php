@@ -77,7 +77,7 @@ class Family extends Model
         foreach ($rules['notices'] as $rule) {
             $outcome = $rule->test($this);
             if ($outcome) {
-                $notices[] = ['reason' => $outcome::SUBJECT."|".$outcome::REASON];
+                $notices[] = ['reason' => class_basename($outcome::SUBJECT)."|".$outcome::REASON];
             }
         }
 
