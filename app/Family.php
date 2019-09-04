@@ -86,7 +86,7 @@ class Family extends Model
             if ($outcome) {
                 $credits[] = [
                     'reason' => class_basename($outcome::SUBJECT)."|".$outcome::REASON,
-                    'credits' => $outcome->value
+                    'value' => $outcome->value
                 ];
             }
         }
@@ -96,7 +96,7 @@ class Family extends Model
         return [
             'credits' => $credits,
             'notices' => $notices,
-            'vouchers' => $entitlement
+            'entitlement' => $entitlement
         ];
     }
 
@@ -125,7 +125,7 @@ class Family extends Model
                             return $credit['reason'] == $reason;
                         }
                     ),
-                    'vouchers'
+                    'value'
                 )
             );
 
@@ -177,7 +177,7 @@ class Family extends Model
      */
     public function getEntitlementAttribute()
     {
-        return $this->getStatus()['vouchers'];
+        return $this->getStatus()['entitlement'];
     }
 
     /**

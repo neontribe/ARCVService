@@ -14,6 +14,11 @@ class FamilyModelTest extends TestCase
 {
     use DatabaseMigrations;
 
+    // This has a | in the reason field because we want to carry the entity with it.
+    const CREDIT_TYPES = [
+        'FamilyIsPregnant' => ['reason' => 'Family|pregnant', 'value' => 3],
+    ];
+
     /** @test */
     public function itCreditsWhenAFamilyIsPregnant()
     {
@@ -24,9 +29,9 @@ class FamilyModelTest extends TestCase
         $family->children()->save($pregnancy);
 
         // There should be a credit reason of 'FamilyIsPregnant'
-        $credit_reasons = $family->getCreditReasons();
-        $this->assertEquals(1, count($credit_reasons));
-        $this->assertEquals('pregnant', $credit_reasons[0]["reason"]);
+        $credits = $family->getStatus()['credits'];
+        $this->assertEquals(1, count($credits));
+        $this->assertContains(self::CREDIT_TYPES['FamilyIsPregnant'], $credits);
     }
 
     /** @test */

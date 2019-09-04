@@ -142,14 +142,14 @@ class Child extends Model
             }
         }
 
-        $entitlement = array_sum(array_column($credits, "value"));
+        $entitlement = array_sum(array_column($credits, 'value'));
 
         if (!$this->born) {
-            $eligibility = "Pregnancy";
+            $eligibility = 'Pregnancy';
         } else {
             $eligibility = ($entitlement > 0)
-                ? "Eligible"
-                : "Ineligible"
+                ? 'Eligible'
+                : 'Ineligible'
             ;
         }
 
