@@ -315,7 +315,7 @@ $factory->define(App\Registration::class, function () {
 
     // Add dependent models
     $family->carers()->saveMany(factory(App\Carer::class, random_int(1, 3))->make());
-    $family->children()->saveMany(factory(\App\Child::class, random_int(0, 4))->make());
+    $family->children()->saveMany(factory(App\Child::class, random_int(0, 4))->make());
 
     return [
         'centre_id' => $centre->id,
