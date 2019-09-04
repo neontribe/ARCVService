@@ -3,7 +3,9 @@
 namespace App;
 
 use App\Traits\Statable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 
@@ -143,7 +145,7 @@ class Voucher extends Model
     /**
      * The Sponsor that backs this voucher
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function sponsor()
     {
@@ -153,7 +155,7 @@ class Voucher extends Model
     /**
      * The Trader that collected this voucher
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function trader()
     {
@@ -163,17 +165,28 @@ class Voucher extends Model
     /**
      * The bundle that A CC may have collated this voucher into
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function bundle()
     {
         return $this->belongsTo(Bundle::class);
     }
+
+    /**
+     * Teh Delivery the voucher was attached to
+     *
+     * @return BelongsTo
+     */
+    public function delivery()
+    {
+        return $this->belongsTo(Delivery::class);
+    }
+
     /**
      * Get the most recent voucher_state change to payment_pending.
      * There should only ever be one per voucher - but most recent safer.
      *
-     * @return App\VoucherState
+     * @return VoucherState
      */
     public function paymentPendedOn()
     {
@@ -186,7 +199,7 @@ class Voucher extends Model
      * Get the most recent voucher_state change to recorded.
      * There should only ever be one per voucher - but most recent safer.
      *
-     * @return App\VoucherState
+     * @return VoucherState
      */
     public function recordedOn()
     {
@@ -199,7 +212,7 @@ class Voucher extends Model
      * Get the most recent voucher_state change to reimbursed.
      * There should only ever be one per voucher - but most recent safer.
      *
-     * @return App\VoucherState
+     * @return VoucherState
      */
     public function reimbursedOn()
     {
@@ -212,7 +225,8 @@ class Voucher extends Model
      * Limit Vouchers to ones that have been confirmed for payment.
      * This will include both pending and reimbursed vouchers.
      *
-     * @return query $query
+     * @param Builder $query
+     * @return Builder
      */
     public function scopeConfirmed($query)
     {
@@ -220,12 +234,19 @@ class Voucher extends Model
         return $query->whereIn('currentstate', $states);
     }
 
+    /**
+     * @param $code
+     * @return Voucher
+     */
     public static function findByCode($code)
     {
         return self::where('code', $code)->get()->first();
     }
 
-
+    /**
+     * @param $codes
+     * @return Collection
+     */
     public static function findByCodes($codes)
     {
         return self::whereIn('code', $codes)->get();
