@@ -13,6 +13,8 @@
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
+use Carbon\Carbon;
+
 /**
  *  Users for Market and CC
  */
@@ -439,10 +441,7 @@ $factory->define(App\Note::class, function (Faker\Generator $faker){
 });
 
 // StateToken - pretty empty, it generates it's own UUID
-$factory->define(
-    App\StateToken::class,
-    function (Faker\Generator $faker, $attributes) {
-
+$factory->define(App\StateToken::class, function (Faker\Generator $faker, $attributes) {
         // Create a default UUID if you havn't got one.
         $uuid = (empty($attributes['uuid']))
             ? App\StateToken::generateUnusedToken()
@@ -452,5 +451,19 @@ $factory->define(
             [
               'uuid' => $uuid
             ];
-    }
-);
+});
+
+// Delivery - a schedule of vouchers sent somewhere
+$factory->define(App\Delivery::class, function (Faker\Generator $faker, $attributes) {
+
+    $centre_id = (empty($attributes['centre_id']))
+        ? factory(App\Centre::class)->create()
+        : $attributes['centre_id']
+    ;
+
+    return [
+        'range' => '',
+        'dispatched_at' => Carbon::today(),
+        'centre_id' => $centre_id
+    ];
+});
