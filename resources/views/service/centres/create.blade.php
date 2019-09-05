@@ -7,7 +7,7 @@
 
         <h1>Add a Children's Centre</h1>
 
-        <p>Use the form below to add a new children's centre. Add their name, voucher prefix, area and form.</p>
+        <p>Use the form below to add a new children's centre. Add their name, RVID prefix, area and form.</p>
 
         <form role="form" class="styled-form" method="POST" action="{{ route('admin.centres.store') }}">
             {!! csrf_field() !!}
@@ -18,7 +18,7 @@
                     @if($errors->has('name')) <label for="name" class="alert-danger">{{ implode("<br>", $errors->get('name')) }}</label> @endif
                 </div>
                 <div>
-                    <label for="rvid_prefix" class="required">RVID</label>
+                    <label for="rvid_prefix" class="required">RVID prefix</label>
                     <input type="text" id="rvid_prefix" name="rvid_prefix" class="{{ $errors->has('rvid_prefix') ? 'error ' : '' }} uppercase" required>
                     @if($errors->has('rvid_prefix')) <label for="rvid_prefix" class="alert-danger">{{ implode("<br>", $errors->get('rvid_prefix')) }}</label> @endif
                 </div>
