@@ -23,7 +23,7 @@ class Delivery extends Model
      * @var array
      */
     protected $dates = [
-        'dispatched_on',
+        'dispatched_at',
     ];
 
     /**

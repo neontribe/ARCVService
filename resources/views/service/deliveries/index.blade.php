@@ -15,27 +15,21 @@
         <table class="table table-striped sortable">
             <thead>
                 <tr>
-                    <th>Voucher Range<button onClick="orderAscending('range')"><span class="glyphicon glyphicon-chevron-down"></span></button></th>
-                    <th>Centre<button onClick="orderAscending('centre')"><span class="glyphicon glyphicon-chevron-down"></span></button></th>
-                    <th>Date Sent<button onClick="orderAscending('date')"><span class="glyphicon glyphicon-chevron-down"></span></button></th>
+                    <th>Voucher Range<button><span class="glyphicon glyphicon-chevron-down"></span></button></th>
+                    <th>Centre<button><span class="glyphicon glyphicon-chevron-down"></span></button></th>
+                    <th>Date Sent<button><span class="glyphicon glyphicon-chevron-down"></span></button></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($deliveries as $delivery)
                     <tr class="{{ $loop->index}}">
                         <td class="range">{{ $delivery->range }}</td>
-                        <td class="centre">{{ $delivery->centre }}</td>
-                        <td class="date">{{ $delivery->date }}</td>
+                        <td class="centre">{{ $delivery->centre->name }}</td>
+                        <td class="date">{{ $delivery->dispatched_at}}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
-    <script>
-        function orderAscending(column) {
-            console.log(column);
-        };
-    </script>
 </div>
-
 @endsection

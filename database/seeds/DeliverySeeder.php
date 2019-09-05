@@ -4,7 +4,6 @@ use App\Centre;
 use App\Delivery;
 use App\User;
 use App\Voucher;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
 
