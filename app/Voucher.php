@@ -173,7 +173,7 @@ class Voucher extends Model
     }
 
     /**
-     * Teh Delivery the voucher was attached to
+     * The Delivery the voucher was attached to
      *
      * @return BelongsTo
      */

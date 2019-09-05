@@ -462,9 +462,14 @@ $factory->define(App\Delivery::class, function (Faker\Generator $faker, $attribu
         : $attributes['centre_id']
     ;
 
+    $dispatched_at = (empty($attributes['dispatched_at']))
+        ? Carbon::today()
+        : $attributes['dispatched_at']
+    ;
+
     return [
         'range' => '',
-        'dispatched_at' => Carbon::today(),
+        'dispatched_at' => $dispatched_at,
         'centre_id' => $centre_id
     ];
 });
