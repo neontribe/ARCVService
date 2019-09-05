@@ -12,7 +12,7 @@ class HistoryController extends Controller
 {
     public function show(Registration $registration)
     {
-        $datesArray = collect();;
+        $datesArray = collect();
         $all_carers = $registration->family->carers->all();
         $disbursedBundles = $registration->bundles()->disbursed()->orderBy('disbursed_at', 'desc')->get();
 
@@ -36,7 +36,7 @@ class HistoryController extends Controller
                 $weeklyCollections[] = Bundle::getByDates($startDate, $endDate);
 
                 // Attach collection of bundles to date
-                $datesArray[$carbonDate->format('d-m-y')] = $weeklyCollections;
+                $datesArray[$carbonDate->startOfWeek()->format('d-m-y')] = $weeklyCollections;
             }
 
             // Reverse order to have the most recent date first.
