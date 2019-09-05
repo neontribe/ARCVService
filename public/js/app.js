@@ -13341,8 +13341,8 @@ try {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /Users/alexandramoore/code/ARCVService/resources/assets/js/app.js */"./resources/assets/js/app.js");
-module.exports = __webpack_require__(/*! /Users/alexandramoore/code/ARCVService/resources/assets/sass/app.scss */"./resources/assets/sass/app.scss");
+__webpack_require__(/*! /home/vagrant/Code/ARCVService/resources/assets/js/app.js */"./resources/assets/js/app.js");
+module.exports = __webpack_require__(/*! /home/vagrant/Code/ARCVService/resources/assets/sass/app.scss */"./resources/assets/sass/app.scss");
 
 
 /***/ })

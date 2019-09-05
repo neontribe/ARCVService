@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Http\Controllers\Service\Admin;
+
 use App\Delivery;
-use App\Http\Controllers\Controller;
 use App\Sponsor;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 
 class DeliveriesController extends Controller
 {
@@ -12,9 +14,12 @@ class DeliveriesController extends Controller
      *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $deliveries = Delivery::get();
+        // load the deliveries.
+        $deliveries = Delivery::with('centre')
+            ->orderByField($request->all(['orderBy', 'direction']))
+        ->get();
 
         return view('service.deliveries.index', compact('deliveries'));
     }
@@ -33,6 +38,6 @@ class DeliveriesController extends Controller
 
     public function store()
     {
-        // impelment store
+        // implement store
     }
 }

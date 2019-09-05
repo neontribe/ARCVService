@@ -8562,7 +8562,7 @@ h1 {
   padding: 0;
 }
 
-.sortable.table button {
+.sortable.table span {
   background: transparent;
   border: 0;
   float: right;
