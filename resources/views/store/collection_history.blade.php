@@ -8,10 +8,80 @@
 
     <div class="content history">
         <div>
-
-            <p>{{$datedBundleArray}}</p>
-
-         
+            <h3>{{ $pri_carer->name }}</h3>
+            <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
+            <div class="link-button link-button-large">
+                <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
+            </div>
+          </a>
+        </div>
+        @if (!empty($bundles_by_week))
+            <table>
+                <tr>
+                    <th>Week Commencing</th>
+                    <th>Amount Collected</th>
+                    <th></th>
+                </tr>
+                <!-- loop through each week in bundles by week -->
+                @foreach ($bundles_by_week as $week)
+                        <tr class="@if(!$week)disabled @endif">
+                            <td>{{ key($week) }}</td>
+                            @if ($week)
+                                <td>count week pf vouchers</td>
+                            @else
+                                <td>0</td>
+                            @endif
+                            <td>
+                                @if ($week)
+                                    <i class="fa fa-caret-down rotate" aria-hidden="true"></i>
+                                @endif
+                            </td>
+                        </tr>
+                        @if ($week)
+                        @foreach($week as $bundle)
+                            <tr>
+                                <td colspan="2">
+                                    <div>
+                                        <p>
+                                            <span>
+                                                <i class="fa fa-calendar"></i>
+                                                Date Collected:
+                                                {{ $bundle->disbursed_at->format('l jS F Y') }}
+                                            </span>
+                                        </p>
+                                        <p>
+                                            <span>
+                                                <i class="fa fa-home"></i>
+                                                Collected At:
+                                                {{ $bundle->disbursingCentre->name }}
+                                            <span>
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p>
+                                            <span>
+                                                <i class="fa fa-user"></i>
+                                                Collected By:
+                                                {{ $bundle->collectingCarer->name }}
+                                            </span>
+                                        </p>
+                                        <p>
+                                            <span>
+                                                <i class="fa fa-users"></i>
+                                                Allocated By:
+                                                {{ $bundle->disbursingUser->name }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        @endif
+                @endforeach
+            </table>
+        @else
+            <p class="content-warning">This family has not collected.</p>
+        @endif
     </div>
 
     <script type="text/javascript">

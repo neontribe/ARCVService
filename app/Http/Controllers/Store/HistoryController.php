@@ -30,10 +30,8 @@ class HistoryController extends Controller
                 $startDate = reset($carbonDate);
                 $endDate = $carbonDate->endOfWeek();
 
-                $weeklyCollections = [];
-
                 // Fetch bundles disbursed between start and end.
-                $weeklyCollections[] = Bundle::getByDates($startDate, $endDate);
+                $weeklyCollections = Bundle::getByDates($startDate, $endDate);
 
                 // Attach collection of bundles to date
                 $datesArray[$carbonDate->startOfWeek()->format('d-m-y')] = $weeklyCollections;
@@ -47,8 +45,7 @@ class HistoryController extends Controller
             'registration' => $registration,
             'pri_carer' => array_shift($all_carers),
             'bundles' => $disbursedBundles,
-            'bundles_by_week' => $datesArray,
-            'datedBundleArray' => $datesArray
+            'bundles_by_week' => $datesArray
         ]);
     }
 }
