@@ -4,6 +4,7 @@ use App\Centre;
 use App\Delivery;
 use App\User;
 use App\Voucher;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class DeliverySeeder extends Seeder
@@ -34,6 +35,11 @@ class DeliverySeeder extends Seeder
                 'centre_id' => function () use (&$centre_ids) {
                     return array_pop($centre_ids);
                 },
+                'dispatched_at' => function () {
+                    return Carbon::today()
+                        ->subDays(rand(0, 30))
+                        ->subMonths(rand(0, 11));
+                }
             ])
             ->each(function (Delivery $delivery) {
                 // get the shortcode

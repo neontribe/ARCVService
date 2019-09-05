@@ -44,7 +44,8 @@ class Delivery extends Model
     }
 
     /**
-     * Call a Macro to add an orderBy to the system
+     * Call a macro [see AppServiceProvider::boot()] to add an order by centre name
+     *
      * @param Builder $query
      * @param string $direction
      */
@@ -57,11 +58,23 @@ class Delivery extends Model
         );
     }
 
+    /**
+     * Scope order by range string (lazy)
+     *
+     * @param Builder $query
+     * @param string $direction
+     */
     public function scopeOrderByRange(Builder $query, $direction = 'asc')
     {
         $query->orderBy('range', $direction);
     }
 
+    /**
+     * Scope order by dispatch date
+     *
+     * @param Builder $query
+     * @param string $direction
+     */
     public function scopeOrderByDispatchDate(Builder $query, $direction = 'asc')
     {
         $query->orderBy('dispatched_at', $direction);
@@ -69,6 +82,7 @@ class Delivery extends Model
 
     /**
      * Strategy to sort columns
+     *
      * @param Builder $query
      * @param array $sort
      * @return Builder
@@ -86,7 +100,8 @@ class Delivery extends Model
                 return $query->orderByDispatchDate($sort['direction']);
                 break;
             default:
-                // do nothing
+                // default to date order ascending, so new things are on the BOTTOM.
+                return $query->orderByDispatchDate('asc');
         }
     }
 }
