@@ -12,7 +12,7 @@ class HistoryController extends Controller
 {
     public function show(Registration $registration)
     {
-        $datesArray = [];
+        $datesArray = collect();;
         $all_carers = $registration->family->carers->all();
         $disbursedBundles = $registration->bundles()->disbursed()->orderBy('disbursed_at', 'desc')->get();
 
@@ -26,34 +26,29 @@ class HistoryController extends Controller
 
             // Set the weekly date as the key of each item in $datesArray.
             foreach ($periodObject as $carbonDate) {
-                $datesArray[$carbonDate->format('d/m/y')] = null;
-            }
+                // Get start of week and end of week.
+                $startDate = reset($carbonDate);
+                $endDate = $carbonDate->endOfWeek();
 
-            $datedBundleArray = $disbursedBundles->mapWithKeys(
-                function ($bundle) {
-                    return [
-                        $bundle->disbursed_at->startOfWeek()->format('d/m/y') => $bundle
-                    ];
-                }
-            );
+                $weeklyCollections = [];
 
-            // Loop through $datedBundleArray, if key matches date in
-            // $datesArray then assign bundle to it.
-            foreach ($datedBundleArray as $week => $bundle) {
-                if (array_key_exists($week, $datesArray)) {
-                    $datesArray[$week] = $bundle;
-                }
+                // Fetch bundles disbursed between start and end.
+                $weeklyCollections[] = Bundle::getByDates($startDate, $endDate);
+
+                // Attach collection of bundles to date
+                $datesArray[$carbonDate->format('d-m-y')] = $weeklyCollections;
             }
 
             // Reverse order to have the most recent date first.
-            $datesArray = array_reverse($datesArray);
+            // $datesArray = array_reverse($datesArray);
         }
 
         return view('store.collection_history', [
             'registration' => $registration,
             'pri_carer' => array_shift($all_carers),
             'bundles' => $disbursedBundles,
-            'bundles_by_week' => $datesArray
+            'bundles_by_week' => $datesArray,
+            'datedBundleArray' => $datesArray
         ]);
     }
 }
