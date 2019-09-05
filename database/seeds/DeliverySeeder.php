@@ -36,21 +36,38 @@ class DeliverySeeder extends Seeder
             });
 
 
-        // Get the Centre Ids
+        // Get the Centre Ids in random order
         $centre_ids = Centre::pluck('id')->toArray();
+        shuffle($centre_ids);
 
-        // Setup 5 deliveries to random centres and add 100-1000 vouchers
-        $deliveries = factory(Delivery::class, 5)->create([
-            'centre_id' => array_random($centre_ids)
-        ])->each(function (Delivery $delivery) {
-            $vs = factory(Voucher::class, 'requested', rand(100, 1000))
-                ->make()
-                ->each(function (Voucher $v) {
-                    $v->applyTransition('order');
-                    $v->applyTransition('print');
-                    $v->applyTransition('dispatch');
-                });
-            $delivery->vouchers()->saveMany($vs);
-        });
+        // Setup 5 deliveries to random centres and add 50 vouchers to each
+        $deliveries = factory(App\Delivery::class, 5)
+            ->create([
+                // pop the last one off.
+                'centre_id' => function () use (&$centre_ids) {
+                    return array_pop($centre_ids);
+                },
+            ])
+            ->each(function (Delivery $delivery) {
+                // get the shortcode
+                $shortcode = $delivery->centre->sponsor->shortcode;
+                // make a code range
+                $codes = Voucher::generateCodeRange($shortcode. "001000", $shortcode. "001050");
+                // turn those into vouchers
+                $vs = factory(Voucher::class, 'requested', count($codes))
+                    ->create([
+                        'code' => function () use (&$codes) {
+                            return array_pop($codes);
+                        },
+                    ])
+                    ->each(function (Voucher $v) {
+                        $v->applyTransition('order');
+                        $v->applyTransition('print');
+                        $v->applyTransition('dispatch');
+                    });
+                $delivery->vouchers()->saveMany($vs);
+                $delivery->range = $shortcode. "001000" . " - " . $shortcode. "001050";
+                $delivery->save();
+            });
     }
 }
