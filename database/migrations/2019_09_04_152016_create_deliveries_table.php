@@ -17,7 +17,7 @@ class CreateDeliveriesTable extends Migration
             $table->increments('id');
             $table->integer('centre_id')->unsigned();
             $table->string('range');
-            $table->timestamp('dispatched_at');
+            $table->dateTime('dispatched_at');
             $table->timestamps();
 
             $table->foreign('centre_id')
