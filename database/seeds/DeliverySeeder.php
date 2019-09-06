@@ -37,9 +37,9 @@ class DeliverySeeder extends Seeder
                 },
                 'dispatched_at' => function () {
                     return Carbon::today()
-                        ->subDays(rand(0, 30))
                         ->subMonths(rand(0, 11));
-                }
+//                        ->subDays(rand(0, 30));
+                },
             ])
             ->each(function (Delivery $delivery) {
                 // get the shortcode
