@@ -4,7 +4,7 @@ php:
 sudo: required
 dist: trusty
 addons:
-  ssh_known_hosts: 46.101.18.83
+  ssh_known_hosts: 206.189.122.208
 before_script:
 - cp .env.travis .env
 - mysql -e 'create database homestead;'
