@@ -116,8 +116,8 @@
                         </button>
                     </div>
                 </form>
-                @includeWhen( $errors->count() > 0, 'store.partials.errors', ['error_array' => $errors->all()])
-                @includeWhen( Session::get('error_message'), 'store.partials.errors', ['error_array' => [Session::get('error_message')]])
+                @includeWhen($errors->count() > 0, 'store.partials.errors', ['error_array' => $errors->all()])
+                @includeWhen(Session::get('error_messages'), 'store.partials.errors', ['error_array' => Session::get('error_messages')])
                 <button id="collection-button"
                         class="long-button"
                         @if ($vouchers_amount == 0)

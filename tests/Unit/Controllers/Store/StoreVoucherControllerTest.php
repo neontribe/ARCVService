@@ -11,9 +11,17 @@ use Storage;
 use Tests\StoreTestCase;
 use URL;
 use ZipArchive;
+use ZipStream\ZipStream;
 
 class StoreVoucherControllerTest extends StoreTestCase
 {
+    /**
+     * Some additional coverage would be nice...
+     * TODO : Test creation of the Master Voucher Log Report
+     * TODO : Test that decryption failing mid-stream results in a response that is well-marked as failed
+     * ...although problems here would soon be spotted by the single person who uses this feature directly.
+     */
+
     use DatabaseMigrations;
 
     /** @var Centre $centre */
@@ -93,12 +101,21 @@ A modest, sharp gentle freeze
 by the tornado
 [https://www.poem-generator.org.uk/?i=m4xaa9c]
 EOD;
-        $za = new ZipArchive();
+        // Enable the secret stream protocol (ssw://). See SecretStreamWrapper for more information.
+        // Registering here guarantees availability but there's probably a static place to put this.
+        if (!in_array("ssw", stream_get_wrappers())) {
+            stream_wrapper_register("ssw", "App\Wrappers\SecretStreamWrapper");
+        }
+
+        // Stream a zip to a file in storage, encrypting as we write (with the secret stream wrapper).
         $storagePath = $this->disk->getAdapter()->getPathPrefix();
-        $za->open($storagePath . '/' . $this->archiveName, ZipArchive::CREATE);
-        $za->addFromString('encrypted.txt.enc', encrypt($sourceContent));
-        $za->addFromString('plain.txt', $sourceContent);
-        $za->close();
+        $za = new ZipStream(null, [
+            ZipStream::OPTION_SEND_HTTP_HEADERS => false,
+            ZipStream::OPTION_OUTPUT_STREAM => fopen('ssw://' . $storagePath . '/' . $this->archiveName, 'w'),
+        ]);
+        $za->addFile('a.txt', $sourceContent);
+        $za->addFile('b.txt', $sourceContent);
+        $za->finish();
 
         $this->assertTrue($this->disk->exists($this->archiveName));
 
@@ -124,7 +141,7 @@ EOD;
         $stream = stream_get_meta_data($fp);
         $tmpFilename = $stream['uri'];
 
-        // Open the temp filename
+        // Interpret the response as a ZIP. If decryption failed, something will go wrong soon.
         $zip = new ZipArchive();
         $zip->open($tmpFilename);
 
@@ -137,8 +154,7 @@ EOD;
             $filename = $zip->getNameIndex($i);
 
             // Check it's one of ours
-            // the encrypted.txt.enc will have been renamed on download.
-            $this->assertContains($filename, ["encrypted.txt", "plain.txt"]);
+            $this->assertContains($filename, ["a.txt", "b.txt"]);
 
             // Get the file contents to memory.
             $fileStream = $zip->getStream($filename);
@@ -149,7 +165,7 @@ EOD;
             // Shut that off
             fclose($fileStream);
 
-            // Test it's the contents, decrypted if it was encrypted when stored.
+            // Confirm the file has the contents we expect.
             $this->assertEquals($sourceContent, $fileContent);
         }
 
@@ -196,10 +212,10 @@ EOD;
     }
 
     /** @test */
-    public function testItRedirectsToDashboardWhenInvalidZip()
+    public function testItRedirectsToDashboardWhenEmptyZip()
     {
         // Make a file that isn't a zip file.
-        $this->disk->put($this->archiveName, "definately not zipfile content");
+        $this->disk->put($this->archiveName, "");
 
         // Get the response when we go to the page.
         $response = $this->actingAs($this->centreUser, 'store')

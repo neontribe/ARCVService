@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Console\Command;
 use Log;
 use Maatwebsite\Excel\Writers\LaravelExcelWriter;
-use ZipArchive;
+use ZipStream\ZipStream;
 
 class CreateMasterVoucherLogReport extends Command
 {
@@ -170,6 +170,13 @@ EOD;
     public function __construct()
     {
         parent::__construct();
+
+        // Enable the secret stream protocol (ssw://). See SecretStreamWrapper for more information.
+        // Registering here guarantees availability but there's probably a more Laravel-y place to put this.
+        if (!in_array("ssw", stream_get_wrappers())) {
+            stream_wrapper_register("ssw", "App\Wrappers\SecretStreamWrapper");
+        }
+
         $this->archiveName = config('arc.mvl_filename');
         $this->disk = config('arc.mvl_disk');
     }
@@ -203,10 +210,20 @@ EOD;
             // Make a zip archive, or not.
             if (!$this->option('no-zip')) {
                 // Setup an archive
-                $za = new ZipArchive();
                 $storagePath = Storage::disk($this->disk)->getAdapter()->getPathPrefix();
                 // Open the file for writing at the correct location
-                $za->open($storagePath . '/' . $this->archiveName, ZipArchive::CREATE);
+                $path = $storagePath . '/' . $this->archiveName;
+
+                // Encrypt the output stream if the user hasn't asked for it to be plain.
+                if (!$this->option('plain')) {
+                    $path = 'ssw://' . $path;
+                }
+
+                // Stream directly to what is either a file or a file wrapped in a secret stream.
+                $za = new ZipStream(null, [
+                    ZipStream::OPTION_SEND_HTTP_HEADERS => false,
+                    ZipStream::OPTION_OUTPUT_STREAM => fopen($path, 'w'),
+                ]);
             } else {
                 $za = null;
             }
@@ -234,7 +251,8 @@ EOD;
             }
 
             if ($za) {
-                $za->close();
+                // End the zip stream with something meaningful.
+                $za->finish();
             }
         }
         // Set 0, above for expected outcomes
@@ -245,28 +263,36 @@ EOD;
      * Encrypts and stashes files.
      *
      * @param LaravelExcelWriter $excelDoc
-     * @param ZipArchive|null $za
+     * @param ZipStream|null $za
      * @return bool
      */
-    public function writeOutput(LaravelExcelWriter $excelDoc, ZipArchive $za = null)
+    public function writeOutput(LaravelExcelWriter $excelDoc, ZipStream $za = null)
     {
         try {
             $excelDoc->ext = 'csv';
+
+            /*
+             * TODO: If we move to a spreadsheet library that gives us an output stream, we need never hold the entire
+             * contents of the resulting file in memory; it could be streamed directly through the zip.
+             */
             $fileContents = $excelDoc->string($excelDoc->ext); // Throws Exception
             $filename = preg_replace('/\s+/', '_', $excelDoc->getSheet()->getTitle()) .
                 "." .
                 $excelDoc->ext;
 
-            // If we're per-file encrypting, fiddle the files
-            if (!$this->option('plain')) {
-                $fileContents = encrypt($fileContents);
-                $filename .= '.enc';
+            if ($za) {
+                // Encryption, if enabled, is handled at the creation of our ZipStream. The stream is directed through
+                // an encrypted wrapper before it writes to the disk.
+                $za->addFile($filename, $fileContents);
+            } else {
+                // Ensure that the user intends to write the output plain to the disk. This is highly unlikely in production.
+                if ($this->option('plain')) {
+                    Storage::disk($this->disk)->put($filename, $fileContents);
+                } else {
+                    // TODO : Consider redesigning the CLI such that this is not even possible to express.
+                    Log::error('Encrypted output is not supported with --no-zip, consider adding --plain if you\'re SURE you want to write this data to the disk unencrypted.');
+                }
             }
-
-            ($za)
-                ? $za->addFromString($filename, $fileContents)
-                : Storage::disk($this->disk)->put($filename, $fileContents)
-            ;
         } catch (\Exception $e) {
             // Could be Storage or LaravelExcelWriterException related
             Log::error($e->getMessage());
