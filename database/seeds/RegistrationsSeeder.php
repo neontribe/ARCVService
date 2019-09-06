@@ -33,6 +33,10 @@ class RegistrationsSeeder extends Seeder
 
         // create 3 regs for a *new* centre (with no users)
         $this->createRegistrationForCentre(3);
+
+        // create a registration with a bundle
+        $bundle = factory(App\Bundle::class)->create();
+        factory(App\Registration::class)->create()->bundles()->save($bundle);
     }
 
 
