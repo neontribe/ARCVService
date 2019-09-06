@@ -2,10 +2,12 @@
 
 namespace App;
 
+use App\Services\VoucherEvaluator\AbstractEvaluator;
+use App\Services\VoucherEvaluator\IEvaluee;
 use Illuminate\Database\Eloquent\Model;
 use Log;
 
-class Family extends Model
+class Family extends Model implements IEvaluee
 {
     /**
      * The attributes that are mass assignable.
@@ -45,6 +47,16 @@ class Family extends Model
         'expecting',
         'rvid'
     ];
+
+    /**
+     * Visitor pattern voucher evaluator
+     *
+     * @param AbstractEvaluator $evaluator
+     */
+    public function accept(AbstractEvaluator $evaluator)
+    {
+        $evaluator->evaluateFamily($this);
+    }
 
     /**
      * Fetches the

@@ -2,10 +2,11 @@
 
 namespace App;
 
-use Auth;
+use App\Services\VoucherEvaluator\AbstractEvaluator;
+use App\Services\VoucherEvaluator\IEvaluee;
 use Illuminate\Database\Eloquent\Model;
 
-class Registration extends Model
+class Registration extends Model implements IEvaluee
 {
     /**
      * The attributes that are mass assignable.
@@ -37,6 +38,15 @@ class Registration extends Model
         'consented_on',
     ];
 
+    /**
+     * Visitor pattern voucher evaluator
+     *
+     * @param AbstractEvaluator $evaluator
+     */
+    public function accept(AbstractEvaluator $evaluator)
+    {
+        $evaluator->evaluateRegistration($this);
+    }
 
     /**
      * Get the Registration's Family

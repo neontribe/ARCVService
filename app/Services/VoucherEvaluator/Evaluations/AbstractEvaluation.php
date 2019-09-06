@@ -25,7 +25,6 @@ abstract class AbstractEvaluation implements IEvaluation
 
     protected function success()
     {
-        //die(print_r(get_class($this)));
         return $this;
     }
 

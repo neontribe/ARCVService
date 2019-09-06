@@ -2,10 +2,12 @@
 
 namespace App;
 
+use App\Services\VoucherEvaluator\AbstractEvaluator;
+use App\Services\VoucherEvaluator\IEvaluee;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
-class Child extends Model
+class Child extends Model implements IEvaluee
 {
     /**
      * The attributes that are mass assignable.
@@ -92,6 +94,16 @@ class Child extends Model
         $school_year = $this->dob->addYears($years)->year;
         //day needs to be set to one as carbon gets confused on 31st
         return Carbon::createFromDate($school_year, $school_month, 1);
+    }
+
+    /**
+     * Visitor pattern voucher evaluator
+     *
+     * @param AbstractEvaluator $evaluator
+     */
+    public function accept(AbstractEvaluator $evaluator)
+    {
+        $evaluator->evaluateChild($this);
     }
 
     /**
