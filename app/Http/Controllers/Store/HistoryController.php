@@ -16,6 +16,7 @@ class HistoryController extends Controller
         $all_carers = $registration->family->carers->all();
         $disbursedBundles = $registration->bundles()->disbursed()->orderBy('disbursed_at', 'desc')->get();
 
+
         if ($disbursedBundles->count() > 0) {
             // Creates a weekly date array from first assigned voucher to today.
             $periodObject = new \DatePeriod(
@@ -32,6 +33,11 @@ class HistoryController extends Controller
 
                 // Fetch bundles disbursed between start and end.
                 $weeklyCollections = Bundle::getByDates($startDate, $endDate);
+                $weeklyCollections->amount = 0;
+
+                foreach($weeklyCollections as $collection) {
+                    $weeklyCollections->amount += $collection->vouchers->count();
+                };
 
                 // Attach collection of bundles to date
                 $datesArray[$carbonDate->startOfWeek()->format('d-m-y')] = $weeklyCollections;

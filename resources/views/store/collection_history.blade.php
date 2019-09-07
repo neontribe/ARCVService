@@ -25,9 +25,9 @@
                 <!-- loop through each week in bundles by week -->
                 @foreach ($bundles_by_week as $week)
                         <tr class="@if(!$week)disabled @endif">
-                            <td>{{ key($week) }}</td>
+                            <td>{{ $week }}</td>
                             @if ($week)
-                                <td>count week pf vouchers</td>
+                                <td>{{ $week->amount }}</td>
                             @else
                                 <td>0</td>
                             @endif
