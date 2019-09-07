@@ -23,9 +23,9 @@
                     <th></th>
                 </tr>
                 <!-- loop through each week in bundles by week -->
-                @foreach ($bundles_by_week as $week)
+                @foreach ($bundles_by_week as $date => $week)
                         <tr class="@if(!$week)disabled @endif">
-                            <td>{{ $week }}</td>
+                            <td>{{ $date }}</td>
                             @if ($week)
                                 <td>{{ $week->amount }}</td>
                             @else
