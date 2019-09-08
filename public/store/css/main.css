@@ -896,7 +896,7 @@ HISTORY PAGE
 	text-align: center;
 }
 
-.history table {
+.history .outer {
 	margin: 5% 5% 0 0;
 	visibility: hidden;
 	width: 70%;
