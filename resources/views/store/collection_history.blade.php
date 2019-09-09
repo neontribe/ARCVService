@@ -15,7 +15,7 @@
             </div>
           </a>
         </div>
-        @if (!empty($bundles_by_week))
+        @if ($bundles->count() > 0)
             <table class="outer">
                 <thead>
                     <tr>
