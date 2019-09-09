@@ -25,7 +25,7 @@ deploy:
     skip_cleanup: true
     script: rsync -r --exclude storage --delete-after --quiet $TRAVIS_BUILD_DIR/* $STAGING_USER@$STAGING_IP:/home/$STAGING_USER/staging/service
     on:
-      branch: 1.7/1377-retarget-travis-at-new-staging-server
+      branch: 1.7/release
   # Create production release tarball.
   - provider: script
     skip_cleanup: true
