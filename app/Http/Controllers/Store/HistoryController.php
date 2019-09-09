@@ -12,7 +12,7 @@ class HistoryController extends Controller
 {
     public function show(Registration $registration)
     {
-        $datesArray = collect();
+        $datesCollection = collect();
         $all_carers = $registration->family->carers->all();
         $disbursedBundles = $registration->bundles()->disbursed()->orderBy('disbursed_at', 'desc')->get();
 
@@ -25,7 +25,7 @@ class HistoryController extends Controller
                 Carbon::now()->endOfWeek()
             );
 
-            // Set the weekly date as the key of each item in $datesArray.
+            // Set the weekly date as the key of each item in $datesCollection.
             foreach ($periodObject as $carbonDate) {
                 // Get start of week and end of week.
                 $startDate = reset($carbonDate);
@@ -40,18 +40,18 @@ class HistoryController extends Controller
                 };
 
                 // Attach collection of bundles to date
-                $datesArray[$carbonDate->startOfWeek()->format('d-m-y')] = $weeklyCollections;
+                $datesCollection[$carbonDate->startOfWeek()->format('d-m-y')] = $weeklyCollections;
             }
 
             // Reverse order to have the most recent date first.
-            // $datesArray = array_reverse($datesArray);
+            $datesCollection = ($datesCollection)->reverse();
         }
 
         return view('store.collection_history', [
             'registration' => $registration,
             'pri_carer' => array_shift($all_carers),
             'bundles' => $disbursedBundles,
-            'bundles_by_week' => $datesArray
+            'bundles_by_week' => $datesCollection
         ]);
     }
 }
