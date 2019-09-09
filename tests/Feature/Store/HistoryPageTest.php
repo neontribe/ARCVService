@@ -5,15 +5,17 @@ namespace Tests;
 use App\Centre;
 use App\CentreUser;
 use App\Registration;
-use Auth;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use URL;
 
 class HistoryPageTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
+    /**
+     * @var Centre $centre
+     * @var CentreUser $centreUser
+     * @var Registration $registration
+     */
     private $centre;
     private $centreUser;
     private $registration;
