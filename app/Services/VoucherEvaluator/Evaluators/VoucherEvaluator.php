@@ -6,49 +6,16 @@ use App\Child;
 use App\Family;
 use App\Registration;
 use App\Services\VoucherEvaluator\AbstractEvaluator;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostBorn;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostOne;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostSchoolAge;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsUnBorn;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderOne;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderSchoolAge;
-use App\Services\VoucherEvaluator\Evaluations\FamilyIsPregnant;
 use App\Services\VoucherEvaluator\IEvaluee;
-use Carbon\Carbon;
 
 class VoucherEvaluator extends AbstractEvaluator
 {
     private $evaluations = [];
 
-    public function __construct($evaluations = null, Carbon $offsetDate = null)
+    public function __construct($evaluations = [])
     {
-        $this->offSetDate = $offsetDate ?? Carbon::today()->startOfDay();
-
-        $defaultEvals = [
-            Child::class => [
-                'notices' => [
-                    new ChildIsUnBorn($offsetDate),
-                    new ChildIsAlmostBorn($offsetDate),
-                    new ChildIsAlmostOne($offsetDate),
-                    new ChildIsAlmostSchoolAge($offsetDate)
-                ],
-                'credits' => [
-                    new ChildIsUnderOne($offsetDate, 3),
-                    new ChildIsUnderSchoolAge($offsetDate, 3)
-                ]
-            ],
-            Family::class => [
-                [
-                    'notices' => [],
-                    'credits' => [
-                        new FamilyIsPregnant(null, 3)
-                    ]
-                ]
-            ],
-            Registration::class => []
-        ];
-
-        $this->evaluations = $evaluations ?? $defaultEvals;
+        // Use the factory to make one of these
+        $this->evaluations = $evaluations;
     }
 
     private function getNotices(IEvaluee $subject)
@@ -73,7 +40,7 @@ class VoucherEvaluator extends AbstractEvaluator
             if ($outcome !== null) {
                 $credits[] = [
                     'reason' => class_basename($outcome::SUBJECT)."|".$outcome::REASON,
-                    'value' => $outcome->value
+                    'value' => $outcome->value,
                 ];
             }
         }
@@ -100,7 +67,7 @@ class VoucherEvaluator extends AbstractEvaluator
             'eligibility' => $eligibility,
             'notices' => $notices,
             'credits' => $credits,
-            'entitlement' => $entitlement
+            'entitlement' => $entitlement,
         ];
     }
 
@@ -109,17 +76,27 @@ class VoucherEvaluator extends AbstractEvaluator
         $credits = $this->getCredits($subject);
         $notices = $this->getNotices($subject);
 
+        $children = $subject->children;
+        /** @var Child $child */
+        foreach ($children as $child) {
+            $child_status = $child->accept($this);
+            $notices = array_merge($notices, $child_status['notices']);
+            $credits = array_merge($credits, $child_status['credits']);
+        }
+
         $entitlement =  array_sum(array_column($credits, 'credits'));
 
         return [
             'credits' => $credits,
             'notices' => $notices,
-            'entitlement' => $entitlement
+            'entitlement' => $entitlement,
         ];
     }
 
     public function evaluateRegistration(Registration $subject)
     {
-        // TODO: Implement evaluateRegistration() method.
+        /** @var Family $family */
+        $family = $subject->family;
+        return $family->accept($this);
     }
 }

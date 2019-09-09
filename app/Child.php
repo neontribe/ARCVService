@@ -41,6 +41,8 @@ class Child extends Model implements IEvaluee
         'entitlement',
     ];
 
+    private $evaluation = [];
+
     /**
      * Calculates and returns the age in Years and Months (or P for pregnancy)
      *
@@ -100,12 +102,18 @@ class Child extends Model implements IEvaluee
      * Visitor pattern voucher evaluator
      *
      * @param AbstractEvaluator $evaluator
+     * @return array
      */
     public function accept(AbstractEvaluator $evaluator)
     {
-        $evaluator->evaluateChild($this);
+        $this->setEvaluation($evaluator->evaluateChild($this));
+        return $this->getEvaluation();
     }
 
+    private function setEvaluationAttribute($array)
+    {
+        $this->evaluation = $array;
+    }
     /**
      * Get an array that holds
      * Notices - array of Notice constants
@@ -118,59 +126,9 @@ class Child extends Model implements IEvaluee
      * @param Carbon|bool $offsetDate The date to compare the DOB to.
      * @return array
      */
-
-    public function getStatus($offsetDate = null)
+    public function getEvaluation()
     {
-        $notices = [];
-        $credits = [];
-
-        $rules = [
-            'notices' => [
-                new Services\VoucherEvaluator\Evaluations\ChildIsUnBorn($offsetDate),
-                new Services\VoucherEvaluator\Evaluations\ChildIsAlmostBorn($offsetDate),
-                new Services\VoucherEvaluator\Evaluations\ChildIsAlmostOne($offsetDate),
-                new Services\VoucherEvaluator\Evaluations\ChildIsAlmostSchoolAge($offsetDate)
-            ],
-            'credits' => [
-                new Services\VoucherEvaluator\Evaluations\ChildIsUnderOne($offsetDate, 3),
-                new Services\VoucherEvaluator\Evaluations\ChildIsUnderSchoolAge($offsetDate, 3)
-            ]
-        ];
-
-        foreach ($rules['notices'] as $rule) {
-            $outcome = $rule->test($this);
-            if ($outcome) {
-                $notices[] = ['reason' => class_basename($outcome::SUBJECT)."|".$outcome::REASON];
-            }
-        }
-
-        foreach ($rules['credits'] as $rule) {
-            $outcome = $rule->test($this);
-            if ($outcome !== null) {
-                $credits[] = [
-                    'reason' => class_basename($outcome::SUBJECT)."|".$outcome::REASON,
-                    'value' => $outcome->value
-                ];
-            }
-        }
-
-        $entitlement = array_sum(array_column($credits, 'value'));
-
-        if (!$this->born) {
-            $eligibility = 'Pregnancy';
-        } else {
-            $eligibility = ($entitlement > 0)
-                ? 'Eligible'
-                : 'Ineligible'
-            ;
-        }
-
-        return [
-            'eligibility' => $eligibility,
-            'notices' => $notices,
-            'credits' => $credits,
-            'entitlement' => $entitlement
-            ];
+        return $this->evaluation;
     }
 
     /**
@@ -180,7 +138,7 @@ class Child extends Model implements IEvaluee
      */
     public function getStatusString()
     {
-        return $this->getStatus()['eligibility'];
+        return $this->getEvaluation()['eligibility'];
     }
 
     /**
