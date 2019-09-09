@@ -6,6 +6,7 @@ use App\Centre;
 use App\CentreUser;
 use App\Registration;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use URL;
 
 class HistoryPageTest extends StoreTestCase
 {
