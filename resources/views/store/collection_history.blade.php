@@ -95,7 +95,7 @@
                     if ( $target.closest("tr").hasClass("bundle-row")) {
                        $target.slideUp();
                     } else if ( $target.closest("tr").next().hasClass("bundle-row")){
-                       $target.closest("tr").next().slideToggle();
+                       $target.closest("tr").nextUntil(".week-row", ".bundle-row").slideToggle();
                     } else {
                        return;
                     }
