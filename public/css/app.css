@@ -8447,19 +8447,6 @@ h1 {
   border: 0;
 }
 
-.styled-form.add-vouchers {
-  width: 450px;
-}
-
-.styled-form.add-vouchers select {
-  width: 100%;
-}
-
-.styled-form.add-vouchers div {
-  display: flex;
-  flex-direction: column;
-}
-
 .styled-form .horizontal-container {
   display: flex;
   flex-wrap: wrap;

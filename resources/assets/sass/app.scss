@@ -191,17 +191,6 @@ h1 {
     outline: none;
     border: 0;
   }
-  &.add-vouchers {
-    width: 450px;
-
-    select {
-      width: 100%;
-    }
-    div {
-      display: flex;
-      flex-direction: column;
-    }
-  }
   .horizontal-container {
     display: flex;
     flex-wrap: wrap;
