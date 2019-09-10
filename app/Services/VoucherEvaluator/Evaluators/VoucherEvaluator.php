@@ -7,10 +7,14 @@ use App\Family;
 use App\Registration;
 use App\Services\VoucherEvaluator\AbstractEvaluator;
 use App\Services\VoucherEvaluator\IEvaluee;
+use App\Services\VoucherEvaluator\Valuation;
 
 class VoucherEvaluator extends AbstractEvaluator
 {
     private $evaluations = [];
+
+    /** @var null Valuation */
+    public $valuation = null;
 
     public function __construct($evaluations = [])
     {
@@ -97,6 +101,6 @@ class VoucherEvaluator extends AbstractEvaluator
     {
         /** @var Family $family */
         $family = $subject->family;
-        return $family->accept($this);
+        $this->valuation = new Valuation($family->accept($this));
     }
 }

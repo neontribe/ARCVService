@@ -31,13 +31,13 @@
                         </ul>
                     </div>
                 </div>
-                @if ( !empty($family->getNoticeReasons()) )
+                @if ( !empty($noticeReasons) )
                 <div class="alert-message warning">
                     <div class="icon-container warning">
                         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
                     </div>
                     <div>
-                        @foreach( $family->getNoticeReasons() as $notices )
+                        @foreach( $noticeReasons as $notices )
                             <p class="v-spaced">
                                 Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
                                 is {{ $notices['reason'] }}
@@ -65,7 +65,7 @@
                 <div>
                     <div class="emphasised-section">
                         <p>This family should collect:</p>
-                        <p><b>{{ $family->entitlement }} vouchers per week</b></p>
+                        <p><b>{{ $entitlement }} vouchers per week</b></p>
                     </div>
                     @if (!empty($lastCollection))
                         <div class="emphasised-section">

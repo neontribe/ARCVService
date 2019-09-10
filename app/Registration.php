@@ -3,6 +3,8 @@
 namespace App;
 
 use App\Services\VoucherEvaluator\AbstractEvaluator;
+use App\Services\VoucherEvaluator\EvaluatorFactory;
+use App\Services\VoucherEvaluator\IEvaluation;
 use App\Services\VoucherEvaluator\IEvaluee;
 use Illuminate\Database\Eloquent\Model;
 
@@ -37,6 +39,22 @@ class Registration extends Model implements IEvaluee
         'updated_at',
         'consented_on',
     ];
+
+    /** @var  AbstractEvaluator null  */
+    private $evaluator = null;
+
+    /**
+     * Run a valuation on this registration.
+     */
+    public function getValuationAttribute()
+    {
+        // Get the evaluator, or make a new one
+        $this->evaluator = ($this->evaluator) ?? EvaluatorFactory::makeFromRegistration($this);
+        // Start the process of making a valuation
+        $this->accept($this->evaluator);
+        // fetch the report
+        return $this->evaluator->valuation;
+    }
 
     /**
      * Visitor pattern voucher evaluator

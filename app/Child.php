@@ -41,8 +41,6 @@ class Child extends Model implements IEvaluee
         'entitlement',
     ];
 
-    private $evaluation = [];
-
     /**
      * Calculates and returns the age in Years and Months (or P for pregnancy)
      *
@@ -106,49 +104,7 @@ class Child extends Model implements IEvaluee
      */
     public function accept(AbstractEvaluator $evaluator)
     {
-        $this->setEvaluation($evaluator->evaluateChild($this));
-        return $this->getEvaluation();
-    }
-
-    private function setEvaluationAttribute($array)
-    {
-        $this->evaluation = $array;
-    }
-    /**
-     * Get an array that holds
-     * Notices - array of Notice constants
-     * Credits - array of Credit constants
-     * Eligibility - status of child on scheme
-     * Vouchers - total vouchers this child is permitted
-     *
-     * These can be used in voucher multipliers
-     *
-     * @param Carbon|bool $offsetDate The date to compare the DOB to.
-     * @return array
-     */
-    public function getEvaluation()
-    {
-        return $this->evaluation;
-    }
-
-    /**
-     * Get eligibility value string for Blade.
-     *
-     * @return mixed|string
-     */
-    public function getStatusString()
-    {
-        return $this->getEvaluation()['eligibility'];
-    }
-
-    /**
-     * Calculates the entitlement for a child
-     *
-     * @return int
-     */
-    public function getEntitlementAttribute()
-    {
-        return $this->getStatus()['entitlement'];
+        return $evaluator->evaluateChild($this);
     }
 
     /**
