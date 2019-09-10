@@ -248,5 +248,14 @@ class Bundle extends Model
     {
         return $query->where('disbursed_at', '!=', null);
     }
+
+    /**
+     * Return an array of vouchers between a set of dates
+     *
+     */
+    public static function getByDates($from, $to)
+    {
+        return Bundle::whereBetween('disbursed_at', [$from, $to])->get();
+    }
 }
 

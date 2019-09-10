@@ -12,9 +12,10 @@ class HistoryController extends Controller
 {
     public function show(Registration $registration)
     {
-        $datesArray = [];
+        $datesCollection = collect();
         $all_carers = $registration->family->carers->all();
         $disbursedBundles = $registration->bundles()->disbursed()->orderBy('disbursed_at', 'desc')->get();
+
 
         if ($disbursedBundles->count() > 0) {
             // Creates a weekly date array from first assigned voucher to today.
@@ -24,36 +25,33 @@ class HistoryController extends Controller
                 Carbon::now()->endOfWeek()
             );
 
-            // Set the weekly date as the key of each item in $datesArray.
+            // Set the weekly date as the key of each item in $datesCollection.
             foreach ($periodObject as $carbonDate) {
-                $datesArray[$carbonDate->format('d/m/y')] = null;
-            }
+                // Get start of week and end of week.
+                $startDate = reset($carbonDate);
+                $endDate = $carbonDate->endOfWeek();
 
-            $datedBundleArray = $disbursedBundles->mapWithKeys(
-                function ($bundle) {
-                    return [
-                        $bundle->disbursed_at->startOfWeek()->format('d/m/y') => $bundle
-                    ];
-                }
-            );
+                // Fetch bundles disbursed between start and end.
+                $weeklyCollections = Bundle::getByDates($startDate, $endDate);
+                $weeklyCollections->amount = 0;
 
-            // Loop through $datedBundleArray, if key matches date in
-            // $datesArray then assign bundle to it.
-            foreach ($datedBundleArray as $week => $bundle) {
-                if (array_key_exists($week, $datesArray)) {
-                    $datesArray[$week] = $bundle;
-                }
+                foreach($weeklyCollections as $collection) {
+                    $weeklyCollections->amount += $collection->vouchers->count();
+                };
+
+                // Attach collection of bundles to date
+                $datesCollection[$carbonDate->startOfWeek()->format('d-m-y')] = $weeklyCollections;
             }
 
             // Reverse order to have the most recent date first.
-            $datesArray = array_reverse($datesArray);
+            $datesCollection = ($datesCollection)->reverse();
         }
 
         return view('store.collection_history', [
             'registration' => $registration,
             'pri_carer' => array_shift($all_carers),
             'bundles' => $disbursedBundles,
-            'bundles_by_week' => $datesArray
+            'bundles_by_week' => $datesCollection
         ]);
     }
 }

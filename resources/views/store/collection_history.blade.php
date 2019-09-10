@@ -8,73 +8,78 @@
 
     <div class="content history">
         <div>
-          <h3>{{ $pri_carer->name }}</h3>
-          <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
-              <div class="link-button link-button-large">
-                  </i><i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
-              </div>
+            <h3>{{ $pri_carer->name }}</h3>
+            <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
+            <div class="link-button link-button-large">
+                <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
+            </div>
           </a>
         </div>
-        @if (!empty($bundles_by_week))
-            <table>
-                <tr>
-                    <th>Week Commencing</th>
-                    <th>Amount Collected</th>
-                    <th></th>
-                </tr>
-                @foreach ($bundles_by_week as $week => $bundle)
-                    <tr class="@if(!$bundle)disabled @endif">
-                        <td>{{ $week }}</td>
-                        @if ($bundle)
-                            <td>{{ $bundle->vouchers->count() }}</td>
-                        @else
-                            <td>0</td>
-                        @endif
-                        <td>
-                            @if ($bundle)
-                                <i class="fa fa-caret-down rotate" aria-hidden="true"></i>
-                            @endif
-                        </td>
+        @if ($bundles->count() > 0)
+            <table class="outer">
+                <thead>
+                    <tr>
+                        <th>Week Commencing</th>
+                        <th>Weekly Total</th>
+                        <th></th>
                     </tr>
-                    @if ($bundle)
-                        <tr>
-                            <td colspan="3">
-                                <div>
-                                    <p>
-                                        <span>
-                                            <i class="fa fa-calendar"></i>
-                                            Date Collected:
-                                            {{ $bundle->disbursed_at->format('l jS F Y') }}
-                                        </span>
-                                    </p>
-                                    <p>
-                                        <span>
-                                            <i class="fa fa-home"></i>
-                                            Collected At:
-                                            {{ $bundle->disbursingCentre->name }}
-                                        <span>
-                                    </p>
-                                </div>
-                                <div>
-                                    <p>
-                                        <span>
-                                            <i class="fa fa-user"></i>
-                                            Collected By:
-                                            {{ $bundle->collectingCarer->name }}
-                                        </span>
-                                    </p>
-                                    <p>
-                                        <span>
-                                            <i class="fa fa-users"></i>
-                                            Allocated By:
-                                            {{ $bundle->disbursingUser->name }}
-                                        </span>
-                                    </p>
-                                </div>
+                </thead>
+                <tbody>
+                    <!-- loop through each week in bundles by week -->
+                    @foreach ($bundles_by_week as $date => $week)
+                        <tr class="@if(!$week)disabled @endif week-row">
+                            <td>{{ $date }}</td>
+                            @if ($week)
+                                <td>{{ $week->amount }}</td>
+                            @else
+                                <td>0</td>
+                            @endif
+                            <td>
+                                @if ($week->amount > 0)
+                                    <i class="fa fa-caret-down rotate" aria-hidden="true"></i>
+                                @endif
                             </td>
                         </tr>
-                    @endif
-                @endforeach
+                        @if ($week)
+                            @foreach($week as $bundle)
+                                <tr class="bundle-row">
+                                    <td colspan="3">
+                                        <table class="bundle-table">
+                                            <tr>
+                                                <td>
+                                                    <i class="fa fa-calendar"></i>
+                                                    Date Collected:
+                                                    {{ $bundle->disbursed_at->format('l jS F Y') }}
+                                                </td>
+                                                <td>
+                                                    <i class="fa fa-home"></i>
+                                                    Collected At:
+                                                    {{ $bundle->disbursingCentre->name }}
+                                                </td>
+                                                <td rowspan="2">
+                                                    <i class="fa fa-ticket button-icon" aria-hidden="true"></i>
+                                                    {{ $bundle->vouchers->count() }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <i class="fa fa-user"></i>
+                                                    Collected By:
+                                                    {{ $bundle->collectingCarer->name }}
+                                                </td>
+                                                <td>
+                                                    <i class="fa fa-users"></i>
+                                                    Allocated By:
+                                                    {{ $bundle->disbursingUser->name }}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endif
+                    @endforeach
+                </tbody>
             </table>
         @else
             <p class="content-warning">This family has not collected.</p>
@@ -84,16 +89,18 @@
     <script type="text/javascript">
         $(document).ready(
             function () {
-                $("table").addClass("show");
-                $("td[colspan=3]").find("p").hide();
-                $("table").click(function(event) {
+                $("table.outer").addClass("show");
+                $(".bundle-row").hide();
+                $("tbody").click(function(event) {
                     event.stopPropagation();
-                    $(".rotate").toggleClass("up");
                     var $target = $(event.target);
-                    if ( $target.closest("td").attr("colspan") > 1 ) {
+                    $target.closest("tr").find(".rotate").toggleClass("up");
+                    if ( $target.closest("tr").hasClass("bundle-row")) {
                        $target.slideUp();
+                    } else if ( $target.closest("tr").next().hasClass("bundle-row")){
+                       $target.closest("tr").nextUntil(".week-row", ".bundle-row").slideToggle();
                     } else {
-                       $target.closest("tr").next().find("p").slideToggle();
+                       return;
                     }
                 });
             }
