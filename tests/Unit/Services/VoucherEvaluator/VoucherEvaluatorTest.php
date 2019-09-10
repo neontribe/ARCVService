@@ -31,13 +31,34 @@ class VoucherEvaluatorTest extends TestCase
     ];
 
     /** @test */
+    public function itCreditsWhenAFamilyIsPregnant()
+    {
+        // Make a pregnant family
+        $family = factory(Family::class)->create();
+
+        $pregnancy = factory(Child::class, 'unbornChild')->make();
+        $family->children()->save($pregnancy);
+
+        // Make standard evaluator
+        $evaluator = EvaluatorFactory::make();
+        $evaluation = $evaluator->evaluateFamily($family);
+        $credits = $evaluation["credits"];
+
+        // There should be a credit reason of 'FamilyIsPregnant'
+        $this->assertEquals(1, count($credits));
+        $this->assertContains(self::CREDIT_TYPES['FamilyIsPregnant'], $credits);
+    }
+
+    /** @test */
     public function itCreditsWhenAChildIsUnderOne()
     {
         // Make a Child under one.
         $child = factory(Child::class, 'underOne')->make();
-        // make standard evaluator
+
+        // Make standard evaluator
         $evaluator = EvaluatorFactory::make();
-        $credits = $child->accept($evaluator)['credits'];
+        $evaluation = $evaluator->evaluateChild($child);
+        $credits = $evaluation["credits"];
 
         // Check there's two, because child *also* under school age.
         $this->assertEquals(2, count($credits));
@@ -45,7 +66,7 @@ class VoucherEvaluatorTest extends TestCase
         // Check the correct credit type is applied.
         $this->assertContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits);
         $this->assertContains(self::CREDIT_TYPES['ChildIsUnderSchoolAge'], $credits);
-        $this->assertEquals(6, $child->entitlement);
+        $this->assertEquals(6, $evaluation["entitlement"]);
     }
 
     /** @test */
@@ -53,7 +74,11 @@ class VoucherEvaluatorTest extends TestCase
     {
         // Make a Child under School Age.
         $child = factory(Child::class, 'underSchoolAge')->make();
-        $credits = $child->getStatus()['credits'];
+
+        // Make standard evaluator
+        $evaluator = EvaluatorFactory::make();
+        $evaluation = $evaluator->evaluateChild($child);
+        $credits = $evaluation["credits"];
 
         // Check there's one, because child is not under one.
         $this->assertEquals(1, count($credits));
@@ -61,7 +86,7 @@ class VoucherEvaluatorTest extends TestCase
         // Check the correct credit type is applied.
         $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits, '');
         $this->assertContains(self::CREDIT_TYPES['ChildIsUnderSchoolAge'], $credits, '');
-        $this->assertEquals(3, $child->entitlement);
+        $this->assertEquals(3, $evaluation["entitlement"]);
     }
 
     /** @test */
@@ -69,7 +94,11 @@ class VoucherEvaluatorTest extends TestCase
     {
         // Make a Child under School Age.
         $child = factory(Child::class, 'overSchoolAge')->make();
-        $credits = $child->getStatus()['credits'];
+
+        // Make standard evaluator
+        $evaluator = EvaluatorFactory::make();
+        $evaluation = $evaluator->evaluateChild($child);
+        $credits = $evaluation["credits"];
 
         // Check there's one, because child is not under one.
         $this->assertEquals(0, count($credits));
@@ -77,7 +106,7 @@ class VoucherEvaluatorTest extends TestCase
         // Check the correct credit type is applied.
         $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits);
         $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderSchoolAge'], $credits);
-        $this->assertEquals(0, $child->entitlement);
+        $this->assertEquals(0, $evaluation["entitlement"]);
     }
 
     // Note, we do not test if a child is overdue or almost born.
@@ -88,7 +117,12 @@ class VoucherEvaluatorTest extends TestCase
     {
         // Make a Child under School Age.
         $child = factory(Child::class, 'almostOne')->make();
-        $notices = $child->getStatus()['notices'];
+
+        // Make standard evaluator
+        $evaluator = EvaluatorFactory::make();
+        $evaluation = $evaluator->evaluateChild($child);
+        $notices = $evaluation["notices"];
+
 
         // Check there's one, because no other event is pending.
         $this->assertEquals(1, count($notices));
@@ -105,7 +139,11 @@ class VoucherEvaluatorTest extends TestCase
         Config::set('arc.school_month', Carbon::now()->addMonth(1)->month);
 
         $child = factory(Child::class, 'readyForSchool')->make();
-        $notices = $child->getStatus()['notices'];
+
+        // Make standard evaluator
+        $evaluator = EvaluatorFactory::make();
+        $evaluation = $evaluator->evaluateChild($child);
+        $notices = $evaluation["notices"];
 
         // Check there's one, because no other event is pending.
         $this->assertEquals(1, count($notices));
@@ -149,20 +187,4 @@ class VoucherEvaluatorTest extends TestCase
         $status = $child->getStatus(Carbon::create(2001, 5, 5, 0, 0, 0, 'Europe/London'));
         $this->assertEquals(3, array_sum(array_column($status['credits'], "value")));
     }
-
-    /** @test */
-    public function itCreditsWhenAFamilyIsPregnant()
-    {
-        // Make a pregnant family
-        $family = factory(Family::class)->create();
-
-        $pregnancy = factory(Child::class, 'unbornChild')->make();
-        $family->children()->save($pregnancy);
-
-        // There should be a credit reason of 'FamilyIsPregnant'
-        $credits = $family->getStatus()['credits'];
-        $this->assertEquals(1, count($credits));
-        $this->assertContains(self::CREDIT_TYPES['FamilyIsPregnant'], $credits);
-    }
-
 }

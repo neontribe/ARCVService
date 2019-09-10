@@ -25,7 +25,7 @@ class VoucherEvaluator extends AbstractEvaluator
     private function getNotices(IEvaluee $subject)
     {
         $notices = [];
-        $rules = $this->evaluations[class_basename($subject)];
+        $rules = $this->evaluations[get_class($subject)];
         foreach ($rules['notices'] as $rule) {
             $outcome = $rule->test($subject);
             if ($outcome) {
@@ -38,7 +38,7 @@ class VoucherEvaluator extends AbstractEvaluator
     private function getCredits(IEvaluee $subject)
     {
         $credits = [];
-        $rules = $this->evaluations[class_basename($subject)];
+        $rules = $this->evaluations[get_class($subject)];
         foreach ($rules['credits'] as $rule) {
             $outcome = $rule->test($subject);
             if ($outcome !== null) {
