@@ -59,14 +59,11 @@ class EvaluatorFactory
                 ]
             ],
             Family::class => [
-                [
-                    'notices' => [],
-                    'credits' => [
-                        new FamilyIsPregnant(null, 3)
-                    ]
+                'notices' => [],
+                'credits' => [
+                    new FamilyIsPregnant(null, 3)
                 ]
             ],
-            Registration::class => []
         ];
     }
 
@@ -88,14 +85,11 @@ class EvaluatorFactory
                 ]
             ],
             Family::class => [
-                [
-                    'notices' => [],
-                    'credits' => [
-                        new FamilyIsPregnant(null, 3)
-                    ]
+                'notices' => [],
+                'credits' => [
+                    new FamilyIsPregnant(null, 3)
                 ]
             ],
-            Registration::class => []
         ];
     }
 }

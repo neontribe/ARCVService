@@ -11,17 +11,29 @@ use App\Services\VoucherEvaluator\Valuation;
 
 class VoucherEvaluator extends AbstractEvaluator
 {
+    /** @var array $evaluations */
     private $evaluations = [];
 
-    /** @var null Valuation */
-    public $valuation = null;
+    /** @var Valuation $valuation */
+    public $valuation;
 
-    public function __construct($evaluations = [])
+    /**
+     * VoucherEvaluator constructor.
+     *
+     * @param array $evaluations
+     */
+    public function __construct(array $evaluations)
     {
         // Use the factory to make one of these
         $this->evaluations = $evaluations;
     }
 
+    /**
+     * Helper to process the current valuation Notices
+     *
+     * @param IEvaluee $subject
+     * @return array
+     */
     private function getNotices(IEvaluee $subject)
     {
         $notices = [];
@@ -35,6 +47,12 @@ class VoucherEvaluator extends AbstractEvaluator
         return $notices;
     }
 
+    /**
+     * Helper to process the current valuation credits
+     *
+     * @param IEvaluee $subject
+     * @return array
+     */
     private function getCredits(IEvaluee $subject)
     {
         $credits = [];
@@ -51,6 +69,12 @@ class VoucherEvaluator extends AbstractEvaluator
         return $credits;
     }
 
+    /**
+     * Evaluates a Child and returns the summary array
+     *
+     * @param Child $subject
+     * @return array
+     */
     public function evaluateChild(Child $subject)
     {
         $credits = $this->getCredits($subject);
@@ -75,6 +99,12 @@ class VoucherEvaluator extends AbstractEvaluator
         ];
     }
 
+    /**
+     * Evaluates a Family object and returns the summary array
+     *
+     * @param Family $subject
+     * @return array
+     */
     public function evaluateFamily(Family $subject)
     {
         $credits = $this->getCredits($subject);
@@ -97,6 +127,11 @@ class VoucherEvaluator extends AbstractEvaluator
         ];
     }
 
+    /**
+     * Evaluates a registration and sets it's valuation
+     *
+     * @param Registration $subject
+     */
     public function evaluateRegistration(Registration $subject)
     {
         /** @var Family $family */

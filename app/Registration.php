@@ -41,7 +41,7 @@ class Registration extends Model implements IEvaluee
     ];
 
     /** @var  AbstractEvaluator null  */
-    private $evaluator = null;
+    public $evaluator = null;
 
     /**
      * Run a valuation on this registration.
@@ -49,7 +49,7 @@ class Registration extends Model implements IEvaluee
     public function getValuationAttribute()
     {
         // Get the evaluator, or make a new one
-        $this->evaluator = ($this->evaluator) ?? EvaluatorFactory::makeFromRegistration($this);
+        $this->evaluator = $this->evaluator ?? EvaluatorFactory::makeFromRegistration($this);
         // Start the process of making a valuation
         $this->accept($this->evaluator);
         // fetch the report

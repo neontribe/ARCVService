@@ -47,10 +47,6 @@ class Family extends Model implements IEvaluee
         'rvid'
     ];
 
-    private $evaluation = [];
-
-
-
     /**
      * Visitor pattern voucher evaluator
      *
@@ -58,61 +54,7 @@ class Family extends Model implements IEvaluee
      */
     public function accept(AbstractEvaluator $evaluator)
     {
-        $evaluator->evaluateFamily($this);
-    }
-
-    /**
-     * Fetches the
-     * Credits
-     * Notices
-     * Vouchers
-     *
-     * From children
-     * and appends it's own if criteria matches
-     * @return array
-     */
-    public function getStatus()
-    {
-        $notices = [];
-        $credits = [];
-
-        foreach ($this->children as $child) {
-            $child_status = $child->getStatus();
-            $notices = array_merge($notices, $child_status['notices']);
-            $credits = array_merge($credits, $child_status['credits']);
-        }
-
-        $rules = [
-            'notices' => [],
-            'credits' => [
-                new Services\VoucherEvaluator\Evaluations\FamilyIsPregnant(null, 3)
-            ]
-        ];
-
-        foreach ($rules['notices'] as $rule) {
-            $outcome = $rule->test($this);
-            if ($outcome) {
-                $notices[] = ['reason' => class_basename($outcome::SUBJECT)."|".$outcome::REASON];
-            }
-        }
-
-        foreach ($rules['credits'] as $rule) {
-            $outcome = $rule->test($this);
-            if ($outcome) {
-                $credits[] = [
-                    'reason' => class_basename($outcome::SUBJECT)."|".$outcome::REASON,
-                    'value' => $outcome->value
-                ];
-            }
-        }
-
-        $entitlement =  array_sum(array_column($credits, 'credits'));
-
-        return [
-            'credits' => $credits,
-            'notices' => $notices,
-            'entitlement' => $entitlement
-        ];
+        return $evaluator->evaluateFamily($this);
     }
 
     /**
