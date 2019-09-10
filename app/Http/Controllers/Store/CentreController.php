@@ -100,7 +100,7 @@ class CentreController extends Controller
                 "RVID" => ($reg->family) ? $reg->family->rvid : 'Family not found',
                 "Centre" => ($reg->centre) ? $reg->centre->name : 'Centre not found',
                 "Primary Carer" => ($reg->family->carers->first()) ? $reg->family->carers->first()->name : null,
-                "Entitlement" => $reg->family->entitlement,
+                "Entitlement" => $reg->valuation->getEntitlement(),
                 "Last Collection" => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format('d/m/Y') : null
             ];
 

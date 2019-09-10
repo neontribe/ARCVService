@@ -136,29 +136,6 @@ class FamilyModelTest extends TestCase
     }
 
     /** @test */
-    public function itHasAnAttributeThatCalculatesSumOfEligibleChildren()
-    {
-        // Create Family
-        $family = factory(Family::class)->create();
-
-        // Add 2 Carers
-        $family->carers()->saveMany(factory(Carer::class, 2)->make());
-
-        // Add some Children
-        $family->children()
-            ->saveMany(
-                collect([
-                    factory(Child::class, 'unbornChild')->make(),
-                    factory(Child::class, 'underOne', 2)->make(),
-                    factory(Child::class, 'underSchoolAge')->make(),
-                    factory(Child::class, 'overSchoolAge')->make(),
-                ])->flatten()
-            );
-
-        $this->assertEquals($family->eligibleChildrenCount, 3);
-    }
-
-    /** @test */
     public function itHasAnAttributeThatReturnsNearestDueDateOrNull()
     {
         // Create Family

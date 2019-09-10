@@ -37,7 +37,7 @@
             </tr>
             <tr>
                 <td rowspan="4" class="colspan">{{ $reg["family"]->rvid }}</td>
-                <td rowspan="4" class="colspan vouchers"><i class="fa fa-ticket" aria-hidden="true"></i> {{ $reg->valuation->entitlement }}</td>
+                <td rowspan="4" class="colspan vouchers"><i class="fa fa-ticket" aria-hidden="true"></i> {{ $reg->valuation->getEntitlement() }}</td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -65,7 +65,7 @@
         <table class="more-info {{ ($index + 1) == count($regs) ? 'no-page-break' : '' }}">
             <tr>
                 <td rowspan="2">
-                    <p>This family should collect <strong>{{ $reg->valuation->entitlement }}</strong> vouchers per week:</p>
+                    <p>This family should collect <strong>{{ $reg->valuation->getEntitlement() }}</strong> vouchers per week:</p>
                     <ul>
                         @foreach( $reg->valuation->getCreditReasons() as $credits)
                             <li>

@@ -104,7 +104,7 @@ class Registration extends Model implements IEvaluee
         if (!$bundle) {
             $bundle = Bundle::create([
                 "registration_id" => $this->id,
-                "entitlement" => $this->family->entitlement
+                "entitlement" => $this->valuation->getEntitlement()
                 ]);
         };
 

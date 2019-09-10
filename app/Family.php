@@ -43,7 +43,6 @@ class Family extends Model implements IEvaluee
      * @var array
      */
     protected $appends = [
-        'entitlement',
         'expecting',
         'rvid'
     ];
@@ -131,23 +130,6 @@ class Family extends Model implements IEvaluee
         }
         return $due;
     }
-
-    /**
-     * Attribute that gets the number of eligible children
-     * If this is 0, then they're not eligible.
-     *
-     * @return integer|null
-     */
-    public function getEligibleChildrenCountAttribute()
-    {
-        return $this->children->reduce(function ($count, $child) {
-            $count += !empty($child->getStatus()['credits'])
-                ? 1
-                : 0 ;
-            return $count;
-        });
-    }
-
 
     /**
      * Generates and sets the components required for an RVID.

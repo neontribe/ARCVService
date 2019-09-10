@@ -37,10 +37,6 @@ class Child extends Model implements IEvaluee
         'dob'
     ];
 
-    protected $appends = [
-        'entitlement',
-    ];
-
     /**
      * Calculates and returns the age in Years and Months (or P for pregnancy)
      *
