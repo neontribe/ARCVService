@@ -20,7 +20,7 @@
                 <thead>
                     <tr>
                         <th>Week Commencing</th>
-                        <th>Amount Collected</th>
+                        <th>Weekly Total</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -56,7 +56,10 @@
                                                     Collected At:
                                                     {{ $bundle->disbursingCentre->name }}
                                                 </td>
-                                                <td rowspan="2">{{ $bundle->vouchers->count() }}</td>
+                                                <td rowspan="2">
+                                                    <i class="fa fa-ticket button-icon" aria-hidden="true"></i>
+                                                    {{ $bundle->vouchers->count() }}
+                                                </td>
                                             </tr>
                                             <tr>
                                                 <td>
