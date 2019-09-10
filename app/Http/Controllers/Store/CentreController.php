@@ -113,7 +113,8 @@ class CentreController extends Controller
                 $child_index = 0;
                 foreach ($reg->family->children as $child) {
                     // make a 'Child X DoB' key
-                    $status = $child->getStatus();
+                    // TODO: Improve this particular hack.
+                    $status = $child->accept($reg->evaluator);
 
                     // Arrange kids by eligibility
                     switch ($status['eligibility']) {
