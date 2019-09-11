@@ -163,28 +163,23 @@ class VoucherEvaluatorTest extends TestCase
             'dob' => $dob,
         ]);
 
-        // Test vouchers if today is the 1st April 2001 / Check is under school age => 3 vouchers
-        $status = $child->getStatus(Carbon::create(2001, 4, 1, 0, 0, 0, 'Europe/London'));
-        $this->assertEquals(6, array_sum(array_column($status['credits'], "value")));
+        // make a bunch of offset dates to check credits on
+        $offsets = [
+            '2001-04-01' => 6,
+            '2001-04-11' => 6,
+            '2001-04-12' => 6,
+            '2001-04-13' => 6,
+            '2001-04-30' => 6,
+            '2001-05-05' => 3
+        ];
 
-        // Test vouchers if today is the 11th April 2001 / Check is under school age => 3 vouchers
-        $status = $child->getStatus(Carbon::create(2001, 4, 11, 0, 0, 0, 'Europe/London'));
-        $this->assertEquals(6, array_sum(array_column($status['credits'], "value")));
-
-        // Test vouchers if today is the 12th April 2001 / Check is under school age => 3 vouchers
-        $status = $child->getStatus(Carbon::create(2001, 4, 12, 0, 0, 0, 'Europe/London'));
-        $this->assertEquals(6, array_sum(array_column($status['credits'], "value")));
-
-        // Test vouchers if today is the 13th April 2001 / Check is under school age => 3 vouchers
-        $status = $child->getStatus(Carbon::create(2001, 4, 13, 0, 0, 0, 'Europe/London'));
-        $this->assertEquals(6, array_sum(array_column($status['credits'], "value")));
-
-        // Test vouchers if today is the 31st April 2001 / Check is under school age => 3 vouchers
-        $status = $child->getStatus(Carbon::create(2001, 4, 30, 0, 0, 0, 'Europe/London'));
-        $this->assertEquals(6, array_sum(array_column($status['credits'], "value")));
-
-        // Test vouchers if today is the 5st May 2001 / Check is in school => 3 vouchers
-        $status = $child->getStatus(Carbon::create(2001, 5, 5, 0, 0, 0, 'Europe/London'));
-        $this->assertEquals(3, array_sum(array_column($status['credits'], "value")));
+        foreach ($offsets as $offset => $expected) {
+            $offsetDate = Carbon::createFromFormat('Y-m-d', $offset, 'Europe/London');
+            // Make a standard valuator
+            $evaluator = EvaluatorFactory::make(null, $offsetDate);
+            $evaluation = $evaluator->evaluateChild($child);
+            $credits = $evaluation["credits"];
+            $this->assertEquals($expected, array_sum(array_column($credits, "value")));
+        }
     }
 }
