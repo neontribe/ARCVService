@@ -38,10 +38,10 @@ class SearchPageFuzzyTest extends StoreTestCase
         try {
             $this->runDatabaseMigrations();
         } catch (Exception $exception) {
-            $this->markTestSkipped(
+            /*$this->markTestSkipped(
                 'Fuzzy searching with TomLingham/Laravel-Searchy needs the MySQL database "' . $connection .
                 '", owing to complex conditionals, but it was unavailable: ' . $exception->getMessage()
-            );
+            );*/
             throw $exception;
         }
 
