@@ -27,7 +27,7 @@
                         <td>{{ $centre->name }}</td>
                         <td>{{ $centre->prefix }}</td>
                         <td>{{ $centre->sponsor->name }}</td>
-                        <td>{{ $centre->print_pref }}</td>
+                        <td>{{ ucwords($centre->print_pref) }}</td>
                     </tr>
                 @endforeach
             </tbody>

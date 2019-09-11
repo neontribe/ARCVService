@@ -896,7 +896,7 @@ HISTORY PAGE
 	text-align: center;
 }
 
-.history table {
+.history .outer {
 	margin: 5% 5% 0 0;
 	visibility: hidden;
 	width: 70%;
@@ -906,11 +906,13 @@ HISTORY PAGE
 .history td {
 	font-size: 1.2rem;
 	text-align: center;
+	border: none;
 }
 
 .history td[colspan="3"] {
 	padding: 0 2rem;
 	background: #eeeeee;
+	border-top: 1px solid #a74e94;
 	pointer-events: none;
 }
 
@@ -918,10 +920,11 @@ HISTORY PAGE
 	display: flex;
 }
 
-.history table p {
-	width: 50%;
-	font-size: 1rem;
-	margin: 0.5rem;
+.history .week-row {
+	border-top: 1px solid #a74e94;
+}
+
+.history .bundle-table td {
 	text-align: left;
 }
 
