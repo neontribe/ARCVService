@@ -72,6 +72,13 @@ class Child extends Model implements IEvaluee
         return $this->dob->format($format);
     }
 
+    /**
+     * Generic future date calculator, uses to school start and extended start
+     *
+     * @param int $years
+     * @param int|null $month
+     * @return Carbon
+     */
     public function calcFutureMonthYear(int $years, int $month = null)
     {
         $month = ($month) ?? config('arc.school_month');

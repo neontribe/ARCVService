@@ -19,7 +19,9 @@ class VoucherEvaluatorTest extends TestCase
         'ChildIsAlmostBorn' => ['reason' => 'Child|almost born'],
         'ChildIsOverDue' => ['reason' => 'Child|over due date'],
         'ChildIsAlmostSchoolAge' => ['reason' => 'Child|almost school age'],
-        'ChildIsAlmostTwelve' => ['reason' => 'Child|almost 12 years old']
+        'ChildIsAlmostExtendedAge' => ['reason' => 'Child|almost extended cut off'],
+        'ChildIsAlmostTwelve' => ['reason' => 'Child|almost 12 years old'],
+
     ];
 
     // This has a | in the reason field because we want to carry the entity with it.
@@ -27,6 +29,7 @@ class VoucherEvaluatorTest extends TestCase
         'ChildIsUnderOne' => ['reason' => 'Child|under 1 year old', 'value' => 3],
         'ChildIsUnderSchoolAge' => ['reason' => 'Child|under school age', 'value' => 3],
         'ChildIsUnderTwelve' => ['reason' => 'Child|under 12 years old', 'value' => 3],
+        'ChildIsUnderExtendedAge' => ['reason' => 'Child|under extended cut off', 'value' => 3],
         'FamilyIsPregnant' => ['reason' => 'Family|pregnant', 'value' => 3],
     ];
 
@@ -87,6 +90,27 @@ class VoucherEvaluatorTest extends TestCase
         $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits, '');
         $this->assertContains(self::CREDIT_TYPES['ChildIsUnderSchoolAge'], $credits, '');
         $this->assertEquals(3, $evaluation["entitlement"]);
+    }
+
+    /** @test */
+    public function itCreditsWhenAChildIsUnderExtendedAge()
+    {
+        // Make a Child under School Age.
+        $child = factory(Child::class, 'underSchoolAge')->make();
+
+        // Make standard evaluator
+        $evaluator = EvaluatorFactory::make('extended_age');
+        $evaluation = $evaluator->evaluateChild($child);
+        $credits = $evaluation["credits"];
+
+        // Check there's two, because child is not under one.
+        $this->assertEquals(2, count($credits));
+
+        // Check the correct credit type is applied.
+        $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits, '');
+        $this->assertContains(self::CREDIT_TYPES['ChildIsUnderSchoolAge'], $credits, '');
+        $this->assertContains(self::CREDIT_TYPES['ChildIsUnderExtendedAge'], $credits, '');
+        $this->assertEquals(6, $evaluation["entitlement"]);
     }
 
     /** @test */

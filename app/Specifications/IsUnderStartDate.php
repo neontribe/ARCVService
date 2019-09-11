@@ -39,8 +39,7 @@ class IsUnderStartDate extends AbstractSpecification
     */
     public function isSatisfiedBy(Child $candidate)
     {
-        $targetDate = $candidate->calcSchoolStart();
+        $targetDate = $candidate->calcFutureMonthYear($this->yearsAhead, $this->offsetMonth);
         return $this->offsetDate->lessThan($targetDate);
     }
-
 }
