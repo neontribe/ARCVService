@@ -11,7 +11,10 @@
 |
 */
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factory;
+
+/** @var Factory $factory */
 
 /**
  *  Users for Market and CC
@@ -312,13 +315,13 @@ $factory->define(App\Registration::class, function () {
 
     // Add dependent models
     $family->carers()->saveMany(factory(App\Carer::class, random_int(1, 3))->make());
-    $family->children()->saveMany(factory(\App\Child::class, random_int(0, 4))->make());
+    $family->children()->saveMany(factory(App\Child::class, random_int(0, 4))->make());
 
     return [
         'centre_id' => $centre->id,
         'family_id' => $family->id,
         'eligibility' => $eligibilities[mt_rand(0, count($eligibilities) - 1)],
-        'consented_on' => Carbon\Carbon::now(),
+        'consented_on' => Carbon::now(),
     ];
 });
 
@@ -338,7 +341,7 @@ $factory->define(App\Carer::class, function (Faker\Generator $faker) {
 // Random Age Child
 $factory->define(App\Child::class, function (Faker\Generator $faker) {
 
-    $dob = Carbon\Carbon::createFromTimestamp($faker->dateTimeBetween('-6 years', '+9 months')->getTimestamp());
+    $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-6 years', '+9 months')->getTimestamp());
     $dob = $dob->startOfMonth();
     return [
         'born' => $dob->isPast(),
@@ -349,7 +352,7 @@ $factory->define(App\Child::class, function (Faker\Generator $faker) {
 // Child - unborn
 $factory->defineAs(App\Child::class, 'unbornChild', function (Faker\Generator $faker) {
 
-    $dob = Carbon\Carbon::createFromTimestamp($faker->dateTimeBetween('+2 month', '+8 months')->getTimestamp());
+    $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('+2 month', '+8 months')->getTimestamp());
     $dob = $dob->startOfMonth();
 
     return [
@@ -361,7 +364,7 @@ $factory->defineAs(App\Child::class, 'unbornChild', function (Faker\Generator $f
 // Child - under 1
 $factory->defineAs(App\Child::class, 'underOne', function (Faker\Generator $faker) {
 
-    $dob = Carbon\Carbon::createFromTimestamp($faker->dateTimeBetween('-10 months', '-2 months')->getTimestamp());
+    $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-10 months', '-2 months')->getTimestamp());
     $dob = $dob->startOfMonth();
 
     return [
@@ -373,7 +376,7 @@ $factory->defineAs(App\Child::class, 'underOne', function (Faker\Generator $fake
 // Child - almost born
 $factory->defineAs(App\Child::class, 'almostBorn', function (Faker\Generator $faker) {
 
-    $dob = Carbon\Carbon::now()->startOfMonth()->addMonths(1);
+    $dob = Carbon::now()->startOfMonth()->addMonths(1);
 
     return [
         'born' => $dob->isPast(),
@@ -385,7 +388,7 @@ $factory->defineAs(App\Child::class, 'almostBorn', function (Faker\Generator $fa
 // Child - almost 1
 $factory->defineAs(App\Child::class, 'almostOne', function (Faker\Generator $faker) {
 
-    $dob = Carbon\Carbon::now()->startOfMonth()->subMonths(11);
+    $dob = Carbon::now()->startOfMonth()->subMonths(11);
 
     return [
         'born' => $dob->isPast(),
@@ -397,7 +400,7 @@ $factory->defineAs(App\Child::class, 'almostOne', function (Faker\Generator $fak
 $factory->defineAs(App\Child::class, 'readyForSchool', function (Faker\Generator $faker) {
 
     // Make a child who's four now, and thus due to start school soon(ish)
-    $dob = Carbon\Carbon::now()->startOfMonth()->subYears(4);
+    $dob = Carbon::now()->startOfMonth()->subYears(4);
 
     return [
         'born' => $dob->isPast(),
@@ -408,7 +411,7 @@ $factory->defineAs(App\Child::class, 'readyForSchool', function (Faker\Generator
 // Child - under School Age
 $factory->defineAs(App\Child::class, 'underSchoolAge', function (Faker\Generator $faker) {
 
-    $dob = Carbon\Carbon::createFromTimestamp($faker->dateTimeBetween('-32 months', '-14 months')->getTimestamp());
+    $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-32 months', '-14 months')->getTimestamp());
     $dob = $dob->startOfMonth();
 
     return [
@@ -420,7 +423,7 @@ $factory->defineAs(App\Child::class, 'underSchoolAge', function (Faker\Generator
 // Child - over SchoolAge
 $factory->defineAs(App\Child::class, 'overSchoolAge', function (Faker\Generator $faker) {
 
-    $dob = Carbon\Carbon::createFromTimestamp($faker->dateTimeBetween('-10 years', '-6 years')->getTimestamp());
+    $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-10 years', '-6 years')->getTimestamp());
     $dob = $dob->startOfMonth();
 
     return [
@@ -439,10 +442,7 @@ $factory->define(App\Note::class, function (Faker\Generator $faker){
 });
 
 // StateToken - pretty empty, it generates it's own UUID
-$factory->define(
-    App\StateToken::class,
-    function (Faker\Generator $faker, $attributes) {
-
+$factory->define(App\StateToken::class, function (Faker\Generator $faker, $attributes) {
         // Create a default UUID if you havn't got one.
         $uuid = (empty($attributes['uuid']))
             ? App\StateToken::generateUnusedToken()
@@ -452,5 +452,24 @@ $factory->define(
             [
               'uuid' => $uuid
             ];
-    }
-);
+});
+
+// Delivery - a schedule of vouchers sent somewhere
+$factory->define(App\Delivery::class, function (Faker\Generator $faker, $attributes) {
+
+    $centre_id = (empty($attributes['centre_id']))
+        ? factory(App\Centre::class)->create()
+        : $attributes['centre_id']
+    ;
+
+    $dispatched_at = (empty($attributes['dispatched_at']))
+        ? Carbon::today()
+        : $attributes['dispatched_at']
+    ;
+
+    return [
+        'range' => '',
+        'dispatched_at' => $dispatched_at,
+        'centre_id' => $centre_id
+    ];
+});

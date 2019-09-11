@@ -2,16 +2,17 @@
 
 namespace Tests\Unit\Models;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use SM\StateMachine\StateMachine;
-use App\VoucherState;
-use App\Voucher;
+use App\Delivery;
 use App\Sponsor;
 use App\Trader;
 use App\User;
-use Carbon\Carbon;
+use App\Voucher;
+use App\VoucherState;
 use Auth;
+use Carbon\Carbon;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use SM\StateMachine\StateMachine;
+use Tests\TestCase;
 
 class VoucherModelTest extends TestCase
 {
@@ -24,6 +25,7 @@ class VoucherModelTest extends TestCase
         $this->voucher = factory(Voucher::class, 'dispatched')->create();
     }
 
+    /** @test */
     public function testAVoucherIsCreatedWithExpectedAttributes()
     {
         $v = $this->voucher;
@@ -41,12 +43,14 @@ class VoucherModelTest extends TestCase
         $this->assertInternalType('integer', $v->trader_id);
     }
 
+    /** @test */
     public function testCreateVoucherStateMachine()
     {
         // Check there's an FSM for the model
         $this->assertInstanceOf(StateMachine::class, $this->voucher->getStateMachine());
     }
 
+    /** @test */
     public function testSoftDeleteVoucher()
     {
         $this->voucher->delete();
@@ -54,11 +58,13 @@ class VoucherModelTest extends TestCase
         $this->assertCount(0, Voucher::all());
     }
 
+    /** @test */
     public function testVoucherBelongsToSponsor()
     {
         $this->assertInstanceOf(Sponsor::class, $this->voucher->sponsor);
     }
 
+    /** @test */
     public function testVoucherCanBelongToTrader()
     {
         // The voucher factory creates a sponsor because it's required.
@@ -69,6 +75,16 @@ class VoucherModelTest extends TestCase
         $this->assertInstanceOf(Trader::class, $voucher->trader);
     }
 
+    /** @test */
+    public function testVoucherCanBelongToDelivery()
+    {
+        $voucher = factory(Voucher::class)->create([
+            'delivery_id' => factory(Delivery::class)->create()->id,
+        ]);
+        $this->assertInstanceOf(Delivery::class, $voucher->delivery);
+    }
+
+    /** @test */
     public function testFindVoucherByCode()
     {
         $a = factory(Voucher::class)->create([
@@ -85,6 +101,7 @@ class VoucherModelTest extends TestCase
         $this->assertNotEquals($b->fresh(), Voucher::findByCode('aaaaa'));
     }
 
+    /** @test */
     public function testGetVoucherPendedOnDay()
     {
         $v = $this->voucher;
@@ -99,6 +116,7 @@ class VoucherModelTest extends TestCase
         );
     }
 
+    /** @test */
     public function testGetVoucherRecordedOnDay()
     {
         $v = $this->voucher;
@@ -112,6 +130,7 @@ class VoucherModelTest extends TestCase
         );
     }
 
+    /** @test */
     public function testGetVoucherReimbursedOnDay()
     {
         $v = $this->voucher;
@@ -127,6 +146,7 @@ class VoucherModelTest extends TestCase
         );
     }
 
+    /** @test */
     public function testCleanVouchers()
     {
         $user = factory(User::class)->create();
@@ -161,6 +181,7 @@ class VoucherModelTest extends TestCase
         $this->assertEquals(count($badCodes), $vouchers->count());
     }
 
+    /** @test */
     public function testScopeConfirmedVouchers()
     {
         $user = factory(User::class)->create();

@@ -2,6 +2,7 @@
 
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 
 class BundleSeeder extends Seeder
 {
@@ -34,7 +35,7 @@ class BundleSeeder extends Seeder
         $bundle = $registration->currentBundle();
 
         // Create three random vouchers and transition to printed, then bundle
-        /** @var \Illuminate\Support\Collection $vs */
+        /** @var Collection $vs */
         $vs1 = factory('App\Voucher', 'requested', 3)
             ->create()
             ->each(function (\App\Voucher $v) {
@@ -64,7 +65,7 @@ class BundleSeeder extends Seeder
      *
      * @param $quantity
      * @param App\Centre $centre
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public function createRegistrationForCentre($quantity, App\Centre $centre = null)
     {
