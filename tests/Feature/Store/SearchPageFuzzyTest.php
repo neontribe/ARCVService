@@ -56,40 +56,21 @@ class SearchPageFuzzyTest extends StoreTestCase
     }
 
     /** @test */
-    public function iCanSearchForExactMatches()
+    public function itCanSearchForExactMatches()
     {
         $this->markTestIncomplete("This test has not been implemented but likely can be");
     }
 
     /** @test */
-    public function iCanSearchForStartOfStringMatches()
+    public function itCanSearchForStartOfStringMatches()
     {
         $this->markTestIncomplete("This test has not been implemented yet but likely can be");
     }
 
     /** @test */
-    public function iCanSearchForAcronymMatches()
+    public function itCanSearchForAcronymMatches()
     {
-        $this->markTestIncomplete("This test has not been implemented but likely can be");
-    }
-
-    /** @test */
-    public function iCanSearchForConsecutiveMatches()
-    {
-        $this->markTestIncomplete("This test has not been implemented yet but likely can be");
-    }
-
-    /** @test */
-    public function iCanSearchForStarOfWordMarches()
-    {
-        $this->markTestIncomplete("This test has not been implemented yet but likely can be");
-    }
-
-    /** @test */
-    public function iCanSearchForStudlyCaseMatches()
-    {
-        // https://github.com/TomLingham/Laravel-Searchy/tree/2.0#studlycasematcher
-        // https://en.wikipedia.org/wiki/Studly_caps
+        // https://github.com/TomLingham/Laravel-Searchy/tree/2.0#acronymmatcher
 
         // Make some named registrations
         $this->createRegWithCarer('Bruce Campbell');
@@ -108,10 +89,28 @@ class SearchPageFuzzyTest extends StoreTestCase
         $this->dontSee("Bruce Campbell");
         $this->dontSee("Sam Raimi");
         $this->dontSee("Ivan Raimi");
+        $this->markTestIncomplete("This test has not been implemented but likely can be");
     }
 
     /** @test */
-    public function iCanSearchForSubtringMatches()
+    public function itCanSearchForConsecutiveMatches()
+    {
+        $this->markTestIncomplete("This test has not been implemented yet but likely can be");
+    }
+
+    /** @test */
+    public function itCanSearchForStarOfWordMarches()
+    {
+        $this->markTestIncomplete("This test has not been implemented yet but likely can be");
+    }
+
+    /** @test */
+    public function itCanSearchForStudlyCaseMatches()
+    {
+    }
+
+    /** @test */
+    public function itCanSearchForSubstringMatches()
     {
         $this->markTestIncomplete("This test has not been implemented yet but likely can be");
     }
