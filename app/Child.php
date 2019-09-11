@@ -72,6 +72,17 @@ class Child extends Model implements IEvaluee
         return $this->dob->format($format);
     }
 
+    public function calcFutureMonthYear(int $years, int $month = null)
+    {
+        $month = ($month) ?? config('arc.school_month');
+        $years = ($this->dob->month < $month)
+            ? $years -1
+            : $years
+        ;
+        $future_year = $this->dob->addYears($years)->year;
+        return Carbon::createFromDate($future_year, $month, 1);
+    }
+
     /**
      * Calculates the School start date for a Child
      * If a Child is born before september, 4 years ahead
@@ -81,15 +92,7 @@ class Child extends Model implements IEvaluee
      */
     public function calcSchoolStart()
     {
-        $school_month = config('arc.school_month');
-        if ($this->dob->month < $school_month) {
-            $years = 4;
-        } else {
-            $years = 5;
-        }
-        $school_year = $this->dob->addYears($years)->year;
-        //day needs to be set to one as carbon gets confused on 31st
-        return Carbon::createFromDate($school_year, $school_month, 1);
+        return $this->calcFutureMonthYear(5);
     }
 
     /**

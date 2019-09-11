@@ -7,9 +7,9 @@ use App\Specifications\IsUnderStartDate;
 use Carbon\Carbon;
 use Chalcedonyt\Specification\AndSpec;
 
-class ChildIsUnderSchoolAge extends BaseChildEvaluation
+class ChildIsUnderExtendedAge extends BaseChildEvaluation
 {
-    const REASON = 'under school age';
+    const REASON = 'under extended cut off';
     private $specification;
 
     public function __construct(Carbon $offsetDate = null, $value = 3)
@@ -18,8 +18,7 @@ class ChildIsUnderSchoolAge extends BaseChildEvaluation
 
         $this->specification = new AndSpec(
             new IsBorn(),
-            // Child school start date
-            new IsUnderStartDate($this->offsetDate, 5, config('arc.school_month'))
+            new IsUnderStartDate($this->offsetDate, 12, config('arc.school_month'))
         );
     }
 

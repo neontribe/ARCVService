@@ -8,14 +8,27 @@ use Chalcedonyt\Specification\AbstractSpecification;
 
 class IsUnderStartDate extends AbstractSpecification
 {
+
     /** @var Carbon $offsetDate */
     protected $offsetDate;
 
+    /** @var int $yearsAhead */
+    private $yearsAhead;
+
+    /** @var int $offsetMonth */
+    private $offsetMonth;
+
     /**
-    *  @param Carbon  $offsetDate   Whenever you want "today" to be
-    */
-    public function __construct(Carbon $offsetDate)
+     * IsUnderStartDate constructor.
+     *
+     * @param $offsetDate
+     * @param int $yearsAhead
+     * @param int $offsetMonth
+     */
+    public function __construct($offsetDate, int $yearsAhead, int $offsetMonth)
     {
+        $this->offsetMonth = $offsetMonth;
+        $this->yearsAhead = $yearsAhead;
         $this->offsetDate = $offsetDate;
     }
 

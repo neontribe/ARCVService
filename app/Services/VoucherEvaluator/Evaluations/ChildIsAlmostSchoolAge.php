@@ -18,7 +18,8 @@ class ChildIsAlmostSchoolAge extends BaseChildEvaluation
 
         $this->specification = new AndSpec(
             new IsBorn(),
-            new IsAlmostStartDate($this->offsetDate)
+            // Child school start date
+            new IsAlmostStartDate($this->offsetDate, 5, config('arc.school_month'))
         );
     }
 

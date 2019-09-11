@@ -6,13 +6,13 @@ use App\Child;
 use App\Family;
 use App\Registration;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostBorn;
+use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostExtendedAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostOne;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostSchoolAge;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostTwelve;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnBorn;
+use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderExtendedAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderOne;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderSchoolAge;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderTwelve;
 use App\Services\VoucherEvaluator\Evaluations\FamilyIsPregnant;
 use App\Services\VoucherEvaluator\Evaluators\VoucherEvaluator;
 use Carbon\Carbon;
@@ -76,12 +76,12 @@ class EvaluatorFactory
                     new ChildIsAlmostBorn($offsetDate),
                     new ChildIsAlmostOne($offsetDate),
                     new ChildIsAlmostSchoolAge($offsetDate),
-                    new ChildIsAlmostTwelve($offsetDate)
+                    new ChildIsAlmostExtendedAge($offsetDate)
                 ],
                 'credits' => [
                     new ChildIsUnderOne($offsetDate, 3),
                     new ChildIsUnderSchoolAge($offsetDate, 3),
-                    new ChildIsUnderTwelve($offsetDate, 3)
+                    new ChildIsUnderExtendedAge($offsetDate, 3)
                 ]
             ],
             Family::class => [
