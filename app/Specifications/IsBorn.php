@@ -8,7 +8,8 @@ use Chalcedonyt\Specification\AbstractSpecification;
 class IsBorn extends AbstractSpecification
 {
     /**
-    * Tests an object and returns a boolean value
+    * Returns the child's born state
+    *
     * @param Child $candidate
     * @return  Boolean
     */

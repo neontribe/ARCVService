@@ -19,8 +19,13 @@ use Carbon\Carbon;
 
 class EvaluatorFactory
 {
-    const EXTENDED_SPONSORS = ['SK'];
-
+    /**
+     * Factory method that makes the evaluator with the correct rules
+     *
+     * @param null $type
+     * @param Carbon|null $offsetDate
+     * @return VoucherEvaluator
+     */
     public static function make($type = null, Carbon $offsetDate = null)
     {
         $offsetDate = $offsetDate ?? Carbon::today()->startOfDay();
@@ -35,14 +40,31 @@ class EvaluatorFactory
         return new VoucherEvaluator($evaluations);
     }
 
+    /**
+     * Factory method that uses the Registration for the correct context
+     *
+     * @param Registration $registration
+     * @param null $offsetDate
+     * @return VoucherEvaluator
+     */
     public static function makeFromRegistration(Registration $registration, $offsetDate = null)
     {
-        return (in_array($registration->centre->sponsor->shortcode, self::EXTENDED_SPONSORS))
+        // Get the list of extended sponsors from config
+        // TODO: when we have more variations of rulessets, make this better
+        $extended_sponsors = config('arc.extended_sponsors');
+
+        return (in_array($registration->centre->sponsor->shortcode, $extended_sponsors))
             ? self::make('extended_age', $offsetDate)
             : self::make(null, $offsetDate)
         ;
     }
 
+    /**
+     * Creates the correct rules for a "standard" Evaluation
+     *
+     * @param Carbon $offsetDate
+     * @return array
+     */
     private static function createStandardEvaluations(Carbon $offsetDate)
     {
         return $evaluations = [
@@ -67,6 +89,12 @@ class EvaluatorFactory
         ];
     }
 
+    /**
+     * Creates the correct rule for an "extended age" evaluation
+     *
+     * @param Carbon $offsetDate
+     * @return array
+     */
     private static function createExtendedEvaluations(Carbon $offsetDate)
     {
         return $evaluations = [
