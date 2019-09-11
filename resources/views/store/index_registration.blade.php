@@ -10,9 +10,9 @@
             <form action="{{ URL::route('store.registration.index') }}" method="GET" id="searchform">
                 {!! csrf_field() !!}
                 <div class="search-actions">
-                    <input type="search" name="family_name" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Enter family name">
-                    <button>
-                        <img src="{{ asset('store/assets/search-light.svg') }}" name="search">
+                    <input type="search" name="family_name" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Enter family name" aria-label="Family Name">
+                    <button name="search" aria-label="Search">
+                        <img src="{{ asset('store/assets/search-light.svg') }}" alt="search">
                     </button>
                 </div>
             </form>
