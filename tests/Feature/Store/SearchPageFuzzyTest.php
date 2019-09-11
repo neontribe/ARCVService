@@ -107,6 +107,7 @@ class SearchPageFuzzyTest extends StoreTestCase
     /** @test */
     public function itCanSearchForStudlyCaseMatches()
     {
+        $this->markTestIncomplete("This test has not been implemented yet but likely can be");
     }
 
     /** @test */
