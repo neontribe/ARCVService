@@ -2,7 +2,7 @@ language: php
 php:
 - '7.2'
 sudo: required
-dist: xenial
+dist: bionic
 addons:
   ssh_known_hosts: 46.101.18.83
 before_script:
