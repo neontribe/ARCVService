@@ -89,7 +89,6 @@ class SearchPageFuzzyTest extends StoreTestCase
         $this->dontSee("Bruce Campbell");
         $this->dontSee("Sam Raimi");
         $this->dontSee("Ivan Raimi");
-        $this->markTestIncomplete("This test has not been implemented but likely can be");
     }
 
     /** @test */
