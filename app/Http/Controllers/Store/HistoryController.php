@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Store;
 
 use App\Http\Controllers\Controller;
-use App\Bundle;
 use App\Registration;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
-use DateTime;
 use Illuminate\Database\Eloquent\Collection;
 
 class HistoryController extends Controller
