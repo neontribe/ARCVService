@@ -22,16 +22,19 @@ class ServiceRoutesTest extends StoreTestCase
             'admin.centreusers.index' => [],
             'admin.centreusers.create' => [],
             'admin.centreusers.edit' => ['id' => 1],
+            'admin.deliveries.create' => [],
+            'admin.deliveries.index' => [],
             'admin.centres.index' => [],
             'admin.centres.create' => [],
             'admin.centre_neighbours.index' => ['id' => 1],
             'admin.sponsors.index' => [],
-            'admin.sponsors.create' => []
+            'admin.sponsors.create' => [],
         ],
         'POST' => [
             'admin.vouchers.storebatch' => [],
             'admin.centreusers.store' => [],
             'admin.centres.store' => [],
+            'admin.deliveries.store' => [],
         ],
         'PUT' => [
             'admin.centreusers.update' => ['id' => 1],
