@@ -42,6 +42,7 @@ class SearchPageFuzzyTest extends StoreTestCase
                 'Fuzzy searching with TomLingham/Laravel-Searchy needs the MySQL database "' . $connection .
                 '", owing to complex conditionals, but it was unavailable: ' . $exception->getMessage()
             );
+            throw $exception;
         }
 
         // Create a centre and user that we can act as
