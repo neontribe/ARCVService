@@ -13,3 +13,8 @@ Homestead.yaml
 npm-debug.log
 .env
 .prettierignore
+
+# webpack results
+/public/css
+/public/fonts
+/public/js
