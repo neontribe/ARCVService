@@ -15,21 +15,6 @@ class FamilyModelTest extends TestCase
     use DatabaseMigrations;
 
     /** @test */
-    public function itCreditsWhenAFamilyIsPregnant()
-    {
-        // Make a pregnant family
-        $family = factory(Family::class)->create();
-
-        $pregnancy = factory(Child::class, 'unbornChild')->make();
-        $family->children()->save($pregnancy);
-
-        // There should be a credit reason of 'FamilyIsPregnant'
-        $credit_reasons = $family->getCreditReasons();
-        $this->assertEquals(1, count($credit_reasons));
-        $this->assertEquals('pregnant', $credit_reasons[0]["reason"]);
-    }
-
-    /** @test */
     public function itCanHaveRegistrations()
     {
         // Create Family
@@ -128,29 +113,6 @@ class FamilyModelTest extends TestCase
         // test the pri_carer  is now filled
         $pri_carer = $carers->first();
         $this->assertEquals($pri_carer->name, $pri_carer_family->pri_carer);
-    }
-
-    /** @test */
-    public function itHasAnAttributeThatCalculatesSumOfEligibleChildren()
-    {
-        // Create Family
-        $family = factory(Family::class)->create();
-
-        // Add 2 Carers
-        $family->carers()->saveMany(factory(Carer::class, 2)->make());
-
-        // Add some Children
-        $family->children()
-            ->saveMany(
-                collect([
-                    factory(Child::class, 'unbornChild')->make(),
-                    factory(Child::class, 'underOne', 2)->make(),
-                    factory(Child::class, 'underSchoolAge')->make(),
-                    factory(Child::class, 'overSchoolAge')->make(),
-                ])->flatten()
-            );
-
-        $this->assertEquals($family->eligibleChildrenCount, 3);
     }
 
     /** @test */

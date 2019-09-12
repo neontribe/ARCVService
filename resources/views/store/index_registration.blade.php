@@ -32,7 +32,7 @@
                     @if ($registration->family)
                         <tr class="{{ $registration->family->leaving_on ? 'inactive' : 'active' }}">
                             <td class="pri_carer">{{ $registration->family->carers->first()->name }}</td>
-                            <td class="center">{{ $registration->family->entitlement }}</td>
+                            <td class="center">{{ $registration->valuation->getEntitlement() }}</td>
                             <td class="center">{{ $registration->family->rvid }}</td>
                             <td class="right no-wrap">
                                 @if( !isset($registration->family->leaving_on) )

@@ -235,7 +235,7 @@ class SearchPageTest extends StoreTestCase
         // Spot the Registration family's RVID
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
-            ->see('<td class="center">' . $registration->family->entitlement . "</td>");
+            ->see('<td class="center">' . $registration->valuation->getEntitlement() . "</td>");
     }
 
     /** @test */

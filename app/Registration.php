@@ -2,10 +2,13 @@
 
 namespace App;
 
-use Auth;
+use App\Services\VoucherEvaluator\AbstractEvaluator;
+use App\Services\VoucherEvaluator\EvaluatorFactory;
+use App\Services\VoucherEvaluator\IEvaluation;
+use App\Services\VoucherEvaluator\IEvaluee;
 use Illuminate\Database\Eloquent\Model;
 
-class Registration extends Model
+class Registration extends Model implements IEvaluee
 {
     /**
      * The attributes that are mass assignable.
@@ -37,6 +40,31 @@ class Registration extends Model
         'consented_on',
     ];
 
+    /** @var  AbstractEvaluator null  */
+    public $evaluator = null;
+
+    /**
+     * Run a valuation on this registration.
+     */
+    public function getValuationAttribute()
+    {
+        // Get the evaluator, or make a new one
+        $this->evaluator = $this->evaluator ?? EvaluatorFactory::makeFromRegistration($this);
+        // Start the process of making a valuation
+        $this->accept($this->evaluator);
+        // fetch the report
+        return $this->evaluator->valuation;
+    }
+
+    /**
+     * Visitor pattern voucher evaluator
+     *
+     * @param AbstractEvaluator $evaluator
+     */
+    public function accept(AbstractEvaluator $evaluator)
+    {
+        $evaluator->evaluateRegistration($this);
+    }
 
     /**
      * Get the Registration's Family
@@ -76,7 +104,7 @@ class Registration extends Model
         if (!$bundle) {
             $bundle = Bundle::create([
                 "registration_id" => $this->id,
-                "entitlement" => $this->family->entitlement
+                "entitlement" => $this->valuation->getEntitlement()
                 ]);
         };
 

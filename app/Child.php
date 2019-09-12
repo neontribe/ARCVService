@@ -2,26 +2,13 @@
 
 namespace App;
 
+use App\Services\VoucherEvaluator\AbstractEvaluator;
+use App\Services\VoucherEvaluator\IEvaluee;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
-class Child extends Model
+class Child extends Model implements IEvaluee
 {
-
-    // This has a | in the reason field because we want to carry the entity with it.
-    const NOTICE_TYPES = [
-        'ChildIsAlmostOne' => ['reason' => 'child|almost 1 year old'],
-        'ChildIsAlmostBorn' => ['reason' => 'child|almost born'],
-        'ChildIsOverDue' => ['reason' => 'child|over due date'],
-        'ChildIsAlmostSchoolAge' => ['reason' => 'child|almost school age'],
-    ];
-
-    // This has a | in the reason field because we want to carry the entity with it.
-    const CREDIT_TYPES = [
-        'ChildIsUnderOne' => ['reason' => 'child|under 1 year old', 'vouchers' => 3],
-        'ChildIsUnderSchoolAge' => ['reason' => 'child|under school age', 'vouchers' => 3],
-    ];
-
     /**
      * The attributes that are mass assignable.
      *
@@ -50,10 +37,6 @@ class Child extends Model
         'dob'
     ];
 
-    protected $appends = [
-        'entitlement',
-    ];
-
     /**
      * Calculates and returns the age in Years and Months (or P for pregnancy)
      *
@@ -68,9 +51,9 @@ class Child extends Model
 
         if ($this->dob->isFuture()) {
             return "P";
-        } else if ($currentDate == $startOfMonth){
+        } else if ($currentDate == $startOfMonth) {
             // Return 2nd of month as on the first of every month
-            // Carbon treats it as the previous month and returns 
+            // Carbon treats it as the previous month and returns
             // A month less than it should be.
             return $this->dob->diff($currentDatePlusOne)->format($format);
         } else {
@@ -90,6 +73,24 @@ class Child extends Model
     }
 
     /**
+     * Generic future date calculator, uses to school start and extended start
+     *
+     * @param int $years
+     * @param int|null $month
+     * @return Carbon
+     */
+    public function calcFutureMonthYear(int $years, int $month = null)
+    {
+        $month = ($month) ?? config('arc.school_month');
+        $years = ($this->dob->month < $month)
+            ? $years -1
+            : $years
+        ;
+        $future_year = $this->dob->addYears($years)->year;
+        return Carbon::createFromDate($future_year, $month, 1);
+    }
+
+    /**
      * Calculates the School start date for a Child
      * If a Child is born before september, 4 years ahead
      * Else 5 years ahead
@@ -98,113 +99,18 @@ class Child extends Model
      */
     public function calcSchoolStart()
     {
-        $school_month = config('arc.school_month');
-        if ($this->dob->month < $school_month) {
-            $years = 4;
-        } else {
-            $years = 5;
-        }
-        $school_year = $this->dob->addYears($years)->year;
-        //day needs to be set to one as carbon gets confused on 31st
-        return Carbon::createFromDate($school_year, $school_month, 1);
+        return $this->calcFutureMonthYear(5);
     }
 
     /**
-     * Get an array that holds
-     * Notices - array of Notice constants
-     * Credits - array of Credit constants
-     * Eligibility - status of child on scheme
-     * Vouchers - total vouchers this child is permitted
+     * Visitor pattern voucher evaluator
      *
-     * These can be used in voucher multipliers
-     *
-     * @param Carbon|bool $offsetDate The date to compare the DOB to.
+     * @param AbstractEvaluator $evaluator
      * @return array
      */
-
-    public function getStatus($offsetDate = false)
+    public function accept(AbstractEvaluator $evaluator)
     {
-        if (!$offsetDate) {
-            $offsetDate = Carbon::today();
-        }
-
-        $notices = [];
-        $credits = [];
-
-        $eligibility = "Ineligible";
-
-        if (!$this->born) {
-            // Regardless of age, if you are unborn, you count as a pregnancy and get not credits
-            // Even positive ages! This is a process thing
-
-            $eligibility = "Pregnancy";
-
-            // Calculate notices
-            /*
-             * Remove these Notices for beta;
-             * TODO: consider way to re-implement so they only show on Web, not print.
-            $is_almost_born = ($today->diffInMonths($this->dob) < 1) && ($this->dob->isFuture());
-            $is_overdue = ($today->diffInMonths($this->dob) > 1) && ($this->dob->isPast());
-
-            // Add notices
-            ($is_almost_born) ? $notices[] = self::NOTICE_TYPES['ChildIsAlmostBorn'] : false;
-            ($is_overdue) ? $notices[] = self::NOTICE_TYPES['ChildIsOverDue'] : false;
-            */
-        } else {
-            // Setup dates
-            /** @var Carbon $first_birthday */
-            $first_birthday = $this->dob->endOfMonth()->addYears(1);
-            $first_schoolday = $this->calcSchoolStart();
-
-            // Calculate credits
-            $is_born = $offsetDate->greaterThanOrEqualTo($this->dob);
-            // Round up today to end of month (https://trello.com/b/2sgIDGYo/arc-dev)
-            $is_one = $offsetDate->greaterThanOrEqualTo($first_birthday);
-            $is_school_age = $offsetDate->greaterThanOrEqualTo($first_schoolday);
-
-            // Calculate notices
-            $is_almost_one = ($first_birthday->isFuture() &&
-                ($offsetDate->diffInMonths($first_birthday) <= 1)) ;
-            $is_almost_school_age = ($first_schoolday->isFuture() &&
-                (($offsetDate->diffInMonths($first_schoolday) <= 1) ? true : false));
-
-            // Populate notices and credits arrays.
-            ($is_almost_one) ? $notices[] = self::NOTICE_TYPES["ChildIsAlmostOne"]: false;
-            ($is_almost_school_age) ? $notices[] = self::NOTICE_TYPES['ChildIsAlmostSchoolAge']: false;
-            (!$is_one && $is_born) ? $credits[] = self::CREDIT_TYPES["ChildIsUnderOne"]: false;
-            (!$is_school_age && $is_born) ? $credits[] = self::CREDIT_TYPES["ChildIsUnderSchoolAge"] : false;
-
-            if (!empty($credits)) {
-                $eligibility = 'Eligible';
-            }
-        }
-
-        return [
-            'eligibility' => $eligibility,
-            'notices' => $notices,
-            'credits' => $credits,
-            'vouchers' => array_sum(array_column($credits, "vouchers")),
-            ];
-    }
-
-    /**
-     * Get eligibility value string for Blade.
-     *
-     * @return mixed|string
-     */
-    public function getStatusString()
-    {
-        return $this->getStatus()['eligibility'];
-    }
-
-    /**
-     * Calculates the entitlement for a child
-     *
-     * @return int
-     */
-    public function getEntitlementAttribute()
-    {
-        return $this->getStatus()['vouchers'];
+        return $evaluator->evaluateChild($this);
     }
 
     /**

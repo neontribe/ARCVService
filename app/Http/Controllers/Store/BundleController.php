@@ -54,18 +54,21 @@ class BundleController extends Controller
             : null
         ;
 
+        $valuation = $registration->valuation;
+
         return view('store.manage_vouchers', array_merge(
             $data,
             [
                 "registration" => $registration,
                 "lastCollection" => $lastCollection,
-                "family" => $registration->family,
                 "children" => $registration->family->children,
                 "centre" => Auth::user()->centre,
                 "carers" => $carers,
                 "pri_carer" => array_shift($carers),
                 "vouchers" => $sorted_bundle,
-                "vouchers_amount" => count($bundle)
+                "vouchers_amount" => count($bundle),
+                "entitlement" => $valuation->getEntitlement(),
+                "noticeReasons" => $valuation->getNoticeReasons()
             ]
         ));
     }

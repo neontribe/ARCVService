@@ -110,7 +110,7 @@
                         <li>
                             Should collect
                             <strong>
-                                {{ $family->entitlement }}
+                                {{ $entitlement }}
                             </strong>
                             per week
                         </li>
@@ -139,13 +139,13 @@
                 <div>
                     <p class="v-spaced">Their RV-ID is: <strong>{{ $family->rvid }}</strong></p>
                 </div>
-                @if ( !empty($family->getNoticeReasons()) )
+                @if ( !empty($noticeReasons) )
                 <div class="alert-message warning">
                     <div class="icon-container warning">
                         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
                     </div>
                     <div>
-                        @foreach( $family->getNoticeReasons() as $notices )
+                        @foreach( $noticeReasons as $notices )
                             <p class="v-spaced">
                                 Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
                                 currently "{{ $notices['reason'] }}"</p>

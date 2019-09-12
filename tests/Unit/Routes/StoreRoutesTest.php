@@ -254,6 +254,7 @@ class StoreRoutesTest extends StoreTestCase
         }
     }
 
+    /** @test */
     public function testVoucherManagerUpdateGate()
     {
         // Create a random registration with our centre.

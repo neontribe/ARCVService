@@ -2,17 +2,13 @@
 
 namespace App;
 
+use App\Services\VoucherEvaluator\AbstractEvaluator;
+use App\Services\VoucherEvaluator\IEvaluee;
 use Illuminate\Database\Eloquent\Model;
 use Log;
 
-class Family extends Model
+class Family extends Model implements IEvaluee
 {
-
-    // This has a | in the reason field because we want to carry the entity with it.
-    const CREDIT_TYPES = [
-        'FamilyIsPregnant' => ['reason' => 'family|pregnant', 'vouchers' => 3],
-    ];
-
     /**
      * The attributes that are mass assignable.
      *
@@ -47,122 +43,18 @@ class Family extends Model
      * @var array
      */
     protected $appends = [
-        'entitlement',
         'expecting',
         'rvid'
     ];
 
     /**
-     * Fetches the
-     * Credits
-     * Notices
-     * Vouchers
+     * Visitor pattern voucher evaluator
      *
-     * From children
-     * and appends it's own if criteria matches
-     * @return array
+     * @param AbstractEvaluator $evaluator
      */
-    public function getStatus()
+    public function accept(AbstractEvaluator $evaluator)
     {
-        $notices = [];
-        $credits = [];
-
-        foreach ($this->children as $child) {
-            $child_status = $child->getStatus();
-            $notices = array_merge($notices, $child_status['notices']);
-            $credits = array_merge($credits, $child_status['credits']);
-        }
-
-        if ($this->expecting) {
-            $credits[] = self::CREDIT_TYPES['FamilyIsPregnant'];
-        }
-
-        return [
-            'credits' => $credits,
-            'notices' => $notices,
-            'vouchers' => array_sum(array_column($credits, "vouchers")),
-        ];
-    }
-
-    /**
-     * Creates an array that Blade can use to publish reasons for voucher credits
-     *
-     * @return array
-     */
-    public function getCreditReasons()
-    {
-        $credit_reasons = [];
-        $credits = $this->getStatus()["credits"];
-
-        // get distinct reasons and frequency.
-        $reason_count = array_count_values(array_column($credits, 'reason'));
-
-        foreach ($reason_count as $reason => $count) {
-            // Filter the raw credits by reason
-            // create an array of the 'vouchers' column for that
-            // sum that column.
-            $reason_vouchers = array_sum(
-                array_column(
-                    array_filter(
-                        $credits,
-                        function ($credit) use ($reason) {
-                            return $credit['reason'] == $reason;
-                        }
-                    ),
-                    'vouchers'
-                )
-            );
-
-            /*
-             * Each element used by Blade in the format
-             * $voucher_sum for $reason_count $entity $reason
-             */
-            $credit_reasons[] = [
-                "entity" => explode('|', $reason)[0],
-                "reason" => explode('|', $reason)[1],
-                "count" => $count,
-                "reason_vouchers" => $reason_vouchers,
-            ];
-        }
-
-        return $credit_reasons;
-    }
-
-    /**
-     * Creates an array that Blade can use to publish reasons for voucher notices
-     *
-     * @return array
-     */
-    public function getNoticeReasons()
-    {
-        $notice_reasons = [];
-        $notices = $this->getStatus()["notices"];
-
-        // get distinct reasons and frequency.
-        $reason_count = array_count_values(array_column($notices, 'reason'));
-
-        foreach ($reason_count as $reason => $count) {
-            /*
-             * Each element used by Blade in the format
-             */
-            $notice_reasons[] = [
-                "entity" => explode('|', $reason)[0],
-                "reason" => explode('|', $reason)[1],
-                "count" => $count,
-            ];
-        }
-
-        return $notice_reasons;
-    }
-
-    /**
-     * Calculates the entitlement Attribute
-     *
-     */
-    public function getEntitlementAttribute()
-    {
-        // TODO: continue to resist urge to use a rules engine or a specification pattern
-        return $this->getStatus()['vouchers'];
+        return $evaluator->evaluateFamily($this);
     }
 
     /**
@@ -180,20 +72,6 @@ class Family extends Model
         }
         return $due;
     }
-
-    /**
-     * Attribute that gets the number of eligible children
-     *
-     * @return integer|null
-     */
-    public function getEligibleChildrenCountAttribute()
-    {
-        return $this->children->reduce(function ($count, $child) {
-            $count += ($child->getStatus()['eligibility'] == "Eligible") ? 1 : 0;
-            return $count;
-        });
-    }
-
 
     /**
      * Generates and sets the components required for an RVID.
