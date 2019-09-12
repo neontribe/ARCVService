@@ -60,6 +60,22 @@ return [
             'engine' => null,
         ],
 
+        // Slower fallback testing database to use for tests we can't run on SQLite.
+        'testing-mysql' => [
+            'driver' => 'mysql',
+            'host' => env('DB_TESTING_MYSQL_HOST', '127.0.0.1'),
+            'port' => env('DB_TESTING_MYSQL_PORT', '3306'),
+            'database' => env('DB_TESTING_MYSQL_DATABASE', 'forgetesting'),
+            'username' => env('DB_TESTING_MYSQL_USERNAME', 'forge'),
+            'password' => env('DB_TESTING_MYSQL_PASSWORD', ''),
+            'unix_socket' => env('DB_TESTING_MYSQL_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'host' => env('DB_HOST', '127.0.0.1'),

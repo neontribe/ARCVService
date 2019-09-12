@@ -287,6 +287,7 @@ $factory->define(App\Centre::class, function (Faker\Generator $faker) {
     return [
         'name' => $name,
         // *Probably* not going to generate a duplicate...
+        // TODO : This generated a duplicate: https://travis-ci.org/neontribe/ARCVService/builds/583632956
         // But metaphone will occassionally return 6 chars if endish char is an X -> KS
         // https://bugs.php.net/bug.php?id=60123
         // Also might return 4 chars - but that's ok for seeds? Or do we pad?
