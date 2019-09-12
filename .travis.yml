@@ -35,6 +35,10 @@ deploy:
       tags: true
 services:
 - mysql
+cache:
+  # Cache composer's cache, for fast installs
+  directories:
+  - $HOME/.composer/cache/files  
 env:
   global:
   # STAGING_USER
