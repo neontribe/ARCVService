@@ -56,13 +56,15 @@
                 }
 
                 // Check date is less than 5 years ago of 10 months away.
-                var lowerBoundDate = moment().startOf('month').subtract(5, 'year');
+                // var lowerBoundDate = moment().startOf('month').subtract(5, 'year');
                 var upperBoundDate = moment().startOf('month').add(9, 'month');
 
+                /*
                 if (dateObj.isBefore(lowerBoundDate)) {
                     dobError.text('Invalid Date: over 5 year ago.');
                     return false;
                 }
+                */
 
                 if (dateObj.isAfter(upperBoundDate)) {
                     dobError.text('Invalid Date: over 9 months away.');
