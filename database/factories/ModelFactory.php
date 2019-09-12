@@ -166,12 +166,10 @@ $factory->define(App\Bundle::class, function (Faker\Generator $faker, $attribute
         : factory(App\Registration::class)->create()
     ;
 
-    $family = $registration->family;
-
     // get/calculate and stash the entitlement
     $entitlement = isset($attributes['entitlement'])
         ? $attributes['entitlement']
-        : $family->entitlement
+        : $registration->valuation->getEntitlement()
     ;
 
     return [

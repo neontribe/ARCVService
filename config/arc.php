@@ -67,4 +67,13 @@ return [
         'individual'
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Quick way to set Sponsors who are extended age areas
+    |--------------------------------------------------------------------------
+    */
+    'extended_sponsors' => explode("|", env(
+        'ARC_EXTENDED_SPONSORS',
+        ""
+    ))
 ];

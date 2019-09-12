@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreNewRegistrationRequest;
 use App\Http\Requests\StoreUpdateRegistrationRequest;
 use App\Registration;
+use App\Services\VoucherEvaluator\Valuation;
 use Auth;
 use Carbon\Carbon;
 use DB;
@@ -158,6 +159,10 @@ class RegistrationController extends Controller
             abort(404, 'Registration not found.');
         }
 
+        // Get the valuation
+        /** @var Valuation $valuation */
+        $valuation = $registration->valuation;
+
         // Grab carers copy for shift)ing without altering family->carers
         $carers = $registration->family->carers->all();
 
@@ -169,6 +174,8 @@ class RegistrationController extends Controller
                 'pri_carer' => array_shift($carers),
                 'sec_carers' => $carers,
                 'children' => $registration->family->children,
+                'noticeReasons' => $valuation->getNoticeReasons(),
+                'entitlement' => $valuation->getEntitlement()
             ]
         ));
     }
@@ -191,6 +198,9 @@ class RegistrationController extends Controller
             abort(404, 'Registration not found.');
         }
 
+        // Get the valuation
+        $valuation = $registration->valuation;
+
         // Make a filename
         $filename = 'Registration' . Carbon::now()->format('YmdHis') .'.pdf';
 
@@ -207,6 +217,8 @@ class RegistrationController extends Controller
             'family' => $registration->family,
             'pri_carer' => $registration->family->pri_carer,
             'children' => $registration->family->children,
+            'noticeReasons' => $valuation->getNoticeReasons(),
+            'creditReasons' => $valuation->getCreditReasons()
         ];
 
         // throw at a PDF
@@ -426,7 +438,6 @@ class RegistrationController extends Controller
 
         // Try to transact, so we can roll it back
         try {
-
             DB::transaction(function () use ($registration, $family, $amendedCarers, $newCarers, $carersKeysToDelete, $children) {
 
                 // delete the missing carers
@@ -440,11 +451,14 @@ class RegistrationController extends Controller
                 $family->children()->saveMany($children);
 
                 // save changes to the changed names
-                collect($amendedCarers)->each(function(Carer $model) {$model->save();});
+                collect($amendedCarers)->each(
+                    function (Carer $model) {
+                        $model->save();
+                    }
+                );
 
                 // save changes to registration.
                 $registration->save();
-
             });
 
         } catch (\Throwable $e) {
