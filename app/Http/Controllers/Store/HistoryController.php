@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Store;
 
 use App\Http\Controllers\Controller;
-use App\Bundle;
 use App\Registration;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
+use Illuminate\Database\Eloquent\Collection;
 
 class HistoryController extends Controller
 {
@@ -14,7 +14,9 @@ class HistoryController extends Controller
     {
         $datesCollection = collect();
         $all_carers = $registration->family->carers->all();
-        $disbursedBundles = $registration->bundles()->disbursed()->orderBy('disbursed_at', 'desc')->get();
+        $disbursedBundlesQuery = $registration->bundles()->disbursed()->orderBy('disbursed_at', 'desc');
+        /** @var Collection $disbursedBundles */
+        $disbursedBundles = $disbursedBundlesQuery->get();
 
 
         if ($disbursedBundles->count() > 0) {
@@ -26,21 +28,29 @@ class HistoryController extends Controller
             );
 
             // Set the weekly date as the key of each item in $datesCollection.
-            foreach ($periodObject as $carbonDate) {
-                // Get start of week and end of week.
-                $startDate = reset($carbonDate);
-                $endDate = $carbonDate->endOfWeek();
-
+            foreach ($periodObject as $dateTime) {
                 // Fetch bundles disbursed between start and end.
-                $weeklyCollections = Bundle::getByDates($startDate, $endDate);
+                $weeklyCollections = $disbursedBundles
+                    ->filter(
+                        function ($bundle) use ($dateTime) {
+                            return $bundle
+                                ->disbursed_at
+                                ->between(
+                                    $dateTime->copy()->startOfWeek(),
+                                    $dateTime->copy()->endOfWeek()
+                                )
+                            ;
+                        }
+                    );
+
                 $weeklyCollections->amount = 0;
 
-                foreach($weeklyCollections as $collection) {
-                    $weeklyCollections->amount += $collection->vouchers->count();
+                foreach ($weeklyCollections as $bundle) {
+                    $weeklyCollections->amount += $bundle->vouchers->count();
                 };
 
                 // Attach collection of bundles to date
-                $datesCollection[$carbonDate->startOfWeek()->format('d-m-y')] = $weeklyCollections;
+                $datesCollection[$dateTime->startOfWeek()->format('d-m-y')] = $weeklyCollections;
             }
 
             // Reverse order to have the most recent date first.
@@ -51,7 +61,7 @@ class HistoryController extends Controller
             'registration' => $registration,
             'pri_carer' => array_shift($all_carers),
             'bundles' => $disbursedBundles,
-            'bundles_by_week' => $datesCollection
+            'bundles_by_week' => $datesCollection,
         ]);
     }
 }

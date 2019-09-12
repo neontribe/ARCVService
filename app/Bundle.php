@@ -5,6 +5,9 @@ namespace App;
 use Auth;
 use DB;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Log;
@@ -192,7 +195,7 @@ class Bundle extends Model
     /**
      * Get the Registration this bundle is for
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function registration()
     {
@@ -202,7 +205,7 @@ class Bundle extends Model
     /**
      * The vouchers in this Bundle
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function vouchers()
     {
@@ -211,7 +214,7 @@ class Bundle extends Model
     /**
      * Return the Carer it was disbursed to
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function collectingCarer()
     {
@@ -221,7 +224,7 @@ class Bundle extends Model
     /**
      * Return the Centre it was disbursed to
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function disbursingCentre()
     {
@@ -231,7 +234,7 @@ class Bundle extends Model
     /**
      * Return the CentreUser it was disbursed by
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function disbursingUser()
     {
@@ -241,21 +244,12 @@ class Bundle extends Model
     /**
      * Scope to pull only disbursed bundles
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param Builder $query
+     * @return Builder
      */
     public function scopeDisbursed($query)
     {
         return $query->where('disbursed_at', '!=', null);
-    }
-
-    /**
-     * Return an array of vouchers between a set of dates
-     *
-     */
-    public static function getByDates($from, $to)
-    {
-        return Bundle::whereBetween('disbursed_at', [$from, $to])->get();
     }
 }
 
