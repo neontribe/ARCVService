@@ -118,7 +118,7 @@ class VoucherEvaluator extends AbstractEvaluator
             $credits = array_merge($credits, $child_status['credits']);
         }
 
-        $entitlement =  array_sum(array_column($credits, 'credits'));
+        $entitlement =  array_sum(array_column($credits, 'value'));
 
         return [
             'credits' => $credits,
