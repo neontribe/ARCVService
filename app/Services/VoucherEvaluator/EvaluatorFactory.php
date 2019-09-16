@@ -103,12 +103,10 @@ class EvaluatorFactory
                     new ChildIsUnBorn($offsetDate),
                     new ChildIsAlmostBorn($offsetDate),
                     new ChildIsAlmostOne($offsetDate),
-                    new ChildIsAlmostSchoolAge($offsetDate),
                     new ChildIsAlmostExtendedAge($offsetDate)
                 ],
                 'credits' => [
                     new ChildIsUnderOne($offsetDate, 3),
-                    new ChildIsUnderSchoolAge($offsetDate, 3),
                     new ChildIsUnderExtendedAge($offsetDate, 3)
                 ]
             ],
