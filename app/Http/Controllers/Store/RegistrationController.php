@@ -10,14 +10,20 @@ use App\Http\Requests\StoreNewRegistrationRequest;
 use App\Http\Requests\StoreUpdateRegistrationRequest;
 use App\Registration;
 use App\Services\VoucherEvaluator\Valuation;
+use App\User;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\View\View;
 use Log;
 use PDF;
 use Searchy;
+use Throwable;
 
 class RegistrationController extends Controller
 {
@@ -28,11 +34,14 @@ class RegistrationController extends Controller
      * This means a User can see the Registrations in his 'neighbour' CCs under a Sponsor
      *
      * Also, the view contains the search functionality.
+     *
+     * @param Request $request
+     * @return Factory|View
      */
-
     public function index(Request $request)
     {
         // Masthead bit
+        /** @var User $user */
         $user = Auth::user();
         $data = [
             "user_name" => $user->name,
@@ -124,10 +133,11 @@ class RegistrationController extends Controller
     /**
      * Returns the registration page
      *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Factory|View
      */
     public function create()
     {
+        /** @var User $user */
         $user = Auth::user();
         $data = [
             "user_name" => $user->name,
@@ -140,7 +150,7 @@ class RegistrationController extends Controller
      * Show the Registration / Family edit form
      *
      * @param integer $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function edit($id)
     {
@@ -184,7 +194,7 @@ class RegistrationController extends Controller
      * Displays a printable version of the Registration.
      *
      * @param integer $id
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Response
      */
     public function printOneIndividualFamilyForm($id)
     {
@@ -218,7 +228,8 @@ class RegistrationController extends Controller
             'pri_carer' => $registration->family->pri_carer,
             'children' => $registration->family->children,
             'noticeReasons' => $valuation->getNoticeReasons(),
-            'creditReasons' => $valuation->getCreditReasons()
+            'creditReasons' => $valuation->getCreditReasons(),
+            'entitlement' => $valuation->getEntitlement()
         ];
 
         // throw at a PDF
@@ -230,7 +241,7 @@ class RegistrationController extends Controller
     /**
      * Displays a printable version of the Registration.
      *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return RedirectResponse|Response
      */
     public function printBatchIndividualFamilyForms()
     {
@@ -269,12 +280,17 @@ class RegistrationController extends Controller
 
         // Stack the registration batch into the data
         foreach ($registrations as $registration) {
+            // Get the valuation
+            $valuation = $registration->valuation;
+
             $data['regs'][] = [
                 'centre' => $centre,
                 'family' => $registration->family,
                 'pri_carer' => $registration->family->pri_carer,
-                // Remove the primary carer from collection
                 'children' => $registration->family->children,
+                'noticeReasons' => $valuation->getNoticeReasons(),
+                'creditReasons' => $valuation->getCreditReasons(),
+                'entitlement' => $valuation->getEntitlement()
             ];
         }
 
@@ -291,8 +307,8 @@ class RegistrationController extends Controller
      * Stores an incoming Registration.
      *
      * @param StoreNewRegistrationRequest $request
-     * @throws \Throwable $e
-     * @return \Illuminate\Http\RedirectResponse
+     * @throws Throwable $e
+     * @return RedirectResponse
      */
     public function store(StoreNewRegistrationRequest $request)
     {
@@ -363,6 +379,12 @@ class RegistrationController extends Controller
             ->with('message', 'Registration created.');
     }
 
+    /**
+     * Update a Registration
+     *
+     * @param StoreUpdateRegistrationRequest $request
+     * @return RedirectResponse
+     */
     public function update(StoreUpdateRegistrationRequest $request)
     {
         $amendedCarers = [];
@@ -461,7 +483,7 @@ class RegistrationController extends Controller
                 $registration->save();
             });
 
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Oops! Log that
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getTraceAsString());
