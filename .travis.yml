@@ -9,6 +9,9 @@ before_script:
 - cp .env.travis .env
 - mysql -e 'create database homestead;'
 - composer install --no-interaction
+- nvm install
+- npm install
+- npm run-script production
 - php artisan key:generate
 - php artisan passport:keys
 - php artisan migrate --seed --force
@@ -35,6 +38,10 @@ deploy:
       tags: true
 services:
 - mysql
+cache:
+  # Cache composer's cache, for fast installs
+  directories:
+  - $HOME/.composer/cache/files  
 env:
   global:
   # STAGING_USER

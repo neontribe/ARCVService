@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 ESC_SEQ="\x1b["
 COL_RESET=$ESC_SEQ"39;49;00m"
@@ -10,6 +10,7 @@ COL_MAGENTA=$ESC_SEQ"35;01m"
 COL_CYAN=$ESC_SEQ"36;01m"
 
 cat <<EOF > .env
+# Set this to true for production envs
 APP_DEBUG=${APP_DEBUG}
 APP_ENV=${APP_ENV}
 APP_KEY=base64:5/euYB2rELcumOH7lKf8aOd4aOb5GAO6J/I1ykDDIPk=
@@ -25,54 +26,60 @@ ARC_SCHOOL_MONTH=${ARC_SCHOOL_MONTH}
 ARC_SERVICE_DOMAIN=${ARC_SERVICE_DOMAIN}
 ARC_STORE_DOMAIN=${ARC_STORE_DOMAIN}
 
-DB_CONNECTION=mysql
-DB_HOST=db
-DB_PORT=3306
-DB_DATABASE=lamp
-DB_USERNAME=lamp
-DB_PASSWORD=lamp
-
 BROADCAST_DRIVER=${BROADCAST_DRIVER}
-CACHE_DRIVER=${CACHE_DRIVER}
-SESSION_DRIVER=${SESSION_DRIVER}
-QUEUE_DRIVER=${QUEUE_DRIVER}
 
-# Set this to true for production envs
-SESSION_SECURE_COOKIE=${SESSION_SECURE_COOKIE}
+CACHE_DRIVER=${CACHE_DRIVER}
+
+DB_CONNECTION=mysql
+DB_DATABASE=lamp
+DB_HOST=db
+DB_PASSWORD=lamp
+DB_PORT=3306
+DB_USERNAME=lamp
 
 MAIL_DRIVER=${MAIL_DRIVER}
-MAIL_HOST=${MAIL_HOST}
-MAIL_PORT=${MAIL_PORT}
-MAIL_USERNAME=${MAIL_USERNAME}
-MAIL_PASSWORD=${MAIL_PASSWORD}
 MAIL_ENCRYPTION=${MAIL_ENCRYPTION}
 MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
 MAIL_FROM_NAME='${MAIL_FROM_NAME}'
+MAIL_HOST=${MAIL_HOST}
+MAIL_PASSWORD=${MAIL_PASSWORD}
+MAIL_PORT=${MAIL_PORT}
 MAIL_TO_ADMIN_ADDRESS=${MAIL_TO_ADMIN_ADDRESS}
 MAIL_TO_ADMIN_NAME='${MAIL_TO_ADMIN_NAME}'
-MAIL_TO_DEVELOPER_TEAM=${MAIL_TO_DEVELOPER_TEAM}
 MAIL_TO_DEVELOPER_NAME='${MAIL_TO_DEVELOPER_NAME}'
+MAIL_TO_DEVELOPER_TEAM=${MAIL_TO_DEVELOPER_TEAM}
+MAIL_USERNAME=${MAIL_USERNAME}
 
 PASSWORD_CLIENT=${PASSWORD_CLIENT}
 PASSWORD_CLIENT_SECRET=${PASSWORD_CLIENT_SECRET}
+
+QUEUE_DRIVER=${QUEUE_DRIVER}
+
+SESSION_DRIVER=${SESSION_DRIVER}
+SESSION_SECURE_COOKIE=${SESSION_SECURE_COOKIE}
 EOF
+cat .env
 
-set +e
-COUNT=$(mysql -u lamp -plamp -h db lamp -e 'select count(*) from users')
-DB_READY="$?"
-set -e
-if [ "$DB_READY" != 0 ]; then
-    echo -e "░▀█▀░█▀█░▀█▀░▀█▀░▀█▀░█▀█░█░░░░░▀█▀░█▀█░█▀▀░▀█▀░█▀█░█░░░█░░\n░░█░░█░█░░█░░░█░░░█░░█▀█░█░░░░░░█░░█░█░▀▀█░░█░░█▀█░█░░░█░░\n░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░▀░▀░▀▀▀░░░▀▀▀░▀░▀░▀▀▀░░▀░░▀░▀░▀▀▀░▀▀▀\n"
-    echo -e $COL_YELLOW"This may take some time..."$COL_RESET
-    echo
-    composer install --no-interaction
-    php artisan key:generate
-    php artisan passport:keys
-    php artisan migrate --seed --force
+composer install
 
-    echo -e "░▀█▀░█▀█░█▀▀░▀█▀░█▀█░█░░░█░░░░░█▀▀░█▀█░█▄█░█▀█░█░░░█▀▀░▀█▀░█▀▀\n░░█░░█░█░▀▀█░░█░░█▀█░█░░░█░░░░░█░░░█░█░█░█░█▀▀░█░░░█▀▀░░█░░█▀▀\n░▀▀▀░▀░▀░▀▀▀░░▀░░▀░▀░▀▀▀░▀▀▀░░░▀▀▀░▀▀▀░▀░▀░▀░░░▀▀▀░▀▀▀░░▀░░▀▀▀\n"
+while [ "$MYSQL_IS_RUNNING" != 0 ]; do
+  echo "Testing for mysql running..."
+  mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -h ${DB_HOST} ${DB_DATABASE} # 2>&1 > /dev/null
+  MYSQL_IS_RUNNING="$?"
+  echo "MYSQL_IS_RUNNING = $MYSQL_IS_RUNNING"
+done
+
+COUNT=$(mysql -u arcservice -parcservice arcservice -sN -e "select count(*) from information_schema.TABLES where TABLE_SCHEMA = '${DB_DATABASE}'" 2>/dev/null)
+# The 20 below is arbitry. It's a test to see if we need to install
+echo $COUNT
+if [ -z "$COUNT" ] || [ "$COUNT" -lt 20 ]; then
+  php ./artisan key:generate
+  php ./artisan migrate --seed
+  php ./artisan passport:install > passport.install
+  echo "PASSWORD_CLIENT=1" >> .env
+  echo -n "PASSWORD_CLIENT_SECRET=" >> .env
+  grep -A 1 "Client ID: 2" passport.install | tail -n 1 | awk '{ print $3 }'
+  touch .docker-installed
 fi
 
-echo -e "░█▀▄░█▀▀░█▀█░█▀▄░█░█\n░█▀▄░█▀▀░█▀█░█░█░░█░\n░▀░▀░▀▀▀░▀░▀░▀▀░░░▀░"
-# apachectl -D FOREGROUND
-php artisan serve --host=0.0.0.0
+php ./artisan serve --host=0.0.0.0

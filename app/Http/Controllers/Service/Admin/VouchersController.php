@@ -57,7 +57,7 @@ class VouchersController extends Controller
         // Calulate the number of codes we need
         $numCodes = $input['end'] - $input['start'];
 
-        $step = null;
+        $step = 1;
         if ($numCodes > 1) {
             // Calculate the step, max = $maxStep.
             $step = ($numCodes < $maxStep)
