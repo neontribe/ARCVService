@@ -2,14 +2,15 @@
 version: '2.1'
 services:
     db:
-        image: mysql:5.6
+        image: mysql:5.7
         environment:
             MYSQL_USER: lamp
             MYSQL_PASSWORD: lamp
             MYSQL_DATABASE: lamp
             MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-        volumes:
-            - mysql:/var/lib/mysql
+        # Uncomment this line to persist data between restarts
+        #volumes:
+            #- mysql:/var/lib/mysql
         restart: always
         healthcheck:
             test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
@@ -18,45 +19,26 @@ services:
             retries: 10
 
     arc:
-        image: neonkvm:5000/arc_service
         build:
             context: .
             dockerfile: .docker/Dockerfile
         user: ${CURRENT_UID}
         ports:
-            - "8001:80"
             - "8000:8000"
         extra_hosts:
             - arc.test:127.0.1.1
             - arcv-service.test:127.0.1.1
             - arcv-store.test:127.0.1.1
-        environment:
-            APP_NAME: ${APP_NAME:-docker}
-            APP_ENV: ${APP_ENV:-local}
-            APP_DEBUG: ${APP_DEBUG:-true}
-            APP_LOG_LEVEL: ${APP_LOG_LEVEL:-debug}
-            APP_URL: ${APP_URL:-http://0.0.0.0:80}
-            APP_SEEDS: ${APP_SEEDS:-Usability}
-            ARC_SCHOOL_MONTH: ${ARC_SCHOOL_MONTH:-9}
-            BROADCAST_DRIVER: ${BROADCAST_DRIVER:-log}
-            CACHE_DRIVER: ${CACHE_DRIVER:-file}
-            SESSION_DRIVER: ${SESSION_DRIVER:-file}
-            QUEUE_DRIVER: ${QUEUE_DRIVER:-sync}
-            SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-true}
-            MAIL_DRIVER: ${MAIL_DRIVER:-log}
-            MAIL_HOST: ${MAIL_HOST:-smtp.mailtrap.io}
-            MAIL_PORT: ${MAIL_PORT:-2525}
-            MAIL_USERNAME: ${MAIL_USERNAME:-null}
-            MAIL_PASSWORD: ${MAIL_PASSWORD:-null}
-            MAIL_ENCRYPTION: ${MAIL_ENCRYPTION:-null}
+        # environment:
+            # If you look in the docker file you can see what envs could be overridden
+            # ARC_SERVICE_DOMAIN: arcv-service.test
+            # ARC_STORE_DOMAIN: arcv-store.test
         # If you un-comment this section you can work on local files that run in the dockers.
-        volumes:
-           - .:/var/www/html
+        #volumes:
+        #- .:/var/www/html
         depends_on: [ db ]
         links:
             - db
-        entrypoint:
-            - /startup.sh
         restart: always
 
 volumes:
