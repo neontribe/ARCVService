@@ -37,7 +37,7 @@
             </tr>
             <tr>
                 <td rowspan="4" class="colspan">{{ $reg["family"]->rvid }}</td>
-                <td rowspan="4" class="colspan vouchers"><i class="fa fa-ticket" aria-hidden="true"></i> {{ $reg->valuation->getEntitlement() }}</td>
+                <td rowspan="4" class="colspan vouchers"><i class="fa fa-ticket" aria-hidden="true"></i> {{ $reg["entitlement"] }}</td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -65,9 +65,9 @@
         <table class="more-info {{ ($index + 1) == count($regs) ? 'no-page-break' : '' }}">
             <tr>
                 <td rowspan="2">
-                    <p>This family should collect <strong>{{ $reg->valuation->getEntitlement() }}</strong> vouchers per week:</p>
+                    <p>This family should collect <strong>{{ $reg["entitlement"] }}</strong> vouchers per week:</p>
                     <ul>
-                        @foreach( $reg->valuation->getCreditReasons() as $credits)
+                        @foreach( $reg["creditReasons"] as $credits)
                             <li>
                                 <strong>
                                     {{ $credits['reason_vouchers'] }}
@@ -97,8 +97,8 @@
                 <td>
                     <div>
                         <h3><i class="fa fa-exclamation-circle" aria-hidden="true"></i> Reminder</h3>
-                        @if ( count($reg->valuation->getNoticeReasons()) > 0 )
-                            @foreach( $reg->valuation->getNoticeReasons() as $notices)
+                        @if ( count($reg["noticeReasons"]) > 0 )
+                            @foreach( $reg["noticeReasons"] as $notices)
                                 <br> {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }} currently "{{ $notices['reason'] }}"
                             @endforeach
                         @else
