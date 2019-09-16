@@ -3,11 +3,14 @@
 namespace App;
 
 use App\Traits\Statable;
+use DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Log;
+use Throwable;
 
 class Voucher extends Model
 {
@@ -141,6 +144,101 @@ class Voucher extends Model
             return false;
         }
     }
+
+    /**
+     * Returns a list of undelivered vouchers.
+     *
+     * @param string $shortcode
+     * @return mixed
+     */
+    /**
+     * @param string $shortcode
+     * @return mixed
+     * @throws Throwable
+     */
+
+    public static function getUndeliveredVoucherRangesByShortCode(string $shortcode)
+    {
+        return DB::transaction(function () use ($shortcode) {
+            try {
+                DB::statement(DB::raw('SET @initial_id, @initial_serial=0, SET @previous=0;'));
+
+                // This seems to be the fastest way to find the start and end of each "range" of vouchers;
+                // in this case specified by vouchers that are not in deliveries.
+                // TODO: convert to eloquent
+                return DB::select(
+                    "
+                    SELECT
+                        t1.*, 
+                        v1.code as intitial_code,
+                        v2.code as final_code
+                    FROM (
+                        
+                        SELECT
+                            @initial_serial := if(serial - @previous = 1, @initial_serial, serial) as initial_serial,
+                            @initial_id := if(serial - @previous = 1, @initial_id, id) as initial_id,
+                            @previous := serial as serial,
+                            id as final_id
+                        FROM (
+                        
+                            SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as serial
+                            FROM vouchers
+                            WHERE code REGEXP '^{$shortcode}[0-9]+\$'
+                              AND (
+                                delivery_id is null 
+                                OR
+                                currentstate NOT IN ('printed', 'requested')
+                              )
+                            ORDER BY serial
+                        
+                        ) as t5
+                    
+                    ) AS t1
+                        INNER JOIN (
+                    
+                            SELECT initial_serial, max(serial) as final_serial
+                            FROM (
+                    
+                                 SELECT
+                                     @initial_serial := if(serial - @previous = 1, @initial_serial, serial) as initial_serial,
+                                     @initial_id := if(serial - @previous = 1, @initial_id, id) as initial_id,
+                                     @previous := serial as serial,
+                                     id
+                                 FROM (
+                                      SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as serial
+                                      FROM vouchers LEFT JOIN voucher_states
+                                        ON vouchers.id = voucher_states.voucher_id
+                                      WHERE code REGEXP '^{$shortcode}[0-9]+\$'
+                                        AND (
+                                            delivery_id is null 
+                                            OR
+                                            currentstate NOT IN ('printed', 'requested')
+                                        )
+                                      ORDER BY serial
+                    
+                                 ) as t4
+                    
+                            ) as t3
+                            GROUP BY initial_serial
+                    
+                        ) as t2
+                        ON t1.initial_serial = t2.initial_serial
+                          AND t1.serial = t2.final_serial
+                    
+                    LEFT JOIN vouchers as v1
+                        ON initial_id = v1.id
+                    
+                    LEFT JOIN vouchers as v2
+                        ON final_id = v2.id
+                    "
+                );
+            } catch (Throwable $e) {
+                Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+                abort(500);
+            }
+        });
+    }
+
 
     /**
      * The Sponsor that backs this voucher

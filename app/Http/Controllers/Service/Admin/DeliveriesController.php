@@ -7,6 +7,7 @@ use App\Delivery;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminNewDeliveryRequest;
 use App\Sponsor;
+use App\Voucher;
 use Carbon\Carbon;
 use DB;
 use Exception;
@@ -14,76 +15,52 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Log;
+use Throwable;
 
 class DeliveriesController extends Controller
 {
-    public static function getDeliveredVoucherRangesByShortCode(string $shortcode)
+    /**
+     * Determines if the given voucher range contains entries already delivered.
+     *
+     * @param $startCode
+     * @param $endCode
+     * @return bool
+     */
+    public static function rangeIsUndelivered($startCode, $endCode)
     {
-        try {
-            $deliveries = DB::transaction(function () use ($shortcode) {
-                DB::statement(DB::raw('SET @initial_id, @initial_serial=0, SET @previous=0;'));
+        // Break the codes up.
+        $start = Voucher::splitShortcodeNumeric($startCode);
+        $start["number"] = intval($start["number"]);
 
-                $result = DB::select(
-                    "
-                    SELECT
-                        t1.*, 
-                        v1.code as intitial_code,
-                        v2.code as final_code
-                    FROM (
-                        
-                        SELECT
-                            @initial_serial := if(serial - @previous = 1, @initial_serial, serial) as initial_serial,
-                            @initial_id := if(serial - @previous = 1, @initial_id, id) as initial_id,
-                            @previous := serial as serial,
-                            id as final_id
-                        FROM (
-                        
-                            SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as serial
-                            FROM vouchers
-                            WHERE code REGEXP '^{$shortcode}[0-9]+\$'
-                              AND delivery_id is null
-                            ORDER BY serial
-                        
-                        ) as t5
-                    
-                    ) AS t1
-                        INNER JOIN (
-                    
-                            SELECT initial_serial, max(serial) as final_serial
-                            FROM (
-                    
-                                 SELECT
-                                     @initial_serial := if(serial - @previous = 1, @initial_serial, serial) as initial_serial,
-                                     @initial_id := if(serial - @previous = 1, @initial_id, id) as initial_id,
-                                     @previous := serial as serial,
-                                     id
-                                 FROM (
-                                      SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as serial
-                                      FROM vouchers
-                                      WHERE code REGEXP '^{$shortcode}[0-9]+\$'
-                                        AND delivery_id is null
-                                      ORDER BY serial
-                    
-                                 ) as t4
-                    
-                            ) as t3
-                            GROUP BY initial_serial
-                    
-                        ) as t2
-                        ON t1.initial_serial = t2.initial_serial
-                          AND t1.serial = t2.final_serial
-                    
-                    LEFT JOIN vouchers as v1
-                        ON initial_id = v1.id
-                    
-                    LEFT JOIN vouchers as v2
-                        ON final_id = v2.id
-                    "
-                );
-            });
-        } catch (Exception $e) {
-            // do something
+        $end = Voucher::splitShortcodeNumeric($endCode);
+        $end["number"] = intval($end["number"]);
+
+        // Get the Undelivered ranges
+        try {
+            $undeliveredRanges = Voucher::getUndeliveredVoucherRangesByShortCode($start["shortcode"]);
+        } catch (Throwable $e) {
+            Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+            Log::error($e->getTraceAsString());
+            abort(500);
         }
+
+        // That cold *possibly* be empty of anything...
+        if (empty($undeliveredRanges)) {
+            return false;
+        }
+
+        foreach ($undeliveredRanges as $undeliveredRange) {
+            // Are Start and End both in the range?
+            if ($start['number'] >= $undeliveredRange['initial_serial'] &&
+                $start['number'] <= $undeliveredRange['final_serial'] &&
+                $end['number'] >= $undeliveredRange['initial_serial'] &&
+                $end['number'] <= $undeliveredRange['final_serial'] &&
+                $start['number'] >= $end['number']) {
+                return true;
+            };
+        }
+        // Start and End within none of the free ranges.
+        return false;
     }
 
     /**
@@ -116,18 +93,30 @@ class DeliveriesController extends Controller
 
     public function store(AdminNewDeliveryRequest $request)
     {
-        try {
-            $delivery = DB::transaction(function () use ($request) {
+        // Get centre
+        $centre = Centre::findOrFail($request->input('centre'));
 
-                // Update a CentreUser;
-                $centre = Centre::findOrFail($request->input('centre'));
-                $dispatched_at = Carbon::createFromFormat('Y-m-d', $request->input('date-sent'));
+        // Create delivery
+        try {
+            $delivery = DB::transaction(function () use ($request, $centre) {
+                // OR, if we get all the undelivered vouchers in this range, are they
+
+                $startCode = $request->input('voucher-start');
+                $endCode = $request->input('voucher-end');
+
+                // Is every voucher in the specified range ok to deliver?
+                if (!self::rangeIsUndelivered($startCode, $endCode)) {
+                    return false;
+                };
 
                 $delivery = Delivery::create([
                     'centre_id' => $centre->id,
-                    'range' => '',
-                    'dispatched_at' => $dispatched_at,
+                    'range' => $startCode . " - " . $endCode,
+                    'dispatched_at' => Carbon::createFromFormat('Y-m-d', $request->input('date-sent')),
                 ]);
+
+                // Add vouchers to delivery
+                // transition to dispatched
 
                 return $delivery;
             });
@@ -141,14 +130,5 @@ class DeliveriesController extends Controller
                 ->route('admin.deliveries.index')
                 ->with('message', 'Delivery to ' . $centre->name . ' created.');
         }
-        // Create delivery
-
-        // Create ranges of deliverable vouchers
-        // they are printed
-        // they are not on a delivery
-
-        // If ranges have problems, fail and say why
-
-        // Progress state of each voucher in the range to delvierable
     }
 }
