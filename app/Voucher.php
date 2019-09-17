@@ -184,11 +184,8 @@ class Voucher extends Model
                             SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as serial
                             FROM vouchers
                             WHERE code REGEXP '^{$shortcode}[0-9]+\$'
-                              AND (
-                                delivery_id is null 
-                                OR
-                                currentstate NOT IN ('printed', 'requested')
-                              )
+                              AND currentstate = 'printed'
+                              AND delivery_id is null
                             ORDER BY serial
                         
                         ) as t5
@@ -209,11 +206,8 @@ class Voucher extends Model
                                       FROM vouchers LEFT JOIN voucher_states
                                         ON vouchers.id = voucher_states.voucher_id
                                       WHERE code REGEXP '^{$shortcode}[0-9]+\$'
-                                        AND (
-                                            delivery_id is null 
-                                            OR
-                                            currentstate NOT IN ('printed', 'requested')
-                                        )
+                                        AND currentstate = 'printed'
+                                        AND delivery_id is null
                                       ORDER BY serial
                     
                                  ) as t4
