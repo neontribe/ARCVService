@@ -125,6 +125,7 @@ class DeliveriesController extends Controller
                         DB::raw("cast(replace(code, '{$start["shortcode"]}', '') as signed)"),
                         [$start["number"], $end["number"]]
                     )->chunk(
+                        10000,
                         function ($vouchers) use ($now_time, $user_id, $user_type) {
                             $states =[];
                             // create VoucherState
@@ -147,9 +148,7 @@ class DeliveriesController extends Controller
                             }
                             // Insert this batch of vouchers.
                             VoucherState::insert($states);
-                        },
-                        // Should execute without blowing any limits
-                        10000
+                        }
                     );
 
                 // Get all the vouchers in the range and update them with the delivery Id and state
