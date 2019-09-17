@@ -24,37 +24,25 @@ class DeliveriesController extends Controller
     /**
      * Determines if the given voucher range contains entries already delivered.
      *
-     * @param $startCode
-     * @param $endCode
-     * @return bool|array
+     * @param $start
+     * @param $end
+     * @param $shortcode
+     * @return bool
+     * @throws Throwable
      */
     public static function rangeIsUndelivered($start, $end, $shortcode)
     {
-        // Get the Undelivered ranges
-        try {
-            $undeliveredRanges = Voucher::getUndeliveredVoucherRangesByShortCode($shortcode);
-        } catch (Throwable $e) {
-            Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
-            Log::error($e->getTraceAsString());
-            return redirect()
-                ->back(500)
-                ->withErrors('Unable to get undelivered voucher ranges');
-        }
-
-        // That cold *possibly* be empty of anything...
-        if (empty($undeliveredRanges)) {
-            return false;
-        }
-
-        foreach ($undeliveredRanges as $undeliveredRange) {
-            // Are Start and End both in the range?
-            if ($start >= $undeliveredRange['initial_serial'] &&
-                $start <= $undeliveredRange['final_serial'] &&
-                $end >= $undeliveredRange['initial_serial'] &&
-                $end <= $undeliveredRange['final_serial'] &&
-                $start >= $end ) {
-                return true;
-            };
+        $undeliveredRanges = Voucher::getUndeliveredVoucherRangesByShortCode($shortcode);
+        // That could *possibly* be empty of anything...
+        if (!empty($undeliveredRanges)) {
+            foreach ($undeliveredRanges as $undeliveredRange) {
+                // Are Start and End both in the range?
+                if ($start >= $undeliveredRange->initial_serial &&
+                    $end <= $undeliveredRange->serial &&
+                    $start <= $end ) {
+                    return true;
+                };
+            }
         }
         // Start and End within none of the free ranges.
         return false;
