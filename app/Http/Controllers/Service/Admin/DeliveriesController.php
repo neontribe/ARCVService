@@ -36,7 +36,9 @@ class DeliveriesController extends Controller
         } catch (Throwable $e) {
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getTraceAsString());
-            abort(500);
+            return redirect()
+                ->back(500)
+                ->withErrors('Unable to get undelivered voucher ranges');
         }
 
         // That cold *possibly* be empty of anything...
@@ -181,7 +183,9 @@ class DeliveriesController extends Controller
             // Oops! Log that
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getTraceAsString());
-            // Throw it back to the user
+            return redirect()
+                ->route('admin.deliveries.create')
+                ->withErrors('Unable to create a voucher delivery.');
         }
         return redirect()
             ->route('admin.deliveries.index')

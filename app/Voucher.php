@@ -150,13 +150,8 @@ class Voucher extends Model
      *
      * @param string $shortcode
      * @return mixed
-     */
-    /**
-     * @param string $shortcode
-     * @return mixed
      * @throws Throwable
      */
-
     public static function getUndeliveredVoucherRangesByShortCode(string $shortcode)
     {
         return DB::transaction(function () use ($shortcode) {
@@ -203,8 +198,7 @@ class Voucher extends Model
                                      id
                                  FROM (
                                       SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as serial
-                                      FROM vouchers LEFT JOIN voucher_states
-                                        ON vouchers.id = voucher_states.voucher_id
+                                      FROM vouchers
                                       WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                                         AND currentstate = 'printed'
                                         AND delivery_id is null
@@ -228,7 +222,8 @@ class Voucher extends Model
                 );
             } catch (Throwable $e) {
                 Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
-                abort(500);
+                Log::error($e->getTraceAsString());
+                return [];
             }
         });
     }
