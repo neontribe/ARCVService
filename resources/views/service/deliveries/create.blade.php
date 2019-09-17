@@ -41,7 +41,7 @@
                     @if($errors->has('date-sent')) <label for="date-sent" class="alert-danger">{{ implode("<br>", $errors->get('date-sent')) }}</label> @endif
                 </div>
             </div>
-            <button type="submit" id="createWorker">Add worker</button>
+            <button type="submit" id="createDelivery">Create Delivery</button>
         </form>
     </div>
 </div>

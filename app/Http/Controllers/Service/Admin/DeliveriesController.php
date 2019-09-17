@@ -9,6 +9,7 @@ use App\Http\Requests\AdminNewDeliveryRequest;
 use App\Sponsor;
 use App\Voucher;
 use App\VoucherState;
+use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Contracts\View\Factory;
