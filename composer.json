@@ -15,7 +15,7 @@
         "laravel/passport": "^4.0",
         "laravel/tinker": "~1.0",
         "maatwebsite/excel": "^2.1",
-        "maennchen/zipstream-php": "0.5.2",
+        "maennchen/zipstream-php": "^1.2",
         "moontoast/math": "^1.1",
         "optimus/api-consumer": "0.2.*",
         "ramsey/uuid": "^3.6",

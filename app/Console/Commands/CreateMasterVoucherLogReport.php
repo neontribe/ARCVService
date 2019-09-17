@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Console\Command;
 use Log;
 use Maatwebsite\Excel\Writers\LaravelExcelWriter;
+use ZipStream\Exception\OverflowException;
+use ZipStream\Option\Archive;
 use ZipStream\ZipStream;
 
 class CreateMasterVoucherLogReport extends Command
@@ -220,12 +222,13 @@ EOD;
                 }
 
                 // Stream directly to what is either a file or a file wrapped in a secret stream.
-                $za = new ZipStream(null, [
-                    ZipStream::OPTION_SEND_HTTP_HEADERS => false,
-                    ZipStream::OPTION_OUTPUT_STREAM => fopen($path, 'w'),
-                ]);
+                $options = new Archive();
+                $zaOutput = fopen($path, 'w');
+                $options->setOutputStream($zaOutput);
+                $za = new ZipStream(null, $options);
             } else {
                 $za = null;
+                $zaOutput = null;
             }
 
             // Create and write a sheet for all data.
@@ -252,7 +255,17 @@ EOD;
 
             if ($za) {
                 // End the zip stream with something meaningful.
-                $za->finish();
+                try {
+                    $za->finish();
+                } catch (OverflowException $e) {
+                    Log::error($e->getMessage());
+                    Log::error("Overflow when attempting to finish a significantly large Zip file");
+                    exit(1);
+                }
+
+                // Manually close our stream. This is especially important when the stream is encrypted, as a little
+                // extra data is spat out.
+                fclose($zaOutput);
             }
         }
         // Set 0, above for expected outcomes
