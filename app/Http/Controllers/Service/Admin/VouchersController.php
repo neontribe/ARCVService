@@ -55,10 +55,9 @@ class VouchersController extends Controller
         $maxStep = 1000;
         $start = $input['start-serial'];
         $end = $input['end-serial'];
-        $pad = strlen($end);
 
         // Calculate the number of codes we need
-        $numCodes = $start - $end;
+        $numCodes = $end - $start;
 
         $step = 1;
         if ($numCodes > 1) {
@@ -76,7 +75,7 @@ class VouchersController extends Controller
         );
 
         // Add the range to the end.
-        if (!in_array($start, $chunks)) {
+        if (!in_array($end, $chunks)) {
             $chunks[] = $end;
         }
 
