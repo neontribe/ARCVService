@@ -131,7 +131,14 @@
                             <ul>
                                 <li>Pregnancy - 3 vouchers</li>
                                 <li>Birth up to 1 year - 6 vouchers</li>
-                                <li>1 year up to school age - 3 vouchers</li>
+                                {{--
+                                TODO : This is not scalable; if this breaks or has to be extended, look at a better abstraction.
+                                --}}
+                                @if ( in_array($registration->centre->sponsor->shortcode, config('arc.extended_sponsors')) )
+                                <li>1 year up to secondary school - 3 vouchers</li>
+                                @else
+                                <li>1 year up to primary school - 3 vouchers</li>
+                                @endif
                             </ul>
                         </li>
                     </ul>
