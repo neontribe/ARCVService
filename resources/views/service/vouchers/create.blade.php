@@ -18,7 +18,7 @@
                     <select name="sponsor_id" id="sponsor_id" class="{{ $errors->has('sponsor_id') ? 'has-error' : '' }}" required>
                         <option value="">Please select an area</option>
                         @foreach ($sponsors as $sponsor)
-                        <option value="{{ $sponsor->id }}">{{ $sponsor->name }}</option>
+                        <option value="{{ $sponsor->id }}" @if(old('sponsor_id') == $sponsor->id) SELECTED @endif >{{ $sponsor->name }}</option>
                         @endforeach
                     </select>
                     @if ($errors->has('sponsor_id')) <label for="sponsor_id" class="alert-danger">{{ $errors->first('sponsor_id') }}</label> @endif
@@ -26,13 +26,13 @@
 
                 <div>
                     <label for="start" class="required">Starting voucher code</label>
-                    <input type="text" id="start" name="start" class="{{ $errors->has('start') ? 'error' : '' }}" required>
+                    <input type="text" id="start" name="start" value="{{ old($start) }}" class="{{ $errors->has('start') ? 'error' : '' }}" required>
                     @if ($errors->has('start')) <label for="start" class="alert-danger">{{ $errors->first('start') }}</label> @endif
                 </div>
 
                 <div>
                     <label for="end">Ending voucher code</label>
-                    <input type="text" id="end" name="end" class="{{ $errors->has('end') ? 'error' : '' }}" required>
+                    <input type="text" id="end" name="end" value="{{ old($end) }}" class="{{ $errors->has('end') ? 'error' : '' }}" required>
                     @if ($errors->has('end')) <label for="end" class="alert-danger">{{ $errors->first('end') }}</label> @endif
                 </div>
             </div>
