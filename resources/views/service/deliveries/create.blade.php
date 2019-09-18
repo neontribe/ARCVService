@@ -6,7 +6,11 @@
     <div id="main-content">
 
         <h1>Send vouchers</h1>
-
+        @if (Session::get('error_message'))
+            <div class="alert alert-danger">
+                {{ Session::get('error_message') }}
+            </div>
+        @endif
         <p>Use the form below to mark a batch of vouchers as being sent. Add the centre they're being sent to, start and end voucher codes of the batch and the date they're being sent.</p>
 
         <form role="form" class="styled-form" method="POST" action="{{ route('admin.deliveries.store') }}">
@@ -19,7 +23,7 @@
                         @foreach ($sponsors as $sponsor)
                             <optgroup label="{{$sponsor->name}}">
                             @foreach ($sponsor->centres as $centre)
-                                <option value="{{ $centre->id }}">{{ $centre->name }}</option>
+                                <option value="{{ $centre->id }}" @if(old('centre') == $centre->id) SELECTED @endif >{{ $centre->name }}</option>
                             @endforeach
                         @endforeach
                     </select>
@@ -27,21 +31,21 @@
                 </div>
                 <div>
                     <label for="voucher-start" class="required">Start Voucher</label>
-                    <input type="text" id="voucher-start" name="voucher-start" class="{{ $errors->has('voucher-start') ? 'error' : '' }} uppercase" required >
+                    <input type="text" id="voucher-start" name="voucher-start" value="{{ old('voucher-start') }}" class="{{ $errors->has('voucher-start') ? 'error' : '' }} uppercase" required >
                     @if($errors->has('voucher-start')) <label for="voucher-start" class="alert-danger">{{ implode("<br>", $errors->get('voucher-start')) }}</label> @endif
                 </div>
                 <div>
                     <label for="voucher-end" class="required">End Voucher</label>
-                    <input type="text" id="voucher-end" name="voucher-end" class="{{ $errors->has('voucher-end') ? 'error' : '' }} uppercase" required >
+                    <input type="text" id="voucher-end" name="voucher-end" value="{{ old('voucher-end') }}" class="{{ $errors->has('voucher-end') ? 'error' : '' }} uppercase" required >
                     @if($errors->has('voucher-end')) <label for="voucher-end" class="alert-danger">{{ implode("<br>", $errors->get('voucher-end')) }}</label> @endif
                 </div>
                 <div>
                 <label for="date-sent" class="required">Date Sent</label>
-                    <input type="date" id="date-sent" name="date-sent" value={{ date("Y-m-d") }} class="{{ $errors->has('date-sent') ? 'error' : '' }}" required >
+                    <input type="date" id="date-sent" name="date-sent" value={{ old('date-sent') ?? date("Y-m-d") }} class="{{ $errors->has('date-sent') ? 'error' : '' }}" required >
                     @if($errors->has('date-sent')) <label for="date-sent" class="alert-danger">{{ implode("<br>", $errors->get('date-sent')) }}</label> @endif
                 </div>
             </div>
-            <button type="submit" id="createWorker">Add worker</button>
+            <button type="submit" id="createDelivery">Create Delivery</button>
         </form>
     </div>
 </div>
