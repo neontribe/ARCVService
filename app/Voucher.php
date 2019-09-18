@@ -158,7 +158,7 @@ class Voucher extends Model
         return DB::transaction(function () use ($shortcode) {
             try {
                 // Set some important variables for the query. breaks SQLlite.
-                DB::statement(DB::raw('SET @initial_id, @initial_serial=0, SET @previous=0;'));
+                DB::statement(DB::raw('SET @initial_id=0, @initial_serial=0, @previous=0;'));
 
                 /* This seems to be the fastest way to find the start and end of each "range" of vouchers;
                  * in this case specified by vouchers that are not in deliveries.

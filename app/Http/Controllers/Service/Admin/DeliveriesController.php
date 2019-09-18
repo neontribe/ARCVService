@@ -40,7 +40,7 @@ class DeliveriesController extends Controller
                 // Are Start and End both in the range?
                 if ($start >= $undeliveredRange->initial_serial &&
                     $end <= $undeliveredRange->serial &&
-                    $start >= $end ) {
+                    $start <= $end ) {
                     return true;
                 };
             }
@@ -103,6 +103,7 @@ class DeliveriesController extends Controller
             // Whoops! Some of the vouchers may have been delivered
             return redirect()
                 ->route('admin.deliveries.create')
+                ->withInput()
                 ->with('error_message', 'The voucher range given contains some vouchers that have already been delivered.');
         };
 
