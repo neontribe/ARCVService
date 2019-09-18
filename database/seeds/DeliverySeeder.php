@@ -42,11 +42,14 @@ class DeliverySeeder extends Seeder
                         ->subDays(rand(0, 30));
                 },
             ])
-            ->each(function (Delivery $delivery) {
+            ->each(function (Delivery $delivery, $key) {
                 // Get the shortcode
                 $shortcode = $delivery->centre->sponsor->shortcode;
                 // Make a code range
-                $codes = Voucher::generateCodeRange($shortcode . "001000", $shortcode . "001050");
+                $codes = Voucher::generateCodeRange(
+                    $shortcode . "01" . $key . "000",
+                    $shortcode . "01" . $key . "050"
+                );
                 // Turn those into vouchers
                 $vs = factory(Voucher::class, 'requested', count($codes))
                     ->create([
@@ -60,7 +63,7 @@ class DeliverySeeder extends Seeder
                         $v->applyTransition('dispatch');
                     });
                 $delivery->vouchers()->saveMany($vs);
-                $delivery->range = $shortcode . "001000" . " - " . $shortcode . "001050";
+                $delivery->range = $shortcode . "01" . $key ."000" . " - " . $shortcode . "01" . $key . "050";
                 $delivery->save();
             });
     }
