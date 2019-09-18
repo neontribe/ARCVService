@@ -23,7 +23,7 @@
                         @foreach ($sponsors as $sponsor)
                             <optgroup label="{{$sponsor->name}}">
                             @foreach ($sponsor->centres as $centre)
-                                <option value="{{ $centre->id }}">{{ $centre->name }}</option>
+                                <option value="{{ $centre->id }}" @if(old('centre') == $centre->id) SELECTED @endif >{{ $centre->name }}</option>
                             @endforeach
                         @endforeach
                     </select>
