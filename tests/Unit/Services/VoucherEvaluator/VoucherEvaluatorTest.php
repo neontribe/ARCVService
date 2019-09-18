@@ -103,14 +103,13 @@ class VoucherEvaluatorTest extends TestCase
         $evaluation = $evaluator->evaluateChild($child);
         $credits = $evaluation["credits"];
 
-        // Check there's two, because child is not under one.
-        $this->assertEquals(2, count($credits));
+        // Check there's one, because child is not under one.
+        $this->assertEquals(1, count($credits));
 
         // Check the correct credit type is applied.
         $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits, '');
-        $this->assertContains(self::CREDIT_TYPES['ChildIsUnderSchoolAge'], $credits, '');
         $this->assertContains(self::CREDIT_TYPES['ChildIsUnderExtendedAge'], $credits, '');
-        $this->assertEquals(6, $evaluation["entitlement"]);
+        $this->assertEquals(3, $evaluation["entitlement"]);
     }
 
     /** @test */
