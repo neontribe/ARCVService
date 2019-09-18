@@ -11,6 +11,7 @@ use Storage;
 use Tests\StoreTestCase;
 use URL;
 use ZipArchive;
+use ZipStream\Option\Archive;
 use ZipStream\ZipStream;
 
 class StoreVoucherControllerTest extends StoreTestCase
@@ -89,6 +90,7 @@ class StoreVoucherControllerTest extends StoreTestCase
     /**
      * @test
      *
+     * @throws \ZipStream\Exception\OverflowException
      */
     public function testItCanDecryptAStoredZip()
     {
@@ -109,13 +111,15 @@ EOD;
 
         // Stream a zip to a file in storage, encrypting as we write (with the secret stream wrapper).
         $storagePath = $this->disk->getAdapter()->getPathPrefix();
-        $za = new ZipStream(null, [
-            ZipStream::OPTION_SEND_HTTP_HEADERS => false,
-            ZipStream::OPTION_OUTPUT_STREAM => fopen('ssw://' . $storagePath . '/' . $this->archiveName, 'w'),
-        ]);
+        $options = new Archive();
+        $output = fopen('ssw://' . $storagePath . '/' . $this->archiveName, 'w');
+        $options->setOutputStream($output);
+
+        $za = new ZipStream(null, $options);
         $za->addFile('a.txt', $sourceContent);
         $za->addFile('b.txt', $sourceContent);
         $za->finish();
+        fclose($output); // Close the stream manually, now, or it will not be ready in time for the read below.
 
         $this->assertTrue($this->disk->exists($this->archiveName));
 
