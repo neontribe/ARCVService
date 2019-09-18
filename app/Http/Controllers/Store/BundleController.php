@@ -13,6 +13,7 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\HtmlString;
 use Log;
 
 class BundleController extends Controller
@@ -325,8 +326,8 @@ class BundleController extends Controller
                         }
 
                         // Generate error messages where vouchers of the sort existed, using unescaped HTML where necessary.
-                        $relevant && $messages[] = array(
-                            'html' => "These vouchers are currently allocated to a different family: " . join(', ', $relevant)
+                        $relevant && $messages[] = new HtmlString(
+                            "These vouchers are currently allocated to a different family: " . join(', ', $relevant)
                         );
                         $inaccessible && $messages[] = "These vouchers are allocated to a family in a centre you can't access: " . join(', ', $inaccessible);
 
