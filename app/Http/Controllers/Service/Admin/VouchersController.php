@@ -53,9 +53,11 @@ class VouchersController extends Controller
         $sponsor = Sponsor::findOrFail($input['sponsor_id']);
         $now_time = Carbon::now();
         $maxStep = 1000;
+        $start = $input['start-serial'];
+        $end = $input['end-serial'];
 
-        // Calulate the number of codes we need
-        $numCodes = $input['end'] - $input['start'];
+        // Calculate the number of codes we need
+        $numCodes = $end - $start;
 
         $step = 1;
         if ($numCodes > 1) {
@@ -67,14 +69,14 @@ class VouchersController extends Controller
 
         // Setup the chunks
         $chunks = range(
-            $input['start'],
-            $input['end'],
+            $start,
+            $end,
             $step
         );
 
         // Add the range to the end.
-        if (!in_array($input['end'], $chunks)) {
-            $chunks[] = $input['end'];
+        if (!in_array($end, $chunks)) {
+            $chunks[] = $end;
         }
 
         // For each chunk, create the integers in that set.
@@ -84,12 +86,19 @@ class VouchersController extends Controller
 
             $chunkEnd = (isset($chunks[$k + 1]))
                 ? $chunks[$k + 1] - 1
-                : $input['end'];
+                : $end;
             $currentChunk = range($chunkStart, $chunkEnd);
 
             foreach ($currentChunk as $c) {
                 $v = new Voucher();
-                $v->code = $sponsor->shortcode . $c;
+                $v->code = $sponsor->shortcode .
+                // left pad the code to the length of the raw "end" with zeros.
+                    str_pad(
+                        $c,
+                        strlen($input['end']),
+                        "0",
+                        STR_PAD_LEFT
+                    );
                 $v->sponsor_id = $sponsor->id;
                 // Set straight to printed; we're faking the process for speed.
                 $v->currentstate = 'printed';

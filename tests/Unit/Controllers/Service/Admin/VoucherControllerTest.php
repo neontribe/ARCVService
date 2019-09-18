@@ -50,7 +50,7 @@ class VoucherControllerTest extends TestCase
             ->assertStatus(302)
             ->assertSessionMissing('notification')
             ->assertSessionHasErrors([
-                'end' => 'The end must be greater than or equal to start.',
+                'end-serial' => 'The end must be greater than or equal to start.',
             ])
         ;
     }
