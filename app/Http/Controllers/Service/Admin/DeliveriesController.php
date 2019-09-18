@@ -34,18 +34,15 @@ class DeliveriesController extends Controller
     {
         $undeliveredRanges = Voucher::getUndeliveredVoucherRangesByShortCode($shortcode);
 
-        // If NOT an empty array
-        if (!empty($undeliveredRanges)) {
-            foreach ($undeliveredRanges as $undeliveredRange) {
-                // Are Start and End both in the range?
-                if ($start >= $undeliveredRange->initial_serial &&
-                    $end <= $undeliveredRange->serial &&
-                    $start <= $end ) {
-                    return true;
-                };
-            }
+        foreach ($undeliveredRanges as $undeliveredRange) {
+            // Are Start and End both in the range?
+            if ($start >= $undeliveredRange->initial_serial &&
+                $end <= $undeliveredRange->serial &&
+                $start <= $end ) {
+                return true;
+            };
         }
-        // Start and End within none of the free ranges.
+        // Start and End within none of the free ranges, if any were returned.
         return false;
     }
 
