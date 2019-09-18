@@ -15,12 +15,12 @@
                 <div>
                     <label for="name" class="required">Name</label>
                     <input type="text" id="name" name="name" class="{{ $errors->has('name') ? 'error' : '' }}" required >
-                    @if($errors->has('name')) <label for="name" class="alert-danger">{{ implode("<br>", $errors->get('name')) }}</label> @endif
+                    @include('service.partials.validationMessages', array('inputName' => 'name'))
                 </div>
                 <div>
                     <label for="email" class="required">Email Address</label>
                     <input type="email" id="email" name="email" class="{{ $errors->has('email') ? 'error' : '' }}" required >
-                    @if($errors->has('email')) <label for="email" class="alert-danger">{{ implode("<br>", $errors->get('email')) }}</label> @endif
+                    @include('service.partials.validationMessages', array('inputName' => 'email'))
                 </div>
                 <div class="select">
                     <label for="worker_centre">Home Centre</label>
@@ -30,7 +30,7 @@
                             <option value="{{ $centre->id }}">{{ $centre->name }}</option>
                         @endforeach
                     </select>
-                    @if($errors->has('worker_centre')) <label for="worker_centre" class="alert-danger">{{ implode("<br>", $errors->get('worker_centre')) }}</label> @endif
+                    @include('service.partials.validationMessages', array('inputName' => 'worker_centre'))
                 </div>
                 <div id="alternatives" class="hidden">
                     <p><strong>Set Neighbours as Alternatives</strong></p>
