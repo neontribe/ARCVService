@@ -173,6 +173,10 @@ class DeliveriesController extends Controller
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getTraceAsString());
             // Throw it back to the user
+            return redirect()
+                ->route('admin.deliveries.create')
+                ->withInput()
+                ->with('error_message', 'Database error, unable to create a delivery');
         }
         // Success
         return redirect()
