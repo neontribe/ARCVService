@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Traits\Statable;
+use Auth;
 use DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -146,25 +147,29 @@ class Voucher extends Model
     }
 
     /**
-     * Returns a list of undelivered vouchers.
+     * Gets the ranges of undelivered vouchers
      *
      * @param string $shortcode
-     * @return mixed
-     */
-    /**
-     * @param string $shortcode
-     * @return mixed
+     * @return array
      * @throws Throwable
      */
-
     public static function getUndeliveredVoucherRangesByShortCode(string $shortcode)
     {
         return DB::transaction(function () use ($shortcode) {
             try {
+                // Set some important variables for the query. breaks SQLlite.
                 DB::statement(DB::raw('SET @initial_id, @initial_serial=0, SET @previous=0;'));
 
-                // This seems to be the fastest way to find the start and end of each "range" of vouchers;
-                // in this case specified by vouchers that are not in deliveries.
+                /* This seems to be the fastest way to find the start and end of each "range" of vouchers;
+                 * in this case specified by vouchers that are not in deliveries.
+                 * returns an array of stdClass objects with
+                 * - serial; the final serial number in the range
+                 * - initial_serial; the initial serial in the range
+                 * - final_code; the code associated with serial
+                 * - initial_code; the code associated with the initial_serial
+                 * - id; the voucher id of the serial
+                 * - initial_id; the voucher id of the initial_serial
+                 */
                 // TODO: convert to eloquent
                 return DB::select(
                     "
@@ -203,8 +208,7 @@ class Voucher extends Model
                                      id
                                  FROM (
                                       SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as serial
-                                      FROM vouchers LEFT JOIN voucher_states
-                                        ON vouchers.id = voucher_states.voucher_id
+                                      FROM vouchers 
                                       WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                                         AND currentstate = 'printed'
                                         AND delivery_id is null
@@ -228,7 +232,8 @@ class Voucher extends Model
                 );
             } catch (Throwable $e) {
                 Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
-                abort(500);
+                Log::error($e->getTraceAsString());
+                return [];
             }
         });
     }

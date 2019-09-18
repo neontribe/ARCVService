@@ -22,37 +22,28 @@ use Throwable;
 class DeliveriesController extends Controller
 {
     /**
-     * Determines if the given voucher range contains entries already delivered.
+     * Determines if the given voucher range contains entries already delivered
      *
-     * @param $startCode
-     * @param $endCode
-     * @return bool|array
+     * @param $start
+     * @param $end
+     * @param $shortcode
+     * @return bool
+     * @throws Throwable
      */
     public static function rangeIsUndelivered($start, $end, $shortcode)
     {
-        // Get the Undelivered ranges
-        try {
-            $undeliveredRanges = Voucher::getUndeliveredVoucherRangesByShortCode($shortcode);
-        } catch (Throwable $e) {
-            Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
-            Log::error($e->getTraceAsString());
-            abort(500);
-        }
+        $undeliveredRanges = Voucher::getUndeliveredVoucherRangesByShortCode($shortcode);
 
-        // That cold *possibly* be empty of anything...
-        if (empty($undeliveredRanges)) {
-            return false;
-        }
-
-        foreach ($undeliveredRanges as $undeliveredRange) {
-            // Are Start and End both in the range?
-            if ($start >= $undeliveredRange['initial_serial'] &&
-                $start <= $undeliveredRange['final_serial'] &&
-                $end >= $undeliveredRange['initial_serial'] &&
-                $end <= $undeliveredRange['final_serial'] &&
-                $start >= $end ) {
-                return true;
-            };
+        // If NOT an empty array
+        if (!empty($undeliveredRanges)) {
+            foreach ($undeliveredRanges as $undeliveredRange) {
+                // Are Start and End both in the range?
+                if ($start >= $undeliveredRange->initial_serial &&
+                    $end <= $undeliveredRange->serial &&
+                    $start >= $end ) {
+                    return true;
+                };
+            }
         }
         // Start and End within none of the free ranges.
         return false;
@@ -86,9 +77,11 @@ class DeliveriesController extends Controller
         return view('service.deliveries.create', compact('sponsors'));
     }
 
+
     /**
      * @param AdminNewDeliveryRequest $request
      * @return RedirectResponse
+     * @throws Throwable
      */
     public function store(AdminNewDeliveryRequest $request)
     {
@@ -110,12 +103,12 @@ class DeliveriesController extends Controller
             // Whoops! Some of the vouchers may have been delivered
             return redirect()
                 ->route('admin.deliveries.create')
-                ->withErrors('The voucher range given contains some vouchers that have already been delivered.');
+                ->with('error_message', 'The voucher range given contains some vouchers that have already been delivered.');
         };
 
-        // Create delivery
+        // Create delivery or roll back
         try {
-            $delivery = DB::transaction(function () use ($start, $end, $centre, $request) {
+            DB::transaction(function () use ($start, $end, $centre, $request) {
 
                 $delivery = Delivery::create([
                     'centre_id' => $centre->id,
@@ -135,6 +128,8 @@ class DeliveriesController extends Controller
                         DB::raw("cast(replace(code, '{$start["shortcode"]}', '') as signed)"),
                         [$start["number"], $end["number"]]
                     )->chunk(
+                        // should be big enough chunks to avoid memory problems
+                        10000,
                         function ($vouchers) use ($now_time, $user_id, $user_type) {
                             $states =[];
                             // create VoucherState
@@ -157,9 +152,7 @@ class DeliveriesController extends Controller
                             }
                             // Insert this batch of vouchers.
                             VoucherState::insert($states);
-                        },
-                        // Should execute without blowing any limits
-                        10000
+                        }
                     );
 
                 // Get all the vouchers in the range and update them with the delivery Id and state
@@ -173,9 +166,6 @@ class DeliveriesController extends Controller
                         'delivery_id' => $delivery->id,
                         'currentState' => 'dispatched'
                         ]);
-
-                // return the delivery
-                return $delivery;
             });
         } catch (Throwable $e) {
             // Oops! Log that
@@ -183,6 +173,7 @@ class DeliveriesController extends Controller
             Log::error($e->getTraceAsString());
             // Throw it back to the user
         }
+        // Success
         return redirect()
             ->route('admin.deliveries.index')
             ->with('message', 'Delivery to ' . $centre->name . ' created.');

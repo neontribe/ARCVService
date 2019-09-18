@@ -6,7 +6,11 @@
     <div id="main-content">
 
         <h1>Send vouchers</h1>
-
+        @if (Session::get('error_message'))
+            <div class="alert alert-danger">
+                {{ Session::get('error_message') }}
+            </div>
+        @endif
         <p>Use the form below to mark a batch of vouchers as being sent. Add the centre they're being sent to, start and end voucher codes of the batch and the date they're being sent.</p>
 
         <form role="form" class="styled-form" method="POST" action="{{ route('admin.deliveries.store') }}">
