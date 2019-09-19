@@ -15,12 +15,12 @@
                 <div>
                     <label for="name" class="required">Name</label>
                     <input type="text" id="name" name="name" class="{{ $errors->has('name') ? 'error' : '' }}" required>
-                    @if($errors->has('name')) <label for="name" class="alert-danger">{{ implode("<br>", $errors->get('name')) }}</label> @endif
+                    @include('service.partials.validationMessages', array('inputName' => 'name'))
                 </div>
                 <div>
                     <label for="rvid_prefix" class="required">RVID prefix</label>
                     <input type="text" id="rvid_prefix" name="rvid_prefix" class="{{ $errors->has('rvid_prefix') ? 'error ' : '' }} uppercase" required>
-                    @if($errors->has('rvid_prefix')) <label for="rvid_prefix" class="alert-danger">{{ implode("<br>", $errors->get('rvid_prefix')) }}</label> @endif
+                    @include('service.partials.validationMessages', array('inputName' => 'rvid_prefix'))
                 </div>
                 <div class="select">
                     <label for="sponsor">Area</label>
@@ -30,7 +30,7 @@
                             <option value="{{ $sponsor->id }}">{{ $sponsor->name }}</option>
                         @endforeach
                     </select>
-                    @if($errors->has('sponsor')) <label for="sponsor" class="alert-danger">{{ implode("<br>", $errors->get('sponsor')) }}</label> @endif
+                    @include('service.partials.validationMessages', array('inputName' => 'sponsor'))
                 </div>
                 <div class="select">
                     <label for="print_pref">Printed Form</label>

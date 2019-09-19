@@ -15,12 +15,12 @@
                 <div>
                     <label for="name" class="required">Name</label>
                     <input type="text" id="name" name="name" class="{{ $errors->has('name') ? 'error' : '' }}" required>
-                    @if($errors->has('name')) <label for="name" class="alert-danger">{{ implode("<br>", $errors->get('name')) }}</label> @endif
+                    @include('service.partials.validationMessages', array('inputName' => 'name'))
                 </div>
                 <div>
                     <label for="voucher_prefix" class="required">Voucher Prefix</label>
                     <input type="text" id="voucher_prefix" name="voucher_prefix" class="{{ $errors->has('voucher_prefix') ? 'error ' : '' }} uppercase" required>
-                    @if($errors->has('voucher_prefix')) <label for="voucher_prefix" class="alert-danger">{{ implode("<br>", $errors->get('voucher_prefix')) }}</label> @endif
+                    @include('service.partials.validationMessages', array('inputName' => 'voucher_prefix'))
                 </div>
             </div>
             <button type="submit" id="createSponsor">Save</button>
