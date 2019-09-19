@@ -19,9 +19,10 @@ class VoucherEvaluatorTest extends TestCase
         'ChildIsAlmostBorn' => ['reason' => 'Child|almost born'],
         'ChildIsOverDue' => ['reason' => 'Child|over due date'],
         'ChildIsAlmostSchoolAge' => ['reason' => 'Child|almost school age'],
-        'ChildIsAlmostSecondarySchoolAge' => ['reason' => 'Child|almost extended cut off'],
+        'ChildIsAlmostSecondarySchoolAge' => ['reason' => 'Child|almost secondary school age'],
         'ChildIsAlmostTwelve' => ['reason' => 'Child|almost 12 years old'],
-
+        'ChildIsSchoolAge' => ['reason' => 'Child|school age (ineligible)'],
+        'ChildIsSecondarySchoolAge' => ['reason' => 'Child|secondary school age (ineligible)'],
     ];
 
     // This has a | in the reason field because we want to carry the entity with it.
@@ -29,7 +30,7 @@ class VoucherEvaluatorTest extends TestCase
         'ChildIsUnderOne' => ['reason' => 'Child|under 1 year old', 'value' => 3],
         'ChildIsUnderSchoolAge' => ['reason' => 'Child|under school age', 'value' => 3],
         'ChildIsUnderTwelve' => ['reason' => 'Child|under 12 years old', 'value' => 3],
-        'ChildIsUnderSecondarySchoolAge' => ['reason' => 'Child|under extended cut off', 'value' => 3],
+        'ChildIsUnderSecondarySchoolAge' => ['reason' => 'Child|under secondary school age', 'value' => 3],
         'FamilyIsPregnant' => ['reason' => 'Family|pregnant', 'value' => 3],
     ];
 
@@ -93,7 +94,7 @@ class VoucherEvaluatorTest extends TestCase
     }
 
     /** @test */
-    public function itCreditsWhenAChildIsUnderExtendedAge()
+    public function itCreditsWhenAChildIsUnderSecondarySchoolAge()
     {
         // Make a Child under School Age.
         $child = factory(Child::class, 'underSchoolAge')->make();
@@ -129,6 +130,26 @@ class VoucherEvaluatorTest extends TestCase
         // Check the correct credit type is applied.
         $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits);
         $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderSchoolAge'], $credits);
+        $this->assertEquals(0, $evaluation["entitlement"]);
+    }
+
+    /** @test */
+    public function itDoesNotCreditWhenAChildIsOverSecondarySchoolAge()
+    {
+        // Make a Child under School Age.
+        $child = factory(Child::class, 'overSecondarySchoolAge')->make();
+
+        // Make standard evaluator
+        $evaluator = EvaluatorFactory::make('extended_age');
+        $evaluation = $evaluator->evaluateChild($child);
+        $credits = $evaluation["credits"];
+
+        // Check there's one, because child is not under one.
+        $this->assertEquals(0, count($credits));
+
+        // Check the correct credit type is applied.
+        $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits);
+        $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderSecondarySchoolAge'], $credits);
         $this->assertEquals(0, $evaluation["entitlement"]);
     }
 
@@ -174,6 +195,27 @@ class VoucherEvaluatorTest extends TestCase
         // Check the correct credit type is applied.
         $this->assertNotContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $notices);
         $this->assertContains(self::NOTICE_TYPES['ChildIsAlmostSchoolAge'], $notices);
+    }
+
+    /** @test */
+    public function itNoticesWhenAChildIsAlmostSecondarySchoolAge()
+    {
+        // Need to change the values we use for school start to next month's integer
+        Config::set('arc.school_month', Carbon::now()->addMonth(1)->month);
+
+        $child = factory(Child::class, 'readyForSecondarySchool')->make();
+
+        // Make standard evaluator
+        $evaluator = EvaluatorFactory::make('extended_age');
+        $evaluation = $evaluator->evaluateChild($child);
+        $notices = $evaluation["notices"];
+
+        // Check there's one, because no other event is pending.
+        $this->assertEquals(1, count($notices));
+
+        // Check the correct credit type is applied.
+        $this->assertNotContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $notices);
+        $this->assertContains(self::NOTICE_TYPES['ChildIsAlmostSecondarySchoolAge'], $notices);
     }
 
     /** @test */

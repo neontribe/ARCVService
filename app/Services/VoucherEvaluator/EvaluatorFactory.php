@@ -9,6 +9,8 @@ use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostBorn;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostSecondarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostOne;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostSchoolAge;
+use App\Services\VoucherEvaluator\Evaluations\ChildIsSchoolAge;
+use App\Services\VoucherEvaluator\Evaluations\ChildIsSecondarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnBorn;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderSecondarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderOne;
@@ -73,7 +75,8 @@ class EvaluatorFactory
                     new ChildIsUnBorn($offsetDate),
                     new ChildIsAlmostBorn($offsetDate),
                     new ChildIsAlmostOne($offsetDate),
-                    new ChildIsAlmostSchoolAge($offsetDate)
+                    new ChildIsAlmostSchoolAge($offsetDate),
+                    new ChildIsSchoolAge($offsetDate)
                 ],
                 'credits' => [
                     new ChildIsUnderOne($offsetDate, 3),
@@ -103,7 +106,8 @@ class EvaluatorFactory
                     new ChildIsUnBorn($offsetDate),
                     new ChildIsAlmostBorn($offsetDate),
                     new ChildIsAlmostOne($offsetDate),
-                    new ChildIsAlmostSecondarySchoolAge($offsetDate)
+                    new ChildIsAlmostSecondarySchoolAge($offsetDate),
+                    new ChildIsSecondarySchoolAge($offsetDate)
                 ],
                 'credits' => [
                     new ChildIsUnderOne($offsetDate, 3),
