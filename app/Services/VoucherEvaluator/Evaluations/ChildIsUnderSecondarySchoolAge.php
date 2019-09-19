@@ -3,23 +3,22 @@
 namespace App\Services\VoucherEvaluator\Evaluations;
 
 use App\Specifications\IsBorn;
-use App\Specifications\IsAlmostStartDate;
+use App\Specifications\IsUnderStartDate;
 use Carbon\Carbon;
 use Chalcedonyt\Specification\AndSpec;
 
-class ChildIsAlmostExtendedAge extends BaseChildEvaluation
+class ChildIsUnderSecondarySchoolAge extends BaseChildEvaluation
 {
-    const REASON = 'almost extended cut off';
+    const REASON = 'under secondary school age';
     private $specification;
 
-    public function __construct(Carbon $offsetDate = null, $value = null)
+    public function __construct(Carbon $offsetDate = null, $value = 3)
     {
         parent::__construct($offsetDate, $value);
 
         $this->specification = new AndSpec(
             new IsBorn(),
-            // Child school start date
-            new IsAlmostStartDate($this->offsetDate, 12, config('arc.school_month'))
+            new IsUnderStartDate($this->offsetDate, 12, config('arc.school_month'))
         );
     }
 

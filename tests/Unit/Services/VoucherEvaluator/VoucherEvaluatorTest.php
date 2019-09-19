@@ -19,7 +19,7 @@ class VoucherEvaluatorTest extends TestCase
         'ChildIsAlmostBorn' => ['reason' => 'Child|almost born'],
         'ChildIsOverDue' => ['reason' => 'Child|over due date'],
         'ChildIsAlmostSchoolAge' => ['reason' => 'Child|almost school age'],
-        'ChildIsAlmostExtendedAge' => ['reason' => 'Child|almost extended cut off'],
+        'ChildIsAlmostSecondarySchoolAge' => ['reason' => 'Child|almost extended cut off'],
         'ChildIsAlmostTwelve' => ['reason' => 'Child|almost 12 years old'],
 
     ];
@@ -29,7 +29,7 @@ class VoucherEvaluatorTest extends TestCase
         'ChildIsUnderOne' => ['reason' => 'Child|under 1 year old', 'value' => 3],
         'ChildIsUnderSchoolAge' => ['reason' => 'Child|under school age', 'value' => 3],
         'ChildIsUnderTwelve' => ['reason' => 'Child|under 12 years old', 'value' => 3],
-        'ChildIsUnderExtendedAge' => ['reason' => 'Child|under extended cut off', 'value' => 3],
+        'ChildIsUnderSecondarySchoolAge' => ['reason' => 'Child|under extended cut off', 'value' => 3],
         'FamilyIsPregnant' => ['reason' => 'Family|pregnant', 'value' => 3],
     ];
 
@@ -108,7 +108,7 @@ class VoucherEvaluatorTest extends TestCase
 
         // Check the correct credit type is applied.
         $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits, '');
-        $this->assertContains(self::CREDIT_TYPES['ChildIsUnderExtendedAge'], $credits, '');
+        $this->assertContains(self::CREDIT_TYPES['ChildIsUnderSecondarySchoolAge'], $credits, '');
         $this->assertEquals(3, $evaluation["entitlement"]);
     }
 
