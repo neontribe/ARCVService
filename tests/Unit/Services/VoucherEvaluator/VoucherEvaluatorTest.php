@@ -21,8 +21,8 @@ class VoucherEvaluatorTest extends TestCase
         'ChildIsAlmostSchoolAge' => ['reason' => 'Child|almost school age'],
         'ChildIsAlmostSecondarySchoolAge' => ['reason' => 'Child|almost secondary school age'],
         'ChildIsAlmostTwelve' => ['reason' => 'Child|almost 12 years old'],
-        'ChildIsSchoolAge' => ['reason' => 'Child|school age (ineligible)'],
-        'ChildIsSecondarySchoolAge' => ['reason' => 'Child|secondary school age (ineligible)'],
+        'ChildIsSchoolAge' => ['reason' => 'Child|school age (no longer eligible)'],
+        'ChildIsSecondarySchoolAge' => ['reason' => 'Child|secondary school age (no longer eligible)'],
     ];
 
     // This has a | in the reason field because we want to carry the entity with it.
