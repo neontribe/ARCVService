@@ -7,9 +7,9 @@ use App\Specifications\IsAlmostStartDate;
 use Carbon\Carbon;
 use Chalcedonyt\Specification\AndSpec;
 
-class ChildIsAlmostExtendedAge extends BaseChildEvaluation
+class ChildIsAlmostSecondarySchoolAge extends BaseChildEvaluation
 {
-    const REASON = 'almost extended cut off';
+    const REASON = 'almost secondary school age';
     private $specification;
 
     public function __construct(Carbon $offsetDate = null, $value = null)

@@ -286,7 +286,7 @@ $factory->define(App\Centre::class, function (Faker\Generator $faker) {
         'name' => $name,
         // *Probably* not going to generate a duplicate...
         // TODO : This generated a duplicate: https://travis-ci.org/neontribe/ARCVService/builds/583632956
-        // But metaphone will occassionally return 6 chars if endish char is an X -> KS
+        // But metaphone will occasionally return 6 chars if end char is an X -> KS
         // https://bugs.php.net/bug.php?id=60123
         // Also might return 4 chars - but that's ok for seeds? Or do we pad?
         'prefix' => substr(metaphone($name, 5), 0, 5),
@@ -395,11 +395,23 @@ $factory->defineAs(App\Child::class, 'almostOne', function (Faker\Generator $fak
     ];
 });
 
-// Child - readyForSchool when the school_month rolls around
+// Child - ready for School when the school_month rolls around
 $factory->defineAs(App\Child::class, 'readyForSchool', function (Faker\Generator $faker) {
 
     // Make a child who's four now, and thus due to start school soon(ish)
     $dob = Carbon::now()->startOfMonth()->subYears(4);
+
+    return [
+        'born' => $dob->isPast(),
+        'dob' => $dob->toDateTimeString(),
+    ];
+});
+
+// Child - ready for Secondary School when the school_month rolls around
+$factory->defineAs(App\Child::class, 'readyForSecondarySchool', function (Faker\Generator $faker) {
+
+    // Make a child who's 11 now, and thus due to start school soon(ish)
+    $dob = Carbon::now()->startOfMonth()->subYears(11);
 
     return [
         'born' => $dob->isPast(),
@@ -419,7 +431,7 @@ $factory->defineAs(App\Child::class, 'underSchoolAge', function (Faker\Generator
     ];
 });
 
-// Child - over SchoolAge
+// Child - over School Age
 $factory->defineAs(App\Child::class, 'overSchoolAge', function (Faker\Generator $faker) {
 
     $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-10 years', '-6 years')->getTimestamp());
@@ -430,8 +442,22 @@ $factory->defineAs(App\Child::class, 'overSchoolAge', function (Faker\Generator 
         'dob' => $dob->toDateTimeString(),
     ];
 });
+
+// Child - over Secondary School Age
+$factory->defineAs(App\Child::class, 'overSecondarySchoolAge', function (Faker\Generator $faker) {
+
+    $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-18 years', '-13 years')->getTimestamp());
+    $dob = $dob->startOfMonth();
+
+    return [
+        'born' => $dob->isPast(),
+        'dob' => $dob->toDateTimeString(),
+    ];
+});
+
+
 //Note
-$factory->define(App\Note::class, function (Faker\Generator $faker){
+$factory->define(App\Note::class, function (Faker\Generator $faker) {
 
     return [
         'content' => 'this is some note content',
