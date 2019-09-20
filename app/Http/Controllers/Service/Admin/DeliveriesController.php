@@ -122,7 +122,7 @@ class DeliveriesController extends Controller
                 Voucher::select('id')
                     ->where('currentState', 'printed')
                     ->whereNull('delivery_id')
-                    ->where('code', 'like', $start['shortcode'] . '%') // Just vouchers that start with our shortcode
+                    ->where('code', 'REGEXP', "^{$start["shortcode"]}[0-9]+\$") // Just vouchers that start with our shortcode
                     ->whereBetween(
                         DB::raw("cast(replace(code, '{$start["shortcode"]}', '') as signed)"),
                         [$start["number"], $end["number"]]
@@ -157,7 +157,7 @@ class DeliveriesController extends Controller
                 // Get all the vouchers in the range and update them with the delivery Id and state
                 Voucher::where('currentState', 'printed')
                     ->whereNull('delivery_id')
-                    ->where('code', 'like', $start['shortcode'] . '%') // Just vouchers that start with our shortcode
+                    ->where('code', 'REGEXP', "^{$start["shortcode"]}[0-9]+\$") // Just vouchers that start with our shortcode
                     ->whereBetween(
                         DB::raw("cast(replace(code, '{$start["shortcode"]}', '') as signed)"),
                         [$start["number"], $end["number"]]
