@@ -110,8 +110,8 @@ class CentreController extends Controller
             $row = [
                 // TODO: null objects when DB is duff: try/catch findOrFail() in the relationship?
                 "RVID" => ($reg->family) ? $reg->family->rvid : 'Family not found',
-                "Centre" => ($reg->centre) ? $reg->centre->name : 'Centre not found',
                 "Area" => ($reg->centre->sponsor) ? $reg->centre->sponsor->name : 'Area not found',
+                "Centre" => ($reg->centre) ? $reg->centre->name : 'Centre not found',
                 "Primary Carer" => ($reg->family->pri_carer) ? $reg->family->pri_carer : null,
                 "Entitlement" => $reg->valuation->getEntitlement(),
                 "Last Collection" => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format('d/m/Y') : null

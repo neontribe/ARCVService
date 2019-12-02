@@ -72,7 +72,28 @@ class CentreControllerTest extends StoreTestCase
         $data = array_filter(explode(PHP_EOL, $content));
         // Shift the headers off.
         $headers = str_getcsv(array_shift($data));
-        // remap the headers onto each line as keys
+
+        // The expected headers
+        $expected_headers = [
+            "RVID",
+            "Area",
+            "Centre",
+            "Primary Carer",
+            "Entitlement",
+            "Last Collection",
+            "Eligible Children",
+            "Due Date",
+            "Join Date",
+            "Leaving Date",
+            "Leaving Reason"
+        ];
+
+        // Check the expected headers are present.
+        foreach ($expected_headers as $expected) {
+            $this->assertContains($expected, $headers);
+        }
+
+        // Remap the headers onto each line as keys
         $lines = array_map(
             function ($line) use ($headers) {
                 return array_combine($headers, str_getcsv($line));
@@ -88,9 +109,16 @@ class CentreControllerTest extends StoreTestCase
             $reg = $this->registrations->first(function ($model) use ($line) {
                 return $model->family->rvid = $line["RVID"];
             });
-            // It returned a not-false thing.
+            // The database has an record from the output.
             $this->assertNotFalse($reg);
-            // That thing has returns a top disbursed bundle
+
+            // It has the correct centre name
+            $this->assertEquals($reg->centre->name, $line["Centre"]);
+
+            // It has the correct area/sponsor name
+            $this->assertEquals($reg->centre->sponsor->name, $line["Area"]);
+
+            // That thing has returned a top disbursed bundle
             $bundle = $reg->bundles()->whereNotNull('disbursed_at')->orderBy('disbursed_at')->first();
             $this->assertNotFalse($bundle);
             // That is the same date as this line.
