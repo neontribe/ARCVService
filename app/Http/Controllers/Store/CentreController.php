@@ -80,6 +80,7 @@ class CentreController extends Controller
             // Create a string hash as our object sorter.
             return
                 $reg->centre->sponsor->name . '#' .
+                $reg->centre->name . '#' .
                 $reg->family->pri_carer;
         });
 
