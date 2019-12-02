@@ -8,7 +8,8 @@ use App\Registration;
 use Auth;
 use Carbon\Carbon;
 use Excel;
-use Illuminate\View\View;
+use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use PDF;
 
 class CentreController extends Controller
@@ -18,7 +19,7 @@ class CentreController extends Controller
      * Displays a printable version of the families registered with the center.
      *
      * @param Centre $centre
-     * @return \Illuminate\Contracts\View\Factory|View
+     * @return Response
      */
     public function printCentreCollectionForm(Centre $centre)
     {
@@ -51,6 +52,7 @@ class CentreController extends Controller
     /**
      * Exports a summary of registrations from the User's relevant Centres.
      *
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
      */
     public function exportRegistrationsSummary()
     {
@@ -60,16 +62,26 @@ class CentreController extends Controller
         // Get now()
         $now = Carbon::now();
 
-        // Get centres
-        $centres = $user->relevantCentres();
+        // Get centre ids
+        $centre_ids = $user->relevantCentres()->pluck('id')->all();
 
-        // get registrations
-        $registrations = Registration::whereIn(
-            'centre_id',
-            $centres->pluck('id')->all()
-        )
-            ->with(['centre','family.children','family.carers'])
+        // Get registrations decorated - may no longer be terribly efficient.
+        /** @var Collection $registrations */
+        $registrations = Registration::withFullFamily()
+            ->whereIn(
+                'centre_id',
+                $centre_ids
+            )
+            ->with(['centre','centre.sponsor'])
             ->get();
+
+        // Sort collection by Centre, Pri_Carer
+        $registrations->sortBy(function ($reg) {
+            // Create a string hash as our object sorter.
+            return
+                $reg->centre->sponsor->name . '#' .
+                $reg->family->pri_carer;
+        });
 
         // set blank rows for laravel-excel
         $rows = [];
@@ -99,7 +111,8 @@ class CentreController extends Controller
                 // TODO: null objects when DB is duff: try/catch findOrFail() in the relationship?
                 "RVID" => ($reg->family) ? $reg->family->rvid : 'Family not found',
                 "Centre" => ($reg->centre) ? $reg->centre->name : 'Centre not found',
-                "Primary Carer" => ($reg->family->carers->first()) ? $reg->family->carers->first()->name : null,
+                "Area" => ($reg->centre->sponsor) ? $reg->centre->sponsor->name : 'Area not found',
+                "Primary Carer" => ($reg->family->pri_carer) ? $reg->family->pri_carer : null,
                 "Entitlement" => $reg->valuation->getEntitlement(),
                 "Last Collection" => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format('d/m/Y') : null
             ];
