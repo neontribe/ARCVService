@@ -10,7 +10,6 @@ use App\Voucher;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Maatwebsite\Excel;
 use Tests\StoreTestCase;
 
 class CentreControllerTest extends StoreTestCase
@@ -72,7 +71,28 @@ class CentreControllerTest extends StoreTestCase
         $data = array_filter(explode(PHP_EOL, $content));
         // Shift the headers off.
         $headers = str_getcsv(array_shift($data));
-        // remap the headers onto each line as keys
+
+        // The expected headers
+        $expected_headers = [
+            "RVID",
+            "Area",
+            "Centre",
+            "Primary Carer",
+            "Entitlement",
+            "Last Collection",
+            "Eligible Children",
+            "Due Date",
+            "Join Date",
+            "Leaving Date",
+            "Leaving Reason"
+        ];
+
+        // Check the expected headers are present.
+        foreach ($expected_headers as $expected) {
+            $this->assertContains($expected, $headers);
+        }
+
+        // Remap the headers onto each line as keys
         $lines = array_map(
             function ($line) use ($headers) {
                 return array_combine($headers, str_getcsv($line));
@@ -83,14 +103,38 @@ class CentreControllerTest extends StoreTestCase
         // There are the right amount of lines.
         $this->assertEquals($this->registrations->count(), count($lines));
 
+        // Prep for testing hashes
+        $hashes = [];
+
         // Test each output line
         foreach ($lines as $line) {
+            // Make a hash, test it and add it to the end
+            $hash =
+                $line["Area"] . '#' .
+                $line["Centre"] . '#' .
+                $line["Primary Carer"];
+
+            if (!empty($hashes)) {
+                // Check that we're greater than or equal to the last hash
+                $this->assertGreaterThanOrEqual(0, strcmp($hash, last($hashes)));
+            }
+
+            // Add it on the end for next round
+            $hashes[] = $hash;
+
             $reg = $this->registrations->first(function ($model) use ($line) {
                 return $model->family->rvid = $line["RVID"];
             });
-            // It returned a not-false thing.
+            // The database has an record from the output.
             $this->assertNotFalse($reg);
-            // That thing has returns a top disbursed bundle
+
+            // It has the correct centre name
+            $this->assertEquals($reg->centre->name, $line["Centre"]);
+
+            // It has the correct area/sponsor name
+            $this->assertEquals($reg->centre->sponsor->name, $line["Area"]);
+
+            // That thing has returned a top disbursed bundle
             $bundle = $reg->bundles()->whereNotNull('disbursed_at')->orderBy('disbursed_at')->first();
             $this->assertNotFalse($bundle);
             // That is the same date as this line.
