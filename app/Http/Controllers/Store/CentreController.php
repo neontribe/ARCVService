@@ -108,12 +108,12 @@ class CentreController extends Controller
                 : null
             ;
 
+            // Null coalesce `??` does not trigger `Trying to get property of non-object` explosions
             $row = [
-                // TODO: null objects when DB is duff: try/catch findOrFail() in the relationship?
-                "RVID" => ($reg->family) ? $reg->family->rvid : 'Family not found',
-                "Area" => ($reg->centre->sponsor) ? $reg->centre->sponsor->name : 'Area not found',
-                "Centre" => ($reg->centre) ? $reg->centre->name : 'Centre not found',
-                "Primary Carer" => ($reg->family->pri_carer) ? $reg->family->pri_carer : null,
+                "RVID" => ($reg->family->rvid) ?? 'Family not found',
+                "Area" => ($reg->centre->sponsor->name) ?? 'Area not found',
+                "Centre" => ($reg->centre->name) ?? 'Centre not found',
+                "Primary Carer" => ($reg->family->pri_carer) ?? 'Primary Carer not Found',
                 "Entitlement" => $reg->valuation->getEntitlement(),
                 "Last Collection" => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format('d/m/Y') : null
             ];
