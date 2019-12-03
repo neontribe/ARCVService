@@ -68,13 +68,14 @@ class Handler extends ExceptionHandler
      *
      * @throws Exception
      * @param  Exception  $e
-     * @return void
+     * @return mixed
      */
     public function report(Exception $e)
     {
         if (!$this->shallWeStackTrace($e)) {
             try {
                 // Should build an appropriate logger for our config;
+                // Alas, Log::shouldReceive can't detect this.
                 $logger = $this->container->make(LoggerInterface::class);
             } catch (Exception $ex) {
                 // Whoops, the logger didn't get made, throw the original exception
@@ -90,7 +91,7 @@ class Handler extends ExceptionHandler
                 .$e->getTrace()[0]['file']
             );
         } else {
-            parent::report($e);
+            return parent::report($e);
         }
     }
 

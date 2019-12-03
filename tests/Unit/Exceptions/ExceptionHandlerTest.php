@@ -4,46 +4,53 @@ namespace Tests\Unit\Controllers\Store;
 
 use App\Exceptions\Handler;
 use Illuminate\Container\Container;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Config;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use ReflectionClass;
 use ReflectionException;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Tests\StoreTestCase;
 
 class ExceptionHandlerTest extends StoreTestCase
 {
 
-    /** @test  */
-    public function itShouldNotStackTracesInProduction()
+    private $exceptions = [];
+
+    protected function setUp()
     {
-        // Set the exceptions to test
-        $exceptions = [
-            new OAuthServerException('', 4, "exception"),
+        // Tests reach into the container, and get upset when run in bulk with other tests.
+        $this->createApplication();
+        $this->exceptions = [
+            new OAuthServerException('mymessage', 4, "exception"),
         ];
+    }
 
-        // get our current config.
-        $old_config = config('app.env');
-
-        // Get the Handler instance.
+    /** @test */
+    public function itShouldNotStackTraceInProduction()
+    {
         $handler = Container::getInstance()->make(Handler::class);
-
         try {
-            foreach ($exceptions as $exception) {
+            foreach ($this->exceptions as $exception) {
                 Config::set('app.env', 'production');
                 $this->assertFalse(
                     $this->invokeMethod($handler, 'shallWeStackTrace', [$exception])
                 );
+            }
+        } catch (ReflectionException $e) {
+            // Just catch it.
+        }
+    }
 
-                // This shouldn't run in production, but just to check...
-                if ($old_config !== 'production') {
-                    Config::set('app.env', $old_config);
-                    $this->assertTrue(
-                        $this->invokeMethod($handler, 'shallWeStackTrace', [$exception])
-                    );
-                }
+    /** @test */
+    public function itShouldStackTraceNotInProduction()
+    {
+        $handler = Container::getInstance()->make(Handler::class);
+        try {
+            foreach ($this->exceptions as $exception) {
+                // hashed to be "anything other than 'production'
+                Config::set('app.env', md5('production'));
+                $this->assertTrue(
+                    $this->invokeMethod($handler, 'shallWeStackTrace', [$exception])
+                );
             }
         } catch (ReflectionException $e) {
             // Just catch it.
