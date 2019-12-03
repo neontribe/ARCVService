@@ -140,7 +140,5 @@ class CentreControllerTest extends StoreTestCase
             // That is the same date as this line.
             $this->assertEquals($bundle->disbursed_at->format('d/m/Y'), $line["Last Collection"]);
         }
-
-        print_r($hashes);
     }
 }

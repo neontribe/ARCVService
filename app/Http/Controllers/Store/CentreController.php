@@ -83,8 +83,7 @@ class CentreController extends Controller
         // So we have to do it by hand.
 
         // create base headers
-        $headers = [
-        ];
+        $headers = [];
 
         // Per registration...
         foreach ($registrations as $reg) {
