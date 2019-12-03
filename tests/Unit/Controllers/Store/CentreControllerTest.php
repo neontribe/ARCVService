@@ -10,7 +10,6 @@ use App\Voucher;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Maatwebsite\Excel;
 use Tests\StoreTestCase;
 
 class CentreControllerTest extends StoreTestCase
@@ -104,8 +103,25 @@ class CentreControllerTest extends StoreTestCase
         // There are the right amount of lines.
         $this->assertEquals($this->registrations->count(), count($lines));
 
+        // Prep for testing hashes
+        $hashes = [];
+
         // Test each output line
         foreach ($lines as $line) {
+            // Make a hash, test it and add it to the end
+            $hash =
+                $line["Area"] . '#' .
+                $line["Centre"] . '#' .
+                $line["Primary Carer"];
+
+            if (!empty($hashes)) {
+                // Check that we're greater than or equal to the last hash
+                $this->assertGreaterThanOrEqual(0, strcmp($hash, last($hashes)));
+            }
+
+            // Add it on the end for next round
+            $hashes[] = $hash;
+
             $reg = $this->registrations->first(function ($model) use ($line) {
                 return $model->family->rvid = $line["RVID"];
             });
@@ -124,5 +140,7 @@ class CentreControllerTest extends StoreTestCase
             // That is the same date as this line.
             $this->assertEquals($bundle->disbursed_at->format('d/m/Y'), $line["Last Collection"]);
         }
+
+        print_r($hashes);
     }
 }

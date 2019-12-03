@@ -75,15 +75,6 @@ class CentreController extends Controller
             ->with(['centre','centre.sponsor'])
             ->get();
 
-        // Sort collection by Centre, Pri_Carer
-        $registrations->sortBy(function ($reg) {
-            // Create a string hash as our object sorter.
-            return
-                $reg->centre->sponsor->name . '#' .
-                $reg->centre->name . '#' .
-                $reg->family->pri_carer;
-        });
-
         // set blank rows for laravel-excel
         $rows = [];
 
@@ -170,9 +161,19 @@ class CentreController extends Controller
             $rows[] = $row;
         }
 
-        // PHP 7 feature; comparison "spaceship" opertator "<=>" : returns -1/0/1
         usort($rows, function ($a, $b) {
-            return $a['RVID'] <=> $b['RVID'];
+            $hashA = strtolower(
+                $a['Area'] . '#' .
+                $a['Centre'] . '#' .
+                $a['Primary Carer']
+            );
+            $hashB = strtolower(
+                $b['Area'] . '#' .
+                $b['Centre'] . '#' .
+                $b['Primary Carer']
+            );
+            // PHP 7 feature; comparison "spaceship" opertator "<=>" : returns -1/0/1
+            return $hashA <=> $hashB;
         });
 
         // en-sparsen the rows with empty fields for unused header.
