@@ -8,7 +8,8 @@ use App\Registration;
 use Auth;
 use Carbon\Carbon;
 use Excel;
-use Illuminate\View\View;
+use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use PDF;
 
 class CentreController extends Controller
@@ -18,7 +19,7 @@ class CentreController extends Controller
      * Displays a printable version of the families registered with the center.
      *
      * @param Centre $centre
-     * @return \Illuminate\Contracts\View\Factory|View
+     * @return Response
      */
     public function printCentreCollectionForm(Centre $centre)
     {
@@ -51,6 +52,7 @@ class CentreController extends Controller
     /**
      * Exports a summary of registrations from the User's relevant Centres.
      *
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
      */
     public function exportRegistrationsSummary()
     {
@@ -60,15 +62,17 @@ class CentreController extends Controller
         // Get now()
         $now = Carbon::now();
 
-        // Get centres
-        $centres = $user->relevantCentres();
+        // Get centre ids
+        $centre_ids = $user->relevantCentres()->pluck('id')->all();
 
-        // get registrations
-        $registrations = Registration::whereIn(
-            'centre_id',
-            $centres->pluck('id')->all()
-        )
-            ->with(['centre','family.children','family.carers'])
+        // Get registrations decorated - may no longer be terribly efficient.
+        /** @var Collection $registrations */
+        $registrations = Registration::withFullFamily()
+            ->whereIn(
+                'centre_id',
+                $centre_ids
+            )
+            ->with(['centre','centre.sponsor'])
             ->get();
 
         // set blank rows for laravel-excel
@@ -79,8 +83,7 @@ class CentreController extends Controller
         // So we have to do it by hand.
 
         // create base headers
-        $headers = [
-        ];
+        $headers = [];
 
         // Per registration...
         foreach ($registrations as $reg) {
@@ -95,11 +98,12 @@ class CentreController extends Controller
                 : null
             ;
 
+            // Null coalesce `??` does not trigger `Trying to get property of non-object` explosions
             $row = [
-                // TODO: null objects when DB is duff: try/catch findOrFail() in the relationship?
-                "RVID" => ($reg->family) ? $reg->family->rvid : 'Family not found',
-                "Centre" => ($reg->centre) ? $reg->centre->name : 'Centre not found',
-                "Primary Carer" => ($reg->family->carers->first()) ? $reg->family->carers->first()->name : null,
+                "RVID" => ($reg->family->rvid) ?? 'Family not found',
+                "Area" => ($reg->centre->sponsor->name) ?? 'Area not found',
+                "Centre" => ($reg->centre->name) ?? 'Centre not found',
+                "Primary Carer" => ($reg->family->pri_carer) ?? 'Primary Carer not Found',
                 "Entitlement" => $reg->valuation->getEntitlement(),
                 "Last Collection" => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format('d/m/Y') : null
             ];
@@ -156,9 +160,19 @@ class CentreController extends Controller
             $rows[] = $row;
         }
 
-        // PHP 7 feature; comparison "spaceship" opertator "<=>" : returns -1/0/1
         usort($rows, function ($a, $b) {
-            return $a['RVID'] <=> $b['RVID'];
+            $hashA = strtolower(
+                $a['Area'] . '#' .
+                $a['Centre'] . '#' .
+                $a['Primary Carer']
+            );
+            $hashB = strtolower(
+                $b['Area'] . '#' .
+                $b['Centre'] . '#' .
+                $b['Primary Carer']
+            );
+            // PHP 7 feature; comparison "spaceship" opertator "<=>" : returns -1/0/1
+            return $hashA <=> $hashB;
         });
 
         // en-sparsen the rows with empty fields for unused header.
