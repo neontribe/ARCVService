@@ -84,10 +84,14 @@ class EvaluatorFactory
                 ]
             ],
             Family::class => [
+                'relations' => ['children'],
                 'notices' => [],
                 'credits' => [
                     new FamilyIsPregnant(null, 3)
                 ]
+            ],
+            Registration::class => [
+                'relations' => ['family'],
             ],
         ];
     }

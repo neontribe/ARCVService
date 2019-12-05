@@ -8,6 +8,8 @@ use App\Registration;
 use App\Services\VoucherEvaluator\AbstractEvaluator;
 use App\Services\VoucherEvaluator\IEvaluee;
 use App\Services\VoucherEvaluator\Valuation;
+use Illuminate\Database\Eloquent\Concerns\HasAttributes;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class VoucherEvaluator extends AbstractEvaluator
 {
@@ -70,13 +72,40 @@ class VoucherEvaluator extends AbstractEvaluator
     }
 
     /**
-     * Evaluates a Child and returns the summary array
+     * Calls relation models to evaluate them
+     * returns an array of valuations, one for each model.
+     *
+     * @param IEvaluee $subject
+     * @return array
+     */
+    private function evaluateRelations(IEvaluee $subject)
+    {
+        /*
+         * Currently we only plan on feeding models to this - If we start
+         * applying it to standard models we'll need to expand it to deal.
+        */
+        $valuations = [];
+        $rules = $this->evaluations[get_class($subject)];
+        foreach ($rules['relations'] as $relationName) {
+            // Executes the given relationship
+            $relation = $subject->getRelationValue($relationName);
+            /** @var IEvaluee $relationModel */
+            foreach ($relation as $relationModel) {
+                $valuations[] = $relationModel->accept($this);
+            }
+        }
+        return $valuations;
+    }
+
+    /**
+     * Evaluates a Child and returns the valuation
      *
      * @param Child $subject
-     * @return array
+     * @return Valuation
      */
     public function evaluateChild(Child $subject)
     {
+        $valuations = $this->evaluateRelations($subject);
         $credits = $this->getCredits($subject);
         $notices = $this->getNotices($subject);
 
@@ -91,40 +120,38 @@ class VoucherEvaluator extends AbstractEvaluator
             ;
         }
 
-        return [
+        return new Valuation([
+            'valuations' = $valuations,
+            'evaluee' => $subject,
             'eligibility' => $eligibility,
             'notices' => $notices,
             'credits' => $credits,
             'entitlement' => $entitlement,
-        ];
+        ]);
     }
 
     /**
      * Evaluates a Family object and returns the summary array
      *
      * @param Family $subject
-     * @return array
+     * @return Valuation
      */
     public function evaluateFamily(Family $subject)
     {
+        $valuations = $this->evaluateRelations($subject);
+
         $credits = $this->getCredits($subject);
         $notices = $this->getNotices($subject);
 
-        $children = $subject->children;
-        /** @var Child $child */
-        foreach ($children as $child) {
-            $child_status = $child->accept($this);
-            $notices = array_merge($notices, $child_status['notices']);
-            $credits = array_merge($credits, $child_status['credits']);
-        }
-
         $entitlement =  array_sum(array_column($credits, 'value'));
 
-        return [
+        return new Valuation([
+            'valuations' => $valuations,
+            'evaluee' => $subject,
             'credits' => $credits,
             'notices' => $notices,
             'entitlement' => $entitlement,
-        ];
+        ]);
     }
 
     /**
@@ -134,8 +161,18 @@ class VoucherEvaluator extends AbstractEvaluator
      */
     public function evaluateRegistration(Registration $subject)
     {
-        /** @var Family $family */
-        $family = $subject->family;
-        $this->valuation = new Valuation($family->accept($this));
+        $credits = $this->getCredits($subject);
+        $notices = $this->getNotices($subject);
+
+        $entitlement =  array_sum(array_column($credits, 'value'));
+
+        $valuations = $this->getRelations($subject);
+        $this->valuation = new Valuation([
+            'valuations' => $valuations,
+            'evaluee' => $subject,
+            'credits' => $credits,
+            'notices' => $notices,
+            'entitlement' => $entitlement,
+        ]);
     }
 }
