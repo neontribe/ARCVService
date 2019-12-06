@@ -2,18 +2,37 @@
 
 namespace App\Services\VoucherEvaluator;
 
-class Valuation
-{
-    /** @var array $valuation */
-    public $valuation = [];
+use ArrayObject;
 
+/**
+ * Class Valuation
+ * Decorated ArrayObject, tweaked so we can access core array as properties
+ * Cheeky way to throw in an Array and then auto-magically get/set members as properties.
+ *
+ * Holds the results of an Evaluator's walk around the subject and it's related models
+ *
+ * @package App\Services\VoucherEvaluator
+ */
+class Valuation extends ArrayObject
+{
     /**
-     * Valuation constructor.
-     * @param array $valuation
+     * Valuation constructor
+     * @param array $input
+     * @param int $flags overridden to change default behaviour from "0"
+     * @param string $iterator_class
      */
-    public function __construct($valuation = [])
+    public function __construct($input = array(), $flags = parent::ARRAY_AS_PROPS, $iterator_class = "ArrayIterator")
     {
-        $this->valuation = $valuation;
+        // Set some expected values;
+        $expected = [
+            'valuations' => $input['valuations'] ?? [],
+            'entitlement' => $input['entitlement'] ?? 0,
+            'evaluee' => $input['evaluee'] ?? null,
+            'eligibility' => $input['eligibility'] ?? false,
+            'notices' => $input['notices'] ?? [],
+            'credits' => $input['credits'] ?? [],
+        ];
+        parent::__construct($expected, $flags, $iterator_class);
     }
 
     /**
@@ -24,10 +43,9 @@ class Valuation
     public function getNoticeReasons()
     {
         $notice_reasons = [];
-        $notices = $this->valuation["notices"];
 
         // get distinct reasons and frequency.
-        $reason_count = array_count_values(array_column($notices, 'reason'));
+        $reason_count = array_count_values(array_column($this->notices, 'reason'));
 
         foreach ($reason_count as $reason => $count) {
             /*
@@ -50,10 +68,9 @@ class Valuation
     public function getCreditReasons()
     {
         $credit_reasons = [];
-        $credits = $this->valuation["credits"];
 
         // get distinct reasons and frequency.
-        $reason_count = array_count_values(array_column($credits, 'reason'));
+        $reason_count = array_count_values(array_column($this->credits, 'reason'));
 
         foreach ($reason_count as $reason => $count) {
             // Filter the raw credits by reason
@@ -62,7 +79,7 @@ class Valuation
             $reason_vouchers = array_sum(
                 array_column(
                     array_filter(
-                        $credits,
+                        $this->credits,
                         function ($credit) use ($reason) {
                             return $credit['reason'] == $reason;
                         }
@@ -83,14 +100,5 @@ class Valuation
             ];
         }
         return $credit_reasons;
-    }
-
-    /**
-     * Gets the the entitlement, specifically
-     * @return int
-     */
-    public function getEntitlement()
-    {
-        return $this->valuation['entitlement'];
     }
 }

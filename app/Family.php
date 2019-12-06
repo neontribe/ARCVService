@@ -3,7 +3,9 @@
 namespace App;
 
 use App\Services\VoucherEvaluator\AbstractEvaluator;
+use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\IEvaluee;
+use App\Services\VoucherEvaluator\Valuation;
 use Illuminate\Database\Eloquent\Model;
 use Log;
 
@@ -48,9 +50,30 @@ class Family extends Model implements IEvaluee
     ];
 
     /**
+     * Gets the evaluator from up the chain.
+     *
+     * @return AbstractEvaluator
+     */
+    public function getEvaluatorAttribute()
+    {
+        return $this->registrations()->first()->evaluator();
+    }
+
+    /**
+     * Get the valuation on this family in context of it's registration.
+     *
+     * @return Valuation
+     */
+    public function getValuationAttribute()
+    {
+        return $this->accept($this->evaluator());
+    }
+
+    /**
      * Visitor pattern voucher evaluator
      *
      * @param AbstractEvaluator $evaluator
+     * @return Valuation
      */
     public function accept(AbstractEvaluator $evaluator)
     {

@@ -4,9 +4,11 @@ namespace App;
 
 use App\Services\VoucherEvaluator\AbstractEvaluator;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
-use App\Services\VoucherEvaluator\IEvaluation;
 use App\Services\VoucherEvaluator\IEvaluee;
+use App\Services\VoucherEvaluator\Valuation;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Registration extends Model implements IEvaluee
 {
@@ -40,20 +42,30 @@ class Registration extends Model implements IEvaluee
         'consented_on',
     ];
 
-    /** @var  AbstractEvaluator null  */
-    public $evaluator = null;
+    /**
+     * Private evaluator stash
+     * @var AbstractEvaluator null
+     */
+    private $_evaluator = null;
 
     /**
-     * Run a valuation on this registration.
+     * Magically gets a public evaluator.
+     * @return AbstractEvaluator
+     */
+    public function getEvaluatorAttribute()
+    {
+        // if the private var is null, make a new one, stash it and return it.
+        $this->_evaluator = $this->_evaluator ?? EvaluatorFactory::makeFromRegistration($this);
+        return $this->_evaluator;
+    }
+
+    /**
+     * Get the valuation on this registration.
+     * @return Valuation
      */
     public function getValuationAttribute()
     {
-        // Get the evaluator, or make a new one
-        $this->evaluator = $this->evaluator ?? EvaluatorFactory::makeFromRegistration($this);
-        // Start the process of making a valuation
-        $this->accept($this->evaluator);
-        // fetch the report
-        return $this->evaluator->valuation;
+        return $this->accept($this->evaluator);
     }
 
     /**
@@ -63,13 +75,13 @@ class Registration extends Model implements IEvaluee
      */
     public function accept(AbstractEvaluator $evaluator)
     {
-        $evaluator->evaluateRegistration($this);
+        return $evaluator->evaluateRegistration($this);
     }
 
     /**
      * Get the Registration's Family
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function family()
     {
@@ -79,7 +91,7 @@ class Registration extends Model implements IEvaluee
     /**
      * Get the Registration's Centre
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function centre()
     {
@@ -114,7 +126,7 @@ class Registration extends Model implements IEvaluee
     /**
      * Get the Registrations's Bundles
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function bundles()
     {

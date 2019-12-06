@@ -3,7 +3,9 @@
 namespace App;
 
 use App\Services\VoucherEvaluator\AbstractEvaluator;
+use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\IEvaluee;
+use App\Services\VoucherEvaluator\Valuation;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -36,6 +38,37 @@ class Child extends Model implements IEvaluee
         'updated_at',
         'dob'
     ];
+
+    /**
+     * Get's the family's preferred evaluator
+     *
+     * @return AbstractEvaluator
+     */
+    public function getEvaluatorAttribute()
+    {
+        return $this->family->evaluator();
+    }
+
+    /**
+     * Get the valuation on this child.
+     *
+     * @return Valuation
+     */
+    public function getValuationAttribute()
+    {
+        return $this->accept($this->evaluator());
+    }
+
+    /**
+     * Visitor pattern voucher evaluator
+     *
+     * @param AbstractEvaluator $evaluator
+     * @return Valuation
+     */
+    public function accept(AbstractEvaluator $evaluator)
+    {
+        return $evaluator->evaluateChild($this);
+    }
 
     /**
      * Calculates and returns the age in Years and Months (or P for pregnancy)
@@ -100,17 +133,6 @@ class Child extends Model implements IEvaluee
     public function calcSchoolStart()
     {
         return $this->calcFutureMonthYear(5);
-    }
-
-    /**
-     * Visitor pattern voucher evaluator
-     *
-     * @param AbstractEvaluator $evaluator
-     * @return array
-     */
-    public function accept(AbstractEvaluator $evaluator)
-    {
-        return $evaluator->evaluateChild($this);
     }
 
     /**

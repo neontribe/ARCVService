@@ -20,8 +20,10 @@
                 <div>
                     <label for="carer">Main carer</label>
                     <span class="@if(!$errors->has('pri_carer'))collapsed @endif invalid-error" id="carer-span">This field is required</span>
-                    <input id="carer" name="pri_carer[{{ $pri_carer->id }}]" class="@if($errors->has('pri_carer'))invalid @endif" type="text" value="{{ $pri_carer->name }}" autocomplete="off"
-                        autocorrect="off" spellcheck="false">
+                    <input id="carer" name="pri_carer[{{ $pri_carer->id }}]"
+                           class="@if($errors->has('pri_carer'))invalid @endif" type="text"
+                           value="{{ $pri_carer->name }}" autocomplete="off"
+                           autocorrect="off" spellcheck="false">
                 </div>
                 <div>
                     <label for="carer_adder_input">Voucher collectors</label>
@@ -29,7 +31,8 @@
                         @foreach ( $sec_carers as $sec_carer )
                             <tr>
                                 <td>
-                                    <input name="sec_carers[{{ $sec_carer->id }}]" type="text" value="{{ $sec_carer->name }}" >
+                                    <input name="sec_carers[{{ $sec_carer->id }}]" type="text"
+                                           value="{{ $sec_carer->name }}">
                                 </td>
                                 <td>
                                     <button type="button" class="remove_field">
@@ -44,7 +47,7 @@
                     <label for="carer_adder_input">Add new collectors:</label>
                     <div id="carer_adder" class="small-button-container">
                         <input id="carer_adder_input" name="carer_adder_input" type="text" autocomplete="off"
-                            autocorrect="off" spellcheck="false">
+                               autocorrect="off" spellcheck="false">
                         <button id="add_collector" class="add-button">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                         </button>
@@ -73,7 +76,7 @@
                                 <td>{{ $child->getDobAsString() }}</td>
                                 <td>
                                     <input type="hidden" name="children[]"
-                                        value="{{ Carbon\Carbon::parse($child->dob)->format('Y-m') }}">
+                                           value="{{ Carbon\Carbon::parse($child->dob)->format('Y-m') }}">
                                     <button class="remove_date_field">
                                         <i class="fa fa-minus" aria-hidden="true"></i>
                                     </button>
@@ -135,9 +138,9 @@
                                 TODO : This is not scalable; if this breaks or has to be extended, look at a better abstraction.
                                 --}}
                                 @if ( in_array($registration->centre->sponsor->shortcode, config('arc.extended_sponsors')) )
-                                <li>1 year up to secondary school - 3 vouchers</li>
+                                    <li>1 year up to secondary school - 3 vouchers</li>
                                 @else
-                                <li>1 year up to primary school - 3 vouchers</li>
+                                    <li>1 year up to primary school - 3 vouchers</li>
                                 @endif
                             </ul>
                         </li>
@@ -147,33 +150,35 @@
                     <p class="v-spaced">Their RV-ID is: <strong>{{ $family->rvid }}</strong></p>
                 </div>
                 @if ( !empty($noticeReasons) )
-                <div class="alert-message warning">
-                    <div class="icon-container warning">
-                        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                    <div class="alert-message warning">
+                        <div class="icon-container warning">
+                            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            @foreach( $noticeReasons as $notices )
+                                <p class="v-spaced">
+                                    Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
+                                    currently "{{ $notices['reason'] }}"</p>
+                                </p>
+                            @endforeach
+                        </div>
                     </div>
-                    <div>
-                        @foreach( $noticeReasons as $notices )
-                            <p class="v-spaced">
-                                Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
-                                currently "{{ $notices['reason'] }}"</p>
-                            </p>
-                        @endforeach
-                    </div>
-                </div>
                 @endif
-                <button class="long-button" onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
+                <button class="long-button"
+                        onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
                     Print a 4 week collection sheet for this family
                 </button>
             </div>
         </form>
 
         @if (!isset($registration->family->leaving_on) )
-            <form  action="{{ URL::route('store.registration.family',['id' => $registration->id]) }}" method="post" id="leaving">
+            <form action="{{ URL::route('store.registration.family',['id' => $registration->id]) }}" method="post"
+                  id="leaving">
                 {{ method_field('PUT') }}
                 {!! csrf_field() !!}
                 <div class="full-width flex-col">
                     <button class="remove long-button" type="button">Remove this family</button>
-                    <div id="expandable" class="collapsed confirm-leaving" >
+                    <div id="expandable" class="collapsed confirm-leaving">
                         <div class="reason">
                             <label for="reason-for-leaving">
                                 Reason for leaving
@@ -246,7 +251,7 @@
         });
 
         //remove invalid class & error span when input is selected/tabbed to
-        $('#carer').on('click focus', function() {
+        $('#carer').on('click focus', function () {
             $(this).removeClass("invalid");
             $('#carer-span').addClass('collapsed');
         });

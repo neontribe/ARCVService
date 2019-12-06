@@ -71,6 +71,10 @@ class EvaluatorFactory
     {
         return $evaluations = [
             Child::class => [
+                'credits' => [
+                    new ChildIsUnderOne($offsetDate, 3),
+                    new ChildIsUnderSchoolAge($offsetDate, 3)
+                ],
                 'notices' => [
                     new ChildIsUnBorn($offsetDate),
                     new ChildIsAlmostBorn($offsetDate),
@@ -78,19 +82,18 @@ class EvaluatorFactory
                     new ChildIsAlmostSchoolAge($offsetDate),
                     new ChildIsSchoolAge($offsetDate)
                 ],
-                'credits' => [
-                    new ChildIsUnderOne($offsetDate, 3),
-                    new ChildIsUnderSchoolAge($offsetDate, 3)
-                ]
+                'relations' => [],
             ],
             Family::class => [
-                'relations' => ['children'],
-                'notices' => [],
                 'credits' => [
                     new FamilyIsPregnant(null, 3)
-                ]
+                ],
+                'notices' => [],
+                'relations' => ['children'],
             ],
             Registration::class => [
+                'credits' => [],
+                'notices' => [],
                 'relations' => ['family'],
             ],
         ];
@@ -106,6 +109,10 @@ class EvaluatorFactory
     {
         return $evaluations = [
             Child::class => [
+                'credits' => [
+                    new ChildIsUnderOne($offsetDate, 3),
+                    new ChildIsUnderSecondarySchoolAge($offsetDate, 3)
+                ],
                 'notices' => [
                     new ChildIsUnBorn($offsetDate),
                     new ChildIsAlmostBorn($offsetDate),
@@ -113,16 +120,19 @@ class EvaluatorFactory
                     new ChildIsAlmostSecondarySchoolAge($offsetDate),
                     new ChildIsSecondarySchoolAge($offsetDate)
                 ],
-                'credits' => [
-                    new ChildIsUnderOne($offsetDate, 3),
-                    new ChildIsUnderSecondarySchoolAge($offsetDate, 3)
-                ]
+                'relations' => [],
             ],
             Family::class => [
-                'notices' => [],
                 'credits' => [
                     new FamilyIsPregnant(null, 3)
-                ]
+                ],
+                'notices' => [],
+                'relations' => ['children'],
+            ],
+            Registration::class => [
+                'credits' => [],
+                'notices' => [],
+                'relations' => ['family'],
             ],
         ];
     }
