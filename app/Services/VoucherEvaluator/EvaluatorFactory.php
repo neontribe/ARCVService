@@ -89,7 +89,9 @@ class EvaluatorFactory
                     new FamilyIsPregnant(null, 3)
                 ],
                 'notices' => [],
-                'relations' => ['children'],
+                'relations' => [
+                    'children'
+                ],
             ],
             Registration::class => [
                 'credits' => [],

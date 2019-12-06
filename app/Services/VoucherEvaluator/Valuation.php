@@ -44,8 +44,10 @@ class Valuation extends ArrayObject
     {
         $notice_reasons = [];
 
+        $notices = $this->flat("notices");
+
         // get distinct reasons and frequency.
-        $reason_count = array_count_values(array_column($this->notices, 'reason'));
+        $reason_count = array_count_values(array_column($notices, 'reason'));
 
         foreach ($reason_count as $reason => $count) {
             /*
@@ -69,8 +71,10 @@ class Valuation extends ArrayObject
     {
         $credit_reasons = [];
 
+        $credits = $this->flat("credits");
+
         // get distinct reasons and frequency.
-        $reason_count = array_count_values(array_column($this->credits, 'reason'));
+        $reason_count = array_count_values(array_column($credits, 'reason'));
 
         foreach ($reason_count as $reason => $count) {
             // Filter the raw credits by reason
@@ -79,7 +83,7 @@ class Valuation extends ArrayObject
             $reason_vouchers = array_sum(
                 array_column(
                     array_filter(
-                        $this->credits,
+                        $credits,
                         function ($credit) use ($reason) {
                             return $credit['reason'] == $reason;
                         }
@@ -100,5 +104,45 @@ class Valuation extends ArrayObject
             ];
         }
         return $credit_reasons;
+    }
+
+    /**
+     * Gets the Entitlement
+     * @return integer;
+     */
+    public function getEntitlement()
+    {
+        return $this->flat('entitlement');
+    }
+
+    /**
+     * Grabs and flattens a specified attribute from Valuations.
+     * @param $attribute
+     * @return mixed
+     */
+    public function flat($attribute)
+    {
+        // take this attribute
+        if (property_exists($this, $attribute)) {
+            $flatAttrib = $this[$attribute];
+
+            if (is_array($flatAttrib)) {
+                // Merge on it's descendents
+                /** @var Valuation $valuation */
+                foreach ($this->valuations as $valuation) {
+                    array_merge($flatAttrib, $valuation->flat($attribute));
+                }
+            } else if (is_integer($flatAttrib)) {
+                // Merge on it's descendents
+                foreach ($this->valuations as $valuation) {
+                    /** @var Valuation $valuation */
+                    $flatAttrib += $valuation->flat($attribute);
+                }
+            }
+            return $flatAttrib;
+        } else {
+            // Something went wrong
+            return null;
+        }
     }
 }

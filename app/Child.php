@@ -3,7 +3,6 @@
 namespace App;
 
 use App\Services\VoucherEvaluator\AbstractEvaluator;
-use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\IEvaluee;
 use App\Services\VoucherEvaluator\Valuation;
 use Carbon\Carbon;
@@ -25,8 +24,7 @@ class Child extends Model implements IEvaluee
      *
      * @var array
      */
-    protected $hidden = [
-    ];
+    protected $hidden = [];
 
     /**
      * These are turned into Date objects on get

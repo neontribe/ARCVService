@@ -55,7 +55,7 @@ class Registration extends Model implements IEvaluee
     public function getEvaluatorAttribute()
     {
         // if the private var is null, make a new one, stash it and return it.
-        $this->_evaluator = $this->_evaluator ?? EvaluatorFactory::makeFromRegistration($this);
+        $this->_evaluator = ($this->_evaluator) ?? EvaluatorFactory::makeFromRegistration($this);
         return $this->_evaluator;
     }
 

@@ -14,9 +14,6 @@ class VoucherEvaluator extends AbstractEvaluator
     /** @var array $evaluations */
     private $evaluations = [];
 
-    /** @var Valuation $valuation */
-    public $valuation;
-
     /**
      * VoucherEvaluator constructor.
      *
@@ -89,10 +86,10 @@ class VoucherEvaluator extends AbstractEvaluator
             // Executes the given relationship
             $relation = $subject->getRelationValue($relationName);
             // could be a single Model, array it.
-            $relation = (is_iterable($relation)) ?: [$relation];
+            $relationIterable = (is_iterable($relation)) ? $relation : [$relation];
 
             /** @var IEvaluee $relationModel */
-            foreach ($relation as $relationModel) {
+            foreach ($relationIterable as $relationModel) {
                 $valuations[] = $relationModel->accept($this);
             }
         }
@@ -154,6 +151,7 @@ class VoucherEvaluator extends AbstractEvaluator
      * Evaluates a registration and sets it's valuation
      *
      * @param Registration $subject
+     * @return Valuation
      */
     public function evaluateRegistration(Registration $subject)
     {
@@ -164,7 +162,7 @@ class VoucherEvaluator extends AbstractEvaluator
 
         $valuations = $this->evaluateRelations($subject);
 
-        $this->valuation = new Valuation([
+        return new Valuation([
             'valuations' => $valuations,
             'evaluee' => $subject,
             'credits' => $credits,

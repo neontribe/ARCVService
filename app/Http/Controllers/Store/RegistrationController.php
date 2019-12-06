@@ -185,7 +185,7 @@ class RegistrationController extends Controller
                 'sec_carers' => $carers,
                 'children' => $registration->family->children,
                 'noticeReasons' => $valuation->getNoticeReasons(),
-                'entitlement' => $valuation->entitlement,
+                'entitlement' => $valuation->getEntitlement(),
             ]
         ));
     }

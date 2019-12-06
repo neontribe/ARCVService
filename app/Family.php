@@ -3,7 +3,6 @@
 namespace App;
 
 use App\Services\VoucherEvaluator\AbstractEvaluator;
-use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\IEvaluee;
 use App\Services\VoucherEvaluator\Valuation;
 use Illuminate\Database\Eloquent\Model;
