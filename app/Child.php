@@ -44,7 +44,7 @@ class Child extends Model implements IEvaluee
      */
     public function getEvaluatorAttribute()
     {
-        return $this->family->evaluator();
+        return $this->family->evaluator;
     }
 
     /**
@@ -54,7 +54,7 @@ class Child extends Model implements IEvaluee
      */
     public function getValuationAttribute()
     {
-        return $this->accept($this->evaluator());
+        return $this->accept($this->evaluator);
     }
 
     /**

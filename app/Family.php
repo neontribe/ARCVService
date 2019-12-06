@@ -55,7 +55,7 @@ class Family extends Model implements IEvaluee
      */
     public function getEvaluatorAttribute()
     {
-        return $this->registrations()->first()->evaluator();
+        return $this->registrations()->first()->evaluator;
     }
 
     /**
@@ -65,7 +65,7 @@ class Family extends Model implements IEvaluee
      */
     public function getValuationAttribute()
     {
-        return $this->accept($this->evaluator());
+        return $this->accept($this->evaluator);
     }
 
     /**
