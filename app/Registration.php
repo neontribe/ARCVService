@@ -6,6 +6,7 @@ use App\Services\VoucherEvaluator\AbstractEvaluator;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\IEvaluation;
 use App\Services\VoucherEvaluator\IEvaluee;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class Registration extends Model implements IEvaluee
@@ -148,5 +149,53 @@ class Registration extends Model implements IEvaluee
         return $query->whereHas('family', function ($q) {
             $q->whereNull('leaving_on');
         });
+    }
+
+    /**
+     * Scope order by name
+     *
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeOrderByName($query, $direction = 'asc')
+    {
+        return $query
+                ->join('families', 'family_id', '=', 'families.id')
+                ->join('carers', 'carers.family_id', '=', 'families.id')
+                ->orderBy('name', $direction);
+    }
+
+    /**
+     * Scope order by centre
+     *
+     * @param Builder $query
+     * @param string $direction
+     */
+    public function scopeOrderByCentre(Builder $query, $direction = 'asc')
+    {
+        return $query
+                ->join('centres', 'centre_id', '=', 'centres.id')
+                ->orderBy('centres.name', $direction);
+    }
+
+        /**
+     * Scope order by centre
+     *
+     * @param Builder $query
+     * @param string $direction
+     */
+    public function scopeOrderByColumn(Builder $query, $sort)
+    {
+        switch ($sort['orderBy']) {
+            case 'name':
+                return $query->orderByName($sort['direction']);
+                break;
+            case 'centre':
+                return $query->orderByCentre($sort['direction']);
+                break;
+            default:
+                // default to date order ascending, so new things are on the BOTTOM.
+                return $query->orderByName('asc');
+        }
     }
 }
