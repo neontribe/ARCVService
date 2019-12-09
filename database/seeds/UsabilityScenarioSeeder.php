@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use App\Carer;
+use App\Child;
 
 class UsabilityScenarioSeeder extends Seeder
 {
@@ -35,29 +37,28 @@ class UsabilityScenarioSeeder extends Seeder
             'print_pref' => config('arc.print_preferences.1'),
         ]);
 
-        factory(App\CentreUser::class)->create([
+        $user1 = factory(App\CentreUser::class, 'FMUser')->create([
             "name"  => "ARC FM User",
             "email" => "arc+fm@neontribe.co.uk",
             "password" => bcrypt('store_pass'),
-            "centre_id" => $centre1->id,
-            "role" => "foodmatters_user",
         ]);
+        $user1->centres()->attach($centre1->id, ['homeCentre' => true]);
 
-        factory(App\CentreUser::class)->create([
+        $user2 = factory(App\CentreUser::class)->create([
             "name"  => "ARC Collecting User",
             "email" => "arc+coll@neontribe.co.uk",
             "password" => bcrypt('store_pass'),
-            "centre_id" => $centre2->id,
             "role" => "centre_user",
         ]);
+        $user2->centres()->attach($centre2->id, ['homeCentre' => true]);
 
-        factory(App\CentreUser::class)->create([
+        $user3 = factory(App\CentreUser::class)->create([
             "name"  => "ARC Indy User",
             "email" => "arc+indy@neontribe.co.uk",
             "password" => bcrypt('store_pass'),
-            "centre_id" => $centre3->id,
             "role" => "centre_user",
         ]);
+        $user3->centres()->attach($centre3->id, ['homeCentre' => true]);
 
         // Create 3 families in centre2
         $centre2_families = $this->createRegistrationForCentre(3, $centre2);
@@ -93,7 +94,7 @@ class UsabilityScenarioSeeder extends Seeder
     public function createRegistrationForCentre($quantity, App\Centre $centre = null)
     {
         // set the loop and centre
-        $quantity = ($quantity) ? $quantity : 1;
+        $quantity = ($quantity) ?? 1;
         if (is_null($centre)) {
             $centre = factory(App\Centre::class)->create();
         }
@@ -106,8 +107,8 @@ class UsabilityScenarioSeeder extends Seeder
             $family = factory(App\Family::class)->make();
             $family->lockToCentre($centre);
             $family->save();
-            $family->carers()->saveMany(factory(App\Carer::class, random_int(1, 3))->make());
-            $family->children()->saveMany(factory(\App\Child::class, random_int(0, 4))->make());
+            $family->carers()->saveMany(factory(Carer::class, random_int(1, 3))->make());
+            $family->children()->saveMany(factory(Child::class, random_int(0, 4))->make());
 
             $registrations[] = App\Registration::create(
                 [

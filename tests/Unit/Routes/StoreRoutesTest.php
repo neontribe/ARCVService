@@ -312,11 +312,10 @@ class StoreRoutesTest extends StoreTestCase
     public function testCentreRegistrationsSummaryGate()
     {
         // Create an FM User
-        $fmuser =  factory(CentreUser::class)->create([
+        $fmuser =  factory(CentreUser::class, 'FMUser')->create([
             "name"  => "FM test user",
             "email" => "testfmuser@example.com",
             "password" => bcrypt('test_fmuser_pass'),
-            "role" => "foodmatters_user",
         ]);
         $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
@@ -325,7 +324,6 @@ class StoreRoutesTest extends StoreTestCase
             "name"  => "CC test user",
             "email" => "testccuser@example.com",
             "password" => bcrypt('test_ccuser_pass'),
-            "role" => "centre_user",
         ]);
         $ccuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
@@ -445,11 +443,10 @@ class StoreRoutesTest extends StoreTestCase
     public function testMVLRouteGuard()
     {
         // Create an FM User
-        $fmuser =  factory(CentreUser::class)->create([
+        $fmuser =  factory(CentreUser::class, 'FMUser')->create([
             "name"  => "FM test user",
             "email" => "testfmuser@example.com",
             "password" => bcrypt('test_fmuser_pass'),
-            "role" => "foodmatters_user",
         ]);
         $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
@@ -458,7 +455,6 @@ class StoreRoutesTest extends StoreTestCase
             "name"  => "CC test user",
             "email" => "testccuser@example.com",
             "password" => bcrypt('test_ccuser_pass'),
-            "role" => "centre_user",
         ]);
         $ccuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 

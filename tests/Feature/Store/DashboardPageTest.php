@@ -35,15 +35,13 @@ class DashboardPageTest extends StoreTestCase
             "name"  => "CC test user",
             "email" => "testccuser@example.com",
             "password" => bcrypt('test_ccuser_pass'),
-            "role" => "centre_user",
         ]);
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
-        $this->fmUser = factory(CentreUser::class)->create([
+        $this->fmUser = factory(CentreUser::class, 'FMUser')->create([
             "name"  => "FM test user",
             "email" => "testfmuser@example.com",
             "password" => bcrypt('test_fmuser_pass'),
-            "role" => "foodmatters_user",
         ]);
         $this->fmUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
