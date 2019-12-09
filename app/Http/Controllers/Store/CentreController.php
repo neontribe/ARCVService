@@ -127,13 +127,13 @@ class CentreController extends Controller
                             break;
                         case 'Eligible':
                             $dob_header = 'Child ' . (string)$child_index . ' DoB';
-                            $kids[$dob_header] = $child->dob->format('m/Y');
+                            $kids[$dob_header] = $child->dob->lastOfMonth()->format('d/m/Y');
                             $eligible += 1;
                             $child_index += 1;
                             break;
                         case "Ineligible":
                             $dob_header = 'Child ' . (string)$child_index . ' DoB';
-                            $kids[$dob_header] = $child->dob->format('m/Y');
+                            $kids[$dob_header] = $child->dob->lastOfMonth()->format('d/m/Y');
                             $child_index += 1;
                             break;
                     }
