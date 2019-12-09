@@ -42,6 +42,9 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
     ];
 });
 
+/**
+ * CentreUser with random role.
+ */
 $factory->define(App\CentreUser::class, function (Faker\Generator $faker) {
     static $password;
 
