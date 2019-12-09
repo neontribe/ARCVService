@@ -41,10 +41,16 @@ class CentreUserModelTest extends TestCase
     /**@test */
     public function testCentreUserCanHaveDownloadTrue()
     {
+        // Standard CU
         $cu = $this->centreUser;
         $this->assertFalse($cu->downloader);
+
+        // Change his settings
         $cu->downloader = true;
         $cu->fresh();
+        $this->assertTrue($cu->downloader);
+
+        $cu = factory(CentreUser::class, 'withDownloader')->create()->fresh();
         $this->assertTrue($cu->downloader);
     }
 

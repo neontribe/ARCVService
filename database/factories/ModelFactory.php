@@ -58,6 +58,17 @@ $factory->define(App\CentreUser::class, function (Faker\Generator $faker) {
 });
 
 /**
+ * CentreUser who can Download.
+ */
+$factory->defineAs(App\CentreUser::class, 'withDownloader', function ($faker) use ($factory) {
+    $cu = $factory->raw(App\CentreUser::class);
+
+    return array_merge($cu, [
+        'downloader' => true,
+    ]);
+});
+
+/**
  * Sponsor for testing
  */
 $factory->define(App\Sponsor::class, function (Faker\Generator $faker) {

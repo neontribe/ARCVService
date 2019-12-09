@@ -2,6 +2,9 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\belongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Notifications\StorePasswordResetNotification;
@@ -51,7 +54,7 @@ class CentreUser extends Authenticatable
     /**
      * Get the Notes that belong to this CentreUser
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     //Because of merge and refactoring User to CentreUser, FK has to be explicitly stated here
     public function notes()
@@ -88,7 +91,7 @@ class CentreUser extends Authenticatable
     /**
      * Get the centres assigned to a user
      *
-     * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
+     * @return belongsToMany
      */
     public function centres()
     {
@@ -109,7 +112,7 @@ class CentreUser extends Authenticatable
      * Get the home centres for this user
      * Alas, we lack a belongsToThrough method to this is a collections.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
+     * @return belongsToMany
      */
     protected function homeCentres()
     {
@@ -119,7 +122,7 @@ class CentreUser extends Authenticatable
     /**
      * Get the relevant centres for this CentreUser, accounting for it's role
      *
-     * @return \Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection|static[]
+     * @return Collection|\Illuminate\Support\Collection|static[]
      */
     public function relevantCentres()
     {
