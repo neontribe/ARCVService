@@ -14,7 +14,7 @@ class AddDataAccessRoleToCentreUsers extends Migration
     public function up()
     {
         Schema::table('centre_users', function (Blueprint $table) {
-            $table->boolean('data_download')->after('role')->nullable();
+            $table->boolean('downloader')->default(false)->after('role');
         });
     }
 
@@ -25,8 +25,8 @@ class AddDataAccessRoleToCentreUsers extends Migration
      */
     public function down()
     {
-        Schema::table('vouchers', function (Blueprint $table) {
-            $table->dropColumn('data_download');
+        Schema::table('centre_users', function (Blueprint $table) {
+            $table->dropColumn('downloader');
         });
     }
 }

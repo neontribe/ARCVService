@@ -53,6 +53,7 @@ $factory->define(App\CentreUser::class, function (Faker\Generator $faker) {
         'password' => $password ?: $password = bcrypt('secret'),
         'remember_token' => str_random(10),
         'role' => $roles[mt_rand(0, count($roles) - 1)],
+        // 'downloader' should default false
     ];
 });
 

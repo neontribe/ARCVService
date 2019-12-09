@@ -18,7 +18,7 @@ class CentreUser extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'role'
+        'name', 'email', 'password', 'role', 'downloader',
     ];
 
     /**
@@ -37,6 +37,15 @@ class CentreUser extends Authenticatable
      */
     protected $hidden = [
         'password', 'remember_token',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'downloader' => 'boolean',
     ];
 
     /**
