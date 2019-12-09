@@ -359,6 +359,19 @@ input[type="text"].invalid,
 	width: calc(100% - 2rem);
 }
 
+.sort-link-container {
+	float: right;
+}
+
+.sort-link-container a {
+	color: #000000;
+	text-decoration: none;
+}
+
+.sort-link-container a:visited {
+	color: #000000;
+}
+
 .disabled {
 	background-color: #dadada;
 }

@@ -21,7 +21,8 @@
             <table>
                 <thead>
                     <tr>
-                        <td>Name</td>
+                        <td>Name<span class="sort-link-container">@include('store.partials.sortableChevron', ['route' => 'store.registration.index', 'orderBy' => 'name', 'direction' => request('direction') ])</span></td>
+                        <td>Centre<span class="sort-link-container">@include('store.partials.sortableChevron', ['route' => 'store.registration.index', 'orderBy' => 'centre', 'direction' => request('direction') ])</span></td>
                         <td class="center">Voucher Entitlement</td>
                         <td class="center">RV-ID</td>
                         <td></td>
@@ -32,6 +33,7 @@
                     @if ($registration->family)
                         <tr class="{{ $registration->family->leaving_on ? 'inactive' : 'active' }}">
                             <td class="pri_carer">{{ $registration->family->carers->first()->name }}</td>
+                            <td class="">{{ $registration->centre->name }}</td>
                             <td class="center">{{ $registration->valuation->getEntitlement() }}</td>
                             <td class="center">{{ $registration->family->rvid }}</td>
                             <td class="right no-wrap">
