@@ -92,11 +92,6 @@
                     </table>
                 </div>
                 <button class="long-button submit" type="submit">Save Changes</button>
-                <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
-                    <div class="link-button link-button-large">
-                        <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
-                    </div>
-                </a>
             </div>
 
             <div class="col collect short-height">
@@ -164,6 +159,11 @@
                 <button class="long-button" onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
                     Print a 4 week collection sheet for this family
                 </button>
+                <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
+                    <div class="link-button link-button-large">
+                        <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
+                    </div>
+                </a>
             </div>
         </form>
 
