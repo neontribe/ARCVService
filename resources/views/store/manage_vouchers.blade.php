@@ -2,10 +2,6 @@
 
 @section('title', 'Voucher Manager')
 
-@section('hoist-head')
-    <script src="{{ asset('store/js/jquery-ui-1.12.1/jquery-ui.min.js')}}"></script>
-@endsection
-
 @section('content')
 
     @include('store.partials.navbar', ['headerTitle' => 'Voucher Manager'])

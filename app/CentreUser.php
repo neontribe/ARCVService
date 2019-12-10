@@ -2,11 +2,11 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\belongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Collection;
 use App\Notifications\StorePasswordResetNotification;
 
 class CentreUser extends Authenticatable
@@ -122,7 +122,7 @@ class CentreUser extends Authenticatable
     /**
      * Get the relevant centres for this CentreUser, accounting for it's role
      *
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public function relevantCentres()
     {
