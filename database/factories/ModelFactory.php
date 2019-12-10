@@ -42,6 +42,9 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
     ];
 });
 
+/**
+ * CentreUser with random role.
+ */
 $factory->define(App\CentreUser::class, function (Faker\Generator $faker) {
     static $password;
 
@@ -53,7 +56,19 @@ $factory->define(App\CentreUser::class, function (Faker\Generator $faker) {
         'password' => $password ?: $password = bcrypt('secret'),
         'remember_token' => str_random(10),
         'role' => $roles[mt_rand(0, count($roles) - 1)],
+        // 'downloader' should default false
     ];
+});
+
+/**
+ * CentreUser who can Download.
+ */
+$factory->defineAs(App\CentreUser::class, 'withDownloader', function ($faker) use ($factory) {
+    $cu = $factory->raw(App\CentreUser::class);
+
+    return array_merge($cu, [
+        'downloader' => true,
+    ]);
 });
 
 /**
