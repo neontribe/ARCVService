@@ -45,7 +45,7 @@ class CentreUserModelTest extends TestCase
         $cu = $this->centreUser;
         $this->assertFalse($cu->downloader);
 
-        // Change his settings
+        // Change their settings
         $cu->downloader = true;
         $cu->fresh();
         $this->assertTrue($cu->downloader);
