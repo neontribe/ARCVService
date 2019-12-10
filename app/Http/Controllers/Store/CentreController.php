@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Store;
 
 use App\Centre;
+use App\CentreUser;
 use App\Http\Controllers\Controller;
 use App\Registration;
 use Auth;
 use Carbon\Carbon;
 use Excel;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use PDF;
@@ -52,15 +54,12 @@ class CentreController extends Controller
     /**
      * Exports a summary of registrations from the User's relevant Centres.
      *
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
+     * @return ResponseFactory|\Symfony\Component\HttpFoundation\Response
      */
     public function exportRegistrationsSummary()
     {
         // Get User
         $user = Auth::user();
-
-        // Get now()
-        $now = Carbon::now();
 
         // Get centre ids
         $centre_ids = $user->relevantCentres()->pluck('id')->all();
@@ -72,7 +71,7 @@ class CentreController extends Controller
                 'centre_id',
                 $centre_ids
             )
-            ->with(['centre','centre.sponsor'])
+            ->with(['centre', 'centre.sponsor'])
             ->get();
 
         // set blank rows for laravel-excel
@@ -90,13 +89,11 @@ class CentreController extends Controller
             $lastCollection = $reg->bundles()
                 ->whereNotNull('disbursed_at')
                 ->orderBy('disbursed_at', 'desc')
-                ->first()
-            ;
+                ->first();
 
             $lastCollectionDate = $lastCollection
                 ? $lastCollection->disbursed_at
-                : null
-            ;
+                : null;
 
             // Null coalesce `??` does not trigger `Trying to get property of non-object` explosions
             $row = [
@@ -147,7 +144,7 @@ class CentreController extends Controller
 
             // Set the last dates.
             $row["Due Date"] = $due_date;
-            $row["Join Date"] = $reg->family->created_at ? $reg->family->created_at->format('d/m/Y')  : null;
+            $row["Join Date"] = (!$reg->family->created_at) ? $reg->family->created_at->format('d/m/Y') : null;
             $row["Leaving Date"] = $reg->family->leaving_on ? $reg->family->leaving_on->format('d/m/Y') : null;
             // Would be confusing if an old reason was left in - so check leaving date is there.
             $row["Leaving Reason"] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
@@ -185,18 +182,27 @@ class CentreController extends Controller
             $rows[$index] = $sparse_row;
         }
 
-        /**
-         * TODO: write an OO system for formatting things better.
-         * Ideally we'd have formatting for
-         * - rows with a leaving date showing grey
-         * - ineligible children showing grey
-         * - children with changes in near future showing red.
-         */
+        return $this->streamFile(
+            $this->writeExcelDoc($user, $rows, $headers)
+        );
+    }
+
+    /**
+     * @param CentreUser $user
+     * @param $rows
+     * @param $headers
+     * @return \Maatwebsite\Excel\LaravelExcelWriter
+     */
+    private function writeExcelDoc(CentreUser $user, $rows, $headers)
+    {
+        // Get now()
+        $now = Carbon::now();
+
         $excel_doc = Excel::create(
             'RegSummary_' . $now->format('YmdHis'),
             function ($excel) use ($user, $rows, $headers) {
                 $excel->setTitle('Registration Summary');
-                $excel->setDescription('Summary of Registrations from Centres available to '. $user->name);
+                $excel->setDescription('Summary of Registrations from Centres available to ' . $user->name);
                 $excel->setManager($user->name);
                 $excel->setCompany(env('APP_URL'));
                 $excel->setCreator(env('APP_NAME'));
@@ -211,7 +217,7 @@ class CentreController extends Controller
                                 ->setFontWeight('bold');
                         });
                         $letters = range('A', 'Z');
-                        $sheet->cells('B1:' . $letters[count($headers)-1] .'1', function ($cells) {
+                        $sheet->cells('B1:' . $letters[count($headers) - 1] . '1', function ($cells) {
                             $cells->setBackground('#9ACD32')
                                 ->setFontWeight('bold');
                         });
@@ -221,6 +227,15 @@ class CentreController extends Controller
             }
         );
 
+        return $excel_doc;
+    }
+
+    /**
+     * @param $excel_doc
+     * @return ResponseFactory|\Symfony\Component\HttpFoundation\Response
+     */
+    public function streamFile($excel_doc)
+    {
         // This appears to help with a PHPUnit/Laravel-excel file download issue.
         $excel_ident = app('excel.identifier');
         $format = $excel_ident->getFormatByExtension('csv');
@@ -234,8 +249,5 @@ class CentreController extends Controller
             'Cache-Control' => 'cache, must-revalidate',
             'Pragma' => 'public',
         ]);
-
-        // avoid xls till we have all the formatting.
-        //)->download('xls');
     }
 }
