@@ -14,8 +14,8 @@ ARCV Service is the service portal and API for ARCV Market.
 8. `php artisan passport:install` to create keys and client
 9. `chmod 600 ./storage/*.key` to set permissions correctly
 10. Add the "password grant client" id and secret to your `.env`
-11. Install npm packages for webpack (JS and Sass) builds: `npm install`
-12. Run `npm watch` in the background during development to automatically compile assets when modifying code or changing commit
+11. Install npm packages for webpack (JS and Sass) builds: `yarn install`
+12. Run `yarn watch` in the background during development to automatically compile assets when modifying code or changing commit
 
 We suggest that you use the TLD `.test` as others, like `.app` may now be in the public domain and you will experience difficulty with respect to browser behavior over HTTP/HTTPS.
 
@@ -46,10 +46,11 @@ It also requires PHP's `zip` extension installed and enabled.
 ### Styling
 #### Service 
 - Service styling is in `resources/assets/sass/app.scss`
-- When amending the styles in development, switching to a new branch or pulling code, run `npm run watch` to watch for changes
-- Service is compiled from Sass with `npm run prod`
+- When amending the styles in development, switching to a new branch or pulling code, run `yarn watch` to watch for changes
+- Service is compiled from Sass with `yarn prod`
 #### Store
 - Store styling is in `public/store/css/main.css`
+- Run `yarn dev` to make sure packages Store shares with Service have been included.
 
 ## Deployment
 
@@ -79,7 +80,7 @@ Under contract for
 
 Alexandra Rose Charity (registered in England and Wales #00279157) 
 
-As such, unless otherwise specified in the appropriate component source, associated file or compiled asset, files in this project repository are Copyright &copy; (2019), Alexandra Rose Charity. All rights reserved.
+As such, unless otherwise specified in the appropriate component source, associated file or compiled asset, files in this project repository are Copyright &copy; (2020), Alexandra Rose Charity. All rights reserved.
 
 If you wish to discuss copyright or licensing issues, please contact:
 
@@ -96,7 +97,7 @@ GU9 7PT
 # Licensing and use of Third Party Applications
 These are the languages and packages used to create ARCV Service and where available the licences associated with them.
 
-ARCV Service 1.7
+ARCV Service 1.8
 
 Programming Language - PHP\
 Framework - Laravel https://github.com/laravel/laravel \

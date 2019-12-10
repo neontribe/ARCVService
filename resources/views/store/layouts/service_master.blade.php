@@ -9,14 +9,10 @@
         <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css?family=Roboto+Slab" rel="stylesheet">
         <link rel="stylesheet" href="{{ asset('store/assets/font-awesome-4.7.0/css/font-awesome.min.css') }}">
-        {{-- JQuery file for datepicker, stripped back to just minified CSS & JS files --}}
-        <link rel="stylesheet" href="{{ asset('store/js/jquery-ui-1.12.1/jquery-ui.min.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ asset('store/css/main.css') }}">
-        <script src="https://code.jquery.com/jquery-3.2.1.min.js"
-                integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-                crossorigin="anonymous"></script>
         <style>@import url('https://fonts.googleapis.com/css?family=Roboto');</style>
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        <script src="{{ asset('js/app.js') }}"></script>
         @yield('hoist-head')
     </head>
     <body>
