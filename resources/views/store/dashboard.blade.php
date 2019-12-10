@@ -27,7 +27,7 @@
                         {{ $print_button_text }}
                     </li>
                 </a>
-                @can('exportRelevant', $user->centre)
+                @can('exportFromRelevantCentre', $user->centre)
                     <a href="{{ URL::route('store.centre.registrations.summary', ['centre' => $centre_id ]) }}" target="_blank" rel="noopener noreferrer">
                         <li>
                             <img src="{{ asset('store/assets/export-light.svg') }}" id="export-centre-registrations">

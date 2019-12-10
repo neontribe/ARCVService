@@ -155,16 +155,15 @@ Route::group(['middleware' => 'auth:store'], function () {
     Route::get('/registrations/print', [
         'as' => 'store.registrations.print',
         'uses' => 'RegistrationController@printBatchIndividualFamilyForms',
-    ])
-        // can view, can print
-        ->middleware('can:view,registration');
+    ]);
+    // If we keep this it needs a guard.
 
 
     // Print a Specific Centre's Registration's register form
     Route::get('/centres/{centre}/registrations/collection', [
         'as' => 'store.centre.registrations.collection',
         'uses' => 'CentreController@printCentreCollectionForm',
-    ])->middleware(['can:exportRelevant,centre']);
+    ])->middleware(['can:exportFromRelevantCentre,centre']);
 
     // ALL centres registrations as a summary spreadsheet
     Route::get('/centres/registrations/summary', [
@@ -176,7 +175,7 @@ Route::group(['middleware' => 'auth:store'], function () {
     Route::get('/centres/{centre}/registrations/summary', [
         'as' => 'store.centre.registrations.summary',
         'uses' => 'CentreController@exportRegistrationsSummary',
-    ])->middleware(['can:exportRelevant,centre']);
+    ])->middleware(['can:exportFromRelevantCentre,centre']);
 
     // ALL vouchers and extra details, in a format suitable for the MVL sheets.
     // As this includes participant ID access, it has "can:export registrations".
