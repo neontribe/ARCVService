@@ -8,6 +8,7 @@ use App\Registration;
 use Auth;
 use Carbon\Carbon;
 use Excel;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\View\View;
 use PDF;
 
@@ -18,7 +19,7 @@ class CentreController extends Controller
      * Displays a printable version of the families registered with the center.
      *
      * @param Centre $centre
-     * @return \Illuminate\Contracts\View\Factory|View
+     * @return Factory|View
      */
     public function printCentreCollectionForm(Centre $centre)
     {

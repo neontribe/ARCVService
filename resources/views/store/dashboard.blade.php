@@ -28,7 +28,7 @@
                 </li>
             </a>
             @endif
-            @can( 'export', App\Registration::class )
+            @can('export', App\CentreUser::class)
             <a href="{{ URL::route('store.centres.registrations.summary') }}">
                 <li>
                     <img src="{{ asset('store/assets/export-light.svg') }}" name="export-registrations">
