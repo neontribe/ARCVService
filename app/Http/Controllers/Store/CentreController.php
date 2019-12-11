@@ -62,14 +62,19 @@ class CentreController extends Controller
         // Get User
         $user = Auth::user();
 
-        // Get centre ids
-        $centre_ids = (is_null($centre))
-            // They want one specific centre
-            ? [$centre]
-            // None specified - get relevant ones.
-            : $centre_ids = $user->relevantCentres()->pluck('id')->all();
+        if (isset($centre->id)) {
+            // Set for specified centre
+            $centre_ids = [$centre->id];
+            $dateFormats = [
+                'dob' => 'm/Y'
+            ];
+        } else {
+            // Set for relevant centres
+            $centre_ids = $user->relevantCentres()->pluck('id')->all();
+            $dateFormats = [];
+        }
 
-        $summary = $this->getCentreRegistrationsSummary($centre_ids);
+        $summary = $this->getCentreRegistrationsSummary($centre_ids, $dateFormats);
 
         return $this->streamFile(
             $this->writeExcelDoc($summary)
@@ -80,10 +85,19 @@ class CentreController extends Controller
      * Returns array of formatted data about the Centre's Registrations
      *
      * @param array $centre_ids
+     * @param array $dateFormats
      * @return array
      */
-    private function getCentreRegistrationsSummary(array $centre_ids)
+    private function getCentreRegistrationsSummary(array $centre_ids, $dateFormats = [])
     {
+        $dateFormats = array_replace([
+            'lastCollection' => 'd/m/Y',
+            'due' => 'd/m/Y',
+            'dob' => 'd/m/Y',
+            'join' => 'd/m/Y',
+            'leave' => 'd/m/Y'
+        ], $dateFormats);
+
         // Get registrations decorated - may no longer be terribly efficient.
         /** @var Collection $registrations */
         $registrations = Registration::withFullFamily()
@@ -122,7 +136,7 @@ class CentreController extends Controller
                 "Centre" => ($reg->centre->name) ?? 'Centre not found',
                 "Primary Carer" => ($reg->family->pri_carer) ?? 'Primary Carer not Found',
                 "Entitlement" => $reg->valuation->getEntitlement(),
-                "Last Collection" => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format('d/m/Y') : null
+                "Last Collection" => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format($dateFormats['lastCollection']) : null
             ];
 
             // Per child dependent things
@@ -140,17 +154,17 @@ class CentreController extends Controller
                     // Arrange kids by eligibility
                     switch ($status['eligibility']) {
                         case 'Pregnancy':
-                            $due_date = $child->dob->format('d/m/Y');
+                            $due_date = $child->dob->format($dateFormats['dob']);
                             break;
                         case 'Eligible':
                             $dob_header = 'Child ' . (string)$child_index . ' DoB';
-                            $kids[$dob_header] = $child->dob->lastOfMonth()->format('d/m/Y');
+                            $kids[$dob_header] = $child->dob->lastOfMonth()->format($dateFormats['dob']);
                             $eligible += 1;
                             $child_index += 1;
                             break;
                         case "Ineligible":
                             $dob_header = 'Child ' . (string)$child_index . ' DoB';
-                            $kids[$dob_header] = $child->dob->lastOfMonth()->format('d/m/Y');
+                            $kids[$dob_header] = $child->dob->lastOfMonth()->format($dateFormats['dob']);
                             $child_index += 1;
                             break;
                     }
@@ -164,8 +178,8 @@ class CentreController extends Controller
 
             // Set the last dates.
             $row["Due Date"] = $due_date;
-            $row["Join Date"] = (!$reg->family->created_at) ? $reg->family->created_at->format('d/m/Y') : null;
-            $row["Leaving Date"] = $reg->family->leaving_on ? $reg->family->leaving_on->format('d/m/Y') : null;
+            $row["Join Date"] = $reg->family->created_at ? $reg->family->created_at->format($dateFormats['join']) : null;
+            $row["Leaving Date"] = $reg->family->leaving_on ? $reg->family->leaving_on->format($dateFormats['leave']) : null;
             // Would be confusing if an old reason was left in - so check leaving date is there.
             $row["Leaving Reason"] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
 
