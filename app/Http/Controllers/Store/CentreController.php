@@ -12,11 +12,12 @@ use Excel;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Exceptions\LaravelExcelException;
+use Maatwebsite\Excel\Writers\LaravelExcelWriter;
 use PDF;
 
 class CentreController extends Controller
 {
-
     /**
      * Displays a printable version of the families registered with the center.
      *
@@ -42,7 +43,6 @@ class CentreController extends Controller
                 'sheet_title' => 'Printable Register',
                 'sheet_header' => 'Register',
                 'centre' => $centre,
-                //'reg_chunks' => $reg_chunks,
                 'registrations' => $registrations,
             ]
         );
@@ -52,18 +52,38 @@ class CentreController extends Controller
     }
 
     /**
-     * Exports a summary of registrations from the User's relevant Centres.
+     * Exports a summary of registrations from the User's relevant Centres or specified Centre.
      *
+     * @param Centre $centre
      * @return ResponseFactory|\Symfony\Component\HttpFoundation\Response
      */
-    public function exportRegistrationsSummary()
+    public function exportRegistrationsSummary(Centre $centre)
     {
         // Get User
         $user = Auth::user();
 
         // Get centre ids
-        $centre_ids = $user->relevantCentres()->pluck('id')->all();
+        $centre_ids = (is_null($centre))
+            // They want one specific centre
+            ? [$centre]
+            // None specified - get relevant ones.
+            : $centre_ids = $user->relevantCentres()->pluck('id')->all();
 
+        $summary = $this->getCentreRegistrationsSummary($centre_ids);
+
+        return $this->streamFile(
+            $this->writeExcelDoc($summary)
+        );
+    }
+
+    /**
+     * Returns array of formatted data about the Centre's Registrations
+     *
+     * @param array $centre_ids
+     * @return array
+     */
+    private function getCentreRegistrationsSummary(array $centre_ids)
+    {
         // Get registrations decorated - may no longer be terribly efficient.
         /** @var Collection $registrations */
         $registrations = Registration::withFullFamily()
@@ -81,7 +101,7 @@ class CentreController extends Controller
         // by collating all the row keys and normalising.
         // So we have to do it by hand.
 
-        // create base headers
+        // Initialise base headers
         $headers = [];
 
         // Per registration...
@@ -182,22 +202,27 @@ class CentreController extends Controller
             $rows[$index] = $sparse_row;
         }
 
-        return $this->streamFile(
-            $this->writeExcelDoc($user, $rows, $headers)
-        );
+        return [$rows, $headers];
     }
 
     /**
-     * @param CentreUser $user
-     * @param $rows
-     * @param $headers
-     * @return \Maatwebsite\Excel\LaravelExcelWriter
+     * Returns a configured writer for the file
+     * @param array $summary
+     * @return LaravelExcelWriter
      */
-    private function writeExcelDoc(CentreUser $user, $rows, $headers)
+    private function writeExcelDoc(array $summary)
     {
+        // Get user
+        /** @var CentreUser $user */
+        $user = Auth::user();
+
+        // Destructure summary
+        list($rows, $headers) = $summary;
+
         // Get now()
         $now = Carbon::now();
 
+        /** @var LaravelExcelWriter $excel_doc */
         $excel_doc = Excel::create(
             'RegSummary_' . $now->format('YmdHis'),
             function ($excel) use ($user, $rows, $headers) {
@@ -226,28 +251,32 @@ class CentreController extends Controller
                 );
             }
         );
-
         return $excel_doc;
     }
 
     /**
-     * @param $excel_doc
+     * Writes and returns file to client
+     * @param LaravelExcelWriter $excel_doc
      * @return ResponseFactory|\Symfony\Component\HttpFoundation\Response
      */
-    public function streamFile($excel_doc)
+    private function streamFile(LaravelExcelWriter $excel_doc)
     {
         // This appears to help with a PHPUnit/Laravel-excel file download issue.
         $excel_ident = app('excel.identifier');
         $format = $excel_ident->getFormatByExtension('csv');
         $contentType = $excel_ident->getContentTypeByFormat($format);
 
-        return response($excel_doc->string('csv'), 200, [
-            'Content-Type' => $contentType,
-            'Content-Disposition' => 'attachment; filename="' . $excel_doc->getFileName() . '.csv"',
-            'Expires' => Carbon::createFromTimestamp(0)->format('D, d M Y H:i:s'),
-            'Last-Modified' => Carbon::now()->format('D, d M Y H:i:s'),
-            'Cache-Control' => 'cache, must-revalidate',
-            'Pragma' => 'public',
-        ]);
+        try {
+            return response($excel_doc->string('csv'), 200, [
+                'Content-Type' => $contentType,
+                'Content-Disposition' => 'attachment; filename="' . $excel_doc->getFileName() . '.csv"',
+                'Expires' => Carbon::createFromTimestamp(0)->format('D, d M Y H:i:s'),
+                'Last-Modified' => Carbon::now()->format('D, d M Y H:i:s'),
+                'Cache-Control' => 'cache, must-revalidate',
+                'Pragma' => 'public',
+            ]);
+        } catch (LaravelExcelException $e) {
+            abort(500, 'Unable to create document');
+        }
     }
 }
