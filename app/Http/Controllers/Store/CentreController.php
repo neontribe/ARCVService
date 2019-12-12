@@ -68,13 +68,17 @@ class CentreController extends Controller
             $dateFormats = [
                 'dob' => 'm/Y'
             ];
+            $excludeColumns = [
+                'Active'
+            ];
         } else {
             // Set for relevant centres
             $centre_ids = $user->relevantCentres()->pluck('id')->all();
             $dateFormats = [];
+            $excludeColumns = [];
         }
 
-        $summary = $this->getCentreRegistrationsSummary($centre_ids, $dateFormats);
+        $summary = $this->getCentreRegistrationsSummary($centre_ids, $dateFormats, $excludeColumns);
 
         return $this->streamFile(
             $this->writeExcelDoc($summary)
@@ -86,9 +90,10 @@ class CentreController extends Controller
      *
      * @param array $centre_ids
      * @param array $dateFormats
+     * @param array $excludeColumns
      * @return array
      */
-    private function getCentreRegistrationsSummary(array $centre_ids, $dateFormats = [])
+    private function getCentreRegistrationsSummary(array $centre_ids, $dateFormats = [], $excludeColumns = [])
     {
         $dateFormats = array_replace([
             'lastCollection' => 'd/m/Y',
@@ -136,7 +141,8 @@ class CentreController extends Controller
                 "Centre" => ($reg->centre->name) ?? 'Centre not found',
                 "Primary Carer" => ($reg->family->pri_carer) ?? 'Primary Carer not Found',
                 "Entitlement" => $reg->valuation->getEntitlement(),
-                "Last Collection" => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format($dateFormats['lastCollection']) : null
+                "Last Collection" => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format($dateFormats['lastCollection']) : null,
+                "Active" => ($reg->isActive()) ? 'true' : 'false'
             ];
 
             // Per child dependent things
@@ -187,8 +193,9 @@ class CentreController extends Controller
             if (count($headers) < count($row)) {
                 $headers = array_keys($row);
             }
-            // stack new row onto the array
-            $rows[] = $row;
+
+            // Remove any keys we don't want and add to the list.
+            $rows[] = array_diff_key($row, $excludeColumns);
         }
 
         usort($rows, function ($a, $b) use ($dateFormats) {
