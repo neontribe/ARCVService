@@ -191,15 +191,28 @@ class CentreController extends Controller
             $rows[] = $row;
         }
 
-        usort($rows, function ($a, $b) {
+        usort($rows, function ($a, $b) use ($dateFormats) {
+
+            $aLastCollectionDateString = Carbon::createFromFormat(
+                $dateFormats['lastCollection'],
+                $a['Last Collection']
+            )->toDateString();
+
+            $bLastCollectionDateString = Carbon::createFromFormat(
+                $dateFormats['lastCollection'],
+                $b['Last Collection']
+            )->toDateString();
+
             $hashA = strtolower(
                 $a['Area'] . '#' .
                 $a['Centre'] . '#' .
+                $aLastCollectionDateString . '#' .
                 $a['Primary Carer']
             );
             $hashB = strtolower(
                 $b['Area'] . '#' .
                 $b['Centre'] . '#' .
+                $bLastCollectionDateString . '#' .
                 $b['Primary Carer']
             );
             // PHP 7 feature; comparison "spaceship" opertator "<=>" : returns -1/0/1
