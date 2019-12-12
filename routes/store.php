@@ -141,36 +141,46 @@ Route::group(['middleware' => 'auth:store'], function () {
     ->middleware('can:view,registration');
 
 
-    // Printables
+    // Printables/Downloadables
 
     // Print a specific Family Form for User Centre (Edit page)
     Route::get('/registrations/{registration}/print', [
         'as' => 'store.registration.print',
         'uses' => 'RegistrationController@printOneIndividualFamilyForm',
-    ]);
+    ])
+        // Can view, can print individual form.
+        ->middleware('can:view,registration');
 
     // Batch print Family Forms for User Centre
     Route::get('/registrations/print', [
         'as' => 'store.registrations.print',
         'uses' => 'RegistrationController@printBatchIndividualFamilyForms',
     ]);
+    // If we keep this it needs a guard.
+
 
     // Print a Specific Centre's Registration's register form
     Route::get('/centres/{centre}/registrations/collection', [
         'as' => 'store.centre.registrations.collection',
         'uses' => 'CentreController@printCentreCollectionForm',
-    ]);
+    ])->middleware(['can:exportFromRelevantCentre,centre']);
 
     // ALL centres registrations as a summary spreadsheet
     Route::get('/centres/registrations/summary', [
         'as' => 'store.centres.registrations.summary',
         'uses' => 'CentreController@exportRegistrationsSummary',
-    ])->middleware(['can:export,App\Registration']);
+    ])->middleware(['can:export,App\CentreUser']);
+
+    // A specific centres' registrations summary spreadsheet.
+    Route::get('/centres/{centre}/registrations/summary', [
+        'as' => 'store.centre.registrations.summary',
+        'uses' => 'CentreController@exportRegistrationsSummary',
+    ])->middleware(['can:exportFromRelevantCentre,centre']);
 
     // ALL vouchers and extra details, in a format suitable for the MVL sheets.
     // As this includes participant ID access, it has "can:export registrations".
     Route::get('/vouchers/master-log', [
         'as' => 'store.vouchers.mvl.export',
         'uses' => 'VoucherController@exportMasterVoucherLog',
-    ])->middleware(['can:export,App\Registration']);
+    ])->middleware(['can:export,App\CentreUser']);
 });

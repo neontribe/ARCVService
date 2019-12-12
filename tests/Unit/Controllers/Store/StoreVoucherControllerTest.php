@@ -64,11 +64,10 @@ class StoreVoucherControllerTest extends StoreTestCase
         $this->centre = factory(Centre::class)->create();
 
         // Create an FM User
-        $this->centreUser = factory(CentreUser::class)->create([
+        $this->centreUser = factory(CentreUser::class, 'FMUser')->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
-            "role" => "foodmatters_user"
         ]);
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 

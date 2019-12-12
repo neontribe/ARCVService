@@ -16,13 +16,16 @@ class DashboardPageTest extends StoreTestCase
     /**
      * @var Centre $centre
      * @var CentreUser $centreUser
+     * @var CentreUser $downloadUser
      * @var CentreUser $fmUser
      * @var Registration $registration
      */
     private $centre;
     private $centreUser;
+    private $downloadUser;
     private $fmUser;
     private $registration;
+
 
     public function setUp()
     {
@@ -35,15 +38,21 @@ class DashboardPageTest extends StoreTestCase
             "name"  => "CC test user",
             "email" => "testccuser@example.com",
             "password" => bcrypt('test_ccuser_pass'),
-            "role" => "centre_user",
         ]);
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
-        $this->fmUser = factory(CentreUser::class)->create([
+        // Create a CentreUser
+        $this->downloadUser = factory(CentreUser::class, 'withDownloader')->create([
+            "name"  => "CC DL user",
+            "email" => "testccdluser@example.com",
+            "password" => bcrypt('test_ccdluser_pass'),
+        ]);
+        $this->downloadUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+
+        $this->fmUser = factory(CentreUser::class, 'FMUser')->create([
             "name"  => "FM test user",
             "email" => "testfmuser@example.com",
             "password" => bcrypt('test_fmuser_pass'),
-            "role" => "foodmatters_user",
         ]);
         $this->fmUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
@@ -62,10 +71,28 @@ class DashboardPageTest extends StoreTestCase
         // Get CC user
         $ccuser = $this->centreUser;
 
+        // Get DL user
+        $downloaduser = $this->downloadUser;
+
+        $relevantRoute = URL::route('store.centres.registrations.summary');
+        $specificRoute = URL::route('store.centre.registrations.summary', ['centre' => $this->centre->id ]);
+        $mvlRoute = URL::route('store.vouchers.mvl.export');
+
         $this->actingAs($ccuser, 'store')
             ->visit(URL::route('store.dashboard'))
-            ->dontSee(URL::route('store.centres.registrations.summary'))
-            ->dontSee(URL::route('store.vouchers.mvl.export'))
+            ->dontSee($relevantRoute)
+            ->dontSee($mvlRoute)
+            ->dontSee($specificRoute)
+            ->see("print-registrations")
+        ;
+
+        Auth::logout();
+
+        $this->actingAs($downloaduser, 'store')
+            ->visit(URL::route('store.dashboard'))
+            ->dontSee($relevantRoute)
+            ->dontSee($mvlRoute)
+            ->see($specificRoute)
             ->see("print-registrations")
         ;
 
@@ -73,8 +100,9 @@ class DashboardPageTest extends StoreTestCase
 
         $this->actingAs($fmuser, 'store')
             ->visit(URL::route('store.dashboard'))
-            ->see(URL::route('store.centres.registrations.summary'))
-            ->see(URL::route('store.vouchers.mvl.export'))
+            ->see($relevantRoute)
+            ->see($mvlRoute)
+            ->dontSee($specificRoute)
             ->dontSee("print-registrations")
         ;
     }
@@ -90,6 +118,20 @@ class DashboardPageTest extends StoreTestCase
     }
 
     /** @test */
+    public function itShowsTheExportButtonWithReleventTextForRole()
+    {
+        // Get DL user
+        $downloaduser = $this->downloadUser;
+
+        $this->actingAs($downloaduser, 'store')
+            ->visit(URL::route('store.dashboard'))
+            ->see("export-centre-registrations")
+            ->seeInElement('li', $this->centre->name);
+        ;
+    }
+
+
+    /** @test */
     public function itShowsThePrintButtonWithReleventTextForPrintPref()
     {
         // Set centre print_pref to 'collection'.
@@ -98,7 +140,7 @@ class DashboardPageTest extends StoreTestCase
         $this->actingAs($this->centreUser->fresh(), 'store')
             ->visit(url::route('store.dashboard'))
             ->see('Print collection sheet')
-            ->see(URL::route('store.centre.registrations.collection', ['id' => $this->centre->id ]))
+            ->see(URL::route('store.centre.registrations.collection', ['centre' => $this->centre->id ]))
         ;
 
         // Set centre print_pref to 'individual'.
