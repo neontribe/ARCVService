@@ -81,36 +81,25 @@ class Registration extends Model implements IEvaluee
             ->orderBy('disbursed_at', 'desc')
             ->first()
         ;
+        // Use created_at, aka "Join Date" if no collections (edge case)
+        /** @var Carbon $activeDate */
+        $activeDate = ($lastCollection->disbursed_at) ?? $this->created_at;
 
-        if ($lastCollection) {
-            /*
-            for ARC's requirements,
-                if today() is less than or equal to
-                    Friday of the 4th week after pickup
-                        then true;
-                else
-                    false
-            */
+        /*  if today() is less than or equal to
+                Friday of the 4th week after pickup
+                    then true, else false
+        */
 
-            // get actual date
-            /** @var Carbon $pickupDate */
-            $pickupDate = $lastCollection->disbursed_at;
-
-            // Calculate forward date.
-            $friday4thWeek = $pickupDate->copy()
-                // set to Monday of week picked up
-                ->startOfWeek()
-                // add three full weeks
-                ->addWeeks(3)
-                // Friday of 4th week.
-                ->addDays(4)
-            ;
-
-            if (Carbon::today()->lessThanOrEqualTo($friday4thWeek)) {
-                return true;
-            }
-        }
-        return false;
+        // Calculate forward date.
+        $friday4thWeek = $activeDate
+            // find start of that week (day 1, monday) ...
+            ->startOfWeek()
+            // add four full weeks ...
+            ->addWeeks(4)
+            // add 4 extra days (day 1 -> 5, friday)
+            ->addDays(4)
+        ;
+        return Carbon::today()->lessThanOrEqualTo($friday4thWeek);
     }
 
     /**

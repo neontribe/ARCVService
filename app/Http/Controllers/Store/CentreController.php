@@ -202,12 +202,14 @@ class CentreController extends Controller
 
             $aLastCollectionDateString = Carbon::createFromFormat(
                 $dateFormats['lastCollection'],
-                $a['Last Collection']
+                // If we haven't ever collected, SORT with unix epoch start (far past)
+                ($a['Last Collection']) ?? Carbon::parse('1970-01-01')
             )->toDateString();
 
             $bLastCollectionDateString = Carbon::createFromFormat(
                 $dateFormats['lastCollection'],
-                $b['Last Collection']
+                // If we haven't ever collected, SORT with unix epoch start (far past)
+                $b['Last Collection']  ?? Carbon::parse('1970-01-01')
             )->toDateString();
 
             $hashA = strtolower(
