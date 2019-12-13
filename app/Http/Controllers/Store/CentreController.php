@@ -198,30 +198,28 @@ class CentreController extends Controller
             $rows[] = array_diff_key($row, $excludeColumns);
         }
 
+        // Sort te columns
         usort($rows, function ($a, $b) use ($dateFormats) {
 
-            $aLastCollectionDateString = Carbon::createFromFormat(
-                $dateFormats['lastCollection'],
-                // If we haven't ever collected, SORT with unix epoch start (far past)
-                ($a['Last Collection']) ?? Carbon::parse('1970-01-01')
-            )->toDateString();
+            // If we haven't ever collected, with unix epoch start (far past)
+            $aActiveDate = ($a['Last Collection'])
+                ? Carbon::createFromFormat($dateFormats['lastCollection'], $a['Last Collection'])
+                : Carbon::parse('1970-01-01');
 
-            $bLastCollectionDateString = Carbon::createFromFormat(
-                $dateFormats['lastCollection'],
-                // If we haven't ever collected, SORT with unix epoch start (far past)
-                $b['Last Collection']  ?? Carbon::parse('1970-01-01')
-            )->toDateString();
+            $bActiveDate = ($b['Last Collection'])
+                ? Carbon::createFromFormat($dateFormats['lastCollection'], $b['Last Collection'])
+                : Carbon::parse('1970-01-01');
 
             $hashA = strtolower(
                 $a['Area'] . '#' .
                 $a['Centre'] . '#' .
-                $aLastCollectionDateString . '#' .
+                $aActiveDate->toDateString() . '#' .
                 $a['Primary Carer']
             );
             $hashB = strtolower(
                 $b['Area'] . '#' .
                 $b['Centre'] . '#' .
-                $bLastCollectionDateString . '#' .
+                $bActiveDate->toDateString() . '#' .
                 $b['Primary Carer']
             );
             // PHP 7 feature; comparison "spaceship" opertator "<=>" : returns -1/0/1
