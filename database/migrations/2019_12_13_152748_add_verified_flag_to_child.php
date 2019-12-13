@@ -14,7 +14,10 @@ class AddVerifiedFlagToChild extends Migration
     public function up()
     {
         Schema::table('children', function (Blueprint $table) {
-            $table->boolean('verified')->nullable()->after('born');
+            $table->boolean('verified')
+                ->nullable()
+                ->default(null)
+                ->after('born');
         });
     }
 
