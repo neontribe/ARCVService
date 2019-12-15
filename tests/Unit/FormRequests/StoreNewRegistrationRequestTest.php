@@ -3,12 +3,12 @@
 namespace Tests\Unit\FormRequests;
 
 use App\Registration;
-use App\Http\Requests\StoreUpdateRegistrationRequest;
+use App\Http\Requests\StoreNewRegistrationRequest;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Validation\Validator;
 use Tests\StoreTestCase;
 
-class StoreUpdateRegistrationRequestTest extends StoreTestCase
+class StoreNewRegistrationRequestTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
@@ -43,7 +43,7 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
     public function testICannotSubmitInvalidValues($shouldPass, $mockedRequestData)
     {
         // Copy the rules out of the FormRequest.
-        $rules = (new StoreUpdateRegistrationRequest())->rules();
+        $rules = (new StoreNewRegistrationRequest())->rules();
 
         $this->assertEquals(
             $shouldPass,
@@ -61,77 +61,86 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
             'requestShouldSucceedWhenRequiredDataIsProvided' => [
                 'passed' => true,
                 'data' => [
-                    'pri_carer' => ['A String'],
+                    'consent' => 'yes',
+                    'carer' => 'A String',
+                    'eligibility' => 'other'
                 ]
             ],
             'requestShouldFailWhenRequiredDataIsMissing' => [
                 'passed' => false,
                 'data' => []
             ],
-            'requestShouldFailWhenTooManyPriCarers' => [
+            'requestShouldFailWhenConsentIsMissing' => [
                 'passed' => false,
                 'data' => [
-                    'pri_carer' => ['A String', 'B String'],
+                    'carer' => 'A String',
+                    'eligibility' => 'other'
                 ]
             ],
-            'requestShouldFailWhenNoPriCarers' => [
+            'requestShouldFailWhenEligibilityIsMissing' => [
                 'passed' => false,
                 'data' => [
-                    'pri_carer' => [],
+                    'consent' => 'on',
+                    'carer' => 'A String',
                 ]
             ],
-            'requestShouldFailWhenNonStringPriCarers' => [
+            'requestShouldFailWhenCarerIsNotAString' => [
                 'passed' => false,
                 'data' => [
-                    'pri_carer' => [1],
+                    'consent' => true,
+                    'carer' => 1,
+                    'eligibility' => 'other'
+                ]
+            ],
+            'requestShouldFailWhenEligibilityIsNotInEnum' => [
+                'passed' => false,
+                'data' => [
+                    'consent' => 'yes',
+                    'carer' => 'A String',
+                    'eligibility' => 'hello'
+                ]
+            ],
+            'requestShouldFailWhenConsentIsNotTruthy' => [
+                'passed' => false,
+                'data' => [
+                    'consent' => 2,
+                    'carer' => 'A String',
+                    'eligibility' => 'healthy-start'
                 ]
             ],
             'requestShouldSucceedWithSecondaryCarers' => [
                 'passed' => true,
                 'data' => [
-                    'pri_carer' => ['A String'],
-                    'sec_carers' => ['B String', 'C String'],
+                    'consent' => 1,
+                    'carer' => 'A String',
+                    'eligibility' => 'other',
+                    'carers' => ['B String', 'C String'],
                 ]
             ],
             'requestShouldFailWithEmptySecondaryCarers' => [
                 'passed' => false,
                 'data' => [
-                    'pri_carer' => ['A String'],
-                    'sec_carers' => [],
+                    'consent' => 1,
+                    'carer' => 'A String',
+                    'eligibility' => 'other',
+                    'carers' => [],
                 ]
             ],
             'requestShouldFailWithNonStringSecondaryCarers' => [
                 'passed' => false,
                 'data' => [
-                    'pri_carer' => ['A String'],
-                    'sec_carers' => [1,2,3,4],
-                ]
-            ],
-            'requestShouldSucceedWithNewCarers' => [
-                'passed' => true,
-                'data' => [
-                    'pri_carer' => ['A String'],
-                    'new_carers' => ['B String', 'C String'],
-                ]
-            ],
-            'requestShouldFailWithEmptyNewCarers' => [
-                'passed' => false,
-                'data' => [
-                    'pri_carer' => ['A String'],
-                    'new_carers' => [],
-                ]
-            ],
-            'requestShouldFailWithNonStringNewCarers' => [
-                'passed' => false,
-                'data' => [
-                    'pri_carer' => ['A String'],
-                    'new_carers' => [1,2,3,4],
-                ]
+                    'consent' => 1,
+                    'carer' => 'A String',
+                    'eligibility' => 'other',
+                    'carers' => [1,2,3,4],
+               ]
             ],
             'requestShouldSucceedWithMinimalChildren' => [
                 'passed' => true,
                 'data' => [
-                    'pri_carer' => ['A String'],
+                    'consent' => 1,
+                    'carer' => 'A String',
+                    'eligibility' => 'other',
                     'children' => [
                         0 => ['dob' => '2017-09']
                     ],
@@ -140,7 +149,9 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
             'requestShouldFailWithChildInvalidDobFormat' => [
                 'passed' => false,
                 'data' => [
-                    'pri_carer' => ['A String'],
+                    'consent' => 1,
+                    'carer' => 'A String',
+                    'eligibility' => 'other',
                     'children' => [
                         0 => ['dob' => '2017-09-01']
                     ],
@@ -149,14 +160,18 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
             'requestShouldFailWithEmptyChildren' => [
                 'passed' => false,
                 'data' => [
-                    'pri_carer' => ['A String'],
+                    'consent' => 1,
+                    'carer' => 'A String',
+                    'eligibility' => 'other',
                     'children' => [],
                 ]
             ],
             'requestShouldSucceedWithManyChildren' => [
                 'passed' => true,
                 'data' => [
-                    'pri_carer' => ['A String'],
+                    'consent' => 1,
+                    'carer' => 'A String',
+                    'eligibility' => 'other',
                     'children' => [
                         0 => ['dob' => '2017-09'],
                         1 => ['dob' => '2016-08'],
@@ -167,7 +182,9 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
             'requestShouldSucceedWithManyVerifiableChildren' => [
                 'passed' => true,
                 'data' => [
-                    'pri_carer' => ['A String'],
+                    'consent' => 1,
+                    'carer' => 'A String',
+                    'eligibility' => 'other',
                     'children' => [
                         0 => [
                             'dob' => '2017-09',
@@ -187,7 +204,9 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
             'requestShouldFailWhenAVerifiableChildHasNoDoB' => [
                 'passed' => false,
                 'data' => [
-                    'pri_carer' => ['A String'],
+                    'consent' => 1,
+                    'carer' => 'A String',
+                    'eligibility' => 'other',
                     'children' => [
                         0 => [
                             'dob' => '2017-09',
