@@ -6,6 +6,7 @@ use App\Registration;
 use App\Bundle;
 use App\Centre;
 use App\CentreUser;
+use App\Sponsor;
 use App\Voucher;
 use Auth;
 use Carbon\Carbon;
@@ -33,7 +34,7 @@ class BundleControllerTest extends StoreTestCase
         $this->centreUser = factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass')
+            "password" => bcrypt('test_user_pass'),
         ]);
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
@@ -554,13 +555,76 @@ class BundleControllerTest extends StoreTestCase
         $response->seeInSession('error_messages');
         $this->assertTrue($this->hasMatchingErrorMessage(
             Session::get('error_messages'),
-            '~These vouchers are currently allocated to a different family. Click on the voucher number to view the other family\'s record: <a href="http://arcv-store.test:8080/registrations/1/voucher-manager">TST09999</a>~'
+            '~These vouchers are currently allocated to a different family. Click on the voucher number to view the other family\'s record: <a href="' . $route . '">' . $this->testCodes[0] . '</a>~'
             ));
 
         // Check the expected error message is in the view
         $this->followRedirects()
-            ->see('<div class="alert-message error">')
-            ->see('Click on the voucher number to view the other family\'s record: <a href="http://arcv-store.test:8080/registrations/1/voucher-manager">TST09999</a>');
+            ->seeInElement('div[class="alert-message error"]', 'Click on the voucher number to view the other family\'s record: <a href="' . $route . '">' . $this->testCodes[0] . '</a>');
+    }
+
+    /** @test */
+    public function testICannotAddAVoucherAllocatedInACentreIDoNotHaveAccessTo()
+    {
+        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
+        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
+
+        // Add a voucher to the registration's bundle
+        $this->actingAs($this->centreUser, 'store')
+        ->visit($route)
+        ->post(
+            $post_route,
+            ["start" => $this->testCodes[1]]
+        );
+
+        // Create a second sponsor, centre and user
+        $this->sponsor2 = factory(Sponsor::class)->create();
+
+        $this->centre2 = factory(Centre::class)->create(["sponsor_id" => $this->sponsor2->id]);
+
+        $this->centreUser2 = factory(CentreUser::class)->create([
+            "name"  => "second test user",
+            "email" => "testuser2@example.com",
+            "password" => bcrypt('test_user_pass2'),
+            "role" => "centre_user"
+        ]);
+
+        $this->centreUser2->centres()->attach($this->centre2->id, ['homeCentre' => true]);
+
+        // Add a registration to the second centre
+        $this->registrationTwo = factory(Registration::class)->create([
+            'centre_id' => $this->centre2->id
+        ]);
+
+        $route_2 = route('store.registration.voucher-manager', [ 'registration' => $this->registrationTwo->id ]);
+        $post_route_2 = route('store.registration.vouchers.post', [ 'registration' => $this->registrationTwo->id ]);
+
+        // Attempt to post the same voucher code into the second registration's bundle
+        $response = $this->actingAs($this->centreUser2, 'store')
+        ->visit($route_2)
+        ->post(
+            $post_route_2,
+            ["start" => $this->testCodes[1]]
+        );
+
+        // See we have no vouchers added.
+        /** @var Bundle $currentBundle */
+        // Get our currentBundle
+        $currentBundle = $this->registrationTwo->currentBundle();
+
+        // See that it's got no vouchers.
+        $this->assertEquals(0, $currentBundle->vouchers()->count());
+
+        // Check the expected error message is in the session
+        $response->seeInSession('error_messages');
+        $this->assertTrue($this->hasMatchingErrorMessage(
+            Session::get('error_messages'),
+            '~These vouchers are allocated to a family in a centre you can\'t access: ' . $this->testCodes[1] . '~'
+        ));
+
+        // Check the expected error message is in the view
+        $this->followRedirects()
+        ->seeInElement('div[class="alert-message error"]', 'These vouchers are allocated to a family in a centre you can\'t access: ' . $this->testCodes[1]);
     }
 
     /** @test */
