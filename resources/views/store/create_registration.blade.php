@@ -57,10 +57,10 @@
                     <h2>Adding children or pregnancies</h2>
                 </div>
                 <div>
-                    <p>To add a child or pregnancy, complete the boxes below with their month and year of birth (or due date) in numbers, e.g. '06 2017' for June 2017.
-                    </p>
-                    @include('store.partials.add_child_form')
+                <p>To add a child or pregnancy, complete the boxes below with their month and year of birth (or due date) in numbers, e.g. '06 2017' for June 2017.
+                </p>
                 </div>
+                @include('store.partials.add_child_form')
                 <div class="added">
                     <label for="child_wrapper">You have added:</label>
                     <table>

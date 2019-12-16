@@ -1,17 +1,27 @@
 <div class="add-child-form">
-    <p><span id="dob-error"></span></p>
-    <div class="form-group">
-        <label for="dob-month">Month</label>
-        <input id="dob-month" name="dob-month" pattern="[0-9]*" min="0" max="12" type="number">
+    <label for="add-child-form">Add children or a pregnancy:</label>
+    <div class="add-child-form">
+        <div class="form-group dob-wrapper">
+            <label for="dob-month">Month</label>
+            <input id="dob-month" name="dob-month" pattern="[0-9]*" min="0" max="12" type="number">
+        </div>
+        <div class="form-group dob-wrapper">
+            <label for="dob-year">Year</label>
+            <input id="dob-year" name="dob-year" type="number" pattern="[0-9]*" min="0"
+                   max="{{ Carbon\Carbon::now()->year }}">
+        </div>
+        <div class="form-group dob-wrapper">
+            <label for="dob-verified">Verified</label>
+            <input type="checkbox" class="styled-checkbox" id="dob-verified" name="dob-verified">
+        </div>
     </div>
-    <div class="form-group">
-        <label for="dob-year">Year</label>
-        <input id="dob-year" name="dob-year" type="number" pattern="[0-9]*" min="0"
-               max="{{ Carbon\Carbon::now()->year }}">
-    </div>
-    <button id="add-dob" class="add-dob">
-        <i class="fa fa-plus" aria-hidden="true"></i>
-    </button>
+</div>
+<button id="add-dob" class="link-button link-button-large">
+    <i class="fa fa-plus button-icon" aria-hidden="true"></i>
+    Add Child or Pregnancy
+</button>
+<div>
+<p><span id="dob-error" class="invalid-error"></span></p>
 </div>
 
 @section('hoist-head')

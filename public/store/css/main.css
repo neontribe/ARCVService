@@ -660,6 +660,14 @@ REGISTER PAGE
 	float: left;
 }
 
+.dob-wrapper {
+    margin : 1em 1em 1em 1em;
+}
+
+.dob-wrapper > input.styled-checkbox {
+	position: relative;
+}
+
 .form-group > label {
 	display: block;
 }

@@ -57,6 +57,7 @@
                     <img src="{{ asset('store/assets/pregnancy-light.svg') }}" name="logo">
                     <h2>Children or pregnancy</h2>
                 </div>
+                @include('store.partials.add_child_form')
                 <div>
                     <table>
                         <thead>
@@ -84,8 +85,6 @@
                     </table>
                 </div>
                 <div>
-                    <label for="add-child-form">Add more children or a pregnancy:</label>
-                    @include('store.partials.add_child_form')
                     <table>
                         <tbody id="child_wrapper">
                         </tbody>
