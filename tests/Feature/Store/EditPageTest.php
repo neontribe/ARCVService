@@ -23,6 +23,7 @@ class EditPageTest extends StoreTestCase
     private $centre;
     private $centreUser;
     private $registration;
+    private $faker;
 
     public function setUp()
     {

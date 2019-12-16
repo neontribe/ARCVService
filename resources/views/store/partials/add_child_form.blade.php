@@ -76,7 +76,7 @@
                 var valueDate = dateObj.format("YYYY-MM");
 
                 // add an input
-                $(el).append('<tr><td><input name="children[]" type="hidden" value="' + valueDate + '" >' + innerTextDate + '</td><td><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
+                $(el).append('<tr><td><input name="children[][dob]" type="hidden" value="' + valueDate + '" >' + innerTextDate + '</td><td><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
 
                 // reset form
                 dobError.text('');
