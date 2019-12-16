@@ -42,19 +42,48 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
     ];
 });
 
+/**
+ * Standard CentreUser
+ */
 $factory->define(App\CentreUser::class, function (Faker\Generator $faker) {
     static $password;
-
-    $roles = ['centre_user', 'foodmatters_user'];
 
     return [
         'name' => $faker->name,
         'email' => $faker->unique()->safeEmail,
         'password' => $password ?: $password = bcrypt('secret'),
         'remember_token' => str_random(10),
-        'role' => $roles[mt_rand(0, count($roles) - 1)],
+        'role' =>'centre_user',
     ];
 });
+
+/**
+ * CentreUser who can Download.
+ */
+$factory->defineAs(App\CentreUser::class, 'withDownloader', function ($faker) use ($factory) {
+    $cu = $factory->raw(App\CentreUser::class);
+
+    return array_merge($cu, [
+        'downloader' => true,
+    ]);
+});
+
+/**
+ * Specifically an Admin Centre User [foodmatters_user]
+ */
+$factory->defineAs(App\CentreUser::class, 'FMUser',function (Faker\Generator $faker) use ($factory){
+    static $password;
+
+    return [
+        'name' => $faker->name,
+        'email' => $faker->unique()->safeEmail,
+        'password' => $password ?: $password = bcrypt('secret'),
+        'remember_token' => str_random(10),
+        'role' => 'foodmatters_user',
+        'downloader' => true
+    ];
+});
+
 
 /**
  * Sponsor for testing

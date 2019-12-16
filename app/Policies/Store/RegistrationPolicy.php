@@ -10,15 +10,9 @@ class RegistrationPolicy
 {
     use HandlesAuthorization;
 
-
+    // Permission to view a specific registration, based on centre.
     public function view(CentreUser $user, Registration $registration)
     {
         return $user->isRelevantCentre($registration->centre);
-    }
-
-    // These are permissions that we need to check a user for.
-    public function export(CentreUser $user)
-    {
-        return ($user->role == "foodmatters_user");
     }
 }

@@ -2,8 +2,11 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Relations\belongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Collection;
 use App\Notifications\StorePasswordResetNotification;
 
 class CentreUser extends Authenticatable
@@ -18,7 +21,7 @@ class CentreUser extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'role'
+        'name', 'email', 'password', 'role', 'downloader',
     ];
 
     /**
@@ -40,9 +43,18 @@ class CentreUser extends Authenticatable
     ];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'downloader' => 'boolean',
+    ];
+
+    /**
      * Get the Notes that belong to this CentreUser
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     //Because of merge and refactoring User to CentreUser, FK has to be explicitly stated here
     public function notes()
@@ -79,7 +91,7 @@ class CentreUser extends Authenticatable
     /**
      * Get the centres assigned to a user
      *
-     * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
+     * @return belongsToMany
      */
     public function centres()
     {
@@ -100,7 +112,7 @@ class CentreUser extends Authenticatable
      * Get the home centres for this user
      * Alas, we lack a belongsToThrough method to this is a collections.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
+     * @return belongsToMany
      */
     protected function homeCentres()
     {
@@ -110,21 +122,23 @@ class CentreUser extends Authenticatable
     /**
      * Get the relevant centres for this CentreUser, accounting for it's role
      *
-     * @return \Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection|static[]
+     * @return Collection
      */
     public function relevantCentres()
     {
         // default to empty collection
-        $centres = collect();
+        $centres = collect([]);
         switch ($this->role) {
             case "foodmatters_user":
                 // Just get all centres
-                $centres = Centre::all();
+                $centres = collect(Centre::get()->all());
                 break;
             case "centre_user":
                 // If we have one, get our centre's neighbours
-                if (!is_null($this->centre)) {
-                    $centres = $this->centre->neighbours;
+                /** @var Centre $centre */
+                $centre = $this->centre;
+                if (!is_null($centre)) {
+                    $centres = collect($centre->neighbours()->get()->all());
                 }
                 break;
         }

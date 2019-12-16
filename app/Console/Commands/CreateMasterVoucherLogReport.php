@@ -118,9 +118,10 @@ FROM vouchers
   # Pivot payment_request date
   LEFT JOIN (
     SELECT voucher_states.voucher_id,
-           voucher_states.created_at AS payment_request_date
+           min(voucher_states.created_at) AS payment_request_date
     FROM voucher_states
     WHERE voucher_states.`to` = 'payment_pending'
+    GROUP BY voucher_states.voucher_id
   ) AS payment_request_query
     ON payment_request_query.voucher_id = vouchers.id
 

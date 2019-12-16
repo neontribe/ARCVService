@@ -3,18 +3,21 @@
 namespace App\Http\Controllers\Store;
 
 use App\Centre;
+use App\CentreUser;
 use App\Http\Controllers\Controller;
 use App\Registration;
 use Auth;
 use Carbon\Carbon;
 use Excel;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Exceptions\LaravelExcelException;
+use Maatwebsite\Excel\Writers\LaravelExcelWriter;
 use PDF;
 
 class CentreController extends Controller
 {
-
     /**
      * Displays a printable version of the families registered with the center.
      *
@@ -40,7 +43,6 @@ class CentreController extends Controller
                 'sheet_title' => 'Printable Register',
                 'sheet_header' => 'Register',
                 'centre' => $centre,
-                //'reg_chunks' => $reg_chunks,
                 'registrations' => $registrations,
             ]
         );
@@ -50,20 +52,51 @@ class CentreController extends Controller
     }
 
     /**
-     * Exports a summary of registrations from the User's relevant Centres.
+     * Exports a summary of registrations from the User's relevant Centres or specified Centre.
      *
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
+     * @param Centre $centre
+     * @return ResponseFactory|\Symfony\Component\HttpFoundation\Response
      */
-    public function exportRegistrationsSummary()
+    public function exportRegistrationsSummary(Centre $centre)
     {
         // Get User
         $user = Auth::user();
 
-        // Get now()
-        $now = Carbon::now();
+        if (isset($centre->id)) {
+            // Set for specified centre
+            $centre_ids = [$centre->id];
+            $dateFormats = [
+                'dob' => 'm/Y'
+            ];
+        } else {
+            // Set for relevant centres
+            $centre_ids = $user->relevantCentres()->pluck('id')->all();
+            $dateFormats = [];
+        }
 
-        // Get centre ids
-        $centre_ids = $user->relevantCentres()->pluck('id')->all();
+        $summary = $this->getCentreRegistrationsSummary($centre_ids, $dateFormats);
+
+        return $this->streamFile(
+            $this->writeExcelDoc($summary)
+        );
+    }
+
+    /**
+     * Returns array of formatted data about the Centre's Registrations
+     *
+     * @param array $centre_ids
+     * @param array $dateFormats
+     * @return array
+     */
+    private function getCentreRegistrationsSummary(array $centre_ids, $dateFormats = [])
+    {
+        $dateFormats = array_replace([
+            'lastCollection' => 'd/m/Y',
+            'due' => 'd/m/Y',
+            'dob' => 'd/m/Y',
+            'join' => 'd/m/Y',
+            'leave' => 'd/m/Y'
+        ], $dateFormats);
 
         // Get registrations decorated - may no longer be terribly efficient.
         /** @var Collection $registrations */
@@ -72,7 +105,7 @@ class CentreController extends Controller
                 'centre_id',
                 $centre_ids
             )
-            ->with(['centre','centre.sponsor'])
+            ->with(['centre', 'centre.sponsor'])
             ->get();
 
         // set blank rows for laravel-excel
@@ -82,7 +115,7 @@ class CentreController extends Controller
         // by collating all the row keys and normalising.
         // So we have to do it by hand.
 
-        // create base headers
+        // Initialise base headers
         $headers = [];
 
         // Per registration...
@@ -90,13 +123,11 @@ class CentreController extends Controller
             $lastCollection = $reg->bundles()
                 ->whereNotNull('disbursed_at')
                 ->orderBy('disbursed_at', 'desc')
-                ->first()
-            ;
+                ->first();
 
             $lastCollectionDate = $lastCollection
                 ? $lastCollection->disbursed_at
-                : null
-            ;
+                : null;
 
             // Null coalesce `??` does not trigger `Trying to get property of non-object` explosions
             $row = [
@@ -105,7 +136,7 @@ class CentreController extends Controller
                 "Centre" => ($reg->centre->name) ?? 'Centre not found',
                 "Primary Carer" => ($reg->family->pri_carer) ?? 'Primary Carer not Found',
                 "Entitlement" => $reg->valuation->getEntitlement(),
-                "Last Collection" => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format('d/m/Y') : null
+                "Last Collection" => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format($dateFormats['lastCollection']) : null
             ];
 
             // Per child dependent things
@@ -123,17 +154,17 @@ class CentreController extends Controller
                     // Arrange kids by eligibility
                     switch ($status['eligibility']) {
                         case 'Pregnancy':
-                            $due_date = $child->dob->format('d/m/Y');
+                            $due_date = $child->dob->format($dateFormats['dob']);
                             break;
                         case 'Eligible':
                             $dob_header = 'Child ' . (string)$child_index . ' DoB';
-                            $kids[$dob_header] = $child->dob->format('m/Y');
+                            $kids[$dob_header] = $child->dob->lastOfMonth()->format($dateFormats['dob']);
                             $eligible += 1;
                             $child_index += 1;
                             break;
                         case "Ineligible":
                             $dob_header = 'Child ' . (string)$child_index . ' DoB';
-                            $kids[$dob_header] = $child->dob->format('m/Y');
+                            $kids[$dob_header] = $child->dob->lastOfMonth()->format($dateFormats['dob']);
                             $child_index += 1;
                             break;
                     }
@@ -147,8 +178,8 @@ class CentreController extends Controller
 
             // Set the last dates.
             $row["Due Date"] = $due_date;
-            $row["Join Date"] = $reg->family->created_at ? $reg->family->created_at->format('d/m/Y')  : null;
-            $row["Leaving Date"] = $reg->family->leaving_on ? $reg->family->leaving_on->format('d/m/Y') : null;
+            $row["Join Date"] = $reg->family->created_at ? $reg->family->created_at->format($dateFormats['join']) : null;
+            $row["Leaving Date"] = $reg->family->leaving_on ? $reg->family->leaving_on->format($dateFormats['leave']) : null;
             // Would be confusing if an old reason was left in - so check leaving date is there.
             $row["Leaving Reason"] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
 
@@ -185,18 +216,32 @@ class CentreController extends Controller
             $rows[$index] = $sparse_row;
         }
 
-        /**
-         * TODO: write an OO system for formatting things better.
-         * Ideally we'd have formatting for
-         * - rows with a leaving date showing grey
-         * - ineligible children showing grey
-         * - children with changes in near future showing red.
-         */
+        return [$rows, $headers];
+    }
+
+    /**
+     * Returns a configured writer for the file
+     * @param array $summary
+     * @return LaravelExcelWriter
+     */
+    private function writeExcelDoc(array $summary)
+    {
+        // Get user
+        /** @var CentreUser $user */
+        $user = Auth::user();
+
+        // Destructure summary
+        list($rows, $headers) = $summary;
+
+        // Get now()
+        $now = Carbon::now();
+
+        /** @var LaravelExcelWriter $excel_doc */
         $excel_doc = Excel::create(
             'RegSummary_' . $now->format('YmdHis'),
             function ($excel) use ($user, $rows, $headers) {
                 $excel->setTitle('Registration Summary');
-                $excel->setDescription('Summary of Registrations from Centres available to '. $user->name);
+                $excel->setDescription('Summary of Registrations from Centres available to ' . $user->name);
                 $excel->setManager($user->name);
                 $excel->setCompany(env('APP_URL'));
                 $excel->setCreator(env('APP_NAME'));
@@ -211,7 +256,7 @@ class CentreController extends Controller
                                 ->setFontWeight('bold');
                         });
                         $letters = range('A', 'Z');
-                        $sheet->cells('B1:' . $letters[count($headers)-1] .'1', function ($cells) {
+                        $sheet->cells('B1:' . $letters[count($headers) - 1] . '1', function ($cells) {
                             $cells->setBackground('#9ACD32')
                                 ->setFontWeight('bold');
                         });
@@ -220,22 +265,32 @@ class CentreController extends Controller
                 );
             }
         );
+        return $excel_doc;
+    }
 
+    /**
+     * Writes and returns file to client
+     * @param LaravelExcelWriter $excel_doc
+     * @return ResponseFactory|\Symfony\Component\HttpFoundation\Response
+     */
+    private function streamFile(LaravelExcelWriter $excel_doc)
+    {
         // This appears to help with a PHPUnit/Laravel-excel file download issue.
         $excel_ident = app('excel.identifier');
         $format = $excel_ident->getFormatByExtension('csv');
         $contentType = $excel_ident->getContentTypeByFormat($format);
 
-        return response($excel_doc->string('csv'), 200, [
-            'Content-Type' => $contentType,
-            'Content-Disposition' => 'attachment; filename="' . $excel_doc->getFileName() . '.csv"',
-            'Expires' => Carbon::createFromTimestamp(0)->format('D, d M Y H:i:s'),
-            'Last-Modified' => Carbon::now()->format('D, d M Y H:i:s'),
-            'Cache-Control' => 'cache, must-revalidate',
-            'Pragma' => 'public',
-        ]);
-
-        // avoid xls till we have all the formatting.
-        //)->download('xls');
+        try {
+            return response($excel_doc->string('csv'), 200, [
+                'Content-Type' => $contentType,
+                'Content-Disposition' => 'attachment; filename="' . $excel_doc->getFileName() . '.csv"',
+                'Expires' => Carbon::createFromTimestamp(0)->format('D, d M Y H:i:s'),
+                'Last-Modified' => Carbon::now()->format('D, d M Y H:i:s'),
+                'Cache-Control' => 'cache, must-revalidate',
+                'Pragma' => 'public',
+            ]);
+        } catch (LaravelExcelException $e) {
+            abort(500, 'Unable to create document');
+        }
     }
 }

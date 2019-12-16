@@ -17,7 +17,7 @@ class CentreUserModelTest extends TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->centreUser = factory(CentreUser::class)->create();
+        $this->centreUser = factory(CentreUser::class)->create()->fresh();
         $this->notes = factory(Note::class, 2)->create(['user_id' => $this->centreUser->id]);
     }
 
@@ -28,12 +28,30 @@ class CentreUserModelTest extends TestCase
         $this->assertNotNull($cu->name);
         $this->assertNotNull($cu->email);
         $this->assertContains($cu->role, ['centre_user', 'foodmatters_user']);
+        // Default false
+        $this->assertFalse($cu->downloader);
     }
 
     /** @test */
     public function testCentreUserCanHaveNotes()
     {
         $this->assertCount(2, $this->centreUser->notes);
+    }
+
+    /**@test */
+    public function testCentreUserCanHaveDownloadTrue()
+    {
+        // Standard CU
+        $cu = $this->centreUser;
+        $this->assertFalse($cu->downloader);
+
+        // Change their settings
+        $cu->downloader = true;
+        $cu->fresh();
+        $this->assertTrue($cu->downloader);
+
+        $cu = factory(CentreUser::class, 'withDownloader')->create()->fresh();
+        $this->assertTrue($cu->downloader);
     }
 
     /** @test */

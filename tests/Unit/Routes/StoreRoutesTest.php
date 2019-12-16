@@ -17,8 +17,14 @@ class StoreRoutesTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
+    /** @var CentreUser $fmUser */
+    private $fmUser;
+
     /** @var CentreUser $centreUser */
     private $centreUser;
+
+    /** @var CentreUser $downlaoderUser */
+    private $downloaderUser;
 
     /** @var CentreUser $neighbourUser */
     private $neighbourUser;
@@ -49,13 +55,27 @@ class StoreRoutesTest extends StoreTestCase
             "sponsor_id" => factory(Sponsor::class)->create()->id
         ]);
 
-        // Create a User
+        // Create a few Users
+        $this->fmUser =  factory(CentreUser::class, 'FMUser')->create([
+            "name"  => "FM test user",
+            "email" => "testfmuser@example.com",
+            "password" => bcrypt('test_fmuser_pass'),
+        ]);
+        $this->fmUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+
         $this->centreUser = factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
         ]);
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+
+        $this->downloaderUser = factory(CentreUser::class, 'withDownloader')->create([
+            "name"  => "test downloader",
+            "email" => "testdl@example.com",
+            "password" => bcrypt('test_user_pass'),
+        ]);
+        $this->downloaderUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         $this->neighbourUser = factory(CentreUser::class)->create([
             "name"  => "test neighbour",
@@ -309,26 +329,8 @@ class StoreRoutesTest extends StoreTestCase
     }
 
     /** test */
-    public function testCentreRegistrationsSummaryGate()
+    public function testCentresRegistrationsSummaryGate()
     {
-        // Create an FM User
-        $fmuser =  factory(CentreUser::class)->create([
-            "name"  => "FM test user",
-            "email" => "testfmuser@example.com",
-            "password" => bcrypt('test_fmuser_pass'),
-            "role" => "foodmatters_user",
-        ]);
-        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
-
-        // Create a CC user
-        $ccuser =  factory(CentreUser::class)->create([
-            "name"  => "CC test user",
-            "email" => "testccuser@example.com",
-            "password" => bcrypt('test_ccuser_pass'),
-            "role" => "centre_user",
-        ]);
-        $ccuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
-
         // Make some registrations
         factory(Registration::class, 5)->create([
             "centre_id" => $this->centre->id,
@@ -345,15 +347,67 @@ class StoreRoutesTest extends StoreTestCase
         ;
 
         // Throw a 403 for auth'd but forbidden
-        $this->actingAs($ccuser, 'store')
+        $this->actingAs($this->centreUser, 'store')
             // need to get, because visit() bombs out with exceptions before you can check them.
             ->get($route)
             ->assertResponseStatus(403)
         ;
         Auth::logout();
 
-        // See page do interesting things
-        $this->actingAs($fmuser, 'store')
+        // Download user cannot access bulk route
+        $this->actingAs($this->downloaderUser, 'store')
+            ->visit(URL::route('store.dashboard'))
+            ->get($route)
+            ->assertResponseStatus(403)
+        ;
+
+        Auth::logout();
+
+        // See page do interesting things for an fm user
+        $this->actingAs($this->fmUser, 'store')
+            ->visit(URL::route('store.dashboard'))
+            ->get($route)
+            ->assertResponseOK()
+        ;
+    }
+
+    /** test */
+    public function testCentreRegistrationsSummaryGate()
+    {
+        // Make some registrations
+        factory(Registration::class, 5)->create([
+            "centre_id" => $this->centre->id,
+        ]);
+
+        $route = $specificCentreRoute = URL::route('store.centre.registrations.summary', ['centre' => $this->centre->id]);
+
+        Auth::logout();
+
+        // Bounce unauth'd to login
+        $this->visit($route)
+            ->seePageIs(URL::route('store.login'))
+            ->assertResponseStatus(200)
+        ;
+
+        // Throw a 403 for auth'd but forbidden
+        $this->actingAs($this->centreUser, 'store')
+            // need to get, because visit() bombs out with exceptions before you can check them.
+            ->get($route)
+            ->assertResponseStatus(403)
+        ;
+        Auth::logout();
+
+        // Download user can access specific route
+        $this->actingAs($this->downloaderUser, 'store')
+            ->visit(URL::route('store.dashboard'))
+            ->get($route)
+            ->assertResponseOK()
+        ;
+
+        Auth::logout();
+
+        // FM User can access specific route
+        $this->actingAs($this->fmUser, 'store')
             ->visit(URL::route('store.dashboard'))
             ->get($route)
             ->assertResponseOK()
@@ -444,24 +498,6 @@ class StoreRoutesTest extends StoreTestCase
     /** @test */
     public function testMVLRouteGuard()
     {
-        // Create an FM User
-        $fmuser =  factory(CentreUser::class)->create([
-            "name"  => "FM test user",
-            "email" => "testfmuser@example.com",
-            "password" => bcrypt('test_fmuser_pass'),
-            "role" => "foodmatters_user",
-        ]);
-        $fmuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
-
-        // Create a CC user
-        $ccuser =  factory(CentreUser::class)->create([
-            "name"  => "CC test user",
-            "email" => "testccuser@example.com",
-            "password" => bcrypt('test_ccuser_pass'),
-            "role" => "centre_user",
-        ]);
-        $ccuser->centres()->attach($this->centre->id, ['homeCentre' => true]);
-
         // Make some registrations
         factory(Registration::class, 5)->create([
             "centre_id" => $this->centre->id,
@@ -479,7 +515,7 @@ class StoreRoutesTest extends StoreTestCase
         ;
 
         // Throw a 403 for auth'd but forbidden
-        $this->actingAs($ccuser, 'store')
+        $this->actingAs($this->centreUser, 'store')
             // need to get, because visit() bombs out with exceptions before you can check them.
             ->get($route)
             ->assertResponseStatus(403)
@@ -487,7 +523,7 @@ class StoreRoutesTest extends StoreTestCase
         Auth::logout();
 
         // See page permit FM User to get from the dashboard.
-        $this->actingAs($fmuser, 'store')
+        $this->actingAs($this->fmUser, 'store')
             ->visit($dashboard_route)
             ->get($route)
             // It's going to 302->200 if there's a problem finding/reading the file (which isn't there).
