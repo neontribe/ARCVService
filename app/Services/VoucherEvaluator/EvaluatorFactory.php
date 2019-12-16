@@ -15,6 +15,7 @@ use App\Services\VoucherEvaluator\Evaluations\ChildIsUnBorn;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderSecondarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderOne;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderSchoolAge;
+use App\Services\VoucherEvaluator\Evaluations\FamilyHasNoEligibleChildren;
 use App\Services\VoucherEvaluator\Evaluations\FamilyIsPregnant;
 use App\Services\VoucherEvaluator\Evaluators\VoucherEvaluator;
 use Carbon\Carbon;
@@ -128,7 +129,9 @@ class EvaluatorFactory
                 'credits' => [
                     new FamilyIsPregnant(null, 3)
                 ],
-                'notices' => [],
+                'notices' => [
+                    new FamilyHasNoEligibleChildren()
+                ],
                 'relations' => ['children'],
             ],
             Registration::class => [

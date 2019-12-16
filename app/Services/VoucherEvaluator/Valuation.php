@@ -36,6 +36,40 @@ class Valuation extends ArrayObject
     }
 
     /**
+     * Checks if this valuation contains a satisfied evaluations
+     *
+     * @param string $class
+     * @param bool $state
+     * @param bool $deep
+     * @return bool
+     */
+    public function hasSatisfiedEvaluation(string $class, bool $state = true, bool $deep = false)
+    {
+        // make a list of the evaluations
+        if (!$deep) {
+            // just what this valuation holds
+            $evaluations = array_merge($this->notices, $this->credits);
+        } else {
+            // all the way down the chain of valuations
+            $evaluations = array_merge($this->flat('notices'), $this->flat('credits'));
+        }
+
+        // resolve to boolean
+        return (
+            !empty(
+                // return those evaluations that are present.
+                array_filter(
+                    $evaluations,
+                    function ($evaluation) use ($class) {
+                        // has the classname?
+                        return (get_class($evaluation) === $class);
+                    }
+                )
+            )
+        );
+    }
+
+    /**
      * Processes notices to make a discrete list
      *
      * @return array
