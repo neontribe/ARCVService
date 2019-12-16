@@ -30,11 +30,10 @@ class BundleControllerTest extends StoreTestCase
         $this->centre = factory(Centre::class)->create();
 
         // Create a User
-        $this->centreUser =  factory(CentreUser::class)->create([
+        $this->centreUser = factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-
+            "password" => bcrypt('test_user_pass')
         ]);
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
@@ -511,6 +510,57 @@ class BundleControllerTest extends StoreTestCase
         $this->followRedirects()
             ->seePageIs($route)
             ->assertResponseStatus(200);
+    }
+
+    /** @test */
+    public function testICannotAddAVoucherAllocatedInACentreIHaveAccessTo()
+    {
+        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
+        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
+
+        // Add a voucher to the registration's bundle
+        $this->actingAs($this->centreUser, 'store')
+        ->visit($route)
+        ->post(
+            $post_route,
+            ["start" => $this->testCodes[0]]
+        );
+
+        // Add a second registration in the same centre
+        $this->registrationTwo = factory(Registration::class)->create([
+            'centre_id' => $this->centre->id
+        ]);
+
+        $route_2 = route('store.registration.voucher-manager', [ 'registration' => $this->registrationTwo->id ]);
+        $post_route_2 = route('store.registration.vouchers.post', [ 'registration' => $this->registrationTwo->id ]);
+
+        // Attempt to post the same voucher code into the second registration's bundle
+        $response = $this->actingAs($this->centreUser, 'store')
+        ->visit($route_2)
+        ->post(
+            $post_route_2,
+            ["start" => $this->testCodes[0]]
+        );
+
+        // See we have no vouchers added.
+        /** @var Bundle $currentBundle */
+        // Get our currentBundle
+        $currentBundle = $this->registrationTwo->currentBundle();
+
+        // See that it's got no vouchers.
+        $this->assertEquals(0, $currentBundle->vouchers()->count());
+
+        // Check the expected error message is in the session
+        $response->seeInSession('error_messages');
+        $this->assertTrue($this->hasMatchingErrorMessage(
+            Session::get('error_messages'),
+            '~These vouchers are currently allocated to a different family. Click on the voucher number to view the other family\'s record: <a href="http://arcv-store.test:8080/registrations/1/voucher-manager">TST09999</a>~'
+            ));
+
+        // Check the expected error message is in the view
+        $this->followRedirects()
+            ->see('<div class="alert-message error">')
+            ->see('Click on the voucher number to view the other family\'s record: <a href="http://arcv-store.test:8080/registrations/1/voucher-manager">TST09999</a>');
     }
 
     /** @test */
