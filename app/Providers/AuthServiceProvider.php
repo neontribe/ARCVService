@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Centre;
+use App\CentreUser;
 use App\Registration;
 use App\Trader;
 use App\Voucher;
@@ -20,6 +22,8 @@ class AuthServiceProvider extends ServiceProvider
         Trader::class => \App\Policies\Api\TraderPolicy::class,
         Voucher::class => \App\Policies\Api\VoucherPolicy::class,
         Registration::class => \App\Policies\Store\RegistrationPolicy::class,
+        Centre::class => \App\Policies\Store\CentrePolicy::class,
+        CentreUser::class => \App\Policies\Store\CentreUserPolicy::class,
     ];
 
     /**
