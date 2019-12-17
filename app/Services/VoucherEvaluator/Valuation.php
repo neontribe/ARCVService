@@ -44,7 +44,7 @@ class Valuation extends ArrayObject
         $notice_reasons = [];
 
         // get all notices
-        $notices = $this->flat("notices");
+        $notices = array_merge($this->flat("notices"), $this->flat('disqualifications'));
 
         // get distinct reasons and frequency.
         $reason_count = array_count_values(array_column($notices, 'reason'));
@@ -117,7 +117,7 @@ class Valuation extends ArrayObject
         // Get only eligible credits from this and relation valuations.
         $credits = $this->flat("credits", true);
         // return summed value
-        return  array_sum(array_column($credits, 'value'));
+        return array_sum(array_column($credits, 'value'));
     }
 
     /**

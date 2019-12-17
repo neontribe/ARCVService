@@ -81,9 +81,11 @@ class EvaluatorFactory
                     new ChildIsAlmostBorn($offsetDate),
                     new ChildIsAlmostOne($offsetDate),
                     new ChildIsAlmostSchoolAge($offsetDate),
-                    new ChildIsSchoolAge($offsetDate)
                 ],
                 'relations' => [],
+                'disqualifiers' => [
+                    new ChildIsSchoolAge($offsetDate)
+                ]
             ],
             Family::class => [
                 'credits' => [
@@ -120,9 +122,11 @@ class EvaluatorFactory
                     new ChildIsAlmostOne($offsetDate),
                     new ChildIsUnderSchoolAge($offsetDate),
                     new ChildIsAlmostSecondarySchoolAge($offsetDate),
-                    new ChildIsSecondarySchoolAge($offsetDate)
                 ],
                 'relations' => [],
+                'disqualifiers' => [
+                    new ChildIsSecondarySchoolAge($offsetDate)
+                ],
             ],
             Family::class => [
                 'credits' => [

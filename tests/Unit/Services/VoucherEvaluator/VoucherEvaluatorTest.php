@@ -64,8 +64,7 @@ class VoucherEvaluatorTest extends TestCase
         // Make our family
         $family = factory(Family::class)->create();
 
-        // Make a ineligible kids
-
+        // Make a set of ineligible kids (no under school age)
         $overSchool = factory(Child::class, 'overSchoolAge')->make();
         $overSecondarySchool = factory(Child::class, 'overSecondarySchoolAge')->make();
 

@@ -163,7 +163,8 @@ class CentreController extends Controller
                         $dob_header = 'Child ' . (string)$child_index . ' DoB';
                         $kids[$dob_header] = $child->dob->lastOfMonth()->format($dateFormats['dob']);
                         $child_index += 1;
-                        if ($childValuation->getEligibility()) {
+                        // A child is eligible if it's family is AND it has no disqualifications of it's own.
+                        if ($reg->family->getEligibility() && $childValuation->getEligibility()) {
                             $eligibleKids += 1;
                         }
                     }
