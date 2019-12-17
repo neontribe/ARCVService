@@ -4,7 +4,9 @@ namespace Tests;
 
 use App\Child;
 use App\Family;
+use App\Registration;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
+use App\Services\VoucherEvaluator\Valuation;
 use Carbon\Carbon;
 use Config;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -51,6 +53,44 @@ class VoucherEvaluatorTest extends TestCase
         // There should be a credit reason of 'FamilyIsPregnant'
         $this->assertEquals(1, count($credits));
         $this->assertContains(self::CREDIT_TYPES['FamilyIsPregnant'], $credits);
+    }
+
+    /** @test */
+    public function itDoesNotCreditWhenAFamilyIsIneligible()
+    {
+        // Make extended evaluator
+        $evaluator = EvaluatorFactory::make("extended_age");
+
+        // Make our family
+        $family = factory(Family::class)->create();
+
+        // Make a ineligible kids
+
+        $overSchool = factory(Child::class, 'overSchoolAge')->make();
+        $overSecondarySchool = factory(Child::class, 'overSecondarySchoolAge')->make();
+
+        // Add the kids
+        $family->children()->saveMany([$overSchool ,$overSecondarySchool]);
+        $this->assertEquals(2, $family->children()->count());
+
+        $evaluation = $evaluator->evaluate($family);
+        // Check it fails
+        $this->assertFalse($evaluation->getEligibility());
+        $this->assertEquals('0', $evaluation->getEntitlement());
+
+        // Add a kid that will make the overSchool kids eligible.
+        $underSchool = factory(Child::class, 'underSchoolAge')->make();
+
+        $family->children()->saveMany([$underSchool, $overSchool ,$overSecondarySchool]);
+        $family = $family->fresh();
+        $this->assertEquals(3, $family->children->count());
+
+        // Re-evaluate
+        $evaluation = $evaluator->evaluate($family);
+
+        // Check it fails
+        $this->assertTrue($evaluation->getEligibility());
+        $this->assertEquals('6', $evaluation->getEntitlement());
     }
 
     /** @test */

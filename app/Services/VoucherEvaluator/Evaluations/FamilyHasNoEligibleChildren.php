@@ -21,7 +21,7 @@ class FamilyHasNoEligibleChildren extends BaseFamilyEvaluation
     {
         parent::__construct($offsetDate);
 
-        // Either of
+        // Pregnancies or under school age.
         $this->specification = new OrSpec(
             // Under school age
             new AndSpec(
@@ -41,28 +41,21 @@ class FamilyHasNoEligibleChildren extends BaseFamilyEvaluation
     {
         parent::test($candidate);
 
-        $children = $candidate->children;
+        $children = $candidate->children->all();
 
-        // Test kids
-        if (!empty(
-            array_filter(
-                $children,
-                function ($child) {
-                    // If we don't satisfy the rule
-                    if (!$this->specification->isSatisfiedBy($child)) {
-                        // This will trigger an evaluation if it hasn't have one already
-                        $v = $child->valuation;
-                        // And add a disqualification to the child.
-                        // the next time we calculate if a kid is eligible, it will fail.
-                        $v->disqualifications[] = new ChildPassesTestBecause('has no eligible siblings');
-                    }
-                }
-            )
-        )) {
-            // There are no eligible Children
-            $this->success();
-        };
-        // There were eligible Children
-        return $this->fail();
+        $satisfiers = array_filter(
+            $children,
+            function ($child) {
+                // If we satisfy the rule
+                return ($this->specification->isSatisfiedBy($child));
+            }
+        );
+
+        if (empty($satisfiers)) {
+            // There are no qualifying kids
+            return $this->success();
+        } else {
+            return $this->fail();
+        }
     }
 }

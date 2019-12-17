@@ -29,7 +29,7 @@ class Valuation extends ArrayObject
             'evaluee' => $input['evaluee'] ?? null,
             'notices' => $input['notices'] ?? [],
             'credits' => $input['credits'] ?? [],
-            'disqualifications' => $input['disqualifications'] ?? [],
+            'disqualifiers' => $input['disqualifiers'] ?? [],
         ];
         parent::__construct($expected, $flags, $iterator_class);
     }
@@ -43,6 +43,7 @@ class Valuation extends ArrayObject
     {
         $notice_reasons = [];
 
+        // get all notices
         $notices = $this->flat("notices");
 
         // get distinct reasons and frequency.
@@ -126,7 +127,7 @@ class Valuation extends ArrayObject
     public function getEligibility()
     {
         // If we have no disqualifications, we are eligible
-        return empty($this->disqualifications);
+        return empty($this->disqualifiers);
     }
 
     /**
@@ -148,7 +149,7 @@ class Valuation extends ArrayObject
                 // Merge on it's descendents
                 /** @var Valuation $valuation */
                 foreach ($this->valuations as $valuation) {
-                    array_merge($flatAttrib, $valuation->flat($attribute, $onlyEligible));
+                    $flatAttrib = array_merge($flatAttrib, $valuation->flat($attribute, $onlyEligible));
                 }
             }
             return $flatAttrib;
