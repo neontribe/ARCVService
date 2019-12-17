@@ -65,7 +65,7 @@ class CentreControllerTest extends StoreTestCase
             ->response
             ->getContent()
         ;
-
+        
         // Create an array of lines and filter off blank ones (default array_filter behaviour)
         $data = array_filter(explode(PHP_EOL, $content));
         // Shift the headers off.

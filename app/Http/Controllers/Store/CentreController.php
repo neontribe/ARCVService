@@ -6,6 +6,7 @@ use App\Centre;
 use App\CentreUser;
 use App\Http\Controllers\Controller;
 use App\Registration;
+use App\Services\VoucherEvaluator\Valuation;
 use Auth;
 use Carbon\Carbon;
 use Excel;
@@ -142,36 +143,34 @@ class CentreController extends Controller
             // Per child dependent things
             $kids = [];
             $due_date = null;
-            $eligible = 0;
+            $eligibleKids = 0;
+
+            // Evaluate it.
+            $regValuation = $reg->valuatation;
 
             if ($reg->family) {
-                $child_index = 0;
+                $child_index = 1;
                 foreach ($reg->family->children as $child) {
-                    // make a 'Child X DoB' key
-                    // TODO: Improve this particular hack.
-                    $status = $child->accept($reg->evaluator);
+                    // Will run a child valuation if we don't already have one.
+                    /** @var Valuation $childValuation */
+                    $childValuation = $child->valuation;
 
-                    // Arrange kids by eligibility
-                    switch ($status['eligibility']) {
-                        case 'Pregnancy':
-                            $due_date = $child->dob->format($dateFormats['dob']);
-                            break;
-                        case 'Eligible':
-                            $dob_header = 'Child ' . (string)$child_index . ' DoB';
-                            $kids[$dob_header] = $child->dob->lastOfMonth()->format($dateFormats['dob']);
-                            $eligible += 1;
-                            $child_index += 1;
-                            break;
-                        case "Ineligible":
-                            $dob_header = 'Child ' . (string)$child_index . ' DoB';
-                            $kids[$dob_header] = $child->dob->lastOfMonth()->format($dateFormats['dob']);
-                            $child_index += 1;
-                            break;
+                    if ($child->dob->isFuture()) {
+                        // If it's a pregnancy, set due date and move on.
+                        $due_date = $child->dob->format($dateFormats['dob']);
+                    } else {
+                        // Otherwise, set the header
+                        $dob_header = 'Child ' . (string)$child_index . ' DoB';
+                        $kids[$dob_header] = $child->dob->lastOfMonth()->format($dateFormats['dob']);
+                        $child_index += 1;
+                        if ($childValuation->getEligibility()) {
+                            $eligibleKids += 1;
+                        }
                     }
                 }
             }
             // Add count of eligible kids
-            $row["Eligible Children"] = $eligible;
+            $row["Eligible Children"] = $eligibleKids;
 
             // Add our kids back in
             $row = array_merge($row, $kids);
