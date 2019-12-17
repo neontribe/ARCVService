@@ -26,6 +26,53 @@ class VoucherEvaluator extends AbstractEvaluator
     }
 
     /**
+     * @param IEvaluee $subject
+     * @return Valuation
+     */
+    private function evaluate(IEvaluee $subject)
+    {
+        $valuations = $this->evaluateRelations($subject);
+        $credits = $this->evaluateCredits($subject);
+        $notices = $this->evaluateNotices($subject);
+        $eligibilities = $this->evaluateEligibilities($subject);
+        $entitlement = array_sum(array_column($credits, 'value'));
+
+        $eligibility = (
+            $entitlement > 0 &&
+            !empty($eligibilities)
+        );
+
+        return new Valuation([
+            'valuations' => $valuations,
+            'evaluee' => $subject,
+            'eligibility' => $eligibility,
+            'notices' => $notices,
+            'credits' => $credits,
+            'entitlement' => $entitlement,
+        ]);
+    }
+
+    /**
+     * Evaluates Eligibilities
+     *
+     * @param IEvaluee $subject
+     * @return array
+     */
+    private function evaluateEligibilities(IEvaluee $subject)
+    {
+        $eligibilities = [];
+        $rules = $this->evaluations[get_class($subject)];
+        foreach ($rules['eligibilities'] as $rule) {
+            $outcome = $rule->test($subject);
+            if ($outcome) {
+                $notices[] = ['reason' => class_basename($outcome::SUBJECT)."|".$outcome::REASON];
+            }
+        }
+        return $eligibilities;
+    }
+
+
+    /**
      * Helper to process the current valuation Notices
      *
      * @param IEvaluee $subject
@@ -104,25 +151,7 @@ class VoucherEvaluator extends AbstractEvaluator
      */
     public function evaluateChild(Child $subject)
     {
-        $valuations = $this->evaluateRelations($subject);
-        $credits = $this->evaluateCredits($subject);
-        $notices = $this->evaluateNotices($subject);
-
-        $entitlement = array_sum(array_column($credits, 'value'));
-
-        $eligibility = ($entitlement > 0)
-            ? 'Eligible'
-            : 'Ineligible'
-        ;
-
-        return new Valuation([
-            'valuations' => $valuations,
-            'evaluee' => $subject,
-            'eligibility' => $eligibility,
-            'notices' => $notices,
-            'credits' => $credits,
-            'entitlement' => $entitlement,
-        ]);
+        return $this->evaluate($subject);
     }
 
     /**
@@ -133,18 +162,7 @@ class VoucherEvaluator extends AbstractEvaluator
      */
     public function evaluateFamily(Family $subject)
     {
-        $valuations = $this->evaluateRelations($subject);
-        $credits = $this->evaluateCredits($subject);
-        $notices = $this->evaluateNotices($subject);
-        $entitlement =  array_sum(array_column($credits, 'value'));
-
-        return new Valuation([
-            'valuations' => $valuations,
-            'evaluee' => $subject,
-            'credits' => $credits,
-            'notices' => $notices,
-            'entitlement' => $entitlement,
-        ]);
+        return $this->evaluate($subject);
     }
 
     /**
@@ -155,19 +173,6 @@ class VoucherEvaluator extends AbstractEvaluator
      */
     public function evaluateRegistration(Registration $subject)
     {
-        $credits = $this->evaluateCredits($subject);
-        $notices = $this->evaluateNotices($subject);
-
-        $entitlement =  array_sum(array_column($credits, 'value'));
-
-        $valuations = $this->evaluateRelations($subject);
-
-        return new Valuation([
-            'valuations' => $valuations,
-            'evaluee' => $subject,
-            'credits' => $credits,
-            'notices' => $notices,
-            'entitlement' => $entitlement,
-        ]);
+        return $this->evaluate($subject);
     }
 }
