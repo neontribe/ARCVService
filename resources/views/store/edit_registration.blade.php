@@ -64,6 +64,7 @@
                         <tr>
                             <td>Age</td>
                             <td>Month / Year</td>
+                            <td>ID</td>
                             <td></td>
                         </tr>
                         </thead>
@@ -72,6 +73,7 @@
                             <tr>
                                 <td>{{ $child->getAgeString() }}</td>
                                 <td>{{ $child->getDobAsString() }}</td>
+                                <td></td>
                                 <td>
                                     <input type="hidden" name="children[]"
                                         value="{{ Carbon\Carbon::parse($child->dob)->format('Y-m') }}">

@@ -372,6 +372,19 @@ input[type="text"].invalid,
 	background-color: #b9368b;
 }
 
+
+.block {
+    display: block;
+}
+
+.flex {
+    display: flex;
+}
+
+.relative {
+    position: relative;
+}
+
 /*
 
 SUBNAV
@@ -1190,4 +1203,57 @@ VOUCHER PAGES
 	0% { transform: scale(1) }
 	50% { transform: scale(1.1) }
 	100% { transform: scale(1) }
+}
+/*
+
+ADD CHILD FORM PARTIAL
+
+*/
+
+.dob-input-container {
+    display: flex;
+    margin: 1rem;
+}
+
+.dob-input {
+    flex: 0 1 auto;
+}
+
+.dob-input > label {
+    margin-bottom: 2px;
+}
+
+#dob-month {
+    border: 2px solid #ffffff;
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    width: 3ch;
+    text-align: center;
+}
+
+#dob-year {
+    border: 2px solid #ffffff;
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    width: 5ch;
+    text-align: center;
+}
+
+/* dob-verified styling leverages the .styled-checkbox styling,
+with overrides to display with a label above rather than inline */
+#dob-verified {
+    position: absolute;
+    top: 20px;
+}
+
+#dob-verified + label {
+    margin-left: 0px;
+}
+
+#dob-verified + label:before {
+    top: 20px;
+}
+
+#dob-verified:checked + label:after {
+    top: 26px;
 }
