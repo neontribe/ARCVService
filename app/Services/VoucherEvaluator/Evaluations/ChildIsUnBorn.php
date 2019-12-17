@@ -8,7 +8,7 @@ use Chalcedonyt\Specification\NotSpec;
 
 class ChildIsUnBorn extends BaseChildEvaluation
 {
-    const REASON = 'unborn';
+    public $reason = 'unborn';
     private $specification;
 
     public function __construct(Carbon $offsetDate = null, $value = 3)

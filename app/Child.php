@@ -65,7 +65,7 @@ class Child extends Model implements IEvaluee
      */
     public function accept(AbstractEvaluator $evaluator)
     {
-        return $evaluator->evaluateChild($this);
+        return $evaluator->evaluate($this);
     }
 
     /**

@@ -26,47 +26,12 @@ class Valuation extends ArrayObject
         // Set some expected values;
         $expected = [
             'valuations' => $input['valuations'] ?? [],
-            'entitlement' => $input['entitlement'] ?? 0,
             'evaluee' => $input['evaluee'] ?? null,
-            'eligibility' => $input['eligibility'] ?? false,
             'notices' => $input['notices'] ?? [],
             'credits' => $input['credits'] ?? [],
+            'disqualifications' => $input['disqualifications'] ?? [],
         ];
         parent::__construct($expected, $flags, $iterator_class);
-    }
-
-    /**
-     * Checks if this valuation contains a satisfied evaluations
-     *
-     * @param string $class
-     * @param bool $state
-     * @param bool $deep
-     * @return bool
-     */
-    public function hasSatisfiedEvaluation(string $class, bool $state = true, bool $deep = false)
-    {
-        // make a list of the evaluations
-        if (!$deep) {
-            // just what this valuation holds
-            $evaluations = array_merge($this->notices, $this->credits);
-        } else {
-            // all the way down the chain of valuations
-            $evaluations = array_merge($this->flat('notices'), $this->flat('credits'));
-        }
-
-        // resolve to boolean
-        return (
-            !empty(
-                // return those evaluations that are present.
-                array_filter(
-                    $evaluations,
-                    function ($evaluation) use ($class) {
-                        // has the classname?
-                        return (get_class($evaluation) === $class);
-                    }
-                )
-            )
-        );
     }
 
     /**
@@ -105,7 +70,8 @@ class Valuation extends ArrayObject
     {
         $credit_reasons = [];
 
-        $credits = $this->flat("credits");
+        // return eligible credits
+        $credits =  $this->flat("credits", true);
 
         // get distinct reasons and frequency.
         $reason_count = array_count_values(array_column($credits, 'reason'));
@@ -141,36 +107,54 @@ class Valuation extends ArrayObject
     }
 
     /**
-     * Gets the Entitlement
-     * @return integer;
+     * Gets the Entitlement total, by counting eligible credits
+     *
+     * @return integer
      */
     public function getEntitlement()
     {
-        return $this->flat('entitlement');
+        // Get only eligible credits from this and relation valuations.
+        $credits = $this->flat("credits", true);
+        // return summed value
+        return  array_sum(array_column($credits, 'value'));
+    }
+
+    /**
+     * Gets the Evaluee's eligibility by checking no disqualifications
+     * @return boolean
+     */
+    public function getEligibility()
+    {
+        // If we have no disqualifications, we are eligible
+        return empty($this->disqualifications);
     }
 
     /**
      * Grabs and flattens a specified attribute from Valuations.
      * @param $attribute
-     * @return mixed
+     * @param bool $onlyEligible
+     * @return mixed|null
      */
-    public function flat($attribute)
+    public function flat($attribute, bool $onlyEligible = false)
     {
-        // take this attribute
-        if (property_exists($this, $attribute)) {
+        // Check this attribute
+        if (property_exists($this, $attribute) &&
+            // If this valuation isn't eligible
+            $this->getEligibility() !== $onlyEligible
+        ) {
             $flatAttrib = $this[$attribute];
 
             if (is_array($flatAttrib)) {
                 // Merge on it's descendents
                 /** @var Valuation $valuation */
                 foreach ($this->valuations as $valuation) {
-                    array_merge($flatAttrib, $valuation->flat($attribute));
+                    array_merge($flatAttrib, $valuation->flat($attribute, $onlyEligible));
                 }
             } else if (is_integer($flatAttrib)) {
                 // Merge on it's descendents
                 foreach ($this->valuations as $valuation) {
                     /** @var Valuation $valuation */
-                    $flatAttrib += $valuation->flat($attribute);
+                    $flatAttrib += $valuation->flat($attribute, $onlyEligible);
                 }
             }
             return $flatAttrib;

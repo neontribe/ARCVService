@@ -6,7 +6,7 @@ use Carbon\Carbon;
 
 class FamilyIsPregnant extends BaseFamilyEvaluation
 {
-    const REASON = 'pregnant';
+    public $reason = 'pregnant';
 
     public function __construct(Carbon $offsetDate = null, $value = 3)
     {

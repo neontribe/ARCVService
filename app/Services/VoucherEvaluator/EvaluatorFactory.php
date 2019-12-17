@@ -15,7 +15,7 @@ use App\Services\VoucherEvaluator\Evaluations\ChildIsUnBorn;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderSecondarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderOne;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderSchoolAge;
-use App\Services\VoucherEvaluator\Evaluations\FamilyHasEligibleChildren;
+use App\Services\VoucherEvaluator\Evaluations\FamilyHasNoEligibleChildren;
 use App\Services\VoucherEvaluator\Evaluations\FamilyIsPregnant;
 use App\Services\VoucherEvaluator\Evaluators\VoucherEvaluator;
 use Carbon\Carbon;
@@ -122,7 +122,6 @@ class EvaluatorFactory
                     new ChildIsAlmostSecondarySchoolAge($offsetDate),
                     new ChildIsSecondarySchoolAge($offsetDate)
                 ],
-                'eligibilities' => [],
                 'relations' => [],
             ],
             Family::class => [
@@ -130,7 +129,9 @@ class EvaluatorFactory
                     new FamilyIsPregnant(null, 3)
                 ],
                 'notices' => [],
-                'eligibilities' => [],
+                'disqualifiers' => [
+                    new FamilyHasNoEligibleChildren($offsetDate),
+                ],
                 'relations' => ['children'],
             ],
             Registration::class => [

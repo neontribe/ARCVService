@@ -75,7 +75,7 @@ class Registration extends Model implements IEvaluee
      */
     public function accept(AbstractEvaluator $evaluator)
     {
-        return $evaluator->evaluateRegistration($this);
+        return $evaluator->evaluate($this);
     }
 
     /**

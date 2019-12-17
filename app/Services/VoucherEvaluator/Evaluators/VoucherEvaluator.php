@@ -2,10 +2,8 @@
 
 namespace App\Services\VoucherEvaluator\Evaluators;
 
-use App\Child;
-use App\Family;
-use App\Registration;
 use App\Services\VoucherEvaluator\AbstractEvaluator;
+use App\Services\VoucherEvaluator\Evaluations\AbstractEvaluation;
 use App\Services\VoucherEvaluator\IEvaluee;
 use App\Services\VoucherEvaluator\Valuation;
 
@@ -29,88 +27,39 @@ class VoucherEvaluator extends AbstractEvaluator
      * @param IEvaluee $subject
      * @return Valuation
      */
-    private function evaluate(IEvaluee $subject)
+    public function evaluate(IEvaluee $subject)
     {
-        $valuations = $this->evaluateRelations($subject);
-        $credits = $this->evaluateCredits($subject);
-        $notices = $this->evaluateNotices($subject);
-        $eligibilities = $this->evaluateEligibilities($subject);
-        $entitlement = array_sum(array_column($credits, 'value'));
-
-        $eligibility = (
-            $entitlement > 0 &&
-            !empty($eligibilities)
-        );
-
         return new Valuation([
-            'valuations' => $valuations,
             'evaluee' => $subject,
-            'eligibility' => $eligibility,
-            'notices' => $notices,
-            'credits' => $credits,
-            'entitlement' => $entitlement,
+            'valuations' => $this->evaluateRelations($subject),
+            'credits' => $this->evaluateRules('credits', $subject),
+            'notices' => $this->evaluateRules('notices', $subject),
+            'disqualifiers' => $this->evaluateRules('disqualifiers', $subject),
         ]);
     }
 
     /**
-     * Evaluates Eligibilities
+     * Evaluates a specific rule key against the Evaluee
      *
+     * @param string $ruleKey
      * @param IEvaluee $subject
      * @return array
      */
-    private function evaluateEligibilities(IEvaluee $subject)
+    private function evaluateRules(string $ruleKey, IEvaluee $subject)
     {
-        $eligibilities = [];
+        $results = [];
         $rules = $this->evaluations[get_class($subject)];
-        foreach ($rules['eligibilities'] as $rule) {
+        /**
+         * @var AbstractEvaluation $rule
+         * @var AbstractEvaluation $outcome
+         */
+        foreach ($rules[$ruleKey] as $rule) {
             $outcome = $rule->test($subject);
             if ($outcome) {
-                $notices[] = ['reason' => class_basename($outcome::SUBJECT)."|".$outcome::REASON];
+                $results[] = $outcome->toReason();
             }
         }
-        return $eligibilities;
-    }
-
-
-    /**
-     * Helper to process the current valuation Notices
-     *
-     * @param IEvaluee $subject
-     * @return array
-     */
-    private function evaluateNotices(IEvaluee $subject)
-    {
-        $notices = [];
-        $rules = $this->evaluations[get_class($subject)];
-        foreach ($rules['notices'] as $rule) {
-            $outcome = $rule->test($subject);
-            if ($outcome) {
-                $notices[] = ['reason' => class_basename($outcome::SUBJECT)."|".$outcome::REASON];
-            }
-        }
-        return $notices;
-    }
-
-    /**
-     * Helper to process the current valuation credits
-     *
-     * @param IEvaluee $subject
-     * @return array
-     */
-    private function evaluateCredits(IEvaluee $subject)
-    {
-        $credits = [];
-        $rules = $this->evaluations[get_class($subject)];
-        foreach ($rules['credits'] as $rule) {
-            $outcome = $rule->test($subject);
-            if ($outcome !== null) {
-                $credits[] = [
-                    'reason' => class_basename($outcome::SUBJECT)."|".$outcome::REASON,
-                    'value' => $outcome->value,
-                ];
-            }
-        }
-        return $credits;
+        return $results;
     }
 
     /**
@@ -141,38 +90,5 @@ class VoucherEvaluator extends AbstractEvaluator
             }
         }
         return $valuations;
-    }
-
-    /**
-     * Evaluates a Child and returns the valuation
-     *
-     * @param Child $subject
-     * @return Valuation
-     */
-    public function evaluateChild(Child $subject)
-    {
-        return $this->evaluate($subject);
-    }
-
-    /**
-     * Evaluates a Family object and returns the summary array
-     *
-     * @param Family $subject
-     * @return Valuation
-     */
-    public function evaluateFamily(Family $subject)
-    {
-        return $this->evaluate($subject);
-    }
-
-    /**
-     * Evaluates a registration and sets it's valuation
-     *
-     * @param Registration $subject
-     * @return Valuation
-     */
-    public function evaluateRegistration(Registration $subject)
-    {
-        return $this->evaluate($subject);
     }
 }

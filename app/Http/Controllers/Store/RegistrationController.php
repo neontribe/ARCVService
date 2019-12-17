@@ -209,6 +209,7 @@ class RegistrationController extends Controller
         }
 
         // Get the valuation
+        /** @var Valuation $valuation */
         $valuation = $registration->valuation;
 
         // Make a filename
