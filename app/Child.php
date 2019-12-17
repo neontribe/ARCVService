@@ -38,6 +38,12 @@ class Child extends Model implements IEvaluee
     ];
 
     /**
+     * Valuation stash
+     * @var Valuation $_valuation
+     */
+    public $_valuation = null;
+
+    /**
      * Get's the family's preferred evaluator
      *
      * @return AbstractEvaluator
@@ -48,13 +54,14 @@ class Child extends Model implements IEvaluee
     }
 
     /**
-     * Get the valuation on this child.
+     * Get the valuation on this registration.
      *
      * @return Valuation
      */
     public function getValuationAttribute()
     {
-        return $this->accept($this->evaluator);
+        // Get the stashed one, or get a new one.
+        return ($this->_valuation) ?? $this->accept($this->evaluator);
     }
 
     /**
@@ -65,7 +72,8 @@ class Child extends Model implements IEvaluee
      */
     public function accept(AbstractEvaluator $evaluator)
     {
-        return $evaluator->evaluate($this);
+        $this->_valuation = $evaluator->evaluate($this);
+        return $this->_valuation;
     }
 
     /**

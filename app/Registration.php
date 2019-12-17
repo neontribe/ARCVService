@@ -49,6 +49,12 @@ class Registration extends Model implements IEvaluee
     private $_evaluator = null;
 
     /**
+     * Valuation stash
+     * @var Valuation $_valuation
+     */
+    public $_valuation = null;
+
+    /**
      * Magically gets a public evaluator.
      * @return AbstractEvaluator
      */
@@ -61,21 +67,25 @@ class Registration extends Model implements IEvaluee
 
     /**
      * Get the valuation on this registration.
+     *
      * @return Valuation
      */
     public function getValuationAttribute()
     {
-        return $this->accept($this->evaluator);
+        // Get the stashed one, or get a new one.
+        return ($this->_valuation) ?? $this->accept($this->evaluator);
     }
 
     /**
      * Visitor pattern voucher evaluator
      *
      * @param AbstractEvaluator $evaluator
+     * @return Valuation
      */
     public function accept(AbstractEvaluator $evaluator)
     {
-        return $evaluator->evaluate($this);
+        $this->_valuation = $evaluator->evaluate($this);
+        return $this->_valuation;
     }
 
     /**

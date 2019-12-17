@@ -49,6 +49,12 @@ class Family extends Model implements IEvaluee
     ];
 
     /**
+     * Valuation stash
+     * @var Valuation $_valuation
+     */
+    private $_valuation = null;
+
+    /**
      * Gets the evaluator from up the chain.
      *
      * @return AbstractEvaluator
@@ -59,16 +65,6 @@ class Family extends Model implements IEvaluee
     }
 
     /**
-     * Get the valuation on this family in context of it's registration.
-     *
-     * @return Valuation
-     */
-    public function getValuationAttribute()
-    {
-        return $this->accept($this->evaluator);
-    }
-
-    /**
      * Visitor pattern voucher evaluator
      *
      * @param AbstractEvaluator $evaluator
@@ -76,7 +72,8 @@ class Family extends Model implements IEvaluee
      */
     public function accept(AbstractEvaluator $evaluator)
     {
-        return $evaluator->evaluate($this);
+        $this->_valuation = $evaluator->evaluate($this);
+        return $this->_valuation;
     }
 
     /**
