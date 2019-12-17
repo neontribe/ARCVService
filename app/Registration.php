@@ -52,7 +52,7 @@ class Registration extends Model implements IEvaluee
      * Valuation stash
      * @var Valuation $_valuation
      */
-    public $_valuation = null;
+    private $_valuation = null;
 
     /**
      * Magically gets a public evaluator.

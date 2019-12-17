@@ -149,6 +149,8 @@ class CentreController extends Controller
             $regValuation = $reg->valuatation;
 
             if ($reg->family) {
+                /** @var Valuation $familyValuation */
+                $familyValuation = $reg->family->valuation;
                 $child_index = 1;
                 foreach ($reg->family->children as $child) {
                     // Will run a child valuation if we don't already have one.
@@ -164,7 +166,7 @@ class CentreController extends Controller
                         $kids[$dob_header] = $child->dob->lastOfMonth()->format($dateFormats['dob']);
                         $child_index += 1;
                         // A child is eligible if it's family is AND it has no disqualifications of it's own.
-                        if ($reg->family->getEligibility() && $childValuation->getEligibility()) {
+                        if ($familyValuation->getEligibility() && $childValuation->getEligibility()) {
                             $eligibleKids += 1;
                         }
                     }
