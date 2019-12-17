@@ -140,7 +140,7 @@ class Valuation extends ArrayObject
         // Check this attribute
         if (property_exists($this, $attribute) &&
             // If this valuation isn't eligible
-            $this->getEligibility() !== $onlyEligible
+            $this->getEligibility() === $onlyEligible
         ) {
             $flatAttrib = $this[$attribute];
 
@@ -150,17 +150,10 @@ class Valuation extends ArrayObject
                 foreach ($this->valuations as $valuation) {
                     array_merge($flatAttrib, $valuation->flat($attribute, $onlyEligible));
                 }
-            } else if (is_integer($flatAttrib)) {
-                // Merge on it's descendents
-                foreach ($this->valuations as $valuation) {
-                    /** @var Valuation $valuation */
-                    $flatAttrib += $valuation->flat($attribute, $onlyEligible);
-                }
             }
             return $flatAttrib;
-        } else {
-            // Something went wrong
-            return null;
         }
+        // Something went wrong
+        return [];
     }
 }

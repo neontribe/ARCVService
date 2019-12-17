@@ -130,7 +130,7 @@ class EvaluatorFactory
                 ],
                 'notices' => [],
                 'disqualifiers' => [
-                    new FamilyHasNoEligibleChildren($offsetDate),
+                    //new FamilyHasNoEligibleChildren($offsetDate),
                 ],
                 'relations' => ['children'],
             ],

@@ -53,10 +53,12 @@ class VoucherEvaluator extends AbstractEvaluator
          * @var AbstractEvaluation $rule
          * @var AbstractEvaluation $outcome
          */
-        foreach ($rules[$ruleKey] as $rule) {
-            $outcome = $rule->test($subject);
-            if ($outcome) {
-                $results[] = $outcome->toReason();
+        if (array_key_exists($ruleKey, $rules)) {
+            foreach ($rules[$ruleKey] as $rule) {
+                $outcome = $rule->test($subject);
+                if ($outcome) {
+                    $results[] = $outcome->toReason();
+                }
             }
         }
         return $results;
