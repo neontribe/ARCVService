@@ -6,6 +6,8 @@ use App\Services\VoucherEvaluator\AbstractEvaluator;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\IEvaluation;
 use App\Services\VoucherEvaluator\IEvaluee;
+use Carbon\Carbon;
+use Carbon\CarbonInterval;
 use Illuminate\Database\Eloquent\Model;
 
 class Registration extends Model implements IEvaluee
@@ -64,6 +66,40 @@ class Registration extends Model implements IEvaluee
     public function accept(AbstractEvaluator $evaluator)
     {
         $evaluator->evaluateRegistration($this);
+    }
+
+    /**
+     * Works out if a Registration can be counted as "Active"
+     *
+     * @return bool
+     */
+    public function isActive()
+    {
+        // Get the last disbursement, if any.
+        $lastCollection = $this->bundles()
+            ->disbursed()
+            ->orderBy('disbursed_at', 'desc')
+            ->first()
+        ;
+        // Use created_at, aka "Join Date" if no collections (edge case)
+        /** @var Carbon $activeDate */
+        $activeDate = ($lastCollection->disbursed_at) ?? $this->created_at;
+
+        /*  if today() is less than or equal to
+                Friday of the 4th week after pickup
+                    then true, else false
+        */
+
+        // Calculate forward date.
+        $friday4thWeek = $activeDate
+            // find start of that week (day 1, monday) ...
+            ->startOfWeek()
+            // add four full weeks ...
+            ->addWeeks(4)
+            // add 4 extra days (day 1 -> 5, friday)
+            ->addDays(4)
+        ;
+        return Carbon::today()->lessThanOrEqualTo($friday4thWeek);
     }
 
     /**
