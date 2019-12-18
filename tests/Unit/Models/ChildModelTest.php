@@ -19,6 +19,19 @@ class ChildModelTest extends TestCase
         $child = factory(Child::class)->make();
         $this->assertNotNull($child->dob);
         $this->assertNotNull($child->born);
+        $this->assertNull($child->verfied);
+    }
+
+    /** @test */
+    public function itCanBeVerified()
+    {
+        $child1 = factory(Child::class)->states('verified')->make();
+        $this->assertNotNull($child1->verified);
+        $this->assertTrue($child1->verified);
+
+        $child2 = factory(Child::class)->states('unverified')->make();
+        $this->assertNotNull($child2->verified);
+        $this->assertFalse($child2->verified);
     }
 
     /** @test */
