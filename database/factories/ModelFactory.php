@@ -201,7 +201,7 @@ $factory->define(App\Bundle::class, function (Faker\Generator $faker, $attribute
     // get/calculate and stash the entitlement
     $entitlement = isset($attributes['entitlement'])
         ? $attributes['entitlement']
-        : $registration->valuation->getEntitlement()
+        : $registration->getValuation()->getEntitlement()
     ;
 
     return [

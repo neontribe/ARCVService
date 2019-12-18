@@ -4,12 +4,13 @@ namespace App;
 
 use App\Services\VoucherEvaluator\AbstractEvaluator;
 use App\Services\VoucherEvaluator\IEvaluee;
-use App\Services\VoucherEvaluator\Valuation;
+use App\Traits\Evaluable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Child extends Model implements IEvaluee
 {
+    use Evaluable;
     /**
      * The attributes that are mass assignable.
      *
@@ -38,42 +39,13 @@ class Child extends Model implements IEvaluee
     ];
 
     /**
-     * Valuation stash
-     * @var Valuation $_valuation
-     */
-    public $_valuation = null;
-
-    /**
      * Get's the family's preferred evaluator
      *
      * @return AbstractEvaluator
      */
-    public function getEvaluatorAttribute()
+    public function getEvaluator()
     {
         return $this->family->evaluator;
-    }
-
-    /**
-     * Get the valuation on this registration.
-     *
-     * @return Valuation
-     */
-    public function getValuationAttribute()
-    {
-        // Get the stashed one, or get a new one.
-        return ($this->_valuation) ?? $this->accept($this->evaluator);
-    }
-
-    /**
-     * Visitor pattern voucher evaluator
-     *
-     * @param AbstractEvaluator $evaluator
-     * @return Valuation
-     */
-    public function accept(AbstractEvaluator $evaluator)
-    {
-        $this->_valuation = $evaluator->evaluate($this);
-        return $this->_valuation;
     }
 
     /**

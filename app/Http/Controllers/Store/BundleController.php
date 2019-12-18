@@ -55,7 +55,7 @@ class BundleController extends Controller
             : null
         ;
 
-        $valuation = $registration->valuation;
+        $valuation = $registration->getValuation();
 
         return view('store.manage_vouchers', array_merge(
             $data,

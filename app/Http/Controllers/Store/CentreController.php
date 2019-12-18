@@ -136,7 +136,7 @@ class CentreController extends Controller
                 "Area" => ($reg->centre->sponsor->name) ?? 'Area not found',
                 "Centre" => ($reg->centre->name) ?? 'Centre not found',
                 "Primary Carer" => ($reg->family->pri_carer) ?? 'Primary Carer not Found',
-                "Entitlement" => $reg->valuation->getEntitlement(),
+                "Entitlement" => $reg->getValuation()->getEntitlement(),
                 "Last Collection" => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format($dateFormats['lastCollection']) : null
             ];
 
@@ -150,12 +150,12 @@ class CentreController extends Controller
 
             if ($reg->family) {
                 /** @var Valuation $familyValuation */
-                $familyValuation = $reg->family->valuation;
+                $familyValuation = $reg->family->getValuation();
                 $child_index = 1;
                 foreach ($reg->family->children as $child) {
                     // Will run a child valuation if we don't already have one.
                     /** @var Valuation $childValuation */
-                    $childValuation = $child->valuation;
+                    $childValuation = $child->getValuation();
 
                     if ($child->dob->isFuture()) {
                         // If it's a pregnancy, set due date and move on.

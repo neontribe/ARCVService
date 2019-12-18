@@ -5,13 +5,15 @@ namespace App;
 use App\Services\VoucherEvaluator\AbstractEvaluator;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\IEvaluee;
-use App\Services\VoucherEvaluator\Valuation;
+use App\Traits\Evaluable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Registration extends Model implements IEvaluee
 {
+    use Evaluable;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -43,49 +45,14 @@ class Registration extends Model implements IEvaluee
     ];
 
     /**
-     * Private evaluator stash
-     * @var AbstractEvaluator null
-     */
-    private $_evaluator = null;
-
-    /**
-     * Valuation stash
-     * @var Valuation $_valuation
-     */
-    private $_valuation = null;
-
-    /**
      * Magically gets a public evaluator.
      * @return AbstractEvaluator
      */
-    public function getEvaluatorAttribute()
+    public function getEvaluator()
     {
         // if the private var is null, make a new one, stash it and return it.
         $this->_evaluator = ($this->_evaluator) ?? EvaluatorFactory::makeFromRegistration($this);
         return $this->_evaluator;
-    }
-
-    /**
-     * Get the valuation on this registration.
-     *
-     * @return Valuation
-     */
-    public function getValuationAttribute()
-    {
-        // Get the stashed one, or get a new one.
-        return ($this->_valuation) ?? $this->accept($this->evaluator);
-    }
-
-    /**
-     * Visitor pattern voucher evaluator
-     *
-     * @param AbstractEvaluator $evaluator
-     * @return Valuation
-     */
-    public function accept(AbstractEvaluator $evaluator)
-    {
-        $this->_valuation = $evaluator->evaluate($this);
-        return $this->_valuation;
     }
 
     /**
@@ -126,7 +93,7 @@ class Registration extends Model implements IEvaluee
         if (!$bundle) {
             $bundle = Bundle::create([
                 "registration_id" => $this->id,
-                "entitlement" => $this->valuation->getEntitlement()
+                "entitlement" => $this->getValuation()->getEntitlement()
                 ]);
         };
 
