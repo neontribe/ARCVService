@@ -28,7 +28,7 @@
         "filp/whoops": "~2.0",
         "fzaninotto/faker": "~1.4",
         "laracasts/generators": "^1.1",
-        "laravel/browser-kit-testing": "3.*",
+        "laravel/browser-kit-testing": "~3.0",
         "mockery/mockery": "~1.0",
         "phpunit/phpunit": "~6.0",
         "spinen/laravel-mail-assertions": "^0.3.0"
