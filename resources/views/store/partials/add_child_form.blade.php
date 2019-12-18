@@ -11,10 +11,12 @@
         <input id="dob-year" name="dob-year" type="number" pattern="[0-9]*" min="0"
                 max="{{ Carbon\Carbon::now()->year }}">
     </div>
+    @if ( in_array(auth::user()->centre->sponsor->shortcode, config('arc.verifies_children')) )
     <div class="dob-input relative">
         <input type="checkbox" class="styled-checkbox" id="dob-verified" name="dob-verified">
         <label for="dob-verified">ID Checked</label>
     </div>
+    @endif
 </div>
 <button id="add-dob" class="link-button link-button-large">
     <i class="fa fa-plus button-icon" aria-hidden="true"></i>
@@ -86,7 +88,7 @@
                 var valueDate = dateObj.format("YYYY-MM");
 
                 // add an input
-                $(el).append('<tr><td><input name="children[]" type="hidden" value="' + valueDate + '" >' + innerTextDate + '</td><td><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
+                $(el).append('<tr><td>age</td><td><input name="children[][dob]" type="hidden" value="' + valueDate + '" >' + innerTextDate + '</td><td>id</td><td><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
 
                 // reset form
                 dobError.text('');

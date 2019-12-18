@@ -64,7 +64,9 @@
                         <tr>
                             <td>Age</td>
                             <td>Month / Year</td>
+                            @if ( in_array(auth::user()->centre->sponsor->shortcode, config('arc.verifies_children')) )
                             <td>ID</td>
+                            @endif
                             <td></td>
                         </tr>
                         </thead>
@@ -73,9 +75,11 @@
                             <tr>
                                 <td>{{ $child->getAgeString() }}</td>
                                 <td>{{ $child->getDobAsString() }}</td>
-                                <td></td>
+                                @if ( in_array(auth::user()->centre->sponsor->shortcode, config('arc.verifies_children')) )
+                                <td>{{ $child->verified ? "✔" : "X" }}</td>
+                                @endif
                                 <td>
-                                    <input type="hidden" name="children[]"
+                                    <input type="hidden" name="children[][dob]"
                                         value="{{ Carbon\Carbon::parse($child->dob)->format('Y-m') }}">
                                     <button class="remove_date_field">
                                         <i class="fa fa-minus" aria-hidden="true"></i>
