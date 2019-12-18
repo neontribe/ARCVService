@@ -42,6 +42,7 @@
 
                 var monthEl = $('#dob-month');
                 var yearEl = $('#dob-year');
+                var idCheckedEl = $('#dob-verified');
 
                 // If input fields are too small, return
                 if (monthEl.val().length < 1 || yearEl.val().length <= 2) {
@@ -87,14 +88,31 @@
                 var innerTextDate = dateObj.format("MMM YYYY");
                 var valueDate = dateObj.format("YYYY-MM");
 
+                // Make some age display values
+                var displayMonths = moment().diff(valueDate, 'months') % 12;
+                var displayYears = moment().diff(valueDate, 'years');
+
+                // Organise the ID verification values and display
+                var verifiedValue = idCheckedEl.is(":checked") ? 1 : 0;
+                var displayVerified = idCheckedEl.is(":checked") ? "✔" : "X";
+                var childKey = Math.random();
+
+                // Create the table columns
+                var ageColumn = '<td class="age-col">' + displayYears + ' yr, ' + displayMonths + ' mo</td>';
+                var dobColumn = '<td><input name="children[' + childKey + '][dob]" type="hidden" value="' + valueDate + '" >' + innerTextDate + '</td>';
+                var idColumn = '<td><input name="children[' + childKey + '][verified]" type="hidden" value="' + verifiedValue + '" >' + displayVerified +  '</td>';
+                var removeColumn = '<td><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>';
+
                 // add an input
-                $(el).append('<tr><td>age</td><td><input name="children[][dob]" type="hidden" value="' + valueDate + '" >' + innerTextDate + '</td><td>id</td><td><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
+                $(el).append('<tr>' + ageColumn + dobColumn + idColumn + removeColumn + '</tr>');
 
                 // reset form
                 dobError.text('');
                 yearEl.val('');
                 monthEl.val('');
+                idCheckedEl.prop('checked', false);
                 monthEl.focus();
+
             });
 
             $(el).on("click", ".remove_date_field", function (e) {

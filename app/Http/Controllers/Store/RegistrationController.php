@@ -492,7 +492,7 @@ class RegistrationController extends Controller
             // Check and set verified, or null
             $verified = null;
             if (array_key_exists('verified', $child)) {
-                $verified = boolval($child('verified'));
+                $verified = boolval($child['verified']);
             }
 
             return new Child([

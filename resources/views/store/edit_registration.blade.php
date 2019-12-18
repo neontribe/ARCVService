@@ -73,7 +73,7 @@
                         <tbody id="existing_wrapper">
                         @foreach ( $children as $child )
                             <tr>
-                                <td>{{ $child->getAgeString() }}</td>
+                                <td class="age-col">{{ $child->getAgeString() }}</td>
                                 <td>{{ $child->getDobAsString() }}</td>
                                 @if ( in_array(auth::user()->centre->sponsor->shortcode, config('arc.verifies_children')) )
                                 <td>{{ $child->verified ? "✔" : "X" }}</td>
