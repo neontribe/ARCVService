@@ -48,6 +48,7 @@ class Child extends Model implements IEvaluee
         return $this->family->evaluator;
     }
 
+    /*
      * The attributes that should be cast.
      *
      * @var array
