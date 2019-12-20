@@ -327,7 +327,7 @@ class BundleController extends Controller
 
                         // Generate error messages where vouchers of the sort existed, using unescaped HTML where necessary.
                         $relevant && $messages[] = new HtmlString(
-                            "These vouchers are currently allocated to a different family: " . join(', ', $relevant)
+                            "These vouchers are currently allocated to a different family. Click on the voucher number to view the other family's record: " . join(', ', $relevant)
                         );
                         $inaccessible && $messages[] = "These vouchers are allocated to a family in a centre you can't access: " . join(', ', $inaccessible);
 
