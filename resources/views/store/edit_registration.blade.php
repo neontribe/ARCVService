@@ -75,8 +75,8 @@
                                 <td>{{ $child->getAgeString() }}</td>
                                 <td>{{ $child->getDobAsString() }}</td>
                                 <td>
-                                    <input type="hidden" name="children[]"
-                                           value="{{ Carbon\Carbon::parse($child->dob)->format('Y-m') }}">
+                                    <input type="hidden" name="children[][dob]"
+                                        value="{{ Carbon\Carbon::parse($child->dob)->format('Y-m') }}">
                                     <button class="remove_date_field">
                                         <i class="fa fa-minus" aria-hidden="true"></i>
                                     </button>

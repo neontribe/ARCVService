@@ -17,7 +17,7 @@ class Child extends Model implements IEvaluee
      * @var array
      */
     protected $fillable = [
-        'dob','born'
+        'dob','born', 'verified'
     ];
 
     /**
@@ -47,6 +47,14 @@ class Child extends Model implements IEvaluee
     {
         return $this->family->evaluator;
     }
+
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'verified' => 'boolean',
+    ];
 
     /**
      * Calculates and returns the age in Years and Months (or P for pregnancy)

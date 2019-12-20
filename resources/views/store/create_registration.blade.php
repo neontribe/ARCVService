@@ -68,7 +68,7 @@
                             @if(is_array(old('children')) || (!empty(old('children'))))
                                 @foreach (old('children') as $old_child )
                                 <tr>
-                                    <td><input name="children[]" type="hidden" value="{{ $old_child }}" > {{ $old_child }}</td>
+                                    <td><input name="children[]['dob']" type="hidden" value="{{ $old_child }}" > {{ $old_child }}</td>
                                     <td><button class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>
                                 </tr>
                                 @endforeach
