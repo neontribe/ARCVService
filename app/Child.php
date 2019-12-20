@@ -15,7 +15,7 @@ class Child extends Model implements IEvaluee
      * @var array
      */
     protected $fillable = [
-        'dob','born'
+        'dob','born', 'verified'
     ];
 
     /**
@@ -35,6 +35,15 @@ class Child extends Model implements IEvaluee
         'created_at',
         'updated_at',
         'dob'
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'verified' => 'boolean',
     ];
 
     /**
