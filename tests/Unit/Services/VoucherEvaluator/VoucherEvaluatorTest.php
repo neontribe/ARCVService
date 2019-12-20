@@ -68,27 +68,36 @@ class VoucherEvaluatorTest extends TestCase
         $overSchool = factory(Child::class, 'overSchoolAge')->make();
         $overSecondarySchool = factory(Child::class, 'overSecondarySchoolAge')->make();
 
-        // Add the kids
+        // Add the kids and check they saved
         $family->children()->saveMany([$overSchool ,$overSecondarySchool]);
         $this->assertEquals(2, $family->children()->count());
 
+        // Run the evaluation
         $evaluation = $evaluator->evaluate($family);
-        // Check it fails
+        // Check it can't find any eligible children (0 vouchers)
+        // - because no under primary school-ers validate the under secondary school-ers.
         $this->assertFalse($evaluation->getEligibility());
         $this->assertEquals('0', $evaluation->getEntitlement());
 
-        // Add a kid that will make the overSchool kids eligible.
+        // Add a kid that will make the child under secondary school age.
         $underSchool = factory(Child::class, 'underSchoolAge')->make();
 
+        // Re-save
         $family->children()->saveMany([$underSchool, $overSchool ,$overSecondarySchool]);
         $family = $family->fresh();
+
+        // Check we've saved the children correctly
         $this->assertEquals(3, $family->children->count());
 
-        // Re-evaluate
+        // Re-evaluate, based on the new reality
         $evaluation = $evaluator->evaluate($family);
 
-        // Check it fails
+        // Check it passes
         $this->assertTrue($evaluation->getEligibility());
+        // We have :
+        // - one child under school age (3 vouchers)
+        // - who enables one child under secondary school age (3 vouchers)
+        // - but not one child who is overage (0 vouchers)
         $this->assertEquals('6', $evaluation->getEntitlement());
     }
 
