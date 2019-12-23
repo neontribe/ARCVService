@@ -62,24 +62,24 @@
                     <table>
                         <thead>
                         <tr>
-                            <td>Age</td>
-                            <td>Month / Year</td>
+                            <td class="age-col">Age</td>
+                            <td class="dob-col">Month / Year</td>
                             @if ( in_array(auth::user()->centre->sponsor->shortcode, config('arc.verifies_children')) )
-                            <td>ID</td>
+                            <td class="verified-col">ID</td>
                             @endif
-                            <td></td>
+                            <td class="remove-col"></td>
                         </tr>
                         </thead>
                         <tbody id="existing_wrapper">
                         @foreach ( $children as $child )
                             <tr>
                                 <td class="age-col">{{ $child->getAgeString() }}</td>
-                                <td>{{ $child->getDobAsString() }}</td>
+                                <td class="dob-col">{{ $child->getDobAsString() }}</td>
                                 @if ( in_array(auth::user()->centre->sponsor->shortcode, config('arc.verifies_children')) )
-                                <td>{{ $child->verified ? "✔" : "X" }}</td>
+                                <td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[{{ $child->id }}][verified]" id="child{{ $child->id }}" {{ $child->verified ? "checked" : null }} value="1"><label for="child{{ $child->id }}"></label></td>
                                 @endif
-                                <td>
-                                    <input type="hidden" name="children[][dob]"
+                                <td class="remove-col">
+                                    <input type="hidden" name="children[{{ $child->id }}][dob]"
                                         value="{{ Carbon\Carbon::parse($child->dob)->format('Y-m') }}">
                                     <button class="remove_date_field">
                                         <i class="fa fa-minus" aria-hidden="true"></i>
