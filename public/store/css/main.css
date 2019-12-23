@@ -82,19 +82,22 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 input[type="radio"],
-.styled-checkbox {
+.styled-checkbox,
+.inline-dob {
 	cursor: pointer;
 	opacity: 0;
 }
 
 input[type=radio]+label,
-.styled-checkbox+label {
+.styled-checkbox+label,
+.inline-dob + div {
 	cursor: pointer;
 	margin-left: -20px;
 }
 
 input[type="radio"]+label:before,
-.styled-checkbox+label:before {
+.styled-checkbox+label:before,
+.inline-dob + div::before {
 	content: "";
 	background: #ffffff;
 	width: 34px;
@@ -106,7 +109,8 @@ input[type="radio"]+label:before,
 }
 
 input[type="radio"]:focus+label:before,
-.styled-checkbox:focus+label:before {
+.styled-checkbox:focus+label:before,
+.inline-dob:focus + label::before {
 	box-shadow: 0 0 0 3px #dcb9d2;
 }
 
@@ -217,7 +221,22 @@ td {
 }
 
 .age-col {
-    width: 32%;
+    width: 25%;
+    padding-left: 0;
+}
+
+.dob-col {
+    width: 30%;
+}
+
+.verified-col {
+    width: 20%;
+    text-align: center;
+}
+
+.remove-col {
+    width: 10%;
+    padding-right: 0;
 }
 
 strong {
@@ -1254,10 +1273,31 @@ with overrides to display with a label above rather than inline */
     margin-left: 0px;
 }
 
-#dob-verified + label:before {
+#dob-verified + label::before {
     top: 20px;
 }
 
-#dob-verified:checked + label:after {
+#dob-verified:checked + label::after {
     top: 26px;
+}
+
+.inline-dob {
+    position: absolute;
+    top: 20px;
+	left: 25px;
+}
+
+.inline-dob + label::before {
+    left: 20px;
+    top: 13px;
+}
+
+.inline-dob + label::before {
+    top: 14px;
+}
+
+.inline-dob:checked + label:after {
+    content: "✔";
+    top: 20px;
+    left: 32px;
 }

@@ -94,14 +94,14 @@
 
                 // Organise the ID verification values and display
                 var verifiedValue = idCheckedEl.is(":checked") ? 1 : 0;
-                var displayVerified = idCheckedEl.is(":checked") ? "✔" : "X";
+                var displayVerified = idCheckedEl.is(":checked") ? "checked" : null;
                 var childKey = Math.random();
 
                 // Create the table columns
                 var ageColumn = '<td class="age-col">' + displayYears + ' yr, ' + displayMonths + ' mo</td>';
-                var dobColumn = '<td><input name="children[' + childKey + '][dob]" type="hidden" value="' + valueDate + '" >' + innerTextDate + '</td>';
-                var idColumn = '<td><input name="children[' + childKey + '][verified]" type="hidden" value="' + verifiedValue + '" >' + displayVerified +  '</td>';
-                var removeColumn = '<td><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>';
+                var dobColumn = '<td class="dob-col"><input name="children[' + childKey + '][dob]" type="hidden" value="' + valueDate + '" >' + innerTextDate + '</td>';
+                var idColumn = '<td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][verified]" id="child' + childKey + '" ' + displayVerified + ' value="' + verifiedValue + '"><label for="child' + childKey + '"></label>' + '</td>';
+                var removeColumn = '<td class="remove-col"><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>';
 
                 // add an input
                 $(el).append('<tr>' + ageColumn + dobColumn + idColumn + removeColumn + '</tr>');
