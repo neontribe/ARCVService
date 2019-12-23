@@ -377,6 +377,15 @@ $factory->define(App\Child::class, function (Faker\Generator $faker) {
     ];
 });
 
+$factory->state(App\Child::class, 'verified', function(Faker\Generator $faker) {
+    return ['verified' => true];
+});
+
+$factory->state(App\Child::class, 'unverified', function(Faker\Generator $faker) {
+    return ['verified' => false];
+});
+
+
 // Child - unborn
 $factory->defineAs(App\Child::class, 'unbornChild', function (Faker\Generator $faker) {
 

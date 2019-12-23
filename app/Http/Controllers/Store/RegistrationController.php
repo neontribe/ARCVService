@@ -151,7 +151,7 @@ class RegistrationController extends Controller
      * Show the Registration / Family edit form
      *
      * @param Registration $registration
-     * @return RedirectResponse
+     * @return Factory|View
      */
     public function edit(Registration $registration)
     {
@@ -325,21 +325,8 @@ class RegistrationController extends Controller
             )
         );
 
-        // Create Children - todo refactor into helper - used twice
-        // Might be lovlier as a foreach too... rather than map closure :)
-        $children = array_map(
-            function ($child) {
-                // Note: Carbon uses different time formats than laravel validation
-                // For crazy reasons known only to the creators of Carbon, when no day provided,
-                // createFromFormat - defaults to 31 - which bumps to next month if not a real day.
-                // So we want '2013-02-01' not '2013-02-31'...
-                $month_of_birth = Carbon::createFromFormat('Y-m-d', $child . '-01');
-
-                return new Child([
-                        'born' => $month_of_birth->isPast(),
-                        'dob' => $month_of_birth->toDateTimeString(),
-                    ]);
-            },
+        // Create Children
+        $children = $this->makeChildrenFromInput(
             (array)$request->get('children')
         );
 
@@ -440,17 +427,7 @@ class RegistrationController extends Controller
         );
 
         // Create New Children
-        $children = array_map(
-            function ($child) {
-                // Note: Carbon uses different time formats than laravel validation
-                // For crazy reasons known only to the creators of Carbon, when no day provided
-                // to createFromFormat - defaults to 31 - which bumps to next month if not a real day.
-                $month_of_birth = Carbon::createFromFormat('Y-m-d', $child . '-01');
-                return new Child([
-                    'born' => $month_of_birth->isPast(),
-                    'dob' => $month_of_birth->toDateTimeString(),
-                ]);
-            },
+        $children = $this->makeChildrenFromInput(
             (array)$request->get('children')
         );
 
@@ -497,5 +474,34 @@ class RegistrationController extends Controller
         return redirect()
             ->route('store.registration.edit', ['id' => $registration->id])
             ->with('message', 'Registration updated.');
+    }
+
+    /**
+     * Makes children from input data
+     * @param array $children
+     * @return array
+     */
+    private function makeChildrenFromInput(array $children = [])
+    {
+        return array_map(function($child) {
+            // Note: Carbon uses different time formats than laravel validation
+            // For crazy reasons known only to the creators of Carbon, when no day provided,
+            // createFromFormat - defaults to 31 - which bumps to next month if not a real day.
+            // So we want '2013-02-01' not '2013-02-31'...
+            $month_of_birth = Carbon::createFromFormat('Y-m-d', $child['dob'] . '-01');
+
+            // Check and set verified, or null
+            $verified = null;
+            if (array_key_exists('verified', $child)) {
+                $verified = boolval($child('verified'));
+            }
+
+            return new Child([
+                'born' => $month_of_birth->isPast(),
+                'dob' => $month_of_birth->toDateTimeString(),
+                'verified' => $verified
+            ]);
+        },
+        $children);
     }
 }
