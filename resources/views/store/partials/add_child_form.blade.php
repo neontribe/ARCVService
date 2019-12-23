@@ -53,7 +53,7 @@
                 // get the dates
                 var month = monthEl.val();
                 var year = yearEl.val();
-                var dateObj = moment(year + '-' + month, "YYYY-MM", true).startOf('month');
+                var dateObj = moment(year + '-' + month, "YYYY-M", true).startOf('month');
 
                 if (!dateObj.isValid()) {
                     switch (dateObj.invalidAt()) {
