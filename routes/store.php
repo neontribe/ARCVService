@@ -28,8 +28,6 @@ Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 // Store Dashboard route
 // Default redirect to Service Dashboard
 
-// TODO : use of singular/plurals in route names; Mixed opinions found. discuss.
-
 Route::get('/', function () {
     $route = 'store.login';
     //$route = (Auth::guard('store')->check()) ? 'store.dashboard' : 'store.login';
@@ -38,21 +36,15 @@ Route::get('/', function () {
 
 
 // Store payment request link handling; does not require any auth
-Route::get(
-    '/payment-request/{paymentUuid}',
-    [
+Route::get('/payment-request/{paymentUuid}', [
         'as' => 'store.payment-request.show',
         'uses' => 'PaymentController@show'
-    ]
-);
+    ]);
 
-Route::put(
-    '/payment-request/{paymentUuid}',
-    [
+Route::put('/payment-request/{paymentUuid}', [
         'as' => 'store.payment-request.update',
         'uses' => 'PaymentController@update'
-    ]
-);
+    ]);
 
 
 // Route groups for authorised routes
@@ -89,11 +81,22 @@ Route::group(['middleware' => 'auth:store'], function () {
         'uses' => 'RegistrationController@printBatchIndividualFamilyForms',
     ]);
 
-
     Route::group(
         // Must be able to access this registration
-        ['middleware' => 'can:viewAndEdit,registration'],
+        ['middleware' => 'can:readOrUpdate,registration'],
         function () {
+
+            // Edit a specific thing
+            Route::get('/registrations/{registration}/edit', [
+                'as' => 'store.registration.edit',
+                'uses' => 'RegistrationController@edit',
+            ]);
+
+            // Update a specific registration
+            Route::put('/registrations/{registration}', [
+                'as' => 'store.registration.update',
+                'uses' => 'RegistrationController@update',
+            ]);
 
             // Update (deactivate) a specific Registration's Family
             Route::put('/registrations/{registration}/family', [
@@ -125,12 +128,6 @@ Route::group(['middleware' => 'auth:store'], function () {
                 'HistoryController@show'
             )->name('store.registration.collection-history');
 
-            // Edit a specific thing
-            Route::get('/registrations/{registration}/edit', [
-                'as' => 'store.registration.edit',
-                'uses' => 'RegistrationController@edit',
-            ]);
-
             // Removes a voucher from the current bundle
             Route::delete(
                 '/registrations/{registration}/vouchers/{voucher}',
@@ -148,12 +145,6 @@ Route::group(['middleware' => 'auth:store'], function () {
                 '/registrations/{registration}/vouchers',
                 'BundleController@addVouchersToCurrentBundle'
             )->name('store.registration.vouchers.post');
-
-            // Update a specific registration
-            Route::put('/registrations/{registration}', [
-                'as' => 'store.registration.update',
-                'uses' => 'RegistrationController@update',
-            ]);
         }
     );
 

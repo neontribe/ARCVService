@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Store;
 
+use App\CentreUser;
 use App\Family;
 use App\Carer;
 use App\Child;
@@ -149,13 +150,13 @@ class RegistrationController extends Controller
     /**
      * Show the Registration / Family edit form
      *
-     * @param integer $id
+     * @param Registration $registration
      * @return RedirectResponse
      */
-    public function edit($id)
+    public function edit(Registration $registration)
     {
         // Get User and Centre;
-        // TODO: turn this into a masthead view composer on the app service provider.
+        /** @var CentreUser $user */
         $user = Auth::user();
         $data = [
             'user_name' => $user->name,
@@ -163,9 +164,9 @@ class RegistrationController extends Controller
         ];
 
         // Get the registration, with deep eager-loaded Family (with Children and Carers)
-        $registration = Registration::withFullFamily()->find($id);
-
-        if (!$registration) {
+        if ($registration) {
+            $registration = Registration::withFullFamily()->find($registration->id);
+        } else {
             abort(404, 'Registration not found.');
         }
 
@@ -193,18 +194,18 @@ class RegistrationController extends Controller
     /**
      * Displays a printable version of the Registration.
      *
-     * @param integer $id
+     * @param Registration $registration
      * @return Response
      */
-    public function printOneIndividualFamilyForm($id)
+    public function printOneIndividualFamilyForm(Registration $registration)
     {
         // Get User
         $user = Auth::user();
 
-        // Find the Registration and subdata
-        $registration = Registration::withFullFamily()->find($id);
-
-        if (!$registration) {
+        // Get the registration, with deep eager-loaded Family (with Children and Carers)
+        if ($registration) {
+            $registration = Registration::withFullFamily()->find($registration->id);
+        } else {
             abort(404, 'Registration not found.');
         }
 
@@ -383,16 +384,16 @@ class RegistrationController extends Controller
      * Update a Registration
      *
      * @param StoreUpdateRegistrationRequest $request
+     * @param Registration $registration
      * @return RedirectResponse
      */
-    public function update(StoreUpdateRegistrationRequest $request)
+    public function update(StoreUpdateRegistrationRequest $request, Registration $registration)
     {
         $amendedCarers = [];
 
         $user = $request->user();
 
-        // Fetch Registration and Family
-        $registration = Registration::findOrFail($request->get('registration'));
+        $registration = ($registration) ?? Registration::findOrFail($request->get('registration'));
 
         // NOTE: Following refactor where we needed to retain Carer ids.
         // Possible that we might want to add flag to carer to distinguish Main from Secondary,

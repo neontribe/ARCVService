@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Http\Request;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Registration;
 
@@ -15,8 +14,9 @@ class StoreUpdateRegistrationRequest extends FormRequest
      */
     public function authorize()
     {
-        // Refuse updates to off-scheme users.
-        $registration = Registration::find($this->route('registration'));
+        $registration = $this->route('registration');
+        // Refuse updates to "left" families;
+        // This is an extra, specific permission requirement for the update route.
         return (!isset($registration->family->leaving_on));
     }
 
