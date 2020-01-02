@@ -60,9 +60,11 @@ class CentreController extends Controller
     public function exportRegistrationsSummary(Centre $centre)
     {
         // Get User
+        /** @var CentreUser $user */
         $user = Auth::user();
 
-        if (isset($centre->id)) {
+        // The "export" policy can export all the things
+        if (!$user->can('export', CentreUser::class)) {
             // Set for specified centre
             $centre_ids = [$centre->id];
             $dateFormats = [
@@ -189,16 +191,21 @@ class CentreController extends Controller
             // Would be confusing if an old reason was left in - so check leaving date is there.
             $row["Leaving Reason"] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
 
-            // update the headers if necessary
+            // Remove any keys we don't want
+            foreach ($excludeColumns as $excludeColumn) {
+                unset($row[$excludeColumn]);
+            }
+
+            // Update the headers if necessary...
             if (count($headers) < count($row)) {
                 $headers = array_keys($row);
             }
 
-            // Remove any keys we don't want and add to the list.
-            $rows[] = array_diff_key($row, $excludeColumns);
+            // And add to the list.
+            $rows[] = $row;
         }
 
-        // Sort te columns
+        // Sort the columns
         usort($rows, function ($a, $b) use ($dateFormats) {
 
             // If we haven't ever collected, with unix epoch start (far past)
