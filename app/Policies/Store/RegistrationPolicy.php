@@ -11,7 +11,7 @@ class RegistrationPolicy
     use HandlesAuthorization;
 
     // Permission to view a specific registration, based on centre.
-    public function view(CentreUser $user, Registration $registration)
+    public function readOrUpdate(CentreUser $user, Registration $registration)
     {
         return $user->isRelevantCentre($registration->centre);
     }
