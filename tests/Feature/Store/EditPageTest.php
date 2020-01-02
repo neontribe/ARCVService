@@ -130,8 +130,8 @@ class EditPageTest extends StoreTestCase
         ;
         // See the names in the page
         foreach ($children as $child) {
-            $this->see('<td>'. $child->getAgeString() .'</td>')
-                ->see('<td>'. $child->getDobAsString() .'</td>')
+            $this->see('<td class="age-col">'. $child->getAgeString() .'</td>')
+                ->see('<td class="dob-col">'. $child->getDobAsString() .'</td>')
                 ->seeElement('input[type="hidden"][value="'. $child->dob->format('Y-m') .'"]')
             ;
         }
@@ -229,9 +229,9 @@ class EditPageTest extends StoreTestCase
         // Test that entering children's DOB's gives the expected age.
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'id' => $family->id ]))
-            ->see('<td>1 yr, 1 mo</td>')
-            ->see('<td>1 yr, 0 mo</td>')
-            ->see('<td>0 yr, 11 mo</td>')
+            ->see('<td class="age-col">1 yr, 1 mo</td>')
+            ->see('<td class="age-col">1 yr, 0 mo</td>')
+            ->see('<td class="age-col">0 yr, 11 mo</td>')
         ;
 
         // Set Carbon date & time back
