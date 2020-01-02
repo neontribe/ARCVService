@@ -42,6 +42,7 @@ class DatabaseSeeder extends Seeder
         $this->call(VoucherStatesSeeder::class);
         $this->call(BundleSeeder::class);
         $this->call(DeliverySeeder::class);
+        $this->call(TestActiveUsersSeeder::class);
     }
 
     /**
