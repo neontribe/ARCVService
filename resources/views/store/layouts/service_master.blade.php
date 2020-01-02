@@ -16,6 +16,7 @@
         @yield('hoist-head')
     </head>
     <body>
+    @yield('cookie-warning')
 
     @include('store.partials.masthead')
 
