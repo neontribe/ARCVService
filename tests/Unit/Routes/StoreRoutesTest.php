@@ -162,25 +162,32 @@ class StoreRoutesTest extends StoreTestCase
     }
 
     /** @test */
-    public function testViewRouteGate()
+    public function testEditRouteGate()
     {
 
         // Create a random registration with our centre.
         $registration = factory(Registration::class)->create([
-            "centre_id" => $this->centre->id,
+            "centre_id" => $this->neighbourCentre->id,
         ]);
 
+        // Make the route;
         $route = URL::route('store.registration.edit', [ 'registration' => $registration->id ]);
 
-        Auth::logout();
+
         // You cannot get there logged out.
-        $this->visit($route)
-            ->seePageIs(URL::route('store.login'))
-            ->assertResponseStatus(200)
-        ;
+        Auth::logout();
+
+        $this->get($route)
+            ->followRedirects()
+            ->seePageIs(route('store.login'))
+            ->assertResponseOK();
+
+
         // You can get there logged in.
+        Auth::logout();
         $this->actingAs($this->centreUser, 'store')
-            ->visit($route)
+            ->get($route)
+            ->followRedirects()
             ->seePageIs($route)
             ->assertResponseStatus(200)
         ;
