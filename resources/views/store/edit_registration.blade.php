@@ -76,7 +76,7 @@
                                 <td class="age-col">{{ $child->getAgeString() }}</td>
                                 <td class="dob-col">{{ $child->getDobAsString() }}</td>
                                 @if ( in_array(auth::user()->centre->sponsor->shortcode, config('arc.verifies_children')) )
-                                <td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[{{ $child->id }}][verified]" id="child{{ $child->id }}" {{ $child->verified ? "checked" : null }} value="1"><label for="child{{ $child->id }}"></label></td>
+                                <td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[{{ $child->id }}][verified]" id="child{{ $child->id }}" {{ $child->verified ? "checked" : null }} value="1"><label for="child{{ $child->id }}"><span class="visually-hidden">Toggle ID checked</span></label></td>
                                 @endif
                                 <td class="remove-col">
                                     <input type="hidden" name="children[{{ $child->id }}][dob]"

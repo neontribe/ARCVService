@@ -64,6 +64,16 @@
                 <div class="added">
                     <label for="child_wrapper">You have added:</label>
                     <table>
+                        <thead>
+                            <tr>
+                                <td class="age-col">Age</td>
+                                <td class="dob-col">Month / Year</td>
+                                @if ( in_array(auth::user()->centre->sponsor->shortcode, config('arc.verifies_children')) )
+                                <td class="verified-col">ID</td>
+                                @endif
+                                <td class="remove-col"></td>
+                            </tr>
+                        </thead>
                         <tbody id="child_wrapper">
                             @if(is_array(old('children')) || (!empty(old('children'))))
                                 @foreach (old('children') as $old_child )
@@ -151,7 +161,7 @@
                     // Create and append new style columns
                     var ageColumn = '<td class="age-col">' + displayYears + ' yr, ' + displayMonths + ' mo</td>';
                     var dobColumn = '<td class="dob-col"><input name="children[' + childKey + '][dob]" type="hidden" value="' + dob + '" >' + dateObj + '</td>';
-                    var idColumn = '<td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][verified]" id="child' + childKey + '" ' + displayVerified + ' value="' + verified + '"><label for="child' + childKey + '"></label>' + '</td>';
+                    var idColumn = '<td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][verified]" id="child' + childKey + '" ' + displayVerified + ' value="' + verified + '"><label for="child' + childKey + '"><span class="visually-hidden">Toggle ID checked</span></label>' + '</td>';
                     var removeColumn = '<td class="remove-col"><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>';
 
                     $(this).append(ageColumn);

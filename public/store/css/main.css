@@ -226,12 +226,11 @@ td {
 }
 
 .dob-col {
-    width: 30%;
+    width: 35%;
 }
 
 .verified-col {
-    width: 20%;
-    text-align: center;
+    width: 15%;
 }
 
 .remove-col {
@@ -406,6 +405,17 @@ input[type="text"].invalid,
 
 .relative {
     position: relative;
+}
+
+.visually-hidden {
+	position: absolute;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	height: 1px;
+	width: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
 }
 
 /*
@@ -694,14 +704,6 @@ REGISTER PAGE
 
 .form-group {
 	float: left;
-}
-
-.dob-wrapper {
-    margin : 1em 1em 1em 1em;
-}
-
-.dob-wrapper > input.styled-checkbox {
-	position: relative;
 }
 
 .form-group > label {
@@ -1284,11 +1286,9 @@ with overrides to display with a label above rather than inline */
 .inline-dob {
     position: absolute;
     top: 20px;
-	left: 25px;
 }
 
 .inline-dob + label::before {
-    left: 20px;
     top: 13px;
 }
 
@@ -1299,5 +1299,5 @@ with overrides to display with a label above rather than inline */
 .inline-dob:checked + label:after {
     content: "✔";
     top: 20px;
-    left: 32px;
+    left: 12px;
 }
