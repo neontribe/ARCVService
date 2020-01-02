@@ -60,22 +60,29 @@
                     <img src="{{ asset('store/assets/pregnancy-light.svg') }}" name="logo">
                     <h2>Children or pregnancy</h2>
                 </div>
+                @include('store.partials.add_child_form')
                 <div>
                     <table>
                         <thead>
                         <tr>
-                            <td>Age</td>
-                            <td>Month / Year</td>
-                            <td></td>
+                            <td class="age-col">Age</td>
+                            <td class="dob-col">Month / Year</td>
+                            @if ( in_array(auth::user()->centre->sponsor->shortcode, config('arc.verifies_children')) )
+                            <td class="verified-col">ID</td>
+                            @endif
+                            <td class="remove-col"></td>
                         </tr>
                         </thead>
                         <tbody id="existing_wrapper">
                         @foreach ( $children as $child )
                             <tr>
-                                <td>{{ $child->getAgeString() }}</td>
-                                <td>{{ $child->getDobAsString() }}</td>
-                                <td>
-                                    <input type="hidden" name="children[][dob]"
+                                <td class="age-col">{{ $child->getAgeString() }}</td>
+                                <td class="dob-col">{{ $child->getDobAsString() }}</td>
+                                @if ( in_array(auth::user()->centre->sponsor->shortcode, config('arc.verifies_children')) )
+                                <td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[{{ $child->id }}][verified]" id="child{{ $child->id }}" {{ $child->verified ? "checked" : null }} value="1"><label for="child{{ $child->id }}"><span class="visually-hidden">Toggle ID checked</span></label></td>
+                                @endif
+                                <td class="remove-col">
+                                    <input type="hidden" name="children[{{ $child->id }}][dob]"
                                         value="{{ Carbon\Carbon::parse($child->dob)->format('Y-m') }}">
                                     <button class="remove_date_field">
                                         <i class="fa fa-minus" aria-hidden="true"></i>
@@ -87,8 +94,6 @@
                     </table>
                 </div>
                 <div>
-                    <label for="add-child-form">Add more children or a pregnancy:</label>
-                    @include('store.partials.add_child_form')
                     <table>
                         <tbody id="child_wrapper">
                         </tbody>
