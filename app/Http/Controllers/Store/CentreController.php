@@ -144,7 +144,7 @@ class CentreController extends Controller
                 "Centre" => ($reg->centre->name) ?? 'Centre not found',
                 "Primary Carer" => ($reg->family->pri_carer) ?? 'Primary Carer not Found',
                 "Entitlement" => $reg->getValuation()->getEntitlement(),
-                "Last Collection" => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format($dateFormats['lastCollection']) : null
+                "Last Collection" => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format($dateFormats['lastCollection']) : null,
                 "Active" => ($reg->isActive()) ? 'true' : 'false'
             ];
 
