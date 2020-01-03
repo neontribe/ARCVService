@@ -4,11 +4,11 @@ namespace App;
 
 use App\Services\VoucherEvaluator\AbstractEvaluator;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
-use App\Services\VoucherEvaluator\IEvaluation;
 use App\Services\VoucherEvaluator\IEvaluee;
 use Carbon\Carbon;
-use Carbon\CarbonInterval;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Registration extends Model implements IEvaluee
 {
@@ -105,7 +105,7 @@ class Registration extends Model implements IEvaluee
     /**
      * Get the Registration's Family
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function family()
     {
@@ -115,7 +115,7 @@ class Registration extends Model implements IEvaluee
     /**
      * Get the Registration's Centre
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function centre()
     {
@@ -150,7 +150,7 @@ class Registration extends Model implements IEvaluee
     /**
      * Get the Registrations's Bundles
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function bundles()
     {

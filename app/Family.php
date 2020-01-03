@@ -5,6 +5,8 @@ namespace App;
 use App\Services\VoucherEvaluator\AbstractEvaluator;
 use App\Services\VoucherEvaluator\IEvaluee;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Log;
 
 class Family extends Model implements IEvaluee
@@ -77,11 +79,12 @@ class Family extends Model implements IEvaluee
      * Generates and sets the components required for an RVID.
      *
      * @param Centre $centre
+     * @param bool $switch Force the user to switch centre and change RVID.
      */
-    public function lockToCentre(Centre $centre)
+    public function lockToCentre(Centre $centre, $switch = false)
     {
         // Check we don't have one.
-        if (!$this->centre_sequence) {
+        if (!$this->centre_sequence || $switch) {
             if ($centre) {
                 // Get the centre's next sequence.
                 $this->centre_sequence = $centre->nextCentreSequence();
@@ -113,7 +116,7 @@ class Family extends Model implements IEvaluee
      * Get the Family's designated Carers
      * There should always be ONE of these!
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function carers()
     {
@@ -122,7 +125,7 @@ class Family extends Model implements IEvaluee
 
     /**
      * Get the Family's Children
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function children()
     {
@@ -132,7 +135,7 @@ class Family extends Model implements IEvaluee
     /**
      * Get Notes about this Family
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function notes()
     {
@@ -142,7 +145,7 @@ class Family extends Model implements IEvaluee
     /**
      * Get the Registrations with Centres for this Family
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function registrations()
     {
@@ -151,7 +154,7 @@ class Family extends Model implements IEvaluee
 
     /**
      * Get the Family's intial registered Centre.
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function initialCentre()
     {

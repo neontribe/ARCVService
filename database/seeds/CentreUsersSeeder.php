@@ -50,14 +50,6 @@ class CentreUsersSeeder extends Seeder
         ]);
         $user3->centres()->attach(2, ['homeCentre' => true]);
 
-        // ARC CCUSer who can download.
-        $user3 = factory(App\CentreUser::class, 'withDownloader')->create([
-            "name"  => "ARC CCDownloader",
-            "email" => "arc+ccdownloader@neontribe.co.uk",
-            "password" => bcrypt('store_pass'),
-        ]);
-        $user3->centres()->attach(2, ['homeCentre' => true]);
-
         // 4 faked users associated with random Centres
         factory(App\CentreUser::class, 4)
             ->create()
