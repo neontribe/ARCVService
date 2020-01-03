@@ -132,15 +132,16 @@
                         <li class="collapsed" id="more-family-info">
                             <p>Vouchers per week per child:</p>
                             <ul>
-                                <li>Pregnancy - 3 vouchers</li>
+                                <li>Pregnancy to birth - 3 vouchers</li>
                                 <li>Birth up to 1 year - 6 vouchers</li>
+                                <li>1 year up to primary school - 3 vouchers</li>
                                 {{--
                                 TODO : This is not scalable; if this breaks or has to be extended, look at a better abstraction.
                                 --}}
-                                @if ( in_array($registration->centre->sponsor->shortcode, config('arc.extended_sponsors')) )
-                                    <li>1 year up to secondary school - 3 vouchers</li>
-                                @else
-                                    <li>1 year up to primary school - 3 vouchers</li>
+                                @if (in_array($registration->centre->sponsor->shortcode, config('arc.extended_sponsors')) )
+                                    <li>Primary school to secondary school start - 3 vouchers<br>
+                                        <small>(Only if family has a child still under primary school age too)</small>
+                                    </li>
                                 @endif
                             </ul>
                         </li>

@@ -10,7 +10,7 @@ use Chalcedonyt\Specification\NotSpec;
 
 class ChildIsSchoolAge extends BaseChildEvaluation
 {
-    public $reason = 'school age (no longer eligible)';
+    public $reason = 'school age';
     private $specification;
 
     public function __construct(Carbon $offsetDate = null, $value = 3)
