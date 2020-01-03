@@ -4,6 +4,7 @@ namespace App;
 
 use App\Services\VoucherEvaluator\AbstractEvaluator;
 use App\Services\VoucherEvaluator\IEvaluee;
+use App\Traits\Evaluable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,6 +12,7 @@ use Log;
 
 class Family extends Model implements IEvaluee
 {
+    use Evaluable;
     /**
      * The attributes that are mass assignable.
      *
@@ -50,13 +52,13 @@ class Family extends Model implements IEvaluee
     ];
 
     /**
-     * Visitor pattern voucher evaluator
+     * Gets the evaluator from up the chain.
      *
-     * @param AbstractEvaluator $evaluator
+     * @return AbstractEvaluator
      */
-    public function accept(AbstractEvaluator $evaluator)
+    public function getEvaluator()
     {
-        return $evaluator->evaluateFamily($this);
+        return $this->registrations()->first()->evaluator;
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App;
 use App\Services\VoucherEvaluator\AbstractEvaluator;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\IEvaluee;
+use App\Traits\Evaluable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Registration extends Model implements IEvaluee
 {
+    use Evaluable;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -42,30 +45,15 @@ class Registration extends Model implements IEvaluee
         'consented_on',
     ];
 
-    /** @var  AbstractEvaluator null  */
-    public $evaluator = null;
-
     /**
-     * Run a valuation on this registration.
+     * Magically gets a public evaluator.
+     * @return AbstractEvaluator
      */
-    public function getValuationAttribute()
+    public function getEvaluator()
     {
-        // Get the evaluator, or make a new one
-        $this->evaluator = $this->evaluator ?? EvaluatorFactory::makeFromRegistration($this);
-        // Start the process of making a valuation
-        $this->accept($this->evaluator);
-        // fetch the report
-        return $this->evaluator->valuation;
-    }
-
-    /**
-     * Visitor pattern voucher evaluator
-     *
-     * @param AbstractEvaluator $evaluator
-     */
-    public function accept(AbstractEvaluator $evaluator)
-    {
-        $evaluator->evaluateRegistration($this);
+        // if the private var is null, make a new one, stash it and return it.
+        $this->_evaluator = ($this->_evaluator) ?? EvaluatorFactory::makeFromRegistration($this);
+        return $this->_evaluator;
     }
 
     /**
@@ -140,7 +128,7 @@ class Registration extends Model implements IEvaluee
         if (!$bundle) {
             $bundle = Bundle::create([
                 "registration_id" => $this->id,
-                "entitlement" => $this->valuation->getEntitlement()
+                "entitlement" => $this->getValuation()->getEntitlement()
                 ]);
         };
 

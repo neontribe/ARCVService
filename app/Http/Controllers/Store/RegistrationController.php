@@ -172,7 +172,7 @@ class RegistrationController extends Controller
 
         // Get the valuation
         /** @var Valuation $valuation */
-        $valuation = $registration->valuation;
+        $valuation = $registration->getValuation();
 
         // Grab carers copy for shift)ing without altering family->carers
         $carers = $registration->family->carers->all();
@@ -186,7 +186,7 @@ class RegistrationController extends Controller
                 'sec_carers' => $carers,
                 'children' => $registration->family->children,
                 'noticeReasons' => $valuation->getNoticeReasons(),
-                'entitlement' => $valuation->getEntitlement()
+                'entitlement' => $valuation->getEntitlement(),
             ]
         ));
     }
@@ -210,7 +210,8 @@ class RegistrationController extends Controller
         }
 
         // Get the valuation
-        $valuation = $registration->valuation;
+        /** @var Valuation $valuation */
+        $valuation = $registration->getValuation();
 
         // Make a filename
         $filename = 'Registration' . Carbon::now()->format('YmdHis') .'.pdf';
@@ -282,7 +283,7 @@ class RegistrationController extends Controller
         // Stack the registration batch into the data
         foreach ($registrations as $registration) {
             // Get the valuation
-            $valuation = $registration->valuation;
+            $valuation = $registration->getValuation();
 
             $data['regs'][] = [
                 'centre' => $centre,

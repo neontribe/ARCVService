@@ -32,13 +32,13 @@
         @foreach ($registrations as $registration)
         <tr>
           <td>
-            @if(!empty($registration->valuation->getNoticeReasons()))
+            @if(!empty($registration->getValuation()->getNoticeReasons()))
               <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
             @endif
             {{ $registration->family->pri_carer }}
           </td>
           <td>{{ $registration->family->rvid }}</td>
-          <td><i class="fa fa-ticket" aria-hidden="true"></i> {{ $registration->valuation->getEntitlement() }}</td>
+          <td><i class="fa fa-ticket" aria-hidden="true"></i> {{ $registration->getValuation()->getEntitlement() }}</td>
           <td></td>
           <td></td>
           <td></td>
