@@ -121,8 +121,8 @@ input[type="radio"]:checked+label:after,
 	position: absolute;
 	width: 0;
 	height: 0;
-	left: 9px;
-	top: 9px;
+	left: 10px;
+	top: 10px;
 	cursor: pointer;
 }
 
@@ -132,9 +132,10 @@ input[type="radio"]:checked+label:after {
 }
 
 .styled-checkbox:checked+label:after {
-	content: "✔";
-	top: 8px;
-	left: 12px;
+	font-family: FontAwesome, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	content: "\f00c";
+	top: 10px;
+	left: 10px;
 	border: 0;
 }
 
@@ -1280,7 +1281,7 @@ with overrides to display with a label above rather than inline */
 }
 
 #dob-verified:checked + label::after {
-    top: 26px;
+    top: 30px;
 }
 
 .inline-dob {
@@ -1297,7 +1298,8 @@ with overrides to display with a label above rather than inline */
 }
 
 .inline-dob:checked + label:after {
-    content: "✔";
-    top: 20px;
-    left: 12px;
+    font-family: FontAwesome, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    content: "\f00c";
+    top: 24px;
+    left: 10px;
 }
