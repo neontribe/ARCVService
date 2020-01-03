@@ -140,7 +140,7 @@
                                 --}}
                                 @if (in_array($registration->centre->sponsor->shortcode, config('arc.extended_sponsors')) )
                                     <li>Primary school to secondary school start- 3 vouchers<br>
-                                        (Only if family has a child still under primary school age too)
+                                        <small>(Only if family has a child still under primary school age too)</small>
                                     </li>
                                 @endif
                             </ul>
