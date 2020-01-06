@@ -132,7 +132,7 @@ input[type="radio"]:checked+label:after {
 }
 
 .styled-checkbox:checked+label:after {
-	font-family: FontAwesome, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font-family: FontAwesome, sans-serif;
 	content: "\f00c";
 	top: 10px;
 	left: 10px;
@@ -1298,7 +1298,7 @@ with overrides to display with a label above rather than inline */
 }
 
 .inline-dob:checked + label:after {
-    font-family: FontAwesome, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: FontAwesome, sans-serif;
     content: "\f00c";
     top: 24px;
     left: 10px;
