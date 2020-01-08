@@ -88,9 +88,14 @@
                 var innerTextDate = dateObj.format("MMM YYYY");
                 var valueDate = dateObj.format("YYYY-MM");
 
-                // Make some age display values
-                var displayMonths = moment().diff(valueDate, 'months') % 12;
-                var displayYears = moment().diff(valueDate, 'years');
+                // Make some age display values based on if it's the future.
+                var ageString = (moment().diff(valueDate, 'days') > 0)
+                    ? '<td class="age-col">' +
+                        moment().diff(valueDate, 'years') + ' yr, ' +
+                        moment().diff(valueDate, 'months') % 12  +
+                        ' mo</td>'
+                    : '<td class="age-col">P</td>'
+                    ;
 
                 // Organise the ID verification values and display
                 var verifiedValue = idCheckedEl.is(":checked") ? 1 : 0;
@@ -98,7 +103,7 @@
                 var childKey = Math.random();
 
                 // Create the table columns
-                var ageColumn = '<td class="age-col">' + displayYears + ' yr, ' + displayMonths + ' mo</td>';
+                var ageColumn = ageString;
                 var dobColumn = '<td class="dob-col"><input name="children[' + childKey + '][dob]" type="hidden" value="' + valueDate + '" >' + innerTextDate + '</td>';
                 var idColumn = (idCheckedEl.length)
                     ? '<td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][verified]" id="child' + childKey + '" ' + displayVerified + ' value="' + verifiedValue + '"><label for="child' + childKey + '"><span class="visually-hidden">Toggle ID checked</span></label>' + '</td>'
