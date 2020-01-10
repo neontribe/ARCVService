@@ -183,7 +183,7 @@ class RegistrationController extends Controller
         // Grab carers copy for shift)ing without altering family->carers
         $carers = $registration->family->carers->all();
 
-        // Check if er verify, based on the existing registration's context
+        // Check if we verify, based on the existing registration's context
         $verifying = in_array($registration->centre->sponsor->shortcode, config('arc.verifies_children'));
 
         return view('store.edit_registration', array_merge(
