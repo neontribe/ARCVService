@@ -11,7 +11,7 @@
         <input id="dob-year" name="dob-year" type="number" pattern="[0-9]*" min="0"
                 max="{{ Carbon\Carbon::now()->year }}">
     </div>
-    @if ( in_array(auth::user()->centre->sponsor->shortcode, config('arc.verifies_children')) )
+    @if ( $verifying )
     <div class="dob-input relative">
         <input type="checkbox" class="styled-checkbox" id="dob-verified" name="dob-verified">
         <label for="dob-verified">ID Checked</label>

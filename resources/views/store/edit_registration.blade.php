@@ -60,14 +60,14 @@
                     <img src="{{ asset('store/assets/pregnancy-light.svg') }}" name="logo">
                     <h2>Children or pregnancy</h2>
                 </div>
-                @include('store.partials.add_child_form')
+                @include('store.partials.add_child_form', ['verifying' => $verifying] )
                 <div>
                     <table>
                         <thead>
                         <tr>
                             <td class="age-col">Age</td>
                             <td class="dob-col">Month / Year</td>
-                            @if ( in_array(auth::user()->centre->sponsor->shortcode, config('arc.verifies_children')) )
+                            @if ( $verifying )
                             <td class="verified-col">ID</td>
                             @endif
                             <td class="remove-col"></td>
@@ -78,7 +78,7 @@
                             <tr>
                                 <td class="age-col">{{ $child->getAgeString() }}</td>
                                 <td class="dob-col">{{ $child->getDobAsString() }}</td>
-                                @if ( in_array(auth::user()->centre->sponsor->shortcode, config('arc.verifies_children')) )
+                                @if ( $verifying )
                                 <td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[{{ $child->id }}][verified]" id="child{{ $child->id }}" {{ $child->verified ? "checked" : null }} value="1"><label for="child{{ $child->id }}"><span class="visually-hidden">Toggle ID checked</span></label></td>
                                 @endif
                                 <td class="remove-col">
@@ -138,7 +138,7 @@
                                 {{--
                                 TODO : This is not scalable; if this breaks or has to be extended, look at a better abstraction.
                                 --}}
-                                @if (in_array($registration->centre->sponsor->shortcode, config('arc.extended_sponsors')) )
+                                @if (in_array($registration->centre->sponsor->shortcode, config('arc.extended_sponsors')))
                                     <li>Primary school to secondary school start - 3 vouchers<br>
                                         <small>(Only if family has a child still under primary school age too)</small>
                                     </li>

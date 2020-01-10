@@ -60,7 +60,7 @@
                 <p>To add a child or pregnancy, complete the boxes below with their month and year of birth (or due date) in numbers, e.g. '06 2017' for June 2017.
                 </p>
                 </div>
-                @include('store.partials.add_child_form')
+                @include('store.partials.add_child_form', ['verifying' => $verifying])
                 <div class="added">
                     <label for="child_wrapper">You have added:</label>
                     <table>
@@ -68,7 +68,7 @@
                             <tr>
                                 <td class="age-col">Age</td>
                                 <td class="dob-col">Month / Year</td>
-                                @if ( in_array(auth::user()->centre->sponsor->shortcode, config('arc.verifies_children')) )
+                                @if ( $verifying )
                                 <td class="verified-col">ID</td>
                                 @endif
                                 <td class="remove-col"></td>
