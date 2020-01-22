@@ -27,13 +27,15 @@
                         {{ $print_button_text }}
                     </li>
                 </a>
-                @can('exportFromRelevantCentre', $user->centre)
-                    <a href="{{ URL::route('store.centre.registrations.summary', ['centre' => $centre_id ]) }}" target="_blank" rel="noopener noreferrer">
-                        <li>
-                            <img src="{{ asset('store/assets/export-light.svg') }}" id="export-centre-registrations">
-                            Export {{ $centre_name }} Registrations
-                        </li>
-                    </a>
+                @can('viewRelevantCentre', $user->centre)
+                    @can('download', App\CentreUser::class)
+                        <a href="{{ URL::route('store.centre.registrations.summary', ['centre' => $centre_id ]) }}" target="_blank" rel="noopener noreferrer">
+                            <li>
+                                <img src="{{ asset('store/assets/export-light.svg') }}" id="export-centre-registrations">
+                                Export {{ $centre_name }} Registrations
+                            </li>
+                        </a>
+                    @endcan
                 @endcan
             @endif
             @can('export', App\CentreUser::class)
