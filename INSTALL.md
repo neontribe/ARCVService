@@ -38,16 +38,16 @@
 
 ## VM Configuration
 9. If successful, enter the vm with **`vagrant ssh`**
-10. You should be in `home/vagrant`  and that should contain a `code` directory that is mapped to your development directory (where you keep your repos) from local (see step 6, folders -> map)
- 11. copy the `.env.example` file contents to `.env` and edit the `.env`  to local settings
+10. You should be in `home/vagrant` and that should contain a `code` directory that is mapped to your development directory (where you keep your repos) from local (see step 6, folders -> map)
+11. Copy the `.env.example` file contents to `.env` and edit the `.env` to local settings
 
 Do the steps below:
--  `composer install`
+- `composer install`
 - `php artisan key:generate` - key is automatically added to the `.env` field
 - `php artisan migrate --seed`
 - `php artisan passport:install` to create keys and client
 - `chmod 600 ./storage/*.key` to set permissions correctly
--  Add the "password grant client" id and secret to your `.env`
+- Add the "password grant client" id and secret to your `.env`
 - [install nvm](https://github.com/nvm-sh/nvm#installing-and-updating) and then exit the vm (`exit` or `ctrl+D`) and re-enter it (`vagrant ssh` command) and navigate back to your ARCVService directory
 - `nvm install lts/carbon`
 - `nvm use`
@@ -56,7 +56,10 @@ Do the steps below:
 - Compile Service from Sass with `yarn prod`
 
 ***
-In your browser of choice, go to `https://arcv-service.test` or `https://arcv-store.test` - try with `http`, too. Check the browser's developer tools console and network tabs for errors.
+
+## Browser test
+12. In your browser of choice, go to `https://arcv-service.test` or `https://arcv-store.test` - try with `http`, too
+13. Check the browser's developer tools console and network tabs for errors
 
 ## Resources
 1. [Laravel Homestead official documentation](https://laravel.com/docs/5.5/homestead)
