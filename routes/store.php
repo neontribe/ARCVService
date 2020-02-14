@@ -168,21 +168,22 @@ Route::group(['middleware' => 'auth:store'], function () {
     );
 
     Route::group(
-        ['middleware' => 'can:exportFromRelevantCentre,centre' ],
+        ['middleware' => 'can:viewRelevantCentre,centre'],
         function () {
 
-            // Print a Specific Centre's Registration's register form
+            // Print a Specific Centre's Registrations list
+            // Anyone who can view a centre can do this
             Route::get('/centres/{centre}/registrations/collection', [
                 'as' => 'store.centre.registrations.collection',
                 'uses' => 'CentreController@printCentreCollectionForm',
-            ])->middleware(['can:exportFromRelevantCentre,centre']);
+            ]);
 
-
-            // A specific centres' registrations summary spreadsheet.
+            // Export A specific centres' registrations summary spreadsheet.
+            // anyone who can view a centre AND download can do this.
             Route::get('/centres/{centre}/registrations/summary', [
                 'as' => 'store.centre.registrations.summary',
                 'uses' => 'CentreController@exportRegistrationsSummary',
-            ]);
+            ])->middleware(['can:download,App\CentreUser']);
         }
     );
 });

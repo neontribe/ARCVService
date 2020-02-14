@@ -279,6 +279,12 @@ class RegistrationController extends Controller
                 return strtolower($registration->family->pri_carer);
             });
 
+        if ($registrations->count() < 1) {
+            return redirect()
+                ->route('store.dashboard')
+                ->with('error_message', 'No Registrations in that centre.');
+        }
+
         // Make a filename
         $filename = 'Registrations_' . Carbon::now()->format('YmdHis') . '.pdf';
 
