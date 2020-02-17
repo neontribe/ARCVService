@@ -86,11 +86,13 @@ class CreateMasterVoucherLogReport extends Command
 SELECT
   vouchers.code AS 'Voucher Number',
   printed_date AS 'Printed date',
-  delivered_date as 'Date Distributed',
-  delivered_to_centre AS 'Distributed to Centre',
-  delivered_to_area AS 'Distributed to Area',
+  dispatch_date as 'Date Distributed',
+  dispatch_to_centre AS 'Distributed to Centre',
+  dispatch_to_area AS 'Distributed to Area',
+       
   # this may need to be rethought;
   ''AS 'Date Allocated',
+  
   disbursed_at AS 'Date Issued',
   rvid AS 'RVID',
   pri_carer_name AS 'Main Carer',
@@ -101,6 +103,7 @@ SELECT
   market_area AS 'Trader\'s Area',
   payment_request_date AS 'Date Received for Reimbursement',
   reimbursed_date AS 'Reimbursed Date',
+  
   # These to be filled by other cards
   '' AS 'Void Voucher Date',
   '' AS 'Void Reason',
@@ -109,15 +112,17 @@ SELECT
 FROM vouchers
 
   # Join for each voucher\'s sponsor name
-  LEFT JOIN sponsors ON vouchers.sponsor_id = sponsors.id
+  # LEFT JOIN sponsors ON vouchers.sponsor_id = sponsors.id
 
-  # Get our trader and market names.
+  # Get our trader, market and sponsor names
   LEFT JOIN (
     SELECT traders.id,
            traders.name AS trader_name,
-           markets.name AS market_name
+           markets.name AS market_name,
+           sponsors.name AS market_area
     FROM traders
     LEFT JOIN markets ON traders.market_id = markets.id
+    LEFT JOIN sponsors on markets.sponsor_id = sponsors.id
   ) AS markets_query
     ON markets_query.id = vouchers.trader_id
 
@@ -158,6 +163,14 @@ FROM vouchers
   ) AS reimburse_query
     ON reimburse_query.voucher_id = vouchers.id
 
+  # Get fields relevant to voucher's delivery (Date, target centre and centre's area)
+  LEFT JOIN (
+      SELECT deliveries.id,
+             deliveries.dispatched_at AS dispatch_date
+      FROM deliveries
+  ) AS delivery_query 
+      ON deliveries.id = vouchers.delivery_id
+      
   # Get fields relevant to bundles (pri_carer/RVID/disbursed_at,disbursing_centre)
   LEFT JOIN (
     SELECT bundles.id,
