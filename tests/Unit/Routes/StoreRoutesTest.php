@@ -386,7 +386,7 @@ class StoreRoutesTest extends StoreTestCase
             "centre_id" => $this->centre->id,
         ]);
 
-        $route = $specificCentreRoute = URL::route('store.centre.registrations.summary', ['centre' => $this->centre->id]);
+        $route = URL::route('store.centre.registrations.summary', ['centre' => $this->centre->id]);
 
         Auth::logout();
 
@@ -527,6 +527,15 @@ class StoreRoutesTest extends StoreTestCase
             ->get($route)
             ->assertResponseStatus(403)
         ;
+
+        Auth::logout();
+
+        // Throw a 403 for auth'd but forbidden
+        $this->actingAs($this->downloaderUser, 'store')
+            ->visit($dashboard_route)
+            ->get($route)
+            ->assertResponseStatus(403);
+
         Auth::logout();
 
         // See page permit FM User to get from the dashboard.
