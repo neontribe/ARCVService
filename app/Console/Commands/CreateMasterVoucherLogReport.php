@@ -86,9 +86,9 @@ class CreateMasterVoucherLogReport extends Command
 SELECT
   vouchers.code AS 'Voucher Number',
   printed_date AS 'Printed date',
-  dispatch_date as 'Date Distributed',
-  dispatch_to_centre AS 'Distributed to Centre',
-  dispatch_to_area AS 'Distributed to Area',
+  deliveries.dispatched_at as 'Date Distributed',
+  delivery_centres.name AS 'Distributed to Centre',
+  delivery_areas.name AS 'Distributed to Area',
        
   # this may need to be rethought;
   ''AS 'Date Allocated',
@@ -132,8 +132,8 @@ FROM vouchers
            voucher_states.created_at AS printed_date
     FROM voucher_states
     WHERE voucher_states.`to` = 'printed'
-  ) AS dispatch_query
-    ON dispatch_query.voucher_id = vouchers.id
+  ) AS printed_query
+    ON printed_query.voucher_id = vouchers.id
       
   # Pivot recorded date
   LEFT JOIN (
@@ -164,13 +164,16 @@ FROM vouchers
     ON reimburse_query.voucher_id = vouchers.id
 
   # Get fields relevant to voucher's delivery (Date, target centre and centre's area)
-  LEFT JOIN (
-      SELECT deliveries.id,
-             deliveries.dispatched_at AS dispatch_date
-      FROM deliveries
-  ) AS delivery_query 
-      ON deliveries.id = vouchers.delivery_id
-      
+  LEFT JOIN deliveries ON vouchers.delivery_id = deliveries.id
+  LEFT JOIN
+    centres AS delivery_centres 
+        ON deliveries.centre_id = delivery_centres.id
+  LEFT JOIN
+     sponsors as delivery_areas 
+        ON delivery_areas.id = delivery_centres.sponsor_id
+
+        
+
   # Get fields relevant to bundles (pri_carer/RVID/disbursed_at,disbursing_centre)
   LEFT JOIN (
     SELECT bundles.id,
