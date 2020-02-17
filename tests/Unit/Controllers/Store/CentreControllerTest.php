@@ -3,21 +3,28 @@
 
 namespace Tests\Unit\Controllers\Store;
 
-use App\Registration;
 use App\Centre;
 use App\CentreUser;
+use App\Registration;
+use App\Sponsor;
 use App\Voucher;
+use Auth;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\StoreTestCase;
+use URL;
 
 class CentreControllerTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
+    /** @var Centre $centre */
     protected $centre;
+
+    /** @var CentreUser $centreUser */
     protected $centreUser;
+
     /** @var Collection */
     protected $registrations;
 
@@ -65,7 +72,7 @@ class CentreControllerTest extends StoreTestCase
             ->response
             ->getContent()
         ;
-        
+
         // Create an array of lines and filter off blank ones (default array_filter behaviour)
         $data = array_filter(explode(PHP_EOL, $content));
         // Shift the headers off.
@@ -139,5 +146,41 @@ class CentreControllerTest extends StoreTestCase
             // That is the same date as this line.
             $this->assertEquals($bundle->disbursed_at->format('d/m/Y'), $line["Last Collection"]);
         }
+    }
+
+    public function testACentreWithNoRegistrationsCanDownloadAnEmptyRecord()
+    {
+        $centre = factory(Centre::class)->create();
+
+        $centre->registrations = factory(Registration::class, 0)->create([
+            'centre_id' => $centre->id,
+            ]);
+        $this->assertEquals(0, $centre->registrations->count());
+
+        $centre->neighbours = factory(Sponsor::class, 0)->create([
+            'centre_id' => $centre->id,
+        ]);
+        $this->assertEquals(0, $centre->neighbours->count());
+
+        $centreUser = factory(CentreUser::class)->create()->fresh();
+        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
+        $centreUser = $centre->centreUsers;
+        $this->assertEquals(1, $centreUser->count());
+
+        $dashboard_route = URL::route('store.dashboard');
+        $sheet_route = URL::route('store.centres.registrations.summary', ['centre' => $centre->id]);
+
+        Auth::logout();
+
+        $this->actingAs($centreUser, 'store')
+            ->visit($dashboard_route)
+            ->get($sheet_route)
+            ->assertResponseOK();
+
+        $this->actingAs($centreUser, 'store')
+            ->visit($dashboard_route)
+            ->get($sheet_route)
+            ->response
+            ->getContent();
     }
 }
