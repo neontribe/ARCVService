@@ -41,6 +41,8 @@ class StoreRoutesTest extends StoreTestCase
     /** @var Centre $unrelatedCentre */
     private $unrelatedCentre;
 
+    private $dashboardRoute;
+
     public function setUp()
     {
         parent::setUp();
@@ -90,6 +92,8 @@ class StoreRoutesTest extends StoreTestCase
             "password" => bcrypt('test_unrelated_pass'),
         ]);
         $this->unrelatedUser->centres()->attach($this->unrelatedCentre->id, ['homeCentre' => true]);
+
+        $this->dashboardRoute = URL::route('store.dashboard');
     }
 
     /**
@@ -125,18 +129,16 @@ class StoreRoutesTest extends StoreTestCase
     /** @test */
     public function testDashboardRouteGate()
     {
-        $route = URL::route('store.dashboard');
-
         Auth::logout();
         // You cannot get there logged out.
-        $this->visit($route)
+        $this->visit($this->dashboardRoute)
             ->seePageIs(URL::route('store.login'))
             ->assertResponseStatus(200)
         ;
         // You can get there logged in.
         $this->actingAs($this->centreUser, 'store')
-            ->visit($route)
-            ->seePageIs($route)
+            ->visit($this->dashboardRoute)
+            ->seePageIs($this->dashboardRoute)
             ->assertResponseStatus(200)
         ;
     }
@@ -363,7 +365,7 @@ class StoreRoutesTest extends StoreTestCase
 
         // Download user cannot access bulk route
         $this->actingAs($this->downloaderUser, 'store')
-            ->visit(URL::route('store.dashboard'))
+            ->visit($this->dashboardRoute)
             ->get($route)
             ->assertResponseStatus(403)
         ;
@@ -372,7 +374,7 @@ class StoreRoutesTest extends StoreTestCase
 
         // See page do interesting things for an fm user
         $this->actingAs($this->fmUser, 'store')
-            ->visit(URL::route('store.dashboard'))
+            ->visit($this->dashboardRoute)
             ->get($route)
             ->assertResponseOK()
         ;
@@ -402,11 +404,12 @@ class StoreRoutesTest extends StoreTestCase
             ->get($route)
             ->assertResponseStatus(403)
         ;
+
         Auth::logout();
 
         // Download user can access specific route
         $this->actingAs($this->downloaderUser, 'store')
-            ->visit(URL::route('store.dashboard'))
+            ->visit($this->dashboardRoute)
             ->get($route)
             ->assertResponseOK()
         ;
@@ -415,7 +418,7 @@ class StoreRoutesTest extends StoreTestCase
 
         // FM User can access specific route
         $this->actingAs($this->fmUser, 'store')
-            ->visit(URL::route('store.dashboard'))
+            ->visit($this->dashboardRoute)
             ->get($route)
             ->assertResponseOK()
         ;
@@ -424,7 +427,6 @@ class StoreRoutesTest extends StoreTestCase
     /** @test */
     public function testSessionUpdateGate()
     {
-        $route = URL::route('store.dashboard');
         $put_route = URL::route('store.session.put');
 
         $this->assertEquals(1, $this->centreUser->centres()->count());
@@ -438,7 +440,7 @@ class StoreRoutesTest extends StoreTestCase
         // can only PUT to the route if logged in.
         Auth::logout();
         $this->actingAs($this->centreUser, 'store')
-            ->visit($route)
+            ->visit($this->dashboardRoute)
             ->call(
                 'PUT',
                 $put_route,
@@ -448,7 +450,7 @@ class StoreRoutesTest extends StoreTestCase
 
         // return to prior route
         $this->followRedirects()
-            ->seePageIs($route)
+            ->seePageIs($this->dashboardRoute)
             ->assertResponseStatus(200);
     }
 
@@ -510,7 +512,6 @@ class StoreRoutesTest extends StoreTestCase
             "centre_id" => $this->centre->id,
         ]);
 
-        $dashboard_route = URL::route('store.dashboard');
         $route = URL::route('store.vouchers.mvl.export');
 
         Auth::logout();
@@ -532,7 +533,7 @@ class StoreRoutesTest extends StoreTestCase
 
         // Throw a 403 for auth'd but forbidden
         $this->actingAs($this->downloaderUser, 'store')
-            ->visit($dashboard_route)
+            ->visit($this->dashboardRoute)
             ->get($route)
             ->assertResponseStatus(403);
 
@@ -540,7 +541,7 @@ class StoreRoutesTest extends StoreTestCase
 
         // See page permit FM User to get from the dashboard.
         $this->actingAs($this->fmUser, 'store')
-            ->visit($dashboard_route)
+            ->visit($this->dashboardRoute)
             ->get($route)
             // It's going to 302->200 if there's a problem finding/reading the file (which isn't there).
             // However, we need to know that it *can* hit the right route
@@ -548,5 +549,44 @@ class StoreRoutesTest extends StoreTestCase
             ->followRedirects()
             ->assertResponseOK()
         ;
+    }
+
+    /** @test */
+    public function testCentreRegistrationCollectionGate()
+    {
+        factory(Registration::class, 5)->create([
+            'centre_id' => $this->centre->id,
+        ]);
+
+        $route = URL::route('store.centre.registrations.collection', ['centre' => $this->centre->id ]);
+
+        Auth::logout();
+
+        // Bounce unauth'd to login
+        $this->visit($route)
+            ->seePageIs(URL::route('store.login'))
+            ->assertResponseStatus(200);
+
+         // Centre User can print the collection forms
+        $this->actingAs($this->centreUser, 'store')
+            ->visit($this->dashboardRoute)
+            ->get($route)
+            ->assertResponseOK();
+
+        Auth::logout();
+
+        // Download user can access specific route
+        $this->actingAs($this->downloaderUser, 'store')
+            ->visit($this->dashboardRoute)
+            ->get($route)
+            ->assertResponseOK();
+
+        Auth::logout();
+
+        // FM User can access specific route
+        $this->actingAs($this->fmUser, 'store')
+            ->visit($this->dashboardRoute)
+            ->get($route)
+            ->assertResponseOK();
     }
 }
