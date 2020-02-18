@@ -85,12 +85,12 @@ class CreateMasterVoucherLogReport extends Command
     private $report = <<<EOD
 SELECT
   vouchers.code AS 'Voucher Number',
-  printed_date AS 'Printed date',
+  printed_date AS 'Date Printed',
   deliveries.dispatched_at as 'Date Distributed',
   delivery_centres.name AS 'Distributed to Centre',
   delivery_areas.name AS 'Distributed to Area',
        
-  # this may need to be rethought;
+  # This may need to be rethought;
   ''AS 'Date Allocated',
   
   disbursed_at AS 'Date Issued',
@@ -110,10 +110,6 @@ SELECT
   '' AS 'Date file was Downloaded'
 
 FROM vouchers
-
-  # Join for each voucher\'s sponsor name
-  # LEFT JOIN sponsors ON vouchers.sponsor_id = sponsors.id
-
   # Get our trader, market and sponsor names
   LEFT JOIN (
     SELECT traders.id,
