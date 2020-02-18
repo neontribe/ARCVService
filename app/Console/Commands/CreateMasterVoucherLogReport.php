@@ -168,8 +168,6 @@ FROM vouchers
      sponsors as delivery_areas 
         ON delivery_areas.id = delivery_centres.sponsor_id
 
-        
-
   # Get fields relevant to bundles (pri_carer/RVID/disbursed_at,disbursing_centre)
   LEFT JOIN (
     SELECT bundles.id,
