@@ -83,6 +83,14 @@ class CentreController extends Controller
 
         $summary = $this->getCentreRegistrationsSummary($centre_ids, $dateFormats, $excludeColumns);
 
+        list($rows, $headers) = $summary;
+
+        if (count($headers) < 1 || count($rows) < 1) {
+            return redirect()
+                ->route('store.dashboard')
+                ->with('error_message', 'No Registrations in that centre.');
+        }
+
         return $this->streamFile(
             $this->writeExcelDoc($summary)
         );
