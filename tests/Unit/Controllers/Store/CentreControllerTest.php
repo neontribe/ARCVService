@@ -28,6 +28,8 @@ class CentreControllerTest extends StoreTestCase
     /** @var Collection */
     protected $registrations;
 
+    protected $dashboard_route;
+
     public function setUp()
     {
         parent::setUp();
@@ -58,16 +60,17 @@ class CentreControllerTest extends StoreTestCase
             $bundle->disbursed_at = Carbon::today()->startOfDay()->addHour($key);
             $bundle->save();
         });
+
+        $this->dashboard_route = route('store.dashboard');
     }
 
     /** @test */
     public function testItCanDownloadARegistrationsSpreadsheet()
     {
-        $dashboard_route = route('store.dashboard');
         $sheet_route = route('store.centres.registrations.summary');
 
         $content = $this->actingAs($this->centreUser, 'store')
-            ->visit($dashboard_route)
+            ->visit($this->dashboard_route)
             ->get($sheet_route)
             ->response
             ->getContent()
@@ -150,37 +153,34 @@ class CentreControllerTest extends StoreTestCase
 
     public function testACentreWithNoRegistrationsCanDownloadAnEmptyRecord()
     {
-        $centre = factory(Centre::class)->create();
+        $sponsor = factory(Sponsor::class)->create();
+        $centre = factory(Centre::class)->create(['sponsor_id' => $sponsor->id]);
+        $this->assertEquals(1, $sponsor->centres->count());
 
-        $centre->registrations = factory(Registration::class, 0)->create([
-            'centre_id' => $centre->id,
-            ]);
-        $this->assertEquals(0, $centre->registrations->count());
-
-        $centre->neighbours = factory(Sponsor::class, 0)->create([
-            'centre_id' => $centre->id,
+        $centreUser = factory(CentreUser::class, 'withDownloader')->create([
+            "name"  => "test downloader",
+            "email" => "testdl@example.com",
+            "password" => bcrypt('test_user_pass'),
         ]);
-        $this->assertEquals(0, $centre->neighbours->count());
 
-        $centreUser = factory(CentreUser::class)->create()->fresh();
         $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
-        $centreUser = $centre->centreUsers;
-        $this->assertEquals(1, $centreUser->count());
+        $centreForUser = $centre->centreUsers;
+        $this->assertEquals(1, $centreForUser->count());
 
-        $dashboard_route = URL::route('store.dashboard');
-        $sheet_route = URL::route('store.centres.registrations.summary', ['centre' => $centre->id]);
-
-        Auth::logout();
+        $sheet_route = route('store.centre.registrations.summary', ['centre' => $centre->id]);
 
         $this->actingAs($centreUser, 'store')
-            ->visit($dashboard_route)
-            ->get($sheet_route)
-            ->assertResponseOK();
-
-        $this->actingAs($centreUser, 'store')
-            ->visit($dashboard_route)
+            ->visit($this->dashboard_route)
             ->get($sheet_route)
             ->response
-            ->getContent();
+            ->getContent()
+        ;
+
+        $this->actingAs($centreUser, 'store')
+            ->visit($this->dashboard_route)
+            ->get($sheet_route)
+            ->followRedirects()
+            ->assertResponseOK()
+        ;
     }
 }

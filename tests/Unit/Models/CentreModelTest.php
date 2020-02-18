@@ -47,9 +47,6 @@ class CentreModelTest extends TestCase
     public function itCanHaveNoRegistrations()
     {
         $centre = factory(Centre::class)->create();
-        $registrations = factory(Registration::class, 0)->create([
-            'centre_id' => $centre->id,
-        ]);
         $registrations = $centre->registrations;
         $this->assertInstanceOf(Collection::class, $registrations);
         $this->assertEquals(0, $registrations->count());
