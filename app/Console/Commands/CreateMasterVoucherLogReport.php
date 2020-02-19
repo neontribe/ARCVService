@@ -55,17 +55,24 @@ class CreateMasterVoucherLogReport extends Command
      */
     private $headers = [
         'Voucher Number',
-        'Distributed to',
+        'Date Printed',
+        'Date Distributed',
+        'Distributed to Centre',
+        'Distributed to Area',
+        'Date Allocated',
         'Date Issued',
-        'Part ID',
-        'Part Name',
+        'RVID',
+        'Main Carer',
+        'Disbursing Centre',
+        'Date Trader Recorded Voucher',
+        'Retailer Name',
         'Retail Outlet',
+        'Trader\'s Area',
         'Date Received for Reimbursement',
-        'Dispatch Date',
-        'Area',
-        'Trader Name',
         'Reimbursed Date',
-        'Disbursing Centre'
+        'Void Voucher Date',
+        'Void Reason',
+        'Date file was Downloaded',
     ];
 
     /**
@@ -78,43 +85,61 @@ class CreateMasterVoucherLogReport extends Command
     private $report = <<<EOD
 SELECT
   vouchers.code AS 'Voucher Number',
-  # To be determined, we don't know this yet.
-  '' AS 'Distributed to',
+  printed_date AS 'Date Printed',
+  deliveries.dispatched_at as 'Date Distributed',
+  delivery_centres.name AS 'Distributed to Centre',
+  delivery_areas.name AS 'Distributed to Area',
+       
+  # This may need to be rethought;
+  ''AS 'Date Allocated',
+  
   disbursed_at AS 'Date Issued',
-  rvid AS 'Part ID',
-  pri_carer_name AS 'Part Name',
+  rvid AS 'RVID',
+  pri_carer_name AS 'Main Carer',
+  disbursing_centre AS 'Disbursing Centre',
+  recorded_date  AS 'Date Trader Recorded Voucher',
+  trader_name AS 'Retailer Name',
   market_name AS 'Retail Outlet',
+  market_area AS 'Trader\'s Area',
   payment_request_date AS 'Date Received for Reimbursement',
-  dispatch_date AS 'Dispatch Date',  
-  sponsors.name AS 'Area',
-  trader_name AS 'Trader Name',
   reimbursed_date AS 'Reimbursed Date',
-  disbursing_centre AS 'Disbursing Centre'
+  
+  # These to be filled by other cards
+  '' AS 'Void Voucher Date',
+  '' AS 'Void Reason',
+  '' AS 'Date file was Downloaded'
 
 FROM vouchers
-
-  # Join for each voucher\'s sponsor name
-  LEFT JOIN sponsors ON vouchers.sponsor_id = sponsors.id
-
-  # Get our trader and market names.
+  # Get our trader, market and sponsor names
   LEFT JOIN (
     SELECT traders.id,
            traders.name AS trader_name,
-           markets.name AS market_name
+           markets.name AS market_name,
+           sponsors.name AS market_area
     FROM traders
     LEFT JOIN markets ON traders.market_id = markets.id
+    LEFT JOIN sponsors on markets.sponsor_id = sponsors.id
   ) AS markets_query
     ON markets_query.id = vouchers.trader_id
 
-  # Pivot dispatched date
+  # Pivot printed date
   LEFT JOIN (
     SELECT voucher_states.voucher_id,
-           voucher_states.created_at AS dispatch_date
+           voucher_states.created_at AS printed_date
     FROM voucher_states
-    WHERE voucher_states.`to` = 'dispatched'
+    WHERE voucher_states.`to` = 'printed'
+  ) AS printed_query
+    ON printed_query.voucher_id = vouchers.id
+      
+  # Pivot recorded date
+  LEFT JOIN (
+    SELECT voucher_states.voucher_id,
+           voucher_states.created_at AS recorded_date
+    FROM voucher_states
+    WHERE voucher_states.`to` = 'recorded'
   ) AS dispatch_query
     ON dispatch_query.voucher_id = vouchers.id
-
+      
   # Pivot payment_request date
   LEFT JOIN (
     SELECT voucher_states.voucher_id,
@@ -134,7 +159,16 @@ FROM vouchers
   ) AS reimburse_query
     ON reimburse_query.voucher_id = vouchers.id
 
-  # Get fields relevant to bundles (pri_carer/RVID/disbursed_at)
+  # Get fields relevant to voucher's delivery (Date, target centre and centre's area)
+  LEFT JOIN deliveries ON vouchers.delivery_id = deliveries.id
+  LEFT JOIN
+    centres AS delivery_centres 
+        ON deliveries.centre_id = delivery_centres.id
+  LEFT JOIN
+     sponsors as delivery_areas 
+        ON delivery_areas.id = delivery_centres.sponsor_id
+
+  # Get fields relevant to bundles (pri_carer/RVID/disbursed_at,disbursing_centre)
   LEFT JOIN (
     SELECT bundles.id,
            bundles.disbursed_at AS disbursed_at,
