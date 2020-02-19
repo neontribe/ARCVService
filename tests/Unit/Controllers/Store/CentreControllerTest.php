@@ -3,23 +3,32 @@
 
 namespace Tests\Unit\Controllers\Store;
 
-use App\Registration;
 use App\Centre;
 use App\CentreUser;
+use App\Registration;
+use App\Sponsor;
 use App\Voucher;
+use Auth;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\StoreTestCase;
+use URL;
 
 class CentreControllerTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
+    /** @var Centre $centre */
     protected $centre;
+
+    /** @var CentreUser $centreUser */
     protected $centreUser;
+
     /** @var Collection */
     protected $registrations;
+
+    protected $dashboard_route;
 
     public function setUp()
     {
@@ -51,21 +60,22 @@ class CentreControllerTest extends StoreTestCase
             $bundle->disbursed_at = Carbon::today()->startOfDay()->addHour($key);
             $bundle->save();
         });
+
+        $this->dashboard_route = route('store.dashboard');
     }
 
     /** @test */
     public function testItCanDownloadARegistrationsSpreadsheet()
     {
-        $dashboard_route = route('store.dashboard');
         $sheet_route = route('store.centres.registrations.summary');
 
         $content = $this->actingAs($this->centreUser, 'store')
-            ->visit($dashboard_route)
+            ->visit($this->dashboard_route)
             ->get($sheet_route)
             ->response
             ->getContent()
         ;
-        
+
         // Create an array of lines and filter off blank ones (default array_filter behaviour)
         $data = array_filter(explode(PHP_EOL, $content));
         // Shift the headers off.
@@ -139,5 +149,38 @@ class CentreControllerTest extends StoreTestCase
             // That is the same date as this line.
             $this->assertEquals($bundle->disbursed_at->format('d/m/Y'), $line["Last Collection"]);
         }
+    }
+
+    public function testACentreWithNoRegistrationsCanDownloadAnEmptyRecord()
+    {
+        $sponsor = factory(Sponsor::class)->create();
+        $centre = factory(Centre::class)->create(['sponsor_id' => $sponsor->id]);
+        $this->assertEquals(1, $sponsor->centres->count());
+
+        $centreUser = factory(CentreUser::class, 'withDownloader')->create([
+            "name"  => "test downloader",
+            "email" => "testdl@example.com",
+            "password" => bcrypt('test_user_pass'),
+        ]);
+
+        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
+        $centreForUser = $centre->centreUsers;
+        $this->assertEquals(1, $centreForUser->count());
+
+        $sheet_route = route('store.centre.registrations.summary', ['centre' => $centre->id]);
+
+        $this->actingAs($centreUser, 'store')
+            ->visit($this->dashboard_route)
+            ->get($sheet_route)
+            ->response
+            ->getContent()
+        ;
+
+        $this->actingAs($centreUser, 'store')
+            ->visit($this->dashboard_route)
+            ->get($sheet_route)
+            ->followRedirects()
+            ->assertResponseOK()
+        ;
     }
 }
