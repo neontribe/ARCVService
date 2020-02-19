@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Store;
+namespace Tests\Feature\Service;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -16,7 +16,7 @@ class SessionCookiesTest extends TestCase
      */
     public function testCookiesOnLogin()
     {
-        $response = $this->get(route('store.login'));
+        $response = $this->get(route('admin.login'));
         $cookies = $response->headers->getCookies();
         list($xsrfToken, $arcCookie) = $cookies;
         /**
