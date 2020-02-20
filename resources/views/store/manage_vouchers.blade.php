@@ -35,8 +35,7 @@
                     <div>
                         @foreach( $noticeReasons as $notices )
                             <p class="v-spaced">
-                                Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
-                                is {{ $notices['reason'] }}
+                                Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }} currently "{{ $notices['reason'] }}"
                             </p>
                         @endforeach
                     </div>

@@ -7,7 +7,7 @@ use Carbon\Carbon;
 
 class FamilyHasUnverifiedChildren extends BaseFamilyEvaluation
 {
-    public $reason = 'children needing ID';
+    public $reason = 'has children needing ID';
     private $specification;
     /**
      * FamilyIsPregnant constructor.
