@@ -39,12 +39,10 @@ class SessionCookiesTest extends TestCase
         $adminUser = factory(AdminUser::class)->create();
         $response = $this
             ->actingAs($adminUser, 'admin')
-            ->get(route('admin.login'))
+            ->followingRedirects()
+            ->call('post', route('admin.login'))
         ;
-        $response->assertCookie('XSRF-TOKEN');
-        $response->assertCookie('arcv-service_session');
 
-        $response->assertRedirect(route('admin.dashboard'));
         $cookies = $response->headers->getCookies();
 
         foreach ($cookies as $cookie) {

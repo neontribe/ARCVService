@@ -48,13 +48,11 @@ class SessionCookiesTest extends TestCase
 
         $response = $this
             ->actingAs($centreUser, 'store')
-            ->get(route('store.login'))
+            ->followingRedirects()
+            ->call('post', route('store.login'))
         ;
 
-        $response->assertRedirect(route('store.dashboard'));
         $cookies = $response->headers->getCookies();
-        $response->assertCookie('XSRF-TOKEN');
-        // $response->assertCookie('arcv-store_session');
 
         foreach ($cookies as $cookie) {
             if ($cookie->getName() !== 'XSRF-TOKEN') {
