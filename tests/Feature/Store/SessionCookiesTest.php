@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Store;
 
+
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
@@ -18,15 +19,18 @@ class SessionCookiesTest extends TestCase
     {
         $response = $this->get(route('store.login'));
         $cookies = $response->headers->getCookies();
-        list($xsrfToken, $arcCookie) = $cookies;
-        /**
-         * the XSRF-TOKEN cookie in Laravel 5.5 does not come with
-         * the httpOnly flag enabled. This is fixed in 5.7 https://github.com/laravel/framework/pull/24726
-         * That's why we're exclud
-         * isHttpOnly() returns whether the cookie is only transmitted over HTTP
-        */
-        $this->assertTrue($arcCookie->isHttpOnly());
-        $this->assertSame('strict', $arcCookie->getSameSite());
-        $this->assertSame('strict', $xsrfToken->getSameSite());
+
+        foreach ($cookies as $cookie) {
+            /**
+            * the XSRF-TOKEN cookie in Laravel 5.5 does not come with
+            * the httpOnly flag enabled. This is fixed in 5.7 https://github.com/laravel/framework/pull/24726
+            * isHttpOnly() returns whether the cookie is only transmitted over HTTP
+            * here we test that only for the cookie we're setting
+            */
+            if ($cookie->getName() !== 'XSRF-TOKEN') {
+                $this->assertTrue($cookie->isHttpOnly());
+            }
+            $this->assertSame('strict', $cookie->getSameSite());
+        }
     }
 }
