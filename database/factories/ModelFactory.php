@@ -327,23 +327,41 @@ $factory->define(App\Centre::class, function (Faker\Generator $faker) {
 });
 
 // Registration
-$factory->define(App\Registration::class, function () {
+$factory->define(App\Registration::class, function (Faker\Generator $faker, $attributes) {
 
     $eligibilities = ['healthy-start', 'other'];
 
-    $centre = App\Centre::inRandomOrder()->first();
+    if (!empty($attributes['centre_id'])) {
+        // Use the passed centre id.
+        $centre = App\Centre::find($attributes['centre_id']);
+    } else {
+        // Default to a random centre.
+        $centre = App\Centre::inRandomOrder()->first();
+    }
+
+    // Make a new one if we have NO centres already
     if (is_null($centre)) {
         $centre = factory(App\Centre::class)->create();
     }
-    $family = factory(App\Family::class)->make();
+
+    // if we weren't given a family, make one.
+    $family = (empty($attributes['family_id']))
+        ? factory(App\Family::class)->make()
+        : App\Family::find($attributes['family_id'])
+    ;
 
     // Set initial centre (and thus, rvid)
     $family->lockToCentre($centre);
     $family->save();
 
     // Add dependent models
-    $family->carers()->saveMany(factory(App\Carer::class, random_int(1, 3))->make());
-    $family->children()->saveMany(factory(App\Child::class, random_int(0, 4))->make());
+    if ($family->carers->count() == 0) {
+        $family->carers()->saveMany(factory(App\Carer::class, random_int(1, 3))->make());
+    }
+
+    if ($family->children->count() == 0) {
+        $family->children()->saveMany(factory(App\Child::class, random_int(0, 4))->make());
+    }
 
     return [
         'centre_id' => $centre->id,

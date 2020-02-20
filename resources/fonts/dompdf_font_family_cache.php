@@ -78,12 +78,12 @@
     'normal' => $rootDir . '/lib/fonts/DejaVuSerif',
   ),
   'roboto slab' => array(
-    'normal' => $fontDir . '/658fccc2ea95579d9a08f28d55643893',
+    'normal' => $fontDir . '/roboto-slab-normal_7d3ab749461b8c135bc134b5e1f175fd',
   ),
   'lato' => array(
-    'normal' => $fontDir . '/9411557d5a93f1acc12dbda200158f2a',
+    'normal' => $fontDir . '/lato-normal_29d5b677c886f2174ede1236ece8bf48',
   ),
   'fontawesome' => array(
-    'normal' => $fontDir . '/4257d307977490af6455ee7fc9e36b9b',
+    'normal' => $fontDir . '/fontawesome-normal_3ab02371fcdcb50f50a860084f7b0e1b',
   ),
 ) ?>
