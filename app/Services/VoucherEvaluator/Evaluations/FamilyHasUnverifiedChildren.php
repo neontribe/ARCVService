@@ -2,13 +2,12 @@
 
 namespace App\Services\VoucherEvaluator\Evaluations;
 
-
 use App\Specifications\IsVerified;
 use Carbon\Carbon;
 
 class FamilyHasUnverifiedChildren extends BaseFamilyEvaluation
 {
-    public $reason = 'has children needing ID';
+    public $reason = 'children needing ID';
     private $specification;
     /**
      * FamilyIsPregnant constructor.

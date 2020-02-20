@@ -3,7 +3,6 @@
 namespace App\Services\VoucherEvaluator;
 
 use ArrayObject;
-use Log;
 
 /**
  * Class Valuation
