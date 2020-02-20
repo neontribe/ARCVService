@@ -4,6 +4,7 @@ namespace Tests\Feature\Service;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use App\AdminUser;
 
 class SessionCookiesTest extends TestCase
 {
@@ -26,6 +27,27 @@ class SessionCookiesTest extends TestCase
             * isHttpOnly() returns whether the cookie is only transmitted over HTTP
             * here we test that only for the cookie we're setting
             */
+            if ($cookie->getName() !== 'XSRF-TOKEN') {
+                $this->assertTrue($cookie->isHttpOnly());
+            }
+            $this->assertSame('strict', $cookie->getSameSite());
+        }
+    }
+
+    public function testCookiesOnAuthenticatedUser()
+    {
+        $adminUser = factory(AdminUser::class)->create();
+        $response = $this
+            ->actingAs($adminUser, 'admin')
+            ->get(route('admin.login'))
+        ;
+        $response->assertCookie('XSRF-TOKEN');
+        $response->assertCookie('arcv-service_session');
+
+        $response->assertRedirect(route('admin.dashboard'));
+        $cookies = $response->headers->getCookies();
+
+        foreach ($cookies as $cookie) {
             if ($cookie->getName() !== 'XSRF-TOKEN') {
                 $this->assertTrue($cookie->isHttpOnly());
             }

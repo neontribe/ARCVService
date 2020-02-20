@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Store;
 
-
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Auth;
+use App\Centre;
+use App\CentreUser;
 
 class SessionCookiesTest extends TestCase
 {
@@ -27,6 +29,34 @@ class SessionCookiesTest extends TestCase
             * isHttpOnly() returns whether the cookie is only transmitted over HTTP
             * here we test that only for the cookie we're setting
             */
+            if ($cookie->getName() !== 'XSRF-TOKEN') {
+                $this->assertTrue($cookie->isHttpOnly());
+            }
+            $this->assertSame('strict', $cookie->getSameSite());
+        }
+    }
+
+    public function testCookiesOnAuthenticatedUser()
+    {
+        $centre = factory(Centre::class)->create();
+        $centreUser = factory(CentreUser::class)->create([
+            "name"  => "test user",
+            "email" => "testuser@example.com",
+            "password" => bcrypt('test_user_pass'),
+        ]);
+        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
+
+        $response = $this
+            ->actingAs($centreUser, 'store')
+            ->get(route('store.login'))
+        ;
+
+        $response->assertRedirect(route('store.dashboard'));
+        $cookies = $response->headers->getCookies();
+        $response->assertCookie('XSRF-TOKEN');
+        // $response->assertCookie('arcv-store_session');
+
+        foreach ($cookies as $cookie) {
             if ($cookie->getName() !== 'XSRF-TOKEN') {
                 $this->assertTrue($cookie->isHttpOnly());
             }
