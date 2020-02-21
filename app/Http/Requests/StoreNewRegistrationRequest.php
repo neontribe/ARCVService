@@ -33,7 +33,7 @@ class StoreNewRegistrationRequest extends FormRequest
             // MUST be present; MUST be in "yes, on, 1, or true"
             'consent' => 'required|accepted',
             // MUST be present; MUST be in listed states
-            'eligibility' => 'required|in:healthy-start,other',
+            'eligibility' => 'required|in:healthy-start-applying,healthy-start-receiving,no-recourse-to-public-funds,other',
             // MUST be present; MUST be a not-null string
             'carer' => 'required|string',
             // MAY be present; MUST be a not-null string
