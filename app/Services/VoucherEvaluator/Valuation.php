@@ -138,7 +138,6 @@ class Valuation extends ArrayObject
      */
     public function flat($attribute, bool $onlyEligibility = null)
     {
-
         // Check we can actually see this property on the valuation
         if (!property_exists($this, $attribute) ||
             (

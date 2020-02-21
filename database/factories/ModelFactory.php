@@ -355,11 +355,11 @@ $factory->define(App\Registration::class, function (Faker\Generator $faker, $att
     $family->save();
 
     // Add dependent models
-    if ($family->carers->count() == 0) {
+    if ($family->carers->count() === 0) {
         $family->carers()->saveMany(factory(App\Carer::class, random_int(1, 3))->make());
     }
 
-    if ($family->children->count() == 0) {
+    if ($family->children->count() === 0) {
         $family->children()->saveMany(factory(App\Child::class, random_int(0, 4))->make());
     }
 
