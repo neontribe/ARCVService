@@ -106,6 +106,10 @@ class CentreController extends Controller
      */
     private function getCentreRegistrationsSummary(array $centre_ids, $dateFormats = [], $excludeColumns = [])
     {
+        // Get User
+        /** @var CentreUser $user */
+        $user = Auth::user();
+
         $dateFormats = array_replace([
             'lastCollection' => 'd/m/Y',
             'due' => 'd/m/Y',
@@ -200,6 +204,10 @@ class CentreController extends Controller
             $row["Leaving Date"] = $reg->family->leaving_on ? $reg->family->leaving_on->format($dateFormats['leave']) : null;
             // Would be confusing if an old reason was left in - so check leaving date is there.
             $row["Leaving Reason"] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
+
+            if ($user->role === "foodmatters_user") {
+                $row["Date file was Downloaded"] = Carbon::today()->toDateString();
+            }
 
             // Remove any keys we don't want
             foreach ($excludeColumns as $excludeColumn) {
