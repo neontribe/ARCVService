@@ -94,11 +94,25 @@
                         Reason for receiving Rose Vouchers
                     </label>
                     <div class="user-control" id="eligibility-reason">
-                        <input type="radio" id="healthy-start" value="healthy-start" name="eligibility"
-                                @if(old('eligibility') == "healthy-start") checked="checked" @endif
+                        <input type="radio" id="healthy-start-applying" value="healthy-start-applying" name="eligibility"
+                                @if(old('eligibility') == "healthy-start-applying") checked="checked" @endif
                                 @if(empty(old('eligibility'))) checked="checked" @endif
                         />
-                        <label for="healthy-start">Entitled to Healthy Start</label>
+                        <label for="healthy-start-applying">Applying for Healthy Start</label>
+                    </div>
+                    <div class="user-control" id="eligibility-reason">
+                        <input type="radio" id="healthy-start-receiving" value="healthy-start-receiving" name="eligibility"
+                               @if(old('eligibility') == "healthy-start-receiving") checked="checked" @endif
+                               @if(empty(old('eligibility'))) checked="checked" @endif
+                        />
+                        <label for="healthy-start-receiving">Receiving Healthy Start</label>
+                    </div>
+                    <div class="user-control" id="eligibility-reason">
+                        <input type="radio" id="no-recourse-to-public-funds" value="no-recourse-to-public-funds" name="eligibility"
+                               @if(old('eligibility') == "no-recourse-to-public-funds") checked="checked" @endif
+                               @if(empty(old('eligibility'))) checked="checked" @endif
+                        />
+                        <label for="no-recourse-to-public-funds">No recourse to public funds</label>
                     </div>
                     <div class="user-control">
                         <input type="radio" id="other" value="other" name="eligibility"
