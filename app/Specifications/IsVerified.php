@@ -8,7 +8,7 @@ use Chalcedonyt\Specification\AbstractSpecification;
 class IsVerified extends AbstractSpecification
 {
     /**
-     * Returns the child's born state
+     * Returns the child's verified state
      *
      * @param Child $candidate
      * @return  Boolean
