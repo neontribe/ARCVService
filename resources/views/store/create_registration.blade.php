@@ -94,26 +94,16 @@
                         Reason for receiving Rose Vouchers
                     </label>
                     <select name="eligibility" id="eligibility-reason">
-                        <option value="healthy-start-applying"
-                                @if(
-                                    old('eligibility') == "healthy-start-applying" ||
-                                    empty(old('eligibility'))
-                                ) selected="selected"
-                                @endif
-                        >Applying for Healthy Start
-                        </option>
-                        <option value="healthy-start-receiving"
-                                @if(old('eligibility') == "healthy-start-receiving") selected="selected" @endif
-                        >Receiving Healthy Start
-                        </option>
-                        <option value="no-recourse-to-public-funds"
-                                @if(old('eligibility') == "no-recourse-to-public-funds") selected="selected" @endif
-                        >No recourse to public funds
-                        </option>
-                        <option value="other"
-                                @if(old('eligibility') == "other") selected="selected" @endif
-                        >Other Local Criteria
-                        </option>
+                        @foreach (config('arc.reg_eligibilities') as $index => $reg_eligibility)
+                            <option value="{{ $reg_eligibility }}"
+                                    @if(
+                                        (empty(old('eligibility')) && $index === 0) ||
+                                        old('eligibility') == "healthy-start-receiving"
+                                        ) selected="selected"
+                                    @endif
+                            >@lang('arc.reg_eligibilities.' . $reg_eligibility)
+                            </option>
+                        @endforeach
                     </select>
                 </div>
                 <div>
