@@ -23,8 +23,9 @@ class VoucherEvaluatorTest extends TestCase
         'ChildIsAlmostSchoolAge' => ['reason' => 'Child|almost school age'],
         'ChildIsAlmostSecondarySchoolAge' => ['reason' => 'Child|almost secondary school age'],
         'ChildIsAlmostTwelve' => ['reason' => 'Child|almost 12 years old'],
-        'ChildIsSchoolAge' => ['reason' => 'Child|school age (no longer eligible)'],
-        'ChildIsSecondarySchoolAge' => ['reason' => 'Child|secondary school age (no longer eligible)'],
+        'ChildIsSchoolAge' => ['reason' => 'Child|school age'],
+        'ChildIsSecondarySchoolAge' => ['reason' => 'Child|secondary school age'],
+        'FamilyHasUnverifiedChildren' => ['reason' => 'Family|has children needing ID']
     ];
 
     // This has a | in the reason field because we want to carry the entity with it.
@@ -35,6 +36,39 @@ class VoucherEvaluatorTest extends TestCase
         'ChildIsUnderSecondarySchoolAge' => ['reason' => 'Child|under secondary school age', 'value' => 3],
         'FamilyIsPregnant' => ['reason' => 'Family|pregnant', 'value' => 3],
     ];
+
+    /** @test */
+    public function itNoticesWhenAFamilyStillRequiresIDForChildren()
+    {
+        // Create a family with kids that have not been verified
+        $family = factory(Family::class)->create();
+
+        $unverifiedKids = factory(Child::class, 3)->states('unverified')->make();
+        $family->children()->saveMany($unverifiedKids);
+
+        // Make extended evaluator
+        $evaluator = EvaluatorFactory::make("extended_age");
+
+        // Evaluate the family
+        $evaluation = $evaluator->evaluate($family);
+        $notices = $evaluation["notices"];
+
+        // There should be a notice reason of 'FamilyHasUnverifiedChildren'
+        $this->assertContains(self::NOTICE_TYPES['FamilyHasUnverifiedChildren'], $notices);
+
+        // Set them all verified
+        $family->children->each(function ($child) {
+            $child->verified = true;
+            $child->save();
+        });
+
+        // Evaluate the family again.
+        $evaluation2 = $evaluator->evaluate($family);
+        $notices = $evaluation2["notices"];
+
+        // There should NOT be a notice reason of 'FamilyHasUnverifiedChildren'
+        $this->assertNotContains(self::NOTICE_TYPES['FamilyHasUnverifiedChildren'], $notices);
+    }
 
     /** @test */
     public function itCreditsWhenAFamilyIsPregnant()
