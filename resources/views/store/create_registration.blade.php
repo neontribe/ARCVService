@@ -93,31 +93,30 @@
                     <label for="eligibility-reason">
                         Reason for receiving Rose Vouchers
                     </label>
-                    <div class="user-control" id="eligibility-reason">
-                        <input type="radio" id="healthy-start-applying" value="healthy-start-applying" name="eligibility"
-                                @if(old('eligibility') == "healthy-start-applying") checked="checked" @endif
-                                @if(empty(old('eligibility'))) checked="checked" @endif
-                        />
-                        <label for="healthy-start-applying">Applying for Healthy Start</label>
-                    </div>
-                    <div class="user-control" id="eligibility-reason">
-                        <input type="radio" id="healthy-start-receiving" value="healthy-start-receiving" name="eligibility"
-                               @if(old('eligibility') == "healthy-start-receiving") checked="checked" @endif
-                        />
-                        <label for="healthy-start-receiving">Receiving Healthy Start</label>
-                    </div>
-                    <div class="user-control" id="eligibility-reason">
-                        <input type="radio" id="no-recourse-to-public-funds" value="no-recourse-to-public-funds" name="eligibility"
-                               @if(old('eligibility') == "no-recourse-to-public-funds") checked="checked" @endif
-                        />
-                        <label for="no-recourse-to-public-funds">No recourse to public funds</label>
-                    </div>
-                    <div class="user-control">
-                        <input type="radio" id="other" value="other" name="eligibility"
-                               @if(old('eligibility') == "other") checked="checked" @endif
-                        />
-                        <label for="other">Other Local Criteria</label>
-                    </div>
+                    <select name="elgibility" id="eligibility-reason">
+                        <option value="healthy-start-applying"
+                                @if(
+                                    old('eligibility') == "healthy-start-applying" ||
+                                    empty(old('eligibility'))
+                                ) selected="selected"
+                                @endif
+                        >Applying for Healthy Start
+                        </option>
+                        <option value="healthy-start-receiving"
+                                @if(old('eligibility') == "healthy-start-receiving") selected="selected" @endif
+                        >Receiving Healthy Start
+                        </option>
+                        <option value="no-recourse-to-public-funds"
+                                @if(old('eligibility') == "no-recourse-to-public-funds") selected="selected" @endif
+                        >No recourse to public funds
+                        </option>
+                        <option value="other"
+                                @if(old('eligibility') == "other") selected="selected" @endif
+                        >Other Local Criteria
+                        </option>
+                    </select>
+                </div>
+                <div>
                     <div class="user-control">
                         <input type="checkbox" class="styled-checkbox @if($errors->has('consent'))invalid @endif" id="privacy-statement" name="consent" @if( old('consent') ) checked @endif/>
                         <label for="privacy-statement">Has the registration form been completed and signed?</label>

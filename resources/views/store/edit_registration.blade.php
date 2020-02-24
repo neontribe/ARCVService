@@ -152,17 +152,21 @@
                     </label>
                     <select name="elgibility" id="eligibility-reason">
                         <option value="healthy-start-applying"
-                            @if($registration->eligibility == "healthy-start-applying") selected="selected" @endif
-                        >Applying for Healthy Start</option>
+                                @if($registration->eligibility == "healthy-start-applying") selected="selected" @endif
+                        >Applying for Healthy Start
+                        </option>
                         <option value="healthy-start-receiving"
-                            @if($registration->eligibility == "healthy-start-receiving") selected="selected" @endif
-                        >Receiving Healthy Start</option>
+                                @if($registration->eligibility == "healthy-start-receiving") selected="selected" @endif
+                        >Receiving Healthy Start
+                        </option>
                         <option value="no-recourse-to-public-funds"
-                            @if($registration->eligibility == "no-recourse-to-public-funds") selected="selected" @endif
-                        >No recourse to public funds</option>
+                                @if($registration->eligibility == "no-recourse-to-public-funds") selected="selected" @endif
+                        >No recourse to public funds
+                        </option>
                         <option value="other"
-                            @if($registration->eligibility == "other") selected="selected" @endif
-                        >Other Local Criteria</option>
+                                @if($registration->eligibility == "other") selected="selected" @endif
+                        >Other Local Criteria
+                        </option>
                     </select>
                 </div>
                 @if ( !empty($noticeReasons) )
