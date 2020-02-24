@@ -161,9 +161,9 @@ class EditPageTest extends StoreTestCase
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->seeElement('#eligibility-reason>option[value="healthy-start-applying"][selected]')
-            ->seeElement('#eligibility-reasonoption[value="healthy-start-receiving"]')
-            ->seeElement('#eligibility-reasonoption[value="no-recourse-to-public-funds"]')
-            ->seeElement('#eligibility-reasonoption[value="other"]')
+            ->seeElement('#eligibility-reason>option[value="healthy-start-receiving"]')
+            ->seeElement('#eligibility-reason>option[value="no-recourse-to-public-funds"]')
+            ->seeElement('#eligibility-reason>option[value="other"]')
         ;
     }
 
