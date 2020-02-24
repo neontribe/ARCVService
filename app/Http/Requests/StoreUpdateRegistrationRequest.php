@@ -48,6 +48,8 @@ class StoreUpdateRegistrationRequest extends FormRequest
             'children.*.dob' => 'required_if:children.*.verified,!=,null|date_format:Y-m',
             // MAY be present; MUST be a boolean
             'children.*.verified' => 'boolean',
+            // MUST be present; MUST be in listed states
+            'eligibility' => 'required|in:healthy-start-applying,healthy-start-receiving,no-recourse-to-public-funds,other',
         ];
 
         return $rules;
