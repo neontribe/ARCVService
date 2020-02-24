@@ -93,7 +93,7 @@
                     <label for="eligibility-reason">
                         Reason for receiving Rose Vouchers
                     </label>
-                    <select name="elgibility" id="eligibility-reason">
+                    <select name="eligibility" id="eligibility-reason">
                         <option value="healthy-start-applying"
                                 @if(
                                     old('eligibility') == "healthy-start-applying" ||

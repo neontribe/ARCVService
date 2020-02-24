@@ -150,7 +150,7 @@
                     <label for="eligibility-reason">
                         Reason for receiving Rose Vouchers
                     </label>
-                    <select name="elgibility" id="eligibility-reason">
+                    <select name="eligibility" id="eligibility-reason">
                         <option value="healthy-start-applying"
                                 @if($registration->eligibility == "healthy-start-applying") selected="selected" @endif
                         >Applying for Healthy Start
