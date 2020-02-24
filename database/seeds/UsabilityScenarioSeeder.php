@@ -100,7 +100,7 @@ class UsabilityScenarioSeeder extends Seeder
         }
         $registrations = [];
 
-        $eligibilities = ['healthy-start', 'other'];
+        $eligibilities = config('arc.reg_eligibilities');
 
         foreach (range(1, $quantity) as $q) {
             // create a family and set it up.

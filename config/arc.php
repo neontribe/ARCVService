@@ -86,4 +86,16 @@ return [
         'ARC_VERIFIES_CHILDREN',
         ""
     )),
+
+    /*
+    |--------------------------------------------------------------------------
+    | List of reasons families can be eligible.
+    |--------------------------------------------------------------------------
+    */
+    'reg_eligibilities' => [
+        'healthy-start-applying',
+        'healthy-start-receiving',
+        'no-recourse-to-public-funds',
+        'other',
+    ],
 ];
