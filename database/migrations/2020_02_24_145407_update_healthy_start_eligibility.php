@@ -14,9 +14,11 @@ class UpdateHealthyStartEligibility extends Migration
     public function up()
     {
         // Change any healthy-start folk to healthy-start-applying as the new normal.
-        DB::update("UPDATE registrations SET eligibility = 'healthy-start-applying' 
-            WHERE eligibility = 'healthy-start'
-        ");
+        if (config('app.env') === 'production') {
+            DB::update("UPDATE registrations SET eligibility = 'healthy-start-applying' 
+                WHERE eligibility = 'healthy-start'
+            ");
+        }
     }
 
     /**
@@ -27,8 +29,10 @@ class UpdateHealthyStartEligibility extends Migration
     public function down()
     {
         // ...and reverse it. Don't run this on live after we've had user changes.
-        DB::update("UPDATE registrations SET eligibility = 'healthy-start' 
-            WHERE eligibility = 'healthy-start-applying' 
-        ");
+        if (config('app.env') === 'production') {
+            DB::update("UPDATE registrations SET eligibility = 'healthy-start' 
+                WHERE eligibility = 'healthy-start-applying' 
+            ");
+        }
     }
 }
