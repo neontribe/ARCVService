@@ -99,7 +99,6 @@
                         </tbody>
                     </table>
                 </div>
-                <button class="long-button submit" type="submit">Save Changes</button>
             </div>
 
             <div class="col collect short-height">
@@ -108,7 +107,7 @@
                     <h2>This family</h2>
                 </div>
                 <div>
-                    <p>This family:</p>
+                    <p class="v-spaced">Their RV-ID is: <strong>{{ $family->rvid }}</strong></p>
                     <ul>
                         <li>
                             Should collect
@@ -148,7 +147,23 @@
                     </ul>
                 </div>
                 <div>
-                    <p class="v-spaced">Their RV-ID is: <strong>{{ $family->rvid }}</strong></p>
+                    <label for="eligibility-reason">
+                        Reason for receiving Rose Vouchers
+                    </label>
+                    <select name="elgibility" id="eligibility-reason">
+                        <option value="healthy-start-applying"
+                            @if($registration->eligibility == "healthy-start-applying") selected="selected" @endif
+                        >Applying for Healthy Start</option>
+                        <option value="healthy-start-receiving"
+                            @if($registration->eligibility == "healthy-start-receiving") selected="selected" @endif
+                        >Receiving Healthy Start</option>
+                        <option value="no-recourse-to-public-funds"
+                            @if($registration->eligibility == "no-recourse-to-public-funds") selected="selected" @endif
+                        >No recourse to public funds</option>
+                        <option value="other"
+                            @if($registration->eligibility == "other") selected="selected" @endif
+                        >Other Local Criteria</option>
+                    </select>
                 </div>
                 @if ( !empty($noticeReasons) )
                     <div class="alert-message warning">
@@ -165,6 +180,8 @@
                         </div>
                     </div>
                 @endif
+                <button class="long-button submit" type="submit">Save Changes</button>
+                <div><hr class="col-break"></div>
                 <button class="long-button"
                         onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
                     Print a 4 week collection sheet for this family
