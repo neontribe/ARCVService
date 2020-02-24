@@ -36,7 +36,7 @@ class CentreController extends Controller
                 return strtolower($registration->family->pri_carer);
             });
 
-        $filename = 'CC' . $centre->id . 'Regs_' . Carbon::now()->format('YmdHis') .'.pdf';
+        $filename = 'CC' . $centre->id . 'Regs_' . Carbon::now()->format('YmdHis') . '.pdf';
 
         $pdf = PDF::loadView(
             'store.printables.families',
@@ -72,7 +72,8 @@ class CentreController extends Controller
                 'dob' => 'm/Y'
             ];
             $excludeColumns = [
-                'Active'
+                'Active',
+                'Date file was Downloaded',
             ];
         } else {
             // Set for relevant centres
@@ -106,10 +107,6 @@ class CentreController extends Controller
      */
     private function getCentreRegistrationsSummary(array $centre_ids, $dateFormats = [], $excludeColumns = [])
     {
-        // Get User
-        /** @var CentreUser $user */
-        $user = Auth::user();
-
         $dateFormats = array_replace([
             'lastCollection' => 'd/m/Y',
             'due' => 'd/m/Y',
@@ -151,13 +148,13 @@ class CentreController extends Controller
 
             // Null coalesce `??` does not trigger `Trying to get property of non-object` explosions
             $row = [
-                "RVID" => ($reg->family->rvid) ?? 'Family not found',
-                "Area" => ($reg->centre->sponsor->name) ?? 'Area not found',
-                "Centre" => ($reg->centre->name) ?? 'Centre not found',
-                "Primary Carer" => ($reg->family->pri_carer) ?? 'Primary Carer not Found',
-                "Entitlement" => $reg->getValuation()->getEntitlement(),
-                "Last Collection" => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format($dateFormats['lastCollection']) : null,
-                "Active" => ($reg->isActive()) ? 'true' : 'false'
+                'RVID' => ($reg->family->rvid) ?? 'Family not found',
+                'Area' => ($reg->centre->sponsor->name) ?? 'Area not found',
+                'Centre' => ($reg->centre->name) ?? 'Centre not found',
+                'Primary Carer' => ($reg->family->pri_carer) ?? 'Primary Carer not Found',
+                'Entitlement' => $reg->getValuation()->getEntitlement(),
+                'Last Collection' => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format($dateFormats['lastCollection']) : null,
+                'Active' => ($reg->isActive()) ? 'true' : 'false'
             ];
 
             // Per child dependent things
@@ -193,21 +190,19 @@ class CentreController extends Controller
                 }
             }
             // Add count of eligible kids
-            $row["Eligible Children"] = $eligibleKids;
+            $row['Eligible Children'] = $eligibleKids;
 
             // Add our kids back in
             $row = array_merge($row, $kids);
 
             // Set the last dates.
-            $row["Due Date"] = $due_date;
-            $row["Join Date"] = $reg->created_at ? $reg->created_at->format($dateFormats['join']) : null;
-            $row["Leaving Date"] = $reg->family->leaving_on ? $reg->family->leaving_on->format($dateFormats['leave']) : null;
+            $row['Due Date'] = $due_date;
+            $row['Join Date'] = $reg->created_at ? $reg->created_at->format($dateFormats['join']) : null;
+            $row['Leaving Date'] = $reg->family->leaving_on ? $reg->family->leaving_on->format($dateFormats['leave']) : null;
             // Would be confusing if an old reason was left in - so check leaving date is there.
-            $row["Leaving Reason"] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
+            $row['Leaving Reason'] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
 
-            if ($user->role === "foodmatters_user") {
-                $row["Date file was Downloaded"] = Carbon::today()->toDateString();
-            }
+            $row['Date file was Downloaded'] = Carbon::today()->toDateString();
 
             // Remove any keys we don't want
             foreach ($excludeColumns as $excludeColumn) {
@@ -225,7 +220,6 @@ class CentreController extends Controller
 
         // Sort the columns
         usort($rows, function ($a, $b) use ($dateFormats) {
-
             // If we haven't ever collected, with unix epoch start (far past)
             $aActiveDate = ($a['Last Collection'])
                 ? Carbon::createFromFormat($dateFormats['lastCollection'], $a['Last Collection'])
