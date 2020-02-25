@@ -156,6 +156,18 @@ class EditPageTest extends StoreTestCase
     }
 
     /** @test */
+    public function itShowsAnEligibilitySelect()
+    {
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.create'))
+            ->seeElement('#eligibility-reason>option[value="healthy-start-applying"][selected]')
+            ->seeElement('#eligibility-reason>option[value="healthy-start-receiving"]')
+            ->seeElement('#eligibility-reason>option[value="no-recourse-to-public-funds"]')
+            ->seeElement('#eligibility-reason>option[value="other"]')
+        ;
+    }
+
+    /** @test */
     public function itShowsTheLoggedInUserDetails()
     {
         $this->actingAs($this->centreUser, 'store')

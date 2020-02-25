@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Registration;
+use Illuminate\Validation\Rule;
 
 class StoreUpdateRegistrationRequest extends FormRequest
 {
@@ -48,6 +49,11 @@ class StoreUpdateRegistrationRequest extends FormRequest
             'children.*.dob' => 'required_if:children.*.verified,!=,null|date_format:Y-m',
             // MAY be present; MUST be a boolean
             'children.*.verified' => 'boolean',
+            // MUST be present; MUST be in listed states
+            'eligibility' => [
+                    'required',
+                    Rule::in(config('arc.reg_eligibilities')),
+                ],
         ];
 
         return $rules;

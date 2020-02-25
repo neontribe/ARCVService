@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreNewRegistrationRequest extends FormRequest
 {
@@ -33,7 +34,10 @@ class StoreNewRegistrationRequest extends FormRequest
             // MUST be present; MUST be in "yes, on, 1, or true"
             'consent' => 'required|accepted',
             // MUST be present; MUST be in listed states
-            'eligibility' => 'required|in:healthy-start,other',
+            'eligibility' => [
+                'required',
+                Rule::in(config('arc.reg_eligibilities')),
+            ],
             // MUST be present; MUST be a not-null string
             'carer' => 'required|string',
             // MAY be present; MUST be a not-null string
