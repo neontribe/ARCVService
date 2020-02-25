@@ -19,8 +19,8 @@
                     <th>Email Address</th>
                     <th>Home Centre</th>
                     <th>Alternative Centres</th>
-                    <th>Edit</th>
                     <th>Downloader</th>
+                    <th>Edit</th>
                 </tr>
             </thead>
             <tbody>
@@ -38,6 +38,7 @@
                             @endforeach
                         </ul>
                     </td>
+                    <td>{{ $worker->downloader ? 'Yes' : 'No' }}</td>
                     <td>
                         <a href="{{ route('admin.centreusers.edit', ['id' => $worker->id ]) }}" class="link">
                             <div class="link-button link-button-small">
@@ -45,7 +46,6 @@
                             </div>
                         </a>
                     </td>
-                    <td>{{ $worker->downloader ? 'Yes' : 'No' }}</td>
                 </tr>
                 @endforeach
             </tbody>

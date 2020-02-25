@@ -9,41 +9,55 @@
 
         <p>Use the form below to amend a Children's Centre Worker's details.</p>
 
-        <form role="form" class="styled-form" method="POST" action="{{ route('admin.centreusers.update', ['id' => $worker->id]) }}">
+        <form role="form" class="styled-form" method="POST"
+            action="{{ route('admin.centreusers.update', ['id' => $worker->id]) }}">
             {!! method_field('PUT') !!}
             {!! csrf_field() !!}
             <div class="horizontal-container">
                 <div>
                     <label for="name" class="required">Name</label>
-                    <input type="text" id="name" value="{{ $worker->name }}" name="name" class="{{ $errors->has('name') ? 'error' : '' }}" required>
+                    <input type="text" id="name" value="{{ $worker->name }}" name="name"
+                        class="{{ $errors->has('name') ? 'error' : '' }}" required>
                     @include('service.partials.validationMessages', array('inputName' => 'name'))
                 </div>
                 <div>
                     <label for="email" class="required">Email Address</label>
-                    <input type="email" id="email" name="email" value="{{ $worker->email }}" class="{{ $errors->has('email') ? 'error' : '' }}" required>
+                    <input type="email" id="email" name="email" value="{{ $worker->email }}"
+                        class="{{ $errors->has('email') ? 'error' : '' }}" required>
                     @include('service.partials.validationMessages', array('inputName' => 'email'))
                 </div>
                 <div class="select">
                     <label for="worker_centre">Home Centre</label>
-                    <select name="worker_centre" id="worker_centre" class="{{ $errors->has('worker_centre') ? 'error' : '' }}" required>
+                    <select name="worker_centre" id="worker_centre"
+                        class="{{ $errors->has('worker_centre') ? 'error' : '' }}" required>
                         @foreach($centresBySponsor as $sponsor)
                         <optgroup label="{{ $sponsor->name }}">
                             @foreach ($sponsor->centres as $centre)
-                                <option value="{{ $centre->id }}"
-                                        @if($centre->selected === "home")
-                                        selected
-                                        @endif
-                                        @if($centre->selected !== false)
-                                            data-workercentre="{{ $centre->selected }}"
-                                        @endif
+                            <option value="{{ $centre->id }}" @if($centre->selected === "home")
+                                selected
+                                @endif
+                                @if($centre->selected !== false)
+                                data-workercentre="{{ $centre->selected }}"
+                                @endif
                                 >
-                                    {{ $centre->name }}
-                                </option>
+                                {{ $centre->name }}
+                            </option>
                             @endforeach
                         </optgroup>
                         @endforeach
                     </select>
                     @include('service.partials.validationMessages', array('inputName' => 'worker_centre'))
+                </div>
+                <div class="select">
+                    <label for="worker_downloader">Downloader Status</label>
+                    <select name="worker_downloader" id="">
+                        <option value="{{ $worker->downloader ? 1 : 0 }}" selected>
+                            {{ $worker->downloader ? 'Yes' : 'No' }}
+                        </option>
+                        <option value="{{ !$worker->downloader ? 1 : 0 }}">
+                            {{ !$worker->downloader ? 'Yes' : 'No' }}
+                        </option>
+                    </select>
                 </div>
                 <div class="checkboxes">
                     <div id="alternatives">
@@ -60,16 +74,16 @@
                 var data = $("#worker_centre")
                     .find(':selected')
                     .siblings()
-                    .map(function(index,centre) {
+                    .map(function(index, centre) {
                         return {
-                            id : centre.value,
-                            name : centre.text,
-                            selected : $(centre).attr('data-workercentre')
+                            id: centre.value,
+                            name: centre.text,
+                            selected: $(centre).attr('data-workercentre')
                         }
                     });
 
                 // Set the default
-                var boxes =[$('<div><p>This centre has no neighbours.</p></div>')];
+                var boxes = [$('<div><p>This centre has no neighbours.</p></div>')];
 
                 // Iterate data to see if we need to change that
                 if (data.length > 0) {
@@ -79,10 +93,10 @@
                         // Make an input
                         $('<input>')
                             .attr({
-                                type    : 'checkbox',
-                                name    : 'alternative_centres[]',
-                                value   : obj.id,
-                                id      : 'neighbour-' +obj.id
+                                type: 'checkbox',
+                                name: 'alternative_centres[]',
+                                value: obj.id,
+                                id: 'neighbour-' + obj.id
                             })
                             .prop('checked', !!(obj.selected))
                             .change(updateModel)
@@ -90,7 +104,7 @@
 
                         // Make a label for it
                         $('<label>').attr({
-                                for  : 'neighbour-' +obj.id
+                                for: 'neighbour-' + obj.id
                             })
                             .text(obj.name)
                             .appendTo(div);
@@ -101,7 +115,7 @@
                 }
                 // build checkboxes
                 $('#centres').children().remove();
-                $.each(boxes, function(i, box){
+                $.each(boxes, function(i, box) {
                     box.appendTo('#centres');
                 });
             }
@@ -112,19 +126,20 @@
                 var centre = $('#worker_centre').find('option[value="' + e.target.value + '"]');
                 $(e.target).prop('checked')
                     //if it's checked, set to 'alternate'
-                    ? centre.attr('data-workercentre', 'alternate')
+                    ?
+                    centre.attr('data-workercentre', 'alternate')
                     //if it's not checked, remove attribute
-                    : centre.removeAttr('data-workercentre')
-                ;
+                    :
+                    centre.removeAttr('data-workercentre');
                 // rebuild the checkboxes.
                 buildCheckboxes();
             }
 
             // Start the page
             $(document).ready(
-                function () {
-                //setup a change method
-                    $('#worker_centre').change(function () {
+                function() {
+                    //setup a change method
+                    $('#worker_centre').change(function() {
                         var newCentre = $('#worker_centre').find(':selected');
                         var prevCentre = $('#worker_centre').find("option[data-workercentre='home']");
                         // If new one is an alternate, set alternate on old one

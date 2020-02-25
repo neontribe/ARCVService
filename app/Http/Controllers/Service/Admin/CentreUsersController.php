@@ -28,11 +28,11 @@ class CentreUsersController extends Controller
         return view('service.centreusers.index', compact('workers'));
     }
 
-     /**
-     * Show the form for creating new CentreUsers
-     *
-     * @return Factory|View
-     */
+    /**
+    * Show the form for creating new CentreUsers
+    *
+    * @return Factory|View
+    */
     public function create()
     {
         $centres = Centre::get(['name','id']);
@@ -101,6 +101,7 @@ class CentreUsersController extends Controller
                 $cu->fill([
                     'name' => $request->input('name'),
                     'email' => $request->input('email'),
+                    'downloader' => $request->input('worker_downloader'),
                 ]);
                 $cu->save();
 
