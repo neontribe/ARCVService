@@ -395,9 +395,10 @@ class RegistrationController extends Controller
     {
         $amendedCarers = [];
 
-        $user = $request->user();
-
         $registration = ($registration) ?? Registration::findOrFail($request->get('registration'));
+
+        // Fetch eligibility
+        $eligibility = $request->get('eligibility');
 
         // NOTE: Following refactor where we needed to retain Carer ids.
         // Possible that we might want to add flag to carer to distinguish Main from Secondary,
@@ -448,14 +449,11 @@ class RegistrationController extends Controller
             (array)$request->get('children')
         );
 
-        // Grab the date
-        $now = Carbon::now();
-
         $family = $registration->family;
 
         // Try to transact, so we can roll it back
         try {
-            DB::transaction(function () use ($registration, $family, $amendedCarers, $newCarers, $carersKeysToDelete, $children) {
+            DB::transaction(function () use ($registration, $family, $amendedCarers, $newCarers, $carersKeysToDelete, $children, $eligibility) {
 
                 // delete the missing carers
                 Carer::whereIn('id', $carersKeysToDelete)->delete();
@@ -473,6 +471,9 @@ class RegistrationController extends Controller
                         $model->save();
                     }
                 );
+
+                // update eligibility
+                $registration->eligibility = $eligibility;
 
                 // save changes to registration.
                 $registration->save();

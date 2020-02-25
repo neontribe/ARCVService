@@ -72,12 +72,14 @@ class RegistrationPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function itShowsAnEligabilityRadioGroup()
+    public function itShowsAnEligibilitySelect()
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
-            ->seeElement('input[type=radio][id="healthy-start"][checked]')
-            ->seeElement('input[type=radio][id="other"]')
+            ->seeElement('#eligibility-reason>option[value="healthy-start-applying"][selected]')
+            ->seeElement('#eligibility-reason>option[value="healthy-start-receiving"]')
+            ->seeElement('#eligibility-reason>option[value="no-recourse-to-public-funds"]')
+            ->seeElement('#eligibility-reason>option[value="other"]')
         ;
     }
 

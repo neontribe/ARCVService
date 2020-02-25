@@ -99,7 +99,6 @@
                         </tbody>
                     </table>
                 </div>
-                <button class="long-button submit" type="submit">Save Changes</button>
             </div>
 
             <div class="col collect short-height">
@@ -108,7 +107,7 @@
                     <h2>This family</h2>
                 </div>
                 <div>
-                    <p>This family:</p>
+                    <p class="v-spaced">Their RV-ID is: <strong>{{ $family->rvid }}</strong></p>
                     <ul>
                         <li>
                             Should collect
@@ -148,7 +147,17 @@
                     </ul>
                 </div>
                 <div>
-                    <p class="v-spaced">Their RV-ID is: <strong>{{ $family->rvid }}</strong></p>
+                    <label for="eligibility-reason">
+                        Reason for receiving Rose Vouchers
+                    </label>
+                    <select name="eligibility" id="eligibility-reason">
+                        @foreach (config('arc.reg_eligibilities') as $reg_eligibility)
+                            <option value="{{ $reg_eligibility }}"
+                                    @if($registration->eligibility == $reg_eligibility) selected="selected" @endif
+                            >@lang('arc.reg_eligibilities.' . $reg_eligibility)
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
                 @if ( !empty($noticeReasons) )
                     <div class="alert-message warning">
@@ -165,6 +174,8 @@
                         </div>
                     </div>
                 @endif
+                <button class="long-button submit" type="submit">Save Changes</button>
+                <div><hr class="col-break"></div>
                 <button class="long-button"
                         onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
                     Print a 4 week collection sheet for this family

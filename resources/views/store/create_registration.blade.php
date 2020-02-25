@@ -93,19 +93,20 @@
                     <label for="eligibility-reason">
                         Reason for receiving Rose Vouchers
                     </label>
-                    <div class="user-control" id="eligibility-reason">
-                        <input type="radio" id="healthy-start" value="healthy-start" name="eligibility"
-                                @if(old('eligibility') == "healthy-start") checked="checked" @endif
-                                @if(empty(old('eligibility'))) checked="checked" @endif
-                        />
-                        <label for="healthy-start">Entitled to Healthy Start</label>
-                    </div>
-                    <div class="user-control">
-                        <input type="radio" id="other" value="other" name="eligibility"
-                               @if(old('eligibility') == "other") checked="checked" @endif
-                        />
-                        <label for="other">Other Local Criteria</label>
-                    </div>
+                    <select name="eligibility" id="eligibility-reason">
+                        @foreach (config('arc.reg_eligibilities') as $index => $reg_eligibility)
+                            <option value="{{ $reg_eligibility }}"
+                                    @if(
+                                        (empty(old('eligibility')) && $index === 0) ||
+                                        old('eligibility') === "healthy-start-receiving"
+                                        ) selected="selected"
+                                    @endif
+                            >@lang('arc.reg_eligibilities.' . $reg_eligibility)
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
                     <div class="user-control">
                         <input type="checkbox" class="styled-checkbox @if($errors->has('consent'))invalid @endif" id="privacy-statement" name="consent" @if( old('consent') ) checked @endif/>
                         <label for="privacy-statement">Has the registration form been completed and signed?</label>
