@@ -133,28 +133,38 @@ class Valuation extends ArrayObject
     /**
      * Grabs and flattens a specified attribute from Valuations.
      * @param $attribute
-     * @param bool $onlyEligible
+     * @param bool $onlyEligibility
      * @return mixed|null
      */
-    public function flat($attribute, bool $onlyEligible = false)
+    public function flat($attribute, bool $onlyEligibility = null)
     {
-        // Check this attribute
-        if (property_exists($this, $attribute) &&
-            // If this valuation isn't eligible
-            $this->getEligibility() === $onlyEligible
+        // Check we can actually see this property on the valuation
+        if (!property_exists($this, $attribute) ||
+            (
+                // OR If you've filled the only eligibility flag
+                $onlyEligibility !== null &&
+                // AND it's not the valuation's eligibility
+                $onlyEligibility !== $this->getEligibility()
+                // Note, this actually allows us to filter *ineligbles* as well...
+            )
         ) {
-            $flatAttrib = $this[$attribute];
-
-            if (is_array($flatAttrib)) {
-                // Merge on it's descendents
-                /** @var Valuation $valuation */
-                foreach ($this->valuations as $valuation) {
-                    $flatAttrib = array_merge($flatAttrib, $valuation->flat($attribute, $onlyEligible));
-                }
-            }
-            return $flatAttrib;
+            // ...then skip this one.
+            return [];
         }
-        // Something went wrong
-        return [];
+
+        // Get the attribute off this valuation.
+        $ownAttrib = $this[$attribute];
+
+        $subAttribs = [];
+
+        // Are there any sub-valuations to check?
+        if (!empty($this->valuations)) {
+            // Merge on it's descendents
+            /** @var Valuation $subValuation */
+            foreach ($this->valuations as $subValuation) {
+                $subAttribs = array_merge($subAttribs, $subValuation->flat($attribute, $onlyEligibility));
+            }
+        }
+        return array_merge($ownAttrib, $subAttribs);
     }
 }
