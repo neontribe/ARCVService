@@ -202,7 +202,9 @@ class CentreController extends Controller
             // Would be confusing if an old reason was left in - so check leaving date is there.
             $row['Leaving Reason'] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
 
-            $row['Date file was Downloaded'] = Carbon::today()->toDateString();
+            if (!in_array('Date file was Downloaded', $excludeColumns, true)) {
+                $row['Date file was Downloaded'] = Carbon::today()->toDateString();
+            };
 
             // Remove any keys we don't want
             foreach ($excludeColumns as $excludeColumn) {
