@@ -93,8 +93,8 @@ SELECT
   delivery_areas.name AS 'Distributed to Area',      
 
   CASE
-      WHEN (disbursed_at is null) AND (disbursing_centre is not null) THEN 'True'
-      WHEN (disbursed_at is not null) AND (disbursing_centre is not null) THEN 'False'
+      WHEN (disbursed_at is null) AND (pri_carer_name is not null) THEN 'True'
+      WHEN (disbursed_at is not null) AND (pri_carer_name is not null) THEN 'False'
   END
   AS 'Waiting for collection',
 
