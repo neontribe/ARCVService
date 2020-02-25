@@ -49,8 +49,8 @@
                     @include('service.partials.validationMessages', array('inputName' => 'worker_centre'))
                 </div>
                 <div class="select">
-                    <label for="worker_downloader">Downloader Status</label>
-                    <select name="worker_downloader" id="">
+                    <label for="downloader">Downloader Status</label>
+                    <select name="downloader" id="">
                         <option value="{{ $worker->downloader ? 1 : 0 }}" selected>
                             {{ $worker->downloader ? 'Yes' : 'No' }}
                         </option>
@@ -58,6 +58,7 @@
                             {{ !$worker->downloader ? 'Yes' : 'No' }}
                         </option>
                     </select>
+                    @include('service.partials.validationMessages', array('inputName' => 'downloader'))
                 </div>
                 <div class="checkboxes">
                     <div id="alternatives">

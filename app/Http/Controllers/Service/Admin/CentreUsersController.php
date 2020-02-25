@@ -102,7 +102,7 @@ class CentreUsersController extends Controller
                 $cu->fill([
                     'name' => $request->input('name'),
                     'email' => $request->input('email'),
-                    'downloader' => $request->input('worker_downloader'),
+                    'downloader' => $request->input('downloader'),
                 ]);
                 $cu->save();
 

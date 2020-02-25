@@ -91,7 +91,6 @@ class CentreUserControllerTest extends StoreTestCase
             ->seePageIs(route('admin.centreusers.index'))
             ->see($this->data["name"])
             ->see($this->data["email"])
-            ->see($this->data['downloader'])
         ;
         ;
         // find the user
