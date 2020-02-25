@@ -35,7 +35,7 @@ class CentreUserControllerTest extends StoreTestCase
             'name' => 'bobby testee',
             'email' => 'bobby@test.co.uk',
             'worker_centre' => $this->centre->id,
-            'alternative_centres.*' => $this->altCentres->pluck('id')->all()
+            'alternative_centres.*' => $this->altCentres->pluck('id')->all(),
         ];
     }
 
@@ -91,6 +91,7 @@ class CentreUserControllerTest extends StoreTestCase
             ->seePageIs(route('admin.centreusers.index'))
             ->see($this->data["name"])
             ->see($this->data["email"])
+            ->see($this->data['downloader'])
         ;
         ;
         // find the user
