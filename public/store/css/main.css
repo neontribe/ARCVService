@@ -26,6 +26,11 @@ h3 {
 	margin-top: 0;
 }
 
+hr {
+	border-color: #a74e94;
+	background-color: #a74e94
+}
+
 b {
 	font-weight: bold;
 }
