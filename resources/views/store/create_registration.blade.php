@@ -98,7 +98,7 @@
                             <option value="{{ $reg_eligibility }}"
                                     @if(
                                         (empty(old('eligibility')) && $index === 0) ||
-                                        old('eligibility') == "healthy-start-receiving"
+                                        old('eligibility') === "healthy-start-receiving"
                                         ) selected="selected"
                                     @endif
                             >@lang('arc.reg_eligibilities.' . $reg_eligibility)
