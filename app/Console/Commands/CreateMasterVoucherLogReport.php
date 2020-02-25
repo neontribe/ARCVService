@@ -55,6 +55,7 @@ class CreateMasterVoucherLogReport extends Command
      */
     private $headers = [
         'Voucher Number',
+        'Voucher Area',
         'Date Printed',
         'Date Distributed',
         'Distributed to Centre',
@@ -85,6 +86,7 @@ class CreateMasterVoucherLogReport extends Command
     private $report = <<<EOD
 SELECT
   vouchers.code AS 'Voucher Number',
+  voucher_sponsor.name AS 'Voucher Area',
   printed_date AS 'Date Printed',
   deliveries.dispatched_at as 'Date Distributed',
   delivery_centres.name AS 'Distributed to Centre',
@@ -110,6 +112,10 @@ SELECT
   '' AS 'Date file was Downloaded'
 
 FROM vouchers
+    
+  # get the voucher sponsor.
+  LEFT JOIN sponsors as voucher_sponsor on vouchers.sponsor_id = voucher_sponsor.id
+      
   # Get our trader, market and sponsor names
   LEFT JOIN (
     SELECT traders.id,
@@ -274,7 +280,7 @@ EOD;
             $areas = [];
             // We're going to use "&" references to avoid memory issues - Hang on to your hat.
             foreach ($rows as $rowindex => &$rowFields) {
-                $area = $rowFields['Area'];
+                $area = $rowFields['Voucher Area'];
                 if (!isset($areas[$area])) {
                     // Not met this Area before? Add it to our list!
                     $areas[$area] = [];
