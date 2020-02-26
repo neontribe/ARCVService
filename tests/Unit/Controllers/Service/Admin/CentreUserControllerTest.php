@@ -36,7 +36,6 @@ class CentreUserControllerTest extends StoreTestCase
             'email' => 'bobby@test.co.uk',
             'worker_centre' => $this->centre->id,
             'alternative_centres.*' => $this->altCentres->pluck('id')->all(),
-            'downloader' => 1,
         ];
     }
 
@@ -82,6 +81,8 @@ class CentreUserControllerTest extends StoreTestCase
         // Check that worked.
         $this->assertCount(1, $cu->centres);
         $this->assertEquals($this->altCentres->last()->id, $cu->homeCentre->id);
+
+        $this->data['downloader'] = 1;
 
         // Totally update the name, email, centre config and downloader status from the $data!
         $this->actingAs($this->adminUser, 'admin')
