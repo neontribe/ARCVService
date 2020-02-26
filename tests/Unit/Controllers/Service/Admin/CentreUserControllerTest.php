@@ -36,6 +36,7 @@ class CentreUserControllerTest extends StoreTestCase
             'email' => 'bobby@test.co.uk',
             'worker_centre' => $this->centre->id,
             'alternative_centres.*' => $this->altCentres->pluck('id')->all(),
+            'downloader' => 1,
         ];
     }
 
@@ -69,28 +70,41 @@ class CentreUserControllerTest extends StoreTestCase
         $cu = factory(CentreUser::class)->create([
             'name' => "testman",
             'email' => "testman@test.co.uk",
+            'downloader' => 0,
         ]);
         $cu->centres()->attach($this->altCentres->last()->id, ['homeCentre' => true]);
 
         $this->seeInDatabase('centre_users', [
-            'name' => "testman",
-            'email' => "testman@test.co.uk",
+            'name' => $cu->name,
+            'email' => $cu->email,
+            'downloader' => $cu->downloader
         ]);
         // Check that worked.
         $this->assertCount(1, $cu->centres);
         $this->assertEquals($this->altCentres->last()->id, $cu->homeCentre->id);
 
-        // Totally update the name, email and centre config from the $data!
+        // Totally update the name, email, centre config and downloader status from the $data!
         $this->actingAs($this->adminUser, 'admin')
-            ->post(
-                route('admin.centreusers.store'),
+            ->put(
+                route('admin.centreusers.update', $cu->id),
                 $this->data
             )
             ->followRedirects()
             ->assertResponseOk()
             ->seePageIs(route('admin.centreusers.index'))
-            ->see($this->data["name"])
-            ->see($this->data["email"])
+            ->see($this->data['name'])
+            ->see($this->data['email'])
+            ->see($this->data['worker_centre'])
+            ->see($this->data['downloader'])
+            ->seeInDatabase('centre_users', [
+                'name' => $this->data['name'],
+                'email' => $this->data['email'],
+                'downloader' => $this->data['downloader']
+            ])
+            ->dontSeeInDatabase('centre_users', [
+                'name' => $cu->name,
+                'email' => $cu->email,
+            ])
         ;
         ;
         // find the user
