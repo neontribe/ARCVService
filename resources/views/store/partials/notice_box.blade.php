@@ -1,6 +1,6 @@
 <div class="alert-message warning">
     <div class="icon-container warning">
-        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+        <i class="fa fa-bell" aria-hidden="true"></i>
     </div>
     <div id="family-warning">
         @foreach( $noticeReasons as $notices )
