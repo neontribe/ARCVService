@@ -60,7 +60,7 @@ class CreateMasterVoucherLogReport extends Command
         'Date Distributed',
         'Distributed to Centre',
         'Distributed to Area',
-        'Date Allocated',
+        'Waiting for collection',
         'Date Issued',
         'RVID',
         'Main Carer',
@@ -90,10 +90,13 @@ SELECT
   printed_date AS 'Date Printed',
   deliveries.dispatched_at as 'Date Distributed',
   delivery_centres.name AS 'Distributed to Centre',
-  delivery_areas.name AS 'Distributed to Area',
+  delivery_areas.name AS 'Distributed to Area',      
 
-  # This may need to be rethought;
-  ''AS 'Date Allocated',
+  CASE
+      WHEN (disbursed_at is null) AND (pri_carer_name is not null) THEN 'True'
+      WHEN (disbursed_at is not null) AND (pri_carer_name is not null) THEN 'False'
+  END
+  AS 'Waiting for collection',
 
   disbursed_at AS 'Date Issued',
   rvid AS 'RVID',
