@@ -1135,6 +1135,13 @@ VOUCHER PAGES
 	background-color: #f8c28b;
 }
 
+.alert-message.success {
+	background-color: #d4edda;
+    border: 1px solid #94d2a3;
+	border-radius: .25rem;
+	margin: 1rem 10%;
+}
+
 .alert-message p {
 	color: #000000;
 	flex: 0 0 auto;
@@ -1155,11 +1162,26 @@ VOUCHER PAGES
     background-color: #f3902f;
 }
 
+.icon-container.success {
+	background-color: #6ba178;
+	display: inline-block;
+    padding: 6px 12px;
+    line-height: 1;
+    border: 1px solid #6ba178;
+}
+
 .icon-container i {
 	color: white;
 	line-height: 2rem;
 	text-align: center;
 	width: 100%;
+}
+
+.icon-container.success i {
+	color: #d4edda;
+	font-size: 2.5rem;
+	padding: 0.5rem;
+	width: inherit;
 }
 
 .slide-in {
