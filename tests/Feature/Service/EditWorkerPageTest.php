@@ -22,22 +22,12 @@ class EditWorkerPageTest extends StoreTestCase
     /** @var Collection $altCentres */
     private $altCentres;
 
-    /** @var array $data */
-    private $data;
-
     public function setUp()
     {
         parent::setUp();
         $this->adminUser = factory(AdminUser::class)->create();
         $this->centre = factory(Centre::class)->create([]);
         $this->altCentres = factory(Centre::class, 2)->create([]);
-        $this->data = [
-            'name' => 'bobby testee',
-            'email' => 'bobby@test.co.uk',
-            'worker_centre' => $this->centre->id,
-            'alternative_centres.*' => $this->altCentres->pluck('id')->all(),
-            'downloader' => 1,
-        ];
     }
 
     /**
@@ -53,17 +43,21 @@ class EditWorkerPageTest extends StoreTestCase
             'email' => 'testman@test.co.uk',
         ]);
         $cu->centres()->attach($this->altCentres->last()->id, ['homeCentre' => true]);
+        $workerEditRoute = route('admin.centreusers.edit', ['id' => $cu->id,]);
 
         $this->actingAs($this->adminUser, 'admin')
-            ->get(route('admin.centreusers.edit', ['id' => $cu->id,]), $this->data)
+            ->get($workerEditRoute)
             ->assertResponseOk()
+            ->seePageIs($workerEditRoute)
             ->seeInElement('h1', 'Edit a Children\'s Centre Worker')
             ->seeElement('form')
             ->seeInElement('label[for="name"]', 'Name')
             ->seeInElement('label[for="email"]', 'Email Address')
             ->seeElement('label[for="worker_centre"]')
+            ->seeInElement('label[for="worker_centre"]', 'Home Centre')
             ->seeElement('select[name="worker_centre"]')
             ->seeElement('label[for="downloader"]')
+            ->seeInElement('label[for="downloader"]', 'Downloader Status')
             ->seeElement('select[name="downloader"]')
         ;
     }

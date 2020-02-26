@@ -50,7 +50,7 @@
                 </div>
                 <div class="select">
                     <label for="downloader">Downloader Status</label>
-                    <select name="downloader" id="">
+                    <select name="downloader" id="downloader">
                         <option value="{{ $worker->downloader ? 1 : 0 }}" selected>
                             {{ $worker->downloader ? 'Yes' : 'No' }}
                         </option>
