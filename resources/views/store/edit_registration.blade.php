@@ -159,21 +159,7 @@
                         @endforeach
                     </select>
                 </div>
-                @if ( !empty($noticeReasons) )
-                    <div class="alert-message warning">
-                        <div class="icon-container warning">
-                            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                        </div>
-                        <div>
-                            @foreach( $noticeReasons as $notices )
-                                <p class="v-spaced">
-                                    Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
-                                    currently "{{ $notices['reason'] }}"</p>
-                                </p>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
+                @includeWhen(!empty($noticeReasons), 'store.partials.notice_box', ['noticeReasons' => $noticeReasons])
                 <button class="long-button submit" type="submit">Save Changes</button>
                 <div><hr class="col-break"></div>
                 <button class="long-button"
