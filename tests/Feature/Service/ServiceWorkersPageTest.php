@@ -5,7 +5,9 @@ namespace Tests\Feature\Service;
 use Tests\StoreTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use App\AdminUser;
-
+use App\Centre;
+use App\CentreUser;
+use Illuminate\Support\Collection;
 
 class ServiceWorkersPageTest extends StoreTestCase
 {
@@ -13,13 +15,55 @@ class ServiceWorkersPageTest extends StoreTestCase
 
     /** @var AdminUser $adminUser */
     private $adminUser;
+
+    /** @var CentreUser $userHomeCentreNoAlt */
+    private $userHomeCentreNoAlt;
+
+    /** @var CentreUser $userHomeCentreTwoAlt */
+    private $userHomeCentreTwoAlt;
+
+    /** @var CentreUser $downlaoderUser */
+    private $downloaderUser;
+
+    /** @var Centre $centre */
+    private $centre;
+
+    /** @var Collection $altCentres */
+    private $altCentres;
+
     private $workersRoute;
 
     public function setUp()
     {
         parent::setUp();
+
         $this->adminUser = factory(AdminUser::class)->create();
+        // Create 3 centres in an area
+        $this->centre = factory(Centre::class, 3)->create();
+        // Create 3 alt centres
+        $this->altCentres = factory(Centre::class, 2)->create([]);
         $this->workersRoute = route('admin.centreusers.index');
+
+        // Create 1 user with a home centre and no alternatives
+        $this->userHomeCentreNoAlt = factory(CentreUser::class)->create([
+            "name"  => "test user",
+            "email" => "testuser@example.com",
+        ]);
+        $this->userHomeCentreNoAlt->centres()->attach(1, ['homeCentre' => true]);
+
+        // Create 1 user with with a homeCentre and 2 alternatives
+        $this->userHomeCentreTwoAlt = factory(CentreUser::class)->create([
+            "name"  => "test user with alternatives",
+            "email" => "testuseralternatives@example.com",
+        ]);
+        $this->userHomeCentreTwoAlt->centres()->attach($this->altCentres->pluck('id')->all(), ['homeCentre' => true]);
+
+        // Create 1 user with a homeCentre who can Download
+        $this->downloaderUser = factory(CentreUser::class, 'withDownloader')->create([
+            "name"  => "test downloader",
+            "email" => "testdl@example.com",
+        ]);
+        $this->downloaderUser->centres()->attach(1, ['homeCentre' => true]);
     }
 
     /**
@@ -27,7 +71,7 @@ class ServiceWorkersPageTest extends StoreTestCase
      *
      * @return void
      */
-    public function itShowsAListOfWorkers()
+    public function itShowsATableWithHeaders()
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->workersRoute)
@@ -40,6 +84,24 @@ class ServiceWorkersPageTest extends StoreTestCase
             ->seeInElement('th', 'Edit')
             ->seeInElement('th', 'Downloader')
             ->see('Downloader')
+        ;
+    }
+
+    /**
+     * @test
+     *
+     * @return void
+     */
+    public function itShowsAListWithUsers()
+    {
+        $this->actingAs($this->adminUser, 'admin')
+            ->visit($this->workersRoute)
+            ->seeInElementAtPos('tbody tr', $this->userHomeCentreNoAlt['name'], 0)
+            ->seeInElementAtPos('tbody tr td', $this->userHomeCentreNoAlt['email'], 1)
+            ->seeInElementAtPos('tbody tr', $this->userHomeCentreTwoAlt['name'], 1)
+            ->seeInElementAtPos('tbody tr td', $this->userHomeCentreTwoAlt['email'], 7)
+            ->seeInElementAtPos('tbody tr', $this->downloaderUser['name'], 2)
+            ->seeInElementAtPos('tbody tr td', $this->downloaderUser['email'], 13)
         ;
     }
 }
