@@ -20,7 +20,7 @@ class CreateMasterVoucherLogReport extends Command
      *
      * @var string $signature
      */
-    protected $signature = 'arc:createMVLReport 
+    protected $signature = 'arc:createMVLReport
                             {--force : Execute without confirmation, eg for automation}
                             {--no-zip : Don\'t wrap files in a single archive}
                             {--plain : Don\'t encrypt contents of files}
@@ -91,10 +91,10 @@ SELECT
   deliveries.dispatched_at as 'Date Distributed',
   delivery_centres.name AS 'Distributed to Centre',
   delivery_areas.name AS 'Distributed to Area',
-       
+
   # This may need to be rethought;
   ''AS 'Date Allocated',
-  
+
   disbursed_at AS 'Date Issued',
   rvid AS 'RVID',
   pri_carer_name AS 'Main Carer',
@@ -105,17 +105,17 @@ SELECT
   market_area AS 'Trader\'s Area',
   payment_request_date AS 'Date Received for Reimbursement',
   reimbursed_date AS 'Reimbursed Date',
-  
+
   # These to be filled by other cards
   '' AS 'Void Voucher Date',
   '' AS 'Void Reason',
-  '' AS 'Date file was Downloaded'
+  CURDATE() AS 'Date file was Downloaded'
 
 FROM vouchers
-    
+
   # get the voucher sponsor.
   LEFT JOIN sponsors as voucher_sponsor on vouchers.sponsor_id = voucher_sponsor.id
-      
+
   # Get our trader, market and sponsor names
   LEFT JOIN (
     SELECT traders.id,
@@ -136,7 +136,7 @@ FROM vouchers
     WHERE voucher_states.`to` = 'printed'
   ) AS printed_query
     ON printed_query.voucher_id = vouchers.id
-      
+
   # Pivot recorded date
   LEFT JOIN (
     SELECT voucher_states.voucher_id,
@@ -145,7 +145,7 @@ FROM vouchers
     WHERE voucher_states.`to` = 'recorded'
   ) AS dispatch_query
     ON dispatch_query.voucher_id = vouchers.id
-      
+
   # Pivot payment_request date
   LEFT JOIN (
     SELECT voucher_states.voucher_id,
@@ -168,10 +168,10 @@ FROM vouchers
   # Get fields relevant to voucher's delivery (Date, target centre and centre's area)
   LEFT JOIN deliveries ON vouchers.delivery_id = deliveries.id
   LEFT JOIN
-    centres AS delivery_centres 
+    centres AS delivery_centres
         ON deliveries.centre_id = delivery_centres.id
   LEFT JOIN
-     sponsors as delivery_areas 
+     sponsors as delivery_areas
         ON delivery_areas.id = delivery_centres.sponsor_id
 
   # Get fields relevant to bundles (pri_carer/RVID/disbursed_at,disbursing_centre)
@@ -187,10 +187,10 @@ FROM vouchers
       LEFT JOIN families ON registrations.family_id = families.id
       LEFT JOIN centres cf ON families.initial_centre_id = cf.id
       LEFT JOIN centres cb ON bundles.disbursing_centre_id = cb.id
-        
+
       # Need to join the Primary Carer here; Primary Carers are only relevant via bundles.
       LEFT JOIN (
-        
+
         # We need the *first*, by self join grouping (classic technique, so SQLite can cope)
         SELECT t1.name, t1.family_id
         FROM carers t1
@@ -198,7 +198,7 @@ FROM vouchers
           SELECT MIN(id) as id
           FROM carers t3
           GROUP BY t3.family_id
-        ) t2 ON t2.id = t1.id 
+        ) t2 ON t2.id = t1.id
       ) AS pri_carer_query
         ON families.id = pri_carer_query.family_id
   ) AS rvid_query
