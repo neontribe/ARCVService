@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Service\Admin;
 use App\Centre;
 use App\CentreUser;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AdminCentreUserRequest;
+use App\Http\Requests\AdminNewCentreUserRequest;
+use App\Http\Requests\AdminUpdateCentreUserRequest;
 use App\Sponsor;
 use DB;
 use Exception;
@@ -28,11 +29,11 @@ class CentreUsersController extends Controller
         return view('service.centreusers.index', compact('workers'));
     }
 
-     /**
-     * Show the form for creating new CentreUsers
-     *
-     * @return Factory|View
-     */
+    /**
+    * Show the form for creating new CentreUsers
+    *
+    * @return Factory|View
+    */
     public function create()
     {
         $centres = Centre::get(['name','id']);
@@ -84,12 +85,12 @@ class CentreUsersController extends Controller
 
     /**
      * Update a CentreUser from a form
-     * @param AdminCentreUserRequest $request
+     * @param AdminUpdateCentreUserRequest $request
      * @param $id
      * @return RedirectResponse
      * @throws \Throwable
      */
-    public function update(AdminCentreUserRequest $request, $id)
+    public function update(AdminUpdateCentreUserRequest $request, $id)
     {
         try {
             $centreUser = DB::transaction(function () use ($request, $id) {
@@ -101,6 +102,7 @@ class CentreUsersController extends Controller
                 $cu->fill([
                     'name' => $request->input('name'),
                     'email' => $request->input('email'),
+                    'downloader' => $request->input('downloader'),
                 ]);
                 $cu->save();
 
@@ -125,11 +127,11 @@ class CentreUsersController extends Controller
 
     /**
      * Create a CentreUser from a form
-     * @param AdminCentreUserRequest $request
+     * @param AdminNewCentreUserRequest $request
      * @return RedirectResponse
      * @throws \Throwable
      */
-    public function store(AdminCentreUserRequest $request)
+    public function store(AdminNewCentreUserRequest $request)
     {
         try {
             $centreUser = DB::transaction(function () use ($request) {
