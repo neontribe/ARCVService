@@ -1139,6 +1139,9 @@ VOUCHER PAGES
 	background-color: #dff0d8;
     border: 1px solid #3c763d;
 	border-radius: .25rem;
+	display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
 	margin: 1rem 10%;
 }
 
@@ -1151,8 +1154,7 @@ VOUCHER PAGES
 }
 
 .alert-message.success p {
-	display: inline-block;
-	vertical-align: text-bottom;
+	align-self: center;
 }
 
 .alert-message.success span {
@@ -1173,7 +1175,6 @@ VOUCHER PAGES
 
 .icon-container.success {
 	background-color: #3c763d;
-	display: inline-block;
     padding: 6px 12px;
     line-height: 1;
     border: 1px solid #3c763d;
