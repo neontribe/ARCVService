@@ -8,6 +8,7 @@ use App\AdminUser;
 use App\Centre;
 use App\CentreUser;
 use Illuminate\Support\Collection;
+use App\Sponsor;
 
 class ServiceWorkersPageTest extends StoreTestCase
 {
@@ -38,9 +39,18 @@ class ServiceWorkersPageTest extends StoreTestCase
         parent::setUp();
 
         $this->adminUser = factory(AdminUser::class)->create();
+        // Create a single Sponsor
+        $sponsor = factory(Sponsor::class)->create();
+
         // Create 3 centres in an area
-        $this->centre = factory(Centre::class, 3)->create();
-        // Create 3 alt centres
+        $this->centre = factory(Centre::class, 3)->create()->each(
+            function ($c) use ($sponsor) {
+                $c->sponsor_id = $sponsor->id;
+                $c->save();
+            }
+        );
+
+        // Create 2 alt centres
         $this->altCentres = factory(Centre::class, 2)->create([]);
         $this->workersRoute = route('admin.centreusers.index');
 
@@ -56,7 +66,9 @@ class ServiceWorkersPageTest extends StoreTestCase
             "name"  => "test user with alternatives",
             "email" => "testuseralternatives@example.com",
         ]);
-        $this->userHomeCentreTwoAlt->centres()->attach($this->altCentres->pluck('id')->all(), ['homeCentre' => true]);
+
+        $this->userHomeCentreTwoAlt->centres()->attach(1, ['homeCentre' => true]);
+        $this->userHomeCentreTwoAlt->centres()->attach($this->altCentres->all());
 
         // Create 1 user with a homeCentre who can Download
         $this->downloaderUser = factory(CentreUser::class, 'withDownloader')->create([
