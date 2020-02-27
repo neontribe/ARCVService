@@ -366,7 +366,7 @@ class BundleController extends Controller
                 $numberOfVouchers = $bundle->vouchers->count();
                 $fullFamily = $bundle->registration()->withFullFamily()->first();
                 $familyName = $fullFamily->family->pri_carer;
-                $message = 'You have just marked ' . $numberOfVouchers . ' vouchers as collected by ' . $familyName;
+                $message = 'You have just marked ' . $numberOfVouchers . ' ' . str_plural('voucher', $numberOfVouchers) . ' as collected by ' . $familyName;
             }
             // Otherwise, sure, return to the new view.
             return redirect($successRoute)
