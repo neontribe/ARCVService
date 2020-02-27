@@ -17,8 +17,8 @@ return [
             'recorded', // submitted to shortlist
             'payment_pending', // shortlist completed
             'reimbursed', // paid out
-            'expired',
-            'lost',
+            'expired', // if time ran out on stamped batch
+            'lost', // when centre loses a batch.
             'retired'
         ],
 
@@ -41,6 +41,10 @@ return [
                 'from' => ['dispatched'],
                 'to' =>  'lost',
             ],
+            'expire' => [
+                'from' => ['dispatched'],
+                'to' =>  'expired',
+            ],
             'collect' => [
                 'from' => ['printed','dispatched'],
                 'to' =>  'recorded',
@@ -61,15 +65,10 @@ return [
                 'from' => ['payment_pending'],
                 'to' =>  'reimbursed',
             ],
-            'expire' => [
-                'from' => ['dispatched', 'printed'],
-                'to' =>  'expired',
-            ],
             'retire' => [
-                'from' => ['lost','expired','reimbursed'],
+                'from' => ['lost','expired'],
                 'to' =>  'retired',
             ],
-
         ],
 
         // list of all callbacks
