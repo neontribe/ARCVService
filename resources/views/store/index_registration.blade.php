@@ -6,23 +6,48 @@
 
     @include('store.partials.navbar', ['headerTitle' => 'Search for a family'])
     <div class="content search">
-        <div>
-            <form action="{{ URL::route('store.registration.index') }}" method="GET" id="searchform">
-                {!! csrf_field() !!}
-                <div class="search-actions">
-                    <input type="search" name="family_name" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Enter family name" aria-label="Family Name">
-                    <button name="search" aria-label="Search">
-                        <img src="{{ asset('store/assets/search-light.svg') }}" alt="search">
-                    </button>
-                </div>
-            </form>
+        <div class="control-container">
+            {{-- Name search --}}
+            <div class="search-control">
+                <label>Search by name</label>
+                <form action="{{ URL::route('store.registration.index') }}" method="GET" id="searchform">
+                    {!! csrf_field() !!}
+                    <div class="search-actions">
+                        <input type="search" name="family_name" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Enter family name" aria-label="Family Name">
+                        <button name="search" aria-label="Search">
+                            <img src="{{ asset('store/assets/search-light.svg') }}" alt="search">
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {{-- Centre filter --}}
+            <div class="filter-control">
+                <label>Filter by centre</label>
+                <form name="centreFilter" id="centre-filter" method="post" action="{{ route('store.session.put') }}">
+                    {!! method_field('put') !!}
+                    {!! csrf_field() !!}
+                    <select name="centre" onchange="document.centreUserForm.submit()">
+                            <option value="all">All</option>
+                        @foreach (Auth::user()->centres as $centre)
+                            <option
+                                    value="{{ $centre->id }}"
+                                    
+                            >{{ $centre->name }}</option>
+                        @endforeach
+                    </select>
+                </form>
+            </div>
+            {{-- Inactive checkbox --}}
+            <div>
+                <label>Show families who have left</label>
+                <input type="checkbox"></input>
+            </div>
         </div>
         <div>
             <table>
                 <thead>
                     <tr>
                         <td>Name<span class="sort-link-container">@include('store.partials.sortableChevron', ['route' => 'store.registration.index', 'orderBy' => 'name', 'direction' => request('direction') ])</span></td>
-                        <td>Centre<span class="sort-link-container">@include('store.partials.sortableChevron', ['route' => 'store.registration.index', 'orderBy' => 'centre', 'direction' => request('direction') ])</span></td>
                         <td class="center">Voucher Entitlement</td>
                         <td class="center">RV-ID</td>
                         <td></td>
@@ -32,8 +57,10 @@
                 @foreach ($registrations as $registration)
                     @if ($registration->family)
                         <tr class="{{ $registration->family->leaving_on ? 'inactive' : 'active' }}">
-                            <td class="pri_carer">{{ $registration->family->carers->first()->name }}</td>
-                            <td class="">{{ $registration->centre->name }}</td>
+                            <td class="pri_carer">
+                                <div>{{ $registration->family->carers->first()->name }}</div>
+                                <div class="secondary_info">{{ $registration->centre->name }}</div>
+                            </td>
                             <td class="center">{{ $registration->valuation->getEntitlement() }}</td>
                             <td class="center">{{ $registration->family->rvid }}</td>
                             <td class="right no-wrap">

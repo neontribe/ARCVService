@@ -805,6 +805,35 @@ SEARCH PAGE
 
 */
 
+.control-container {
+	display: flex;
+	justify-content: space-between;
+}
+
+.search-control {
+	flex: 0 0 48%;
+}
+
+.search-control > button {
+	height: 64px;
+	margin-top: 2px;
+	width: 72px;
+}
+
+.filter-control {
+	flex: 0 1 48%;
+}
+
+.filter-control select {
+	font-family: "Roboto Slab", serif;
+	font-size: 1.3rem;
+	border-radius: 3px;
+	padding: 1rem;
+	height: 64px;
+	margin: 2px;
+	border: 2px solid #757475;
+}
+
 .search {
 	background-color: #ffffff;
 	box-sizing: border-box;
@@ -827,6 +856,8 @@ SEARCH PAGE
 
 .search-actions input {
 	padding: 1rem;
+	border: 2px solid #757475;
+	border-radius: 3px;
 }
 
 .search-actions button {
@@ -1194,4 +1225,10 @@ VOUCHER PAGES
 	0% { transform: scale(1) }
 	50% { transform: scale(1.1) }
 	100% { transform: scale(1) }
+}
+
+/* new stuff */
+.secondary_info {
+	color: #757475;
+	font-size: 1rem;
 }
