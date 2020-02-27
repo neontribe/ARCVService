@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Request;
 
-class AdminCentreUserRequest extends FormRequest
+class AdminUpdateCentreUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -51,6 +51,7 @@ class AdminCentreUserRequest extends FormRequest
             ],
             // MAY be present, MUST be integers, distinct, id exists in table
             'alternative_centres.*' => 'integer|distinct|exists:centres,id',
+            'downloader' => 'required|boolean',
         ];
         return $rules;
     }
