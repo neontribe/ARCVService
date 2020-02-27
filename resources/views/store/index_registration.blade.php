@@ -5,14 +5,7 @@
 @section('content')
 
 @include('store.partials.navbar', ['headerTitle' => 'Search for a family'])
-@if (Session::has('message'))
-<div class="alert-message success">
-    <div class="icon-container success">
-        <i class="fa fa-check-circle-o" aria-hidden="true"></i>
-    </div>
-    <p><span>Success:</span> {{ Session::get('message') }} </p>
-</div>
-@endif
+@includeWhen(Session::has('message'), 'store.partials.success')
 <div class="content search">
     <div>
         <form action="{{ URL::route('store.registration.index') }}" method="GET" id="searchform">
