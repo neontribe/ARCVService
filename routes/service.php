@@ -45,6 +45,10 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.vouchers.storebatch',
         'uses' => 'Admin\VouchersController@storeBatch',
     ]);
+    Route::post('vouchers', [
+        'as' =>'admin.vouchers.updatebatch',
+        'uses' => 'Admin\VouchersController@updateBatch',
+    ]);
 
     // Worker Management
     Route::get('workers', [

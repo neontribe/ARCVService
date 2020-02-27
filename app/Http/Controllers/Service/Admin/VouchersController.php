@@ -39,6 +39,30 @@ class VouchersController extends Controller
     }
 
     /**
+     * Show the void Vouchers form
+     *
+     * @return Factory|view
+     */
+    public function void()
+    {
+        // A range of numbers from first to last.
+        // Last can be empty. Then only one is created.
+        $sponsors = Sponsor::all();
+        return view('service.vouchers.void', compact('sponsors'));
+    }
+
+    /**
+     * Update Voucher range - specifically, state
+     *
+     * @param AdminUpdateVoucherRequest $request
+     * @return RedirectResponse
+     */
+    public function updateBatch($request)
+    {
+        // stub update
+    }
+
+    /**
      * Store Voucher range.
      *
      * @param AdminNewVoucherRequest $request
