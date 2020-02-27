@@ -10,7 +10,7 @@
     <div class="icon-container success">
         <i class="fa fa-check-circle-o" aria-hidden="true"></i>
     </div>
-    {{ Session::get('message') }}
+    <p><span>Success:</span> {{ Session::get('message') }} </p>
 </div>
 @endif
 <div class="content search">
