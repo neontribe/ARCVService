@@ -183,7 +183,7 @@ class BundleController extends Controller
             isset($inputs['collected_on'])
         ) {
             // Check there are actual vouchers to disburse, or this is a bit.
-            if ($bundle->vouchers->count() == 0) {
+            if ($bundle->vouchers->count() === 0) {
                 $errors["empty"] = true;
             } else {
                 // Add the date;
@@ -206,7 +206,6 @@ class BundleController extends Controller
 
                     // Store it.
                     $bundle->save();
-
                 } catch (Exception $e) {
                     // Fires if finOrFail() or save() breaks
                     // Log that error by hand
@@ -222,7 +221,7 @@ class BundleController extends Controller
             }
         }
 
-        return $this->redirectAfterRequest($errors, $successRoute, $failRoute);
+        return $this->redirectAfterRequest($errors, $successRoute, $failRoute, $bundle);
     }
 
     /**
@@ -286,9 +285,10 @@ class BundleController extends Controller
      * @param $errors
      * @param $successRoute
      * @param $failRoute
+     * @param $bundle
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function redirectAfterRequest($errors, $successRoute, $failRoute)
+    public function redirectAfterRequest($errors, $successRoute, $failRoute, $bundle = null)
     {
         if (!empty($errors)) {
             // Assemble messages
@@ -361,9 +361,12 @@ class BundleController extends Controller
                 ->withInput()
                 ->with('error_messages', $messages);
         } else {
+            $numberOfVouchers = $bundle->vouchers->count();
+            $fullFamily = $bundle->registration()->withFullFamily();
+            $familyName = $fullFamily->family->pri_carer;
             // Otherwise, sure, return to the new view.
             return redirect($successRoute)
-                ->with('message', 'Voucher bundle updated.');
+                ->with('message', 'You have just marked ' . $numberOfVouchers . ' vouchers as collected by ' . $familyName);
         }
     }
 }
