@@ -361,12 +361,16 @@ class BundleController extends Controller
                 ->withInput()
                 ->with('error_messages', $messages);
         } else {
-            $numberOfVouchers = $bundle->vouchers->count();
-            $fullFamily = $bundle->registration()->withFullFamily();
-            $familyName = $fullFamily->family->pri_carer;
+            $message = "Voucher bundle updated";
+            if ($bundle instanceof Bundle) {
+                $numberOfVouchers = $bundle->vouchers->count();
+                $fullFamily = $bundle->registration()->withFullFamily()->first();
+                $familyName = $fullFamily->family->pri_carer;
+                $message = 'You have just marked ' . $numberOfVouchers . ' vouchers as collected by ' . $familyName;
+            }
             // Otherwise, sure, return to the new view.
             return redirect($successRoute)
-                ->with('message', 'You have just marked ' . $numberOfVouchers . ' vouchers as collected by ' . $familyName);
+                ->with('message', $message);
         }
     }
 }
