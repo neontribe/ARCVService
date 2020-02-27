@@ -15,6 +15,8 @@ use App\Services\VoucherEvaluator\Evaluations\ChildIsUnBorn;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderSecondarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderOne;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderSchoolAge;
+use App\Services\VoucherEvaluator\Evaluations\FamilyHasNoEligibleChildren;
+use App\Services\VoucherEvaluator\Evaluations\FamilyHasUnverifiedChildren;
 use App\Services\VoucherEvaluator\Evaluations\FamilyIsPregnant;
 use App\Services\VoucherEvaluator\Evaluators\VoucherEvaluator;
 use Carbon\Carbon;
@@ -71,23 +73,32 @@ class EvaluatorFactory
     {
         return $evaluations = [
             Child::class => [
+                'credits' => [
+                    new ChildIsUnderOne($offsetDate, 3),
+                    new ChildIsUnderSchoolAge($offsetDate, 3)
+                ],
                 'notices' => [
                     new ChildIsUnBorn($offsetDate),
                     new ChildIsAlmostBorn($offsetDate),
                     new ChildIsAlmostOne($offsetDate),
                     new ChildIsAlmostSchoolAge($offsetDate),
-                    new ChildIsSchoolAge($offsetDate)
                 ],
-                'credits' => [
-                    new ChildIsUnderOne($offsetDate, 3),
-                    new ChildIsUnderSchoolAge($offsetDate, 3)
+                'relations' => [],
+                'disqualifiers' => [
+                    new ChildIsSchoolAge($offsetDate)
                 ]
             ],
             Family::class => [
-                'notices' => [],
                 'credits' => [
                     new FamilyIsPregnant(null, 3)
-                ]
+                ],
+                'notices' => [],
+                'relations' => ['children'],
+            ],
+            Registration::class => [
+                'credits' => [],
+                'notices' => [],
+                'relations' => ['family'],
             ],
         ];
     }
@@ -102,23 +113,38 @@ class EvaluatorFactory
     {
         return $evaluations = [
             Child::class => [
+                'credits' => [
+                    new ChildIsUnderOne($offsetDate, 3),
+                    new ChildIsUnderSecondarySchoolAge($offsetDate, 3)
+                ],
                 'notices' => [
                     new ChildIsUnBorn($offsetDate),
                     new ChildIsAlmostBorn($offsetDate),
                     new ChildIsAlmostOne($offsetDate),
+                    new ChildIsUnderSchoolAge($offsetDate),
                     new ChildIsAlmostSecondarySchoolAge($offsetDate),
+                ],
+                'relations' => [],
+                'disqualifiers' => [
                     new ChildIsSecondarySchoolAge($offsetDate)
                 ],
-                'credits' => [
-                    new ChildIsUnderOne($offsetDate, 3),
-                    new ChildIsUnderSecondarySchoolAge($offsetDate, 3)
-                ]
             ],
             Family::class => [
-                'notices' => [],
                 'credits' => [
                     new FamilyIsPregnant(null, 3)
-                ]
+                ],
+                'notices' => [
+                    new FamilyHasUnverifiedChildren($offsetDate),
+                ],
+                'disqualifiers' => [
+                    new FamilyHasNoEligibleChildren($offsetDate),
+                ],
+                'relations' => ['children'],
+            ],
+            Registration::class => [
+                'credits' => [],
+                'notices' => [],
+                'relations' => ['family'],
             ],
         ];
     }

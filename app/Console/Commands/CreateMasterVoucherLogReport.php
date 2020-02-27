@@ -20,7 +20,7 @@ class CreateMasterVoucherLogReport extends Command
      *
      * @var string $signature
      */
-    protected $signature = 'arc:createMVLReport 
+    protected $signature = 'arc:createMVLReport
                             {--force : Execute without confirmation, eg for automation}
                             {--no-zip : Don\'t wrap files in a single archive}
                             {--plain : Don\'t encrypt contents of files}
@@ -55,17 +55,25 @@ class CreateMasterVoucherLogReport extends Command
      */
     private $headers = [
         'Voucher Number',
-        'Distributed to',
+        'Voucher Area',
+        'Date Printed',
+        'Date Distributed',
+        'Distributed to Centre',
+        'Distributed to Area',
+        'Waiting for collection',
         'Date Issued',
-        'Part ID',
-        'Part Name',
+        'RVID',
+        'Main Carer',
+        'Disbursing Centre',
+        'Date Trader Recorded Voucher',
+        'Retailer Name',
         'Retail Outlet',
+        'Trader\'s Area',
         'Date Received for Reimbursement',
-        'Dispatch Date',
-        'Area',
-        'Trader Name',
         'Reimbursed Date',
-        'Disbursing Centre'
+        'Void Voucher Date',
+        'Void Reason',
+        'Date file was Downloaded',
     ];
 
     /**
@@ -78,49 +86,76 @@ class CreateMasterVoucherLogReport extends Command
     private $report = <<<EOD
 SELECT
   vouchers.code AS 'Voucher Number',
-  # To be determined, we don't know this yet.
-  '' AS 'Distributed to',
+  voucher_sponsor.name AS 'Voucher Area',
+  printed_date AS 'Date Printed',
+  deliveries.dispatched_at as 'Date Distributed',
+  delivery_centres.name AS 'Distributed to Centre',
+  delivery_areas.name AS 'Distributed to Area',      
+
+  CASE
+      WHEN (disbursed_at is null) AND (pri_carer_name is not null) THEN 'True'
+      WHEN (disbursed_at is not null) AND (pri_carer_name is not null) THEN 'False'
+  END
+  AS 'Waiting for collection',
+
   disbursed_at AS 'Date Issued',
-  rvid AS 'Part ID',
-  pri_carer_name AS 'Part Name',
+  rvid AS 'RVID',
+  pri_carer_name AS 'Main Carer',
+  disbursing_centre AS 'Disbursing Centre',
+  recorded_date  AS 'Date Trader Recorded Voucher',
+  trader_name AS 'Retailer Name',
   market_name AS 'Retail Outlet',
+  market_area AS 'Trader\'s Area',
   payment_request_date AS 'Date Received for Reimbursement',
-  dispatch_date AS 'Dispatch Date',  
-  sponsors.name AS 'Area',
-  trader_name AS 'Trader Name',
   reimbursed_date AS 'Reimbursed Date',
-  disbursing_centre AS 'Disbursing Centre'
+
+  # These to be filled by other cards
+  '' AS 'Void Voucher Date',
+  '' AS 'Void Reason',
+  CURDATE() AS 'Date file was Downloaded'
 
 FROM vouchers
 
-  # Join for each voucher\'s sponsor name
-  LEFT JOIN sponsors ON vouchers.sponsor_id = sponsors.id
+  # get the voucher sponsor.
+  LEFT JOIN sponsors as voucher_sponsor on vouchers.sponsor_id = voucher_sponsor.id
 
-  # Get our trader and market names.
+  # Get our trader, market and sponsor names
   LEFT JOIN (
     SELECT traders.id,
            traders.name AS trader_name,
-           markets.name AS market_name
+           markets.name AS market_name,
+           sponsors.name AS market_area
     FROM traders
     LEFT JOIN markets ON traders.market_id = markets.id
+    LEFT JOIN sponsors on markets.sponsor_id = sponsors.id
   ) AS markets_query
     ON markets_query.id = vouchers.trader_id
 
-  # Pivot dispatched date
+  # Pivot printed date
   LEFT JOIN (
     SELECT voucher_states.voucher_id,
-           voucher_states.created_at AS dispatch_date
+           voucher_states.created_at AS printed_date
     FROM voucher_states
-    WHERE voucher_states.`to` = 'dispatched'
+    WHERE voucher_states.`to` = 'printed'
+  ) AS printed_query
+    ON printed_query.voucher_id = vouchers.id
+
+  # Pivot recorded date
+  LEFT JOIN (
+    SELECT voucher_states.voucher_id,
+           voucher_states.created_at AS recorded_date
+    FROM voucher_states
+    WHERE voucher_states.`to` = 'recorded'
   ) AS dispatch_query
     ON dispatch_query.voucher_id = vouchers.id
 
   # Pivot payment_request date
   LEFT JOIN (
     SELECT voucher_states.voucher_id,
-           voucher_states.created_at AS payment_request_date
+           min(voucher_states.created_at) AS payment_request_date
     FROM voucher_states
     WHERE voucher_states.`to` = 'payment_pending'
+    GROUP BY voucher_states.voucher_id
   ) AS payment_request_query
     ON payment_request_query.voucher_id = vouchers.id
 
@@ -133,7 +168,16 @@ FROM vouchers
   ) AS reimburse_query
     ON reimburse_query.voucher_id = vouchers.id
 
-  # Get fields relevant to bundles (pri_carer/RVID/disbursed_at)
+  # Get fields relevant to voucher's delivery (Date, target centre and centre's area)
+  LEFT JOIN deliveries ON vouchers.delivery_id = deliveries.id
+  LEFT JOIN
+    centres AS delivery_centres
+        ON deliveries.centre_id = delivery_centres.id
+  LEFT JOIN
+     sponsors as delivery_areas
+        ON delivery_areas.id = delivery_centres.sponsor_id
+
+  # Get fields relevant to bundles (pri_carer/RVID/disbursed_at,disbursing_centre)
   LEFT JOIN (
     SELECT bundles.id,
            bundles.disbursed_at AS disbursed_at,
@@ -146,10 +190,10 @@ FROM vouchers
       LEFT JOIN families ON registrations.family_id = families.id
       LEFT JOIN centres cf ON families.initial_centre_id = cf.id
       LEFT JOIN centres cb ON bundles.disbursing_centre_id = cb.id
-        
+
       # Need to join the Primary Carer here; Primary Carers are only relevant via bundles.
       LEFT JOIN (
-        
+
         # We need the *first*, by self join grouping (classic technique, so SQLite can cope)
         SELECT t1.name, t1.family_id
         FROM carers t1
@@ -157,7 +201,7 @@ FROM vouchers
           SELECT MIN(id) as id
           FROM carers t3
           GROUP BY t3.family_id
-        ) t2 ON t2.id = t1.id 
+        ) t2 ON t2.id = t1.id
       ) AS pri_carer_query
         ON families.id = pri_carer_query.family_id
   ) AS rvid_query
@@ -239,7 +283,7 @@ EOD;
             $areas = [];
             // We're going to use "&" references to avoid memory issues - Hang on to your hat.
             foreach ($rows as $rowindex => &$rowFields) {
-                $area = $rowFields['Area'];
+                $area = $rowFields['Voucher Area'];
                 if (!isset($areas[$area])) {
                     // Not met this Area before? Add it to our list!
                     $areas[$area] = [];

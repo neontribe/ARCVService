@@ -1,7 +1,7 @@
 {
     "name": "neontribe/arcvservice",
     "description": "ARCV Service",
-    "version": "1.8.0-dev",
+    "version": "1.9.0-dev",
     "keywords": [],
     "license": "",
     "type": "project",
@@ -11,6 +11,7 @@
         "barryvdh/laravel-dompdf": "^0.8.1",
         "chalcedonyt/laravel-specification": "^1.0",
         "doctrine/dbal": "^2.5",
+        "fzaninotto/faker": "~1.4",
         "laravel/framework": "5.5.*",
         "laravel/passport": "^4.0",
         "laravel/tinker": "~1.0",
@@ -26,9 +27,8 @@
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.4",
         "filp/whoops": "~2.0",
-        "fzaninotto/faker": "~1.4",
         "laracasts/generators": "^1.1",
-        "laravel/browser-kit-testing": "3.*",
+        "laravel/browser-kit-testing": "~3.0",
         "mockery/mockery": "~1.0",
         "phpunit/phpunit": "~6.0",
         "spinen/laravel-mail-assertions": "^0.3.0"

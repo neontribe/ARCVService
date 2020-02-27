@@ -25,6 +25,7 @@ class DashboardController extends Controller
             URL::route('store.registrations.print');
 
         $data = [
+            "user" => $user,
             "user_name" => $user->name,
             "centre_name" => $centre ? $centre->name : null,
             "centre_id" => $centre_id,

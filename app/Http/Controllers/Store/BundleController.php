@@ -55,7 +55,16 @@ class BundleController extends Controller
             : null
         ;
 
-        $valuation = $registration->valuation;
+        $valuation = $registration->getValuation();
+
+        // We only need the reasons at family level.
+        // TODO: move this to a Valuation if we use this elsewhere.
+        $familyNoticeReasons = array_filter(
+            $valuation->getNoticeReasons(),
+            function ($notice) {
+                return $notice["entity"] == "Family";
+            }
+        );
 
         return view('store.manage_vouchers', array_merge(
             $data,
@@ -69,7 +78,7 @@ class BundleController extends Controller
                 "vouchers" => $sorted_bundle,
                 "vouchers_amount" => count($bundle),
                 "entitlement" => $valuation->getEntitlement(),
-                "noticeReasons" => $valuation->getNoticeReasons()
+                "noticeReasons" => $familyNoticeReasons
             ]
         ));
     }
@@ -327,7 +336,7 @@ class BundleController extends Controller
 
                         // Generate error messages where vouchers of the sort existed, using unescaped HTML where necessary.
                         $relevant && $messages[] = new HtmlString(
-                            "These vouchers are currently allocated to a different family: " . join(', ', $relevant)
+                            "These vouchers are currently allocated to a different family. Click on the voucher number to view the other family's record: " . join(', ', $relevant)
                         );
                         $inaccessible && $messages[] = "These vouchers are allocated to a family in a centre you can't access: " . join(', ', $inaccessible);
 

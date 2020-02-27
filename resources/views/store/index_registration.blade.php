@@ -31,7 +31,6 @@
                         @foreach (Auth::user()->centres as $centre)
                             <option
                                     value="{{ $centre->id }}"
-                                    
                             >{{ $centre->name }}</option>
                         @endforeach
                     </select>

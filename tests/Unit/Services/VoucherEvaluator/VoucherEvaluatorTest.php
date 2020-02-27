@@ -4,7 +4,9 @@ namespace Tests;
 
 use App\Child;
 use App\Family;
+use App\Registration;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
+use App\Services\VoucherEvaluator\Valuation;
 use Carbon\Carbon;
 use Config;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -21,8 +23,9 @@ class VoucherEvaluatorTest extends TestCase
         'ChildIsAlmostSchoolAge' => ['reason' => 'Child|almost school age'],
         'ChildIsAlmostSecondarySchoolAge' => ['reason' => 'Child|almost secondary school age'],
         'ChildIsAlmostTwelve' => ['reason' => 'Child|almost 12 years old'],
-        'ChildIsSchoolAge' => ['reason' => 'Child|school age (no longer eligible)'],
-        'ChildIsSecondarySchoolAge' => ['reason' => 'Child|secondary school age (no longer eligible)'],
+        'ChildIsSchoolAge' => ['reason' => 'Child|school age'],
+        'ChildIsSecondarySchoolAge' => ['reason' => 'Child|secondary school age'],
+        'FamilyHasUnverifiedChildren' => ['reason' => 'Family|has children needing ID']
     ];
 
     // This has a | in the reason field because we want to carry the entity with it.
@@ -35,6 +38,39 @@ class VoucherEvaluatorTest extends TestCase
     ];
 
     /** @test */
+    public function itNoticesWhenAFamilyStillRequiresIDForChildren()
+    {
+        // Create a family with kids that have not been verified
+        $family = factory(Family::class)->create();
+
+        $unverifiedKids = factory(Child::class, 3)->states('unverified')->make();
+        $family->children()->saveMany($unverifiedKids);
+
+        // Make extended evaluator
+        $evaluator = EvaluatorFactory::make("extended_age");
+
+        // Evaluate the family
+        $evaluation = $evaluator->evaluate($family);
+        $notices = $evaluation["notices"];
+
+        // There should be a notice reason of 'FamilyHasUnverifiedChildren'
+        $this->assertContains(self::NOTICE_TYPES['FamilyHasUnverifiedChildren'], $notices);
+
+        // Set them all verified
+        $family->children->each(function ($child) {
+            $child->verified = true;
+            $child->save();
+        });
+
+        // Evaluate the family again.
+        $evaluation2 = $evaluator->evaluate($family);
+        $notices = $evaluation2["notices"];
+
+        // There should NOT be a notice reason of 'FamilyHasUnverifiedChildren'
+        $this->assertNotContains(self::NOTICE_TYPES['FamilyHasUnverifiedChildren'], $notices);
+    }
+
+    /** @test */
     public function itCreditsWhenAFamilyIsPregnant()
     {
         // Make a pregnant family
@@ -45,12 +81,58 @@ class VoucherEvaluatorTest extends TestCase
 
         // Make standard evaluator
         $evaluator = EvaluatorFactory::make();
-        $evaluation = $evaluator->evaluateFamily($family);
+        $evaluation = $evaluator->evaluate($family);
         $credits = $evaluation["credits"];
 
         // There should be a credit reason of 'FamilyIsPregnant'
         $this->assertEquals(1, count($credits));
         $this->assertContains(self::CREDIT_TYPES['FamilyIsPregnant'], $credits);
+    }
+
+    /** @test */
+    public function itDoesNotCreditWhenAFamilyIsIneligible()
+    {
+        // Make extended evaluator
+        $evaluator = EvaluatorFactory::make("extended_age");
+
+        // Make our family
+        $family = factory(Family::class)->create();
+
+        // Make a set of ineligible kids (no under school age)
+        $overSchool = factory(Child::class, 'overSchoolAge')->make();
+        $overSecondarySchool = factory(Child::class, 'overSecondarySchoolAge')->make();
+
+        // Add the kids and check they saved
+        $family->children()->saveMany([$overSchool ,$overSecondarySchool]);
+        $this->assertEquals(2, $family->children()->count());
+
+        // Run the evaluation
+        $evaluation = $evaluator->evaluate($family);
+        // Check it can't find any eligible children (0 vouchers)
+        // - because no under primary school-ers validate the under secondary school-ers.
+        $this->assertFalse($evaluation->getEligibility());
+        $this->assertEquals('0', $evaluation->getEntitlement());
+
+        // Add a kid that will make the child under secondary school age.
+        $underSchool = factory(Child::class, 'underSchoolAge')->make();
+
+        // Re-save
+        $family->children()->saveMany([$underSchool, $overSchool ,$overSecondarySchool]);
+        $family = $family->fresh();
+
+        // Check we've saved the children correctly
+        $this->assertEquals(3, $family->children->count());
+
+        // Re-evaluate, based on the new reality
+        $evaluation = $evaluator->evaluate($family);
+
+        // Check it passes
+        $this->assertTrue($evaluation->getEligibility());
+        // We have :
+        // - one child under school age (3 vouchers)
+        // - who enables one child under secondary school age (3 vouchers)
+        // - but not one child who is overage (0 vouchers)
+        $this->assertEquals('6', $evaluation->getEntitlement());
     }
 
     /** @test */
@@ -61,7 +143,7 @@ class VoucherEvaluatorTest extends TestCase
 
         // Make standard evaluator
         $evaluator = EvaluatorFactory::make();
-        $evaluation = $evaluator->evaluateChild($child);
+        $evaluation = $evaluator->evaluate($child);
         $credits = $evaluation["credits"];
 
         // Check there's two, because child *also* under school age.
@@ -70,7 +152,7 @@ class VoucherEvaluatorTest extends TestCase
         // Check the correct credit type is applied.
         $this->assertContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits);
         $this->assertContains(self::CREDIT_TYPES['ChildIsUnderSchoolAge'], $credits);
-        $this->assertEquals(6, $evaluation["entitlement"]);
+        $this->assertEquals(6, $evaluation->getEntitlement());
     }
 
     /** @test */
@@ -81,7 +163,7 @@ class VoucherEvaluatorTest extends TestCase
 
         // Make standard evaluator
         $evaluator = EvaluatorFactory::make();
-        $evaluation = $evaluator->evaluateChild($child);
+        $evaluation = $evaluator->evaluate($child);
         $credits = $evaluation["credits"];
 
         // Check there's one, because child is not under one.
@@ -90,7 +172,7 @@ class VoucherEvaluatorTest extends TestCase
         // Check the correct credit type is applied.
         $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits, '');
         $this->assertContains(self::CREDIT_TYPES['ChildIsUnderSchoolAge'], $credits, '');
-        $this->assertEquals(3, $evaluation["entitlement"]);
+        $this->assertEquals(3, $evaluation->getEntitlement());
     }
 
     /** @test */
@@ -101,7 +183,7 @@ class VoucherEvaluatorTest extends TestCase
 
         // Make standard evaluator
         $evaluator = EvaluatorFactory::make('extended_age');
-        $evaluation = $evaluator->evaluateChild($child);
+        $evaluation = $evaluator->evaluate($child);
         $credits = $evaluation["credits"];
 
         // Check there's one, because child is not under one.
@@ -110,7 +192,7 @@ class VoucherEvaluatorTest extends TestCase
         // Check the correct credit type is applied.
         $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits, '');
         $this->assertContains(self::CREDIT_TYPES['ChildIsUnderSecondarySchoolAge'], $credits, '');
-        $this->assertEquals(3, $evaluation["entitlement"]);
+        $this->assertEquals(3, $evaluation->getEntitlement());
     }
 
     /** @test */
@@ -121,7 +203,7 @@ class VoucherEvaluatorTest extends TestCase
 
         // Make standard evaluator
         $evaluator = EvaluatorFactory::make();
-        $evaluation = $evaluator->evaluateChild($child);
+        $evaluation = $evaluator->evaluate($child);
         $credits = $evaluation["credits"];
 
         // Check there's one, because child is not under one.
@@ -130,7 +212,7 @@ class VoucherEvaluatorTest extends TestCase
         // Check the correct credit type is applied.
         $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits);
         $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderSchoolAge'], $credits);
-        $this->assertEquals(0, $evaluation["entitlement"]);
+        $this->assertEquals(0, $evaluation->getEntitlement());
     }
 
     /** @test */
@@ -141,7 +223,7 @@ class VoucherEvaluatorTest extends TestCase
 
         // Make standard evaluator
         $evaluator = EvaluatorFactory::make('extended_age');
-        $evaluation = $evaluator->evaluateChild($child);
+        $evaluation = $evaluator->evaluate($child);
         $credits = $evaluation["credits"];
 
         // Check there's one, because child is not under one.
@@ -150,7 +232,7 @@ class VoucherEvaluatorTest extends TestCase
         // Check the correct credit type is applied.
         $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits);
         $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderSecondarySchoolAge'], $credits);
-        $this->assertEquals(0, $evaluation["entitlement"]);
+        $this->assertEquals(0, $evaluation->getEntitlement());
     }
 
     // Note, we do not test if a child is overdue or almost born.
@@ -164,7 +246,7 @@ class VoucherEvaluatorTest extends TestCase
 
         // Make standard evaluator
         $evaluator = EvaluatorFactory::make();
-        $evaluation = $evaluator->evaluateChild($child);
+        $evaluation = $evaluator->evaluate($child);
         $notices = $evaluation["notices"];
 
 
@@ -186,7 +268,7 @@ class VoucherEvaluatorTest extends TestCase
 
         // Make standard evaluator
         $evaluator = EvaluatorFactory::make();
-        $evaluation = $evaluator->evaluateChild($child);
+        $evaluation = $evaluator->evaluate($child);
         $notices = $evaluation["notices"];
 
         // Check there's one, because no other event is pending.
@@ -207,7 +289,7 @@ class VoucherEvaluatorTest extends TestCase
 
         // Make standard evaluator
         $evaluator = EvaluatorFactory::make('extended_age');
-        $evaluation = $evaluator->evaluateChild($child);
+        $evaluation = $evaluator->evaluate($child);
         $notices = $evaluation["notices"];
 
         // Check there's one, because no other event is pending.
@@ -242,7 +324,7 @@ class VoucherEvaluatorTest extends TestCase
             $offsetDate = Carbon::createFromFormat('Y-m-d', $offset, 'Europe/London');
             // Make a standard valuator
             $evaluator = EvaluatorFactory::make(null, $offsetDate);
-            $evaluation = $evaluator->evaluateChild($child);
+            $evaluation = $evaluator->evaluate($child);
             $credits = $evaluation["credits"];
             $this->assertEquals($expected, array_sum(array_column($credits, "value")));
         }

@@ -75,5 +75,27 @@ return [
     'extended_sponsors' => explode("|", env(
         'ARC_EXTENDED_SPONSORS',
         ""
-    ))
+    )),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Quick way to set Sponsors who verify children
+    |--------------------------------------------------------------------------
+    */
+    'verifies_children' => explode("|", env(
+        'ARC_VERIFIES_CHILDREN',
+        ""
+    )),
+
+    /*
+    |--------------------------------------------------------------------------
+    | List of reasons families can be eligible.
+    |--------------------------------------------------------------------------
+    */
+    'reg_eligibilities' => [
+        'healthy-start-applying',
+        'healthy-start-receiving',
+        'no-recourse-to-public-funds',
+        'other',
+    ],
 ];

@@ -3,12 +3,15 @@ namespace Tests;
 
 use App\Centre;
 use App\CentreUser;
+use App\Child;
+use App\Family;
 use App\Registration;
+use App\Sponsor;
 use App\Voucher;
 use Auth;
+use Config;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use URL;
-use Tests\StoreTestCase;
 
 class VoucherManagerTest extends StoreTestCase
 {
@@ -38,11 +41,10 @@ class VoucherManagerTest extends StoreTestCase
         $this->centre = factory(Centre::class)->create();
 
         // Food matters user
-        $this->fmUser = factory(CentreUser::class)->create([
+        $this->fmUser = factory(CentreUser::class, 'FMUser')->create([
             "name" => "FM test user",
             "email" => "testfmuser@example.com",
             "password" => bcrypt('test_fmuser_pass'),
-            "role" => "foodmatters_user"
         ]);
         $this->fmUser->centres()->attach($this->centre->id, [
             'homeCentre' => true
@@ -74,11 +76,7 @@ class VoucherManagerTest extends StoreTestCase
         Auth::logout();
     }
 
-    /**
-     * *
-     *
-     * @test
-     */
+    /** @test */
     public function testThreeColumnsAreVisible()
     {
         // Check we can see the this family div
@@ -91,6 +89,75 @@ class VoucherManagerTest extends StoreTestCase
             ->seeElement("#allocate-vouchers");
     }
 
+    /** @test */
+    public function itCanShowFamilyWarnings()
+    {
+        /**
+         * Create
+         * - a registration
+         * - on a center
+         * - in an area that checks for ID
+         * - for a family
+         * - with kids who havn't been checked for ID.
+         */
+
+        // Make a sponsor
+        $sponsor = factory(Sponsor::class)->create();
+
+        // Set the verification and extended rules to match it.
+        Config::set('arc.verifies_children', [$sponsor->shortcode]);
+        Config::set('arc.extended_sponsors', [$sponsor->shortcode]);
+
+        // Make a Centre in it.
+        $centre =  factory(Centre::class)->create([
+            'sponsor_id' => $sponsor->id,
+        ]);
+
+        // Make a family, with unverified kids.
+        $family = factory(Family::class)->create();
+        $unverifiedKids = factory(Child::class, 3)->states('unverified')->make();
+        $family->children()->saveMany($unverifiedKids);
+
+        // Link it all up to a registration.
+        $registration = factory(Registration::class)->create([
+            'centre_id' => $centre->id,
+            'family_id' => $family->id,
+        ]);
+
+        // Make a CentreUser
+        $ccUser = factory(CentreUser::class)->create([
+            "name" => "CC test user",
+            "email" => "testccuser@example.com",
+            "password" => bcrypt('test_ccuser_pass'),
+        ]);
+        $ccUser->centres()->attach($centre->id, [
+            'homeCentre' => true
+        ]);
+
+        // Navigate to the page as that user.
+        $this->actingAs($ccUser, 'store')
+            ->visit(URL::route('store.registration.voucher-manager', [ 'id' => $registration ]))
+        ;
+
+        // We can see the warnings area
+        $this->seeElement("#family-warning");
+
+        // Fetch the registration in question and check it's notices are present.
+        $registration->fresh();
+        $notices = $registration->getValuation()->getNoticeReasons();
+        $this->assertGreaterThan(0, count($notices));
+
+        // We can see only family warnings
+        foreach ($notices as $notice) {
+            if ($notice["entity"] == "Family") {
+                $this->see($notice["reason"]);
+            } else {
+                $this->dontSee($notice["reason"]);
+            }
+        }
+    }
+
+    /** @test */
     public function testFollowLinks()
     {
 
@@ -113,6 +180,7 @@ class VoucherManagerTest extends StoreTestCase
             ->assertResponseOk();
     }
 
+    /** @test */
     public function testAddBulkVoucher()
     {
         // check we can bulk add vouchers
@@ -135,6 +203,7 @@ class VoucherManagerTest extends StoreTestCase
         $this->assertEquals(1, count($this->crawler->filter('.delete-button')));
     }
 
+    /** @test */
     public function testAddSingleVoucher()
     {
         // check we can add a single voucher

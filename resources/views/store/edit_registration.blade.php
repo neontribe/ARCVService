@@ -20,8 +20,10 @@
                 <div>
                     <label for="carer">Main carer</label>
                     <span class="@if(!$errors->has('pri_carer'))collapsed @endif invalid-error" id="carer-span">This field is required</span>
-                    <input id="carer" name="pri_carer[{{ $pri_carer->id }}]" class="@if($errors->has('pri_carer'))invalid @endif" type="text" value="{{ $pri_carer->name }}" autocomplete="off"
-                        autocorrect="off" spellcheck="false">
+                    <input id="carer" name="pri_carer[{{ $pri_carer->id }}]"
+                           class="@if($errors->has('pri_carer'))invalid @endif" type="text"
+                           value="{{ $pri_carer->name }}" autocomplete="off"
+                           autocorrect="off" spellcheck="false">
                 </div>
                 <div>
                     <label for="carer_adder_input">Voucher collectors</label>
@@ -29,7 +31,8 @@
                         @foreach ( $sec_carers as $sec_carer )
                             <tr>
                                 <td>
-                                    <input name="sec_carers[{{ $sec_carer->id }}]" type="text" value="{{ $sec_carer->name }}" >
+                                    <input name="sec_carers[{{ $sec_carer->id }}]" type="text"
+                                           value="{{ $sec_carer->name }}">
                                 </td>
                                 <td>
                                     <button type="button" class="remove_field">
@@ -44,7 +47,7 @@
                     <label for="carer_adder_input">Add new collectors:</label>
                     <div id="carer_adder" class="small-button-container">
                         <input id="carer_adder_input" name="carer_adder_input" type="text" autocomplete="off"
-                            autocorrect="off" spellcheck="false">
+                               autocorrect="off" spellcheck="false">
                         <button id="add_collector" class="add-button">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                         </button>
@@ -57,22 +60,29 @@
                     <img src="{{ asset('store/assets/pregnancy-light.svg') }}" name="logo">
                     <h2>Children or pregnancy</h2>
                 </div>
+                @include('store.partials.add_child_form', ['verifying' => $verifying] )
                 <div>
                     <table>
                         <thead>
                         <tr>
-                            <td>Age</td>
-                            <td>Month / Year</td>
-                            <td></td>
+                            <td class="age-col">Age</td>
+                            <td class="dob-col">Month / Year</td>
+                            @if ( $verifying )
+                            <td class="verified-col">ID</td>
+                            @endif
+                            <td class="remove-col"></td>
                         </tr>
                         </thead>
                         <tbody id="existing_wrapper">
                         @foreach ( $children as $child )
                             <tr>
-                                <td>{{ $child->getAgeString() }}</td>
-                                <td>{{ $child->getDobAsString() }}</td>
-                                <td>
-                                    <input type="hidden" name="children[]"
+                                <td class="age-col">{{ $child->getAgeString() }}</td>
+                                <td class="dob-col">{{ $child->getDobAsString() }}</td>
+                                @if ( $verifying )
+                                <td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[{{ $child->id }}][verified]" id="child{{ $child->id }}" {{ $child->verified ? "checked" : null }} value="1"><label for="child{{ $child->id }}"><span class="visually-hidden">Toggle ID checked</span></label></td>
+                                @endif
+                                <td class="remove-col">
+                                    <input type="hidden" name="children[{{ $child->id }}][dob]"
                                         value="{{ Carbon\Carbon::parse($child->dob)->format('Y-m') }}">
                                     <button class="remove_date_field">
                                         <i class="fa fa-minus" aria-hidden="true"></i>
@@ -84,19 +94,11 @@
                     </table>
                 </div>
                 <div>
-                    <label for="add-child-form">Add more children or a pregnancy:</label>
-                    @include('store.partials.add_child_form')
                     <table>
                         <tbody id="child_wrapper">
                         </tbody>
                     </table>
                 </div>
-                <button class="long-button submit" type="submit">Save Changes</button>
-                <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
-                    <div class="link-button link-button-large">
-                        <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
-                    </div>
-                </a>
             </div>
 
             <div class="col collect short-height">
@@ -105,7 +107,7 @@
                     <h2>This family</h2>
                 </div>
                 <div>
-                    <p>This family:</p>
+                    <p class="v-spaced">Their RV-ID is: <strong>{{ $family->rvid }}</strong></p>
                     <ul>
                         <li>
                             Should collect
@@ -129,51 +131,71 @@
                         <li class="collapsed" id="more-family-info">
                             <p>Vouchers per week per child:</p>
                             <ul>
-                                <li>Pregnancy - 3 vouchers</li>
+                                <li>Pregnancy to birth - 3 vouchers</li>
                                 <li>Birth up to 1 year - 6 vouchers</li>
+                                <li>1 year up to primary school - 3 vouchers</li>
                                 {{--
                                 TODO : This is not scalable; if this breaks or has to be extended, look at a better abstraction.
                                 --}}
-                                @if ( in_array($registration->centre->sponsor->shortcode, config('arc.extended_sponsors')) )
-                                <li>1 year up to secondary school - 3 vouchers</li>
-                                @else
-                                <li>1 year up to primary school - 3 vouchers</li>
+                                @if (in_array($registration->centre->sponsor->shortcode, config('arc.extended_sponsors')))
+                                    <li>Primary school to secondary school start - 3 vouchers<br>
+                                        <small>(Only if family has a child still under primary school age too)</small>
+                                    </li>
                                 @endif
                             </ul>
                         </li>
                     </ul>
                 </div>
                 <div>
-                    <p class="v-spaced">Their RV-ID is: <strong>{{ $family->rvid }}</strong></p>
+                    <label for="eligibility-reason">
+                        Reason for receiving Rose Vouchers
+                    </label>
+                    <select name="eligibility" id="eligibility-reason">
+                        @foreach (config('arc.reg_eligibilities') as $reg_eligibility)
+                            <option value="{{ $reg_eligibility }}"
+                                    @if($registration->eligibility == $reg_eligibility) selected="selected" @endif
+                            >@lang('arc.reg_eligibilities.' . $reg_eligibility)
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
                 @if ( !empty($noticeReasons) )
-                <div class="alert-message warning">
-                    <div class="icon-container warning">
-                        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                    <div class="alert-message warning">
+                        <div class="icon-container warning">
+                            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            @foreach( $noticeReasons as $notices )
+                                <p class="v-spaced">
+                                    Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
+                                    currently "{{ $notices['reason'] }}"</p>
+                                </p>
+                            @endforeach
+                        </div>
                     </div>
-                    <div>
-                        @foreach( $noticeReasons as $notices )
-                            <p class="v-spaced">
-                                Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
-                                currently "{{ $notices['reason'] }}"</p>
-                            </p>
-                        @endforeach
-                    </div>
-                </div>
                 @endif
-                <button class="long-button" onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
+                <button class="long-button submit" type="submit">Save Changes</button>
+                <div><hr class="col-break"></div>
+                <button class="long-button"
+                        onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
                     Print a 4 week collection sheet for this family
                 </button>
+                <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
+                    <div class="link-button link-button-large">
+                        <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
+                    </div>
+                </a>
             </div>
         </form>
 
         @if (!isset($registration->family->leaving_on) )
-            <form  action="{{ URL::route('store.registration.family',['id' => $registration->id]) }}" method="post" id="leaving">
+            <form action="{{ URL::route('store.registration.family',['id' => $registration->id]) }}" method="post"
+                  id="leaving">
                 {{ method_field('PUT') }}
                 {!! csrf_field() !!}
                 <div class="full-width flex-col">
                     <button class="remove long-button" type="button">Remove this family</button>
-                    <div id="expandable" class="collapsed confirm-leaving" >
+                    <div id="expandable" class="collapsed confirm-leaving">
                         <div class="reason">
                             <label for="reason-for-leaving">
                                 Reason for leaving
@@ -246,7 +268,7 @@
         });
 
         //remove invalid class & error span when input is selected/tabbed to
-        $('#carer').on('click focus', function() {
+        $('#carer').on('click focus', function () {
             $(this).removeClass("invalid");
             $('#carer-span').addClass('collapsed');
         });

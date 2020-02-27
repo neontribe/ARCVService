@@ -10,6 +10,9 @@ abstract class AbstractEvaluation implements IEvaluation
     /** @var integer $value */
     public $value;
 
+    /** @var string $reason */
+    public $reason;
+
     /** @var Carbon $offsetDate */
     protected $offsetDate;
 
@@ -31,5 +34,15 @@ abstract class AbstractEvaluation implements IEvaluation
     protected function fail()
     {
         return null;
+    }
+
+    public function toReason()
+    {
+        $reason = ['reason' => $this->reason];
+        // if there's a value, include it
+        return ($this->value)
+            ? array_merge($reason, ['value' => $this->value ])
+            : $reason
+        ;
     }
 }

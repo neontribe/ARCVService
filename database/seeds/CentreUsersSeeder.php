@@ -35,20 +35,18 @@ class CentreUsersSeeder extends Seeder
             $local_centres[1]->id  => ['homeCentre' => false],
         ]);
 
-        $user2 = factory(App\CentreUser::class)->create([
+        $user2 = factory(App\CentreUser::class, 'FMUser')->create([
             "name"  => "ARC FM User",
             "email" => "arc+fmuser@neontribe.co.uk",
             "password" => bcrypt('store_pass'),
-            "role" => "foodmatters_user",
         ]);
         $user2->centres()->attach(1, ['homeCentre' => true]);
 
         // ARC admin is an fmuser in centre 2, which has individual forms on the dashboard.
-        $user3 = factory(App\CentreUser::class)->create([
+        $user3 = factory(App\CentreUser::class, 'FMUser')->create([
             "name"  => "ARC fmuser2",
             "email" => "arc+fmuser2@neontribe.co.uk",
             "password" => bcrypt('store_pass'),
-            "role" => "foodmatters_user",
         ]);
         $user3->centres()->attach(2, ['homeCentre' => true]);
 

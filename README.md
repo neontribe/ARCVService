@@ -14,8 +14,8 @@ ARCV Service is the service portal and API for ARCV Market.
 8. `php artisan passport:install` to create keys and client
 9. `chmod 600 ./storage/*.key` to set permissions correctly
 10. Add the "password grant client" id and secret to your `.env`
-11. Install npm packages for webpack (JS and Sass) builds: `npm install`
-12. Run `npm watch` in the background during development to automatically compile assets when modifying code or changing commit
+11. Install npm packages for webpack (JS and Sass) builds: `yarn install`
+12. Run `yarn watch` in the background during development to automatically compile assets when modifying code or changing commit
 
 We suggest that you use the TLD `.test` as others, like `.app` may now be in the public domain and you will experience difficulty with respect to browser behavior over HTTP/HTTPS.
 
@@ -46,10 +46,11 @@ It also requires PHP's `zip` extension installed and enabled.
 ### Styling
 #### Service 
 - Service styling is in `resources/assets/sass/app.scss`
-- When amending the styles in development, switching to a new branch or pulling code, run `npm run watch` to watch for changes
-- Service is compiled from Sass with `npm run prod`
+- When amending the styles in development, switching to a new branch or pulling code, run `yarn watch` to watch for changes
+- Service is compiled from Sass with `yarn prod`
 #### Store
 - Store styling is in `public/store/css/main.css`
+- Run `yarn dev` to make sure packages Store shares with Service have been included.
 
 ## Deployment
 

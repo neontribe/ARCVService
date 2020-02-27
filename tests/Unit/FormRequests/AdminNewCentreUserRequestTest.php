@@ -3,12 +3,12 @@
 namespace Tests\Unit\FormRequests;
 
 use App\Centre;
-use App\Http\Requests\AdminCentreUserRequest;
+use App\Http\Requests\AdminNewCentreUserRequest;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Validation\Validator;
 use Tests\StoreTestCase;
 
-class AdminCentreUserRequestTest extends StoreTestCase
+class AdminNewCentreUserRequestTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
@@ -48,7 +48,7 @@ class AdminCentreUserRequestTest extends StoreTestCase
             : null;
 
         // Copy the rules out of the FormRequest.
-        $rules = (new AdminCentreUserRequest())->rules($alternatives);
+        $rules = (new AdminNewCentreUserRequest())->rules($alternatives);
 
         $this->assertEquals(
             $shouldPass,

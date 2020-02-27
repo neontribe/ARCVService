@@ -42,19 +42,48 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
     ];
 });
 
+/**
+ * Standard CentreUser
+ */
 $factory->define(App\CentreUser::class, function (Faker\Generator $faker) {
     static $password;
-
-    $roles = ['centre_user', 'foodmatters_user'];
 
     return [
         'name' => $faker->name,
         'email' => $faker->unique()->safeEmail,
         'password' => $password ?: $password = bcrypt('secret'),
         'remember_token' => str_random(10),
-        'role' => $roles[mt_rand(0, count($roles) - 1)],
+        'role' =>'centre_user',
     ];
 });
+
+/**
+ * CentreUser who can Download.
+ */
+$factory->defineAs(App\CentreUser::class, 'withDownloader', function ($faker) use ($factory) {
+    $cu = $factory->raw(App\CentreUser::class);
+
+    return array_merge($cu, [
+        'downloader' => true,
+    ]);
+});
+
+/**
+ * Specifically an Admin Centre User [foodmatters_user]
+ */
+$factory->defineAs(App\CentreUser::class, 'FMUser',function (Faker\Generator $faker) use ($factory){
+    static $password;
+
+    return [
+        'name' => $faker->name,
+        'email' => $faker->unique()->safeEmail,
+        'password' => $password ?: $password = bcrypt('secret'),
+        'remember_token' => str_random(10),
+        'role' => 'foodmatters_user',
+        'downloader' => true
+    ];
+});
+
 
 /**
  * Sponsor for testing
@@ -172,7 +201,7 @@ $factory->define(App\Bundle::class, function (Faker\Generator $faker, $attribute
     // get/calculate and stash the entitlement
     $entitlement = isset($attributes['entitlement'])
         ? $attributes['entitlement']
-        : $registration->valuation->getEntitlement()
+        : $registration->getValuation()->getEntitlement()
     ;
 
     return [
@@ -298,23 +327,41 @@ $factory->define(App\Centre::class, function (Faker\Generator $faker) {
 });
 
 // Registration
-$factory->define(App\Registration::class, function () {
+$factory->define(App\Registration::class, function (Faker\Generator $faker, $attributes) {
 
     $eligibilities = ['healthy-start', 'other'];
 
-    $centre = App\Centre::inRandomOrder()->first();
+    if (!empty($attributes['centre_id'])) {
+        // Use the passed centre id.
+        $centre = App\Centre::find($attributes['centre_id']);
+    } else {
+        // Default to a random centre.
+        $centre = App\Centre::inRandomOrder()->first();
+    }
+
+    // Make a new one if we have NO centres already
     if (is_null($centre)) {
         $centre = factory(App\Centre::class)->create();
     }
-    $family = factory(App\Family::class)->make();
+
+    // if we weren't given a family, make one.
+    $family = (empty($attributes['family_id']))
+        ? factory(App\Family::class)->make()
+        : App\Family::find($attributes['family_id'])
+    ;
 
     // Set initial centre (and thus, rvid)
     $family->lockToCentre($centre);
     $family->save();
 
     // Add dependent models
-    $family->carers()->saveMany(factory(App\Carer::class, random_int(1, 3))->make());
-    $family->children()->saveMany(factory(App\Child::class, random_int(0, 4))->make());
+    if ($family->carers->count() === 0) {
+        $family->carers()->saveMany(factory(App\Carer::class, random_int(1, 3))->make());
+    }
+
+    if ($family->children->count() === 0) {
+        $family->children()->saveMany(factory(App\Child::class, random_int(0, 4))->make());
+    }
 
     return [
         'centre_id' => $centre->id,
@@ -347,6 +394,15 @@ $factory->define(App\Child::class, function (Faker\Generator $faker) {
         'dob' => $dob->toDateTimeString(),
     ];
 });
+
+$factory->state(App\Child::class, 'verified', function(Faker\Generator $faker) {
+    return ['verified' => true];
+});
+
+$factory->state(App\Child::class, 'unverified', function(Faker\Generator $faker) {
+    return ['verified' => false];
+});
+
 
 // Child - unborn
 $factory->defineAs(App\Child::class, 'unbornChild', function (Faker\Generator $faker) {

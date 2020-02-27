@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Store;
 
+use App\CentreUser;
 use App\Family;
 use App\Carer;
 use App\Child;
@@ -141,9 +142,15 @@ class RegistrationController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
+
+        // Check if we verify, based on the currently logged in user's context
+        // as we have no registration to refer to yet.
+        $verifying = in_array($user->centre->sponsor->shortcode, config('arc.verifies_children'));
+
         $data = [
             "user_name" => $user->name,
             "centre_name" => ($user->centre) ? $user->centre->name : null,
+            "verifying" => $verifying
         ];
         return view('store.create_registration', $data);
     }
@@ -151,13 +158,13 @@ class RegistrationController extends Controller
     /**
      * Show the Registration / Family edit form
      *
-     * @param integer $id
-     * @return RedirectResponse
+     * @param Registration $registration
+     * @return Factory|View
      */
-    public function edit($id)
+    public function edit(Registration $registration)
     {
         // Get User and Centre;
-        // TODO: turn this into a masthead view composer on the app service provider.
+        /** @var CentreUser $user */
         $user = Auth::user();
         $data = [
             'user_name' => $user->name,
@@ -165,18 +172,21 @@ class RegistrationController extends Controller
         ];
 
         // Get the registration, with deep eager-loaded Family (with Children and Carers)
-        $registration = Registration::withFullFamily()->find($id);
-
-        if (!$registration) {
+        if ($registration) {
+            $registration = Registration::withFullFamily()->find($registration->id);
+        } else {
             abort(404, 'Registration not found.');
         }
 
         // Get the valuation
         /** @var Valuation $valuation */
-        $valuation = $registration->valuation;
+        $valuation = $registration->getValuation();
 
         // Grab carers copy for shift)ing without altering family->carers
         $carers = $registration->family->carers->all();
+
+        // Check if we verify, based on the existing registration's context
+        $verifying = in_array($registration->centre->sponsor->shortcode, config('arc.verifies_children'));
 
         return view('store.edit_registration', array_merge(
             $data,
@@ -187,7 +197,8 @@ class RegistrationController extends Controller
                 'sec_carers' => $carers,
                 'children' => $registration->family->children,
                 'noticeReasons' => $valuation->getNoticeReasons(),
-                'entitlement' => $valuation->getEntitlement()
+                'entitlement' => $valuation->getEntitlement(),
+                'verifying' => $verifying
             ]
         ));
     }
@@ -195,23 +206,24 @@ class RegistrationController extends Controller
     /**
      * Displays a printable version of the Registration.
      *
-     * @param integer $id
+     * @param Registration $registration
      * @return Response
      */
-    public function printOneIndividualFamilyForm($id)
+    public function printOneIndividualFamilyForm(Registration $registration)
     {
         // Get User
         $user = Auth::user();
 
-        // Find the Registration and subdata
-        $registration = Registration::withFullFamily()->find($id);
-
-        if (!$registration) {
+        // Get the registration, with deep eager-loaded Family (with Children and Carers)
+        if ($registration) {
+            $registration = Registration::withFullFamily()->find($registration->id);
+        } else {
             abort(404, 'Registration not found.');
         }
 
         // Get the valuation
-        $valuation = $registration->valuation;
+        /** @var Valuation $valuation */
+        $valuation = $registration->getValuation();
 
         // Make a filename
         $filename = 'Registration' . Carbon::now()->format('YmdHis') .'.pdf';
@@ -269,6 +281,12 @@ class RegistrationController extends Controller
                 return strtolower($registration->family->pri_carer);
             });
 
+        if ($registrations->count() < 1) {
+            return redirect()
+                ->route('store.dashboard')
+                ->with('error_message', 'No Registrations in that centre.');
+        }
+
         // Make a filename
         $filename = 'Registrations_' . Carbon::now()->format('YmdHis') . '.pdf';
 
@@ -283,7 +301,7 @@ class RegistrationController extends Controller
         // Stack the registration batch into the data
         foreach ($registrations as $registration) {
             // Get the valuation
-            $valuation = $registration->valuation;
+            $valuation = $registration->getValuation();
 
             $data['regs'][] = [
                 'centre' => $centre,
@@ -326,21 +344,8 @@ class RegistrationController extends Controller
             )
         );
 
-        // Create Children - todo refactor into helper - used twice
-        // Might be lovlier as a foreach too... rather than map closure :)
-        $children = array_map(
-            function ($child) {
-                // Note: Carbon uses different time formats than laravel validation
-                // For crazy reasons known only to the creators of Carbon, when no day provided,
-                // createFromFormat - defaults to 31 - which bumps to next month if not a real day.
-                // So we want '2013-02-01' not '2013-02-31'...
-                $month_of_birth = Carbon::createFromFormat('Y-m-d', $child . '-01');
-
-                return new Child([
-                        'born' => $month_of_birth->isPast(),
-                        'dob' => $month_of_birth->toDateTimeString(),
-                    ]);
-            },
+        // Create Children
+        $children = $this->makeChildrenFromInput(
             (array)$request->get('children')
         );
 
@@ -385,16 +390,17 @@ class RegistrationController extends Controller
      * Update a Registration
      *
      * @param StoreUpdateRegistrationRequest $request
+     * @param Registration $registration
      * @return RedirectResponse
      */
-    public function update(StoreUpdateRegistrationRequest $request)
+    public function update(StoreUpdateRegistrationRequest $request, Registration $registration)
     {
         $amendedCarers = [];
 
-        $user = $request->user();
+        $registration = ($registration) ?? Registration::findOrFail($request->get('registration'));
 
-        // Fetch Registration and Family
-        $registration = Registration::findOrFail($request->get('registration'));
+        // Fetch eligibility
+        $eligibility = $request->get('eligibility');
 
         // NOTE: Following refactor where we needed to retain Carer ids.
         // Possible that we might want to add flag to carer to distinguish Main from Secondary,
@@ -441,28 +447,15 @@ class RegistrationController extends Controller
         );
 
         // Create New Children
-        $children = array_map(
-            function ($child) {
-                // Note: Carbon uses different time formats than laravel validation
-                // For crazy reasons known only to the creators of Carbon, when no day provided
-                // to createFromFormat - defaults to 31 - which bumps to next month if not a real day.
-                $month_of_birth = Carbon::createFromFormat('Y-m-d', $child . '-01');
-                return new Child([
-                    'born' => $month_of_birth->isPast(),
-                    'dob' => $month_of_birth->toDateTimeString(),
-                ]);
-            },
+        $children = $this->makeChildrenFromInput(
             (array)$request->get('children')
         );
-
-        // Grab the date
-        $now = Carbon::now();
 
         $family = $registration->family;
 
         // Try to transact, so we can roll it back
         try {
-            DB::transaction(function () use ($registration, $family, $amendedCarers, $newCarers, $carersKeysToDelete, $children) {
+            DB::transaction(function () use ($registration, $family, $amendedCarers, $newCarers, $carersKeysToDelete, $children, $eligibility) {
 
                 // delete the missing carers
                 Carer::whereIn('id', $carersKeysToDelete)->delete();
@@ -481,6 +474,9 @@ class RegistrationController extends Controller
                     }
                 );
 
+                // update eligibility
+                $registration->eligibility = $eligibility;
+
                 // save changes to registration.
                 $registration->save();
             });
@@ -498,5 +494,34 @@ class RegistrationController extends Controller
         return redirect()
             ->route('store.registration.edit', ['id' => $registration->id])
             ->with('message', 'Registration updated.');
+    }
+
+    /**
+     * Makes children from input data
+     * @param array $children
+     * @return array
+     */
+    private function makeChildrenFromInput(array $children = [])
+    {
+        return array_map(function($child) {
+            // Note: Carbon uses different time formats than laravel validation
+            // For crazy reasons known only to the creators of Carbon, when no day provided,
+            // createFromFormat - defaults to 31 - which bumps to next month if not a real day.
+            // So we want '2013-02-01' not '2013-02-31'...
+            $month_of_birth = Carbon::createFromFormat('Y-m-d', $child['dob'] . '-01');
+
+            // Check and set verified, or null
+            $verified = null;
+            if (array_key_exists('verified', $child)) {
+                $verified = boolval($child['verified']);
+            }
+
+            return new Child([
+                'born' => $month_of_birth->isPast(),
+                'dob' => $month_of_birth->toDateTimeString(),
+                'verified' => $verified
+            ]);
+        },
+        $children);
     }
 }

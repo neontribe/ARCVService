@@ -57,20 +57,27 @@
                     <h2>Adding children or pregnancies</h2>
                 </div>
                 <div>
-                    <p>To add a child or pregnancy, complete the boxes below with their month and year of birth (or due date) in numbers, e.g. '06 2017' for June 2017.
-                    </p>
-                    @include('store.partials.add_child_form')
+                <p>To add a child or pregnancy, complete the boxes below with their month and year of birth (or due date) in numbers, e.g. '06 2017' for June 2017.
+                </p>
                 </div>
+                @include('store.partials.add_child_form', ['verifying' => $verifying])
                 <div class="added">
                     <label for="child_wrapper">You have added:</label>
                     <table>
+                        <thead>
+                            <tr>
+                                <td class="age-col">Age</td>
+                                <td class="dob-col">Month / Year</td>
+                                @if ( $verifying )
+                                <td class="verified-col">ID</td>
+                                @endif
+                                <td class="remove-col"></td>
+                            </tr>
+                        </thead>
                         <tbody id="child_wrapper">
                             @if(is_array(old('children')) || (!empty(old('children'))))
                                 @foreach (old('children') as $old_child )
-                                <tr>
-                                    <td><input name="children[]" type="hidden" value="{{ $old_child }}" > {{ $old_child }}</td>
-                                    <td><button class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>
-                                </tr>
+                                <tr class="js-old-child" data-dob={{ $old_child['dob'] }} data-verified={{ $old_child['verified'] or 0 }}></tr>
                                 @endforeach
                             @endif
                         </tbody>
@@ -86,19 +93,20 @@
                     <label for="eligibility-reason">
                         Reason for receiving Rose Vouchers
                     </label>
-                    <div class="user-control" id="eligibility-reason">
-                        <input type="radio" id="healthy-start" value="healthy-start" name="eligibility"
-                                @if(old('eligibility') == "healthy-start") checked="checked" @endif
-                                @if(empty(old('eligibility'))) checked="checked" @endif
-                        />
-                        <label for="healthy-start">Entitled to Healthy Start</label>
-                    </div>
-                    <div class="user-control">
-                        <input type="radio" id="other" value="other" name="eligibility"
-                               @if(old('eligibility') == "other") checked="checked" @endif
-                        />
-                        <label for="other">Other Local Criteria</label>
-                    </div>
+                    <select name="eligibility" id="eligibility-reason">
+                        @foreach (config('arc.reg_eligibilities') as $index => $reg_eligibility)
+                            <option value="{{ $reg_eligibility }}"
+                                    @if(
+                                        (empty(old('eligibility')) && $index === 0) ||
+                                        old('eligibility') === "healthy-start-receiving"
+                                        ) selected="selected"
+                                    @endif
+                            >@lang('arc.reg_eligibilities.' . $reg_eligibility)
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
                     <div class="user-control">
                         <input type="checkbox" class="styled-checkbox @if($errors->has('consent'))invalid @endif" id="privacy-statement" name="consent" @if( old('consent') ) checked @endif/>
                         <label for="privacy-statement">Has the registration form been completed and signed?</label>
@@ -136,6 +144,31 @@
                         $(el).append('<tr><td><input name="carers[]" type="text" value="' + carer_el.val() + '" ></td><td><button type="button" class="remove_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
                         carer_el.val('');
                     }
+                });
+
+                // In the case of failed submission, iterate the children previously submitted
+                $(".js-old-child").each(function( index ) {
+                    // Grab the data out of the data attributes
+                    var dob = $(this).data("dob");
+                    var verified = $(this).data("verified");
+
+                    // Convert to useful formats - add_child_form partial should have validated these
+                    var dateObj = moment(dob, "YYYY-MM", true).format("MMM YYYY");
+                    var childKey = Math.random();
+                    var displayVerified = verified === 1 ? "checked" : null;
+                    var displayMonths = moment().diff(dob, 'months') % 12;
+                    var displayYears = moment().diff(dob, 'years');
+
+                    // Create and append new style columns
+                    var ageColumn = '<td class="age-col">' + displayYears + ' yr, ' + displayMonths + ' mo</td>';
+                    var dobColumn = '<td class="dob-col"><input name="children[' + childKey + '][dob]" type="hidden" value="' + dob + '" >' + dateObj + '</td>';
+                    var idColumn = '<td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][verified]" id="child' + childKey + '" ' + displayVerified + ' value="' + verified + '"><label for="child' + childKey + '"><span class="visually-hidden">Toggle ID checked</span></label>' + '</td>';
+                    var removeColumn = '<td class="remove-col"><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>';
+
+                    $(this).append(ageColumn);
+                    $(this).append(dobColumn);
+                    $(this).append(idColumn);
+                    $(this).append(removeColumn);
                 });
 
                 $(el).on("click", ".remove_field", function (e) {

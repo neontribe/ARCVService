@@ -4,18 +4,20 @@ namespace App;
 
 use App\Services\VoucherEvaluator\AbstractEvaluator;
 use App\Services\VoucherEvaluator\IEvaluee;
+use App\Traits\Evaluable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Child extends Model implements IEvaluee
 {
+    use Evaluable;
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'dob','born'
+        'dob','born', 'verified'
     ];
 
     /**
@@ -23,8 +25,7 @@ class Child extends Model implements IEvaluee
      *
      * @var array
      */
-    protected $hidden = [
-    ];
+    protected $hidden = [];
 
     /**
      * These are turned into Date objects on get
@@ -35,6 +36,25 @@ class Child extends Model implements IEvaluee
         'created_at',
         'updated_at',
         'dob'
+    ];
+
+    /**
+     * Get's the family's preferred evaluator
+     *
+     * @return AbstractEvaluator
+     */
+    public function getEvaluator()
+    {
+        return $this->family->evaluator;
+    }
+
+    /*
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'verified' => 'boolean',
     ];
 
     /**
@@ -100,17 +120,6 @@ class Child extends Model implements IEvaluee
     public function calcSchoolStart()
     {
         return $this->calcFutureMonthYear(5);
-    }
-
-    /**
-     * Visitor pattern voucher evaluator
-     *
-     * @param AbstractEvaluator $evaluator
-     * @return array
-     */
-    public function accept(AbstractEvaluator $evaluator)
-    {
-        return $evaluator->evaluateChild($this);
     }
 
     /**

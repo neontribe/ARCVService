@@ -26,6 +26,11 @@ h3 {
 	margin-top: 0;
 }
 
+hr {
+	border-color: #a74e94;
+	background-color: #a74e94
+}
+
 b {
 	font-weight: bold;
 }
@@ -82,19 +87,22 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 input[type="radio"],
-.styled-checkbox {
+.styled-checkbox,
+.inline-dob {
 	cursor: pointer;
 	opacity: 0;
 }
 
 input[type=radio]+label,
-.styled-checkbox+label {
+.styled-checkbox+label,
+.inline-dob + div {
 	cursor: pointer;
 	margin-left: -20px;
 }
 
 input[type="radio"]+label:before,
-.styled-checkbox+label:before {
+.styled-checkbox+label:before,
+.inline-dob + div::before {
 	content: "";
 	background: #ffffff;
 	width: 34px;
@@ -106,7 +114,8 @@ input[type="radio"]+label:before,
 }
 
 input[type="radio"]:focus+label:before,
-.styled-checkbox:focus+label:before {
+.styled-checkbox:focus+label:before,
+.inline-dob:focus + label::before {
 	box-shadow: 0 0 0 3px #dcb9d2;
 }
 
@@ -117,8 +126,8 @@ input[type="radio"]:checked+label:after,
 	position: absolute;
 	width: 0;
 	height: 0;
-	left: 9px;
-	top: 9px;
+	left: 10px;
+	top: 10px;
 	cursor: pointer;
 }
 
@@ -128,9 +137,10 @@ input[type="radio"]:checked+label:after {
 }
 
 .styled-checkbox:checked+label:after {
-	content: "✔";
-	top: 8px;
-	left: 12px;
+	font-family: FontAwesome, sans-serif;
+	content: "\f00c";
+	top: 10px;
+	left: 10px;
 	border: 0;
 }
 
@@ -214,6 +224,24 @@ td {
 	border-top: 1px solid #a74e94;
 	padding: 0.5rem;
 	font-size: 1.2rem;
+}
+
+.age-col {
+    width: 25%;
+    padding-left: 0;
+}
+
+.dob-col {
+    width: 35%;
+}
+
+.verified-col {
+    width: 15%;
+}
+
+.remove-col {
+    width: 10%;
+    padding-right: 0;
 }
 
 strong {
@@ -383,6 +411,30 @@ input[type="text"].invalid,
 
 .submit {
 	background-color: #b9368b;
+}
+
+
+.block {
+    display: block;
+}
+
+.flex {
+    display: flex;
+}
+
+.relative {
+    position: relative;
+}
+
+.visually-hidden {
+	position: absolute;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	height: 1px;
+	width: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
 }
 
 /*
@@ -664,6 +716,7 @@ REGISTER PAGE
 }
 
 .long-button {
+	display: block;
 	margin: 1rem;
 	width: calc(100% - 2rem);
 }
@@ -1231,4 +1284,77 @@ VOUCHER PAGES
 .secondary_info {
 	color: #757475;
 	font-size: 1rem;
+}
+/*
+
+ADD CHILD FORM PARTIAL
+
+*/
+
+.dob-input-container {
+    display: flex;
+    margin: 1rem;
+}
+
+.dob-input {
+    flex: 0 1 auto;
+}
+
+.dob-input > label {
+    margin-bottom: 2px;
+}
+
+#dob-month {
+    border: 2px solid #ffffff;
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    width: 3ch;
+    text-align: center;
+}
+
+#dob-year {
+    border: 2px solid #ffffff;
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    width: 5ch;
+    text-align: center;
+}
+
+/* dob-verified styling leverages the .styled-checkbox styling,
+with overrides to display with a label above rather than inline */
+#dob-verified {
+    position: absolute;
+    top: 20px;
+}
+
+#dob-verified + label {
+    margin-left: 0px;
+}
+
+#dob-verified + label::before {
+    top: 20px;
+}
+
+#dob-verified:checked + label::after {
+    top: 30px;
+}
+
+.inline-dob {
+    position: absolute;
+    top: 20px;
+}
+
+.inline-dob + label::before {
+    top: 13px;
+}
+
+.inline-dob + label::before {
+    top: 14px;
+}
+
+.inline-dob:checked + label:after {
+    font-family: FontAwesome, sans-serif;
+    content: "\f00c";
+    top: 24px;
+    left: 10px;
 }

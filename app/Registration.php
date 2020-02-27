@@ -4,13 +4,17 @@ namespace App;
 
 use App\Services\VoucherEvaluator\AbstractEvaluator;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
-use App\Services\VoucherEvaluator\IEvaluation;
 use App\Services\VoucherEvaluator\IEvaluee;
-use Illuminate\Database\Eloquent\Builder;
+use App\Traits\Evaluable;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Registration extends Model implements IEvaluee
 {
+    use Evaluable;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -41,36 +45,55 @@ class Registration extends Model implements IEvaluee
         'consented_on',
     ];
 
-    /** @var  AbstractEvaluator null  */
-    public $evaluator = null;
-
     /**
-     * Run a valuation on this registration.
+     * Magically gets a public evaluator.
+     * @return AbstractEvaluator
      */
-    public function getValuationAttribute()
+    public function getEvaluator()
     {
-        // Get the evaluator, or make a new one
-        $this->evaluator = $this->evaluator ?? EvaluatorFactory::makeFromRegistration($this);
-        // Start the process of making a valuation
-        $this->accept($this->evaluator);
-        // fetch the report
-        return $this->evaluator->valuation;
+        // if the private var is null, make a new one, stash it and return it.
+        $this->_evaluator = ($this->_evaluator) ?? EvaluatorFactory::makeFromRegistration($this);
+        return $this->_evaluator;
     }
 
     /**
-     * Visitor pattern voucher evaluator
+     * Works out if a Registration can be counted as "Active"
      *
-     * @param AbstractEvaluator $evaluator
+     * @return bool
      */
-    public function accept(AbstractEvaluator $evaluator)
+    public function isActive()
     {
-        $evaluator->evaluateRegistration($this);
+        // Get the last disbursement, if any.
+        $lastCollection = $this->bundles()
+            ->disbursed()
+            ->orderBy('disbursed_at', 'desc')
+            ->first()
+        ;
+        // Use created_at, aka "Join Date" if no collections (edge case)
+        /** @var Carbon $activeDate */
+        $activeDate = ($lastCollection->disbursed_at) ?? $this->created_at;
+
+        /*  if today() is less than or equal to
+                Friday of the 4th week after pickup
+                    then true, else false
+        */
+
+        // Calculate forward date.
+        $friday4thWeek = $activeDate
+            // find start of that week (day 1, monday) ...
+            ->startOfWeek()
+            // add four full weeks ...
+            ->addWeeks(4)
+            // add 4 extra days (day 1 -> 5, friday)
+            ->addDays(4)
+        ;
+        return Carbon::today()->lessThanOrEqualTo($friday4thWeek);
     }
 
     /**
      * Get the Registration's Family
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function family()
     {
@@ -80,7 +103,7 @@ class Registration extends Model implements IEvaluee
     /**
      * Get the Registration's Centre
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function centre()
     {
@@ -105,7 +128,7 @@ class Registration extends Model implements IEvaluee
         if (!$bundle) {
             $bundle = Bundle::create([
                 "registration_id" => $this->id,
-                "entitlement" => $this->valuation->getEntitlement()
+                "entitlement" => $this->getValuation()->getEntitlement()
                 ]);
         };
 
@@ -115,7 +138,7 @@ class Registration extends Model implements IEvaluee
     /**
      * Get the Registrations's Bundles
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function bundles()
     {

@@ -2,10 +2,6 @@
 
 @section('title', 'Voucher Manager')
 
-@section('hoist-head')
-    <script src="{{ asset('store/js/jquery-ui-1.12.1/jquery-ui.min.js')}}"></script>
-@endsection
-
 @section('content')
 
     @include('store.partials.navbar', ['headerTitle' => 'Voucher Manager'])
@@ -36,11 +32,10 @@
                     <div class="icon-container warning">
                         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
                     </div>
-                    <div>
+                    <div id="family-warning">
                         @foreach( $noticeReasons as $notices )
                             <p class="v-spaced">
-                                Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }}
-                                is {{ $notices['reason'] }}
+                                Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }} currently "{{ $notices['reason'] }}"
                             </p>
                         @endforeach
                     </div>

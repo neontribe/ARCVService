@@ -7,7 +7,6 @@ use App\Centre;
 use App\Child;
 use App\CentreUser;
 use App\Registration;
-use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use URL;
@@ -24,6 +23,7 @@ class EditPageTest extends StoreTestCase
     private $centre;
     private $centreUser;
     private $registration;
+    private $faker;
 
     public function setUp()
     {
@@ -130,13 +130,12 @@ class EditPageTest extends StoreTestCase
         ;
         // See the names in the page
         foreach ($children as $child) {
-            $this->see('<td>'. $child->getAgeString() .'</td>')
-                ->see('<td>'. $child->getDobAsString() .'</td>')
+            $this->see('<td class="age-col">'. $child->getAgeString() .'</td>')
+                ->see('<td class="dob-col">'. $child->getDobAsString() .'</td>')
                 ->seeElement('input[type="hidden"][value="'. $child->dob->format('Y-m') .'"]')
             ;
         }
     }
-
 
     /** @test */
     public function itShowsALogoutButton()
@@ -153,6 +152,18 @@ class EditPageTest extends StoreTestCase
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
             ->seeInElement('button[type=submit]', 'Save Changes')
+        ;
+    }
+
+    /** @test */
+    public function itShowsAnEligibilitySelect()
+    {
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.create'))
+            ->seeElement('#eligibility-reason>option[value="healthy-start-applying"][selected]')
+            ->seeElement('#eligibility-reason>option[value="healthy-start-receiving"]')
+            ->seeElement('#eligibility-reason>option[value="no-recourse-to-public-funds"]')
+            ->seeElement('#eligibility-reason>option[value="other"]')
         ;
     }
 
@@ -189,66 +200,6 @@ class EditPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function itWillRejectLeavingWithoutAReason()
-    {
-        $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', $this->registration->id))
-            ->press('Remove this family')
-            ->press('Yes')
-            // Still see header of leaving popup
-            ->see('Reason for leaving')
-            // Still see the button - will prove that the family is still in scheme
-            ->see('Remove this family')
-        ;
-    }
-
-    /** @test */
-    public function itWillAcceptLeavingWithAReason()
-    {
-        $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', $this->registration->id))
-            ->press('Remove this family')
-            ->select(config('arc.leaving_reasons')[0], 'leaving_reason')
-            ->press('Yes')
-            ->seePageIs(route('store.registration.index'))
-        ;
-    }
-
-    /** @test */
-    public function itWillNotAcceptAnInvalidLeavingReason()
-    {
-        $response = $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', $this->registration->id))
-            ->press('Remove this family')
-            ->call(
-                'PUT',
-                route('store.registration.family', $this->registration->family->id),
-                ['leaving_reason' => 'Not a good one']
-            )
-        ;
-        $this->assertResponseStatus(302);
-        $this->assertEquals('The given data was invalid.', $response->exception->getMessage());
-    }
-
-    /** @test */
-    public function itWillRejectUpdatesIfFamilyHasLeft()
-    {
-        $family = $this->registration->family;
-        $family->leaving_on = Carbon::now();
-        $family->leaving_reason = config('arc.leaving_reasons')[0];
-        $family->save();
-        $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', $this->registration->id))
-            // Throws Authorization exception 403. Expecting this exception doesn't seem to help.
-            // Not sure this is the desired behaviour and it makes untestable. We need to handle gracefully.
-            //->press('Save Changes')
-        ;
-        //$this->assertResponseStatus(403);
-    }
-
-        /**
-     * @test
-     */
     public function childrensDOBsGiveExpectedAge()
     {
         // Set Carbon::now to 01/01/2018
@@ -290,12 +241,80 @@ class EditPageTest extends StoreTestCase
         // Test that entering children's DOB's gives the expected age.
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'id' => $family->id ]))
-            ->see('<td>1 yr, 1 mo</td>')
-            ->see('<td>1 yr, 0 mo</td>')
-            ->see('<td>0 yr, 11 mo</td>')
+            ->see('<td class="age-col">1 yr, 1 mo</td>')
+            ->see('<td class="age-col">1 yr, 0 mo</td>')
+            ->see('<td class="age-col">0 yr, 11 mo</td>')
         ;
 
         // Set Carbon date & time back
         Carbon::setTestNow();
+    }
+
+    /** @test */
+    public function itWillNotAcceptAnInvalidLeavingReason()
+    {
+        $response = $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.edit', $this->registration->id))
+            ->press('Remove this family')
+            ->call(
+                'PUT',
+                route('store.registration.family', $this->registration->family->id),
+                ['leaving_reason' => 'Not a good one']
+            )
+        ;
+        $this->assertResponseStatus(302);
+        $this->assertEquals('The given data was invalid.', $response->exception->getMessage());
+    }
+
+    /** @test */
+    public function itWillRejectUpdatesIfFamilyHasLeft()
+    {
+        $family = $this->registration->family;
+        $family->leaving_on = Carbon::now();
+        $family->leaving_reason = config('arc.leaving_reasons')[0];
+        $family->save();
+
+        $data = [
+            'pri_carer' => ['A String'],
+            'children' => [
+                0 => ['dob' => '2017-09']
+            ]
+        ];
+
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.edit', $this->registration->id))
+            ->call(
+                'PUT',
+                route('store.registration.update', $this->registration->id),
+                $data
+            )
+        ;
+        $this->assertResponseStatus(403);
+    }
+
+    /** @test */
+    public function itWillRejectLeavingWithoutAReason()
+    {
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.edit', $this->registration->id))
+            ->press('Remove this family')
+            ->press('Yes')
+            // Still see header of leaving popup
+            ->see('Reason for leaving')
+            // Still see the button - will prove that the family is still in scheme
+            ->see('Remove this family')
+        ;
+    }
+
+    /** @test */
+    public function itWillAcceptLeavingWithAReason()
+    {
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.edit', $this->registration->id))
+            ->press('Remove this family')
+            ->select(config('arc.leaving_reasons')[0], 'leaving_reason')
+            ->press('Yes')
+            ->seePageIs(route('store.registration.index'))
+        ;
     }
 }
