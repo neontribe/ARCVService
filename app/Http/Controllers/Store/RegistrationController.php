@@ -106,15 +106,9 @@ class RegistrationController extends Controller
 
         // This isn't ideal as it relies on getting all the families, then sorting them.
         // However, the whereIn statements above destroy any sorted order on family_ids.
-        $reg_models = $q
-            ->withFullFamily()
+        $reg_models = $q->withFullFamily()
             ->get()
             ->values();
-
-        // Filter by centre
-        $centre = $request->get('centre');
-
-        //$reg_models = $reg_models->where('centre', $centre );
 
         // Get any sorting direction from the request
         $direction = $request->get('direction') ? $request->get('direction') : 'asc';
