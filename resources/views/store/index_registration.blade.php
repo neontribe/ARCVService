@@ -7,42 +7,38 @@
     @include('store.partials.navbar', ['headerTitle' => 'Search for a family'])
     <div class="content search">
         <div class="control-container">
-            {{-- Name search --}}
-            <div class="search-control">
-                <label>Search by name</label>
-                <form action="{{ URL::route('store.registration.index') }}" method="GET" id="searchform">
-                    {!! csrf_field() !!}
+            <form action="{{ URL::route('store.registration.index') }}" method="GET" id="searchform">
+                {!! csrf_field() !!}
+                {{-- Name search --}}
+                <div class="search-control">
+                    <label>Search by name</label>
                     <div class="search-actions">
                         <input type="search" name="family_name" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Enter family name" aria-label="Family Name">
-                        <button name="search" aria-label="Search">
-                            <img src="{{ asset('store/assets/search-light.svg') }}" alt="search">
-                        </button>
                     </div>
-                </form>
-            </div>
-            {{-- Centre filter --}}
-            <div class="filter-control">
-                <label>Filter by centre</label>
-                <form name="centreFilter" id="centre-filter"}}">
-                    {!! method_field('put') !!}
-                    {!! csrf_field() !!}
-                    <select name="centre" onchange="document.centreUserForm.submit()">
-                            <option value="all">All</option>
+                </div>
+                {{-- Centre filter --}}
+                <div class="filter-control">
+                    <label>Filter by centre</label>
+                    <select name="centre">
+                        <option value="">All</option>
                         @foreach (Auth::user()->centres as $centre)
-                            <option
-                                    value="{{ $centre->id }}"
-                            >{{ $centre->name }}</option>
+                            <option value="{{ $centre->id }}" {{ Request::get("centre") == ($centre->id) ? 'selected' : '' }}>
+                                {{ $centre->name }}
+                            </option>
                         @endforeach
                     </select>
-                </form>
-            </div>
-            {{-- Families left checkbox --}}
-            <div class="checkbox-control">
-                <div class="user-control">
-                    <input type="checkbox" class="styled-checkbox" id="families-left" name="families-left" @if( old('consent') ) checked @endif/>
-                    <label for="families-left">Show families who have left</label>
                 </div>
-            </div>
+                {{-- Families left checkbox --}}
+                <div class="checkbox-control relative">
+                    <input type="checkbox" class="styled-checkbox no-margin" id="families_left" name="families_left"
+                    {{ Request::get("families_left") ? 'checked' : '' }}
+                    />
+                    <label for="families_left">Show families who have left</label>
+                </div>
+                <button name="search" aria-label="Search" class="search-button">
+                    <img src="{{ asset('store/assets/search-light.svg') }}" alt="search">
+                </button>
+            </form>
         </div>
         <div>
             <table>
@@ -60,7 +56,9 @@
                         <tr class="{{ $registration->family->leaving_on ? 'inactive' : 'active' }}">
                             <td class="pri_carer">
                                 <div>{{ $registration->family->carers->first()->name }}</div>
-                                <div class="secondary_info">{{ $registration->centre->name }}</div>
+                                {!! Request::get("centre") == ($registration->centre->id) ?
+                                    null : '<div class="secondary_info">' . $registration->centre->name . '</div>'
+                                !!}
                             </td>
                             <td class="center">{{ $registration->getValuation()->getEntitlement() }}</td>
                             <td class="center">{{ $registration->family->rvid }}</td>

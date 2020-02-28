@@ -401,7 +401,7 @@ input[type="text"].invalid,
 }
 
 .disabled {
-	background-color: #dadada;
+	background-color: #757575;
 }
 
 .disabled:hover {
@@ -861,17 +861,10 @@ SEARCH PAGE
 .control-container {
 	display: flex;
 	justify-content: space-between;
-	align-items: center;
 }
 
 .search-control {
 	flex: 1 0 40%;
-}
-
-.search-control button {
-	height: 64px;
-	margin-top: 2px;
-	width: 72px;
 }
 
 .filter-control {
@@ -892,11 +885,24 @@ SEARCH PAGE
 
 .checkbox-control {
 	flex: 0 1 20%;
+	position: relative;
+	padding-left: 55px;
+	margin-top: 21px;
 }
 
 .checkbox-control label::before {
 	border: 2px solid #757475;
 	border-radius: 3px;
+}
+
+.search-button {
+	height: 64px;
+	margin-top: 21px;
+	flex: 0 0 64px;
+}
+
+.search-button > img {
+	max-height: 40px;
 }
 
 .search {
@@ -925,15 +931,9 @@ SEARCH PAGE
 	border-radius: 3px;
 }
 
-.search-actions button {
-	width: 75px;
-	padding: 0.5rem;
-	margin-left: 0.5rem;
-}
-
-/* Set fixed height for IE */
-.search-actions button img {
-	max-height: 40px;
+.secondary_info {
+	color: #757475;
+	font-size: 1rem;
 }
 
 .pagination {
