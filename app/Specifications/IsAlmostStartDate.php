@@ -42,6 +42,7 @@ class IsAlmostStartDate extends AbstractSpecification
         /** @var Carbon $targetDate */
         $targetDate = $candidate->calcFutureMonthYear($this->yearsAhead, $this->offsetMonth);
         return $targetDate->isFuture() &&
+            // If it's *this* month or *next* month, not *last* month
             $this->offsetDate->diffInMonths($targetDate) <=1;
     }
 }

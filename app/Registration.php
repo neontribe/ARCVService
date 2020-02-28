@@ -173,5 +173,4 @@ class Registration extends Model implements IEvaluee
             $q->whereNull('leaving_on');
         });
     }
-
 }
