@@ -37,15 +37,23 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' =>'admin.vouchers.index',
         'uses' => 'Admin\VouchersController@index',
     ]);
+    // ...create form
     Route::get('vouchers/create', [
         'as' =>'admin.vouchers.create',
         'uses' => 'Admin\VouchersController@create',
     ]);
+    // ...void form
+    Route::get('vouchers/void', [
+        'as' =>'admin.vouchers.void',
+        'uses' => 'Admin\VouchersController@void',
+    ]);
+    // ...transition to printed
     Route::post('vouchers', [
         'as' =>'admin.vouchers.storebatch',
         'uses' => 'Admin\VouchersController@storeBatch',
     ]);
-    Route::post('vouchers', [
+    // ...patch because changing state of a partial collection of vouchers.
+    Route::patch('vouchers', [
         'as' =>'admin.vouchers.updatebatch',
         'uses' => 'Admin\VouchersController@updateBatch',
     ]);
