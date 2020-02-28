@@ -52,7 +52,7 @@ form {
 }
 
 input.uppercase {
-	text-transform:uppercase
+	text-transform: uppercase;
 }
 
 input[type="text"],
@@ -693,7 +693,7 @@ REGISTER PAGE
 
 .small-button-container {
 	display: flex;
-  	justify-content: center;
+	justify-content: center;
 }
 
 .small-button-container button {
@@ -861,20 +861,22 @@ SEARCH PAGE
 .control-container {
 	display: flex;
 	justify-content: space-between;
+	align-items: center;
 }
 
 .search-control {
-	flex: 0 0 48%;
+	flex: 1 0 40%;
 }
 
-.search-control > button {
+.search-control button {
 	height: 64px;
 	margin-top: 2px;
 	width: 72px;
 }
 
 .filter-control {
-	flex: 0 1 48%;
+	flex: 0 1 30%;
+	margin: 0 1rem;
 }
 
 .filter-control select {
@@ -885,6 +887,16 @@ SEARCH PAGE
 	height: 64px;
 	margin: 2px;
 	border: 2px solid #757475;
+	width: 100%;
+}
+
+.checkbox-control {
+	flex: 0 1 20%;
+}
+
+.checkbox-control label::before {
+	border: 2px solid #757475;
+	border-radius: 3px;
 }
 
 .search {
@@ -899,7 +911,7 @@ SEARCH PAGE
 }
 
 .search table tr.inactive {
-	color:#AEAEAE;
+	color: #757575;
 }
 
 .search-actions {

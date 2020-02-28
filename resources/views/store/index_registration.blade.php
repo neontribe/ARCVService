@@ -23,7 +23,7 @@
             {{-- Centre filter --}}
             <div class="filter-control">
                 <label>Filter by centre</label>
-                <form name="centreFilter" id="centre-filter" method="post" action="{{ route('store.session.put') }}">
+                <form name="centreFilter" id="centre-filter"}}">
                     {!! method_field('put') !!}
                     {!! csrf_field() !!}
                     <select name="centre" onchange="document.centreUserForm.submit()">
@@ -36,10 +36,12 @@
                     </select>
                 </form>
             </div>
-            {{-- Inactive checkbox --}}
-            <div>
-                <label>Show families who have left</label>
-                <input type="checkbox"></input>
+            {{-- Families left checkbox --}}
+            <div class="checkbox-control">
+                <div class="user-control">
+                    <input type="checkbox" class="styled-checkbox" id="families-left" name="families-left" @if( old('consent') ) checked @endif/>
+                    <label for="families-left">Show families who have left</label>
+                </div>
             </div>
         </div>
         <div>
@@ -60,7 +62,7 @@
                                 <div>{{ $registration->family->carers->first()->name }}</div>
                                 <div class="secondary_info">{{ $registration->centre->name }}</div>
                             </td>
-                            <td class="center">{{ $registration->valuation->getEntitlement() }}</td>
+                            <td class="center">{{ $registration->getValuation()->getEntitlement() }}</td>
                             <td class="center">{{ $registration->family->rvid }}</td>
                             <td class="right no-wrap">
                                 @if( !isset($registration->family->leaving_on) )
