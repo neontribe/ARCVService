@@ -1137,11 +1137,10 @@ VOUCHER PAGES
 
 .alert-message.success {
 	background-color: #dff0d8;
-    border: 1px solid #3c763d;
+	border: 1px solid #3c763d;
 	border-radius: .25rem;
 	display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+	flex-wrap: wrap;
 	margin: 1rem 10%;
 }
 
@@ -1162,7 +1161,7 @@ VOUCHER PAGES
 }
 
 .icon-container {
-    flex: 0 0 3rem;
+	flex: 0 0 3rem;
 }
 
 .icon-container.error {
@@ -1170,14 +1169,14 @@ VOUCHER PAGES
 }
 
 .icon-container.warning {
-    background-color: #f3902f;
+	background-color: #f3902f;
 }
 
 .icon-container.success {
 	background-color: #3c763d;
-    padding: 6px 12px;
-    line-height: 1;
-    border: 1px solid #3c763d;
+	padding: 6px 12px;
+	line-height: 1;
+	border: 1px solid #3c763d;
 }
 
 .icon-container i {
