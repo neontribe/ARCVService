@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Service\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminNewVoucherRequest;
+use App\Http\Requests\AdminUpdateVoucherRequest;
 use App\Sponsor;
 use App\Voucher;
 use App\VoucherState;
@@ -57,10 +58,48 @@ class VouchersController extends Controller
      * @param AdminUpdateVoucherRequest $request
      * @return RedirectResponse
      */
-    public function updateBatch($request)
+    public function updateBatch(AdminUpdateVoucherRequest $request)
     {
-        // stub update
+        // Prepare input
+        $input = $request->all();
+        $user_id = auth()->id();
+        $user_type = class_basename(auth()->user());
+        $sponsor = Sponsor::findOrFail($input['sponsor_id']);
+        $now_time = Carbon::now();
+        $maxStep = 1000;
+        $start = $input['start-serial'];
+        $end = $input['end-serial'];
+        $transition = $input['transition'];
+
+
+        /**
+         * Find all the proposed vouchers
+         * - who CAN be transitioned
+         * - IN the range given
+         *
+        */
+
+
+
+        // Prepare the message
+        $transition_type = [
+            'lose' => 'Voided',
+            'expire' => 'Expired'
+        ];
+
+        $notification_msg = trans('service.messages.vouchers_voidexpire_success', [
+            'transition' => $transition_type[$transition],
+            'shortcode' => $sponsor->shortcode,
+            'start' => $request['start'],
+            'end' => $request['end'],
+        ]);
+
+        return redirect()
+            ->route('admin.vouchers.index')
+            ->with('notification', $notification_msg)
+            ;
     }
+
 
     /**
      * Store Voucher range.

@@ -8,6 +8,7 @@ use DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Log;
@@ -283,7 +284,7 @@ class Voucher extends Model
      * Get the most recent voucher_state change to payment_pending.
      * There should only ever be one per voucher - but most recent safer.
      *
-     * @return VoucherState
+     * @return HasOne
      */
     public function paymentPendedOn()
     {
@@ -296,7 +297,7 @@ class Voucher extends Model
      * Get the most recent voucher_state change to recorded.
      * There should only ever be one per voucher - but most recent safer.
      *
-     * @return VoucherState
+     * @return HasOne
      */
     public function recordedOn()
     {
@@ -309,7 +310,7 @@ class Voucher extends Model
      * Get the most recent voucher_state change to reimbursed.
      * There should only ever be one per voucher - but most recent safer.
      *
-     * @return VoucherState
+     * @return HasOne
      */
     public function reimbursedOn()
     {
@@ -332,16 +333,16 @@ class Voucher extends Model
     }
 
     /**
-     * @param $code
+     * @param string $code
      * @return Voucher
      */
     public static function findByCode($code)
     {
-        return self::where('code', $code)->get()->first();
+        return self::where('code', $code)->first();
     }
 
     /**
-     * @param $codes
+     * @param array $codes
      * @return Collection
      */
     public static function findByCodes($codes)
