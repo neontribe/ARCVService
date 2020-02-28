@@ -2,30 +2,24 @@
 
 namespace App\Http\Requests;
 
-use App\Http\Requests\AdminNewVoucherRequest;
+use Illuminate\Validation\Rule;
 
 class AdminUpdateVoucherRequest extends AdminNewVoucherRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
-    {
-        // Should be route protected.
-        return true;
-    }
-
-    /**
      * Get the validation rules that apply to the request.
+     * Append ours to the parent ones
      *
      * @return array
      */
     public function rules()
     {
         $additionalRules = [
-
+            // MUST be present AND be in a subset of transitions
+            'transition' => [
+                'required',
+                Rule::in(['expire', 'lose']),
+            ],
         ];
         return  array_merge(parent::rules(), $additionalRules);
     }
