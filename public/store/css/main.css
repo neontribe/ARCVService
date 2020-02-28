@@ -1135,6 +1135,15 @@ VOUCHER PAGES
 	background-color: #f8c28b;
 }
 
+.alert-message.success {
+	background-color: #d8ebdc;
+	border: 1px solid #3f9b54;
+	border-radius: 3px;
+	display: flex;
+	flex-wrap: wrap;
+	margin: 1rem 10%;
+}
+
 .alert-message p {
 	color: #000000;
 	flex: 0 0 auto;
@@ -1143,8 +1152,16 @@ VOUCHER PAGES
 	padding: 0 0.5rem;
 }
 
+.alert-message.success p {
+	align-self: center;
+}
+
+.alert-message.success span {
+	font-weight: 700;
+}
+
 .icon-container {
-    flex: 0 0 3rem;
+	flex: 0 0 3rem;
 }
 
 .icon-container.error {
@@ -1152,7 +1169,14 @@ VOUCHER PAGES
 }
 
 .icon-container.warning {
-    background-color: #f3902f;
+	background-color: #f3902f;
+}
+
+.icon-container.success {
+	background-color: #3f9b54;
+	padding: 6px 12px;
+	line-height: 1;
+	border: 1px solid #3f9b54;
 }
 
 .icon-container i {
@@ -1160,6 +1184,13 @@ VOUCHER PAGES
 	line-height: 2rem;
 	text-align: center;
 	width: 100%;
+}
+
+.icon-container.success i {
+	color: #d8ebdc;
+	font-size: 2.5rem;
+	padding: 0.5rem;
+	width: inherit;
 }
 
 .slide-in {
