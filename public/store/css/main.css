@@ -1136,9 +1136,9 @@ VOUCHER PAGES
 }
 
 .alert-message.success {
-	background-color: #dff0d8;
-	border: 1px solid #3c763d;
-	border-radius: .25rem;
+	background-color: #d8ebdc;
+	border: 1px solid #3f9b54;
+	border-radius: 3px;
 	display: flex;
 	flex-wrap: wrap;
 	margin: 1rem 10%;
@@ -1173,10 +1173,10 @@ VOUCHER PAGES
 }
 
 .icon-container.success {
-	background-color: #3c763d;
+	background-color: #3f9b54;
 	padding: 6px 12px;
 	line-height: 1;
-	border: 1px solid #3c763d;
+	border: 1px solid #3f9b54;
 }
 
 .icon-container i {
@@ -1187,7 +1187,7 @@ VOUCHER PAGES
 }
 
 .icon-container.success i {
-	color: #dff0d8;
+	color: #d8ebdc;
 	font-size: 2.5rem;
 	padding: 0.5rem;
 	width: inherit;
