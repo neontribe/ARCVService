@@ -15,11 +15,31 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Email Address</th>
-                    <th>Home Centre</th>
-                    <th>Alternative Centres</th>
-                    <th>Downloader</th>
+                    <th>
+                        Name
+                        <span>@include('service.partials.sortableChevron', ['route' =>
+                            'admin.centreusers.index', 'orderBy' => '', 'direction' => request('direction') ])</span>
+                    </th>
+                    <th>
+                        Email Address
+                        <span>@include('service.partials.sortableChevron', ['route' =>
+                            'admin.centreusers.index', 'orderBy' => '', 'direction' => request('direction') ])</span>
+                    </th>
+                    <th>
+                        Home Centre
+                        <span>@include('service.partials.sortableChevron', ['route' =>
+                            'admin.centreusers.index', 'orderBy' => '', 'direction' => request('direction') ])</span>
+                    </th>
+                    <th>
+                        Alternative Centres
+                        <span>@include('service.partials.sortableChevron', ['route' =>
+                            'admin.centreusers.index', 'orderBy' => '', 'direction' => request('direction') ])</span>
+                    </th>
+                    <th>
+                        Downloader
+                        <span>@include('service.partials.sortableChevron', ['route' =>
+                            'admin.centreusers.index', 'orderBy' => '', 'direction' => request('direction') ])</span>
+                    </th>
                     <th>Edit</th>
                 </tr>
             </thead>
