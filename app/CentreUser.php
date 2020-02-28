@@ -180,17 +180,6 @@ class CentreUser extends Authenticatable
     }
 
     /**
-     * Scope order by email
-     *
-     * @param Builder $query
-     * @param string $direction
-     */
-    public function scopeOrderByEmail(Builder $query, $direction = 'asc')
-    {
-        $query->orderBy('email', $direction);
-    }
-
-    /**
      * Call a macro [see AppServiceProvider::boot()] to add an order by centre name
      *
      * @param Builder $query
@@ -206,17 +195,6 @@ class CentreUser extends Authenticatable
     }
 
     /**
-     * Scope order by downloader
-     *
-     * @param Builder $query
-     * @param string $direction
-     */
-    public function scopeOrderByDownloader(Builder $query, $direction)
-    {
-        $query->orderBy('downloader', $direction);
-    }
-
-    /**
      * Strategy to sort columns
      *
      * @param Builder $query
@@ -229,14 +207,8 @@ class CentreUser extends Authenticatable
             case 'name':
                 return $query->orderByName($sort['direction']);
                 break;
-            case 'email':
-                return $query->orderByEmail($sort['direction']);
-                break;
             case 'centre':
                 return $query->orderByHomeCentre($sort['direction']);
-                break;
-            case 'downloader':
-                return $query->orderByDownloader($sort['direction']);
                 break;
             default:
                 return $query->orderByHomeCentre('asc');

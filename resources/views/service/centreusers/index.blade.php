@@ -20,26 +20,14 @@
                         <span>@include('service.partials.sortableChevron', ['route' =>
                             'admin.centreusers.index', 'orderBy' => 'name', 'direction' => request('direction') ])</span>
                     </th>
-                    <th>
-                        Email Address
-                        <span>@include('service.partials.sortableChevron', ['route' =>
-                            'admin.centreusers.index', 'orderBy' => 'email', 'direction' => request('direction') ])</span>
-                    </th>
+                    <th>Email Address</th>
                     <th>
                         Home Centre
                         <span>@include('service.partials.sortableChevron', ['route' =>
-                            'admin.centreusers.index', 'orderBy' => '', 'direction' => request('direction') ])</span>
+                            'admin.centreusers.index', 'orderBy' => 'centre', 'direction' => request('direction') ])</span>
                     </th>
-                    <th>
-                        Alternative Centres
-                        <span>@include('service.partials.sortableChevron', ['route' =>
-                            'admin.centreusers.index', 'orderBy' => 'homeCentre', 'direction' => request('direction') ])</span>
-                    </th>
-                    <th>
-                        Downloader
-                        <span>@include('service.partials.sortableChevron', ['route' =>
-                            'admin.centreusers.index', 'orderBy' => 'downloader', 'direction' => request('direction') ])</span>
-                    </th>
+                    <th>Alternative Centres</th>
+                    <th>Downloader</th>
                     <th>Edit</th>
                 </tr>
             </thead>
