@@ -196,7 +196,7 @@ class CentreUser extends Authenticatable
      * @param Builder $query
      * @param string $direction
      */
-    public function scopeOrderByCentre(Builder $query, $direction = 'asc')
+    public function scopeOrderByHomeCentre(Builder $query, $direction = 'asc')
     {
         $query->orderBySub(
             Centre::select('name')
@@ -233,14 +233,13 @@ class CentreUser extends Authenticatable
                 return $query->orderByEmail($sort['direction']);
                 break;
             case 'centre':
-                return $query->orderByCentre($sort['direction']);
+                return $query->orderByHomeCentre($sort['direction']);
                 break;
             case 'downloader':
                 return $query->orderByDownloader($sort['direction']);
                 break;
             default:
-                // default to date order ascending, so new things are on the BOTTOM.
-                return $query->orderByCentre('asc');
+                return $query->orderByHomeCentre('asc');
         }
     }
 
