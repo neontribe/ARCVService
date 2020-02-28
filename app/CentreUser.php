@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\belongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
@@ -166,4 +167,81 @@ class CentreUser extends Authenticatable
     {
         $this->notify(new StorePasswordResetNotification($token, $this->name));
     }
+
+    /**
+     * Scope order by name
+     *
+     * @param Builder $query
+     * @param string $direction
+     */
+    public function scopeOrderByName(Builder $query, $direction = 'asc')
+    {
+        $query->orderBy('name', $direction);
+    }
+
+    /**
+     * Scope order by email
+     *
+     * @param Builder $query
+     * @param string $direction
+     */
+    public function scopeOrderByEmail(Builder $query, $direction = 'asc')
+    {
+        $query->orderBy('email', $direction);
+    }
+
+    /**
+     * Call a macro [see AppServiceProvider::boot()] to add an order by centre name
+     *
+     * @param Builder $query
+     * @param string $direction
+     */
+    public function scopeOrderByCentre(Builder $query, $direction = 'asc')
+    {
+        $query->orderBySub(
+            Centre::select('name')
+                ->whereRaw('centre_id = centres.id'),
+            $direction
+        );
+    }
+
+    /**
+     * Scope order by downloader
+     *
+     * @param Builder $query
+     * @param string $direction
+     */
+    public function scopeOrderByDownloader(Builder $query, $direction)
+    {
+        $query->orderBy('downloader', $direction);
+    }
+
+    /**
+     * Strategy to sort columns
+     *
+     * @param Builder $query
+     * @param array $sort
+     * @return Builder
+     */
+    public function scopeOrderByField(Builder $query, $sort)
+    {
+        switch ($sort['orderBy']) {
+            case 'name':
+                return $query->orderByName($sort['direction']);
+                break;
+            case 'email':
+                return $query->orderByEmail($sort['direction']);
+                break;
+            case 'centre':
+                return $query->orderByCentre($sort['direction']);
+                break;
+            case 'downloader':
+                return $query->orderByDownloader($sort['direction']);
+                break;
+            default:
+                // default to date order ascending, so new things are on the BOTTOM.
+                return $query->orderByCentre('asc');
+        }
+    }
+
 }

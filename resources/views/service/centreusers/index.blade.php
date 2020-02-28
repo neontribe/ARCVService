@@ -12,18 +12,18 @@
             {{ Session::get('message') }}
         </div>
         @endif
-        <table class="table table-striped">
+        <table class="table table-striped sortable">
             <thead>
                 <tr>
                     <th>
                         Name
                         <span>@include('service.partials.sortableChevron', ['route' =>
-                            'admin.centreusers.index', 'orderBy' => '', 'direction' => request('direction') ])</span>
+                            'admin.centreusers.index', 'orderBy' => 'name', 'direction' => request('direction') ])</span>
                     </th>
                     <th>
                         Email Address
                         <span>@include('service.partials.sortableChevron', ['route' =>
-                            'admin.centreusers.index', 'orderBy' => '', 'direction' => request('direction') ])</span>
+                            'admin.centreusers.index', 'orderBy' => 'email', 'direction' => request('direction') ])</span>
                     </th>
                     <th>
                         Home Centre
@@ -33,12 +33,12 @@
                     <th>
                         Alternative Centres
                         <span>@include('service.partials.sortableChevron', ['route' =>
-                            'admin.centreusers.index', 'orderBy' => '', 'direction' => request('direction') ])</span>
+                            'admin.centreusers.index', 'orderBy' => 'homeCentre', 'direction' => request('direction') ])</span>
                     </th>
                     <th>
                         Downloader
                         <span>@include('service.partials.sortableChevron', ['route' =>
-                            'admin.centreusers.index', 'orderBy' => '', 'direction' => request('direction') ])</span>
+                            'admin.centreusers.index', 'orderBy' => 'downloader', 'direction' => request('direction') ])</span>
                     </th>
                     <th>Edit</th>
                 </tr>

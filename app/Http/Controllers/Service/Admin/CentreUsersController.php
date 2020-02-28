@@ -12,6 +12,7 @@ use DB;
 use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Log;
 use Ramsey\Uuid\Uuid;
@@ -21,11 +22,14 @@ class CentreUsersController extends Controller
     /**
      * Display a listing of Workers.
      *
+     * @param Request $request
      * @return Factory|View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $workers = CentreUser::get();
+        $workers = CentreUser::orderByField($request->all(['orderBy', 'direction']))
+            ->get();
+
         return view('service.centreusers.index', compact('workers'));
     }
 
