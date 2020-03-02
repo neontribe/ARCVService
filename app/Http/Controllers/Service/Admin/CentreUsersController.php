@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Log;
 use Ramsey\Uuid\Uuid;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class CentreUsersController extends Controller
 {
@@ -42,6 +43,21 @@ class CentreUsersController extends Controller
         } else {
             $workers = CentreUser::get()->sortBy('homeCentre.name');
         }
+
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 10;
+        $offset = ($page * $perPage) - $perPage;
+        $workers = new LengthAwarePaginator(
+            $workers->slice($offset, $perPage),
+            $workers->count(),
+            $perPage,
+            $page,
+            [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'query' => array_except($request->query(), 'page'),
+            ]
+        );
+
         return view('service.centreusers.index', compact('workers'));
     }
 
