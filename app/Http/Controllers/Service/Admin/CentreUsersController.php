@@ -27,7 +27,14 @@ class CentreUsersController extends Controller
      */
     public function index(Request $request)
     {
+        // Returns a collection of arrays where each value is a CentreUser object
         $workers = CentreUser::orderByField($request->all(['orderBy', 'direction']))->get();
+        // dd($workers);
+        // By default, we want to sort/order the collection by homeCentre, alphabetically
+        // Option 1 - map over the collection, sort worker centres alphabetically and return new collection
+        // Option 1.1 - transform collection so that is sorted by home centre
+        // Option 2 - convert collection toArray(), get a bi-dimensional array, use a usort() or uasort() on that
+        // Option 3 - figure out how to use the Collections sortBy or groupBy methods.
 
         return view('service.centreusers.index', compact('workers'));
     }
