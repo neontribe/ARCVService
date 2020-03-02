@@ -12,6 +12,7 @@
             {{ Session::get('message') }}
         </div>
         @endif
+        <p>{{ $workers->links() }}</p>
         <table class="table table-striped sortable">
             <thead>
                 <tr>

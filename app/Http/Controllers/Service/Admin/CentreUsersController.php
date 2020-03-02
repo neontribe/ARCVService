@@ -45,7 +45,7 @@ class CentreUsersController extends Controller
         }
 
         $page = LengthAwarePaginator::resolveCurrentPage();
-        $perPage = 10;
+        $perPage = 15;
         $offset = ($page * $perPage) - $perPage;
         $workers = new LengthAwarePaginator(
             $workers->slice($offset, $perPage),
