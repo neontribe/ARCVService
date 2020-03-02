@@ -21,7 +21,11 @@
                             'admin.centreusers.index', 'orderBy' => 'name', 'direction' => request('direction') ])</span>
                     </th>
                     <th>Email Address</th>
-                    <th>Home Centre</th>
+                    <th>
+                        Home Centre
+                        <span>@include('service.partials.sortableChevron', ['route' =>
+                            'admin.centreusers.index', 'orderBy' => 'homeCentre', 'direction' => request('direction') ])</span>
+                    </th>
                     <th>Alternative Centres</th>
                     <th>Downloader</th>
                     <th>Edit</th>

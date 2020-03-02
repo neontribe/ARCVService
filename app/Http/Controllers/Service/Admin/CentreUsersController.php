@@ -31,20 +31,17 @@ class CentreUsersController extends Controller
         $field = $request->input('orderBy', null);
         $direction = $request->input('direction', null);
 
-        if ($field) {
-
-             dd($field);
-
+        if ($field === 'name') {
             //sort the orderby
             $workers = CentreUser::orderByField([
                 'orderBy' => $field,
                 'direction' => $direction
             ])->get();
+        } elseif($field === 'homeCentre' && $direction === 'desc') {
+            $workers = CentreUser::get()->sortByDesc('homeCentre.name');
         } else {
-            // do the default.
             $workers = CentreUser::get()->sortBy('homeCentre.name');
         }
-
         return view('service.centreusers.index', compact('workers'));
     }
 
