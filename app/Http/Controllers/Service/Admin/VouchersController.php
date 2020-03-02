@@ -60,16 +60,27 @@ class VouchersController extends Controller
      */
     public function updateBatch(AdminUpdateVoucherRequest $request)
     {
-        // Prepare input
-        $input = $request->all();
+        // Set some variables
         $user_id = auth()->id();
         $user_type = class_basename(auth()->user());
-        $sponsor = Sponsor::findOrFail($input['sponsor_id']);
         $now_time = Carbon::now();
         $maxStep = 1000;
+
+        // get bits of input.
+        $input = $request->all();
+        $sponsor = Sponsor::findOrFail($input['sponsor_id']);
         $start = $input['start-serial'];
         $end = $input['end-serial'];
         $transition = $input['transition'];
+
+        // Find all transitionable vouchers
+        // Does our range fit into that?
+            // then transition them, the fast way
+            // else don't and say where the problems are.
+
+
+
+
 
 
         /**

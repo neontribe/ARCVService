@@ -147,6 +147,104 @@ class Voucher extends Model
         }
     }
 
+
+    /**
+     * Gets ranges of the vouchers that *can* be voided, in a shortcode.
+     *
+     * @param string $shortcode
+     * @return array
+     * @throws Throwable
+     */
+    public static function getVoidableVoucherRangesByShortCode(string $shortcode)
+    {
+        return DB::transaction(function () use ($shortcode) {
+            // Get the Sponsor Id for that shortcode
+            $sponsor_id = Sponsor::where('shortcode', $shortcode)
+                ->firstOrFail()
+                ->sponsor_id;
+            try {
+                // Set some important variables for the query. breaks SQLlite.
+                DB::statement(DB::raw('SET @initial_id=0, @initial_serial=0, @previous=0;'));
+
+                /* This seems to be the fastest way to find the start and end of each "range" of vouchers;
+                 * in this case specified by vouchers that are not in deliveries.
+                 * returns an array of stdClass objects with
+                 * - serial; the final serial number in the range
+                 * - initial_serial; the initial serial in the range
+                 * - final_code; the code associated with serial
+                 * - initial_code; the code associated with the initial_serial
+                 * - id; the voucher id of the serial
+                 * - initial_id; the voucher id of the initial_serial
+                 */
+                // TODO: convert to eloquent
+                return DB::select(
+                    "
+                    SELECT
+                        t1.*, 
+                        v1.code as intitial_code,
+                        v2.code as final_code
+                    FROM (
+                        
+                        SELECT
+                            @initial_serial := if(serial - @previous = 1, @initial_serial, serial) as initial_serial,
+                            @initial_id := if(serial - @previous = 1, @initial_id, id) as initial_id,
+                            @previous := serial as serial,
+                            id as final_id
+                        FROM (
+                        
+                            SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as serial
+                            FROM vouchers
+                            WHERE code REGEXP '^{$shortcode}[0-9]+\$'
+                              AND currentstate = 'dispatched'
+                              AND sponsor_id = {$sponsor_id}
+                            ORDER BY serial
+                        
+                        ) as t5
+                    
+                    ) AS t1
+                        INNER JOIN (
+                    
+                            SELECT initial_serial, max(serial) as final_serial
+                            FROM (
+                    
+                                 SELECT
+                                     @initial_serial := if(serial - @previous = 1, @initial_serial, serial) as initial_serial,
+                                     @initial_id := if(serial - @previous = 1, @initial_id, id) as initial_id,
+                                     @previous := serial as serial,
+                                     id
+                                 FROM (
+                                      SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as serial
+                                      FROM vouchers 
+                                      WHERE code REGEXP '^{$shortcode}[0-9]+\$'
+                                        AND currentstate = 'printed'
+                                      ORDER BY serial
+                    
+                                 ) as t4
+                    
+                            ) as t3
+                            GROUP BY initial_serial
+                    
+                        ) as t2
+                        ON t1.initial_serial = t2.initial_serial
+                          AND t1.serial = t2.final_serial
+                    
+                    LEFT JOIN vouchers as v1
+                        ON initial_id = v1.id
+                    
+                    LEFT JOIN vouchers as v2
+                        ON final_id = v2.id
+                    "
+                );
+            } catch (Throwable $e) {
+                Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+                Log::error($e->getTraceAsString());
+                return [];
+            }
+        }
+    }
+
+
+
     /**
      * Gets the ranges of undelivered vouchers
      *
