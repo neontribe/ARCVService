@@ -922,7 +922,7 @@ SEARCH PAGE
 .search-button {
 	flex: 0 0 64px;
 	height: 64px;
-	margin-top: 21px;
+	margin-top: 24px;
 }
 
 .search-button:focus {

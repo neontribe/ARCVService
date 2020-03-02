@@ -364,6 +364,30 @@ class SearchPageTest extends StoreTestCase
     }
 
     /** @test */
+    public function itShowsCentreLabelsForUsersByDefault()
+    {
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+            );
+    }
+
+            /** @test */
+    public function itCanFilterUsersByCentre()
+    {
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+          );
+    }
+
+    /** @test */
+    public function itDoesNotShowLeftFamiliesByDefault()
+    {
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+          );
+    }
+
+    /** @test */
     public function itShowsLeftFamilyRegistrationsAsDistinct()
     {
         $centre = factory(App\Centre::class)->create();
@@ -388,7 +412,9 @@ class SearchPageTest extends StoreTestCase
         $leavingFamily->save();
 
         $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.index'));
+            ->visit(URL::route('store.registration.index'))
+            ->check('#families_left')
+            ->press('search');
 
         $this->assertCount(1, $this->crawler->filter('tr.inactive'));
         $this->assertCount(9, $this->crawler->filter('tr.active'));
@@ -419,13 +445,15 @@ class SearchPageTest extends StoreTestCase
         $leavingFamily->save();
 
         $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.index'));
+            ->visit(URL::route('store.registration.index'))
+            ->check('#families_left')
+            ->press('search');
 
         // Check the number of enabled and disabled buttons.
-        $this->assertCount(2, $this->crawler->filter('tr.inactive div.disabled'));
-        $this->assertCount(0, $this->crawler->filter('tr.inactive div:not(.disabled)'));
-        $this->assertCount(0, $this->crawler->filter('tr.active div.disabled'));
-        $this->assertCount(18, $this->crawler->filter('tr.active div:not(.disabled)'));
+        $this->assertCount(2, $this->crawler->filter('tr.inactive td.right.no-wrap div.disabled'));
+        $this->assertCount(0, $this->crawler->filter('tr.inactive td.right.no-wrap div:not(.disabled)'));
+        $this->assertCount(0, $this->crawler->filter('tr.active td.right.no-wrap div.disabled'));
+        $this->assertCount(18, $this->crawler->filter('tr.active td.right.no-wrap div:not(.disabled)'));
     }
 
     /** @test */
