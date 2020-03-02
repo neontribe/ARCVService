@@ -387,6 +387,16 @@ input[type="text"].invalid,
 	width: calc(100% - 2rem);
 }
 
+.inline-link-button {
+	display: inline-block;
+	margin-left: 1rem;
+	min-width: 120px;
+}
+
+.inline-link-button:focus {
+	outline: 4px solid #dcb9d2;
+}
+
 .sort-link-container {
 	float: right;
 }
@@ -867,27 +877,41 @@ SEARCH PAGE
 	flex: 1 0 40%;
 }
 
+.search-control input {
+	margin: 5px 0 0 0;
+}
+
+.search-control input:focus {
+	outline: 3px solid #dcb9d2;
+	outline-offset: 0px;
+}
+
 .filter-control {
 	flex: 0 1 30%;
 	margin: 0 1rem;
 }
 
 .filter-control select {
+	border: 2px solid #757475;
+	border-radius: 3px;
 	font-family: "Roboto Slab", serif;
 	font-size: 1.3rem;
-	border-radius: 3px;
-	padding: 1rem;
 	height: 64px;
-	margin: 2px;
-	border: 2px solid #757475;
+	margin: 5px 0 0 0;
+	padding: 1rem;
 	width: 100%;
+}
+
+.filter-control select:focus {
+	outline: 3px solid #dcb9d2;
+	outline-offset: 0px;
 }
 
 .checkbox-control {
 	flex: 0 1 20%;
-	position: relative;
 	padding-left: 55px;
-	margin-top: 21px;
+	position: relative;
+	margin-top: 24px;
 }
 
 .checkbox-control label::before {
@@ -896,9 +920,14 @@ SEARCH PAGE
 }
 
 .search-button {
+	flex: 0 0 64px;
 	height: 64px;
 	margin-top: 21px;
-	flex: 0 0 64px;
+}
+
+.search-button:focus {
+	outline: 3px solid #dcb9d2;
+	outline-offset: 0px;
 }
 
 .search-button > img {

@@ -12,15 +12,15 @@
             {!! csrf_field() !!}
             {{-- Name search --}}
             <div class="search-control">
-                <label>Search by name</label>
+                <label for="family_name">Search by name</label>
                 <div class="search-actions">
-                    <input type="search" name="family_name" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Enter family name" aria-label="Family Name">
+                    <input type="search" name="family_name" id="family_name" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Enter family name" aria-label="Family Name">
                 </div>
             </div>
             {{-- Centre filter --}}
             <div class="filter-control">
-                <label>Filter by centre</label>
-                <select name="centre">
+                <label for="centre">Filter by centre</label>
+                <select name="centre" id="centre">
                     <option value="">All</option>
                     @foreach (Auth::user()->centres as $centre)
                         <option value="{{ $centre->id }}" {{ Request::get("centre") == ($centre->id) ? 'selected' : '' }}>
@@ -65,13 +65,13 @@
                         <td class="center">{{ $registration->family->rvid }}</td>
                         <td class="right no-wrap">
                             @if( !isset($registration->family->leaving_on) )
-                            <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
-                                <div class="link-button link-button-small">
+                            <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link inline-link-button">
+                                <div class="link-button">
                                     <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Vouchers
                                 </div>
                             </a>
-                            <a href="{{ route("store.registration.edit", ['id' => $registration->id ]) }}" class="link">
-                                <div class="link-button link-button-small">
+                            <a href="{{ route("store.registration.edit", ['id' => $registration->id ]) }}" class="link inline-link-button">
+                                <div class="link-button">
                                     <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Edit
                                 </div>
                             </a>
