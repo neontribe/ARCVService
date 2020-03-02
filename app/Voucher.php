@@ -155,6 +155,7 @@ class Voucher extends Model
      * @return array
      * @throws Throwable
      */
+
     public static function getVoidableVoucherRangesByShortCode(string $shortcode)
     {
         return DB::transaction(function () use ($shortcode) {
@@ -213,11 +214,13 @@ class Voucher extends Model
                                      @previous := serial as serial,
                                      id
                                  FROM (
-                                      SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as serial
-                                      FROM vouchers 
-                                      WHERE code REGEXP '^{$shortcode}[0-9]+\$'
-                                        AND currentstate = 'printed'
-                                      ORDER BY serial
+                                     
+                                    SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as serial
+                                    FROM vouchers
+                                    WHERE code REGEXP '^{$shortcode}[0-9]+\$'
+                                      AND currentstate = 'dispatched'
+                                      AND sponsor_id = {$sponsor_id}
+                                    ORDER BY serial
                     
                                  ) as t4
                     
@@ -240,10 +243,33 @@ class Voucher extends Model
                 Log::error($e->getTraceAsString());
                 return [];
             }
-        }
+        });
     }
 
+    private function subInitialFinalSerial($query)
+    {
 
+    }
+
+    /**
+     * subQuery that gets the serials for a sponsor.
+     *
+     * @param Builder $query
+     * @param $shortcode string 'shortcode' from Sponsor
+     * @param $sponsor_id integer Sponsor id
+     *
+     * @return Builder
+     */
+    private function subDispatchedSerial(Builder $query, $shortcode, $sponsor_id)
+    {
+        return $query->selectRaw("id, cast(replace(code, ?, '') as signed) as serial", [$shortcode])
+            ->from(self::getTable())
+            ->where('current_state', 'dispatched')
+            ->where('sponsor_id', $sponsor_id)
+            ->where('code', 'REGEXP', '^' . $shortcode . '[0-9]+$')
+            ->orderBy('serial')
+        ;
+    }
 
     /**
      * Gets the ranges of undelivered vouchers
@@ -255,6 +281,9 @@ class Voucher extends Model
     public static function getUndeliveredVoucherRangesByShortCode(string $shortcode)
     {
         return DB::transaction(function () use ($shortcode) {
+            $sponsor_id = Sponsor::where('shortcode', $shortcode)
+                ->firstOrFail()
+                ->sponsor_id;
             try {
                 // Set some important variables for the query. breaks SQLlite.
                 DB::statement(DB::raw('SET @initial_id=0, @initial_serial=0, @previous=0;'));
@@ -290,6 +319,7 @@ class Voucher extends Model
                             WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                               AND currentstate = 'printed'
                               AND delivery_id is null
+                              AND sponsor_id = {$sponsor_id}
                             ORDER BY serial
                         
                         ) as t5
@@ -311,6 +341,7 @@ class Voucher extends Model
                                       WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                                         AND currentstate = 'printed'
                                         AND delivery_id is null
+                                        AND sponsor_id = {$sponsor_id}
                                       ORDER BY serial
                     
                                  ) as t4
