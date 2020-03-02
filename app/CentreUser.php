@@ -180,21 +180,6 @@ class CentreUser extends Authenticatable
     }
 
     /**
-     * Call a macro [see AppServiceProvider::boot()] to add an order by centre name
-     *
-     * @param Builder $query
-     * @param string $direction
-     */
-    public function scopeOrderByHomeCentre(Builder $query, $direction = 'asc')
-    {
-        $query->orderBySub(
-            Centre::select('name')
-                ->whereRaw('centre_id = centres.id'),
-            $direction
-        );
-    }
-
-    /**
      * Strategy to sort columns
      *
      * @param Builder $query
@@ -203,16 +188,8 @@ class CentreUser extends Authenticatable
      */
     public function scopeOrderByField(Builder $query, $sort)
     {
-        switch ($sort['orderBy']) {
-            case 'name':
-                return $query->orderByName($sort['direction']);
-                break;
-            case 'centre':
-                return $query->orderByHomeCentre($sort['direction']);
-                break;
-            default:
-                return $query->orderByHomeCentre('asc');
+        if ($sort['orderBy'] === 'name') {
+            return $query->orderByName($sort['direction']);
         }
     }
-
 }
