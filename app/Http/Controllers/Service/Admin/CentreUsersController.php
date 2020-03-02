@@ -27,8 +27,23 @@ class CentreUsersController extends Controller
      */
     public function index(Request $request)
     {
-        // Returns a collection of arrays where each value is a CentreUser object
-        $workers = CentreUser::orderByField($request->all(['orderBy', 'direction']))->get()->sortBy('homeCentre.name');
+       // fetch query params from request
+        $field = $request->input('orderBy', null);
+        $direction = $request->input('direction', null);
+
+        if ($field) {
+
+             dd($field);
+
+            //sort the orderby
+            $workers = CentreUser::orderByField([
+                'orderBy' => $field,
+                'direction' => $direction
+            ])->get();
+        } else {
+            // do the default.
+            $workers = CentreUser::get()->sortBy('homeCentre.name');
+        }
 
         return view('service.centreusers.index', compact('workers'));
     }
