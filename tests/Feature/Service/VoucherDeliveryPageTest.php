@@ -2,10 +2,11 @@
 
 namespace Tests\Feature\Service;
 
-use Tests\StoreTestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use App\AdminUser;
-use Auth;
+use App\Centre;
+use App\Sponsor;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\StoreTestCase;
 
 class VoucherDeliveryPageTest extends StoreTestCase
 {
@@ -14,6 +15,9 @@ class VoucherDeliveryPageTest extends StoreTestCase
     /** @var AdminUser $adminUser */
     private $adminUser;
 
+    /** @var Centre $centre */
+    private $centre;
+
     private $voucherDeliveryRoute;
 
     public function setUp()
@@ -21,7 +25,17 @@ class VoucherDeliveryPageTest extends StoreTestCase
         parent::setUp();
 
         $this->adminUser = factory(AdminUser::class)->create();
-        $this->voucherDeliveryRoute = route('admin.vouchers.create');
+        $this->voucherDeliveryRoute = route('admin.deliveries.create');
+
+        $sponsor = factory(Sponsor::class)->create();
+
+        // Create 3 centres in an area
+        $this->centre = factory(Centre::class, 3)->create()->each(
+            function ($c) use ($sponsor) {
+                $c->sponsor_id = $sponsor->id;
+                $c->save();
+            }
+        );
     }
 
     /**
@@ -29,28 +43,24 @@ class VoucherDeliveryPageTest extends StoreTestCase
      *
      * @return void
      */
-    public function testItCanRouteToVoucherDeliveryPage()
+    public function testItShowsAFormWithInputs()
     {
-        Auth::logout();
         $this->actingAs($this->adminUser, 'admin')
-            ->get($this->voucherDeliveryRoute)
+            ->visit($this->voucherDeliveryRoute)
             ->assertResponseOk()
-            ->seePageIs($this->voucherDeliveryRoute)
-        ;
-    }
-
-    /**
-     * @test
-     *
-     * @return void
-     */
-    public function testRouteIsProtectedFromUnauthorisedUsers()
-    {
-        Auth::logout();
-        $this->get($this->voucherDeliveryRoute)
-            ->followRedirects()
-            ->seePageIs(route('admin.login'))
-            ->assertResponseOk()
+            ->seeInElement('h1', 'Send vouchers')
+            ->seeInElement('p', 'Use the form below to mark a batch of vouchers as being sent. Add the centre they\'re being sent to, start and end voucher codes of the batch and the date they\'re being sent.')
+            ->seeElement('form')
+            ->seeElement('select[name="centre"]')
+            ->seeInElement('label[for="centre"]', 'Centre')
+            ->seeElement('input[type="text"]')
+            ->seeInElement('label[for="voucher-start"]', 'Start Voucher')
+            ->seeElement('input[type="text"]')
+            ->seeInElement('label[for="voucher-end"]', 'End Voucher')
+            ->seeElement('input[type="date"]')
+            ->seeInElement('label[for="date-sent"]', 'Date Sent')
+            ->seeInElement('button[type=submit]', 'Create Delivery')
+            ->seeInElementAtPos('select[name="centre"]', 'Choose one', 0)
         ;
     }
 }
