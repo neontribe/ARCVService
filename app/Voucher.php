@@ -127,6 +127,60 @@ class Voucher extends Model
     }
 
     /**
+     * Gets the range from an array of ranges
+     *
+     * @param $start
+     * @param $end
+     * @param $ranges array
+     *
+     * @return array
+     */
+    private static function getContainingRange($start, $end, array $ranges)
+    {
+        foreach ($ranges as $range) {
+            // Are Start and End both in the range?
+            if ($start >= $range->initial_serial &&
+                $end <= $range->serial &&
+                $start <= $end ) {
+                return $range;
+            };
+        }
+        // Start and End within none of the free ranges, if any were returned.
+        return [];
+    }
+
+    /**
+     * Determines if the given voucher range contains entries already delivered
+     *
+     * @param $start
+     * @param $end
+     * @param $shortcode
+     * @return bool
+     * @throws Throwable
+     */
+    public static function rangeIsDeliverable($start, $end, $shortcode)
+    {
+        $ranges = self::getDeliverableVoucherRangesByShortCode($shortcode);
+        return (empty(self::getContainingRange($start, $end, $ranges)));
+    }
+
+    /**
+     * Determines if the given voucher range cannot be voided
+     *
+     *
+     * @param $start
+     * @param $end
+     * @param $shortcode
+     * @return bool
+     * @throws Throwable
+     */
+    public static function rangeIsVoidable($start, $end, $shortcode)
+    {
+        $ranges = self::getVoidableVoucherRangesByShortCode($shortcode);
+        return (empty(self::getContainingRange($start, $end, $ranges)));
+    }
+
+    /**
      * Splits a voucher code up
      *
      * @param string $code
@@ -147,9 +201,8 @@ class Voucher extends Model
         }
     }
 
-
     /**
-     * Gets ranges of the vouchers that *can* be voided, in a shortcode.
+     * Gets ranges of the vouchers that *can* be voided, by a Sponsor's shortcode.
      *
      * @param string $shortcode
      * @return array
@@ -246,31 +299,6 @@ class Voucher extends Model
         });
     }
 
-    private function subInitialFinalSerial($query)
-    {
-
-    }
-
-    /**
-     * subQuery that gets the serials for a sponsor.
-     *
-     * @param Builder $query
-     * @param $shortcode string 'shortcode' from Sponsor
-     * @param $sponsor_id integer Sponsor id
-     *
-     * @return Builder
-     */
-    private function subDispatchedSerial(Builder $query, $shortcode, $sponsor_id)
-    {
-        return $query->selectRaw("id, cast(replace(code, ?, '') as signed) as serial", [$shortcode])
-            ->from(self::getTable())
-            ->where('current_state', 'dispatched')
-            ->where('sponsor_id', $sponsor_id)
-            ->where('code', 'REGEXP', '^' . $shortcode . '[0-9]+$')
-            ->orderBy('serial')
-        ;
-    }
-
     /**
      * Gets the ranges of undelivered vouchers
      *
@@ -278,7 +306,7 @@ class Voucher extends Model
      * @return array
      * @throws Throwable
      */
-    public static function getUndeliveredVoucherRangesByShortCode(string $shortcode)
+    public static function getDeliverableVoucherRangesByShortCode(string $shortcode)
     {
         return DB::transaction(function () use ($shortcode) {
             $sponsor_id = Sponsor::where('shortcode', $shortcode)

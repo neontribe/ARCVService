@@ -22,31 +22,6 @@ use Throwable;
 class DeliveriesController extends Controller
 {
     /**
-     * Determines if the given voucher range contains entries already delivered
-     *
-     * @param $start
-     * @param $end
-     * @param $shortcode
-     * @return bool
-     * @throws Throwable
-     */
-    public static function rangeIsUndelivered($start, $end, $shortcode)
-    {
-        $undeliveredRanges = Voucher::getUndeliveredVoucherRangesByShortCode($shortcode);
-
-        foreach ($undeliveredRanges as $undeliveredRange) {
-            // Are Start and End both in the range?
-            if ($start >= $undeliveredRange->initial_serial &&
-                $end <= $undeliveredRange->serial &&
-                $start <= $end ) {
-                return true;
-            };
-        }
-        // Start and End within none of the free ranges, if any were returned.
-        return false;
-    }
-
-    /**
      * Display a listing of Sponsors.
      *
      * @param Request $request
@@ -96,7 +71,7 @@ class DeliveriesController extends Controller
         $end["number"] = intval($end["number"]);
 
         // Check the voucher range is clear to be delivered.
-        if (!self::rangeIsUndelivered($start["number"], $end["number"], $start["shortcode"])) {
+        if (!Voucher::rangeIsDeliverable($start["number"], $end["number"], $start["shortcode"])) {
             // Whoops! Some of the vouchers may have been delivered
             return redirect()
                 ->route('admin.deliveries.create')
