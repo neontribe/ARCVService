@@ -167,12 +167,10 @@ class Voucher extends Model
     /**
      * Determines if the given voucher range cannot be voided
      *
-     *
      * @param $start
      * @param $end
      * @param $shortcode
      * @return bool
-     * @throws Throwable
      */
     public static function rangeIsVoidable($start, $end, $shortcode)
     {
@@ -206,17 +204,12 @@ class Voucher extends Model
      *
      * @param string $shortcode
      * @return array
-     * @throws Throwable
      */
 
     public static function getVoidableVoucherRangesByShortCode(string $shortcode)
     {
-        return DB::transaction(function () use ($shortcode) {
-            // Get the Sponsor Id for that shortcode
-            $sponsor_id = Sponsor::where('shortcode', $shortcode)
-                ->firstOrFail()
-                ->sponsor_id;
-            try {
+        try {
+            return DB::transaction(function () use ($shortcode) {
                 // Set some important variables for the query. breaks SQLlite.
                 DB::statement(DB::raw('SET @initial_id=0, @initial_serial=0, @previous=0;'));
 
@@ -250,7 +243,6 @@ class Voucher extends Model
                             FROM vouchers
                             WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                               AND currentstate = 'dispatched'
-                              AND sponsor_id = {$sponsor_id}
                             ORDER BY serial
                         
                         ) as t5
@@ -272,7 +264,6 @@ class Voucher extends Model
                                     FROM vouchers
                                     WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                                       AND currentstate = 'dispatched'
-                                      AND sponsor_id = {$sponsor_id}
                                     ORDER BY serial
                     
                                  ) as t4
@@ -291,12 +282,12 @@ class Voucher extends Model
                         ON final_id = v2.id
                     "
                 );
-            } catch (Throwable $e) {
-                Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
-                Log::error($e->getTraceAsString());
-                return [];
-            }
-        });
+            });
+        } catch (Throwable $e) {
+            Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+            Log::error($e->getTraceAsString());
+            return [];
+        }
     }
 
     /**
@@ -309,9 +300,6 @@ class Voucher extends Model
     public static function getDeliverableVoucherRangesByShortCode(string $shortcode)
     {
         return DB::transaction(function () use ($shortcode) {
-            $sponsor_id = Sponsor::where('shortcode', $shortcode)
-                ->firstOrFail()
-                ->sponsor_id;
             try {
                 // Set some important variables for the query. breaks SQLlite.
                 DB::statement(DB::raw('SET @initial_id=0, @initial_serial=0, @previous=0;'));
@@ -347,7 +335,6 @@ class Voucher extends Model
                             WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                               AND currentstate = 'printed'
                               AND delivery_id is null
-                              AND sponsor_id = {$sponsor_id}
                             ORDER BY serial
                         
                         ) as t5
@@ -369,7 +356,6 @@ class Voucher extends Model
                                       WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                                         AND currentstate = 'printed'
                                         AND delivery_id is null
-                                        AND sponsor_id = {$sponsor_id}
                                       ORDER BY serial
                     
                                  ) as t4
