@@ -18,7 +18,7 @@ return [
             'payment_pending', // shortlist completed
             'reimbursed', // paid out
             'expired', // if time ran out on stamped batch
-            'lost', // when centre loses a batch.
+            'voided', // when centre loses a batch.
             'retired'
         ],
 
@@ -37,9 +37,9 @@ return [
                 'from' => ['printed'],
                 'to' => 'dispatched',
             ],
-            'lose' => [
+            'void' => [
                 'from' => ['dispatched'],
-                'to' =>  'lost',
+                'to' =>  'voided',
             ],
             'expire' => [
                 'from' => ['dispatched'],
@@ -66,7 +66,7 @@ return [
                 'to' =>  'reimbursed',
             ],
             'retire' => [
-                'from' => ['lost','expired'],
+                'from' => ['voided','expired'],
                 'to' =>  'retired',
             ],
         ],
