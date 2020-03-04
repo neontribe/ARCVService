@@ -150,6 +150,30 @@ class Voucher extends Model
     }
 
     /**
+     * Creates a rangeDef structure
+     * TODO: convert to class?
+     *
+     * @param array $input
+     * @return object
+     */
+    public static function createRangeDefFromArray(array $input)
+    {
+        // Add the sponsor's id
+        $rangeDef["sponsor_id"] = self::where('code', $input['voucher-start'])->sponsor()->id();
+
+        // Slightly complicated way of making an object that represents the range.
+        // Destructure the output of into an assoc array
+        [ 'shortcode' => $rangeDef['shortcode'], 'number' => $rangeDef['start'] ] = self::splitShortcodeNumeric($input('voucher-start'));
+        [ 'number' => $rangeDef['end'] ] = self::splitShortcodeNumeric($input('voucher-end'));
+
+        // Modify the start/end numbers to integers
+        $rangeDef["start"] = intval($rangeDef["start"]);
+        $rangeDef["end"] = intval($rangeDef["end"]);
+
+        return (object) $rangeDef;
+    }
+
+    /**
      * Determines if the given voucher range contains entries already delivered
      *
      * @param $start
@@ -167,15 +191,13 @@ class Voucher extends Model
     /**
      * Determines if the given voucher range cannot be voided
      *
-     * @param $start
-     * @param $end
-     * @param $shortcode
+     * @param $rangeDef object { 'start', 'end', 'shortcode', 'sponsor_id' }
      * @return bool
      */
-    public static function rangeIsVoidable($start, $end, $shortcode)
+    public static function rangeIsVoidable($rangeDef)
     {
-        $ranges = self::getVoidableVoucherRangesByShortCode($shortcode);
-        return (empty(self::getContainingRange($start, $end, $ranges)));
+        $ranges = self::getVoidableVoucherRangesByShortCode($rangeDef->shortcode);
+        return (empty(self::getContainingRange($rangeDef->start, $rangeDef->end, $ranges)));
     }
 
     /**
