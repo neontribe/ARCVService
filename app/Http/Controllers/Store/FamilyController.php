@@ -35,6 +35,6 @@ class FamilyController extends Controller
         // Successful deactivation. Go back to registration/ family search listing
         return redirect()
             ->route('store.registration.index')
-            ->with('message', 'Family ' . $family->id . ' de-activated.');
+            ->with('message', 'You have just marked ' . $family->carers->first()->name . ' as leaving the project');
     }
 }
