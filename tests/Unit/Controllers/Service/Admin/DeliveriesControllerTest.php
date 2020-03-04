@@ -14,8 +14,10 @@ class DeliveriesControllerTest extends TestCase
 
     /** @var AdminUser $adminUser */
     private $adminUser;
+
     /** @var Centre $centre */
     private $centre;
+
     private $vouchersDeliveryroute;
 
     public function setUp()
@@ -75,18 +77,17 @@ class DeliveriesControllerTest extends TestCase
      *
      * @return void
      */
-    public function testStoreCentreIsNotIntegerErrors()
+    public function testStoreCentreIsNotNumberErrors()
     {
         $this->actingAs($this->adminUser, 'admin')
             ->post($this->vouchersDeliveryroute, [
-                'centre' => 'blast',
+                'centre' => 'not a number but a wombat',
             ])
             ->assertStatus(302)
             ->assertSessionMissing('message')
-            // ->assertSessionHasErrors([
-            //     'centre' => 'The selected centre is invalid.'
-            // ])
+            ->assertSessionHasErrors([
+                'centre' => 'The centre must be a number.'
+            ]);
         ;
-        dd(strval($this->centre->id), session('errors'));
     }
 }
