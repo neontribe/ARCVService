@@ -79,13 +79,14 @@ class DeliveriesControllerTest extends TestCase
     {
         $this->actingAs($this->adminUser, 'admin')
             ->post($this->vouchersDeliveryroute, [
-                'centre' => '182',
+                'centre' => strval($this->centre->id),
             ])
             ->assertStatus(302)
             ->assertSessionMissing('message')
-            ->assertSessionHasErrors([
-                'centre' => 'The selected centre is invalid.'
-            ])
+            // ->assertSessionHasErrors([
+            //     'centre' => 'The selected centre is invalid.'
+            // ])
         ;
+        dd(strval($this->centre->id), session('errors'));
     }
 }
