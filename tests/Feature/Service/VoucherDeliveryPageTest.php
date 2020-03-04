@@ -3,8 +3,6 @@
 namespace Tests\Feature\Service;
 
 use App\AdminUser;
-use App\Centre;
-use App\Sponsor;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\StoreTestCase;
 
@@ -15,9 +13,6 @@ class VoucherDeliveryPageTest extends StoreTestCase
     /** @var AdminUser $adminUser */
     private $adminUser;
 
-    /** @var Centre $centre */
-    private $centre;
-
     private $voucherDeliveryRoute;
 
     public function setUp()
@@ -26,16 +21,6 @@ class VoucherDeliveryPageTest extends StoreTestCase
 
         $this->adminUser = factory(AdminUser::class)->create();
         $this->voucherDeliveryRoute = route('admin.deliveries.create');
-
-        $sponsor = factory(Sponsor::class)->create();
-
-        // Create 3 centres in an area
-        $this->centre = factory(Centre::class, 3)->create()->each(
-            function ($c) use ($sponsor) {
-                $c->sponsor_id = $sponsor->id;
-                $c->save();
-            }
-        );
     }
 
     /**
