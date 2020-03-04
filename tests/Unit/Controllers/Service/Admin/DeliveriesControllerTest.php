@@ -79,7 +79,7 @@ class DeliveriesControllerTest extends TestCase
     {
         $this->actingAs($this->adminUser, 'admin')
             ->post($this->vouchersDeliveryroute, [
-                'centre' => strval($this->centre->id),
+                'centre' => 'blast',
             ])
             ->assertStatus(302)
             ->assertSessionMissing('message')
