@@ -60,18 +60,14 @@ class DeliveriesController extends Controller
         // Get centre
         $centre = Centre::findOrFail($request->input('centre'));
 
-        $startCode = $request->input('voucher-start');
-        $endCode = $request->input('voucher-end');
+        // Mae a transition definition
+        $transitionDef = Voucher::createTransitionDef("printed", $request->input("transition"));
 
-        // Break the codes up.
-        $start = Voucher::splitShortcodeNumeric($startCode);
-        $start["number"] = intval($start["number"]);
-
-        $end = Voucher::splitShortcodeNumeric($endCode);
-        $end["number"] = intval($end["number"]);
+        // Make a rangeDef
+        $rangeDef = Voucher::createRangeDefFromArray($request->all());
 
         // Check the voucher range is clear to be delivered.
-        if (!Voucher::rangeIsDeliverable($start["number"], $end["number"], $start["shortcode"])) {
+        if (!Voucher::rangeIsDeliverable($rangeDef)) {
             // Whoops! Some of the vouchers may have been delivered
             return redirect()
                 ->route('admin.deliveries.create')
@@ -81,11 +77,13 @@ class DeliveriesController extends Controller
 
         // Create delivery or roll back
         try {
-            DB::transaction(function () use ($start, $end, $centre, $request) {
+            DB::transaction(function () use ($rangeDef, $centre, $request) {
 
                 $delivery = Delivery::create([
                     'centre_id' => $centre->id,
-                    'range' => $start[0] . " - " . $end[0],
+                    'range' => $rangeDef->shortcode . $rangeDef->start .
+                        " - " .
+                        $rangeDef->shortcode . $rangeDef->end,
                     'dispatched_at' => Carbon::createFromFormat('Y-m-d', $request->input('date-sent')),
                 ]);
 

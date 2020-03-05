@@ -86,16 +86,16 @@ class VouchersController extends Controller
 
                 // Bulk update VoucherStates for speed.
                 Voucher::select('id')
-                    ->where('currentState', $transition["from"])
-                    ->where('code', 'REGEXP', "^{$shortcode}[0-9]+\$") // Just vouchers that start with our shortcode
-                    ->where('sponsor_id', $sponsor_id)
+                    ->where('currentState', $transitionDef->from)
+                    ->where('code', 'REGEXP', "^{$rangeDef->shortcode}[0-9]+\$") // Just vouchers that start with our shortcode
+                    ->where('sponsor_id', $rangeDef->sponsor_id) // that are in the sponsor (performance, using the index)
                     ->whereBetween(
-                        DB::raw("cast(replace(code, '{$shortcode}', '') as signed)"),
-                        [$start["number"], $end["number"]]
+                        DB::raw("cast(replace(code, '{$rangeDef->shortcode}', '') as signed)"),
+                        [$rangeDef->start, $rangeDef->end]
                     )->chunk(
                         // Should be big enough chunks to avoid memory problems
                         10000,
-                        function ($vouchers) use ($now_time, $user_id, $user_type, $transition) {
+                        function ($vouchers) use ($now_time, $user_id, $user_type, $transitionDef) {
                             $states = [];
 
                             // create VoucherState
@@ -103,10 +103,10 @@ class VouchersController extends Controller
                                 $s = new VoucherState();
 
                                 // Set initial attributes
-                                $s->transition = $transition["name"];
+                                $s->transition = $transitionDef->name;
                                 $s->from = $voucher->currentState;
                                 $s->voucher_id = $voucher->id;
-                                $s->to = $transition["to"];
+                                $s->to = $transitionDef->to;
                                 $s->created_at = $now_time;
                                 $s->updated_at = $now_time;
                                 $s->source = "";
@@ -136,10 +136,10 @@ class VouchersController extends Controller
 
         // Prepare the message
         $notification_msg = trans('service.messages.vouchers_voidexpire_success', [
-            'transition_to' => $transition["to"],
-            'shortcode' => $shortcode,
-            'start' => $start["number"],
-            'end' => $end["number"],
+            'transition_to' => $transitionDef->to,
+            'shortcode' => $rangeDef->shortcode,
+            'start' => $rangeDef->start,
+            'end' => $rangeDef->end,
         ]);
 
         return redirect()

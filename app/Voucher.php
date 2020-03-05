@@ -176,16 +176,13 @@ class Voucher extends Model
     /**
      * Determines if the given voucher range contains entries already delivered
      *
-     * @param $start
-     * @param $end
-     * @param $shortcode
+     * @param $rangeDef object { 'start', 'end', 'shortcode', 'sponsor_id' }
      * @return bool
-     * @throws Throwable
      */
-    public static function rangeIsDeliverable($start, $end, $shortcode)
+    public static function rangeIsDeliverable($rangeDef)
     {
-        $ranges = self::getDeliverableVoucherRangesByShortCode($shortcode);
-        return (empty(self::getContainingRange($start, $end, $ranges)));
+        $ranges = self::getDeliverableVoucherRangesByShortCode($rangeDef->shortcode);
+        return (empty(self::getContainingRange($rangeDef->start, $rangeDef->end, $ranges)));
     }
 
     /**
@@ -227,7 +224,6 @@ class Voucher extends Model
      * @param string $shortcode
      * @return array
      */
-
     public static function getVoidableVoucherRangesByShortCode(string $shortcode)
     {
         try {
@@ -317,12 +313,12 @@ class Voucher extends Model
      *
      * @param string $shortcode
      * @return array
-     * @throws Throwable
      */
     public static function getDeliverableVoucherRangesByShortCode(string $shortcode)
     {
-        return DB::transaction(function () use ($shortcode) {
-            try {
+        try {
+            return DB::transaction(function () use ($shortcode) {
+
                 // Set some important variables for the query. breaks SQLlite.
                 DB::statement(DB::raw('SET @initial_id=0, @initial_serial=0, @previous=0;'));
 
@@ -396,12 +392,12 @@ class Voucher extends Model
                         ON final_id = v2.id
                     "
                 );
-            } catch (Throwable $e) {
-                Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
-                Log::error($e->getTraceAsString());
-                return [];
-            }
-        });
+            });
+        } catch (Throwable $e) {
+            Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+            Log::error($e->getTraceAsString());
+            return [];
+        }
     }
 
 
