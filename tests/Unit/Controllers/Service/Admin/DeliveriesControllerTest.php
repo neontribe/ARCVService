@@ -90,4 +90,25 @@ class DeliveriesControllerTest extends TestCase
             ]);
         ;
     }
+
+    /**
+     *
+     * @return void
+     */
+    public function testStoreStartIsNotTheSameSponsorAsEndErrors()
+    {
+        $this->actingAs($this->adminUser, 'admin')
+            ->post($this->vouchersDeliveryroute, [
+                'centre' => $this->centre->id,
+                'voucher-start' => 'EMRTP0007',
+                'voucher-end' => 'KNTLN0009',
+                'date-sent' => Carbon::now()->format('Y-m-d'),
+            ])
+            ->assertStatus(302)
+            ->assertSessionMissing('message')
+            ->assertSessionHasErrors([
+                'voucher-end' => 'The voucher-end field must be the same sponsor as the voucher-start field.'
+            ])
+        ;
+    }
 }
