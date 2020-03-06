@@ -25,11 +25,12 @@ class DeliveriesControllerTest extends TestCase
         parent::setUp();
 
         $this->adminUser = factory(AdminUser::class)->create();
-        $this->centre = factory(Centre::class)->create([]);
+        $this->centre = factory(Centre::class)->create();
         $this->vouchersDeliveryroute = route('admin.deliveries.store');
     }
 
     /**
+     * @test
      *
      * @return void
      */
@@ -48,11 +49,11 @@ class DeliveriesControllerTest extends TestCase
                 'centre' => 'The centre field is required.',
                 'voucher-start' => 'The voucher-start field is required.',
                 'voucher-end' => 'The voucher-end field is required.'
-            ])
-        ;
+            ]);
     }
 
     /**
+     * @test
      *
      * @return void
      */
@@ -69,11 +70,11 @@ class DeliveriesControllerTest extends TestCase
             ->assertSessionMissing('message')
             ->assertSessionHasErrors([
                 'voucher-end' => 'The voucher-end field must be greater than the voucher-start field.'
-            ])
-        ;
+            ]);
     }
 
     /**
+     * @test
      *
      * @return void
      */
@@ -92,6 +93,7 @@ class DeliveriesControllerTest extends TestCase
     }
 
     /**
+     * @test
      *
      * @return void
      */
@@ -108,7 +110,6 @@ class DeliveriesControllerTest extends TestCase
             ->assertSessionMissing('message')
             ->assertSessionHasErrors([
                 'voucher-end' => 'The voucher-end field must be the same sponsor as the voucher-start field.'
-            ])
-        ;
+            ]);
     }
 }
