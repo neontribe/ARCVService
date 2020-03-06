@@ -105,7 +105,7 @@ class VoucherStateModelTest extends TestCase
     }
 
     /** @test */
-    public function testOnlyADispatchedVoucherCanBeExpiredOrLost()
+    public function testOnlyADispatchedVoucherCanBeExpiredOrVoided()
     {
         Auth::login($this->user);
         $v = factory(Voucher::class, 'requested')->create();
@@ -113,7 +113,7 @@ class VoucherStateModelTest extends TestCase
 
         // Cant get there from requested
         $this->assertFalse($v->transitionAllowed("expire"));
-        $this->assertFalse($v->transitionAllowed("lose"));
+        $this->assertFalse($v->transitionAllowed("void"));
 
         $route = [
             'order' => 'ordered',
@@ -130,16 +130,16 @@ class VoucherStateModelTest extends TestCase
             $this->assertEquals($v->currentstate, $state);
             if ($state === 'dispatched') {
                 $this->assertTrue($v->transitionAllowed("expire"));
-                $this->assertTrue($v->transitionAllowed("lose"));
+                $this->assertTrue($v->transitionAllowed("void"));
             } else {
                 $this->assertFalse($v->transitionAllowed("expire"));
-                $this->assertFalse($v->transitionAllowed("lose"));
+                $this->assertFalse($v->transitionAllowed("void"));
             }
         }
     }
 
     /** @test */
-    public function testAnExpiredOrLostVoucherCanBeRetired()
+    public function testAnExpiredOrVoidedVoucherCanBeRetired()
     {
         Auth::login($this->user);
         $vouchers = factory(Voucher::class, 'requested', 2)
@@ -159,8 +159,8 @@ class VoucherStateModelTest extends TestCase
         $v1->applyTransition('retire');
         $this->assertEquals($v1->currentstate, 'retired');
 
-        $v2->applyTransition('lose');
-        $this->assertEquals($v2->currentstate, 'lost');
+        $v2->applyTransition('void');
+        $this->assertEquals($v2->currentstate, 'voided');
         $this->assertTrue($v2->transitionAllowed("retire"));
         $v2->applyTransition('retire');
         $this->assertEquals($v2->currentstate, 'retired');
