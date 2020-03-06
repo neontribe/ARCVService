@@ -77,7 +77,7 @@ class DeliveriesController extends Controller
 
         // Create delivery or roll back
         try {
-            DB::transaction(function () use ($rangeDef, $centre, $request) {
+            DB::transaction(function () use ($rangeDef, $transitionDef, $centre, $request) {
 
                 $delivery = Delivery::create([
                     'centre_id' => $centre->id,
@@ -93,52 +93,27 @@ class DeliveriesController extends Controller
 
                 // Bulk update VoucherStates for speed.
                 Voucher::select('id')
-                    ->where('currentState', 'printed')
                     ->whereNull('delivery_id')
-                    ->where('code', 'REGEXP', "^{$start["shortcode"]}[0-9]+\$") // Just vouchers that start with our shortcode
-                    ->whereBetween(
-                        DB::raw("cast(replace(code, '{$start["shortcode"]}', '') as signed)"),
-                        [$start["number"], $end["number"]]
-                    )->chunk(
+                    ->withRangedVouchersInState($rangeDef, 'printed')
+                    ->chunk(
                         // should be big enough chunks to avoid memory problems
                         10000,
-                        function ($vouchers) use ($now_time, $user_id, $user_type) {
-                            $states =[];
-                            // create VoucherState
-                            foreach ($vouchers as $voucher) {
-                                $s = new VoucherState();
-
-                                // Set initial attributes
-                                $s->transition = 'dispatch';
-                                $s->from = 'printed';
-                                $s->voucher_id = $voucher->id;
-                                $s->to = 'dispatched';
-                                $s->created_at = $now_time;
-                                $s->updated_at = $now_time;
-                                $s->source = "";
-                                $s->user_id = $user_id; // the user ID
-                                $s->user_type = $user_type; // the type of user
-
-                                // Add them to the array.
-                                $states[] = $s->attributesToArray();
-                            }
-                            // Insert this batch of vouchers.
-                            VoucherState::insert($states);
+                        function ($vouchers) use ($now_time, $user_id, $user_type, $transitionDef) {
+                            VoucherState::batchInsert($vouchers, $now_time, $user_id, $user_type, $transitionDef);
                         }
-                    );
+                    )
+                ;
 
                 // Get all the vouchers in the range and update them with the delivery Id and state
-                Voucher::where('currentState', 'printed')
-                    ->whereNull('delivery_id')
-                    ->where('code', 'REGEXP', "^{$start["shortcode"]}[0-9]+\$") // Just vouchers that start with our shortcode
-                    ->whereBetween(
-                        DB::raw("cast(replace(code, '{$start["shortcode"]}', '') as signed)"),
-                        [$start["number"], $end["number"]]
+                Voucher::whereNull('delivery_id')
+                    ->withRangedVouchersInState($rangeDef, 'printed')
+                    ->update(
+                        [
+                            'delivery_id' => $delivery->id,
+                            'currentState' => 'dispatched'
+                        ]
                     )
-                    ->update([
-                        'delivery_id' => $delivery->id,
-                        'currentState' => 'dispatched'
-                        ]);
+                ;
             });
         } catch (Throwable $e) {
             // Oops! Log that

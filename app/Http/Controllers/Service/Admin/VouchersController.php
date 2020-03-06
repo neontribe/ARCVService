@@ -60,7 +60,7 @@ class VouchersController extends Controller
      */
     public function updateBatch(AdminUpdateVoucherRequest $request)
     {
-        // Mae a transition definition
+        // Make a transition definition
         $transitionDef = Voucher::createTransitionDef("dispatched", $request->input("transition"));
 
         // Make a rangeDef
@@ -80,47 +80,28 @@ class VouchersController extends Controller
         try {
             DB::transaction(function () use ($rangeDef, $transitionDef) {
 
+                // Some things we'll be using.
                 $now_time = Carbon::now();
                 $user_id = auth()->id();
                 $user_type = class_basename(auth()->user());
 
                 // Bulk update VoucherStates for speed.
                 Voucher::select('id')
-                    ->where('currentState', $transitionDef->from)
-                    ->where('code', 'REGEXP', "^{$rangeDef->shortcode}[0-9]+\$") // Just vouchers that start with our shortcode
-                    ->where('sponsor_id', $rangeDef->sponsor_id) // that are in the sponsor (performance, using the index)
-                    ->whereBetween(
-                        DB::raw("cast(replace(code, '{$rangeDef->shortcode}', '') as signed)"),
-                        [$rangeDef->start, $rangeDef->end]
-                    )->chunk(
+                    ->withRangedVouchersInState($rangeDef, $transitionDef->from)
+                    ->chunk(
                         // Should be big enough chunks to avoid memory problems
                         10000,
+                        // Closure only has 1 param...
                         function ($vouchers) use ($now_time, $user_id, $user_type, $transitionDef) {
-                            $states = [];
-
-                            // create VoucherState
-                            foreach ($vouchers as $voucher) {
-                                $s = new VoucherState();
-
-                                // Set initial attributes
-                                $s->transition = $transitionDef->name;
-                                $s->from = $voucher->currentState;
-                                $s->voucher_id = $voucher->id;
-                                $s->to = $transitionDef->to;
-                                $s->created_at = $now_time;
-                                $s->updated_at = $now_time;
-                                $s->source = "";
-                                $s->user_id = $user_id; // the user ID
-                                $s->user_type = $user_type; // the type of user
-
-                                // Add them to the array.
-                                $states[] = $s->attributesToArray();
-                            }
-                            // Insert this batch of vouchers.
-                            VoucherState::insert($states);
-                            unset($states);
+                            // ... but method needs 'em all.
+                            VoucherState::batchInsert($vouchers, $now_time, $user_id, $user_type, $transitionDef);
                         }
                     );
+
+                // Get all the vouchers in the range and update them with the end state
+                Voucher::withRangedVouchersInState($rangeDef, $transitionDef->from)
+                    ->update(['currentState' => 'retired'])
+                ;
             });
         } catch (\Throwable $e) {
             // Oops! Log that
@@ -131,7 +112,7 @@ class VouchersController extends Controller
             return redirect()
                 ->route('admin.deliveries.create')
                 ->withInput()
-                ->with('error_message', 'Database error, unable to create a delivery');
+                ->with('error_message', 'Database error, unable to transition a voucher.');
         }
 
         // Prepare the message
@@ -142,6 +123,7 @@ class VouchersController extends Controller
             'end' => $rangeDef->end,
         ]);
 
+        // Send it.
         return redirect()
             ->route('admin.vouchers.index')
             ->with('notification', $notification_msg)

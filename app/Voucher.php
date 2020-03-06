@@ -532,4 +532,22 @@ class Voucher extends Model
 
         return [$min_date, $max_date];
     }
+
+    /**
+     * @param Builder $query
+     * @param $rangeDef
+     * @param $state
+     * @return Builder
+     */
+    public function scopeWithRangedVouchersInState(Builder $query, $rangeDef, $state)
+    {
+        return $query
+            ->where('currentState', $state)
+            ->where('code', 'REGEXP', "^{$rangeDef->shortcode}[0-9]+\$") // Just vouchers that start with our shortcode
+            ->where('sponsor_id', $rangeDef->sponsor_id) // that are in the sponsor (performance, using the index)
+            ->whereBetween(
+                DB::raw("cast(replace(code, '{$rangeDef->shortcode}', '') as signed)"),
+                [$rangeDef->start, $rangeDef->end]
+            );
+    }
 }
