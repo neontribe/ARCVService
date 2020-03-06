@@ -49,7 +49,6 @@ class DeliveriesController extends Controller
         return view('service.deliveries.create', compact('sponsors'));
     }
 
-
     /**
      * @param AdminNewDeliveryRequest $request
      * @return RedirectResponse
@@ -57,12 +56,6 @@ class DeliveriesController extends Controller
      */
     public function store(AdminNewDeliveryRequest $request)
     {
-        // Get centre
-        $centre = Centre::findOrFail($request->input('centre'));
-
-        // Mae a transition definition
-        $transitionDef = Voucher::createTransitionDef("printed", $request->input("transition"));
-
         // Make a rangeDef
         $rangeDef = Voucher::createRangeDefFromArray($request->all());
 
@@ -75,9 +68,15 @@ class DeliveriesController extends Controller
                 ->with('error_message', 'The voucher range given contains some vouchers that have already been delivered.');
         };
 
+        // Get centre
+        $centre = Centre::findOrFail($request->input('centre'));
+
+        // Make a transition definition
+        $transitions[] = Voucher::createTransitionDef("printed", $request->input("transition"));
+
         // Create delivery or roll back
         try {
-            DB::transaction(function () use ($rangeDef, $transitionDef, $centre, $request) {
+            DB::transaction(function () use ($rangeDef, $transitions, $centre, $request) {
 
                 $delivery = Delivery::create([
                     'centre_id' => $centre->id,
@@ -92,25 +91,27 @@ class DeliveriesController extends Controller
                 $user_type = class_basename(auth()->user());
 
                 // Bulk update VoucherStates for speed.
-                Voucher::select('id')
-                    ->whereNull('delivery_id')
-                    ->withRangedVouchersInState($rangeDef, 'printed')
-                    ->chunk(
-                        // should be big enough chunks to avoid memory problems
-                        10000,
-                        function ($vouchers) use ($now_time, $user_id, $user_type, $transitionDef) {
-                            VoucherState::batchInsert($vouchers, $now_time, $user_id, $user_type, $transitionDef);
-                        }
-                    )
-                ;
-
+                foreach ($transitions as $transitionDef) {
+                    Voucher::select('id')
+                        ->whereNull('delivery_id')
+                        ->withRangedVouchersInState($rangeDef, 'printed')
+                        ->chunk(
+                            // should be big enough chunks to avoid memory problems
+                            10000,
+                            // Closure only has 1 param...
+                            function ($vouchers) use ($now_time, $user_id, $user_type, $transitionDef) {
+                                // ... but method needs 'em all.
+                                VoucherState::batchInsert($vouchers, $now_time, $user_id, $user_type, $transitionDef);
+                            }
+                        );
+                }
                 // Get all the vouchers in the range and update them with the delivery Id and state
                 Voucher::whereNull('delivery_id')
-                    ->withRangedVouchersInState($rangeDef, 'printed')
+                    ->withRangedVouchersInState($rangeDef, end($transitions)->from)
                     ->update(
                         [
                             'delivery_id' => $delivery->id,
-                            'currentState' => 'dispatched'
+                            'currentState' => end($transitions)->to
                         ]
                     )
                 ;

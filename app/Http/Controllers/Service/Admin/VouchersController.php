@@ -60,9 +60,6 @@ class VouchersController extends Controller
      */
     public function updateBatch(AdminUpdateVoucherRequest $request)
     {
-        // Make a transition definition
-        $transitionDef = Voucher::createTransitionDef("dispatched", $request->input("transition"));
-
         // Make a rangeDef
         $rangeDef = Voucher::createRangeDefFromArray($request->all());
 
@@ -76,31 +73,38 @@ class VouchersController extends Controller
                 ->with('error_message', trans('service.messages.vouchers_voidexpire_blocked'));
         };
 
-        // Void or roll back
+        // Create and reset the transitions route to start point
+        $transitions[] = Voucher::createTransitionDef("dispatched", $request->input("transition"));
+        $transitions[] = Voucher::createTransitionDef(end($transitions)->to, 'retire');
+        reset($transitions);
+
+        // Update vouchers or roll back
         try {
-            DB::transaction(function () use ($rangeDef, $transitionDef) {
+            DB::transaction(function () use ($rangeDef, $transitions) {
 
                 // Some things we'll be using.
                 $now_time = Carbon::now();
                 $user_id = auth()->id();
                 $user_type = class_basename(auth()->user());
 
-                // Bulk update VoucherStates for speed.
-                Voucher::select('id')
-                    ->withRangedVouchersInState($rangeDef, $transitionDef->from)
-                    ->chunk(
-                        // Should be big enough chunks to avoid memory problems
-                        10000,
-                        // Closure only has 1 param...
-                        function ($vouchers) use ($now_time, $user_id, $user_type, $transitionDef) {
-                            // ... but method needs 'em all.
-                            VoucherState::batchInsert($vouchers, $now_time, $user_id, $user_type, $transitionDef);
-                        }
-                    );
-
+                foreach ($transitions as $transitionDef) {
+                    // Bulk update VoucherStates for speed.
+                    Voucher::select('id')
+                        ->withRangedVouchersInState($rangeDef, $transitionDef->from)
+                        ->chunk(
+                            // Should be big enough chunks to avoid memory problems
+                            10000,
+                            // Closure only has 1 param...
+                            function ($vouchers) use ($now_time, $user_id, $user_type, $transitionDef) {
+                                // ... but method needs 'em all.
+                                VoucherState::batchInsert($vouchers, $now_time, $user_id, $user_type, $transitionDef);
+                            }
+                        )
+                    ;
+                }
                 // Get all the vouchers in the range and update them with the end state
-                Voucher::withRangedVouchersInState($rangeDef, $transitionDef->from)
-                    ->update(['currentState' => 'retired'])
+                Voucher::withRangedVouchersInState($rangeDef, end($transitions)->from)
+                    ->update(['currentState' => end($transitions)->to])
                 ;
             });
         } catch (\Throwable $e) {
@@ -117,7 +121,7 @@ class VouchersController extends Controller
 
         // Prepare the message
         $notification_msg = trans('service.messages.vouchers_voidexpire_success', [
-            'transition_to' => $transitionDef->to,
+            'transition_to' => end($transitions)->to,
             'shortcode' => $rangeDef->shortcode,
             'start' => $rangeDef->start,
             'end' => $rangeDef->end,

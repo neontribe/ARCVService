@@ -92,7 +92,7 @@ trait Statable
     }
 
     /**
-     * Creates a transtionDef object
+     * Creates a transitionDef object
      *
      * @param $fromState
      * @param $transitionName
@@ -101,19 +101,15 @@ trait Statable
     public static function createTransitionDef($fromState, $transitionName)
     {
         // Set a transition details, because we can't pull the protected StateMachine config.
-        $transition = array_filter(
-            config('state-machine.' . self::SM_CONFIG . '.transitions'),
-            function ($k) use ($transitionName) {
-                return $k == $transitionName;
-            },
-            ARRAY_FILTER_USE_KEY
-        );
+        if ($transition = config('state-machine.' . self::SM_CONFIG . '.transitions.' . $transitionName)
+            ?? null
+        ) {
+            $transitionDef['to'] = $transition['to'];
+            $transitionDef['name'] = $transitionName;
+            $transitionDef['from'] = $fromState;
 
-        // TODO: Check we can go fromState with $transitionName
-        $transitionDef['to'] = $transition["to"];
-        $transitionDef['name'] = $transitionName;
-        $transitionDef['from'] = $fromState;
-
-        return (object) $transitionDef;
+            return (object) $transitionDef;
+        }
+        return null;
     }
 }
