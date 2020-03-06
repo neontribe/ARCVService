@@ -534,6 +534,8 @@ class Voucher extends Model
     }
 
     /**
+     * Gets a set of vouchers that share a shortcode and currentstate in a sponsor
+     *
      * @param Builder $query
      * @param $rangeDef
      * @param $state
