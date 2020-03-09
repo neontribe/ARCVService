@@ -10,6 +10,7 @@ use App\Voucher;
 use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use SM\StateMachine\StateMachine;
 use Tests\TestCase;
@@ -203,5 +204,66 @@ class VoucherModelTest extends TestCase
 
         $this->assertCount(3, Voucher::confirmed()->get());
         $this->assertEquals([2,3,4], Voucher::confirmed()->pluck('id')->toArray());
+    }
+
+    /**
+     * Here because I can't work out how to test the Stateable Trait well
+     *
+     * @test
+     */
+    public function testItCanCreateAValidTransitionDefinition()
+    {
+        $validTransDef = Voucher::createTransitionDef("ordered", "print");
+
+        $this->assertEquals('print', $validTransDef->name);
+        $this->assertEquals('ordered', $validTransDef->from);
+        $this->assertNotNull('printed', $validTransDef->to);
+
+        // Has an invalid transition name
+        $this->assertNull(Voucher::createTransitionDef("ordered", "spacejam!"));
+
+        // Has an invalid transition "from" state
+        $this->assertNull(Voucher::createTransitionDef("kensington", "printed"));
+    }
+
+    /** @test */
+
+    public function testItCanCreateARangeDef()
+    {
+        // Make some vouchers
+        $sponsor = factory(Sponsor::class)->create([
+            'shortcode' => "TST",
+        ]);
+        $vouchers[] = factory(Voucher::class)->create([
+            'code' => 'TST0010',
+            'sponsor_id' => $sponsor->id,
+        ]);
+        $vouchers[] = factory(Voucher::class)->create([
+            'code' => 'TST1000',
+            'sponsor_id' => $sponsor->id,
+        ]);
+
+        // Make some input
+        $input = [
+            'voucher-start' => reset($vouchers)->code,
+            'voucher-end' => end($vouchers)->code,
+        ];
+        $validRangeDef = Voucher::createRangeDefFromArray($input);
+
+        $this->assertEquals($sponsor->id, $validRangeDef->sponsor_id);
+        $this->assertInternalType('integer', $validRangeDef->sponsor_id);
+        $this->assertEquals($sponsor->shortcode, $validRangeDef->shortcode);
+        $this->assertEquals(10, $validRangeDef->start);
+        $this->assertInternalType('integer', $validRangeDef->start);
+        $this->assertEquals(1000, $validRangeDef->end);
+        $this->assertInternalType('integer', $validRangeDef->end);
+
+        // If you pass it a duff shortcode, it takes exception
+        $input = [
+            'voucher-start' => 'INV999998',
+            'voucher-end' => 'INV999999',
+        ];
+        $this->expectException(ModelNotFoundException::class);
+        Voucher::createRangeDefFromArray($input);
     }
 }

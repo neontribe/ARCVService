@@ -158,13 +158,13 @@ class Voucher extends Model
      */
     public static function createRangeDefFromArray(array $input)
     {
-        // Add the sponsor's id
-        $rangeDef["sponsor_id"] = self::where('code', $input['voucher-start'])->sponsor()->id();
+        // Add the sponsor's id, use the start code.
+        $rangeDef["sponsor_id"] = self::where('code', $input['voucher-start'])->firstOrFail()->sponsor_id;
 
         // Slightly complicated way of making an object that represents the range.
         // Destructure the output of into an assoc array
-        [ 'shortcode' => $rangeDef['shortcode'], 'number' => $rangeDef['start'] ] = self::splitShortcodeNumeric($input('voucher-start'));
-        [ 'number' => $rangeDef['end'] ] = self::splitShortcodeNumeric($input('voucher-end'));
+        [ 'shortcode' => $rangeDef['shortcode'], 'number' => $rangeDef['start'] ] = self::splitShortcodeNumeric($input['voucher-start']);
+        [ 'number' => $rangeDef['end'] ] = self::splitShortcodeNumeric($input['voucher-end']);
 
         // Modify the start/end numbers to integers
         $rangeDef["start"] = intval($rangeDef["start"]);
