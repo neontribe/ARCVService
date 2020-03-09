@@ -57,7 +57,7 @@ class DeliveriesController extends Controller
     public function store(AdminNewDeliveryRequest $request)
     {
         // Make a rangeDef
-        $rangeDef = Voucher::createRangeDefFromArray($request->all());
+        $rangeDef = Voucher::createRangeDefFromVoucherCodes($request->input('voucher-start'), $request->input('voucher-end'));
 
         // Check the voucher range is clear to be delivered.
         if (!Voucher::rangeIsDeliverable($rangeDef)) {

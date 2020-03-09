@@ -243,11 +243,7 @@ class VoucherModelTest extends TestCase
         ]);
 
         // Make some input
-        $input = [
-            'voucher-start' => reset($vouchers)->code,
-            'voucher-end' => end($vouchers)->code,
-        ];
-        $validRangeDef = Voucher::createRangeDefFromArray($input);
+        $validRangeDef = Voucher::createRangeDefFromVoucherCodes(reset($vouchers)->code, end($vouchers)->code);
 
         $this->assertEquals($sponsor->id, $validRangeDef->sponsor_id);
         $this->assertInternalType('integer', $validRangeDef->sponsor_id);
@@ -258,12 +254,8 @@ class VoucherModelTest extends TestCase
         $this->assertInternalType('integer', $validRangeDef->end);
 
         // If you pass it a duff shortcode, it takes exception
-        $input = [
-            'voucher-start' => 'INV999998',
-            'voucher-end' => 'INV999999',
-        ];
         $this->expectException(ModelNotFoundException::class);
-        Voucher::createRangeDefFromArray($input);
+        Voucher::createRangeDefFromVoucherCodes('INV999998', 'INV999999');
     }
 
     /** @test */

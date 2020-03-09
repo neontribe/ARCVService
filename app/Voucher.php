@@ -139,8 +139,8 @@ class Voucher extends Model
     {
         foreach ($ranges as $range) {
             // Are Start and End both in the range?
-            if ($start >= $range->initial_serial &&
-                $end <= $range->serial &&
+            if ($start >= $range->start &&
+                $end <= $range->end &&
                 $start <= $end ) {
                 return $range;
             };
@@ -153,18 +153,19 @@ class Voucher extends Model
      * Creates a rangeDef structure
      * TODO: convert to class?
      *
-     * @param array $input
+     * @param string $startCode
+     * @param string $endCode
      * @return object
      */
-    public static function createRangeDefFromArray(array $input)
+    public static function createRangeDefFromVoucherCodes($startCode, $endCode)
     {
         // Add the sponsor's id, use the start code.
-        $rangeDef["sponsor_id"] = self::where('code', $input['voucher-start'])->firstOrFail()->sponsor_id;
+        $rangeDef['sponsor_id'] = self::where('code', $startCode)->firstOrFail()->sponsor_id;
 
         // Slightly complicated way of making an object that represents the range.
         // Destructure the output of into an assoc array
-        [ 'shortcode' => $rangeDef['shortcode'], 'number' => $rangeDef['start'] ] = self::splitShortcodeNumeric($input['voucher-start']);
-        [ 'number' => $rangeDef['end'] ] = self::splitShortcodeNumeric($input['voucher-end']);
+        [ 'shortcode' => $rangeDef['shortcode'], 'number' => $rangeDef['start'] ] = self::splitShortcodeNumeric($startCode);
+        [ 'number' => $rangeDef['end'] ] = self::splitShortcodeNumeric($endCode);
 
         // Modify the start/end numbers to integers
         $rangeDef["start"] = intval($rangeDef["start"]);
@@ -229,17 +230,17 @@ class Voucher extends Model
         try {
             return DB::transaction(function () use ($shortcode) {
                 // Set some important variables for the query. breaks SQLlite.
-                DB::statement(DB::raw('SET @initial_id=0, @initial_serial=0, @previous=0;'));
+                DB::statement(DB::raw('SET @initial_id=0, @start=0, @previous=0;'));
 
                 /* This seems to be the fastest way to find the start and end of each "range" of vouchers;
                  * in this case specified by vouchers that are not in deliveries.
                  * returns an array of stdClass objects with
                  * - serial; the final serial number in the range
-                 * - initial_serial; the initial serial in the range
+                 * - start; the initial serial in the range
                  * - final_code; the code associated with serial
-                 * - initial_code; the code associated with the initial_serial
+                 * - initial_code; the code associated with the start
                  * - id; the voucher id of the serial
-                 * - initial_id; the voucher id of the initial_serial
+                 * - initial_id; the voucher id of the start
                  */
                 // TODO: convert to eloquent
                 return DB::select(
@@ -251,47 +252,47 @@ class Voucher extends Model
                     FROM (
                         
                         SELECT
-                            @initial_serial := if(serial - @previous = 1, @initial_serial, serial) as initial_serial,
-                            @initial_id := if(serial - @previous = 1, @initial_id, id) as initial_id,
-                            @previous := serial as serial,
+                            @start := if(end - @previous = 1, @start, end) as start,
+                            @initial_id := if(end - @previous = 1, @initial_id, id) as initial_id,
+                            @previous := end as end,
                             id as final_id
                         FROM (
                         
-                            SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as serial
+                            SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as end
                             FROM vouchers
                             WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                               AND currentstate = 'dispatched'
-                            ORDER BY serial
+                            ORDER BY end
                         
                         ) as t5
                     
                     ) AS t1
                         INNER JOIN (
                     
-                            SELECT initial_serial, max(serial) as final_serial
+                            SELECT start, max(end) as final
                             FROM (
                     
                                  SELECT
-                                     @initial_serial := if(serial - @previous = 1, @initial_serial, serial) as initial_serial,
-                                     @initial_id := if(serial - @previous = 1, @initial_id, id) as initial_id,
-                                     @previous := serial as serial,
+                                     @start := if(end - @previous = 1, @start, end) as start,
+                                     @initial_id := if(end - @previous = 1, @initial_id, id) as initial_id,
+                                     @previous := end as end,
                                      id
                                  FROM (
                                      
-                                    SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as serial
+                                    SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as end
                                     FROM vouchers
                                     WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                                       AND currentstate = 'dispatched'
-                                    ORDER BY serial
+                                    ORDER BY end
                     
                                  ) as t4
                     
                             ) as t3
-                            GROUP BY initial_serial
+                            GROUP BY start
                     
                         ) as t2
-                        ON t1.initial_serial = t2.initial_serial
-                          AND t1.serial = t2.final_serial
+                        ON t1.start = t2.start
+                          AND t1.end = t2.final
                     
                     LEFT JOIN vouchers as v1
                         ON initial_id = v1.id
@@ -320,17 +321,17 @@ class Voucher extends Model
             return DB::transaction(function () use ($shortcode) {
 
                 // Set some important variables for the query. breaks SQLlite.
-                DB::statement(DB::raw('SET @initial_id=0, @initial_serial=0, @previous=0;'));
+                DB::statement(DB::raw('SET @initial_id=0, @start=0, @previous=0;'));
 
                 /* This seems to be the fastest way to find the start and end of each "range" of vouchers;
                  * in this case specified by vouchers that are not in deliveries.
                  * returns an array of stdClass objects with
-                 * - serial; the final serial number in the range
-                 * - initial_serial; the initial serial in the range
-                 * - final_code; the code associated with serial
-                 * - initial_code; the code associated with the initial_serial
-                 * - id; the voucher id of the serial
-                 * - initial_id; the voucher id of the initial_serial
+                 * - end; the final end number in the range
+                 * - start; the initial end in the range
+                 * - final_code; the code associated with end
+                 * - initial_code; the code associated with the start
+                 * - id; the voucher id of the end
+                 * - initial_id; the voucher id of the start
                  */
                 // TODO: convert to eloquent
                 return DB::select(
@@ -342,48 +343,48 @@ class Voucher extends Model
                     FROM (
                         
                         SELECT
-                            @initial_serial := if(serial - @previous = 1, @initial_serial, serial) as initial_serial,
-                            @initial_id := if(serial - @previous = 1, @initial_id, id) as initial_id,
-                            @previous := serial as serial,
+                            @start := if(end - @previous = 1, @start, end) as start,
+                            @initial_id := if(end - @previous = 1, @initial_id, id) as initial_id,
+                            @previous := end as end,
                             id as final_id
                         FROM (
                         
-                            SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as serial
+                            SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as end
                             FROM vouchers
                             WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                               AND currentstate = 'printed'
                               AND delivery_id is null
-                            ORDER BY serial
+                            ORDER BY end
                         
                         ) as t5
                     
                     ) AS t1
                         INNER JOIN (
                     
-                            SELECT initial_serial, max(serial) as final_serial
+                            SELECT start, max(end) as final
                             FROM (
                     
                                  SELECT
-                                     @initial_serial := if(serial - @previous = 1, @initial_serial, serial) as initial_serial,
-                                     @initial_id := if(serial - @previous = 1, @initial_id, id) as initial_id,
-                                     @previous := serial as serial,
+                                     @start := if(end - @previous = 1, @start, end) as start,
+                                     @initial_id := if(end - @previous = 1, @initial_id, id) as initial_id,
+                                     @previous := end as end,
                                      id
                                  FROM (
-                                      SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as serial
+                                      SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as end
                                       FROM vouchers 
                                       WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                                         AND currentstate = 'printed'
                                         AND delivery_id is null
-                                      ORDER BY serial
+                                      ORDER BY end
                     
                                  ) as t4
                     
                             ) as t3
-                            GROUP BY initial_serial
+                            GROUP BY start
                     
                         ) as t2
-                        ON t1.initial_serial = t2.initial_serial
-                          AND t1.serial = t2.final_serial
+                        ON t1.start = t2.start
+                          AND t1.end = t2.final
                     
                     LEFT JOIN vouchers as v1
                         ON initial_id = v1.id
