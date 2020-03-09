@@ -5,13 +5,11 @@ namespace App\Services\VoucherEvaluator;
 use App\Child;
 use App\Family;
 use App\Registration;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostBorn;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostSecondarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostOne;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostSchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsSchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsSecondarySchoolAge;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsUnBorn;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderSecondarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderOne;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderSchoolAge;
@@ -78,8 +76,6 @@ class EvaluatorFactory
                     new ChildIsUnderSchoolAge($offsetDate, 3)
                 ],
                 'notices' => [
-                    new ChildIsUnBorn($offsetDate),
-                    new ChildIsAlmostBorn($offsetDate),
                     new ChildIsAlmostOne($offsetDate),
                     new ChildIsAlmostSchoolAge($offsetDate),
                 ],
@@ -118,8 +114,6 @@ class EvaluatorFactory
                     new ChildIsUnderSecondarySchoolAge($offsetDate, 3)
                 ],
                 'notices' => [
-                    new ChildIsUnBorn($offsetDate),
-                    new ChildIsAlmostBorn($offsetDate),
                     new ChildIsAlmostOne($offsetDate),
                     new ChildIsUnderSchoolAge($offsetDate),
                     new ChildIsAlmostSecondarySchoolAge($offsetDate),

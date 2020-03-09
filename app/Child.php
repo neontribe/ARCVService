@@ -95,18 +95,24 @@ class Child extends Model implements IEvaluee
     /**
      * Generic future date calculator, uses to school start and extended start
      *
-     * @param int $years
-     * @param int|null $month
+     * @param int $years Years to look ahead
+     * @param int|null $month A specific month for "end of year"
      * @return Carbon
      */
     public function calcFutureMonthYear(int $years, int $month = null)
     {
+        // Take the month we're given, or default to the config
         $month = ($month) ?? config('arc.school_month');
+        // If we're born BEFORE the month
         $years = ($this->dob->month < $month)
+            // ... then we'll start one year earlier
             ? $years -1
+            // ... else we're a late starter and it'll be the number given.
             : $years
         ;
+        // Calculate our birth year in that many years time
         $future_year = $this->dob->addYears($years)->year;
+        // Return the desired month in that many years time
         return Carbon::createFromDate($future_year, $month, 1);
     }
 

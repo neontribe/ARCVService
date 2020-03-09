@@ -27,20 +27,7 @@
                         </ul>
                     </div>
                 </div>
-                @if ( !empty($noticeReasons) )
-                <div class="alert-message warning">
-                    <div class="icon-container warning">
-                        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                    </div>
-                    <div id="family-warning">
-                        @foreach( $noticeReasons as $notices )
-                            <p class="v-spaced">
-                                Warning: {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }} currently "{{ $notices['reason'] }}"
-                            </p>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
+                @includeWhen(!empty($noticeReasons), 'store.partials.notice_box', ['noticeReasons' => $noticeReasons])
                 <a href="{{ route("store.registration.edit", ['id' => $registration->id ]) }}" class="link" id='edit-family-link'>
                     <div class="link-button link-button-large">
                         <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Go to edit family
