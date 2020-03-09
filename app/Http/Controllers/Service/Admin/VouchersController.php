@@ -84,7 +84,7 @@ class VouchersController extends Controller
 
                 // Some things we'll be using.
                 $now_time = Carbon::now();
-                $user_id = auth()->user()->id;
+                $user_id = auth()->id();
                 $user_type = class_basename(auth()->user());
 
                 foreach ($transitions as $transitionDef) {
@@ -145,7 +145,7 @@ class VouchersController extends Controller
     {
         // Setup some variables
         $input = $request->all();
-        $user_id = auth()->user()->id;
+        $user_id = auth()->id();
         $user_type = class_basename(auth()->user());
         $sponsor = Sponsor::findOrFail($input['sponsor_id']);
         $now_time = Carbon::now();

@@ -39,7 +39,7 @@ class StateHistoryManager
             "transition" => $event->getTransition(),
             "from" => $event->getState(), // what the state was before.
             "to" => $sm->getState(),
-            "user_id" => auth()->user()->id, // the user ID
+            "user_id" => auth()->id(), // the user ID
             "user_type" => $user_type, // the type of user (we now have many)
             "source" => "",
         ]);
