@@ -227,7 +227,6 @@ class VoucherModelTest extends TestCase
     }
 
     /** @test */
-
     public function testItCanCreateARangeDef()
     {
         // Make some vouchers
@@ -265,5 +264,29 @@ class VoucherModelTest extends TestCase
         ];
         $this->expectException(ModelNotFoundException::class);
         Voucher::createRangeDefFromArray($input);
+    }
+
+    /** @test */
+    public function testItCanFindASupersetRangeFromARangeSet()
+    {
+        // Create a set of ranged for vouchers
+
+        // Create a subrange
+        // Check subrange is in the correct range
+
+        // Create an overlap range
+        // Check overlap range is not in a range
+    }
+
+    /** @test */
+    public function testItCanCheckARangeIsVoidable()
+    {
+        //
+    }
+
+    /** @test */
+    public function testItCanGetVoidableVouchersByShortcode()
+    {
+        //
     }
 }
