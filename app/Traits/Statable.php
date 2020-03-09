@@ -104,7 +104,7 @@ trait Statable
         // Set a transition details, because we can't pull the protected StateMachine config.
         $transition = config('state-machine.' . self::SM_CONFIG . '.transitions.' . $transitionName) ?? null;
 
-        if ($transition && in_array($fromState, $transition)) {
+        if ($transition && in_array($fromState, $transition["from"])) {
             $transitionDef['to'] = $transition['to'];
             $transitionDef['name'] = $transitionName;
             $transitionDef['from'] = $fromState;

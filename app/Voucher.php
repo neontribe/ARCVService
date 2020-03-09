@@ -127,7 +127,7 @@ class Voucher extends Model
     }
 
     /**
-     * Gets the range from an array of ranges
+     * Gets the range that contains our range from an array of ranges
      *
      * @param $start
      * @param $end

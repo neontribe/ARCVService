@@ -45,10 +45,10 @@ class VoucherState extends Model
                 'voucher_id' => $voucher->id,
                 'to' => $transitionDef->to,
                 'created_at' => $time,
-                '$s->updated_at' => $time,
-                '$s->source' => "",
-                '$s->user_id' => $user_id, // the user ID
-                '$s->user_type' => $user_type, // the type of user
+                'updated_at' => $time,
+                'source' => "",
+                'user_id' => $user_id, // the user ID
+                'user_type' => $user_type, // the type of user
             ];
         }
         // Insert this batch of vouchers.

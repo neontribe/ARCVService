@@ -87,7 +87,7 @@ class DeliveriesController extends Controller
                 ]);
 
                 $now_time = $delivery->created_at;
-                $user_id = auth()->id();
+                $user_id = auth()->user()->id;
                 $user_type = class_basename(auth()->user());
 
                 // Bulk update VoucherStates for speed.

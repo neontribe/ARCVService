@@ -2,6 +2,8 @@
 
 namespace Tests\Unit;
 
+use App\AdminUser;
+use Carbon\Carbon;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -16,12 +18,14 @@ class VoucherStateModelTest extends TestCase
 {
     use DatabaseMigrations, DatabaseTransactions;
 
-    protected $user;
+    protected $marketUser;
+    protected $adminUser;
 
     public function setUp()
     {
         parent::setUp();
-        $this->user = factory(User::class)->create();
+        $this->marketUser = factory(User::class)->create();
+        $this->adminUser = factory(AdminUser::class)->create();
     }
 
     /** @test */
@@ -29,7 +33,7 @@ class VoucherStateModelTest extends TestCase
     {
 
         // We need an auth's user to progress the voucher states.
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
 
         $voucher = factory(Voucher::class, 'requested')->create();
 
@@ -52,7 +56,7 @@ class VoucherStateModelTest extends TestCase
     public function testTransitionAllowed()
     {
         // We need an auth's user to progress the voucher states.
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
 
         $voucher = factory(Voucher::class, 'requested')->create();
 
@@ -69,7 +73,7 @@ class VoucherStateModelTest extends TestCase
     public function testInvalidTransition()
     {
         // We need an auth's user to progress the voucher states.
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
 
         $voucher = factory(Voucher::class, 'requested')->create();
         // This will throw exception $this->expectException() wasn't defined
@@ -80,7 +84,7 @@ class VoucherStateModelTest extends TestCase
     /** @test */
     public function testAPrintedVoucherCanBeCollected()
     {
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
         $voucher = factory(Voucher::class, 'requested')->create();
 
         $voucher->applyTransition('order');
@@ -93,7 +97,7 @@ class VoucherStateModelTest extends TestCase
     /** @test */
     public function testADispatchedVoucherCanBeCollected()
     {
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
         $voucher = factory(Voucher::class, 'requested')->create();
 
         $voucher->applyTransition('order');
@@ -107,7 +111,7 @@ class VoucherStateModelTest extends TestCase
     /** @test */
     public function testOnlyADispatchedVoucherCanBeExpiredOrVoided()
     {
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
         $v = factory(Voucher::class, 'requested')->create();
         $this->assertEquals($v->currentstate, 'requested');
 
@@ -141,7 +145,7 @@ class VoucherStateModelTest extends TestCase
     /** @test */
     public function testAnExpiredOrVoidedVoucherCanBeRetired()
     {
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
         $vouchers = factory(Voucher::class, 'requested', 2)
             ->create()
             ->each(function ($voucher) {
@@ -168,7 +172,7 @@ class VoucherStateModelTest extends TestCase
     /** @test */
     public function testARecordedVoucherCanBeRejectedBackToPrinted()
     {
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
         $voucher = factory(Voucher::class, 'requested')->create();
 
         $voucher->applyTransition('order');
@@ -182,7 +186,7 @@ class VoucherStateModelTest extends TestCase
     /** @test */
     public function testARecordedVoucherCanBeRejectedBackToDispatched()
     {
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
         $voucher = factory(Voucher::class, 'requested')->create();
 
         $voucher->applyTransition('order');
@@ -198,7 +202,7 @@ class VoucherStateModelTest extends TestCase
     public function testAVoucherMayHaveAStateToken()
     {
         // Make a voucher
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
         $voucher = factory(Voucher::class, 'requested')->create();
         $voucher->applyTransition('order');
         $voucher->applyTransition('print');
@@ -219,5 +223,31 @@ class VoucherStateModelTest extends TestCase
         // See that it has one
         $this->assertFalse(empty($state->stateToken));
         $this->assertEquals("aStringOfCharacters", $state->stateToken->uuid);
+    }
+
+    /** @test */
+    public function testItCanBatchInsertVoucherStates()
+    {
+        // Make a 150 vouchers
+        Auth::login($this->adminUser);
+        $vouchers = factory(Voucher::class, 'requested', 150)->create();
+
+        // Order them the normal way
+        foreach ($vouchers as $voucher) {
+            $voucher->applyTransition('order');
+        }
+
+        // Check they're Ordered.
+        $this->assertequals(150, VoucherState::where('to', 'ordered')->count());
+
+        // Batch transition
+        $now = Carbon::now();
+        $user_id = auth()->user()->id;
+        $user_type = class_basename(auth()->user());
+        $transitionDef = Voucher::createTransitionDef('ordered', 'print');
+        VoucherState::batchInsert($vouchers, $now, $user_id, $user_type, $transitionDef);
+
+        // Check they're Printed.
+        $this->assertequals(150, VoucherState::where('to', 'printed')->count());
     }
 }
