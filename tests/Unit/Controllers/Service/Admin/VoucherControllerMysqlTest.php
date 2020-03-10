@@ -1,31 +1,33 @@
 <?php
 
-namespace Tests\Unit\Models;
+namespace Tests\Unit\Controllers\Service\Admin;
 
-use App\User;
+use App\AdminUser;
+use App\Http\Controllers\Service\VoucherController;
+use App\Market;
 use App\Sponsor;
+use App\User;
 use App\Voucher;
 use Auth;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Config;
 use Exception;
-use Tests\CreatesApplication;
 use Tests\StoreTestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 
-class VoucherModelMysqlTest extends StoreTestCase
+class VoucherControllerMysqlTest extends StoreTestCase
 {
-    use CreatesApplication;
     use DatabaseMigrations;
 
+    protected $market;
     protected $user;
-    protected $rangeCodes;
-    protected $vouchers;
     protected $sponsor;
+    protected $rangeCodes;
+    protected $admin_user;
 
     // TODO : Consider pulling this out to a config option or environment variable
     private const TESTING_MYSQL_FALLBACK = 'testing-mysql';
 
-    public function setUp()
+    protected function setUp()
     {
         parent::setUp();
 
@@ -73,14 +75,13 @@ class VoucherModelMysqlTest extends StoreTestCase
             ['shortcode' => 'TST']
         );
 
-        $this->user = factory(User::class)->create();
-        Auth::login($this->user);
-    }
+        $this->admin_user = factory(User::class)->create();
 
-    /** @test */
-    public function testItCanGetVoidableVouchersByShortcode()
-    {
-        // Make vouchers from them
+        // TODO: Looks ike voucher transitioning might be dependent on trader users
+        $this->user = factory(User::class)->create();
+
+        Auth::login($this->user);
+
         foreach ($this->rangeCodes as $rangeCode) {
             $voucher = factory(Voucher::class, 'requested')->create([
                 'code' => $rangeCode,
@@ -91,44 +92,61 @@ class VoucherModelMysqlTest extends StoreTestCase
             $voucher->applyTransition('dispatch');
         }
 
-        // Make a range to check
-        $inBoundsRange = Voucher::createRangeDefFromVoucherCodes('TST0102', 'TST0104');
-
-        // Check it.
-        $ranges = Voucher::getVoidableVoucherRangesByShortCode($inBoundsRange->shortcode);
-        $this->assertCount(3, $ranges);
-        $this->assertEquals(101, $ranges[0]->start);
-        $this->assertEquals(105, $ranges[0]->end);
-        $this->assertEquals(201, $ranges[1]->start);
-        $this->assertEquals(205, $ranges[1]->end);
-        $this->assertEquals(301, $ranges[2]->start);
-        $this->assertEquals(305, $ranges[2]->end);
+        Auth::logout();
     }
 
     /** @test */
-    public function testItCanGetDeliverableVouchersByShortcode()
+    public function testItCanVoidVoucherCodes()
     {
-        // Make vouchers from them
-        foreach ($this->rangeCodes as $rangeCode) {
-            $voucher = factory(Voucher::class, 'requested')->create([
-                'code' => $rangeCode,
-                'sponsor_id' => $this->sponsor->id,
-            ]);
-            $voucher->applyTransition('order');
-            $voucher->applyTransition('print');
-        }
+        Auth::login($this->admin_user);
 
-        // Make a range to check
-        $inBoundsRange = Voucher::createRangeDefFromVoucherCodes('TST0102', 'TST0104');
+        // The post data
+        $data = [
+            'voucher-start' => 'TST0102',
+            'voucher-end' => 'TST0104',
+            'transition' => 'void'
+        ];
 
-        // Check it.
-        $ranges = Voucher::getDeliverableVoucherRangesByShortCode($inBoundsRange->shortcode);
-        $this->assertCount(3, $ranges);
-        $this->assertEquals(101, $ranges[0]->start);
-        $this->assertEquals(105, $ranges[0]->end);
-        $this->assertEquals(201, $ranges[1]->start);
-        $this->assertEquals(205, $ranges[1]->end);
-        $this->assertEquals(301, $ranges[2]->start);
-        $this->assertEquals(305, $ranges[2]->end);
+        // Set some routes
+        $formRoute = route('admin.vouchers.void');
+        $requestRoute = route('admin.vouchers.updatebatch');
+        $successRoute = route('admin.vouchers.index');
+
+        // Set the message to look for
+        $msg = trans('service.messages.vouchers_voidexpire_success', [
+            'transition_to' => 'retired',
+            'shortcode' => 'TST',
+            'start' => 102,
+            'end' => 104,
+        ]);
+
+        // Make the patch
+        $this->actingAs($this->admin_user, 'admin')
+            ->visit($formRoute)
+            ->patch($requestRoute, $data)
+            ->followRedirects()
+            ->seePageIs($successRoute)
+            ->see($msg)
+        ;
+
+        // fetch those back.
+        $vouchers = Voucher::where('currentstate', 'retired')
+            ->with('history')
+            ->get()
+        ;
+
+        // Check there are 3.
+        $this->assertCount(3, $vouchers);
+
+        $vouchers->each(function ($v) {
+            $this->assertEquals(1, $v->history->where('to', 'voided')->count());
+            $this->assertEquals(1, $v->history->where('to', 'retired')->count());
+        });
+    }
+
+    /** @test */
+    public function testItCanExpireVoucherCodes()
+    {
+        // Move vouchers towards transition
     }
 }

@@ -68,7 +68,7 @@ class VouchersController extends Controller
             // Whoops! Some of the vouchers may have not be voidable
             // TODO : report problem voucher ranges.
             return redirect()
-                ->route('admin.deliveries.create')
+                ->route('admin.vouchers.void')
                 ->withInput()
                 ->with('error_message', trans('service.messages.vouchers_voidexpire_blocked'));
         };
@@ -98,14 +98,12 @@ class VouchersController extends Controller
                             function ($vouchers) use ($now_time, $user_id, $user_type, $transitionDef) {
                                 // ... but method needs 'em all.
                                 VoucherState::batchInsert($vouchers, $now_time, $user_id, $user_type, $transitionDef);
+                                Voucher::whereIn('id', $vouchers->pluck('id'))
+                                    ->update(['currentState' => $transitionDef->to]);
                             }
                         )
                     ;
                 }
-                // Get all the vouchers in the range and update them with the end state
-                Voucher::withRangedVouchersInState($rangeDef, end($transitions)->from)
-                    ->update(['currentState' => end($transitions)->to])
-                ;
             });
         } catch (\Throwable $e) {
             // Oops! Log that
@@ -114,7 +112,7 @@ class VouchersController extends Controller
             Log::error($e->getTraceAsString());
             // Throw it back to the user
             return redirect()
-                ->route('admin.deliveries.create')
+                ->route('admin.vouchers.void')
                 ->withInput()
                 ->with('error_message', 'Database error, unable to transition a voucher.');
         }

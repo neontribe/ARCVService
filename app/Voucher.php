@@ -183,7 +183,8 @@ class Voucher extends Model
     public static function rangeIsDeliverable($rangeDef)
     {
         $ranges = self::getDeliverableVoucherRangesByShortCode($rangeDef->shortcode);
-        return (empty(self::getContainingRange($rangeDef->start, $rangeDef->end, $ranges)));
+        $range = self::getContainingRange($rangeDef->start, $rangeDef->end, $ranges);
+        return (!is_null($range) && is_object($range));
     }
 
     /**
@@ -195,7 +196,8 @@ class Voucher extends Model
     public static function rangeIsVoidable($rangeDef)
     {
         $ranges = self::getVoidableVoucherRangesByShortCode($rangeDef->shortcode);
-        return (empty(self::getContainingRange($rangeDef->start, $rangeDef->end, $ranges)));
+        $range = self::getContainingRange($rangeDef->start, $rangeDef->end, $ranges);
+        return (!is_null($range) && is_object($range));
     }
 
     /**
@@ -538,14 +540,14 @@ class Voucher extends Model
      * Gets a set of vouchers that share a shortcode and currentstate in a sponsor
      *
      * @param Builder $query
-     * @param $rangeDef
-     * @param $state
+     * @param object $rangeDef
+     * @param string $state State if interest
      * @return Builder
      */
     public function scopeWithRangedVouchersInState(Builder $query, $rangeDef, $state)
     {
         return $query
-            ->where('currentState', $state)
+            ->where('currentstate', $state)
             ->where('code', 'REGEXP', "^{$rangeDef->shortcode}[0-9]+\$") // Just vouchers that start with our shortcode
             ->where('sponsor_id', $rangeDef->sponsor_id) // that are in the sponsor (performance, using the index)
             ->whereBetween(
