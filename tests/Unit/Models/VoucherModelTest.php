@@ -261,24 +261,75 @@ class VoucherModelTest extends TestCase
     /** @test */
     public function testItCanFindASupersetRangeFromARangeSet()
     {
-        // Create a set of ranged for vouchers
+        $rangeCodes = [
+            'tst0101',
+            'tst0102',
+            'tst0103',
+            'tst0104',
+            'tst0105',
 
-        // Create a subrange
-        // Check subrange is in the correct range
+            'tst0201',
+            'tst0202',
+            'tst0203',
+            'tst0204',
+            'tst0205',
 
-        // Create an overlap range
-        // Check overlap range is not in a range
+            'tst0301',
+            'tst0302',
+            'tst0303',
+            'tst0304',
+            'tst0305',
+        ];
+
+        $sponsor = factory(Sponsor::class)->create(
+            ['shortcode' => 'tst']
+        );
+
+        foreach ($rangeCodes as $rangeCode) {
+            $voucher = factory(Voucher::class, 'requested')->create([
+                'code' => $rangeCode,
+                'sponsor_id' => $sponsor->id,
+            ]);
+        }
+
+        $ranges = [
+            Voucher::createRangeDefFromVoucherCodes('tst0101', 'tst0105'),
+            Voucher::createRangeDefFromVoucherCodes('tst0201', 'tst0205'),
+            Voucher::createRangeDefFromVoucherCodes('tst0301', 'tst0305'),
+        ];
+
+        $inBoundsRange = Voucher::createRangeDefFromVoucherCodes('tst0202', 'tst0204');
+
+        $voucher = new Voucher();
+        // Invoke the private method to check a good range
+        $range = $this->invokeMethod($voucher, 'getContainingRange', [
+            $inBoundsRange->start,
+            $inBoundsRange->end,
+            $ranges
+        ]);
+
+        $this->assertEquals(201, $range->start);
+        $this->assertEquals(205, $range->end);
+
+        // Send a bad rang through
+        $range = $this->invokeMethod($voucher, 'getContainingRange', [
+            202,
+            209,
+            $ranges
+        ]);
+        $this->assertNull($range);
     }
 
-    /** @test */
-    public function testItCanCheckARangeIsVoidable()
+    // Cheeky method for accessing private methods.
+    public function invokeMethod(&$object, $methodName, array $parameters = array())
     {
-        //
-    }
-
-    /** @test */
-    public function testItCanGetVoidableVouchersByShortcode()
-    {
-        //
+        try {
+            $reflection = new \ReflectionClass(get_class($object));
+            $method = $reflection->getMethod($methodName);
+            $method->setAccessible(true);
+            return $method->invokeArgs($object, $parameters);
+        } catch (\ReflectionException $e) {
+            return null;
+        }
     }
 }

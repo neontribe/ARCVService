@@ -131,12 +131,13 @@ class Voucher extends Model
      *
      * @param $start
      * @param $end
-     * @param $ranges array
+     * @param $ranges array of range objects.
      *
-     * @return array
+     * @return object|null
      */
     private static function getContainingRange($start, $end, array $ranges)
     {
+        /** @var object $range */
         foreach ($ranges as $range) {
             // Are Start and End both in the range?
             if ($start >= $range->start &&
@@ -145,8 +146,7 @@ class Voucher extends Model
                 return $range;
             };
         }
-        // Start and End within none of the free ranges, if any were returned.
-        return [];
+        return null;
     }
 
     /**
