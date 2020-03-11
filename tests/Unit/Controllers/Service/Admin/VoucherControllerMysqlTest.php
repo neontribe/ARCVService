@@ -2,9 +2,6 @@
 
 namespace Tests\Unit\Controllers\Service\Admin;
 
-use App\AdminUser;
-use App\Http\Controllers\Service\VoucherController;
-use App\Market;
 use App\Sponsor;
 use App\User;
 use App\Voucher;
@@ -22,7 +19,6 @@ class VoucherControllerMysqlTest extends StoreTestCase
     protected $user;
     protected $sponsor;
     protected $rangeCodes;
-    protected $admin_user;
 
     // TODO : Consider pulling this out to a config option or environment variable
     private const TESTING_MYSQL_FALLBACK = 'testing-mysql';
@@ -75,8 +71,6 @@ class VoucherControllerMysqlTest extends StoreTestCase
             ['shortcode' => 'TST']
         );
 
-        $this->admin_user = factory(User::class)->create();
-
         // TODO: Looks ike voucher transitioning might be dependent on trader users
         $this->user = factory(User::class)->create();
 
@@ -98,7 +92,7 @@ class VoucherControllerMysqlTest extends StoreTestCase
     /** @test */
     public function testItCanVoidVoucherCodes()
     {
-        Auth::login($this->admin_user);
+        Auth::login($this->user);
 
         // The post data
         $data = [
@@ -121,19 +115,17 @@ class VoucherControllerMysqlTest extends StoreTestCase
         ]);
 
         // Make the patch
-        $this->actingAs($this->admin_user, 'admin')
+        $this->actingAs($this->user, 'admin')
             ->visit($formRoute)
             ->patch($requestRoute, $data)
             ->followRedirects()
             ->seePageIs($successRoute)
-            ->see($msg)
-        ;
+            ->see($msg);
 
         // fetch those back.
         $vouchers = Voucher::where('currentstate', 'retired')
             ->with('history')
-            ->get()
-        ;
+            ->get();
 
         // Check there are 3.
         $this->assertCount(3, $vouchers);
@@ -147,6 +139,49 @@ class VoucherControllerMysqlTest extends StoreTestCase
     /** @test */
     public function testItCanExpireVoucherCodes()
     {
-        // Move vouchers towards transition
+        {
+            Auth::login($this->user);
+
+            // The post data
+            $data = [
+                'voucher-start' => 'TST0102',
+                'voucher-end' => 'TST0104',
+                'transition' => 'expire'
+            ];
+
+            // Set some routes
+            $formRoute = route('admin.vouchers.void');
+            $requestRoute = route('admin.vouchers.updatebatch');
+            $successRoute = route('admin.vouchers.index');
+
+            // Set the message to look for
+            $msg = trans('service.messages.vouchers_voidexpire_success', [
+                'transition_to' => 'retired',
+                'shortcode' => 'TST',
+                'start' => 102,
+                'end' => 104,
+            ]);
+
+            // Make the patch
+            $this->actingAs($this->user, 'admin')
+                ->visit($formRoute)
+                ->patch($requestRoute, $data)
+                ->followRedirects()
+                ->seePageIs($successRoute)
+                ->see($msg);
+
+            // fetch those back.
+            $vouchers = Voucher::where('currentstate', 'retired')
+                ->with('history')
+                ->get();
+
+            // Check there are 3.
+            $this->assertCount(3, $vouchers);
+
+            $vouchers->each(function ($v) {
+                $this->assertEquals(1, $v->history->where('to', 'expired')->count());
+                $this->assertEquals(1, $v->history->where('to', 'retired')->count());
+            });
+        }
     }
 }
