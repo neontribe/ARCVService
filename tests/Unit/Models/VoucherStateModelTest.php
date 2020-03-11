@@ -230,7 +230,7 @@ class VoucherStateModelTest extends TestCase
     {
         // Make a 150 vouchers
         Auth::login($this->adminUser);
-        $vouchers = factory(Voucher::class, 'requested', 150)->create();
+        $vouchers = factory(Voucher::class, 'requested', 100)->create();
 
         // Order them the normal way
         foreach ($vouchers as $voucher) {
@@ -238,7 +238,7 @@ class VoucherStateModelTest extends TestCase
         }
 
         // Check they're Ordered.
-        $this->assertequals(150, VoucherState::where('to', 'ordered')->count());
+        $this->assertequals(100, VoucherState::where('to', 'ordered')->count());
 
         // Batch transition
         $now = Carbon::now();
@@ -248,6 +248,6 @@ class VoucherStateModelTest extends TestCase
         VoucherState::batchInsert($vouchers, $now, $user_id, $user_type, $transitionDef);
 
         // Check they're Printed.
-        $this->assertequals(150, VoucherState::where('to', 'printed')->count());
+        $this->assertequals(100, VoucherState::where('to', 'printed')->count());
     }
 }
