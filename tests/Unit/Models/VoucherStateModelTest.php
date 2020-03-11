@@ -228,7 +228,7 @@ class VoucherStateModelTest extends TestCase
     /** @test */
     public function testItCanBatchInsertVoucherStates()
     {
-        // Make a 150 vouchers
+        // Make a 100 vouchers
         Auth::login($this->adminUser);
         $vouchers = factory(Voucher::class, 'requested', 100)->create();
 
