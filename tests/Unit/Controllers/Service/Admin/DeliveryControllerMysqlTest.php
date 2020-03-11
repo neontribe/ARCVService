@@ -2,19 +2,23 @@
 
 namespace Tests\Unit\Controllers\Service\Admin;
 
+use App\AdminUser;
+use App\Centre;
 use App\Sponsor;
 use App\User;
 use App\Voucher;
 use Auth;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Config;
 use Exception;
 use Tests\StoreTestCase;
 
-class VoucherControllerMysqlTest extends StoreTestCase
+class DeliveryControllerMysqlTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
+    protected $centre;
     protected $user;
     protected $sponsor;
     protected $rangeCodes;
@@ -70,6 +74,11 @@ class VoucherControllerMysqlTest extends StoreTestCase
             ['shortcode' => 'TST']
         );
 
+        // Make a centre to send things to
+        $this->centre = factory(Centre::class)->create([
+            'sponsor_id' => $this->sponsor->id,
+        ]);
+
         $this->user = factory(User::class)->create();
 
         Auth::login($this->user);
@@ -81,101 +90,55 @@ class VoucherControllerMysqlTest extends StoreTestCase
             ]);
             $voucher->applyTransition('order');
             $voucher->applyTransition('print');
-            $voucher->applyTransition('dispatch');
         }
 
         Auth::logout();
     }
 
     /** @test */
-    public function testItCanVoidVoucherCodes()
+    public function testItCanMakeADelivery()
     {
         // The post data
+        $now = Carbon::today()->format('Y-m-d');
+
         $data = [
+            'centre' => $this->centre->id,
             'voucher-start' => 'TST0102',
             'voucher-end' => 'TST0104',
-            'transition' => 'void'
+            'date-sent' => $now,
         ];
 
         // Set some routes
-        $formRoute = route('admin.vouchers.void');
-        $requestRoute = route('admin.vouchers.updatebatch');
-        $successRoute = route('admin.vouchers.index');
+        $formRoute = route('admin.deliveries.create');
+        $requestRoute = route('admin.deliveries.store');
+        $successRoute = route('admin.deliveries.index');
 
         // Set the message to look for
-        $msg = trans('service.messages.vouchers_batchtransiton.success', [
-            'transition_to' => 'retired',
-            'shortcode' => 'TST',
-            'start' => 102,
-            'end' => 104,
+        $msg = trans('service.messages.vouchers_delivery.success', [
+            'centre_name' => $this->centre->name,
         ]);
 
         // Make the patch
         $this->actingAs($this->user, 'admin')
             ->visit($formRoute)
-            ->patch($requestRoute, $data)
+            ->post($requestRoute, $data)
             ->followRedirects()
             ->seePageIs($successRoute)
-            ->see($msg);
-
+            ->see($msg)
+        ;
+        
         // fetch those back.
-        $vouchers = Voucher::where('currentstate', 'retired')
-            ->with('history')
+        $vouchers = Voucher::where('currentstate', 'dispatched')
+            ->with('delivery')
             ->get();
 
         // Check there are 3.
         $this->assertCount(3, $vouchers);
 
-        $vouchers->each(function ($v) {
-            $this->assertEquals(1, $v->history->where('to', 'voided')->count());
-            $this->assertEquals(1, $v->history->where('to', 'retired')->count());
+        $vouchers->each(function ($v) use ($now) {
+            $this->assertNotNull($v->delivery);
+            $this->assertEquals($this->centre->id, $v->delivery->centre->id);
+            $this->assertEquals($now, $v->delivery->dispatched_at->format('Y-m-d'));
         });
-    }
-
-    /** @test */
-    public function testItCanExpireVoucherCodes()
-    {
-        {
-            // The post data
-            $data = [
-                'voucher-start' => 'TST0102',
-                'voucher-end' => 'TST0104',
-                'transition' => 'expire'
-            ];
-
-            // Set some routes
-            $formRoute = route('admin.vouchers.void');
-            $requestRoute = route('admin.vouchers.updatebatch');
-            $successRoute = route('admin.vouchers.index');
-
-            // Set the message to look for
-            $msg = trans('service.messages.vouchers_batchtransiton.success', [
-                'transition_to' => 'retired',
-                'shortcode' => 'TST',
-                'start' => 102,
-                'end' => 104,
-            ]);
-
-            // Make the patch
-            $this->actingAs($this->user, 'admin')
-                ->visit($formRoute)
-                ->patch($requestRoute, $data)
-                ->followRedirects()
-                ->seePageIs($successRoute)
-                ->see($msg);
-
-            // fetch those back.
-            $vouchers = Voucher::where('currentstate', 'retired')
-                ->with('history')
-                ->get();
-
-            // Check there are 3.
-            $this->assertCount(3, $vouchers);
-
-            $vouchers->each(function ($v) {
-                $this->assertEquals(1, $v->history->where('to', 'expired')->count());
-                $this->assertEquals(1, $v->history->where('to', 'retired')->count());
-            });
-        }
     }
 }

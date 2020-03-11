@@ -73,7 +73,7 @@ class DeliveriesController extends Controller
         $centre = Centre::findOrFail($request->input('centre'));
 
         // Make a transition definition
-        $transitions[] = Voucher::createTransitionDef("printed", $request->input("transition"));
+        $transitions[] = Voucher::createTransitionDef("printed", "dispatch");
 
         // Create delivery or roll back
         try {
@@ -93,6 +93,7 @@ class DeliveriesController extends Controller
 
                 // Bulk update VoucherStates for speed.
                 foreach ($transitions as $transitionDef) {
+                    DB::enableQueryLog();
                     Voucher::select('id')
                         ->whereNull('delivery_id')
                         ->withRangedVouchersInState($rangeDef, 'printed')
@@ -115,6 +116,7 @@ class DeliveriesController extends Controller
             });
         } catch (Throwable $e) {
             // Oops! Log that
+            dd(DB::getQueryLog());
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getMessage()); // Log original error message too
             Log::error($e->getTraceAsString());
