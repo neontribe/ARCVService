@@ -3,6 +3,6 @@
         <i class="fa fa-check-circle-o" aria-hidden="true"></i>
     </div>
     <p>
-        <span>Success:</span> {{ Session::get('message') }}
+        {{ Session::get('message') }}
     </p>
 </div>
