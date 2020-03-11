@@ -361,7 +361,7 @@ class BundleController extends Controller
                 ->withInput()
                 ->with('error_messages', $messages);
         } else {
-            $message = "Voucher bundle updated";
+            $message = "Vouchers updated";
             if ($bundle instanceof Bundle) {
                 $numberOfVouchers = $bundle->vouchers->count();
                 $fullFamily = $bundle->registration()->withFullFamily()->first();

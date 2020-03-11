@@ -26,8 +26,8 @@ class AdminNewDeliveryRequest extends FormRequest
     public function rules()
     {
         return  [
-            // MUST be present, and exist in table
-            'centre' => 'required|exists:centres,id',
+            // MUST be present, be a number and exist in table
+            'centre' => 'required|exists:centres,id|numeric',
             // MUST be present, string, exists
             'voucher-start' => 'required|string|exists:vouchers,code',
             // MUST be present, string, exists, greater/equal to start and same sponsor as start

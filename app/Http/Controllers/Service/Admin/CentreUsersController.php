@@ -12,20 +12,52 @@ use DB;
 use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Log;
 use Ramsey\Uuid\Uuid;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class CentreUsersController extends Controller
 {
     /**
      * Display a listing of Workers.
      *
+     * @param Request $request
      * @return Factory|View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $workers = CentreUser::get();
+       // fetch query params from request
+        $field = $request->input('orderBy', null);
+        $direction = $request->input('direction', null);
+
+        if ($field === 'name') {
+            //sort the orderby
+            $workers = CentreUser::orderByField([
+                'orderBy' => $field,
+                'direction' => $direction
+            ])->get();
+        } elseif($field === 'homeCentre' && $direction === 'desc') {
+            $workers = CentreUser::get()->sortByDesc('homeCentre.name');
+        } else {
+            $workers = CentreUser::get()->sortBy('homeCentre.name');
+        }
+
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 15;
+        $offset = ($page * $perPage) - $perPage;
+        $workers = new LengthAwarePaginator(
+            $workers->slice($offset, $perPage),
+            $workers->count(),
+            $perPage,
+            $page,
+            [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'query' => array_except($request->query(), 'page'),
+            ]
+        );
+
         return view('service.centreusers.index', compact('workers'));
     }
 
