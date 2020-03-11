@@ -62,10 +62,11 @@ class DeliveriesController extends Controller
         // Check the voucher range is clear to be delivered.
         if (!Voucher::rangeIsDeliverable($rangeDef)) {
             // Whoops! Some of the vouchers may have been delivered
+            // TODO : report problem voucher ranges.
             return redirect()
                 ->route('admin.deliveries.create')
                 ->withInput()
-                ->with('error_message', 'The voucher range given contains some vouchers that have already been delivered.');
+                ->with('error_message', trans('service.messages.vouchers_delivery.blocked'));
         };
 
         // Get centre
@@ -99,22 +100,18 @@ class DeliveriesController extends Controller
                             // should be big enough chunks to avoid memory problems
                             10000,
                             // Closure only has 1 param...
-                            function ($vouchers) use ($now_time, $user_id, $user_type, $transitionDef) {
-                                // ... but method needs 'em all.
+                            function ($vouchers) use ($now_time, $user_id, $user_type, $transitionDef, $delivery) {
+                                // ... but method needs 'em.
                                 VoucherState::batchInsert($vouchers, $now_time, $user_id, $user_type, $transitionDef);
+                                // Get all the vouchers in the current chunk and update them with the delivery Id and state
+                                Voucher::whereIn('id', $vouchers->pluck('id'))
+                                    ->update([
+                                        'delivery_id' => $delivery->id,
+                                        'currentState' => $transitionDef->to
+                                    ]);
                             }
                         );
                 }
-                // Get all the vouchers in the range and update them with the delivery Id and state
-                Voucher::whereNull('delivery_id')
-                    ->withRangedVouchersInState($rangeDef, end($transitions)->from)
-                    ->update(
-                        [
-                            'delivery_id' => $delivery->id,
-                            'currentState' => end($transitions)->to
-                        ]
-                    )
-                ;
             });
         } catch (Throwable $e) {
             // Oops! Log that
@@ -130,6 +127,6 @@ class DeliveriesController extends Controller
         // Success
         return redirect()
             ->route('admin.deliveries.index')
-            ->with('message', 'Delivery to ' . $centre->name . ' created.');
+            ->with('message', trans('service.messages.vouchers_delivery.success', ['centre_name' => $centre->name]));
     }
 }

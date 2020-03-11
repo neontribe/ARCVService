@@ -107,7 +107,7 @@ class VoucherControllerMysqlTest extends StoreTestCase
         $successRoute = route('admin.vouchers.index');
 
         // Set the message to look for
-        $msg = trans('service.messages.vouchers_voidexpire_success', [
+        $msg = trans('service.messages.vouchers_batchtransiton.success', [
             'transition_to' => 'retired',
             'shortcode' => 'TST',
             'start' => 102,
@@ -155,7 +155,7 @@ class VoucherControllerMysqlTest extends StoreTestCase
             $successRoute = route('admin.vouchers.index');
 
             // Set the message to look for
-            $msg = trans('service.messages.vouchers_voidexpire_success', [
+            $msg = trans('service.messages.vouchers_batchtransiton.success', [
                 'transition_to' => 'retired',
                 'shortcode' => 'TST',
                 'start' => 102,
