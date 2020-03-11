@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\Controllers\Service\Admin;
 
-use App\AdminUser;
 use App\Centre;
 use App\Sponsor;
 use App\User;

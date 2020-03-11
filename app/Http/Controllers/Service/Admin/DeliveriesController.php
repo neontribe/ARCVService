@@ -115,8 +115,6 @@ class DeliveriesController extends Controller
                 }
             });
         } catch (Throwable $e) {
-            // Oops! Log that
-            dd(DB::getQueryLog());
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getMessage()); // Log original error message too
             Log::error($e->getTraceAsString());
