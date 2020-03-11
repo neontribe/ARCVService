@@ -364,7 +364,95 @@ class SearchPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function itShowsLeftFamilyRegistrationsAsDistinct()
+    public function itShowsCentreLabelsForUsersByDefault()
+    {
+        // Create some centres
+        $centre1 = factory(App\Centre::class)->create([
+            "name" => "Tatooine"
+        ]);
+        $centre2 = factory(App\Centre::class)->create([
+            "name" => "Dagobah"
+        ]);
+        $centre3 = factory(App\Centre::class)->create([
+            "name" => "Coruscant"
+        ]);
+
+        // Create a Centre User
+        $centreUser =  factory(App\CentreUser::class)->create([
+            "name"  => "test user",
+            "email" => "testuser@example.com",
+            "password" => bcrypt('test_user_pass'),
+        ]);
+        $centreUser->centres()->attach($centre1->id, ['homeCentre' => true]);
+
+        // Create some registrations in different centres
+        $registrations = factory(App\Registration::class, 4)->create([
+            "centre_id" => $centre1->id,
+        ]);
+        $registrations = factory(App\Registration::class, 3)->create([
+            "centre_id" => $centre2->id,
+        ]);
+        $registrations = factory(App\Registration::class, 2)->create([
+            "centre_id" => $centre3->id,
+        ]);
+
+        // Check that we can see the centre labels in the page
+        $this->actingAs($centreUser, 'store')
+            ->visit(URL::route('store.registration.index'))
+            ->see('Tatooine')
+            ->see('Dagobah')
+            ->see('Coruscant');
+
+        // Check that each user we have added has a secondary info field
+        $this->assertCount(9, $this->crawler->filter('div.secondary_info'));
+    }
+
+    /** @test */
+    public function itCanFilterUsersByCentre()
+    {
+        // Create some centres
+        $centre1 = factory(App\Centre::class)->create([
+            "name" => "Tatooine"
+        ]);
+        $centre2 = factory(App\Centre::class)->create([
+            "name" => "Dagobah"
+        ]);
+        $centre3 = factory(App\Centre::class)->create([
+            "name" => "Coruscant"
+        ]);
+
+        // Create a Centre User
+        $centreUser =  factory(App\CentreUser::class)->create([
+            "name"  => "test user",
+            "email" => "testuser@example.com",
+            "password" => bcrypt('test_user_pass'),
+        ]);
+        $centreUser->centres()->attach($centre1->id, ['homeCentre' => true]);
+
+        // Create some registrations in different centres
+        $registrations = factory(App\Registration::class, 4)->create([
+            "centre_id" => $centre1->id,
+        ]);
+        $registrations = factory(App\Registration::class, 3)->create([
+            "centre_id" => $centre2->id,
+        ]);
+        $registrations = factory(App\Registration::class, 2)->create([
+            "centre_id" => $centre3->id,
+        ]);
+
+        // Go to the page and filter
+        $this->actingAs($centreUser, 'store')
+            ->visit(URL::route('store.registration.index'))
+            ->select($centre1->id, 'centre')
+            ->press('search');
+
+        // Check that only the 4 users added to centre are displayed
+        $this->assertCount(4, $this->crawler->filter('td.pri_carer'));
+        $this->assertCount(0, $this->crawler->filter('div.secondary_info'));
+    }
+
+    /** @test */
+    public function itDoesNotShowLeftFamiliesByDefault()
     {
         $centre = factory(App\Centre::class)->create();
 
@@ -389,6 +477,38 @@ class SearchPageTest extends StoreTestCase
 
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'));
+
+        $this->assertCount(9, $this->crawler->filter('td.pri_carer'));
+    }
+
+    /** @test */
+    public function itShowsLeftFamilyRegistrationsAsDistinct()
+    {
+        $centre = factory(App\Centre::class)->create();
+
+        // Create a Centre User
+        $centreUser =  factory(App\CentreUser::class)->create([
+            "name"  => "test user",
+            "email" => "testuser@example.com",
+            "password" => bcrypt('test_user_pass'),
+        ]);
+        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
+
+        // Create 10 random registrations, which should be the per-page pagination limit.
+        $registrations = factory(App\Registration::class, 10)->create([
+            "centre_id" => $centre->id,
+        ]);
+
+        // Find and "leave" the first registrations Family
+        $leavingFamily = $registrations->first()->family;
+        $leavingFamily->leaving_on = Carbon::now();
+        $leavingFamily->leaving_reason = config('arc.leaving_reasons')[0];
+        $leavingFamily->save();
+
+        $this->actingAs($centreUser, 'store')
+            ->visit(URL::route('store.registration.index'))
+            ->check('#families_left')
+            ->press('search');
 
         $this->assertCount(1, $this->crawler->filter('tr.inactive'));
         $this->assertCount(9, $this->crawler->filter('tr.active'));
@@ -419,13 +539,15 @@ class SearchPageTest extends StoreTestCase
         $leavingFamily->save();
 
         $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.index'));
+            ->visit(URL::route('store.registration.index'))
+            ->check('#families_left')
+            ->press('search');
 
         // Check the number of enabled and disabled buttons.
-        $this->assertCount(2, $this->crawler->filter('tr.inactive div.disabled'));
-        $this->assertCount(0, $this->crawler->filter('tr.inactive div:not(.disabled)'));
-        $this->assertCount(0, $this->crawler->filter('tr.active div.disabled'));
-        $this->assertCount(18, $this->crawler->filter('tr.active div:not(.disabled)'));
+        $this->assertCount(2, $this->crawler->filter('tr.inactive td.right.no-wrap div.disabled'));
+        $this->assertCount(0, $this->crawler->filter('tr.inactive td.right.no-wrap div:not(.disabled)'));
+        $this->assertCount(0, $this->crawler->filter('tr.active td.right.no-wrap div.disabled'));
+        $this->assertCount(18, $this->crawler->filter('tr.active td.right.no-wrap div:not(.disabled)'));
     }
 
     /** @test */
@@ -451,6 +573,5 @@ class SearchPageTest extends StoreTestCase
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
             ->see('Vouchers');
-            ;
     }
 }
