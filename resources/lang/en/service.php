@@ -5,7 +5,7 @@ return [
         'vouchers_create' => [
             'success' => 'Created and activated :shortcode :start to :shortcode :end',
         ],
-        'vouchers_batchtransiton' => [
+        'vouchers_batchtransition' => [
             'blocked' => 'The voucher range given contains some vouchers that are not voidable',
             'success' => 'Vouchers :shortcode :start to :shortcode :end have been :transition_to',
         ],

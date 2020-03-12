@@ -70,7 +70,7 @@ class VouchersController extends Controller
             return redirect()
                 ->route('admin.vouchers.void')
                 ->withInput()
-                ->with('error_message', trans('service.messages.vouchers_batchtransiton.blocked'));
+                ->with('error_message', trans('service.messages.vouchers_batchtransition.blocked'));
         };
 
         // Create and reset the transitions route to start point
@@ -118,7 +118,7 @@ class VouchersController extends Controller
         }
 
         // Prepare the message
-        $notification_msg = trans('service.messages.vouchers_batchtransiton.success', [
+        $notification_msg = trans('service.messages.vouchers_batchtransition.success', [
             'transition_to' => end($transitions)->to,
             'shortcode' => $rangeDef->shortcode,
             'start' => $rangeDef->start,

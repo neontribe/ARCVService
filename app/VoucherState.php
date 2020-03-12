@@ -26,7 +26,7 @@ class VoucherState extends Model
 
     /**
      * Inserts a bunch of raw voucher states into the system
-     * For speed, we don't check it, we just ry it!
+     * For speed, we don't check it, we just try it!
      *
      * @param $vouchers
      * @param $time

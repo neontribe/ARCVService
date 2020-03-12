@@ -41,7 +41,7 @@ class AdminUpdateVoucherRequestTest extends StoreTestCase
             ['shortcode' => 'ERR']
         );
 
-        // TODO: Looks ike voucher transitioning might be dependent on trader users
+        // TODO: Looks like voucher transitioning might be dependent on trader users
         $user = factory(User::class)->create();
 
         Auth::login($user);

@@ -339,18 +339,19 @@ class Voucher extends Model
                 return DB::select(
                     "
                     SELECT
+                        # Resolves the sub-queries operation to a table of ranges
                         t1.*, 
                         v1.code as intitial_code,
                         v2.code as final_code
                     FROM (
-                        
                         SELECT
+                            # Variables! allows us to compare the _actual_ start ranges of vouchers.
                             @start := if(end - @previous = 1, @start, end) as start,
                             @initial_id := if(end - @previous = 1, @initial_id, id) as initial_id,
                             @previous := end as end,
                             id as final_id
                         FROM (
-                        
+                            # sub-query that gets the vouchers in a state we want under a specific shortcode. 
                             SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as end
                             FROM vouchers
                             WHERE code REGEXP '^{$shortcode}[0-9]+\$'
@@ -362,10 +363,10 @@ class Voucher extends Model
                     
                     ) AS t1
                         INNER JOIN (
-                    
+                            # Bit of a self join going on in this one to find the end values.
                             SELECT start, max(end) as final
                             FROM (
-                    
+                                 # Look familiar? should do, it's the same as the above, for a comaprative join.
                                  SELECT
                                      @start := if(end - @previous = 1, @start, end) as start,
                                      @initial_id := if(end - @previous = 1, @initial_id, id) as initial_id,

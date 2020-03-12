@@ -155,9 +155,9 @@ class VoucherModelTest extends TestCase
 
         // Create a voucher set ready to go
         $goodCodes = [
-            'tst0123455',
-            'tst0123456',
-            'tst0123457'
+            'TST0123455',
+            'TST0123456',
+            'TST0123457'
         ];
         foreach ($goodCodes as $goodCode) {
             $voucher = factory(Voucher::class, 'requested')->create([
@@ -170,9 +170,9 @@ class VoucherModelTest extends TestCase
 
         // Mangled codes from bad input
         $badCodes = [
-            'tst012 3455',
-            'tst 0123456',
-            'tst0123457'
+            'TST012 3455',
+            'TST 0123456',
+            'TST0123457'
         ];
         // Clean 'em up!
         $cleanCodes = Voucher::cleanCodes($badCodes);
@@ -262,27 +262,27 @@ class VoucherModelTest extends TestCase
     public function testItCanFindASupersetRangeFromARangeSet()
     {
         $rangeCodes = [
-            'tst0101',
-            'tst0102',
-            'tst0103',
-            'tst0104',
-            'tst0105',
+            'TST0101',
+            'TST0102',
+            'TST0103',
+            'TST0104',
+            'TST0105',
 
-            'tst0201',
-            'tst0202',
-            'tst0203',
-            'tst0204',
-            'tst0205',
+            'TST0201',
+            'TST0202',
+            'TST0203',
+            'TST0204',
+            'TST0205',
 
-            'tst0301',
-            'tst0302',
-            'tst0303',
-            'tst0304',
-            'tst0305',
+            'TST0301',
+            'TST0302',
+            'TST0303',
+            'TST0304',
+            'TST0305',
         ];
 
         $sponsor = factory(Sponsor::class)->create(
-            ['shortcode' => 'tst']
+            ['shortcode' => 'TST']
         );
 
         foreach ($rangeCodes as $rangeCode) {
@@ -293,12 +293,12 @@ class VoucherModelTest extends TestCase
         }
 
         $ranges = [
-            Voucher::createRangeDefFromVoucherCodes('tst0101', 'tst0105'),
-            Voucher::createRangeDefFromVoucherCodes('tst0201', 'tst0205'),
-            Voucher::createRangeDefFromVoucherCodes('tst0301', 'tst0305'),
+            Voucher::createRangeDefFromVoucherCodes('TST0101', 'TST0105'),
+            Voucher::createRangeDefFromVoucherCodes('TST0201', 'TST0205'),
+            Voucher::createRangeDefFromVoucherCodes('TST0301', 'TST0305'),
         ];
 
-        $inBoundsRange = Voucher::createRangeDefFromVoucherCodes('tst0202', 'tst0204');
+        $inBoundsRange = Voucher::createRangeDefFromVoucherCodes('TST0202', 'TST0204');
 
         $voucher = new Voucher();
         // Invoke the private method to check a good range

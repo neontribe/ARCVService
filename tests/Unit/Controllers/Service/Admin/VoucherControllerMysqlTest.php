@@ -103,7 +103,7 @@ class VoucherControllerMysqlTest extends StoreTestCase
         $successRoute = route('admin.vouchers.index');
 
         // Set the message to look for
-        $msg = trans('service.messages.vouchers_batchtransiton.success', [
+        $msg = trans('service.messages.vouchers_batchtransition.success', [
             'transition_to' => 'retired',
             'shortcode' => 'TST',
             'start' => 102,
@@ -116,12 +116,14 @@ class VoucherControllerMysqlTest extends StoreTestCase
             ->patch($requestRoute, $data)
             ->followRedirects()
             ->seePageIs($successRoute)
-            ->see($msg);
+            ->see($msg)
+        ;
 
         // fetch those back.
         $vouchers = Voucher::where('currentstate', 'retired')
             ->with('history')
-            ->get();
+            ->get()
+        ;
 
         // Check there are 3.
         $this->assertCount(3, $vouchers);
@@ -149,7 +151,7 @@ class VoucherControllerMysqlTest extends StoreTestCase
             $successRoute = route('admin.vouchers.index');
 
             // Set the message to look for
-            $msg = trans('service.messages.vouchers_batchtransiton.success', [
+            $msg = trans('service.messages.vouchers_batchtransition.success', [
                 'transition_to' => 'retired',
                 'shortcode' => 'TST',
                 'start' => 102,
@@ -162,12 +164,14 @@ class VoucherControllerMysqlTest extends StoreTestCase
                 ->patch($requestRoute, $data)
                 ->followRedirects()
                 ->seePageIs($successRoute)
-                ->see($msg);
+                ->see($msg)
+            ;
 
             // fetch those back.
             $vouchers = Voucher::where('currentstate', 'retired')
                 ->with('history')
-                ->get();
+                ->get()
+            ;
 
             // Check there are 3.
             $this->assertCount(3, $vouchers);
