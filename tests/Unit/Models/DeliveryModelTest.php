@@ -35,7 +35,7 @@ class DeliveryModelTest extends TestCase
     {
         $centre = factory('App\Centre')->create();
 
-        //create three vouchers and transition to collected.
+        // create three vouchers and transition to collected.
         $vs = factory('App\Voucher', 'requested', 3)
             ->create()
             ->each(function ($v) {
@@ -45,6 +45,7 @@ class DeliveryModelTest extends TestCase
                 $v->delivery()->associate($this->delivery);
                 $v->save();
             });
+
         //just to check we have the expected number of vouchers before continuing
         $this->assertEquals($vs->count(), $this->delivery->vouchers()->count());
 

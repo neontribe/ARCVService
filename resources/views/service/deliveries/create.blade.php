@@ -25,6 +25,7 @@
                             @foreach ($sponsor->centres as $centre)
                                 <option value="{{ $centre->id }}" @if(old('centre') == $centre->id) SELECTED @endif >{{ $centre->name }}</option>
                             @endforeach
+                            </optgroup>
                         @endforeach
                     </select>
                     @include('service.partials.validationMessages', array('inputName' => 'centre'))

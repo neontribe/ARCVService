@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Service\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminNewVoucherRequest;
+use App\Http\Requests\AdminUpdateVoucherRequest;
 use App\Sponsor;
 use App\Voucher;
 use App\VoucherState;
+use Auth;
 use Carbon\Carbon;
+use DB;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use Log;
 
 class VouchersController extends Controller
 {
@@ -37,6 +41,97 @@ class VouchersController extends Controller
         $sponsors = Sponsor::all();
         return view('service.vouchers.create', compact('sponsors'));
     }
+
+    /**
+     * Show the void Vouchers form
+     *
+     * @return Factory|view
+     */
+    public function void()
+    {
+        return view('service.vouchers.void');
+    }
+
+    /**
+     * Update Voucher range - specifically, state
+     *
+     * @param AdminUpdateVoucherRequest $request
+     * @return RedirectResponse
+     */
+    public function updateBatch(AdminUpdateVoucherRequest $request)
+    {
+        // Make a rangeDef
+        $rangeDef = Voucher::createRangeDefFromVoucherCodes($request->input('voucher-start'), $request->input('voucher-end'));
+
+        // Check the voucher range is clear to be voided.
+        if (!Voucher::rangeIsVoidable($rangeDef)) {
+            // Whoops! Some of the vouchers may have not be voidable
+            // TODO : report problem voucher ranges.
+            return redirect()
+                ->route('admin.vouchers.void')
+                ->withInput()
+                ->with('error_message', trans('service.messages.vouchers_batchtransition.blocked'));
+        };
+
+        // Create and reset the transitions route to start point
+        $transitions[] = Voucher::createTransitionDef("dispatched", $request->input("transition"));
+        $transitions[] = Voucher::createTransitionDef(end($transitions)->to, 'retire');
+        reset($transitions);
+
+        // Update vouchers or roll back
+        try {
+            DB::transaction(function () use ($rangeDef, $transitions) {
+
+                // Some things we'll be using.
+                $now_time = Carbon::now();
+                $user_id = auth()->id();
+                $user_type = class_basename(auth()->user());
+
+                foreach ($transitions as $transitionDef) {
+                    // Bulk update VoucherStates for speed.
+                    Voucher::select('id')
+                        ->withRangedVouchersInState($rangeDef, $transitionDef->from)
+                        ->chunk(
+                            // Should be big enough chunks to avoid memory problems
+                            10000,
+                            // Closure only has 1 param...
+                            function ($vouchers) use ($now_time, $user_id, $user_type, $transitionDef) {
+                                // ... but method needs 'em all.
+                                VoucherState::batchInsert($vouchers, $now_time, $user_id, $user_type, $transitionDef);
+                                Voucher::whereIn('id', $vouchers->pluck('id'))
+                                    ->update(['currentState' => $transitionDef->to]);
+                            }
+                        )
+                    ;
+                }
+            });
+        } catch (\Throwable $e) {
+            // Oops! Log that
+            Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+            Log::error($e->getMessage()); // Log original error message too
+            Log::error($e->getTraceAsString());
+            // Throw it back to the user
+            return redirect()
+                ->route('admin.vouchers.void')
+                ->withInput()
+                ->with('error_message', 'Database error, unable to transition a voucher.');
+        }
+
+        // Prepare the message
+        $notification_msg = trans('service.messages.vouchers_batchtransition.success', [
+            'transition_to' => end($transitions)->to,
+            'shortcode' => $rangeDef->shortcode,
+            'start' => $rangeDef->start,
+            'end' => $rangeDef->end,
+        ]);
+
+        // Send it.
+        return redirect()
+            ->route('admin.vouchers.index')
+            ->with('notification', $notification_msg)
+            ;
+    }
+
 
     /**
      * Store Voucher range.
@@ -151,7 +246,7 @@ class VouchersController extends Controller
             // printed vouchers should now be redeemable.
         }
 
-        $notification_msg = trans('service.messages.vouchers_create_success', [
+        $notification_msg = trans('service.messages.vouchers_create.success', [
             'shortcode' => $sponsor->shortcode,
             'start' => $request['start'],
             'end' => $request['end'],
