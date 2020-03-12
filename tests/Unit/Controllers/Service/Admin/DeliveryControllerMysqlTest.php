@@ -8,9 +8,9 @@ use App\User;
 use App\Voucher;
 use Auth;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Config;
 use Exception;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\StoreTestCase;
 
 class DeliveryControllerMysqlTest extends StoreTestCase
