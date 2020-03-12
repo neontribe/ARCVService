@@ -44,7 +44,7 @@
                             <button type="submit" name="transition" value="expire">Expire vouchers</button>
                         </div>
                         <div class="col-sm-6 col-lg-9">
-                            <button type="submit" name="transition" value="lose">Void vouchers</button>
+                            <button type="submit" name="transition" value="void">Void vouchers</button>
                         </div>
                     </div>
                 </div>
