@@ -147,13 +147,9 @@ class VoucherManagerTest extends StoreTestCase
         $notices = $registration->getValuation()->getNoticeReasons();
         $this->assertGreaterThan(0, count($notices));
 
-        // We can see only family warnings
+        // We can see the notice reason
         foreach ($notices as $notice) {
-            if ($notice["entity"] == "Family") {
-                $this->see($notice["reason"]);
-            } else {
-                $this->dontSee($notice["reason"]);
-            }
+            $this->see($notice["reason"]);
         }
     }
 
