@@ -8,9 +8,10 @@
 
 namespace App\Traits;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use SM\Factory\FactoryInterface;
 use SM\StateMachine\StateMachine;
+use SM\StateMachine\StateMachineInterface;
 
 /**
  * Class Statable
@@ -26,7 +27,7 @@ trait Statable
     /**
      * gets the FSM associated with the Stateable model.
      *
-     * @return StateMachine|\SM\StateMachine\StateMachineInterface
+     * @return StateMachine|StateMachineInterface
      */
     public function getStateMachine()
     {
@@ -84,10 +85,32 @@ trait Statable
     /**
      * Gets a collection of Models representing the history.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return HasMany
      */
     public function history()
     {
         return $this->hasMany(self::HISTORY_MODEL);
+    }
+
+    /**
+     * Creates a transitionDef object
+     *
+     * @param $fromState
+     * @param $transitionName
+     * @return object
+     */
+    public static function createTransitionDef($fromState, $transitionName)
+    {
+        // Set a transition details, because we can't pull the protected StateMachine config.
+        $transition = config('state-machine.' . self::SM_CONFIG . '.transitions.' . $transitionName) ?? null;
+
+        if ($transition && in_array($fromState, $transition["from"])) {
+            $transitionDef['to'] = $transition['to'];
+            $transitionDef['name'] = $transitionName;
+            $transitionDef['from'] = $fromState;
+            // Send it back to the user
+            return (object) $transitionDef;
+        }
+        return null;
     }
 }

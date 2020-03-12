@@ -10,6 +10,7 @@ use App\Voucher;
 use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use SM\StateMachine\StateMachine;
 use Tests\TestCase;
@@ -154,9 +155,9 @@ class VoucherModelTest extends TestCase
 
         // Create a voucher set ready to go
         $goodCodes = [
-            'tst0123455',
-            'tst0123456',
-            'tst0123457'
+            'TST0123455',
+            'TST0123456',
+            'TST0123457'
         ];
         foreach ($goodCodes as $goodCode) {
             $voucher = factory(Voucher::class, 'requested')->create([
@@ -169,9 +170,9 @@ class VoucherModelTest extends TestCase
 
         // Mangled codes from bad input
         $badCodes = [
-            'tst012 3455',
-            'tst 0123456',
-            'tst0123457'
+            'TST012 3455',
+            'TST 0123456',
+            'TST0123457'
         ];
         // Clean 'em up!
         $cleanCodes = Voucher::cleanCodes($badCodes);
@@ -203,5 +204,132 @@ class VoucherModelTest extends TestCase
 
         $this->assertCount(3, Voucher::confirmed()->get());
         $this->assertEquals([2,3,4], Voucher::confirmed()->pluck('id')->toArray());
+    }
+
+    /**
+     * Here because I can't work out how to test the Stateable Trait well
+     *
+     * @test
+     */
+    public function testItCanCreateAValidTransitionDefinition()
+    {
+        $validTransDef = Voucher::createTransitionDef("ordered", "print");
+
+        $this->assertEquals('print', $validTransDef->name);
+        $this->assertEquals('ordered', $validTransDef->from);
+        $this->assertNotNull('printed', $validTransDef->to);
+
+        // Has an invalid transition name
+        $this->assertNull(Voucher::createTransitionDef("ordered", "spacejam!"));
+
+        // Has an invalid transition "from" state
+        $this->assertNull(Voucher::createTransitionDef("kensington", "printed"));
+    }
+
+    /** @test */
+    public function testItCanCreateARangeDef()
+    {
+        // Make some vouchers
+        $sponsor = factory(Sponsor::class)->create([
+            'shortcode' => "TST",
+        ]);
+        $vouchers[] = factory(Voucher::class)->create([
+            'code' => 'TST0010',
+            'sponsor_id' => $sponsor->id,
+        ]);
+        $vouchers[] = factory(Voucher::class)->create([
+            'code' => 'TST1000',
+            'sponsor_id' => $sponsor->id,
+        ]);
+
+        // Make some input
+        $validRangeDef = Voucher::createRangeDefFromVoucherCodes(reset($vouchers)->code, end($vouchers)->code);
+
+        $this->assertEquals($sponsor->id, $validRangeDef->sponsor_id);
+        $this->assertInternalType('integer', $validRangeDef->sponsor_id);
+        $this->assertEquals($sponsor->shortcode, $validRangeDef->shortcode);
+        $this->assertEquals(10, $validRangeDef->start);
+        $this->assertInternalType('integer', $validRangeDef->start);
+        $this->assertEquals(1000, $validRangeDef->end);
+        $this->assertInternalType('integer', $validRangeDef->end);
+
+        // If you pass it a duff shortcode, it takes exception
+        $this->expectException(ModelNotFoundException::class);
+        Voucher::createRangeDefFromVoucherCodes('INV999998', 'INV999999');
+    }
+
+    /** @test */
+    public function testItCanFindASupersetRangeFromARangeSet()
+    {
+        $rangeCodes = [
+            'TST0101',
+            'TST0102',
+            'TST0103',
+            'TST0104',
+            'TST0105',
+
+            'TST0201',
+            'TST0202',
+            'TST0203',
+            'TST0204',
+            'TST0205',
+
+            'TST0301',
+            'TST0302',
+            'TST0303',
+            'TST0304',
+            'TST0305',
+        ];
+
+        $sponsor = factory(Sponsor::class)->create(
+            ['shortcode' => 'TST']
+        );
+
+        foreach ($rangeCodes as $rangeCode) {
+            $voucher = factory(Voucher::class, 'requested')->create([
+                'code' => $rangeCode,
+                'sponsor_id' => $sponsor->id,
+            ]);
+        }
+
+        $ranges = [
+            Voucher::createRangeDefFromVoucherCodes('TST0101', 'TST0105'),
+            Voucher::createRangeDefFromVoucherCodes('TST0201', 'TST0205'),
+            Voucher::createRangeDefFromVoucherCodes('TST0301', 'TST0305'),
+        ];
+
+        $inBoundsRange = Voucher::createRangeDefFromVoucherCodes('TST0202', 'TST0204');
+
+        $voucher = new Voucher();
+        // Invoke the private method to check a good range
+        $range = $this->invokeMethod($voucher, 'getContainingRange', [
+            $inBoundsRange->start,
+            $inBoundsRange->end,
+            $ranges
+        ]);
+
+        $this->assertEquals(201, $range->start);
+        $this->assertEquals(205, $range->end);
+
+        // Send a bad rang through
+        $range = $this->invokeMethod($voucher, 'getContainingRange', [
+            202,
+            209,
+            $ranges
+        ]);
+        $this->assertNull($range);
+    }
+
+    // Cheeky method for accessing private methods.
+    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    {
+        try {
+            $reflection = new \ReflectionClass(get_class($object));
+            $method = $reflection->getMethod($methodName);
+            $method->setAccessible(true);
+            return $method->invokeArgs($object, $parameters);
+        } catch (\ReflectionException $e) {
+            return null;
+        }
     }
 }

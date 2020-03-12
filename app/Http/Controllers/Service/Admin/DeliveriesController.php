@@ -22,31 +22,6 @@ use Throwable;
 class DeliveriesController extends Controller
 {
     /**
-     * Determines if the given voucher range contains entries already delivered
-     *
-     * @param $start
-     * @param $end
-     * @param $shortcode
-     * @return bool
-     * @throws Throwable
-     */
-    public static function rangeIsUndelivered($start, $end, $shortcode)
-    {
-        $undeliveredRanges = Voucher::getUndeliveredVoucherRangesByShortCode($shortcode);
-
-        foreach ($undeliveredRanges as $undeliveredRange) {
-            // Are Start and End both in the range?
-            if ($start >= $undeliveredRange->initial_serial &&
-                $end <= $undeliveredRange->serial &&
-                $start <= $end ) {
-                return true;
-            };
-        }
-        // Start and End within none of the free ranges, if any were returned.
-        return false;
-    }
-
-    /**
      * Display a listing of Sponsors.
      *
      * @param Request $request
@@ -74,7 +49,6 @@ class DeliveriesController extends Controller
         return view('service.deliveries.create', compact('sponsors'));
     }
 
-
     /**
      * @param AdminNewDeliveryRequest $request
      * @return RedirectResponse
@@ -82,35 +56,34 @@ class DeliveriesController extends Controller
      */
     public function store(AdminNewDeliveryRequest $request)
     {
-        // Get centre
-        $centre = Centre::findOrFail($request->input('centre'));
-
-        $startCode = $request->input('voucher-start');
-        $endCode = $request->input('voucher-end');
-
-        // Break the codes up.
-        $start = Voucher::splitShortcodeNumeric($startCode);
-        $start["number"] = intval($start["number"]);
-
-        $end = Voucher::splitShortcodeNumeric($endCode);
-        $end["number"] = intval($end["number"]);
+        // Make a rangeDef
+        $rangeDef = Voucher::createRangeDefFromVoucherCodes($request->input('voucher-start'), $request->input('voucher-end'));
 
         // Check the voucher range is clear to be delivered.
-        if (!self::rangeIsUndelivered($start["number"], $end["number"], $start["shortcode"])) {
+        if (!Voucher::rangeIsDeliverable($rangeDef)) {
             // Whoops! Some of the vouchers may have been delivered
+            // TODO : report problem voucher ranges.
             return redirect()
                 ->route('admin.deliveries.create')
                 ->withInput()
-                ->with('error_message', 'The voucher range given contains some vouchers that have already been delivered.');
+                ->with('error_message', trans('service.messages.vouchers_delivery.blocked'));
         };
+
+        // Get centre
+        $centre = Centre::findOrFail($request->input('centre'));
+
+        // Make a transition definition
+        $transitions[] = Voucher::createTransitionDef("printed", "dispatch");
 
         // Create delivery or roll back
         try {
-            DB::transaction(function () use ($start, $end, $centre, $request) {
+            DB::transaction(function () use ($rangeDef, $transitions, $centre, $request) {
 
                 $delivery = Delivery::create([
                     'centre_id' => $centre->id,
-                    'range' => $start[0] . " - " . $end[0],
+                    'range' => $rangeDef->shortcode . $rangeDef->start .
+                        " - " .
+                        $rangeDef->shortcode . $rangeDef->end,
                     'dispatched_at' => Carbon::createFromFormat('Y-m-d', $request->input('date-sent')),
                 ]);
 
@@ -119,56 +92,29 @@ class DeliveriesController extends Controller
                 $user_type = class_basename(auth()->user());
 
                 // Bulk update VoucherStates for speed.
-                Voucher::select('id')
-                    ->where('currentState', 'printed')
-                    ->whereNull('delivery_id')
-                    ->where('code', 'REGEXP', "^{$start["shortcode"]}[0-9]+\$") // Just vouchers that start with our shortcode
-                    ->whereBetween(
-                        DB::raw("cast(replace(code, '{$start["shortcode"]}', '') as signed)"),
-                        [$start["number"], $end["number"]]
-                    )->chunk(
-                        // should be big enough chunks to avoid memory problems
-                        10000,
-                        function ($vouchers) use ($now_time, $user_id, $user_type) {
-                            $states =[];
-                            // create VoucherState
-                            foreach ($vouchers as $voucher) {
-                                $s = new VoucherState();
-
-                                // Set initial attributes
-                                $s->transition = 'dispatch';
-                                $s->from = 'printed';
-                                $s->voucher_id = $voucher->id;
-                                $s->to = 'dispatched';
-                                $s->created_at = $now_time;
-                                $s->updated_at = $now_time;
-                                $s->source = "";
-                                $s->user_id = $user_id; // the user ID
-                                $s->user_type = $user_type; // the type of user
-
-                                // Add them to the array.
-                                $states[] = $s->attributesToArray();
+                foreach ($transitions as $transitionDef) {
+                    DB::enableQueryLog();
+                    Voucher::select('id')
+                        ->whereNull('delivery_id')
+                        ->withRangedVouchersInState($rangeDef, 'printed')
+                        ->chunk(
+                            // should be big enough chunks to avoid memory problems
+                            10000,
+                            // Closure only has 1 param...
+                            function ($vouchers) use ($now_time, $user_id, $user_type, $transitionDef, $delivery) {
+                                // ... but method needs 'em.
+                                VoucherState::batchInsert($vouchers, $now_time, $user_id, $user_type, $transitionDef);
+                                // Get all the vouchers in the current chunk and update them with the delivery Id and state
+                                Voucher::whereIn('id', $vouchers->pluck('id'))
+                                    ->update([
+                                        'delivery_id' => $delivery->id,
+                                        'currentState' => $transitionDef->to
+                                    ]);
                             }
-                            // Insert this batch of vouchers.
-                            VoucherState::insert($states);
-                        }
-                    );
-
-                // Get all the vouchers in the range and update them with the delivery Id and state
-                Voucher::where('currentState', 'printed')
-                    ->whereNull('delivery_id')
-                    ->where('code', 'REGEXP', "^{$start["shortcode"]}[0-9]+\$") // Just vouchers that start with our shortcode
-                    ->whereBetween(
-                        DB::raw("cast(replace(code, '{$start["shortcode"]}', '') as signed)"),
-                        [$start["number"], $end["number"]]
-                    )
-                    ->update([
-                        'delivery_id' => $delivery->id,
-                        'currentState' => 'dispatched'
-                        ]);
+                        );
+                }
             });
         } catch (Throwable $e) {
-            // Oops! Log that
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getMessage()); // Log original error message too
             Log::error($e->getTraceAsString());
@@ -181,6 +127,6 @@ class DeliveriesController extends Controller
         // Success
         return redirect()
             ->route('admin.deliveries.index')
-            ->with('message', 'Delivery to ' . $centre->name . ' created.');
+            ->with('message', trans('service.messages.vouchers_delivery.success', ['centre_name' => $centre->name]));
     }
 }
