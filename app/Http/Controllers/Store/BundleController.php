@@ -57,15 +57,6 @@ class BundleController extends Controller
 
         $valuation = $registration->getValuation();
 
-        // We only need the reasons at family level.
-        // TODO: move this to a Valuation if we use this elsewhere.
-        $familyNoticeReasons = array_filter(
-            $valuation->getNoticeReasons(),
-            function ($notice) {
-                return $notice["entity"] == "Family";
-            }
-        );
-
         return view('store.manage_vouchers', array_merge(
             $data,
             [
@@ -78,7 +69,7 @@ class BundleController extends Controller
                 "vouchers" => $sorted_bundle,
                 "vouchers_amount" => count($bundle),
                 "entitlement" => $valuation->getEntitlement(),
-                "noticeReasons" => $familyNoticeReasons
+                "noticeReasons" => $valuation->getNoticeReasons()
             ]
         ));
     }
