@@ -907,10 +907,13 @@ SEARCH PAGE
 	outline-offset: 0px;
 }
 
+.checkbox-control.relative {
+	display: flex;
+}
+
 .checkbox-control {
 	flex: 0 1 20%;
 	padding-left: 55px;
-	position: relative;
 	margin-top: 24px;
 }
 
