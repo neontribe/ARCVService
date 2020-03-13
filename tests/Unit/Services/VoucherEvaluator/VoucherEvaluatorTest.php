@@ -295,8 +295,6 @@ class VoucherEvaluatorTest extends TestCase
         // Check there's two
         $this->assertEquals(2, count($notices));
 
-        dd($notices);
-
         // Check the correct credit type is applied.
         $this->assertNotContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $notices);
         $this->assertContains(self::NOTICE_TYPES['ChildIsAlmostSecondarySchoolAge'], $notices);
