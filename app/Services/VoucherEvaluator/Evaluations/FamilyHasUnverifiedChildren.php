@@ -35,15 +35,17 @@ class FamilyHasUnverifiedChildren extends BaseFamilyEvaluation
         $satisfiers = array_filter(
             $children,
             function ($child) {
-                // If we satisfy the rule
+                // If we satisfy the rule by finding a kid who has ID
                 return ($this->specification->isSatisfiedBy($child));
             }
         );
 
-        if (empty($satisfiers)) {
-            // There are no qualifying kids
+        // If the number of kids is not equal to kids with ID ...
+        if (count($satisfiers) !== count($children)) {
+            // ... there are some kids needing ID
             return $this->success();
         } else {
+            // ... all kids have it, or there are no kids.
             return $this->fail();
         }
     }
