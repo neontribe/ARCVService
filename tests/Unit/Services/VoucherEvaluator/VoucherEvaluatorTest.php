@@ -292,8 +292,10 @@ class VoucherEvaluatorTest extends TestCase
         $evaluation = $evaluator->evaluate($child);
         $notices = $evaluation["notices"];
 
-        // Check there's one, because no other event is pending.
-        $this->assertEquals(1, count($notices));
+        // Check there's two
+        $this->assertEquals(2, count($notices));
+
+        dd($notices);
 
         // Check the correct credit type is applied.
         $this->assertNotContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $notices);
