@@ -31,7 +31,7 @@
                 </select>
             </div>
             {{-- Families left checkbox --}}
-            <div class="checkbox-control relative">
+            <div class="checkbox-control">
                 <input type="checkbox" class="styled-checkbox no-margin" id="families_left" name="families_left" {{
                     Request::get("families_left") ? 'checked' : '' }} />
                 <label for="families_left">Show families who have left</label>
