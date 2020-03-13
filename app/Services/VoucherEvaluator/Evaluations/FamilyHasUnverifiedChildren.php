@@ -32,10 +32,11 @@ class FamilyHasUnverifiedChildren extends BaseFamilyEvaluation
 
         $children = $candidate->children->all();
 
+        // Get a list of kids who have ID.
         $satisfiers = array_filter(
             $children,
             function ($child) {
-                // If we satisfy the rule by finding a kid who has ID
+                // We satisfy if a Kid has ID
                 return ($this->specification->isSatisfiedBy($child));
             }
         );
