@@ -43,18 +43,21 @@ class FamilyHasNoEligibleChildren extends BaseFamilyEvaluation
 
         $children = $candidate->children->all();
 
+        // Get a list of kids who can qualify others
         $satisfiers = array_filter(
             $children,
             function ($child) {
-                // If we satisfy the rule
+                // We satisfy them
                 return ($this->specification->isSatisfiedBy($child));
             }
         );
 
+        // Check if there are kids who might qualify others ...
         if (empty($satisfiers)) {
-            // There are no qualifying kids
+            // ... there are none, pass this rule
             return $this->success();
         } else {
+            // ... there are some, fail this rule.
             return $this->fail();
         }
     }
