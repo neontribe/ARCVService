@@ -116,12 +116,16 @@ class EvaluatorFactory
                 'notices' => [
                     // warn if we're almost 1yo
                     new ChildIsAlmostOne($offsetDate),
-                    // or if under school age
-                    new ChildIsUnderSchoolAge($offsetDate),
+
+                    // ... or if under school age; turns out we don't need this here!
+                    # new ChildIsUnderSchoolAge($offsetDate),
+
                     // ... or if almost primary school age
                     new ChildIsAlmostSchoolAge($offsetDate),
-                    // ... or if actually primary school age
-                    new ChildIsSchoolAge($offsetDate),
+
+                    // ... or if actually primary school age; turns out we don't need this here!
+                    # new ChildIsSchoolAge($offsetDate)
+
                     // ... or if almost secondary school age
                     new ChildIsAlmostSecondarySchoolAge($offsetDate),
                 ],
