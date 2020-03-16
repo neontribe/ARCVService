@@ -908,10 +908,11 @@ SEARCH PAGE
 }
 
 .checkbox-control {
+	display: flex;
 	flex: 0 1 20%;
+	margin-top: 24px;
 	padding-left: 55px;
 	position: relative;
-	margin-top: 24px;
 }
 
 .checkbox-control label::before {

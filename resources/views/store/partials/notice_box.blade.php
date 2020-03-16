@@ -5,7 +5,10 @@
     <div id="family-warning">
         @foreach( $noticeReasons as $notices )
         <p class="v-spaced">
-            {{ $notices['count'] }} {{ str_plural($notices['entity'], $notices['count']) }} currently {{$notices['reason'] }}
+            {{ $notices['count'] === 1 ? 'A' : $notices['count'] }} {{ str_plural(strtolower($notices['entity']),
+            $notices['count'])
+            }} currently
+            {{$notices['reason'] }}
         </p>
         @endforeach
     </div>

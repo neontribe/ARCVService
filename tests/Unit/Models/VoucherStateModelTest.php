@@ -2,10 +2,11 @@
 
 namespace Tests\Unit;
 
+use App\AdminUser;
+use Carbon\Carbon;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use SM\SMException;
 use App\Voucher;
 use App\VoucherState;
 use App\StateToken;
@@ -17,20 +18,22 @@ class VoucherStateModelTest extends TestCase
 {
     use DatabaseMigrations, DatabaseTransactions;
 
-    protected $user;
+    protected $marketUser;
+    protected $adminUser;
 
     public function setUp()
     {
         parent::setUp();
-        $this->user = factory(User::class)->create();
+        $this->marketUser = factory(User::class)->create();
+        $this->adminUser = factory(AdminUser::class)->create();
     }
 
-
+    /** @test */
     public function testProgressVoucherState()
     {
 
         // We need an auth's user to progress the voucher states.
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
 
         $voucher = factory(Voucher::class, 'requested')->create();
 
@@ -49,10 +52,11 @@ class VoucherStateModelTest extends TestCase
         $this->assertEquals(2, $voucher->history()->count());
     }
 
+    /** @test */
     public function testTransitionAllowed()
     {
         // We need an auth's user to progress the voucher states.
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
 
         $voucher = factory(Voucher::class, 'requested')->create();
 
@@ -63,12 +67,13 @@ class VoucherStateModelTest extends TestCase
     }
 
     /**
+     * @test
      * @expectedException \SM\SMException
      */
     public function testInvalidTransition()
     {
         // We need an auth's user to progress the voucher states.
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
 
         $voucher = factory(Voucher::class, 'requested')->create();
         // This will throw exception $this->expectException() wasn't defined
@@ -76,9 +81,10 @@ class VoucherStateModelTest extends TestCase
         $voucher->state('collect');
     }
 
+    /** @test */
     public function testAPrintedVoucherCanBeCollected()
     {
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
         $voucher = factory(Voucher::class, 'requested')->create();
 
         $voucher->applyTransition('order');
@@ -88,9 +94,10 @@ class VoucherStateModelTest extends TestCase
         $this->assertEquals($voucher->currentstate, 'recorded');
     }
 
+    /** @test */
     public function testADispatchedVoucherCanBeCollected()
     {
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
         $voucher = factory(Voucher::class, 'requested')->create();
 
         $voucher->applyTransition('order');
@@ -101,9 +108,71 @@ class VoucherStateModelTest extends TestCase
         $this->assertEquals($voucher->currentstate, 'recorded');
     }
 
+    /** @test */
+    public function testOnlyADispatchedVoucherCanBeExpiredOrVoided()
+    {
+        Auth::login($this->marketUser);
+        $v = factory(Voucher::class, 'requested')->create();
+        $this->assertEquals($v->currentstate, 'requested');
+
+        // Cant get there from requested
+        $this->assertFalse($v->transitionAllowed("expire"));
+        $this->assertFalse($v->transitionAllowed("void"));
+
+        $route = [
+            'order' => 'ordered',
+            'print' => 'printed',
+            'dispatch' => 'dispatched',
+            'collect' => 'recorded',
+            'confirm' =>'payment_pending',
+            'payout' => 'reimbursed',
+        ];
+
+        // Lets follow that route and see if we can fall off it.
+        foreach ($route as $transition => $state) {
+            $v->applyTransition($transition);
+            $this->assertEquals($v->currentstate, $state);
+            if ($state === 'dispatched') {
+                $this->assertTrue($v->transitionAllowed("expire"));
+                $this->assertTrue($v->transitionAllowed("void"));
+            } else {
+                $this->assertFalse($v->transitionAllowed("expire"));
+                $this->assertFalse($v->transitionAllowed("void"));
+            }
+        }
+    }
+
+    /** @test */
+    public function testAnExpiredOrVoidedVoucherCanBeRetired()
+    {
+        Auth::login($this->marketUser);
+        $vouchers = factory(Voucher::class, 'requested', 2)
+            ->create()
+            ->each(function ($voucher) {
+                $voucher->applyTransition('order');
+                $voucher->applyTransition('print');
+                $voucher->applyTransition('dispatch');
+            });
+
+        $v1 = $vouchers->first();
+        $v2 = $vouchers->last();
+
+        $v1->applyTransition('expire');
+        $this->assertEquals($v1->currentstate, 'expired');
+        $this->assertTrue($v1->transitionAllowed("retire"));
+        $v1->applyTransition('retire');
+        $this->assertEquals($v1->currentstate, 'retired');
+
+        $v2->applyTransition('void');
+        $this->assertEquals($v2->currentstate, 'voided');
+        $this->assertTrue($v2->transitionAllowed("retire"));
+        $v2->applyTransition('retire');
+        $this->assertEquals($v2->currentstate, 'retired');
+    }
+    /** @test */
     public function testARecordedVoucherCanBeRejectedBackToPrinted()
     {
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
         $voucher = factory(Voucher::class, 'requested')->create();
 
         $voucher->applyTransition('order');
@@ -114,9 +183,10 @@ class VoucherStateModelTest extends TestCase
         $this->assertEquals($voucher->currentstate, 'printed');
     }
 
+    /** @test */
     public function testARecordedVoucherCanBeRejectedBackToDispatched()
     {
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
         $voucher = factory(Voucher::class, 'requested')->create();
 
         $voucher->applyTransition('order');
@@ -128,10 +198,11 @@ class VoucherStateModelTest extends TestCase
         $this->assertEquals($voucher->currentstate, 'dispatched');
     }
 
+    /** @test */
     public function testAVoucherMayHaveAStateToken()
     {
         // Make a voucher
-        Auth::login($this->user);
+        Auth::login($this->marketUser);
         $voucher = factory(Voucher::class, 'requested')->create();
         $voucher->applyTransition('order');
         $voucher->applyTransition('print');
@@ -152,5 +223,31 @@ class VoucherStateModelTest extends TestCase
         // See that it has one
         $this->assertFalse(empty($state->stateToken));
         $this->assertEquals("aStringOfCharacters", $state->stateToken->uuid);
+    }
+
+    /** @test */
+    public function testItCanBatchInsertVoucherStates()
+    {
+        // Make a 100 vouchers
+        Auth::login($this->adminUser);
+        $vouchers = factory(Voucher::class, 'requested', 100)->create();
+
+        // Order them the normal way
+        foreach ($vouchers as $voucher) {
+            $voucher->applyTransition('order');
+        }
+
+        // Check they're Ordered.
+        $this->assertequals(100, VoucherState::where('to', 'ordered')->count());
+
+        // Batch transition
+        $now = Carbon::now();
+        $user_id = auth()->user()->id;
+        $user_type = class_basename(auth()->user());
+        $transitionDef = Voucher::createTransitionDef('ordered', 'print');
+        VoucherState::batchInsert($vouchers, $now, $user_id, $user_type, $transitionDef);
+
+        // Check they're Printed.
+        $this->assertequals(100, VoucherState::where('to', 'printed')->count());
     }
 }

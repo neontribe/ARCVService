@@ -72,7 +72,7 @@ class VoucherControllerTest extends TestCase
         $shortcode = $this->market->sponsor_shortcode;
         $start = '1';
         $end = '10';
-        $notification_msg = trans('service.messages.vouchers_create_success',[
+        $notification_msg = trans('service.messages.vouchers_create.success',[
             'shortcode' => $shortcode,
             'start' => $start,
             'end' => $end,

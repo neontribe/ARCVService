@@ -108,10 +108,8 @@ SELECT
   market_area AS 'Trader\'s Area',
   payment_request_date AS 'Date Received for Reimbursement',
   reimbursed_date AS 'Reimbursed Date',
-
-  # These to be filled by other cards
-  '' AS 'Void Voucher Date',
-  '' AS 'Void Reason',
+  retired_date AS 'Void Voucher Date',
+  retire_reason AS 'Void Reason',
   CURDATE() AS 'Date file was Downloaded'
 
 FROM vouchers
@@ -168,6 +166,25 @@ FROM vouchers
   ) AS reimburse_query
     ON reimburse_query.voucher_id = vouchers.id
 
+  # Pivot retired date
+  LEFT JOIN (
+    SELECT voucher_states.voucher_id,
+           voucher_states.created_at AS retired_date
+    FROM voucher_states
+    WHERE voucher_states.`to` = 'retired'
+  ) AS retire_query
+    ON retire_query.voucher_id = vouchers.id
+      
+  # Pivot ans supply the appropriate reason from voucher states   
+  LEFT JOIN (
+    SELECT voucher_states.voucher_id,
+           voucher_states.to AS retire_reason
+    FROM voucher_states
+    # it shouldn't be possible to have multiple of these...
+    WHERE voucher_states.`to` in ('expired', 'voided')
+  ) AS retire_reason_query
+    ON retire_reason_query.voucher_id = vouchers.id
+      
   # Get fields relevant to voucher's delivery (Date, target centre and centre's area)
   LEFT JOIN deliveries ON vouchers.delivery_id = deliveries.id
   LEFT JOIN
