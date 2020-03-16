@@ -87,7 +87,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 input[type=number] {
-    -moz-appearance:textfield;
+    -moz-appearance: textfield;
 }
 
 input[type="radio"],
@@ -1401,7 +1401,7 @@ ADD CHILD FORM PARTIAL
 with overrides to display with a label above rather than inline */
 #dob-verified {
     position: absolute;
-    top: 20px;
+	top: 20px;
 }
 
 #dob-verified + label {
@@ -1411,6 +1411,22 @@ with overrides to display with a label above rather than inline */
 #dob-verified + label::before {
     top: 20px;
 }
+
+/* on Firefox, this element is slightly misaligned at 20px */
+@-moz-document url-prefix() {
+	#dob-verified + label::before {
+		top: 21px;
+	}
+}
+
+/* >=Safari 10.1+ <= Safari 13 */
+/* need this to fix a browser rendering issue where the checkbox is misaligned in Safari 12.4 and lower */
+@media not all and (min-resolution:.001dpcm)
+{ @supports (-webkit-appearance:none) {
+	#dob-verified + label::before {
+		top: 22px;
+	}
+}}
 
 #dob-verified:checked + label::after {
     top: 30px;
