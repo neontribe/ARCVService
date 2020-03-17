@@ -39,7 +39,7 @@ ENV APP_NAME ARCVService
 ENV APP_SEEDS 'Dev'
 ENV APP_TIMEZONE Europe/London
 ENV APP_URL http://0.0.0.0:8000
-ENV APP_VER 1.8.0
+ENV APP_VER 1.9.0
 ENV ARC_MARKET_URL https://voucher-staging.alexandrarose.org.uk
 ENV ARC_SCHOOL_MONTH 9
 ENV ARC_SERVICE_DOMAIN arcv-service.test
