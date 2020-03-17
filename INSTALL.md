@@ -63,4 +63,4 @@ Do the steps below:
 
 ## Resources
 1. [Laravel Homestead official documentation](https://laravel.com/docs/5.5/homestead)
-2. [ARC Service Readme file](https://github.com/neontribe/ARCVService/blob/1.8/release/README.md)
+2. [ARC Service Readme file](https://github.com/neontribe/ARCVService/blob/1.9/release/README.md)
