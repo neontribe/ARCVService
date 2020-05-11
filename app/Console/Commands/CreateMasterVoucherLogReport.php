@@ -5,10 +5,12 @@ namespace App\Console\Commands;
 use Carbon\Carbon;
 use DB;
 use Excel;
+use Exception;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Console\Command;
 use Log;
 use Maatwebsite\Excel\Writers\LaravelExcelWriter;
+use PDO;
 use ZipStream\Exception\OverflowException;
 use ZipStream\Option\Archive;
 use ZipStream\ZipStream;
@@ -24,8 +26,7 @@ class CreateMasterVoucherLogReport extends Command
                             {--force : Execute without confirmation, eg for automation}
                             {--no-zip : Don\'t wrap files in a single archive}
                             {--plain : Don\'t encrypt contents of files}
-                            '
-    ;
+                            ';
 
     /**
      * The console command description.
@@ -87,36 +88,36 @@ class CreateMasterVoucherLogReport extends Command
 SELECT
   vouchers.code AS 'Voucher Number',
   voucher_sponsor.name AS 'Voucher Area',
-  printed_date AS 'Date Printed',
+  (select created_at from voucher_states where vouchers.id = voucher_id and `to` = 'printed' order by id desc limit 1) AS 'Date Printed',
   deliveries.dispatched_at as 'Date Distributed',
   delivery_centres.name AS 'Distributed to Centre',
   delivery_areas.name AS 'Distributed to Area',      
-
   CASE
       WHEN (disbursed_at is null) AND (pri_carer_name is not null) THEN 'True'
       WHEN (disbursed_at is not null) AND (pri_carer_name is not null) THEN 'False'
   END
   AS 'Waiting for collection',
-
   disbursed_at AS 'Date Issued',
   rvid AS 'RVID',
   pri_carer_name AS 'Main Carer',
   disbursing_centre AS 'Disbursing Centre',
-  recorded_date  AS 'Date Trader Recorded Voucher',
+  (select created_at from voucher_states where vouchers.id = voucher_id and `to` = 'recorded' order by id desc limit 1)  AS 'Date Trader Recorded Voucher',
   trader_name AS 'Retailer Name',
   market_name AS 'Retail Outlet',
   market_area AS 'Trader\'s Area',
-  payment_request_date AS 'Date Received for Reimbursement',
-  reimbursed_date AS 'Reimbursed Date',
-  retired_date AS 'Void Voucher Date',
-  retire_reason AS 'Void Reason',
+  (select min(voucher_states.created_at)
+    FROM voucher_states
+    WHERE voucher_states.`to` = 'payment_pending'
+    and vouchers.id = voucher_id 
+    group by voucher_id
+    limit 1) AS 'Date Received for Reimbursement',
+  (select created_at from voucher_states where vouchers.id = voucher_id and `to` = 'reimbursed' order by id desc limit 1) AS 'Reimbursed Date',
+  (select created_at from voucher_states where vouchers.id = voucher_id and `to` = 'retired' order by id desc limit 1)  AS 'Void Voucher Date',
+  (select created_at from voucher_states where vouchers.id = voucher_id and `to` in ('expired', 'voided') order by id desc limit 1) AS 'Void Reason',
   CURDATE() AS 'Date file was Downloaded'
-
 FROM vouchers
-
   # get the voucher sponsor.
   LEFT JOIN sponsors as voucher_sponsor on vouchers.sponsor_id = voucher_sponsor.id
-
   # Get our trader, market and sponsor names
   LEFT JOIN (
     SELECT traders.id,
@@ -128,63 +129,6 @@ FROM vouchers
     LEFT JOIN sponsors on markets.sponsor_id = sponsors.id
   ) AS markets_query
     ON markets_query.id = vouchers.trader_id
-
-  # Pivot printed date
-  LEFT JOIN (
-    SELECT voucher_states.voucher_id,
-           voucher_states.created_at AS printed_date
-    FROM voucher_states
-    WHERE voucher_states.`to` = 'printed'
-  ) AS printed_query
-    ON printed_query.voucher_id = vouchers.id
-
-  # Pivot recorded date
-  LEFT JOIN (
-    SELECT voucher_states.voucher_id,
-           voucher_states.created_at AS recorded_date
-    FROM voucher_states
-    WHERE voucher_states.`to` = 'recorded'
-  ) AS dispatch_query
-    ON dispatch_query.voucher_id = vouchers.id
-
-  # Pivot payment_request date
-  LEFT JOIN (
-    SELECT voucher_states.voucher_id,
-           min(voucher_states.created_at) AS payment_request_date
-    FROM voucher_states
-    WHERE voucher_states.`to` = 'payment_pending'
-    GROUP BY voucher_states.voucher_id
-  ) AS payment_request_query
-    ON payment_request_query.voucher_id = vouchers.id
-
-  # Pivot reimbursed date
-  LEFT JOIN (
-    SELECT voucher_states.voucher_id,
-           voucher_states.created_at AS reimbursed_date
-    FROM voucher_states
-    WHERE voucher_states.`to` = 'reimbursed'
-  ) AS reimburse_query
-    ON reimburse_query.voucher_id = vouchers.id
-
-  # Pivot retired date
-  LEFT JOIN (
-    SELECT voucher_states.voucher_id,
-           voucher_states.created_at AS retired_date
-    FROM voucher_states
-    WHERE voucher_states.`to` = 'retired'
-  ) AS retire_query
-    ON retire_query.voucher_id = vouchers.id
-      
-  # Pivot ans supply the appropriate reason from voucher states   
-  LEFT JOIN (
-    SELECT voucher_states.voucher_id,
-           voucher_states.to AS retire_reason
-    FROM voucher_states
-    # it shouldn't be possible to have multiple of these...
-    WHERE voucher_states.`to` in ('expired', 'voided')
-  ) AS retire_reason_query
-    ON retire_reason_query.voucher_id = vouchers.id
-      
   # Get fields relevant to voucher's delivery (Date, target centre and centre's area)
   LEFT JOIN deliveries ON vouchers.delivery_id = deliveries.id
   LEFT JOIN
@@ -193,7 +137,6 @@ FROM vouchers
   LEFT JOIN
      sponsors as delivery_areas
         ON delivery_areas.id = delivery_centres.sponsor_id
-
   # Get fields relevant to bundles (pri_carer/RVID/disbursed_at,disbursing_centre)
   LEFT JOIN (
     SELECT bundles.id,
@@ -207,10 +150,8 @@ FROM vouchers
       LEFT JOIN families ON registrations.family_id = families.id
       LEFT JOIN centres cf ON families.initial_centre_id = cf.id
       LEFT JOIN centres cb ON bundles.disbursing_centre_id = cb.id
-
       # Need to join the Primary Carer here; Primary Carers are only relevant via bundles.
       LEFT JOIN (
-
         # We need the *first*, by self join grouping (classic technique, so SQLite can cope)
         SELECT t1.name, t1.family_id
         FROM carers t1
@@ -223,7 +164,10 @@ FROM vouchers
         ON families.id = pri_carer_query.family_id
   ) AS rvid_query
     ON rvid_query.id = vouchers.bundle_id
-;
+
+order by vouchers.id desc
+LIMIT ?
+OFFSET ?
 EOD;
 
     /**
@@ -253,22 +197,39 @@ EOD;
     {
         // Assess permission to continue
         if ($this->option('force') || $this->warnUser()) {
-            // We're going to run this monster *once* and then split it into files.
             // We could run it once per sponsor; consider that if it becomes super-unwieldy.
 
-            $rows = array_map(
-                // Cast each element to proper array, not stdObjects as returned by DB::select()
-                function ($value) {
-                    return (array)$value;
-                },
-                DB::select($this->report)
-            );
+            $rows = [];
+            $continue = true;
+            $lookups = 0;
+            $chunkSize = 50000;
+
+            Log::info("starting query, mem :" . memory_get_usage());
+
+            while ($continue) {
+                $chunk = $this->execQuery($chunkSize, $chunkSize * $lookups);
+
+                if (count($chunk) < $chunkSize) {
+                    $continue = false;
+                }
+
+                $rows = array_merge($rows, $chunk);
+                $lookups++;
+                $chunk = null;
+                unset($chunk);
+
+                $mem = memory_get_usage();
+                Log::info($lookups . 'x' . $chunkSize . ', skip ' . $chunkSize * $lookups . ",mem :" . $mem);
+            }
+
+            Log::info("finished query, meme:" . $mem);
 
             // Set the disk
             $this->disk = ($this->option('plain'))
                 ? 'local'
-                : 'enc'
-            ;
+                : 'enc';
+
+            Log::info("using " . $this->disk);
 
             // Make a zip archive, or not.
             if (!$this->option('no-zip')) {
@@ -291,6 +252,8 @@ EOD;
                 $za = null;
                 $zaOutput = null;
             }
+
+            Log::info("beginning file write, mem:" . memory_get_usage());
 
             // Create and write a sheet for all data.
             $excelDoc = $this->createWorkSheet('ALL', $rows);
@@ -334,46 +297,23 @@ EOD;
     }
 
     /**
-     * Encrypts and stashes files.
+     * Warn the user before they execute.
      *
-     * @param LaravelExcelWriter $excelDoc
-     * @param ZipStream|null $za
      * @return bool
      */
-    public function writeOutput(LaravelExcelWriter $excelDoc, ZipStream $za = null)
+    public function warnUser()
     {
-        try {
-            $excelDoc->ext = 'csv';
+        $this->info('WARNING: This command will run a long, blocking query that will interrupt normal service use.');
+        return $this->confirm('Do you wish to continue?');
+    }
 
-            /*
-             * TODO: If we move to a spreadsheet library that gives us an output stream, we need never hold the entire
-             * contents of the resulting file in memory; it could be streamed directly through the zip.
-             */
-            $fileContents = $excelDoc->string($excelDoc->ext); // Throws Exception
-            $filename = preg_replace('/\s+/', '_', $excelDoc->getSheet()->getTitle()) .
-                "." .
-                $excelDoc->ext;
-
-            if ($za) {
-                // Encryption, if enabled, is handled at the creation of our ZipStream. The stream is directed through
-                // an encrypted wrapper before it writes to the disk.
-                $za->addFile($filename, $fileContents);
-            } else {
-                // Ensure that the user intends to write the output plain to the disk. This is highly unlikely in production.
-                if ($this->option('plain')) {
-                    Storage::disk($this->disk)->put($filename, $fileContents);
-                } else {
-                    // TODO : Consider redesigning the CLI such that this is not even possible to express.
-                    Log::error('Encrypted output is not supported with --no-zip, consider adding --plain if you\'re SURE you want to write this data to the disk unencrypted.');
-                }
-            }
-        } catch (\Exception $e) {
-            // Could be Storage or LaravelExcelWriterException related
-            Log::error($e->getMessage());
-            Log::error(class_basename($this) . ": Failed to write file for '" . $excelDoc->getTitle() ."'");
-            exit(1);
-        }
-        return true;
+    private function execQuery($limit, $offset)
+    {
+        $s = DB::connection()
+            ->getPdo()
+            ->prepare($this->report);
+        $s->execute([$limit, $offset]);
+        return $s->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -415,13 +355,45 @@ EOD;
     }
 
     /**
-     * Warn the user before they execute.
+     * Encrypts and stashes files.
      *
+     * @param LaravelExcelWriter $excelDoc
+     * @param ZipStream|null $za
      * @return bool
      */
-    public function warnUser()
+    public function writeOutput(LaravelExcelWriter $excelDoc, ZipStream $za = null)
     {
-        $this->info('WARNING: This command will run a long, blocking query that will interrupt normal service use.');
-        return $this->confirm('Do you wish to continue?');
+        try {
+            $excelDoc->ext = 'csv';
+
+            /*
+             * TODO: If we move to a spreadsheet library that gives us an output stream, we need never hold the entire
+             * contents of the resulting file in memory; it could be streamed directly through the zip.
+             */
+            $fileContents = $excelDoc->string($excelDoc->ext); // Throws Exception
+            $filename = preg_replace('/\s+/', '_', $excelDoc->getSheet()->getTitle()) .
+                "." .
+                $excelDoc->ext;
+
+            if ($za) {
+                // Encryption, if enabled, is handled at the creation of our ZipStream. The stream is directed through
+                // an encrypted wrapper before it writes to the disk.
+                $za->addFile($filename, $fileContents);
+            } else {
+                // Ensure that the user intends to write the output plain to the disk. This is highly unlikely in production.
+                if ($this->option('plain')) {
+                    Storage::disk($this->disk)->put($filename, $fileContents);
+                } else {
+                    // TODO : Consider redesigning the CLI such that this is not even possible to express.
+                    Log::error('Encrypted output is not supported with --no-zip, consider adding --plain if you\'re SURE you want to write this data to the disk unencrypted.');
+                }
+            }
+        } catch (Exception $e) {
+            // Could be Storage or LaravelExcelWriterException related
+            Log::error($e->getMessage());
+            Log::error(class_basename($this) . ": Failed to write file for '" . $excelDoc->getTitle() . "'");
+            exit(1);
+        }
+        return true;
     }
 }
