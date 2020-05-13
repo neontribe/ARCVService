@@ -16,4 +16,16 @@ class UserController extends Controller
     {
         return User::all();
     }
+
+    /**
+     * Display the specified resource.
+     *
+     * @codeCoverageIgnore
+     * @param  \App\User  $user
+     * @return \Illuminate\Http\Response
+     */
+    public function show(User $user)
+    {
+        //
+    }
 }

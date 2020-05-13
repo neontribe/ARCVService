@@ -12,7 +12,7 @@ use Carbon\Carbon;
 Route::group(['middleware' => 'auth:admin'], function () {
     // For now these routes are only available in dev and staging environs.
     Route::resource('vouchers', 'VoucherController', [
-        'only' => ['index', 'store', ]
+        'only' => ['index', 'show', ]
     ]);
 
     Route::resource('users', 'UserController', [

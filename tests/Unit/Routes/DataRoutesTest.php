@@ -27,8 +27,7 @@ class DataRoutesTest extends TestCase
     public function testVouchersIndexRouteNotAuthd()
     {
         $this->get(route('vouchers.index'))
-            ->assertStatus(302)
-        ;
+            ->assertStatus(302);
     }
 
     // Admin Users can see the data.
@@ -37,10 +36,9 @@ class DataRoutesTest extends TestCase
         $this->actingAs($this->admin, 'admin')
             ->get(route('vouchers.index'))
             ->assertStatus(200)
-            ->assertJsonStructure([ 0 => [
+            ->assertJsonStructure([0 => [
                 'id', 'trader_id', 'code', 'currentstate', 'sponsor_id'
-            ]])
-        ;
+            ]]);
     }
 
     // API Users do not have permission.
@@ -48,8 +46,7 @@ class DataRoutesTest extends TestCase
     {
         $this->actingAs($this->users[0], 'api')
             ->get(route('vouchers.index'))
-            ->assertStatus(302)
-        ;
+            ->assertStatus(302);
     }
 
     // For the rest - we will just be auth'd as admin for sake of time.
@@ -60,8 +57,7 @@ class DataRoutesTest extends TestCase
             ->assertStatus(200)
             ->assertJsonStructure([
                 'id', 'trader_id', 'code', 'currentstate', 'sponsor_id'
-            ])
-        ;
+            ]);
     }
 
     public function testUsersIndexRoute()
@@ -69,10 +65,9 @@ class DataRoutesTest extends TestCase
         $this->actingAs($this->admin, 'admin')
             ->get(route('users.index'))
             ->assertStatus(200)
-            ->assertJsonStructure([ 0 => [
+            ->assertJsonStructure([0 => [
                 'id', 'name', 'email'
-            ]])
-        ;
+            ]]);
     }
 
     public function testMarketsIndexRoute()
@@ -80,10 +75,9 @@ class DataRoutesTest extends TestCase
         $this->actingAs($this->admin, 'admin')
             ->get(route('markets.index'))
             ->assertStatus(200)
-            ->assertJsonStructure([ 0 => [
+            ->assertJsonStructure([0 => [
                 'id', 'name', 'location', 'sponsor_id'
-            ]])
-        ;
+            ]]);
     }
 
     public function testTradersIndexRoute()
@@ -91,10 +85,9 @@ class DataRoutesTest extends TestCase
         $this->actingAs($this->admin, 'admin')
             ->get(route('traders.index'))
             ->assertStatus(200)
-            ->assertJsonStructure([ 0 => [
+            ->assertJsonStructure([0 => [
                 'id', 'name', 'pic_url', 'market_id'
-            ]])
-        ;
+            ]]);
     }
 
     // Need to be auth'd for these too.
@@ -105,11 +98,9 @@ class DataRoutesTest extends TestCase
         foreach ($models as $model) {
             $this->actingAs($this->admin, 'admin')
                 ->get(route($model . '.index'))
-                ->assertStatus(418)
-            ;
-            $this->get(route($model . '.show', $this->$model[0]))
-                ->assertStatus(418)
-            ;
+                ->assertStatus(418);
         }
+        $this->get(route('vouchers.show', $this->vouchers[0]))
+                ->assertStatus(418);
     }
 }
