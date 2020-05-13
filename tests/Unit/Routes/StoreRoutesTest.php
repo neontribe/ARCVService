@@ -448,7 +448,6 @@ class StoreRoutesTest extends StoreTestCase
 
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', $registration->id))
-            ->press('Remove this family')
             ->call(
                 'PUT',
                 $route,
@@ -480,7 +479,7 @@ class StoreRoutesTest extends StoreTestCase
                 ->call(
                     'PUT',
                     $route,
-                    []
+                    ['leaving_reason' => 'found employment']
                 );
         } catch (\Exception $e) {
             $this->assertContains('Received status code [403]', $e->getMessage());
