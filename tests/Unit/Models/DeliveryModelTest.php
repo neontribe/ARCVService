@@ -2,7 +2,6 @@
 
 namespace Tests;
 
-use App\Centre;
 use App\Delivery;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
