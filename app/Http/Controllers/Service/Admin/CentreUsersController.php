@@ -221,6 +221,29 @@ class CentreUsersController extends Controller
 
     public function download()
     {
-        return redirect()->route('admin.centreusers.index');
+        $workers = CentreUser::get()->sortBy('homeCentre.name');
+        $csvExporter = new \Laracsv\Export();
+        // modify downloader values to print user friendly text
+        // currently it just prints 1 and I can't tell why
+        $csvExporter->beforeEach(function ($worker) {
+            $worker->downloader = $worker->downloader ? 'Yes' : 'No';
+            foreach ($worker->centres as $centre) {
+                if ($centre->id !== $worker->homeCentre->id) {
+                    $worker->alternative_centres = $centre->name;
+                }
+            }
+        });
+
+        $header = [
+            'name' => 'Name',
+            'email' => 'E-mail Address',
+            'homeCentre.name' => 'Home Centre',
+            'alternative_centres' => 'Alternative Centre',
+            'downloader' => 'Downloader'
+        ];
+
+        $fileName = 'active_workers.csv';
+        $buildFile = $csvExporter->build($workers, $header);
+        $buildFile->download($fileName);
     }
 }
