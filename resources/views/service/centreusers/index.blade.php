@@ -61,7 +61,7 @@
                 @endforeach
             </tbody>
         </table>
-        <a href="#" class="link">
+        <a href="{{ URL::route('admin.centreusers.download')}}" class="link">
             <div class="link-button link-button-large" style="display: inline-block; padding: .8em;">
                 Download Worker List
             </div>

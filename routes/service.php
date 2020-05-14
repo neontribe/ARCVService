@@ -1,9 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-use Symfony\Component\Process\Process;
-use Carbon\Carbon;
-
 /*
 |--------------------------------------------------------------------------
 | Service Routes
@@ -34,59 +30,63 @@ Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 Route::group(['middleware' => 'auth:admin'], function () {
     // Voucher Management
     Route::get('vouchers', [
-        'as' =>'admin.vouchers.index',
+        'as' => 'admin.vouchers.index',
         'uses' => 'Admin\VouchersController@index',
     ]);
     // ...create form
     Route::get('vouchers/create', [
-        'as' =>'admin.vouchers.create',
+        'as' => 'admin.vouchers.create',
         'uses' => 'Admin\VouchersController@create',
     ]);
     // ...void form
     Route::get('vouchers/void', [
-        'as' =>'admin.vouchers.void',
+        'as' => 'admin.vouchers.void',
         'uses' => 'Admin\VouchersController@void',
     ]);
     // ...transition to printed
     Route::post('vouchers', [
-        'as' =>'admin.vouchers.storebatch',
+        'as' => 'admin.vouchers.storebatch',
         'uses' => 'Admin\VouchersController@storeBatch',
     ]);
     // ...patch because changing state of a partial collection of vouchers.
     Route::patch('vouchers', [
-        'as' =>'admin.vouchers.updatebatch',
+        'as' => 'admin.vouchers.updatebatch',
         'uses' => 'Admin\VouchersController@updateBatch',
     ]);
 
     // Worker Management
     Route::get('workers', [
-        'as' =>'admin.centreusers.index',
+        'as' => 'admin.centreusers.index',
         'uses' => 'Admin\CentreUsersController@index',
     ]);
     Route::get('workers/create', [
-        'as' =>'admin.centreusers.create',
+        'as' => 'admin.centreusers.create',
         'uses' => 'Admin\CentreUsersController@create',
     ]);
     Route::post('workers', [
-        'as' =>'admin.centreusers.store',
+        'as' => 'admin.centreusers.store',
         'uses' => 'Admin\CentreUsersController@store',
     ]);
     Route::put('workers/{id}', [
-        'as' =>'admin.centreusers.update',
+        'as' => 'admin.centreusers.update',
         'uses' => 'Admin\CentreUsersController@update',
     ]);
     Route::get('workers/{id}/edit', [
-        'as' =>'admin.centreusers.edit',
+        'as' => 'admin.centreusers.edit',
         'uses' => 'Admin\CentreUsersController@edit',
     ]);
-    
+    Route::get('workers/download', [
+        'as' => 'admin.centreusers.download',
+        'uses' => 'Admin\CentreUsersController@download',
+    ]);
+
     // Centre Management
     Route::get('centres', [
-        'as' =>'admin.centres.index',
+        'as' => 'admin.centres.index',
         'uses' => 'Admin\CentresController@index',
     ]);
     Route::get('centres/create', [
-        'as' =>'admin.centres.create',
+        'as' => 'admin.centres.create',
         'uses' => 'Admin\CentresController@create',
     ]);
     Route::get('centres/{id}/neighbours', [
@@ -94,40 +94,40 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'uses' => 'Admin\CentresController@getNeighboursAsJson'
     ]);
     Route::post('centres', [
-        'as' =>'admin.centres.store',
+        'as' => 'admin.centres.store',
         'uses' => 'Admin\CentresController@store',
     ]);
 
     // Sponsor Management
     Route::get('sponsors', [
-        'as' =>'admin.sponsors.index',
+        'as' => 'admin.sponsors.index',
         'uses' => 'Admin\SponsorsController@index',
     ]);
     Route::get('sponsors/create', [
-        'as' =>'admin.sponsors.create',
+        'as' => 'admin.sponsors.create',
         'uses' => 'Admin\SponsorsController@create',
     ]);
     Route::post('sponsors', [
-        'as' =>'admin.sponsors.store',
+        'as' => 'admin.sponsors.store',
         'uses' => 'Admin\SponsorsController@store',
     ]);
 
     Route::post('logout', [
-        'as' =>'admin.logout',
+        'as' => 'admin.logout',
         'uses' => 'Auth\LoginController@logout',
     ]);
 
     // Deliveries Management
     Route::get('deliveries', [
-        'as' =>'admin.deliveries.index',
+        'as' => 'admin.deliveries.index',
         'uses' => 'Admin\DeliveriesController@index',
     ]);
     Route::get('deliveries/create', [
-        'as' =>'admin.deliveries.create',
+        'as' => 'admin.deliveries.create',
         'uses' => 'Admin\DeliveriesController@create',
     ]);
     Route::post('deliveries/store', [
-        'as' =>'admin.deliveries.store',
+        'as' => 'admin.deliveries.store',
         'uses' => 'Admin\DeliveriesController@store',
     ]);
 });

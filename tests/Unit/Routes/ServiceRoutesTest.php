@@ -22,6 +22,7 @@ class ServiceRoutesTest extends StoreTestCase
             'admin.centreusers.index' => [],
             'admin.centreusers.create' => [],
             'admin.centreusers.edit' => ['id' => 1],
+            'admin.centreusers.download' => [],
             'admin.deliveries.create' => [],
             'admin.deliveries.index' => [],
             'admin.centres.index' => [],
