@@ -56,14 +56,14 @@ class ServiceWorkersPageTest extends StoreTestCase
 
         // Create 1 user with a home centre and no alternatives
         $this->userHomeCentreNoAlt = factory(CentreUser::class)->create([
-            "name"  => "test user",
+            "name" => "test user",
             "email" => "testuser@example.com",
         ]);
         $this->userHomeCentreNoAlt->centres()->attach(1, ['homeCentre' => true]);
 
         // Create 1 user with with a homeCentre and 2 alternatives
         $this->userHomeCentreTwoAlt = factory(CentreUser::class)->create([
-            "name"  => "test user with alternatives",
+            "name" => "test user with alternatives",
             "email" => "testuseralternatives@example.com",
         ]);
 
@@ -72,7 +72,7 @@ class ServiceWorkersPageTest extends StoreTestCase
 
         // Create 1 user with a homeCentre who can Download
         $this->downloaderUser = factory(CentreUser::class, 'withDownloader')->create([
-            "name"  => "test downloader",
+            "name" => "test downloader",
             "email" => "testdl@example.com",
         ]);
         $this->downloaderUser->centres()->attach(1, ['homeCentre' => true]);
@@ -114,6 +114,20 @@ class ServiceWorkersPageTest extends StoreTestCase
             ->seeInElementAtPos('tbody tr td', $this->userHomeCentreTwoAlt['email'], 7)
             ->seeInElementAtPos('tbody tr', $this->downloaderUser['name'], 2)
             ->seeInElementAtPos('tbody tr td', $this->downloaderUser['email'], 13)
+        ;
+    }
+
+    /**
+    * @test
+    *
+    * @return void
+    */
+    public function itShowsADownloadWorkersListButton()
+    {
+        $this->actingAs($this->adminUser, 'admin')
+            ->visit($this->workersRoute)
+            ->assertResponseOk()
+            ->seeInElement('a', 'Download Worker List')
         ;
     }
 }
