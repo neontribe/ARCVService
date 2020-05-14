@@ -14,7 +14,6 @@ use Illuminate\Http\Request;
 
 class TraderController extends Controller
 {
-
     /**
      * A list of traders belonging to auth's user.
      *
@@ -41,40 +40,6 @@ class TraderController extends Controller
     public function show(Trader $trader)
     {
         return response()->json($trader, 200);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Trader  $trader
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Trader $trader)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Trader  $trader
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Trader $trader)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Trader  $trader
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Trader $trader)
-    {
-        //
     }
 
     /**
@@ -130,8 +95,7 @@ class TraderController extends Controller
                     'code' => $v->code,
                     'recorded_on' => (array_key_exists('recorded', $history))
                         ? $history["recorded"]->format('d-m-Y')
-                        : ''
-                    ,
+                        : '',
                     'reimbursed_on' => (array_key_exists('reimbursed', $history))
                         ? $history["reimbursed"]->format('d-m-Y')
                         : ''
@@ -171,7 +135,7 @@ class TraderController extends Controller
         $file = $this->createVoucherListFile($trader, $vouchers, $title, $date);
 
         // If all vouchers are requested attempt to get the minimum and maximum dates for the report.
-        if(is_null($date)) {
+        if (is_null($date)) {
             list($min_date, $max_date) = Voucher::getMinMaxVoucherDates($vouchers);
             event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file, $min_date, $max_date));
         } else {
@@ -183,7 +147,8 @@ class TraderController extends Controller
         // If a date is provided generate a specific response message.
         if ($date) {
             $response_text = trans(
-                'api.messages.email_voucher_history_date', [
+                'api.messages.email_voucher_history_date',
+                [
                     'date' => $date
                 ]
             );
@@ -243,13 +208,12 @@ class TraderController extends Controller
     private function createExcel($data)
     {
         $time = Carbon::now()->format('Y-m-d_Hi');
-        $filename = str_slug($data['trader'] . '-vouchers-' .$time);
+        $filename = str_slug($data['trader'] . '-vouchers-' . $time);
         $excel = Excel::create($filename, function ($excel) use ($data) {
             // Set the title
             $excel->setTitle($data['trader'] . 'Voucher Records')
                 ->setCompany($data['user'])
-                ->setDescription($data['report_title'])
-            ;
+                ->setDescription($data['report_title']);
 
             $excel->sheet('Vouchers', function ($sheet) use ($data) {
                 $sheet->loadView('api.reports.vouchers', [
