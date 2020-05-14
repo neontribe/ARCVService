@@ -24,7 +24,6 @@ class BundleController extends Controller
      * @param Registration $registration
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-
     public function create(Registration $registration)
     {
         $user = Auth::user();
@@ -52,8 +51,7 @@ class BundleController extends Controller
         $lastCollection = ($lastCollectedBundle && (!empty($lastCollectedBundle->disbursed_at)))
             // 'disbursed_at' is auto-carbon'd by the Bundle model
             ? $lastCollectedBundle->disbursed_at->format('l jS \of F Y')
-            : null
-        ;
+            : null;
 
         $valuation = $registration->getValuation();
 
@@ -75,20 +73,12 @@ class BundleController extends Controller
     }
 
     /**
-     * List all the bundles
-     */
-    public function index()
-    {
-    }
-
-    /**
      * Does a single or multiple voucher.
      *
      * @param StoreAppendBundleRequest $request
      * @param Registration $registration
      * @return \Illuminate\Http\RedirectResponse
      */
-
     public function addVouchersToCurrentBundle(StoreAppendBundleRequest $request, Registration $registration)
     {
         // Generate code range from given values (may be only 1)
@@ -104,7 +94,7 @@ class BundleController extends Controller
             // try to add the vouchers.
             $errors = $bundle->addVouchers($voucherCodes);
         } else {
-            $errors = [ 'append' => $numVouchers ];
+            $errors = ['append' => $numVouchers];
         }
 
         // Return to manager in all cases
@@ -305,8 +295,8 @@ class BundleController extends Controller
                         // has permission to remove them from the current family, so we can make a nice interactive
                         // error message.
 
-                        $relevant = array();
-                        $inaccessible = array();
+                        $relevant = [];
+                        $inaccessible = [];
 
                         foreach ($values as $voucher) {
                             $registration = $voucher->bundle->registration;
@@ -339,7 +329,7 @@ class BundleController extends Controller
                         break;
                     case "append":
                         if ($values) {
-                            $messages[] = "Failed adding more than ". config('arc.bundle_max_voucher_append') ." vouchers";
+                            $messages[] = "Failed adding more than " . config('arc.bundle_max_voucher_append') . " vouchers";
                         }
                         break;
                     default:
