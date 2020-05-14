@@ -9,7 +9,12 @@ use App\Trader;
 use App\Voucher;
 use Auth;
 use Carbon\Carbon;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class VoucherController extends Controller
 {
@@ -18,9 +23,10 @@ class VoucherController extends Controller
      *
      * route POST api/vouchers
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return ResponseFactory|Application|JsonResponse|\Symfony\Component\HttpFoundation\Response
      */
+
     public function transition(Request $request)
     {
         /* expecting a body of type application/json; a collect transition looks like
@@ -79,6 +85,10 @@ class VoucherController extends Controller
         $own_duplicate_codes = [];
         $failed_rejects = [];
         $vouchers_for_payment = [];
+        $undelivered_codes = [];
+
+        // Fetch the date we start to care about deliveries
+        $collect_delivery_date = Carbon::parse(config('arc.collect_delivery_date'));
 
         if ($transition === 'confirm') {
             // We'll need a StateToken for Later
@@ -88,55 +98,59 @@ class VoucherController extends Controller
         /** @var Voucher $voucher */
         // TODO: Unsquirrel this ginormo-function.
         foreach ($vouchers as $voucher) {
-            // do we need to finangle the rejections?
-            if ($transition === "reject") {
-                $last_state = $voucher->getPriorState();
-                if (!$last_state) {
-                    $failed_rejects[] = $voucher->from;
-                    continue;
-                }
-                $transition = "reject-to-" . $last_state->from;
-            }
-            // can we?
-            if ($voucher->transitionAllowed($transition)) {
-                // Some-what naive
-
-                $voucher->trader_id = ($request['transition'] == 'reject')
-                    ? null
-                    : $trader->id;
-
-                // this saves the model too.
-                $voucher->applyTransition($transition);
-
-                // Success for this one.
-                if ($request['transition'] != 'reject') {
-                    $success_codes[] = $voucher->code;
-                } else {
-                    $reject_codes[] = $voucher->code;
-                }
-                // If this is a confirm transition - add to a list
-                // for sending to ARC admin. This is a request for payment.
-                if ($transition === 'confirm' && $stateToken) {
-                    $vouchers_for_payment[] = $voucher;
-
-                    // Fetch the last transition and add the state
-                    $voucher->getPriorState()
-                        ->stateToken()
-                        ->associate($stateToken)
-                        ->save()
-                    ;
-                }
+            // Don't transition newer, undelivered vouchers
+            if ($transition === "collect" &&
+                $collect_delivery_date->lessThanOrEqualTo($voucher->created_at) &&
+                $voucher->delivery_id === null
+            ) {
+                // Dont proceed, just file this voucher for a message
+                $undelivered_codes[] = $voucher->code;
             } else {
-                // These are duplicates - or invalid for another reason.
-                // For now - we treat them all as 'duplicates'.
-                // Advise trader to send in for verification and payment.
-                if ($trader->id === $voucher->trader_id) {
-                    // Trader has already submitted this voucher
-                    $own_duplicate_codes[] = $voucher->code;
+                // Work out which transition we need to roll back to for "rejects"
+                if ($transition === "reject") {
+                    $last_state = $voucher->getPriorState();
+                    if (!$last_state) {
+                        $failed_rejects[] = $voucher->from;
+                        continue;
+                    }
+                    $transition = "reject-to-" . $last_state->from;
+                }
+
+                // can we do a transition already?
+                if ($voucher->transitionAllowed($transition)) {
+                    // Was the _original_ transition "reject" (now reject-to-...)
+                    if ($request['transition'] === 'reject') {
+                        $voucher->trader_id = null;
+                        $reject_codes[] = $voucher->code;
+                    } else {
+                        $voucher->trader_id = $trader->id;
+                        $success_codes[] = $voucher->code;
+                    }
+
+                    // This saves the model too.
+                    $voucher->applyTransition($transition);
+
+                    // If this is a confirm transition - add to a list
+                    // for sending to ARC admin. This is a request for payment.
+                    if ($transition === 'confirm' && $stateToken) {
+                        $vouchers_for_payment[] = $voucher;
+
+                        // Fetch the last transition and add the state
+                        $voucher->getPriorState()
+                            ->stateToken()
+                            ->associate($stateToken)
+                            ->save();
+                    }
                 } else {
-                    // Another trader has mistakenly submitted this voucher,
-                    // Or the transition isn't valid (i.e expired state)
-                    $other_duplicate_codes[] = $voucher->code;
+                    // These are duplicates - or invalid for another reason.
+                    // For now - we treat them all as 'duplicates'.
+                    // Advise trader to send in for verification and payment.
+                    ($voucher->trader_id === $trader->id)
+                        // Trader has already submitted this voucher
+                        ? $own_duplicate_codes[] = $voucher->code
+                        // Another trader has mistakenly submitted this voucher,
+                        // Or the transition isn't valid (i.e expired state)
+                        : $other_duplicate_codes[] = $voucher->code;
                 }
             }
         }
@@ -154,6 +168,7 @@ class VoucherController extends Controller
         $responses['other_duplicate'] = $other_duplicate_codes;
         $responses['invalid'] = $bad_codes;
         $responses['failed_reject'] = $failed_rejects;
+        $responses['undelivered'] = $undelivered_codes;
 
         $response = $this->constructResponseMessage($responses);
 
@@ -165,14 +180,13 @@ class VoucherController extends Controller
      *
      * @param Trader $trader
      * @param StateToken $stateToken
-     * @param \Illuminate\Database\Eloquent\Collection Voucher $vouchers
-     * @return \Illuminate\Http\Response
+     * @param Collection Voucher $vouchers
+     * @return Response
      */
     public function emailVoucherPaymentRequest(Trader $trader, StateToken $stateToken, $vouchers)
     {
         $title = 'A report containing voucher payment request for '
-            . $trader->name . '.'
-        ;
+            . $trader->name . '.';
         // Request date string as dd-mm-yyyy
         $date = Carbon::now()->format('d-m-Y');
         // Todo factor excel/csv create functions out into service.
@@ -187,8 +201,8 @@ class VoucherController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  string $code
-     * @return \Illuminate\Http\Response
+     * @param string $code
+     * @return Response
      */
     public function show($code)
     {
@@ -224,7 +238,7 @@ class VoucherController extends Controller
                     break;
                 case 'success_reject':
                     return [
-                        'message' => trans('api.messages.voucher_success_reject')
+                        'message' => trans('api.messages.voucher_success_reject'),
                     ];
                 case 'own_duplicate':
                     return [
@@ -247,6 +261,12 @@ class VoucherController extends Controller
                         ]),
                     ];
                     break;
+                case 'undelivered':
+                    return [
+                        'warning' => trans('api.errors.voucher_undelivered', [
+                            'code' => $responses['undelivered'][0],
+                        ]),
+                    ];
                 case 'invalid':
                 default:
                     return [
@@ -260,10 +280,11 @@ class VoucherController extends Controller
                 'message' => trans(
                     'api.messages.batch_voucher_submit',
                     [
-                    'success_amount' => count($responses['success_add']),
-                    'duplicate_amount' => count($responses['own_duplicate'])
-                        + count($responses['other_duplicate']),
-                    'invalid_amount' => count($responses['invalid']),
+                        'success_amount' => count($responses['success_add']),
+                        'duplicate_amount' => count($responses['own_duplicate'])
+                            + count($responses['other_duplicate']),
+                        'invalid_amount' => count($responses['invalid']),
+                        'undelivered_amount' => count($responses['undelivered']),
                     ]
                 ),
             ];

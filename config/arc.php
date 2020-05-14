@@ -98,4 +98,13 @@ return [
         'no-recourse-to-public-funds',
         'other',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Voucher printed date from which API will complain if un-dispatched
+    | vouchers are collected by traders
+    |--------------------------------------------------------------------------
+    */
+    'collect_delivery_date' => env('ARC_DELIVERY_DATE', '2019-09-26'),
+
 ];
