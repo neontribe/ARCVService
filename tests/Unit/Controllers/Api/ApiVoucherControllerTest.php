@@ -209,7 +209,7 @@ class ApiVoucherControllerTest extends TestCase
             $centre
         );
 
-        // Progress some vouchers to recorded state via the controller;
+        // Progress some vouchers to recorded state via the controller
         $data = [
             "trader_id" => 1,
             "transition" => 'collect',
@@ -219,8 +219,10 @@ class ApiVoucherControllerTest extends TestCase
         $route = route('api.voucher.transition');
 
         $expectedCounts = [
+            // The last one is undelivered.
             'success_amount' => $this->vouchers->count()-1,
             'duplicate_amount' => 0,
+            // The invalid one is the one hat was undelivered.
             'invalid_amount' => 1,
         ];
 
