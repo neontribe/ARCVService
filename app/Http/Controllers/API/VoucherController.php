@@ -90,6 +90,7 @@ class VoucherController extends Controller
         // Fetch the date we start to care about deliveries
         $collect_delivery_date = Carbon::parse(config('arc.collect_delivery_date'));
 
+
         if ($transition === 'confirm') {
             // We'll need a StateToken for Later
             $stateToken = factory(StateToken::class)->create();
@@ -100,9 +101,12 @@ class VoucherController extends Controller
         foreach ($vouchers as $voucher) {
             // Don't transition newer, undelivered vouchers
             if ($transition === "collect" &&
+                // The cutoff date is less than or equal to the create at and
                 $collect_delivery_date->lessThanOrEqualTo($voucher->created_at) &&
+                // delivery_id is null
                 $voucher->delivery_id === null
             ) {
+
                 // Dont proceed, just file this voucher for a message
                 $undelivered_codes[] = $voucher->code;
             } else {
@@ -263,14 +267,14 @@ class VoucherController extends Controller
                     break;
                 case 'undelivered':
                     return [
-                        'warning' => trans('api.errors.voucher_undelivered', [
+                        'warning' => trans('api.errors.voucher_unavailable', [
                             'code' => $responses['undelivered'][0],
                         ]),
                     ];
                 case 'invalid':
                 default:
                     return [
-                        'error' => trans('api.errors.voucher_invalid'),
+                        'error' => trans('api.errors.voucher_unavailable'),
                     ];
                     break;
             }
