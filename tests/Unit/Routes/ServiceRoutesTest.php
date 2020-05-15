@@ -23,8 +23,8 @@ class ServiceRoutesTest extends StoreTestCase
             'admin.centreusers.create' => [],
             'admin.centreusers.edit' => ['id' => 1],
             /**
-             * * this route outputs a file and that breaks the test as it tries to modify headers
-             * * separate test is written for this route
+             * * this route streams a csv file and that breaks the test as it tries to modify headers
+             * * further thinking needed and maybe a separate testing framework
              */
             // 'admin.centreusers.download' => [],
             'admin.deliveries.create' => [],
