@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Symfony\Component\Process\Process;
 use Carbon\Carbon;
 
@@ -11,24 +10,22 @@ use Carbon\Carbon;
  */
 
 Route::group(['middleware' => 'auth:admin'], function () {
-
     // For now these routes are only available in dev and staging environs.
     Route::resource('vouchers', 'VoucherController', [
-        'only' => ['index','show','store',]
+        'only' => ['index', 'show', ]
     ]);
 
     Route::resource('users', 'UserController', [
-        'only' => ['index','show',]
+        'only' => ['index', ]
     ]);
 
     Route::resource('markets', 'MarketController', [
-        'only' => ['index','show',]
+        'only' => ['index', ]
     ]);
 
     Route::resource('traders', 'TraderController', [
-        'only' => ['index','show',]
+        'only' => ['index', ]
     ]);
-
 
     // Temp route for demo only.
     Route::get('reset-data', function () {
@@ -45,10 +42,10 @@ Route::group(['middleware' => 'auth:admin'], function () {
         $env_file_path = base_path('.env');
         $old_secret = env('PASSWORD_CLIENT_SECRET');
         file_put_contents($env_file_path, preg_replace(
-        "/^PASSWORD_CLIENT_SECRET={$old_secret}/m",
-        "PASSWORD_CLIENT_SECRET={$new_secret}",
-        file_get_contents($env_file_path)
-    ));
+            "/^PASSWORD_CLIENT_SECRET={$old_secret}/m",
+            "PASSWORD_CLIENT_SECRET={$new_secret}",
+            file_get_contents($env_file_path)
+        ));
 
         return Redirect::route('admin.dashboard')
         ->with('message', 'Reseeded @' . Carbon::now());
