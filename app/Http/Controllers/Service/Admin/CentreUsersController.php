@@ -9,6 +9,7 @@ use App\Http\Requests\AdminNewCentreUserRequest;
 use App\Http\Requests\AdminUpdateCentreUserRequest;
 use App\Sponsor;
 use DB;
+use Debugbar;
 use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
@@ -223,10 +224,14 @@ class CentreUsersController extends Controller
     {
         $workers = CentreUser::get()->sortBy('homeCentre.name');
         $csvExporter = new \Laracsv\Export();
-        // modify downloader values to print user friendly text
-        // currently it just prints 1 and I can't tell why
+
+        /**
+         * * modify downloader values to print user friendly text
+         * * currently, the y/n in the model reverts to 0/1 because of Laravel casting
+         * * so we are creating a temporary property
+        */
         $csvExporter->beforeEach(function ($worker) {
-            $worker->downloader = $worker->downloader ? 'Yes' : 'No';
+            $worker->downloaderRole = $worker->downloader ? 'Yes' : 'No';
             foreach ($worker->centres as $centre) {
                 if ($centre->id !== $worker->homeCentre->id) {
                     $worker->alternative_centres = $centre->name;
@@ -239,11 +244,20 @@ class CentreUsersController extends Controller
             'email' => 'E-mail Address',
             'homeCentre.name' => 'Home Centre',
             'alternative_centres' => 'Alternative Centre',
-            'downloader' => 'Downloader'
+            'downloaderRole' => 'Downloader'
         ];
 
         $fileName = 'active_workers.csv';
         $buildFile = $csvExporter->build($workers, $header);
+
+        /**
+         * * have to disable the debugbar on local on the fly as it conflicts with LaraCSV
+         * * that is not yet fixed https://github.com/usmanhalalit/laracsv/issues/34
+         */
+        if (Debugbar::isEnabled()) {
+            app('debugbar')->disable();
+        }
+
         $buildFile->download($fileName);
     }
 }
