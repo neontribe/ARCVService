@@ -18,6 +18,7 @@ use Illuminate\View\View;
 use Log;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Laracsv\Export;
 
 class CentreUsersController extends Controller
 {
@@ -223,7 +224,7 @@ class CentreUsersController extends Controller
     public function download()
     {
         $workers = CentreUser::get()->sortBy('homeCentre.name');
-        $csvExporter = new \Laracsv\Export();
+        $csvExporter = new Export();
 
         /**
          * * modify downloader values to print user friendly text
