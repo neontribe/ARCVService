@@ -287,8 +287,8 @@ class VoucherController extends Controller
                         'success_amount' => count($responses['success_add']),
                         'duplicate_amount' => count($responses['own_duplicate'])
                             + count($responses['other_duplicate']),
-                        'invalid_amount' => count($responses['invalid']),
-                        'undelivered_amount' => count($responses['undelivered']),
+                        'invalid_amount' => count($responses['invalid'])
+                            + count($responses['undelivered']),
                     ]
                 ),
             ];

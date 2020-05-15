@@ -152,7 +152,7 @@ class ApiVoucherControllerTest extends TestCase
         // Create a Centre
         $centre = factory(Centre::class)->create();
 
-        // Dispatch them
+        // Dispatch the vouchers
         $this->dispatchVouchers(
             $this->vouchers,
             $centre
@@ -164,8 +164,6 @@ class ApiVoucherControllerTest extends TestCase
             "transition" => 'collect',
             "vouchers" => $this->vouchers->pluck('code')->toArray()
         ];
-
-
 
         $route = route('api.voucher.transition');
 
@@ -199,4 +197,37 @@ class ApiVoucherControllerTest extends TestCase
             });
     }
 
+    /** @test */
+    public function testItReturnsArrayOfUndeliveredVouchers()
+    {
+        // Create a Centre
+        $centre = factory(Centre::class)->create();
+
+        // Dispatch all except the last one
+        $this->dispatchVouchers(
+            $this->vouchers->slice(0, 9),
+            $centre
+        );
+
+        // Progress some vouchers to recorded state via the controller;
+        $data = [
+            "trader_id" => 1,
+            "transition" => 'collect',
+            "vouchers" => $this->vouchers->pluck('code')->toArray()
+        ];
+
+        $route = route('api.voucher.transition');
+
+        $expectedCounts = [
+            'success_amount' => $this->vouchers->count()-1,
+            'duplicate_amount' => 0,
+            'invalid_amount' => 1,
+        ];
+
+        $this->actingAs($this->user, 'api')
+            ->json('POST', $route, $data)
+            ->assertStatus(200)
+            ->assertJson(['message' => trans('api.messages.batch_voucher_submit', $expectedCounts)])
+        ;
+    }
 }
