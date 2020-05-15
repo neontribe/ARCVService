@@ -106,7 +106,6 @@ class VoucherController extends Controller
                 // delivery_id is null
                 $voucher->delivery_id === null
             ) {
-
                 // Dont proceed, just file this voucher for a message
                 $undelivered_codes[] = $voucher->code;
             } else {
