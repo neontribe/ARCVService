@@ -82,7 +82,7 @@ h1 {
     padding-left: 55px;
     margin: 0.5rem 0 2rem 0;
     min-height: 10px;
-    
+
     > input {
       cursor: pointer;
       opacity: 0;
@@ -194,7 +194,7 @@ h1 {
   .horizontal-container {
     display: flex;
     flex-wrap: wrap;
-  
+
     > div {
       display: flex;
       flex-direction: column;
@@ -213,8 +213,14 @@ h1 {
 	line-height: 2.5rem;
 	min-height: 2.5rem;
 	text-align: center;
-	vertical-align: top;
+  vertical-align: top;
 }
+
+.download-worker-list {
+  display: inline-block;
+  padding: .8em;
+}
+
 .navbar {
   background-color: $arc_white;
   margin-bottom: 0;

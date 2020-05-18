@@ -22,7 +22,8 @@
         "ramsey/uuid": "^3.6",
         "sebdesign/laravel-state-machine": "^2.0",
         "symfony/event-dispatcher": "4.2.11",
-        "tom-lingham/searchy": "2.*"
+        "tom-lingham/searchy": "2.*",
+        "usmanhalalit/laracsv": "^2.0"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.4",
