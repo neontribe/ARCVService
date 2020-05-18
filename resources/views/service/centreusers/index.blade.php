@@ -19,13 +19,15 @@
                     <th>
                         Name
                         <span>@include('service.partials.sortableChevron', ['route' =>
-                            'admin.centreusers.index', 'orderBy' => 'name', 'direction' => request('direction') ])</span>
+                            'admin.centreusers.index', 'orderBy' => 'name', 'direction' => request('direction')
+                            ])</span>
                     </th>
                     <th>Email Address</th>
                     <th>
                         Home Centre
                         <span>@include('service.partials.sortableChevron', ['route' =>
-                            'admin.centreusers.index', 'orderBy' => 'homeCentre', 'direction' => request('direction') ])</span>
+                            'admin.centreusers.index', 'orderBy' => 'homeCentre', 'direction' => request('direction')
+                            ])</span>
                     </th>
                     <th>Alternative Centres</th>
                     <th>Downloader</th>
@@ -59,6 +61,11 @@
                 @endforeach
             </tbody>
         </table>
+        <a href="{{ URL::route('admin.centreusers.download')}}" class="link" target="_blank">
+            <div class="link-button download-worker-list">
+                Download Worker List
+            </div>
+        </a>
     </div>
 
 </div>
