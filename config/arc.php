@@ -101,10 +101,10 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Voucher printed date from which API will complain if un-dispatched
+    | Voucher created_at date from which API will complain if un-dispatched
     | vouchers are collected by traders
     |--------------------------------------------------------------------------
     */
-    'collect_delivery_date' => env('ARC_DELIVERY_DATE', '2019-09-26'),
+    'first_delivery_date' => env('ARC_FIRST_DELIVERY_DATE', '2019-09-26'),
 
 ];

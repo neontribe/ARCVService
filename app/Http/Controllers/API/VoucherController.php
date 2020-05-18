@@ -9,9 +9,7 @@ use App\Trader;
 use App\Voucher;
 use Auth;
 use Carbon\Carbon;
-use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Foundation\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -24,9 +22,8 @@ class VoucherController extends Controller
      * route POST api/vouchers
      *
      * @param Request $request
-     * @return ResponseFactory|Application|JsonResponse|\Symfony\Component\HttpFoundation\Response
+     * @return Response|JsonResponse
      */
-
     public function transition(Request $request)
     {
         /* expecting a body of type application/json; a collect transition looks like
@@ -88,7 +85,7 @@ class VoucherController extends Controller
         $undelivered_codes = [];
 
         // Fetch the date we start to care about deliveries
-        $collect_delivery_date = Carbon::parse(config('arc.collect_delivery_date'));
+        $collect_delivery_date = Carbon::parse(config('arc.first_delivery_date'));
 
 
         if ($transition === 'confirm') {
@@ -106,7 +103,6 @@ class VoucherController extends Controller
                 // delivery_id is null
                 $voucher->delivery_id === null
             ) {
-
                 // Dont proceed, just file this voucher for a message
                 $undelivered_codes[] = $voucher->code;
             } else {

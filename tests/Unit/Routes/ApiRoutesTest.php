@@ -218,9 +218,9 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testCollectUndeliveredNewVoucherRoute()
+    public function testCollectUndeliveredVouchersAfterDeliveriesRoute()
     {
-        $created_at = Carbon::parse(config('arc.collect_delivery_date'))->addDay();
+        $created_at = Carbon::parse(config('arc.first_delivery_date'))->addDay();
         $this->vouchers[2]->created_at = $created_at;
         $this->vouchers[2]->delivery_id = null;
         $this->vouchers[2]->save();
@@ -242,9 +242,9 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testCollectUndeliveredOldVoucherRoute()
+    public function testCollectUndeliveredVouchersFromBeforeDeliveriesRoute()
     {
-        $created_at = Carbon::parse(config('arc.collect_delivery_date'))->subDays(1);
+        $created_at = Carbon::parse(config('arc.first_delivery_date'))->subDays(1);
         $this->vouchers[2]->created_at = $created_at;
         $this->vouchers[2]->save();
         $code = $this->vouchers[2]->code;
