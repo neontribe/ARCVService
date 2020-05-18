@@ -9,6 +9,7 @@ use App\Http\Requests\AdminNewCentreUserRequest;
 use App\Http\Requests\AdminUpdateCentreUserRequest;
 use App\Sponsor;
 use DB;
+use Debugbar;
 use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
@@ -17,6 +18,7 @@ use Illuminate\View\View;
 use Log;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Laracsv\Export;
 
 class CentreUsersController extends Controller
 {
@@ -28,7 +30,7 @@ class CentreUsersController extends Controller
      */
     public function index(Request $request)
     {
-       // fetch query params from request
+        // fetch query params from request
         $field = $request->input('orderBy', null);
         $direction = $request->input('direction', null);
 
@@ -38,7 +40,7 @@ class CentreUsersController extends Controller
                 'orderBy' => $field,
                 'direction' => $direction
             ])->get();
-        } elseif($field === 'homeCentre' && $direction === 'desc') {
+        } elseif ($field === 'homeCentre' && $direction === 'desc') {
             $workers = CentreUser::get()->sortByDesc('homeCentre.name');
         } else {
             $workers = CentreUser::get()->sortBy('homeCentre.name');
@@ -68,7 +70,7 @@ class CentreUsersController extends Controller
     */
     public function create()
     {
-        $centres = Centre::get(['name','id']);
+        $centres = Centre::get(['name', 'id']);
         return view('service.centreusers.create', compact('centres'));
     }
 
@@ -102,7 +104,7 @@ class CentreUsersController extends Controller
             // Set some flags on those.
             ->each(function ($sponsor) use ($workerCentres) {
                 $sponsor->centres->each(function ($centre) use ($workerCentres) {
-                    if ($centre->id ===  $workerCentres["home"]) {
+                    if ($centre->id === $workerCentres["home"]) {
                         $centre->selected = "home";
                     } elseif (in_array($centre->id, $workerCentres["alternates"])) {
                         $centre->selected = "alternate";
@@ -126,7 +128,6 @@ class CentreUsersController extends Controller
     {
         try {
             $centreUser = DB::transaction(function () use ($request, $id) {
-
                 // Update a CentreUser;
                 $cu = CentreUser::findOrFail($id);
 
@@ -149,7 +150,7 @@ class CentreUsersController extends Controller
             Log::error($e->getTraceAsString());
             // Throw it back to the user
             return redirect()
-                ->route('admin.centreusers.edit', ['id' => $id ])
+                ->route('admin.centreusers.edit', ['id' => $id])
                 ->withErrors('Update failed - DB Error.');
         }
         return redirect()
@@ -218,5 +219,46 @@ class CentreUsersController extends Controller
         }
         // Sync them setting pivots.
         return $cu->centres()->sync($centre_ids);
+    }
+
+    public function download()
+    {
+        $workers = CentreUser::get()->sortBy('homeCentre.name');
+        $csvExporter = new Export();
+
+        /**
+         * * modify downloader values to print user friendly text
+         * * currently, the y/n in the model reverts to 0/1 because of Laravel casting
+         * * so we are creating a temporary property
+        */
+        $csvExporter->beforeEach(function ($worker) {
+            $worker->downloaderRole = $worker->downloader ? 'Yes' : 'No';
+            foreach ($worker->centres as $centre) {
+                if ($centre->id !== $worker->homeCentre->id) {
+                    $worker->alternative_centres = $centre->name;
+                }
+            }
+        });
+
+        $header = [
+            'name' => 'Name',
+            'email' => 'E-mail Address',
+            'homeCentre.name' => 'Home Centre',
+            'alternative_centres' => 'Alternative Centre',
+            'downloaderRole' => 'Downloader'
+        ];
+
+        $fileName = 'active_workers.csv';
+        $buildFile = $csvExporter->build($workers, $header);
+
+        /**
+         * * have to disable the debugbar on local on the fly as it conflicts with LaraCSV
+         * * that is not yet fixed https://github.com/usmanhalalit/laracsv/issues/34
+         */
+        if (Debugbar::isEnabled()) {
+            app('debugbar')->disable();
+        }
+
+        $buildFile->download($fileName);
     }
 }
