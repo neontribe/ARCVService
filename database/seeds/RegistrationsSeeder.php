@@ -37,8 +37,9 @@ class RegistrationsSeeder extends Seeder
         // create a registration with a bundle
         $bundle = factory(App\Bundle::class)->create();
         factory(App\Registration::class)->create()->bundles()->save($bundle);
-    }
 
+        $this->createRegistrationTestCases();
+    }
 
     /**
      * This is horrible and there's a better way to mke seeds, imagine.
@@ -66,7 +67,7 @@ class RegistrationsSeeder extends Seeder
             $family->children()->saveMany(factory(\App\Child::class, random_int(0, 4))->make());
 
             $registrations[] = App\Registration::create(
-                 [
+                [
                     'centre_id' => $centre->id,
                     'family_id' => $family->id,
                     'eligibility' => $eligibilities[mt_rand(0, count($eligibilities) - 1)],
@@ -76,5 +77,40 @@ class RegistrationsSeeder extends Seeder
         }
         // Return the collection in case anyone needs it.
         return collect($registrations);
+    }
+
+    public function createRegistrationTestCases()
+    {
+        $eligibilities = config('arc.reg_eligibilities');
+
+        $family = factory(App\Family::class)->make();
+        $family->lockToCentre(App\Centre::find(1)); //to be confirmed
+        dd($family);
+        $family->save();
+        factory(App\Carer::class)->create([
+            'name' => 'MAY20-VC1-CH6-HAS-112019',
+            'family_id' => $family->id,
+        ]);
+
+        $child1 = factory(App\Child::class, 'almostOne')->states('verified')->make();
+        $child2 = factory(App\Child::class, 'underSchoolAge')->states('verified')->make();
+        $child3 = factory(App\Child::class, 'readyForSecondarySchool')->states('unverified')->make();
+        $child4 = factory(App\Child::class, 'readyForSecondarySchool')->states('unverified')->make();
+        $child5 = factory(App\Child::class, 'readyForSecondarySchool')->states('verified')->make();
+        $child6 = factory(App\Child::class, 'readyForSecondarySchool')->states('verified')->make();
+
+        $children = collect($child1, $child2, $child3, $child4, $child5, $child6);
+        $family->children()->saveMany($children);
+
+        $registration = App\Registration::create(
+            [
+                'centre_id' => App\Centre::find(1)->id,
+                'family_id' => $family->id,
+                'eligibility' => $eligibilities[mt_rand(0, count($eligibilities) - 1)],
+                'consented_on' => Carbon::create(2019, 11, 22),
+            ]
+        );
+
+        return collect($registration);
     }
 }
