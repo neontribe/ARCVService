@@ -43,8 +43,6 @@ class RegistrationsSeeder extends Seeder
         $centre = App\Centre::find(1);
         $family = [
             [
-                'centre' => $centre,
-                'centreId'=> $centre->id,
                 'carers' => [
                     ['name' => 'MAY20-VC1-CH6-HAS-112019'],
                 ],
@@ -58,7 +56,7 @@ class RegistrationsSeeder extends Seeder
                 ]
             ]
         ];
-        $this->createRegistrationTestCases($family);
+        $this->createRegistrationTestCases($family, $centre);
     }
 
     /**
@@ -100,25 +98,28 @@ class RegistrationsSeeder extends Seeder
     }
 
     /**
-     *
-     *
-     * @param $array $arrayOfFamilies
-     * @return \Illuminate\Support\Collection
+     * @param arra $arrayOfFamilies
+     * @param App\Centre $centre
+     * @return void
      */
-    public function createRegistrationTestCases($arrayOfFamilies)
+    public function createRegistrationTestCases($arrayOfFamilies, App\Centre $centre = null)
     {
         $registration = [];
         $eligibilities = config('arc.reg_eligibilities');
 
+        if (is_null($centre)) {
+            $centre = factory(App\Centre::class)->create();
+        }
+
         foreach ($arrayOfFamilies as $family) {
             $family = factory(App\Family::class)->make();
-            $family->lockToCentre($family->centre);
+            $family->lockToCentre($centre);
             $family->save();
 
             foreach ($family->carers as $carer) {
                 factory(App\Carer::class)->make(['name' => $carer->name]);
             }
-            $family->carers()->save($family->carers);
+            $family->carers()->saveMany($family->carers);
 
             foreach ($family->children as $child) {
                 factory(App\Carer::class, $child->state)->states($child->idSeen)->make();
@@ -128,7 +129,7 @@ class RegistrationsSeeder extends Seeder
 
             $registration[] = App\Registration::create(
                 [
-                    'centre_id' => $family->centreId,
+                    'centre_id' =>$centre->id,
                     'family_id' => $family->id,
                     'eligibility' => $eligibilities[mt_rand(0, count($eligibilities) - 1)],
                     'consented_on' => Carbon::create(2019, 11, 22),
