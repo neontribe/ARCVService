@@ -38,25 +38,95 @@ class RegistrationsSeeder extends Seeder
         $bundle = factory(App\Bundle::class)->create();
         factory(App\Registration::class)->create()->bundles()->save($bundle);
 
-        //make an array of registrations - data array
-        // each will be a family - carer name, centre id, array of children's states
-        $centre = App\Centre::find(1);
-        $family = [
-            [
-                'carers' => [
-                    ['name' => 'MAY20-VC1-CH6-HAS-112019'],
-                ],
-                'children' => [
-                    ['state' => 'underSchoolAge', 'idSeen' => 'verified'],
-                    ['state' => 'underSchoolAge', 'idSeen' => 'verified'],
-                    ['state' => 'readyForSchool', 'idSeen' => 'unverified'],
-                    ['state' => 'readyForSecondarySchool', 'idSeen' => 'unverified'],
-                    ['state' => 'readyForSecondarySchool', 'idSeen' => 'verified'],
-                    ['state' => 'readyForSecondarySchool', 'idSeen' => 'verified'],
-                ]
-            ]
+        $testCentre = App\Centre::find(1);
+
+        /*
+        TODO: create/find a centre without SK rules for fam1 and fam4 that is not in same area as families 3, 5 and 6
+        TODO: create/find a centre with SK rules for fam2 that is not in same area as families 3, 5 and 6
+        TODO: create/find a centre with SK rules for fam3 that is in a different area from all other families
+        TODO: create/find a centre with SK rules but without toggle for fam 5 that is in a different area from all other families
+        TODO: create/find a centre with non SK rules for fam 6 that is in a different area from all other families
+         */
+
+        $familyData1 = [
+            'carers' => [
+                ['name' => '1MAY20a-VC2-CH1-HI-042019'],
+                ['name' => 'MAY20b-VC2-CH1-HI-042019'],
+            ],
+            'children' => [
+                ['age' => 'almostOne', 'state' => 'unverified'],
+            ],
+            'joined_on' => Carbon::create(2019, 4, 9),
         ];
-        $this->createRegistrationTestCases($family, $centre);
+
+        $familyData2 = [
+            'carers' => [
+                ['name' => '2MAY20-VC1-CH2-HI-122018']
+            ],
+            'children' => [
+                ['age' => 'underOne', 'state' => 'unverified'],
+                ['age' => 'underSchoolAge', 'state' => 'unverified'],
+                ['age' => 'readyForSecondarySchool', 'state' => 'verified'],
+            ],
+            'joined_on' => Carbon::create(2018, 12, 14),
+        ];
+
+        $familyData3 = [
+            'carers' => [
+                ['name' => '3MAY20-VC1-CH6-HAS-112019'],
+            ],
+            'children' => [
+                ['age' => 'underSchoolAge', 'state' => 'verified'],
+                ['age' => 'underSchoolAge', 'state' => 'verified'],
+                ['age' => 'readyForSchool', 'state' => 'unverified'],
+                ['age' => 'readyForSecondarySchool', 'state' => 'unverified'],
+                ['age' => 'readyForSecondarySchool', 'state' => 'verified'],
+                ['age' => 'readyForSecondarySchool', 'state' => 'verified'],
+            ],
+            'joined_on' => Carbon::create(2019, 11, 22),
+        ];
+
+
+        $familyData4 = [
+            'carers' => [
+                ['name' => '4MAY20-VC1-CH1P-HA-012020'],
+            ],
+            'children' => [
+                ['age' => 'underSchoolAge', 'state' => 'unverified'],
+                ['age' => 'unbornChild', 'state' => 'verified'],
+            ],
+            'joined_on' => Carbon::create(2020, 1, 30),
+        ];
+
+        $familyData5 = [
+            'carers' => [
+                ['name' => '5MAY20-VC1-CH3-HA-112015'],
+            ],
+            'children' => [
+                ['age' => 'readyForSecondarySchool', 'state' => 'verified'],
+                ['age' => 'readyForSecondarySchool', 'state' => 'verified'],
+                ['age' => 'underSchoolAge', 'state' => 'unverified'],
+            ],
+            'joined_on' => Carbon::create(2019, 11, 12),
+        ];
+
+        $familyData6 = [
+            'carers' => [
+                ['name' => '6MAY-VC1-CH2-HI-032020'],
+            ],
+            'children' => [
+                ['age' => 'underOne', 'state' => 'unverified'],
+                ['age' => 'underSchoolAge', 'state' => 'verified'],
+            ],
+            'joined_on' => Carbon::create(2020, 4, 1),
+        ];
+
+        $this->createRegistrationTestCase($familyData1, $testCentre);
+        $this->createRegistrationTestCase($familyData2, $testCentre);
+        $this->createRegistrationTestCase($familyData3, $testCentre);
+        $this->createRegistrationTestCase($familyData4, $testCentre);
+        $this->createRegistrationTestCase($familyData5, $testCentre);
+        $this->createRegistrationTestCase($familyData6, $testCentre);
     }
 
     /**
@@ -98,45 +168,43 @@ class RegistrationsSeeder extends Seeder
     }
 
     /**
-     * @param arra $arrayOfFamilies
+     * @param array $familyData
      * @param App\Centre $centre
      * @return void
      */
-    public function createRegistrationTestCases($arrayOfFamilies, App\Centre $centre = null)
+    public function createRegistrationTestCase($familyData, App\Centre $centre = null)
     {
-        $registration = [];
+        $carers = [];
+        $children = [];
         $eligibilities = config('arc.reg_eligibilities');
 
         if (is_null($centre)) {
             $centre = factory(App\Centre::class)->create();
         }
 
-        foreach ($arrayOfFamilies as $family) {
-            $family = factory(App\Family::class)->make();
-            $family->lockToCentre($centre);
-            $family->save();
+        $family = factory(App\Family::class)->make();
+        $family->lockToCentre($centre);
+        $family->save();
 
-            foreach ($family->carers as $carer) {
-                factory(App\Carer::class)->make(['name' => $carer->name]);
-            }
-            $family->carers()->saveMany($family->carers);
-
-            foreach ($family->children as $child) {
-                factory(App\Carer::class, $child->state)->states($child->idSeen)->make();
-            }
-
-            $family->children()->saveMany([$family->children]);
-
-            $registration[] = App\Registration::create(
-                [
-                    'centre_id' =>$centre->id,
-                    'family_id' => $family->id,
-                    'eligibility' => $eligibilities[mt_rand(0, count($eligibilities) - 1)],
-                    'consented_on' => Carbon::create(2019, 11, 22),
-                ]
-            );
+        foreach ($familyData['carers'] as $carer) {
+            $carers[] = factory(App\Carer::class)->make(['name' => $carer['name']]);
         }
+        $family->carers()->saveMany($carers);
+
+        foreach ($familyData['children'] as $child) {
+            $children[] = factory(App\Child::class, $child['age'])->states($child['state'])->make();
+        }
+
+        $family->children()->saveMany($children);
         Log::info($family);
-        return collect($registration);
+        return App\Registration::create(
+            [
+                'centre_id' => $centre->id,
+                'family_id' => $family->id,
+                'eligibility' => $eligibilities[mt_rand(0, count($eligibilities) - 1)],
+                'consented_on' => $familyData['joined_on'],
+            ]
+        );
     }
+
 }
