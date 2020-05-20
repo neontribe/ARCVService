@@ -24,7 +24,12 @@ class VouchersSeeder extends Seeder
 
         // Only requested state works with seeder for now.
         // Only 40 for now or we will get 9 digits.
-        $rvp_vouchers = factory(App\Voucher::class, 'requested', 40)->create();
+        // These vouchers dispatched before we added delivery to system.
+        // They can be collected even though they do not have a delivery_id.
+        $timestamp_pre_delivery = Carbon\Carbon::parse(config('arc.first_delivery_date'))->subMonth(1);
+        $rvp_vouchers = factory(App\Voucher::class, 'requested', 40)->create([
+            'created_at' => $timestamp_pre_delivery,
+        ]);
 
         // Make some random vouchers.
         factory(App\Voucher::class, 'requested', 50)->create();
@@ -89,5 +94,13 @@ class VouchersSeeder extends Seeder
             $v->applyTransition('dispatch');
         }
 
+        // Generate a corresponding delivery
+        $delivery = factory(App\Delivery::class)->create([
+            // Our sponsor 'RVNT' is definitely linked to this centre
+            'centre_id' => 1,
+            'dispatched_at' => Carbon\Carbon::now()->subMonth(1),
+            'range' => 'RVNT0000-RVNT0099',
+        ]);
+        $delivery->vouchers()->saveMany($rvnt4);
     }
 }
