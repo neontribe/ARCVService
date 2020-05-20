@@ -12,7 +12,7 @@ use App\Services\VoucherEvaluator\Evaluations\ChildIsSchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsSecondarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderSecondarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderOne;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderSchoolAge;
+use App\Services\VoucherEvaluator\Evaluations\ChildIsBetweenOneAndSchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\FamilyHasNoEligibleChildren;
 use App\Services\VoucherEvaluator\Evaluations\FamilyHasUnverifiedChildren;
 use App\Services\VoucherEvaluator\Evaluations\FamilyIsPregnant;
@@ -73,7 +73,7 @@ class EvaluatorFactory
             Child::class => [
                 'credits' => [
                     new ChildIsUnderOne($offsetDate, 3),
-                    new ChildIsUnderSchoolAge($offsetDate, 3)
+                    new ChildIsBetweenOneAndSchoolAge($offsetDate, 3)
                 ],
                 'notices' => [
                     new ChildIsAlmostOne($offsetDate),
@@ -117,14 +117,8 @@ class EvaluatorFactory
                     // warn if we're almost 1yo
                     new ChildIsAlmostOne($offsetDate),
 
-                    // ... or if under school age; turns out we don't need this here!
-                    # new ChildIsUnderSchoolAge($offsetDate),
-
                     // ... or if almost primary school age
                     new ChildIsAlmostSchoolAge($offsetDate),
-
-                    // ... or if actually primary school age; turns out we don't need this here!
-                    # new ChildIsSchoolAge($offsetDate)
 
                     // ... or if almost secondary school age
                     new ChildIsAlmostSecondarySchoolAge($offsetDate),
