@@ -241,14 +241,15 @@ $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
 });
 
 /**
- * Voucher with currentstate requested.
+ * Voucher with currentstate printed.
  */
-$factory->defineAs(App\Voucher::class, 'requested', function ($faker) use ($factory) {
+$factory->defineAs(App\Voucher::class, 'printed', function ($faker) use ($factory) {
 
+    // As our starting state, we do not require a `voucher_state` to be generated.
     $voucher = $factory->raw(App\Voucher::class);
 
     return array_merge($voucher, [
-        'currentstate' => 'requested',
+        'currentstate' => 'printed',
     ]);
 });
 
@@ -258,18 +259,9 @@ $factory->defineAs(App\Voucher::class, 'requested', function ($faker) use ($fact
 $factory->defineAs(App\Voucher::class, 'dispatched', function ($faker) use ($factory) {
     $voucher = $factory->raw(App\Voucher::class);
 
-    // Todo create the voucher_states on the road to dispatched.
+    // Dispatched is the first state, so we can go with default values here.
     factory(App\VoucherState::class)->create();
-    factory(App\VoucherState::class)->create([
-        'transition' => 'print',
-        'from' => 'ordered',
-        'to' => 'printed',
-    ]);
-    factory(App\VoucherState::class)->create([
-        'transition' => 'dispatch',
-        'from' => 'printed',
-        'to' => 'dispatched',
-    ]);
+
     return array_merge($voucher, [
         'currentstate' => 'dispatched',
     ]);
@@ -277,16 +269,15 @@ $factory->defineAs(App\Voucher::class, 'dispatched', function ($faker) use ($fac
 
 $factory->define(App\VoucherState::class, function (Faker\Generator $faker) {
 
-    // Factory adds initial values - overwrite when we create.
-    // There will be a batter way to seed states - but for now
-    // just need a way to force one.
+    // Factory adds initial values for first possible state (dispatched)
+    // Overwrite when we create - other states.
     return [
-        'transition' => 'order',
-        'from' => 'requested',
+        'transition' => 'dispatch',
+        'from' => 'printed',
         'user_id' => 1,
         'voucher_id' => 1,
-        'to' => 'ordered',
-        // Not sure what source refers to.
+        'to' => 'dispatched',
+        // Required by the state package we are using, but we don't use this field
         'source' => 'factory',
     ];
 });
