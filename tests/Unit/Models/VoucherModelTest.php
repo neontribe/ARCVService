@@ -160,11 +160,9 @@ class VoucherModelTest extends TestCase
             'TST0123457'
         ];
         foreach ($goodCodes as $goodCode) {
-            $voucher = factory(Voucher::class, 'requested')->create([
+            $voucher = factory(Voucher::class, 'printed')->create([
                 'code' => $goodCode
             ]);
-            $voucher->applyTransition('order');
-            $voucher->applyTransition('print');
             $voucher->applyTransition('dispatch');
         }
 
@@ -213,17 +211,17 @@ class VoucherModelTest extends TestCase
      */
     public function testItCanCreateAValidTransitionDefinition()
     {
-        $validTransDef = Voucher::createTransitionDef("ordered", "print");
+        $validTransDef = Voucher::createTransitionDef("printed", "dispatch");
 
-        $this->assertEquals('print', $validTransDef->name);
-        $this->assertEquals('ordered', $validTransDef->from);
-        $this->assertNotNull('printed', $validTransDef->to);
+        $this->assertEquals('dispatch', $validTransDef->name);
+        $this->assertEquals('printed', $validTransDef->from);
+        $this->assertNotNull('dispatched', $validTransDef->to);
 
         // Has an invalid transition name
-        $this->assertNull(Voucher::createTransitionDef("ordered", "spacejam!"));
+        $this->assertNull(Voucher::createTransitionDef("printed", "spacejam!"));
 
         // Has an invalid transition "from" state
-        $this->assertNull(Voucher::createTransitionDef("kensington", "printed"));
+        $this->assertNull(Voucher::createTransitionDef("kensington", "dispatched"));
     }
 
     /** @test */
@@ -286,7 +284,7 @@ class VoucherModelTest extends TestCase
         );
 
         foreach ($rangeCodes as $rangeCode) {
-            $voucher = factory(Voucher::class, 'requested')->create([
+            $voucher = factory(Voucher::class, 'printed')->create([
                 'code' => $rangeCode,
                 'sponsor_id' => $sponsor->id,
             ]);

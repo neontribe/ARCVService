@@ -82,12 +82,10 @@ class VoucherModelMysqlTest extends StoreTestCase
     {
         // Make vouchers from them
         foreach ($this->rangeCodes as $rangeCode) {
-            $voucher = factory(Voucher::class, 'requested')->create([
+            $voucher = factory(Voucher::class, 'printed')->create([
                 'code' => $rangeCode,
                 'sponsor_id' => $this->sponsor->id,
             ]);
-            $voucher->applyTransition('order');
-            $voucher->applyTransition('print');
             $voucher->applyTransition('dispatch');
         }
 
@@ -110,12 +108,10 @@ class VoucherModelMysqlTest extends StoreTestCase
     {
         // Make vouchers from them
         foreach ($this->rangeCodes as $rangeCode) {
-            $voucher = factory(Voucher::class, 'requested')->create([
+            $voucher = factory(Voucher::class, 'printed')->create([
                 'code' => $rangeCode,
                 'sponsor_id' => $this->sponsor->id,
             ]);
-            $voucher->applyTransition('order');
-            $voucher->applyTransition('print');
         }
 
         // Make a range to check
