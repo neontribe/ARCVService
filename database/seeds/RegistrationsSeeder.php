@@ -38,7 +38,27 @@ class RegistrationsSeeder extends Seeder
         $bundle = factory(App\Bundle::class)->create();
         factory(App\Registration::class)->create()->bundles()->save($bundle);
 
-        $this->createRegistrationTestCases();
+        //make an array of registrations - data array
+        // each will be a family - carer name, centre id, array of children's states
+        $centre = App\Centre::find(1);
+        $family = [
+            [
+                'centre' => $centre,
+                'centreId'=> $centre->id,
+                'carers' => [
+                    ['name' => 'MAY20-VC1-CH6-HAS-112019'],
+                ],
+                'children' => [
+                    ['state' => 'underSchoolAge', 'idSeen' => 'verified'],
+                    ['state' => 'underSchoolAge', 'idSeen' => 'verified'],
+                    ['state' => 'readyForSchool', 'idSeen' => 'unverified'],
+                    ['state' => 'readyForSecondarySchool', 'idSeen' => 'unverified'],
+                    ['state' => 'readyForSecondarySchool', 'idSeen' => 'verified'],
+                    ['state' => 'readyForSecondarySchool', 'idSeen' => 'verified'],
+                ]
+            ]
+        ];
+        $this->createRegistrationTestCases($family);
     }
 
     /**
@@ -79,38 +99,43 @@ class RegistrationsSeeder extends Seeder
         return collect($registrations);
     }
 
-    public function createRegistrationTestCases()
+    /**
+     *
+     *
+     * @param $array $arrayOfFamilies
+     * @return \Illuminate\Support\Collection
+     */
+    public function createRegistrationTestCases($arrayOfFamilies)
     {
+        $registration = [];
         $eligibilities = config('arc.reg_eligibilities');
 
-        $family = factory(App\Family::class)->make();
-        $family->lockToCentre(App\Centre::find(1)); //to be confirmed
-        dd($family);
-        $family->save();
-        factory(App\Carer::class)->create([
-            'name' => 'MAY20-VC1-CH6-HAS-112019',
-            'family_id' => $family->id,
-        ]);
+        foreach ($arrayOfFamilies as $family) {
+            $family = factory(App\Family::class)->make();
+            $family->lockToCentre($family->centre);
+            $family->save();
 
-        $child1 = factory(App\Child::class, 'almostOne')->states('verified')->make();
-        $child2 = factory(App\Child::class, 'underSchoolAge')->states('verified')->make();
-        $child3 = factory(App\Child::class, 'readyForSecondarySchool')->states('unverified')->make();
-        $child4 = factory(App\Child::class, 'readyForSecondarySchool')->states('unverified')->make();
-        $child5 = factory(App\Child::class, 'readyForSecondarySchool')->states('verified')->make();
-        $child6 = factory(App\Child::class, 'readyForSecondarySchool')->states('verified')->make();
+            foreach ($family->carers as $carer) {
+                factory(App\Carer::class)->make(['name' => $carer->name]);
+            }
+            $family->carers()->save($family->carers);
 
-        $children = collect($child1, $child2, $child3, $child4, $child5, $child6);
-        $family->children()->saveMany($children);
+            foreach ($family->children as $child) {
+                factory(App\Carer::class, $child->state)->states($child->idSeen)->make();
+            }
 
-        $registration = App\Registration::create(
-            [
-                'centre_id' => App\Centre::find(1)->id,
-                'family_id' => $family->id,
-                'eligibility' => $eligibilities[mt_rand(0, count($eligibilities) - 1)],
-                'consented_on' => Carbon::create(2019, 11, 22),
-            ]
-        );
+            $family->children()->saveMany([$family->children]);
 
+            $registration[] = App\Registration::create(
+                [
+                    'centre_id' => $family->centreId,
+                    'family_id' => $family->id,
+                    'eligibility' => $eligibilities[mt_rand(0, count($eligibilities) - 1)],
+                    'consented_on' => Carbon::create(2019, 11, 22),
+                ]
+            );
+        }
+        Log::info($family);
         return collect($registration);
     }
 }
