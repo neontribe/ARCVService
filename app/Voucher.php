@@ -248,57 +248,57 @@ class Voucher extends Model
                 return DB::select(
                     "
                     SELECT
-                        t1.*, 
+                        t1.*,
                         v1.code as intitial_code,
                         v2.code as final_code
                     FROM (
-                        
+
                         SELECT
                             @start := if(end - @previous = 1, @start, end) as start,
                             @initial_id := if(end - @previous = 1, @initial_id, id) as initial_id,
                             @previous := end as end,
                             id as final_id
                         FROM (
-                        
+
                             SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as end
                             FROM vouchers
                             WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                               AND currentstate = 'dispatched'
                             ORDER BY end
-                        
+
                         ) as t5
-                    
+
                     ) AS t1
                         INNER JOIN (
-                    
+
                             SELECT start, max(end) as final
                             FROM (
-                    
+
                                  SELECT
                                      @start := if(end - @previous = 1, @start, end) as start,
                                      @initial_id := if(end - @previous = 1, @initial_id, id) as initial_id,
                                      @previous := end as end,
                                      id
                                  FROM (
-                                     
+
                                     SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as end
                                     FROM vouchers
                                     WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                                       AND currentstate = 'dispatched'
                                     ORDER BY end
-                    
+
                                  ) as t4
-                    
+
                             ) as t3
                             GROUP BY start
-                    
+
                         ) as t2
                         ON t1.start = t2.start
                           AND t1.end = t2.final
-                    
+
                     LEFT JOIN vouchers as v1
                         ON initial_id = v1.id
-                    
+
                     LEFT JOIN vouchers as v2
                         ON final_id = v2.id
                     "
@@ -340,7 +340,7 @@ class Voucher extends Model
                     "
                     SELECT
                         # Resolves the sub-queries operation to a table of ranges
-                        t1.*, 
+                        t1.*,
                         v1.code as intitial_code,
                         v2.code as final_code
                     FROM (
@@ -351,16 +351,16 @@ class Voucher extends Model
                             @previous := end as end,
                             id as final_id
                         FROM (
-                            # sub-query that gets the vouchers in a state we want under a specific shortcode. 
+                            # sub-query that gets the vouchers in a state we want under a specific shortcode.
                             SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as end
                             FROM vouchers
                             WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                               AND currentstate = 'printed'
                               AND delivery_id is null
                             ORDER BY end
-                        
+
                         ) as t5
-                    
+
                     ) AS t1
                         INNER JOIN (
                             # Bit of a self join going on in this one to find the end values.
@@ -374,24 +374,24 @@ class Voucher extends Model
                                      id
                                  FROM (
                                       SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as end
-                                      FROM vouchers 
+                                      FROM vouchers
                                       WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                                         AND currentstate = 'printed'
                                         AND delivery_id is null
                                       ORDER BY end
-                    
+
                                  ) as t4
-                    
+
                             ) as t3
                             GROUP BY start
-                    
+
                         ) as t2
                         ON t1.start = t2.start
                           AND t1.end = t2.final
-                    
+
                     LEFT JOIN vouchers as v1
                         ON initial_id = v1.id
-                    
+
                     LEFT JOIN vouchers as v2
                         ON final_id = v2.id
                     "
