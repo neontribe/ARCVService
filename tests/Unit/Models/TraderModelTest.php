@@ -58,7 +58,7 @@ class TraderModelTest extends TestCase
 
     public function testTraderHasConfirmedVouchers()
     {
-        $vouchers = factory(Voucher::class, 'requested', 3)->create([
+        $vouchers = factory(Voucher::class, 'printed', 3)->create([
             'trader_id' => $this->trader->id,
         ]);
 
@@ -67,8 +67,6 @@ class TraderModelTest extends TestCase
         Auth::login($user);
 
         foreach ($vouchers as $v) {
-            $v->applyTransition('order');
-            $v->applyTransition('print');
             $v->applyTransition('dispatch');
             $v->trader_id = 1;
             $v->applyTransition('collect');
@@ -91,7 +89,7 @@ class TraderModelTest extends TestCase
 
     public function testTraderHasVouchersWithStatus()
     {
-        $vouchers = factory(Voucher::class, 'requested', 6)->create([
+        $vouchers = factory(Voucher::class, 'printed', 6)->create([
             'trader_id' => $this->trader->id,
         ]);
 
@@ -100,8 +98,6 @@ class TraderModelTest extends TestCase
         Auth::login($user);
 
         foreach ($vouchers as $v) {
-            $v->applyTransition('order');
-            $v->applyTransition('print');
             $v->applyTransition('dispatch');
             $v->trader_id = 1;
             $v->applyTransition('collect');

@@ -10,8 +10,6 @@ return [
 
         // list of all possible states
         'states' => [
-            'requested',
-            'ordered',
             'printed',
             'dispatched',
             'recorded', // submitted to shortlist
@@ -25,14 +23,6 @@ return [
         // list of all possible transitions
         'transitions' => [
 
-            'order' => [
-                'from' => ['requested'],
-                'to' => 'ordered',
-            ],
-            'print' => [
-                'from' =>  ['ordered'],
-                'to' => 'printed',
-            ],
             'dispatch' => [
                 'from' => ['printed'],
                 'to' => 'dispatched',

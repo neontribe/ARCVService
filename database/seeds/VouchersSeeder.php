@@ -22,17 +22,16 @@ class VouchersSeeder extends Seeder
         // Create RVNT one as id 1 our trader will be affiliated with this.
         $rvp = App\Sponsor::where('shortcode', 'RVNT')->first();
 
-        // Only requested state works with seeder for now.
         // Only 40 for now or we will get 9 digits.
         // These vouchers dispatched before we added delivery to system.
         // They can be collected even though they do not have a delivery_id.
         $timestamp_pre_delivery = Carbon\Carbon::parse(config('arc.first_delivery_date'))->subMonth(1);
-        $rvp_vouchers = factory(App\Voucher::class, 'requested', 40)->create([
+        $rvp_vouchers = factory(App\Voucher::class, 'printed', 40)->create([
             'created_at' => $timestamp_pre_delivery,
         ]);
 
         // Make some random vouchers.
-        factory(App\Voucher::class, 'requested', 50)->create();
+        factory(App\Voucher::class, 'printed', 50)->create();
 
         $size = sizeOf($rvp_vouchers);
         // Assign the codes that match the paper.
@@ -41,12 +40,6 @@ class VouchersSeeder extends Seeder
             $rvp_vouchers[$k]->code = 'RVNT123455'.$i;
             $rvp_vouchers[$k]->sponsor_id = $rvp->id;
             $rvp_vouchers[$k]->save();
-
-            if ($rvp_vouchers[$k]->id < 32) {
-                //Progress these to printed.
-                $rvp_vouchers[$k]->applyTransition('order');
-                $rvp_vouchers[$k]->applyTransition('print');
-            }
 
             if ($rvp_vouchers[$k]->id < 22) {
                 //Progress these to dispatched.
@@ -84,13 +77,11 @@ class VouchersSeeder extends Seeder
         }
 
         // 4 digit printed vouchers for trial.
-        $rvnt4 = factory(App\Voucher::class, 'requested', 100)->create();
+        $rvnt4 = factory(App\Voucher::class, 'printed', 100)->create();
         foreach ($rvnt4 as $k => $v) {
             $v->code = 'RVNT' . str_pad($k, 4, '0', STR_PAD_LEFT);
             $v->sponsor_id = $rvp->id;
-            // Progress to printed.
-            $v->applyTransition('order');
-            $v->applyTransition('print');
+            // Progress to dispatched.
             $v->applyTransition('dispatch');
         }
 

@@ -32,7 +32,7 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
     {
         parent::setUp();
         $this->traders = factory(Trader::class, 2)->create();
-        $this->vouchers = factory(Voucher::class, 'requested', 10)->create();
+        $this->vouchers = factory(Voucher::class, 'printed', 10)->create();
         $this->user = factory(User::class)->create();
 
         // Add market to trader[1];
@@ -50,8 +50,6 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
         $this->stateToken = factory(StateToken::class)->create();
 
         foreach ($this->vouchers as $v) {
-            $v->applyTransition('order');
-            $v->applyTransition('print');
             $v->applyTransition('dispatch');
             $v->trader_id = 1;
             $v->applyTransition('collect');

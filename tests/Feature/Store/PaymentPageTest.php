@@ -22,15 +22,13 @@ class PaymentPageTest extends StoreTestCase
         parent::setUp();
 
         // Create a voucher and a trader with some info
-        $this->voucher = factory(Voucher::class, 'requested')->create();
+        $this->voucher = factory(Voucher::class, 'printed')->create();
         $trader = factory(Trader::class, 'withnullable')->create();
         $this->voucher->code = 'TEST12345';
         $this->voucher->trader_id = $trader->id;
         $this->voucher->save();
 
         // Transition to PaymentPending
-        $this->voucher->applyTransition('order');
-        $this->voucher->applyTransition('print');
         $this->voucher->applyTransition('dispatch');
         $this->voucher->applyTransition('collect');
         $this->voucher->applyTransition('confirm');

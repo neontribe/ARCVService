@@ -24,7 +24,7 @@ class ApiRoutesTest extends TestCase
     {
         parent::setUp();
         $this->trader = factory(Trader::class)->create();
-        $this->vouchers = factory(Voucher::class, 'requested', 10)->create();
+        $this->vouchers = factory(Voucher::class, 'printed', 10)->create();
         $this->user = factory(User::class)->create();
 
         // Set up password client
@@ -58,8 +58,6 @@ class ApiRoutesTest extends TestCase
         // Set up voucher states.
         Auth::login($this->user);
         foreach ($this->vouchers as $v) {
-            $v->applyTransition('order');
-            $v->applyTransition('print');
             $v->delivery_id = $delivery->id;
             $v->applyTransition('dispatch');
         }

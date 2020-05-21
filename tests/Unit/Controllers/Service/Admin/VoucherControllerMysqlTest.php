@@ -75,12 +75,10 @@ class VoucherControllerMysqlTest extends StoreTestCase
         Auth::login($this->user);
 
         foreach ($this->rangeCodes as $rangeCode) {
-            $voucher = factory(Voucher::class, 'requested')->create([
+            $voucher = factory(Voucher::class, 'printed')->create([
                 'code' => $rangeCode,
                 'sponsor_id' => $this->sponsor->id,
             ]);
-            $voucher->applyTransition('order');
-            $voucher->applyTransition('print');
             $voucher->applyTransition('dispatch');
         }
 
