@@ -2,11 +2,12 @@
 
 namespace Tests\Unit\Controllers\Api;
 
-use App\Voucher;
+use App\Centre;
+use App\Delivery;
 use App\StateToken;
 use App\Trader;
 use App\User;
-use App\VoucherState;
+use App\Voucher;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -33,11 +34,31 @@ class ApiVoucherControllerTest extends TestCase
 
         Auth::login($this->user);
 
-        // Create some vouchers at dispatched state
-        $this->vouchers = factory(Voucher::class, 'requested', 10)->create();
-        $this->vouchers->each(function ($voucher) {
-            $voucher->applyTransition('order');
-            $voucher->applyTransition('print');
+        // Create some vouchers at printed state
+        $this->vouchers = factory(Voucher::class, 'printed', 10)->create();
+    }
+
+    /**
+     * Transition to delivery
+     *
+     * @param $vouchers
+     * @param Centre|null $centre
+     * @param Carbon|null $deliveryDate
+     */
+    private function dispatchVouchers($vouchers, Centre $centre, Carbon $deliveryDate = null)
+    {
+        $deliveryDate = $deliveryDate ?? Carbon::today();
+
+        // Make a delivery
+        $delivery = factory(Delivery::class)->create([
+                'centre_id' => $centre->id,
+                'dispatched_at' => $deliveryDate,
+            ]);
+
+        // Update the transition and add delivery
+        $vouchers->each(function ($voucher) use ($delivery) {
+            $voucher->delivery_id = $delivery->id;
+            // Saves voucher
             $voucher->applyTransition('dispatch');
         });
     }
@@ -45,7 +66,14 @@ class ApiVoucherControllerTest extends TestCase
     /** @test */
     public function testItNeverTidiesOldTokensOnConfirmTransitions()
     {
-        // test inverted because we used to do "confirm" tidying, now we don't
+        // Create a Centre
+        $centre = factory(Centre::class)->create();
+
+        // Dispatch the first one.
+        $this->dispatchVouchers(
+            $this->vouchers->slice(0, 1),
+            $centre
+        );
 
         // Shift a voucher off to be our oldVoucher.
         $oldVoucher = $this->vouchers->shift();
@@ -62,6 +90,7 @@ class ApiVoucherControllerTest extends TestCase
             ->json('POST', $route, $data)
             ->assertStatus(200)
         ;
+
         // There should be no token for this request
         $this->assertEquals(0, StateToken::all()->count());
 
@@ -116,6 +145,15 @@ class ApiVoucherControllerTest extends TestCase
     /** @test */
     public function testItAttachesTokensToPaymentPendingStates()
     {
+        // Create a Centre
+        $centre = factory(Centre::class)->create();
+
+        // Dispatch the vouchers
+        $this->dispatchVouchers(
+            $this->vouchers,
+            $centre
+        );
+
         // Progress some vouchers to recorded state via the controller;
         $data = [
             "trader_id" => 1,
@@ -155,4 +193,39 @@ class ApiVoucherControllerTest extends TestCase
             });
     }
 
+    /** @test */
+    public function testItReturnsArrayOfUndeliveredVouchers()
+    {
+        // Create a Centre
+        $centre = factory(Centre::class)->create();
+
+        // Dispatch all except the last one
+        $this->dispatchVouchers(
+            $this->vouchers->slice(0, 9),
+            $centre
+        );
+
+        // Progress some vouchers to recorded state via the controller
+        $data = [
+            "trader_id" => 1,
+            "transition" => 'collect',
+            "vouchers" => $this->vouchers->pluck('code')->toArray()
+        ];
+
+        $route = route('api.voucher.transition');
+
+        $expectedCounts = [
+            // The last one is undelivered.
+            'success_amount' => $this->vouchers->count()-1,
+            'duplicate_amount' => 0,
+            // The invalid one is the one hat was undelivered.
+            'invalid_amount' => 1,
+        ];
+
+        $this->actingAs($this->user, 'api')
+            ->json('POST', $route, $data)
+            ->assertStatus(200)
+            ->assertJson(['message' => trans('api.messages.batch_voucher_submit', $expectedCounts)])
+        ;
+    }
 }

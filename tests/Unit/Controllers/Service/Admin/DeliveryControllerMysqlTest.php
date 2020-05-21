@@ -83,12 +83,10 @@ class DeliveryControllerMysqlTest extends StoreTestCase
         Auth::login($this->user);
 
         foreach ($this->rangeCodes as $rangeCode) {
-            $voucher = factory(Voucher::class, 'requested')->create([
+            $voucher = factory(Voucher::class, 'printed')->create([
                 'code' => $rangeCode,
                 'sponsor_id' => $this->sponsor->id,
             ]);
-            $voucher->applyTransition('order');
-            $voucher->applyTransition('print');
         }
 
         Auth::logout();
@@ -125,7 +123,7 @@ class DeliveryControllerMysqlTest extends StoreTestCase
             ->seePageIs($successRoute)
             ->see($msg)
         ;
-        
+
         // fetch those back.
         $vouchers = Voucher::where('currentstate', 'dispatched')
             ->with('delivery')
