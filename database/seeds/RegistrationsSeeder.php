@@ -38,15 +38,37 @@ class RegistrationsSeeder extends Seeder
         $bundle = factory(App\Bundle::class)->create();
         factory(App\Registration::class)->create()->bundles()->save($bundle);
 
-        $testCentre = App\Centre::find(1);
+        // centre without SK rules for fam1 & fam4 that is not in same area as families 3, 5 and 6
+        $testCentreFam1And4 = App\Centre::find(7);
+        $testCentreFam1And4->sponsor_id = App\Sponsor::find(5)->id;
 
         /*
-        TODO: create/find a centre without SK rules for fam1 and fam4 that is not in same area as families 3, 5 and 6
-        TODO: create/find a centre with SK rules for fam2 that is not in same area as families 3, 5 and 6
-        TODO: create/find a centre with SK rules for fam3 that is in a different area from all other families
-        TODO: create/find a centre with SK rules but without toggle for fam 5 that is in a different area from all other families
-        TODO: create/find a centre with non SK rules for fam 6 that is in a different area from all other families
-         */
+        centre with SK rules for fam2 that is not in same area as families 3, 5 and 6
+        TODO: add SK rules
+        */
+        $testCentreFam2 = App\Centre::find(2);
+        $testCentreFam2->sponsor_id = App\Sponsor::find(2)->id;
+
+        /*
+        centre with SK rules for fam3 that is in a different area from all other families
+        TODO: check and/or add SK rules
+        */
+        $testCentreFam3 = App\Centre::find(1);
+        $testCentreFam3->sponsor_id = App\Sponsor::find(1)->id;
+
+        /*
+        centre with SK rules but without toggle for fam 5 that is in a different area from all other families
+        TODO: check and/or add SK rules without toggle
+        */
+        $testCentreFam5 = App\Centre::find(3);
+        $testCentreFam5->sponsor_id = App\Sponsor::find(3)->id;
+
+        /*
+        centre with non SK rules for fam 6 that is in a different area from all other families
+        TODO: check that we don't have SK rules
+        */
+        $testCentreFam6 = App\Centre::find(6);
+        $testCentreFam6->sponsor_id = App\Sponsor::find(4)->id;
 
         $familyData1 = [
             'carers' => [
@@ -54,7 +76,7 @@ class RegistrationsSeeder extends Seeder
                 ['name' => 'MAY20b-VC2-CH1-HI-042019'],
             ],
             'children' => [
-                ['age' => 'almostOne', 'state' => 'unverified'],
+                ['age' => 'almostOne'],
             ],
             'joined_on' => Carbon::create(2019, 4, 9),
         ];
@@ -66,7 +88,7 @@ class RegistrationsSeeder extends Seeder
             'children' => [
                 ['age' => 'underOne', 'state' => 'unverified'],
                 ['age' => 'underSchoolAge', 'state' => 'unverified'],
-                ['age' => 'readyForSecondarySchool', 'state' => 'verified'],
+                ['age' => 'overSchoolAge', 'state' => 'unverified'],
             ],
             'joined_on' => Carbon::create(2018, 12, 14),
         ];
@@ -79,9 +101,9 @@ class RegistrationsSeeder extends Seeder
                 ['age' => 'underSchoolAge', 'state' => 'verified'],
                 ['age' => 'underSchoolAge', 'state' => 'verified'],
                 ['age' => 'readyForSchool', 'state' => 'unverified'],
-                ['age' => 'readyForSecondarySchool', 'state' => 'unverified'],
-                ['age' => 'readyForSecondarySchool', 'state' => 'verified'],
-                ['age' => 'readyForSecondarySchool', 'state' => 'verified'],
+                ['age' => 'overSchoolAge', 'state' => 'unverified'],
+                ['age' => 'overSchoolAge', 'state' => 'verified'],
+                ['age' => 'overSchoolAge', 'state' => 'verified'],
             ],
             'joined_on' => Carbon::create(2019, 11, 22),
         ];
@@ -92,8 +114,8 @@ class RegistrationsSeeder extends Seeder
                 ['name' => '4MAY20-VC1-CH1P-HA-012020'],
             ],
             'children' => [
-                ['age' => 'underSchoolAge', 'state' => 'unverified'],
-                ['age' => 'unbornChild', 'state' => 'verified'],
+                ['age' => 'underSchoolAge'],
+                ['age' => 'unbornChild'],
             ],
             'joined_on' => Carbon::create(2020, 1, 30),
         ];
@@ -103,8 +125,8 @@ class RegistrationsSeeder extends Seeder
                 ['name' => '5MAY20-VC1-CH3-HA-112015'],
             ],
             'children' => [
-                ['age' => 'readyForSecondarySchool', 'state' => 'verified'],
-                ['age' => 'readyForSecondarySchool', 'state' => 'verified'],
+                ['age' => 'overSchoolAge', 'state' => 'unverified'],
+                ['age' => 'overSchoolAge', 'state' => 'unverified'],
                 ['age' => 'underSchoolAge', 'state' => 'unverified'],
             ],
             'joined_on' => Carbon::create(2019, 11, 12),
@@ -121,12 +143,12 @@ class RegistrationsSeeder extends Seeder
             'joined_on' => Carbon::create(2020, 4, 1),
         ];
 
-        $this->createRegistrationTestCase($familyData1, $testCentre);
-        $this->createRegistrationTestCase($familyData2, $testCentre);
-        $this->createRegistrationTestCase($familyData3, $testCentre);
-        $this->createRegistrationTestCase($familyData4, $testCentre);
-        $this->createRegistrationTestCase($familyData5, $testCentre);
-        $this->createRegistrationTestCase($familyData6, $testCentre);
+        $this->createRegistrationTestCase($familyData1, $testCentreFam1And4);
+        $this->createRegistrationTestCase($familyData2, $testCentreFam2);
+        $this->createRegistrationTestCase($familyData3, $testCentreFam3);
+        $this->createRegistrationTestCase($familyData4, $testCentreFam1And4);
+        $this->createRegistrationTestCase($familyData5, $testCentreFam5);
+        $this->createRegistrationTestCase($familyData6, $testCentreFam6);
     }
 
     /**
@@ -192,7 +214,11 @@ class RegistrationsSeeder extends Seeder
         $family->carers()->saveMany($carers);
 
         foreach ($familyData['children'] as $child) {
-            $children[] = factory(App\Child::class, $child['age'])->states($child['state'])->make();
+            if (isset($child['state']) && !is_null($child['state'])) {
+                $children[] = factory(App\Child::class, $child['age'])->states($child['state'])->make();
+            } else {
+                $children[] = factory(App\Child::class, $child['age'])->make();
+            }
         }
 
         $family->children()->saveMany($children);
