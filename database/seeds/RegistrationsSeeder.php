@@ -222,7 +222,7 @@ class RegistrationsSeeder extends Seeder
         }
 
         $family->children()->saveMany($children);
-        Log::info($family);
+
         return App\Registration::create(
             [
                 'centre_id' => $centre->id,
