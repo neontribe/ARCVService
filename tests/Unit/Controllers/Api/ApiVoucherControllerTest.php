@@ -34,12 +34,8 @@ class ApiVoucherControllerTest extends TestCase
 
         Auth::login($this->user);
 
-        // Create some vouchers at dispatched state
-        $this->vouchers = factory(Voucher::class, 'requested', 10)->create();
-        $this->vouchers->each(function ($voucher) {
-            $voucher->applyTransition('order');
-            $voucher->applyTransition('print');
-        });
+        // Create some vouchers at printed state
+        $this->vouchers = factory(Voucher::class, 'printed', 10)->create();
     }
 
     /**

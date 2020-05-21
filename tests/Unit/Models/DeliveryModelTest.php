@@ -38,11 +38,9 @@ class DeliveryModelTest extends TestCase
         $centre = factory('App\Centre')->create();
 
         // create three vouchers and transition to collected.
-        $vs = factory('App\Voucher', 'requested', 3)
+        $vs = factory('App\Voucher', 'printed', 3)
             ->create()
             ->each(function ($v) {
-                $v->applyTransition('order');
-                $v->applyTransition('print');
                 $v->applyTransition('dispatch');
                 $v->delivery()->associate($this->delivery);
                 $v->save();
@@ -64,12 +62,10 @@ class DeliveryModelTest extends TestCase
     /** @test */
     public function testDeliveryCanHaveManyVouchers()
     {
-        // Create three vouchers and transition to printed.
-        $vs = factory('App\Voucher', 'requested', 3)
+        // Create three vouchers and transition to dipatched.
+        $vs = factory('App\Voucher', 'printed', 3)
             ->create()
             ->each(function ($v) {
-                $v->applyTransition('order');
-                $v->applyTransition('print');
                 $v->applyTransition('dispatch');
                 $v->delivery()->associate($this->delivery);
                 $v->save();
