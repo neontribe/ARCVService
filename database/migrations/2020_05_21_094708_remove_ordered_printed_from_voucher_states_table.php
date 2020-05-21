@@ -16,9 +16,10 @@ class RemoveOrderedPrintedFromVoucherStatesTable extends Migration
         Schema::table('voucher_states', function (Blueprint $table) {
             // I guess nice to have a record of how many rows were deleted?
             $number_to_delete = App\VoucherState::whereIn('to', ['ordered', 'printed'])->count();
-
-            App\VoucherState::whereIn('to', ['ordered', 'printed'])->delete();
-            Log::info($number_to_delete . ' printed and ordered voucher_states records deleted on migration.');
+            if ($number_to_delete > 0) {
+                App\VoucherState::whereIn('to', ['ordered', 'printed'])->delete();
+                Log::info($number_to_delete . ' printed and ordered voucher_states records deleted on migration.');
+            }
         });
     }
 
