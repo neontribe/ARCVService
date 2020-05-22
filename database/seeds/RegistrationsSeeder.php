@@ -2,6 +2,8 @@
 
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use App\User;
+use App\Voucher;
 
 class RegistrationsSeeder extends Seeder
 {
@@ -38,37 +40,41 @@ class RegistrationsSeeder extends Seeder
         $bundle = factory(App\Bundle::class)->create();
         factory(App\Registration::class)->create()->bundles()->save($bundle);
 
+        $this->user = User::where('name', 'demoseeder')->first();
+        if (!$this->user) {
+            $this->user = factory(User::class)->create(['name' => 'demoseeder']);
+        };
+
+        // set some variables.
+        Auth::login($this->user);
+
+        $this->centre = $this->user->centre;
+
         // centre without SK rules for fam1 & fam4 that is not in same area as families 3, 5 and 6
         $testCentreFam1And4 = App\Centre::find(7);
         $testCentreFam1And4->sponsor_id = App\Sponsor::find(5)->id;
+        $testCentreFam1And4->save();
+        // centre with SK rules for fam2 that is not in same area as families 3, 5 and 6
 
-        /*
-        centre with SK rules for fam2 that is not in same area as families 3, 5 and 6
-        TODO: add SK rules
-        */
         $testCentreFam2 = App\Centre::find(2);
         $testCentreFam2->sponsor_id = App\Sponsor::find(2)->id;
+        $testCentreFam2->save();
 
-        /*
-        centre with SK rules for fam3 that is in a different area from all other families
-        TODO: check and/or add SK rules
-        */
+        // centre with SK rules for fam3 that is in a different area from all other families
         $testCentreFam3 = App\Centre::find(1);
         $testCentreFam3->sponsor_id = App\Sponsor::find(1)->id;
+        $testCentreFam3->save();
 
-        /*
-        centre with SK rules but without toggle for fam 5 that is in a different area from all other families
-        TODO: check and/or add SK rules without toggle
-        */
+        // centre with SK rules but without toggle for fam 5 that is in a different area from all other families
+
         $testCentreFam5 = App\Centre::find(3);
         $testCentreFam5->sponsor_id = App\Sponsor::find(3)->id;
+        $testCentreFam5->save();
 
-        /*
-        centre with non SK rules for fam 6 that is in a different area from all other families
-        TODO: check that we don't have SK rules
-        */
+        // centre with non SK rules for fam 6 that is in a different area from all other families
         $testCentreFam6 = App\Centre::find(6);
         $testCentreFam6->sponsor_id = App\Sponsor::find(4)->id;
+        $testCentreFam6->save();
 
         $familyData1 = [
             'carers' => [
@@ -79,6 +85,11 @@ class RegistrationsSeeder extends Seeder
                 ['age' => 'almostOne'],
             ],
             'joined_on' => Carbon::create(2019, 4, 9),
+            'collection' => [
+                ['date' => Carbon::create(2019, 4, 9)],
+                ['date' => Carbon::create(2019, 4, 23)],
+                ['date' => Carbon::create(2019, 5, 3)],
+            ],
         ];
 
         $familyData2 = [
@@ -91,6 +102,21 @@ class RegistrationsSeeder extends Seeder
                 ['age' => 'overSchoolAge', 'state' => 'unverified'],
             ],
             'joined_on' => Carbon::create(2018, 12, 14),
+            'collection' => [
+                ['date' => Carbon::create(2018, 12, 14)],
+                ['date' => Carbon::create(2019, 1, 15)],
+                ['date' => Carbon::create(2019, 1, 29)],
+                ['date' => Carbon::create(2019, 2, 5)],
+                ['date' => Carbon::create(2019, 2, 26)],
+                ['date' => Carbon::create(2019, 3, 19)],
+                ['date' => Carbon::create(2019, 5, 14)],
+                ['date' => Carbon::create(2019, 5, 28)],
+                ['date' => Carbon::create(2019, 6, 11)],
+                ['date' => Carbon::create(2019, 6, 18)],
+                ['date' => Carbon::create(2019, 9, 17)],
+                ['date' => Carbon::create(2019, 10, 22)],
+                ['date' => Carbon::create(2019, 11, 2019)],
+            ],
         ];
 
         $familyData3 = [
@@ -106,6 +132,16 @@ class RegistrationsSeeder extends Seeder
                 ['age' => 'overSchoolAge', 'state' => 'verified'],
             ],
             'joined_on' => Carbon::create(2019, 11, 22),
+            'collection' => [
+                ['date' => Carbon::create(2019, 11, 29)],
+                ['date' => Carbon::create(2019, 12, 6)],
+                ['date' => Carbon::create(2019, 12, 13)],
+                ['date' => Carbon::create(2020, 1, 3)],
+                ['date' => Carbon::create(2020, 1, 10)],
+                ['date' => Carbon::create(2020, 1, 16)],
+                ['date' => Carbon::create(2020, 1, 23)],
+                ['date' => Carbon::create(2020, 5, 12)],
+            ]
         ];
 
 
@@ -118,6 +154,10 @@ class RegistrationsSeeder extends Seeder
                 ['age' => 'unbornChild'],
             ],
             'joined_on' => Carbon::create(2020, 1, 30),
+            'collection' => [
+                ['date' => Carbon::create(2020, 1, 30)],
+                ['date' => Carbon::create(2020, 5, 15)],
+            ]
         ];
 
         $familyData5 = [
@@ -130,6 +170,18 @@ class RegistrationsSeeder extends Seeder
                 ['age' => 'underSchoolAge', 'state' => 'unverified'],
             ],
             'joined_on' => Carbon::create(2019, 11, 12),
+            'collection' => [
+                ['date' => Carbon::create(2019, 11, 12)],
+                ['date' => Carbon::create(2019, 11, 27)],
+                ['date' => Carbon::create(2019, 12, 3)],
+                ['date' => Carbon::create(2019, 12, 16)],
+                ['date' => Carbon::create(2019, 12, 20)],
+                ['date' => Carbon::create(2020, 1, 7)],
+                ['date' => Carbon::create(2020, 1, 20)],
+                ['date' => Carbon::create(2020, 1, 24)],
+                ['date' => Carbon::create(2020, 2, 5)],
+                ['date' => Carbon::create(2020, 5, 22)],
+            ]
         ];
 
         $familyData6 = [
@@ -141,6 +193,10 @@ class RegistrationsSeeder extends Seeder
                 ['age' => 'underSchoolAge', 'state' => 'verified'],
             ],
             'joined_on' => Carbon::create(2020, 4, 1),
+            'collection' => [
+                ['date' => Carbon::create(2020, 4, 1)],
+                ['date' => Carbon::create(2020, 5, 1)],
+            ]
         ];
 
         $this->createRegistrationTestCase($familyData1, $testCentreFam1And4);
@@ -164,6 +220,7 @@ class RegistrationsSeeder extends Seeder
         if (is_null($centre)) {
             $centre = factory(App\Centre::class)->create();
         }
+
         $registrations = [];
 
         $eligibilities = config('arc.reg_eligibilities');
@@ -223,7 +280,7 @@ class RegistrationsSeeder extends Seeder
 
         $family->children()->saveMany($children);
 
-        return App\Registration::create(
+        $registration = App\Registration::create(
             [
                 'centre_id' => $centre->id,
                 'family_id' => $family->id,
@@ -231,6 +288,45 @@ class RegistrationsSeeder extends Seeder
                 'consented_on' => $familyData['joined_on'],
             ]
         );
-    }
 
+        $pri_carer = $registration->family->carers->first();
+
+        // Get/make the current bundle
+        /** @var Bundle $bundle */
+        $bundle = $registration->currentBundle();
+
+        foreach ($familyData['collection'] as $voucherCollectionDate) {
+            // Create three random vouchers and transition to dispatched, then deliver the bundle
+            /** @var Collection $vs */
+            $vs1 = factory(Voucher::class, 'printed', 3)
+                ->create()
+                ->each(function (Voucher $v) {
+                    $v->applyTransition('dispatch');
+                });
+
+            // Generate a corresponding delivery
+            $delivery = factory(App\Delivery::class)->create([
+                // Using the reg centre id but it won't match with voucher sponsor since they are random
+                'centre_id' => $registration->centre->id,
+                'dispatched_at' => $voucherCollectionDate,
+                // These are random and will not be a proper range, but should be identifiable with this.
+                'range' => $vs1[0]->code . '-' . $vs1[2]->code,
+            ]);
+            $delivery->vouchers()->saveMany($vs1);
+
+            // Ask bundle to add these vouchers.
+            $bundle->addVouchers($vs1->pluck('code')->toArray());
+
+            // "Collect" it 14 days ago, by hand as the methods don't really exist, yet
+            $bundle->disbursed_at = Carbon::now()->subDays(14);
+            $bundle->disbursingCentre()->associate($registration->centre);
+            $bundle->collectingCarer()->associate($pri_carer);
+            $bundle->disbursingUser()->associate($this->user);
+            $bundle->save();
+        }
+
+        // Again, the current bundle, should be blank as we just saved one.
+        /** @var Bundle $bundle2 */
+        $registration->currentBundle();
+    }
 }
