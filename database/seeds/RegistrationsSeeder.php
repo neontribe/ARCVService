@@ -2,6 +2,7 @@
 
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use App\Delivery;
 use App\User;
 use App\Voucher;
 
@@ -115,7 +116,7 @@ class RegistrationsSeeder extends Seeder
                 ['date' => Carbon::create(2019, 6, 18)],
                 ['date' => Carbon::create(2019, 9, 17)],
                 ['date' => Carbon::create(2019, 10, 22)],
-                ['date' => Carbon::create(2019, 11, 2019)],
+                ['date' => Carbon::create(2019, 11, 18)],
             ],
         ];
 
@@ -291,11 +292,11 @@ class RegistrationsSeeder extends Seeder
 
         $pri_carer = $registration->family->carers->first();
 
-        // Get/make the current bundle
-        /** @var Bundle $bundle */
-        $bundle = $registration->currentBundle();
+        foreach ($familyData['collection'] as $voucherCollection) {
 
-        foreach ($familyData['collection'] as $voucherCollectionDate) {
+            // Get/make the current bundle
+            /** @var Bundle $bundle */
+            $bundle = $registration->currentBundle();
             // Create three random vouchers and transition to dispatched, then deliver the bundle
             /** @var Collection $vs */
             $vs1 = factory(Voucher::class, 'printed', 3)
@@ -305,28 +306,29 @@ class RegistrationsSeeder extends Seeder
                 });
 
             // Generate a corresponding delivery
-            $delivery = factory(App\Delivery::class)->create([
+            $delivery = factory(Delivery::class)->create([
                 // Using the reg centre id but it won't match with voucher sponsor since they are random
                 'centre_id' => $registration->centre->id,
-                'dispatched_at' => $voucherCollectionDate,
+                'dispatched_at' => $voucherCollection['date']->copy()->subDays(10),
                 // These are random and will not be a proper range, but should be identifiable with this.
                 'range' => $vs1[0]->code . '-' . $vs1[2]->code,
             ]);
+
             $delivery->vouchers()->saveMany($vs1);
 
             // Ask bundle to add these vouchers.
             $bundle->addVouchers($vs1->pluck('code')->toArray());
 
-            // "Collect" it 14 days ago, by hand as the methods don't really exist, yet
-            $bundle->disbursed_at = Carbon::now()->subDays(14);
+            // "Collect" it on collection date, by hand as the methods don't really exist, yet
+            $bundle->disbursed_at = $voucherCollection['date'];
             $bundle->disbursingCentre()->associate($registration->centre);
             $bundle->collectingCarer()->associate($pri_carer);
             $bundle->disbursingUser()->associate($this->user);
             $bundle->save();
-        }
 
-        // Again, the current bundle, should be blank as we just saved one.
-        /** @var Bundle $bundle2 */
-        $registration->currentBundle();
+            // Again, the current bundle, should be blank as we just saved one.
+            /** @var Bundle $bundle2 */
+            $registration->currentBundle();
+        }
     }
 }
