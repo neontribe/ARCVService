@@ -416,18 +416,6 @@ $factory->defineAs(App\Child::class, 'unbornChild', function (Faker\Generator $f
     ];
 });
 
-// Child - under 1
-$factory->defineAs(App\Child::class, 'underOne', function (Faker\Generator $faker) {
-
-    $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-10 months', '-2 months')->getTimestamp());
-    $dob = $dob->startOfMonth();
-
-    return [
-        'born' => $dob->isPast(),
-        'dob' => $dob->toDateTimeString(),
-    ];
-});
-
 // Child - almost born
 $factory->defineAs(App\Child::class, 'almostBorn', function (Faker\Generator $faker) {
 
@@ -451,11 +439,47 @@ $factory->defineAs(App\Child::class, 'almostOne', function (Faker\Generator $fak
     ];
 });
 
-// Child - ready for School when the school_month rolls around
-$factory->defineAs(App\Child::class, 'readyForSchool', function (Faker\Generator $faker) {
+// Child - under 1
+$factory->defineAs(App\Child::class, 'underOne', function (Faker\Generator $faker) {
+
+    $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-10 months', '-2 months')->getTimestamp());
+    $dob = $dob->startOfMonth();
+
+    return [
+        'born' => $dob->isPast(),
+        'dob' => $dob->toDateTimeString(),
+    ];
+});
+
+// Child - Between One and Primary School Age
+$factory->defineAs(App\Child::class, 'betweenOneAndPrimarySchoolAge', function (Faker\Generator $faker) {
+
+    $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-32 months', '-14 months')->getTimestamp());
+    $dob = $dob->startOfMonth();
+
+    return [
+        'born' => $dob->isPast(),
+        'dob' => $dob->toDateTimeString(),
+    ];
+});
+
+// Child - ready for Primary School when the school_month rolls around
+$factory->defineAs(App\Child::class, 'readyForPrimarySchool', function (Faker\Generator $faker) {
 
     // Make a child who's four now, and thus due to start school soon(ish)
     $dob = Carbon::now()->startOfMonth()->subYears(4);
+
+    return [
+        'born' => $dob->isPast(),
+        'dob' => $dob->toDateTimeString(),
+    ];
+});
+
+// Child - over School Age
+$factory->defineAs(App\Child::class, 'isPrimarySchoolAge', function (Faker\Generator $faker) {
+
+    $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-10 years', '-6 years')->getTimestamp());
+    $dob = $dob->startOfMonth();
 
     return [
         'born' => $dob->isPast(),
@@ -475,34 +499,10 @@ $factory->defineAs(App\Child::class, 'readyForSecondarySchool', function (Faker\
     ];
 });
 
-// Child - under School Age
-$factory->defineAs(App\Child::class, 'underSchoolAge', function (Faker\Generator $faker) {
+// Child - over Primary School Age
+$factory->defineAs(App\Child::class, 'isOverPrimarySchoolAge', function (Faker\Generator $faker) {
 
-    $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-32 months', '-14 months')->getTimestamp());
-    $dob = $dob->startOfMonth();
-
-    return [
-        'born' => $dob->isPast(),
-        'dob' => $dob->toDateTimeString(),
-    ];
-});
-
-// Child - over School Age
-$factory->defineAs(App\Child::class, 'overSchoolAge', function (Faker\Generator $faker) {
-
-    $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-10 years', '-6 years')->getTimestamp());
-    $dob = $dob->startOfMonth();
-
-    return [
-        'born' => $dob->isPast(),
-        'dob' => $dob->toDateTimeString(),
-    ];
-});
-
-// Child - over Secondary School Age
-$factory->defineAs(App\Child::class, 'overSecondarySchoolAge', function (Faker\Generator $faker) {
-
-    $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-18 years', '-13 years')->getTimestamp());
+    $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-17 years', '-12 years')->getTimestamp());
     $dob = $dob->startOfMonth();
 
     return [

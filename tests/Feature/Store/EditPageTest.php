@@ -225,7 +225,7 @@ class EditPageTest extends StoreTestCase
         $family->children()
             ->saveMany(
                 collect([
-                    factory(Child::class, 'underSchoolAge', 3)->make(),
+                    factory(Child::class, 'betweenOneAndPrimarySchoolAge', 3)->make(),
                 ])->flatten()
             )
         ;
