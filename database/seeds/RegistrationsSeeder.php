@@ -40,97 +40,9 @@ class RegistrationsSeeder extends Seeder
         $bundle = factory(App\Bundle::class)->create();
         factory(App\Registration::class)->create()->bundles()->save($bundle);
 
-        $familyData1 = [
-            // centre without SK rules that is not in same area as families 3, 5 and 6
-            'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(5)->id]),
-            'carers' => [
-                ['name' => '1MAY20a-VC2-CH1-HI-042019'],
-                ['name' => 'MAY20b-VC2-CH1-HI-042019'],
-            ],
-            'children' => [
-                ['age' => 'almostOne'],
-            ],
-            'joined_on' => Carbon::create(2019, 4, 9),
-        ];
-
-        $familyData2 = [
-            // centre with SK rules that is not in same area as families 3, 5 and 6
-            'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(2)->id]),
-            'carers' => [
-                ['name' => '2MAY20-VC1-CH2-HI-122018']
-            ],
-            'children' => [
-                ['age' => 'underOne', 'state' => 'unverified'],
-                ['age' => 'underSchoolAge', 'state' => 'unverified'],
-                ['age' => 'overSchoolAge', 'state' => 'unverified'],
-            ],
-            'joined_on' => Carbon::create(2018, 12, 14),
-        ];
-
-        $familyData3 = [
-             // centre with SK rules that is in a different area from all other families
-            'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(1)->id]),
-            'carers' => [
-                ['name' => '3MAY20-VC1-CH6-HAS-112019'],
-            ],
-            'children' => [
-                ['age' => 'underSchoolAge', 'state' => 'verified'],
-                ['age' => 'underSchoolAge', 'state' => 'verified'],
-                ['age' => 'readyForSchool', 'state' => 'unverified'],
-                ['age' => 'overSchoolAge', 'state' => 'unverified'],
-                ['age' => 'overSchoolAge', 'state' => 'verified'],
-                ['age' => 'overSchoolAge', 'state' => 'verified'],
-            ],
-            'joined_on' => Carbon::create(2019, 11, 22),
-        ];
-
-
-        $familyData4 = [
-            // centre without SK rules that is not in same area as families 3, 5 and 6
-            'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(5)->id]),
-            'carers' => [
-                ['name' => '4MAY20-VC1-CH1P-HA-012020'],
-            ],
-            'children' => [
-                ['age' => 'underSchoolAge'],
-                ['age' => 'unbornChild'],
-            ],
-            'joined_on' => Carbon::create(2020, 1, 30),
-        ];
-
-        $familyData5 = [
-            // centre with SK rules but without toggle that is in a different area from all other families
-            'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(3)->id]),
-            'carers' => [
-                ['name' => '5MAY20-VC1-CH3-HA-112015'],
-            ],
-            'children' => [
-                ['age' => 'overSchoolAge', 'state' => 'unverified'],
-                ['age' => 'overSchoolAge', 'state' => 'unverified'],
-                ['age' => 'underSchoolAge', 'state' => 'unverified'],
-            ],
-            'joined_on' => Carbon::create(2019, 11, 12),
-        ];
-
-        $familyData6 = [
-            // centre with non SK rules that is in a different area from all other families
-            'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(4)->id]),
-            'carers' => [
-                ['name' => '6MAY-VC1-CH2-HI-032020'],
-            ],
-            'children' => [
-                ['age' => 'underOne', 'state' => 'unverified'],
-                ['age' => 'underSchoolAge', 'state' => 'verified'],
-            ],
-            'joined_on' => Carbon::create(2020, 4, 1),
-        ];
-
-        $this->createRegistrationTestCase($familyData1, $familyData1['centre']);
-        $this->createRegistrationTestCase($familyData2, $familyData2['centre']);
-        $this->createRegistrationTestCase($familyData3, $familyData3['centre']);
-        $this->createRegistrationTestCase($familyData4, $familyData4['centre']);
-        $this->createRegistrationTestCase($familyData5, $familyData5['centre']);
-        $this->createRegistrationTestCase($familyData6, $familyData6['centre']);
+        foreach($this->familiesData() as $familyData){
+            $this->createRegistrationTestCase($familyData, $familyData['centre']);
+        }
     }
 
     /**
@@ -215,4 +127,91 @@ class RegistrationsSeeder extends Seeder
         );
     }
 
+    /**
+     * @return array
+     */
+    private function familiesData()
+    {
+        return [
+            'familyData1' => [
+                // centre without SK rules that is not in same area as families 3, 5 and 6
+                'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(5)->id]),
+                'carers' => [
+                    ['name' => '1MAY20a-VC2-CH1-HI-042019'],
+                    ['name' => 'MAY20b-VC2-CH1-HI-042019'],
+                ],
+                'children' => [
+                    ['age' => 'almostOne'],
+                ],
+                'joined_on' => Carbon::create(2019, 4, 9),
+            ],
+            'familyData2' => [
+                // centre with SK rules that is not in same area as families 3, 5 and 6
+                'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(2)->id]),
+                'carers' => [
+                    ['name' => '2MAY20-VC1-CH2-HI-122018']
+                ],
+                'children' => [
+                    ['age' => 'underOne', 'state' => 'unverified'],
+                    ['age' => 'underSchoolAge', 'state' => 'unverified'],
+                    ['age' => 'overSchoolAge', 'state' => 'unverified'],
+                ],
+                'joined_on' => Carbon::create(2018, 12, 14),
+            ],
+            'familyData3' => [
+                // centre with SK rules that is in a different area from all other families
+                'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(1)->id]),
+                'carers' => [
+                    ['name' => '3MAY20-VC1-CH6-HAS-112019'],
+                ],
+                'children' => [
+                    ['age' => 'underSchoolAge', 'state' => 'verified'],
+                    ['age' => 'underSchoolAge', 'state' => 'verified'],
+                    ['age' => 'readyForSchool', 'state' => 'unverified'],
+                    ['age' => 'overSchoolAge', 'state' => 'unverified'],
+                    ['age' => 'overSchoolAge', 'state' => 'verified'],
+                    ['age' => 'overSchoolAge', 'state' => 'verified'],
+                ],
+                'joined_on' => Carbon::create(2019, 11, 22),
+            ],
+
+            'familyData4' => [
+                // centre without SK rules that is not in same area as families 3, 5 and 6
+                'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(5)->id]),
+                'carers' => [
+                    ['name' => '4MAY20-VC1-CH1P-HA-012020'],
+                ],
+                'children' => [
+                    ['age' => 'underSchoolAge'],
+                    ['age' => 'unbornChild'],
+                ],
+                'joined_on' => Carbon::create(2020, 1, 30),
+            ],
+            'familyData5' => [
+                // centre with SK rules but without toggle that is in a different area from all other families
+                'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(3)->id]),
+                'carers' => [
+                    ['name' => '5MAY20-VC1-CH3-HA-112015'],
+                ],
+                'children' => [
+                    ['age' => 'overSchoolAge', 'state' => 'unverified'],
+                    ['age' => 'overSchoolAge', 'state' => 'unverified'],
+                    ['age' => 'underSchoolAge', 'state' => 'unverified'],
+                ],
+                'joined_on' => Carbon::create(2019, 11, 12),
+            ],
+            'familyData6' => [
+                // centre with non SK rules that is in a different area from all other families
+                'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(4)->id]),
+                'carers' => [
+                    ['name' => '6MAY-VC1-CH2-HI-032020'],
+                ],
+                'children' => [
+                    ['age' => 'underOne', 'state' => 'unverified'],
+                    ['age' => 'underSchoolAge', 'state' => 'verified'],
+                ],
+                'joined_on' => Carbon::create(2020, 4, 1),
+            ],
+        ];
+    }
 }
