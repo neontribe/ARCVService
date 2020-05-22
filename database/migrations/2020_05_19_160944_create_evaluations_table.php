@@ -31,7 +31,7 @@ class CreateEvaluationsTable extends Migration
     public function down()
     {
         if (Schema::hasTable('evaluations')) {
-            Schema::table('sponsors', function (Blueprint $table) {
+            Schema::table('evaluations', function (Blueprint $table) {
                 $table->dropUnique('unique_sponsor_name');
             });
             Schema::drop('evaluations');
