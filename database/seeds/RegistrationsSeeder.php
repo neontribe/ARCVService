@@ -10,6 +10,7 @@ use App\Registration;
 use App\Sponsor;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 
 class RegistrationsSeeder extends Seeder
 {
@@ -46,6 +47,7 @@ class RegistrationsSeeder extends Seeder
         $bundle = factory(Bundle::class)->create();
         factory(Registration::class)->create()->bundles()->save($bundle);
 
+        // create the test families asked for by Faith and Karl
         foreach($this->familiesData() as $familyData){
             $this->createRegistrationTestCase($familyData, $familyData['centre']);
         }
@@ -55,7 +57,7 @@ class RegistrationsSeeder extends Seeder
      * This is horrible and there's a better way to mke seeds, imagine.
      * @param $quantity
      * @param Centre $centre
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public function createRegistrationForCentre($quantity, App\Centre $centre = null)
     {
@@ -91,7 +93,7 @@ class RegistrationsSeeder extends Seeder
 
     /**
      * @param array $familyData
-     * @param App\Centre $centre
+     * @param Centre $centre
      * @return void
      */
     public function createRegistrationTestCase($familyData, App\Centre $centre = null)
