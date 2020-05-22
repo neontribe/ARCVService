@@ -53,25 +53,31 @@ class VouchersController extends Controller
     }
 
     /**
-     * Update Voucher range - specifically, state
+     * Retire voucher range - through void or expire
      *
      * @param AdminUpdateVoucherRequest $request
      * @return RedirectResponse
      */
-    public function updateBatch(AdminUpdateVoucherRequest $request)
+    public function retireBatch(AdminUpdateVoucherRequest $request)
     {
-        // Make a rangeDef
-        $rangeDef = Voucher::createRangeDefFromVoucherCodes($request->input('voucher-start'), $request->input('voucher-end'));
+        // Make a rangeDef & get the vouchers in it.
+        $rangeDef = Voucher::createRangeDefFromVoucherCodes(
+            $request->input('voucher-start'), $request->input('voucher-end')
+        );
 
-        // Check the voucher range is clear to be voided.
-        if (!Voucher::rangeIsVoidable($rangeDef)) {
-            // Whoops! Some of the vouchers may have not be voidable
-            // TODO : report problem voucher ranges.
+        $voidableVouchers = Voucher::inDefinedRange($rangeDef)->inVoidableState()->pluck('code');
+        $allVouchersInRange = Voucher::inDefinedRange($rangeDef)->pluck('code');
+
+        // Check if any vouchers in range are clear to be voided.
+        if ($voidableVouchers->count() === 0) {
+            // Whoops! None of the vouchers are voidable
             return redirect()
-                ->route('admin.vouchers.void')
-                ->withInput()
-                ->with('error_message', trans('service.messages.vouchers_batchtransition.blocked'));
+              ->route('admin.vouchers.void')
+              ->withInput()
+              ->with('error_message', trans('service.messages.vouchers_batchretiretransition.blocked'));
+            return;
         };
+
 
         // Create and reset the transitions route to start point
         $transitions[] = Voucher::createTransitionDef("dispatched", $request->input("transition"));
@@ -87,10 +93,12 @@ class VouchersController extends Controller
                 $user_id = auth()->id();
                 $user_type = class_basename(auth()->user());
 
+                // Since we usually retire in batches of less than 5 vouchers, probably overkill.
                 foreach ($transitions as $transitionDef) {
                     // Bulk update VoucherStates for speed.
                     Voucher::select('id')
-                        ->withRangedVouchersInState($rangeDef, $transitionDef->from)
+                        ->inDefinedRange($rangeDef)
+                        ->inOneOfStates([$transitionDef->from])
                         ->chunk(
                             // Should be big enough chunks to avoid memory problems
                             10000,
@@ -117,19 +125,25 @@ class VouchersController extends Controller
                 ->with('error_message', 'Database error, unable to transition a voucher.');
         }
 
+        // I don't like building up message data separate from the update function.
+        // But now does not seem the time to undo that code.
+        $voidableVouchersArr = $voidableVouchers->toArray();
+        $allVouchersInRangeArr = $allVouchersInRange->toArray();
+        $success_codes = implode(' ', $voidableVouchersArr);
+        $fail_codes = implode(' ', array_diff($allVouchersInRangeArr, $voidableVouchersArr));
+
         // Prepare the message
-        $notification_msg = trans('service.messages.vouchers_batchtransition.success', [
+        $notification_msg = trans('service.messages.vouchers_batchretiretransition.success', [
             'transition_to' => end($transitions)->to,
-            'shortcode' => $rangeDef->shortcode,
-            'start' => $rangeDef->start,
-            'end' => $rangeDef->end,
+            'success_codes' => $success_codes,
+            'fail_code_details' => $fail_codes ? $fail_codes . ' could not be retired.' : '',
         ]);
 
         // Send it.
         return redirect()
             ->route('admin.vouchers.index')
             ->with('notification', $notification_msg)
-            ;
+        ;
     }
 
 

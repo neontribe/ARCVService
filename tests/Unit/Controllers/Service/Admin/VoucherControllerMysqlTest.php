@@ -97,15 +97,14 @@ class VoucherControllerMysqlTest extends StoreTestCase
 
         // Set some routes
         $formRoute = route('admin.vouchers.void');
-        $requestRoute = route('admin.vouchers.updatebatch');
+        $requestRoute = route('admin.vouchers.retirebatch');
         $successRoute = route('admin.vouchers.index');
 
         // Set the message to look for
-        $msg = trans('service.messages.vouchers_batchtransition.success', [
+        $msg = trans('service.messages.vouchers_batchretiretransition.success', [
             'transition_to' => 'retired',
-            'shortcode' => 'TST',
-            'start' => 102,
-            'end' => 104,
+            'success_codes' => 'TST102 TST103 TST104 ',
+            'fail_code_details' => '',
         ]);
 
         // Make the patch
@@ -145,15 +144,14 @@ class VoucherControllerMysqlTest extends StoreTestCase
 
             // Set some routes
             $formRoute = route('admin.vouchers.void');
-            $requestRoute = route('admin.vouchers.updatebatch');
+            $requestRoute = route('admin.vouchers.retirebatch');
             $successRoute = route('admin.vouchers.index');
 
             // Set the message to look for
-            $msg = trans('service.messages.vouchers_batchtransition.success', [
+            $msg = trans('service.messages.vouchers_batchretiretransition.success', [
                 'transition_to' => 'retired',
-                'shortcode' => 'TST',
-                'start' => 102,
-                'end' => 104,
+                'success_codes' => 'TST102 TST103 TST104 ',
+                'fail_code_details' => '',
             ]);
 
             // Make the patch

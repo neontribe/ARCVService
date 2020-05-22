@@ -60,6 +60,34 @@ class CustomValidationProvider extends ServiceProvider
         });
 
         /**
+         * Is the supplied voucher code value greater than the the target voucher code value
+         */
+        Validator::extend('codeGreaterOrEqual', function ($attribute, $value, $parameters, $validator) {
+            // Grab the regex matched array
+            $val = Voucher::splitShortcodeNumeric($value);
+
+            // Grab the content of the parameter we pass the rule in a roundabout fashion
+            $otherVal = array_get(
+                $validator->getData(),
+                $parameters[0]
+            );
+
+            if (!empty($otherVal)) {
+                $other = Voucher::splitShortcodeNumeric($otherVal);
+                if (is_numeric($val["number"]) && is_numeric($other["number"])) {
+                    return intval($val["number"]) >= intval($other["number"]);
+                }
+            }
+            // Else "Nope"!
+            return false;
+        });
+
+        Validator::replacer('codeGreaterOrEqual', function ($message, $attribute, $rule, $parameters) {
+            return str_replace(':other', $parameters[0], $message);
+        });
+
+
+        /**
          * Is the supplied voucher value the same sponsor as the target value
          */
         Validator::extend('sameSponsor', function ($attribute, $value, $parameters, $validator) {

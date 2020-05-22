@@ -13,7 +13,7 @@
             @endif
             <p>Use the form below to mark a batch of vouchers as "Void" or "Expired". Add start and end voucher codes of the batch.</p>
 
-            <form role="form" class="styled-form" method="POST" action="{{ route('admin.vouchers.updatebatch') }}">
+            <form role="form" class="styled-form" method="POST" action="{{ route('admin.vouchers.retirebatch') }}">
                 {!! method_field("PATCH") !!}
                 {!! csrf_field() !!}
                 <div class="container">
@@ -28,7 +28,7 @@
                                    required >
                             @include('service.partials.validationMessages', array('inputName' => 'voucher-start'))
                         </div>
-                        <div class="col-sm-6 col-lg-9">
+                        <div class="col-sm-6 col-lg-3">
                             <label for="voucher-end" class="required">End Voucher</label>
                             <input type="text"
                                    id="voucher-end"
@@ -43,7 +43,7 @@
                         <div class="col-sm-6 col-lg-3">
                             <button type="submit" name="transition" value="expire">Expire vouchers</button>
                         </div>
-                        <div class="col-sm-6 col-lg-9">
+                        <div class="col-sm-6 col-lg-3">
                             <button type="submit" name="transition" value="void">Void vouchers</button>
                         </div>
                     </div>
