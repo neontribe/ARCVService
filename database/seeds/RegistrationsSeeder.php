@@ -48,7 +48,7 @@ class RegistrationsSeeder extends Seeder
         factory(Registration::class)->create()->bundles()->save($bundle);
 
         // create the test families asked for by Faith and Karl
-        foreach($this->familiesData() as $familyData){
+        foreach ($this->familiesData() as $familyData) {
             $this->createRegistrationTestCase($familyData, $familyData['centre']);
         }
     }
@@ -152,6 +152,11 @@ class RegistrationsSeeder extends Seeder
                     ['age' => 'almostOne'],
                 ],
                 'joined_on' => Carbon::create(2019, 4, 9),
+                'collection' => [
+                    ['date' => Carbon::create(2019, 4, 9)],
+                    ['date' => Carbon::create(2019, 4, 23)],
+                    ['date' => Carbon::create(2019, 5, 3)],
+                ],
             ],
             'familyData2' => [
                 // centre with SK rules that is not in same area as families 3, 5 and 6
@@ -165,6 +170,21 @@ class RegistrationsSeeder extends Seeder
                     ['age' => 'overSchoolAge', 'state' => 'unverified'],
                 ],
                 'joined_on' => Carbon::create(2018, 12, 14),
+                'collection' => [
+                    ['date' => Carbon::create(2018, 12, 14)],
+                    ['date' => Carbon::create(2019, 1, 15)],
+                    ['date' => Carbon::create(2019, 1, 29)],
+                    ['date' => Carbon::create(2019, 2, 5)],
+                    ['date' => Carbon::create(2019, 2, 26)],
+                    ['date' => Carbon::create(2019, 3, 19)],
+                    ['date' => Carbon::create(2019, 5, 14)],
+                    ['date' => Carbon::create(2019, 5, 28)],
+                    ['date' => Carbon::create(2019, 6, 11)],
+                    ['date' => Carbon::create(2019, 6, 18)],
+                    ['date' => Carbon::create(2019, 9, 17)],
+                    ['date' => Carbon::create(2019, 10, 22)],
+                    ['date' => Carbon::create(2019, 11, 18)],
+                ],
             ],
             'familyData3' => [
                 // centre with SK rules that is in a different area from all other families
@@ -181,6 +201,16 @@ class RegistrationsSeeder extends Seeder
                     ['age' => 'overSchoolAge', 'state' => 'verified'],
                 ],
                 'joined_on' => Carbon::create(2019, 11, 22),
+                'collection' => [
+                    ['date' => Carbon::create(2019, 11, 29)],
+                    ['date' => Carbon::create(2019, 12, 6)],
+                    ['date' => Carbon::create(2019, 12, 13)],
+                    ['date' => Carbon::create(2020, 1, 3)],
+                    ['date' => Carbon::create(2020, 1, 10)],
+                    ['date' => Carbon::create(2020, 1, 16)],
+                    ['date' => Carbon::create(2020, 1, 23)],
+                    ['date' => Carbon::create(2020, 5, 12)],
+                ],
             ],
 
             'familyData4' => [
@@ -194,6 +224,10 @@ class RegistrationsSeeder extends Seeder
                     ['age' => 'unbornChild'],
                 ],
                 'joined_on' => Carbon::create(2020, 1, 30),
+                'collection' => [
+                    ['date' => Carbon::create(2020, 1, 30)],
+                    ['date' => Carbon::create(2020, 5, 15)],
+                ],
             ],
             'familyData5' => [
                 // centre with SK rules but without toggle that is in a different area from all other families
@@ -207,6 +241,18 @@ class RegistrationsSeeder extends Seeder
                     ['age' => 'underSchoolAge', 'state' => 'unverified'],
                 ],
                 'joined_on' => Carbon::create(2019, 11, 12),
+                'collection' => [
+                    ['date' => Carbon::create(2019, 11, 12)],
+                    ['date' => Carbon::create(2019, 11, 27)],
+                    ['date' => Carbon::create(2019, 12, 3)],
+                    ['date' => Carbon::create(2019, 12, 16)],
+                    ['date' => Carbon::create(2019, 12, 20)],
+                    ['date' => Carbon::create(2020, 1, 7)],
+                    ['date' => Carbon::create(2020, 1, 20)],
+                    ['date' => Carbon::create(2020, 1, 24)],
+                    ['date' => Carbon::create(2020, 2, 5)],
+                    ['date' => Carbon::create(2020, 5, 22)],
+                ],
             ],
             'familyData6' => [
                 // centre with non SK rules that is in a different area from all other families
@@ -219,6 +265,10 @@ class RegistrationsSeeder extends Seeder
                     ['age' => 'underSchoolAge', 'state' => 'verified'],
                 ],
                 'joined_on' => Carbon::create(2020, 4, 1),
+                'collection' => [
+                    ['date' => Carbon::create(2020, 4, 1)],
+                    ['date' => Carbon::create(2020, 5, 1)],
+                ],
             ],
         ];
     }
