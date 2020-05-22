@@ -1,6 +1,8 @@
 <?php
 
 use Carbon\Carbon;
+use App\Centre;
+use App\Sponsor;
 use Illuminate\Database\Seeder;
 
 class RegistrationsSeeder extends Seeder
@@ -38,39 +40,9 @@ class RegistrationsSeeder extends Seeder
         $bundle = factory(App\Bundle::class)->create();
         factory(App\Registration::class)->create()->bundles()->save($bundle);
 
-        // centre without SK rules for fam1 & fam4 that is not in same area as families 3, 5 and 6
-        $testCentreFam1And4 = App\Centre::find(7);
-        $testCentreFam1And4->sponsor_id = App\Sponsor::find(5)->id;
-
-        /*
-        centre with SK rules for fam2 that is not in same area as families 3, 5 and 6
-        TODO: add SK rules
-        */
-        $testCentreFam2 = App\Centre::find(2);
-        $testCentreFam2->sponsor_id = App\Sponsor::find(2)->id;
-
-        /*
-        centre with SK rules for fam3 that is in a different area from all other families
-        TODO: check and/or add SK rules
-        */
-        $testCentreFam3 = App\Centre::find(1);
-        $testCentreFam3->sponsor_id = App\Sponsor::find(1)->id;
-
-        /*
-        centre with SK rules but without toggle for fam 5 that is in a different area from all other families
-        TODO: check and/or add SK rules without toggle
-        */
-        $testCentreFam5 = App\Centre::find(3);
-        $testCentreFam5->sponsor_id = App\Sponsor::find(3)->id;
-
-        /*
-        centre with non SK rules for fam 6 that is in a different area from all other families
-        TODO: check that we don't have SK rules
-        */
-        $testCentreFam6 = App\Centre::find(6);
-        $testCentreFam6->sponsor_id = App\Sponsor::find(4)->id;
-
         $familyData1 = [
+            // centre without SK rules that is not in same area as families 3, 5 and 6
+            'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(5)->id]),
             'carers' => [
                 ['name' => '1MAY20a-VC2-CH1-HI-042019'],
                 ['name' => 'MAY20b-VC2-CH1-HI-042019'],
@@ -82,6 +54,8 @@ class RegistrationsSeeder extends Seeder
         ];
 
         $familyData2 = [
+            // centre with SK rules that is not in same area as families 3, 5 and 6
+            'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(2)->id]),
             'carers' => [
                 ['name' => '2MAY20-VC1-CH2-HI-122018']
             ],
@@ -94,6 +68,8 @@ class RegistrationsSeeder extends Seeder
         ];
 
         $familyData3 = [
+             // centre with SK rules that is in a different area from all other families
+            'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(1)->id]),
             'carers' => [
                 ['name' => '3MAY20-VC1-CH6-HAS-112019'],
             ],
@@ -110,6 +86,8 @@ class RegistrationsSeeder extends Seeder
 
 
         $familyData4 = [
+            // centre without SK rules that is not in same area as families 3, 5 and 6
+            'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(5)->id]),
             'carers' => [
                 ['name' => '4MAY20-VC1-CH1P-HA-012020'],
             ],
@@ -121,6 +99,8 @@ class RegistrationsSeeder extends Seeder
         ];
 
         $familyData5 = [
+            // centre with SK rules but without toggle that is in a different area from all other families
+            'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(3)->id]),
             'carers' => [
                 ['name' => '5MAY20-VC1-CH3-HA-112015'],
             ],
@@ -133,6 +113,8 @@ class RegistrationsSeeder extends Seeder
         ];
 
         $familyData6 = [
+            // centre with non SK rules that is in a different area from all other families
+            'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(4)->id]),
             'carers' => [
                 ['name' => '6MAY-VC1-CH2-HI-032020'],
             ],
@@ -143,12 +125,12 @@ class RegistrationsSeeder extends Seeder
             'joined_on' => Carbon::create(2020, 4, 1),
         ];
 
-        $this->createRegistrationTestCase($familyData1, $testCentreFam1And4);
-        $this->createRegistrationTestCase($familyData2, $testCentreFam2);
-        $this->createRegistrationTestCase($familyData3, $testCentreFam3);
-        $this->createRegistrationTestCase($familyData4, $testCentreFam1And4);
-        $this->createRegistrationTestCase($familyData5, $testCentreFam5);
-        $this->createRegistrationTestCase($familyData6, $testCentreFam6);
+        $this->createRegistrationTestCase($familyData1, $familyData1['centre']);
+        $this->createRegistrationTestCase($familyData2, $familyData2['centre']);
+        $this->createRegistrationTestCase($familyData3, $familyData3['centre']);
+        $this->createRegistrationTestCase($familyData4, $familyData4['centre']);
+        $this->createRegistrationTestCase($familyData5, $familyData5['centre']);
+        $this->createRegistrationTestCase($familyData6, $familyData6['centre']);
     }
 
     /**
