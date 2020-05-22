@@ -7,12 +7,11 @@ use App\Family;
 use App\Registration;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostSecondarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostOne;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostSchoolAge;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsSchoolAge;
+use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostPrimarySchoolAge;
+use App\Services\VoucherEvaluator\Evaluations\ChildIsPrimarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsSecondarySchoolAge;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderSecondarySchoolAge;
+use App\Services\VoucherEvaluator\Evaluations\ChildIsBetweenOneAndPrimarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderOne;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsBetweenOneAndSchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\FamilyHasNoEligibleChildren;
 use App\Services\VoucherEvaluator\Evaluations\FamilyHasUnverifiedChildren;
 use App\Services\VoucherEvaluator\Evaluations\FamilyIsPregnant;
@@ -72,16 +71,16 @@ class EvaluatorFactory
         return $evaluations = [
             Child::class => [
                 'credits' => [
-                    new ChildIsUnderOne($offsetDate, 3),
-                    new ChildIsBetweenOneAndSchoolAge($offsetDate, 3)
+                    new ChildIsUnderOne($offsetDate, 6),
+                    new ChildIsBetweenOneAndPrimarySchoolAge($offsetDate, 3)
                 ],
                 'notices' => [
                     new ChildIsAlmostOne($offsetDate),
-                    new ChildIsAlmostSchoolAge($offsetDate),
+                    new ChildIsAlmostPrimarySchoolAge($offsetDate),
                 ],
                 'relations' => [],
                 'disqualifiers' => [
-                    new ChildIsSchoolAge($offsetDate)
+                    new ChildIsPrimarySchoolAge($offsetDate)
                 ]
             ],
             Family::class => [
@@ -110,17 +109,13 @@ class EvaluatorFactory
         return $evaluations = [
             Child::class => [
                 'credits' => [
-                    new ChildIsUnderOne($offsetDate, 3),
-                    new ChildIsUnderSecondarySchoolAge($offsetDate, 3)
+                    new ChildIsUnderOne($offsetDate, 6),
+                    new ChildIsBetweenOneAndPrimarySchoolAge($offsetDate, 3),
+                    new ChildIsPrimarySchoolAge($offsetDate, 3),
                 ],
                 'notices' => [
-                    // warn if we're almost 1yo
                     new ChildIsAlmostOne($offsetDate),
-
-                    // ... or if almost primary school age
-                    new ChildIsAlmostSchoolAge($offsetDate),
-
-                    // ... or if almost secondary school age
+                    new ChildIsAlmostPrimarySchoolAge($offsetDate),
                     new ChildIsAlmostSecondarySchoolAge($offsetDate),
                 ],
                 'relations' => [],

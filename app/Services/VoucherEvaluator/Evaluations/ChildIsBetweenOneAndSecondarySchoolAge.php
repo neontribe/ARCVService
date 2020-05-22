@@ -8,9 +8,9 @@ use Carbon\Carbon;
 use Chalcedonyt\Specification\AndSpec;
 use Chalcedonyt\Specification\NotSpec;
 
-class ChildIsSchoolAge extends BaseChildEvaluation
+class ChildIsBetweenOneAndSecondarySchoolAge extends BaseChildEvaluation
 {
-    public $reason = 'primary school age';
+    public $reason = 'under secondary school age';
     private $specification;
 
     public function __construct(Carbon $offsetDate = null, $value = 3)
@@ -20,11 +20,9 @@ class ChildIsSchoolAge extends BaseChildEvaluation
         $this->specification = new AndSpec(
             new IsBorn(),
             new AndSpec(
-                // Not under primary school age ...
-                new notSpec(
-                    new IsUnderStartDate($this->offsetDate, 5, config('arc.school_month'))
+                new NotSpec(
+                    new IsUnderStartDate($this->offsetDate, 1, config('arc.school_month'))
                 ),
-                // but _is_ under secondary school age
                 new IsUnderStartDate($this->offsetDate, 12, config('arc.school_month'))
             )
         );
