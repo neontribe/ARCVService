@@ -1,8 +1,14 @@
 <?php
 
-use Carbon\Carbon;
+use App\Bundle;
+use App\Carer;
 use App\Centre;
+use App\CentreUser;
+use App\Child;
+use App\Family;
+use App\Registration;
 use App\Sponsor;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class RegistrationsSeeder extends Seeder
@@ -15,15 +21,15 @@ class RegistrationsSeeder extends Seeder
     public function run()
     {
         // Create 2 Regs for each known user
-        $this->createRegistrationForCentre(2, App\CentreUser::find(1)->centre);
-        $this->createRegistrationForCentre(2, App\CentreUser::find(2)->centre);
-        $this->createRegistrationForCentre(2, App\CentreUser::find(3)->centre);
+        $this->createRegistrationForCentre(2, CentreUser::find(1)->centre);
+        $this->createRegistrationForCentre(2, CentreUser::find(2)->centre);
+        $this->createRegistrationForCentre(2, CentreUser::find(3)->centre);
 
         // Create 10 regs randomly
         factory(App\Registration::class, 10)->create();
 
         // One registration with our CC with an incative family.
-        $inactive = factory(App\Registration::class)
+        $inactive = factory(Registration::class)
             ->create();
 
         // We will have a better way of incorporating this into factories - but currenly families get created by Reg seeds.
@@ -37,8 +43,8 @@ class RegistrationsSeeder extends Seeder
         $this->createRegistrationForCentre(3);
 
         // create a registration with a bundle
-        $bundle = factory(App\Bundle::class)->create();
-        factory(App\Registration::class)->create()->bundles()->save($bundle);
+        $bundle = factory(Bundle::class)->create();
+        factory(Registration::class)->create()->bundles()->save($bundle);
 
         foreach($this->familiesData() as $familyData){
             $this->createRegistrationTestCase($familyData, $familyData['centre']);
@@ -56,7 +62,7 @@ class RegistrationsSeeder extends Seeder
         // set the loop and centre
         $quantity = ($quantity) ? $quantity : 1;
         if (is_null($centre)) {
-            $centre = factory(App\Centre::class)->create();
+            $centre = factory(Centre::class)->create();
         }
         $registrations = [];
 
@@ -64,13 +70,13 @@ class RegistrationsSeeder extends Seeder
 
         foreach (range(1, $quantity) as $q) {
             // create a family and set it up.
-            $family = factory(App\Family::class)->make();
+            $family = factory(Family::class)->make();
             $family->lockToCentre($centre);
             $family->save();
             $family->carers()->saveMany(factory(App\Carer::class, random_int(1, 3))->make());
             $family->children()->saveMany(factory(\App\Child::class, random_int(0, 4))->make());
 
-            $registrations[] = App\Registration::create(
+            $registrations[] = Registration::create(
                 [
                     'centre_id' => $centre->id,
                     'family_id' => $family->id,
@@ -95,29 +101,29 @@ class RegistrationsSeeder extends Seeder
         $eligibilities = config('arc.reg_eligibilities');
 
         if (is_null($centre)) {
-            $centre = factory(App\Centre::class)->create();
+            $centre = factory(Centre::class)->create();
         }
 
-        $family = factory(App\Family::class)->make();
+        $family = factory(Family::class)->make();
         $family->lockToCentre($centre);
         $family->save();
 
         foreach ($familyData['carers'] as $carer) {
-            $carers[] = factory(App\Carer::class)->make(['name' => $carer['name']]);
+            $carers[] = factory(Carer::class)->make(['name' => $carer['name']]);
         }
         $family->carers()->saveMany($carers);
 
         foreach ($familyData['children'] as $child) {
             if (isset($child['state']) && !is_null($child['state'])) {
-                $children[] = factory(App\Child::class, $child['age'])->states($child['state'])->make();
+                $children[] = factory(Child::class, $child['age'])->states($child['state'])->make();
             } else {
-                $children[] = factory(App\Child::class, $child['age'])->make();
+                $children[] = factory(Child::class, $child['age'])->make();
             }
         }
 
         $family->children()->saveMany($children);
 
-        return App\Registration::create(
+        return Registration::create(
             [
                 'centre_id' => $centre->id,
                 'family_id' => $family->id,
