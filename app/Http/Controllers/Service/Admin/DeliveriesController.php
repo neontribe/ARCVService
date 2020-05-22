@@ -60,14 +60,33 @@ class DeliveriesController extends Controller
         $rangeDef = Voucher::createRangeDefFromVoucherCodes($request->input('voucher-start'), $request->input('voucher-end'));
 
         // Check the voucher range is clear to be delivered.
+        // Only applies if a voucher in the batch already has a delievry id.
+        // TBC - maybe also if 'retired'?
+        // List 'delivered' codes in the error message so batches can be made around them.
         if (!Voucher::rangeIsDeliverable($rangeDef)) {
             // Whoops! Some of the vouchers may have been delivered
-            // TODO : report problem voucher ranges.
             return redirect()
                 ->route('admin.deliveries.create')
                 ->withInput()
                 ->with('error_message', trans('service.messages.vouchers_delivery.blocked'));
         };
+
+        // If we got this far, we need to check the voucher states.
+        // We hope they are in 'printed' state, but if they were physically sent out
+        // before logging, they might be recorded, payment_pending or reimbursed already.
+
+        // Show a warning message with codes - also trader_id, state and updated_at if easy.
+        // "The following vouchers are already in use. Do you want to change the delivery
+        // date or the voucher batches?"
+        // Include a deliver (force) button with this messgage that allows the delivery to go ahead.
+
+        // Hopefully code as existing below will work as:
+        // Add this whole batch to the delivery (giving them delivery IDs and recording the range string)
+        // Transition any vouchers that had not gone past 'printed' to dispatched.
+        // Vouchers that had gone beyond 'printed' will remain in their currentstate
+        // and never get a 'dispatched' voucher_state record.
+
+
 
         // Get centre
         $centre = Centre::findOrFail($request->input('centre'));
