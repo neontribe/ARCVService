@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Config;
 use Exception;
 use Tests\StoreTestCase;
+use Log;
 
 class VoucherControllerMysqlTest extends StoreTestCase
 {
@@ -51,6 +52,7 @@ class VoucherControllerMysqlTest extends StoreTestCase
             'TST0103',
             'TST0104',
             'TST0105',
+            'TST0106',
 
             'TST0201',
             'TST0202',
@@ -103,8 +105,61 @@ class VoucherControllerMysqlTest extends StoreTestCase
         // Set the message to look for
         $msg = trans('service.messages.vouchers_batchretiretransition.success', [
             'transition_to' => 'retired',
-            'success_codes' => 'TST102 TST103 TST104 ',
+            'success_codes' => 'TST0102 TST0103 TST0104',
             'fail_code_details' => '',
+        ]);
+
+        // Make the patch
+        $this->actingAs($this->user, 'admin')
+            ->visit($formRoute)
+            ->patch($requestRoute, $data)
+            ->followRedirects()
+            ->seePageIs($successRoute)
+            ->see($msg)
+        ;
+
+        // fetch those back.
+        $vouchers = Voucher::where('currentstate', 'retired')
+            ->with('history')
+            ->get()
+        ;
+
+        // Check there are 3.
+        $this->assertCount(3, $vouchers);
+
+        $vouchers->each(function ($v) {
+            $this->assertEquals(1, $v->history->where('to', 'voided')->count());
+            $this->assertEquals(1, $v->history->where('to', 'retired')->count());
+        });
+    }
+
+    /** @test */
+    public function testItCanVoidVoucherCodesInABatchWithNonVoidables()
+    {
+        // The post data
+        $data = [
+            'voucher-start' => 'TST0102',
+            'voucher-end' => 'TST0106',
+            'transition' => 'void'
+        ];
+
+        // Set 0104 and 0106 back to printed
+        $setToPrinted = Voucher::whereIn('code', ['TST0104', 'TST0106'])->get();
+        foreach ($setToPrinted as $v) {
+            $v->applyTransition('collect');
+            $v->applyTransition('reject-to-printed');
+        }
+
+        // Set some routes
+        $formRoute = route('admin.vouchers.void');
+        $requestRoute = route('admin.vouchers.retirebatch');
+        $successRoute = route('admin.vouchers.index');
+
+        // Set the message to look for
+        $msg = trans('service.messages.vouchers_batchretiretransition.success', [
+            'transition_to' => 'retired',
+            'success_codes' => 'TST0102 TST0103 TST0105',
+            'fail_code_details' => 'TST0104 TST0106',
         ]);
 
         // Make the patch
@@ -150,8 +205,63 @@ class VoucherControllerMysqlTest extends StoreTestCase
             // Set the message to look for
             $msg = trans('service.messages.vouchers_batchretiretransition.success', [
                 'transition_to' => 'retired',
-                'success_codes' => 'TST102 TST103 TST104 ',
+                'success_codes' => 'TST0102 TST0103 TST0104',
                 'fail_code_details' => '',
+            ]);
+
+            // Make the patch
+            $this->actingAs($this->user, 'admin')
+                ->visit($formRoute)
+                ->patch($requestRoute, $data)
+                ->followRedirects()
+                ->seePageIs($successRoute)
+                ->see($msg)
+            ;
+
+            // fetch those back.
+            $vouchers = Voucher::where('currentstate', 'retired')
+                ->with('history')
+                ->get()
+            ;
+
+            // Check there are 3.
+            $this->assertCount(3, $vouchers);
+
+            $vouchers->each(function ($v) {
+                $this->assertEquals(1, $v->history->where('to', 'expired')->count());
+                $this->assertEquals(1, $v->history->where('to', 'retired')->count());
+            });
+        }
+    }
+
+    /** @test */
+    public function testItCanExpireVoucherCodesInABatchWithNonExpireables()
+    {
+        {
+            // The post data
+            $data = [
+                'voucher-start' => 'TST0102',
+                'voucher-end' => 'TST0106',
+                'transition' => 'expire'
+            ];
+
+            // Set 0104 and 0106 back to printed
+            $setToPrinted = Voucher::whereIn('code', ['TST0104', 'TST0106'])->get();
+            foreach ($setToPrinted as $v) {
+                $v->applyTransition('collect');
+                $v->applyTransition('reject-to-printed');
+            }
+
+            // Set some routes
+            $formRoute = route('admin.vouchers.void');
+            $requestRoute = route('admin.vouchers.retirebatch');
+            $successRoute = route('admin.vouchers.index');
+
+            // Set the message to look for
+            $msg = trans('service.messages.vouchers_batchretiretransition.success', [
+                'transition_to' => 'retired',
+                'success_codes' => 'TST0102 TST0103 TST0105',
+                'fail_code_details' => 'TST0104 TST0106',
             ]);
 
             // Make the patch
