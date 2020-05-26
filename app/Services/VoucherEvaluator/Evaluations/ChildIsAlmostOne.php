@@ -12,7 +12,12 @@ class ChildIsAlmostOne extends BaseChildEvaluation
     public $reason = 'almost 1 year old';
     private $specification;
 
-    public function __construct(Carbon $offsetDate = null, $value = null)
+    /**
+     * ChildIsAlmostOne constructor.
+     * @param Carbon|null $offsetDate
+     * @param int|null $value
+     */
+    public function __construct(Carbon $offsetDate = null, int $value = null)
     {
         parent::__construct($offsetDate, $value);
 

@@ -13,7 +13,12 @@ class ChildIsBetweenOneAndSecondarySchoolAge extends BaseChildEvaluation
     public $reason = 'under secondary school age';
     private $specification;
 
-    public function __construct(Carbon $offsetDate = null, $value = 3)
+    /**
+     * ChildIsBetweenOneAndSecondarySchoolAge constructor.
+     * @param Carbon|null $offsetDate
+     * @param int|null $value
+     */
+    public function __construct(Carbon $offsetDate = null, int $value = null)
     {
         parent::__construct($offsetDate, $value);
 

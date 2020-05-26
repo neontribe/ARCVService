@@ -14,7 +14,12 @@ class ChildIsBetweenOneAndPrimarySchoolAge extends BaseChildEvaluation
     public $reason = 'between 1 and primary school age';
     private $specification;
 
-    public function __construct(Carbon $offsetDate = null, $value = 3)
+    /**
+     * ChildIsBetweenOneAndPrimarySchoolAge constructor.
+     * @param Carbon|null $offsetDate
+     * @param int|null $value
+     */
+    public function __construct(Carbon $offsetDate = null, int $value = null)
     {
         parent::__construct($offsetDate, $value);
 
