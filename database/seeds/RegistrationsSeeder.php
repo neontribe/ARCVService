@@ -50,6 +50,16 @@ class RegistrationsSeeder extends Seeder
         $bundle = factory(Bundle::class)->create();
         factory(Registration::class)->create()->bundles()->save($bundle);
 
+        $this->user = User::where('name', 'demoseeder')->first();
+        if (!$this->user) {
+            $this->user = factory(User::class)->create(['name' => 'demoseeder']);
+        };
+
+        // set some variables.
+        Auth::login($this->user);
+
+        $this->centre = $this->user->centre;
+
         // create the test families asked for by Faith and Karl
         foreach ($this->familiesData() as $familyData) {
             $this->createRegistrationTestCase($familyData, $familyData['centre']);
@@ -178,6 +188,7 @@ class RegistrationsSeeder extends Seeder
             /** @var Bundle $bundle2 */
             $registration->currentBundle();
         }
+        return $registration;
     }
 
     /**
