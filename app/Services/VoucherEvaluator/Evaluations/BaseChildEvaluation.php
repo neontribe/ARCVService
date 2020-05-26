@@ -13,6 +13,11 @@ class BaseChildEvaluation extends AbstractEvaluation
     {
         $subject = self::SUBJECT;
 
+        // Don't run any further if we don't have a value
+        if (is_null($this->value)) {
+            return $this->fail();
+        }
+
         if (!isset($candidate) || !$candidate instanceof $subject) {
             throw new InvalidArgumentException("Argument 1 must be instance of " . $subject);
         }

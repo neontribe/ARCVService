@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Models;
 
+use App\Evaluation;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use App\Sponsor;
@@ -75,5 +76,32 @@ class SponsorModelTest extends TestCase
         foreach ($centres as $index => $centre) {
             $this->assertEquals($centres[$index]->name, $centre->name);
         }
+    }
+
+    /** @test */
+    public function itCanHaveEvaluations()
+    {
+        // Make a sponsor
+        $s = $this->sponsor;
+
+        // create 2, junk but valid evaluations
+        $evaluations = collect([
+            new Evaluation([
+               "name" => "a test name",
+               "value" => 2,
+               "entity" => "App\Child",
+               "purpose" => "tests"
+            ]),
+            new Evaluation([
+                "name" => "a test name2",
+                "value" => 2,
+                "entity" => "App\Child",
+                "purpose" => "tests"
+            ])
+        ]);
+
+        $this->sponsor->evaluations()->saveMany($evaluations);
+        $this->sponsor->fresh();
+        $this->assertCount(2, $this->sponsor->evaluations);
     }
 }

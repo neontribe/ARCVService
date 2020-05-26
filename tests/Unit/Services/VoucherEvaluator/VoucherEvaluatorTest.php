@@ -3,6 +3,7 @@
 namespace Tests;
 
 use App\Child;
+use App\Evaluation;
 use App\Family;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
 use Carbon\Carbon;
@@ -31,6 +32,72 @@ class VoucherEvaluatorTest extends TestCase
         'FamilyIsPregnant' => ['reason' => 'Family|pregnant', 'value' => 3],
     ];
 
+    private $rulesMods = [];
+
+    protected function setUp()
+    {
+        parent::setUp();
+
+        // Changes for "extended age".
+        $this->rulesMods["credit-extended"] = [
+            // warn when primary schoolers are approaching end of school
+            new Evaluation([
+                "name" => "ChildIsAlmostSecondarySchoolAge",
+                "value" => "0",
+                "purpose" => "notice",
+                "entity" => "App\Child",
+            ]),
+            // credit primary schoolers
+            new Evaluation([
+               "name" => "ChildIsPrimarySchoolAge",
+               "value" => "3",
+               "purpose" => "credits",
+               "entity" => "App\Child",
+            ]),
+            // don't disqualify primary schoolers
+            new Evaluation([
+                "name" => "ChildIsPrimarySchoolAge",
+                "value" => null,
+                "purpose" => "disqualifiers",
+                "entity" => "App\Child",
+            ]),
+            // do secondary schoolers instead
+            new Evaluation([
+                "name" => "ChildIsSecondarySchoolAge",
+                "value" => 0,
+                "purpose" => "disqualifiers",
+                "entity" => "App\Child",
+            ])
+        ];
+
+        // this one is a decoration of the above
+        $this->rulesMods["credit-extended-qualified"] = array_merge(
+            $this->rulesMods["credit-extended"],
+            [
+                // Turn on disqualifier
+                new Evaluation([
+                    "name" => "FamilyHasNoEligibleChildren",
+                    "value" => 0,
+                    "purpose" => "disqualifiers",
+                    "entity" => "App\Family",
+                ]),
+            ]
+        );
+
+        //dd($this->rulesMods["credit-extended-qualified"]);
+
+        // This one can be standalone; combine with others in test
+        $this->rulesMods["notice-unverified-kids"] = [
+            // Turn on notice
+            new Evaluation([
+                "name" => "FamilyHasUnverifiedChildren",
+                "value" => 0,
+                "purpose" => "notices",
+                "entity" => "App\Family",
+            ]),
+        ];
+    }
+
     /** @test */
     public function itNoticesWhenAFamilyStillRequiresIDForChildren()
     {
@@ -40,8 +107,11 @@ class VoucherEvaluatorTest extends TestCase
         $unverifiedKids = factory(Child::class, 3)->states('unverified')->make();
         $family->children()->saveMany($unverifiedKids);
 
+        // Get rules Mods
+        $rulesMods = collect($this->rulesMods["notice-unverified-kids"]);
+
         // Make extended evaluator
-        $evaluator = EvaluatorFactory::make("extended_age");
+        $evaluator = EvaluatorFactory::make($rulesMods);
 
         // Evaluate the family
         $evaluation = $evaluator->evaluate($family);
@@ -86,8 +156,11 @@ class VoucherEvaluatorTest extends TestCase
     /** @test */
     public function itCreditsQualifiedPrimarySchoolChildrenButNotUnqualifiedOnes()
     {
+        // get rules mods
+        $rulesMods = collect($this->rulesMods["credit-extended-qualified"]);
+
         // Make extended evaluator
-        $evaluator = EvaluatorFactory::make("extended_age");
+        $evaluator = EvaluatorFactory::make($rulesMods);
 
         // Make our family
         $family = factory(Family::class)->create();
@@ -126,6 +199,7 @@ class VoucherEvaluatorTest extends TestCase
         // - one child between 1 and primary school age (3 vouchers)
         // - who enables one child at primary school age (3 vouchers)
         // - but not one child who is overage (0 vouchers)
+
         $this->assertEquals('6', $evaluation->getEntitlement());
     }
 
@@ -169,15 +243,17 @@ class VoucherEvaluatorTest extends TestCase
     /** @test */
     public function itDoesNotCreditWhenAChildIsOverPrimarySchoolAge()
     {
-        // Make a Child under School Age.
+        // Make a Secondary school child
         $child = factory(Child::class, 'isOverPrimarySchoolAge')->make();
 
-        // Make standard evaluator
-        $evaluator = EvaluatorFactory::make('extended_age');
+        $rulesMod = collect($this->rulesMods["credit-extended"]);
+
+        // Make extended evaluator
+        $evaluator = EvaluatorFactory::make($rulesMod);
         $evaluation = $evaluator->evaluate($child);
         $credits = $evaluation["credits"];
 
-        // Check there's one, because child is not under one.
+        // Check there's none, because child is not primary or under.
         $this->assertEquals(0, count($credits));
 
         // Check the correct credit type is applied.
@@ -237,8 +313,11 @@ class VoucherEvaluatorTest extends TestCase
 
         $child = factory(Child::class, 'readyForSecondarySchool')->make();
 
+        // Get Rules Mods
+        $rulesMod = collect($this->rulesMods["credit-extended"]);
+
         // Make standard evaluator
-        $evaluator = EvaluatorFactory::make('extended_age');
+        $evaluator = EvaluatorFactory::make($rulesMod);
         $evaluation = $evaluator->evaluate($child);
         $notices = $evaluation["notices"];
 

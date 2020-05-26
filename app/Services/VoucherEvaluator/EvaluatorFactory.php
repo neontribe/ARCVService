@@ -2,8 +2,6 @@
 
 namespace App\Services\VoucherEvaluator;
 
-use App\Child;
-use App\Family;
 use App\Registration;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostOne;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostPrimarySchoolAge;
@@ -17,7 +15,7 @@ use App\Services\VoucherEvaluator\Evaluations\FamilyHasUnverifiedChildren;
 use App\Services\VoucherEvaluator\Evaluations\FamilyIsPregnant;
 use App\Services\VoucherEvaluator\Evaluators\VoucherEvaluator;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 
 class EvaluatorFactory
 {
@@ -56,7 +54,7 @@ class EvaluatorFactory
      * @param Carbon $offsetDate
      * @return array
      */
-    public function generateEvaluations(Collection $modEvaluations, Carbon $offsetDate)
+    public static function generateEvaluations(Collection $modEvaluations, Carbon $offsetDate)
     {
         $evaluations = [
             "App\Child" => [
