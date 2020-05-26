@@ -30,7 +30,7 @@ class RegistrationsSeeder extends Seeder
         $this->createRegistrationForCentre(2, CentreUser::find(3)->centre);
 
         // Create 10 regs randomly
-        factory(App\Registration::class, 10)->create();
+        factory(Registration::class, 10)->create();
 
         // One registration with our CC with an incative family.
         $inactive = factory(Registration::class)
@@ -139,7 +139,7 @@ class RegistrationsSeeder extends Seeder
 
         $family->children()->saveMany($children);
 
-        $registration = App\Registration::create(
+        $registration = Registration::create(
             [
                 'centre_id' => $centre->id,
                 'family_id' => $family->id,
