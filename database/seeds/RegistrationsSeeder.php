@@ -59,7 +59,7 @@ class RegistrationsSeeder extends Seeder
      * @param Centre $centre
      * @return Collection
      */
-    public function createRegistrationForCentre($quantity, App\Centre $centre = null)
+    public function createRegistrationForCentre($quantity, Centre $centre = null)
     {
         // set the loop and centre
         $quantity = ($quantity) ? $quantity : 1;
@@ -75,8 +75,8 @@ class RegistrationsSeeder extends Seeder
             $family = factory(Family::class)->make();
             $family->lockToCentre($centre);
             $family->save();
-            $family->carers()->saveMany(factory(App\Carer::class, random_int(1, 3))->make());
-            $family->children()->saveMany(factory(\App\Child::class, random_int(0, 4))->make());
+            $family->carers()->saveMany(factory(Carer::class, random_int(1, 3))->make());
+            $family->children()->saveMany(factory(Child::class, random_int(0, 4))->make());
 
             $registrations[] = Registration::create(
                 [
@@ -96,7 +96,7 @@ class RegistrationsSeeder extends Seeder
      * @param Centre $centre
      * @return void
      */
-    public function createRegistrationTestCase($familyData, App\Centre $centre = null)
+    public function createRegistrationTestCase($familyData, Centre $centre = null)
     {
         $carers = [];
         $children = [];
