@@ -10,6 +10,9 @@ use App\Registration;
 use App\Sponsor;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use App\Delivery;
+use App\User;
+use App\Voucher;
 use Illuminate\Support\Collection;
 
 class RegistrationsSeeder extends Seeder
@@ -27,7 +30,7 @@ class RegistrationsSeeder extends Seeder
         $this->createRegistrationForCentre(2, CentreUser::find(3)->centre);
 
         // Create 10 regs randomly
-        factory(App\Registration::class, 10)->create();
+        factory(Registration::class, 10)->create();
 
         // One registration with our CC with an incative family.
         $inactive = factory(Registration::class)
@@ -46,6 +49,16 @@ class RegistrationsSeeder extends Seeder
         // create a registration with a bundle
         $bundle = factory(Bundle::class)->create();
         factory(Registration::class)->create()->bundles()->save($bundle);
+
+        $this->user = User::where('name', 'demoseeder')->first();
+        if (!$this->user) {
+            $this->user = factory(User::class)->create(['name' => 'demoseeder']);
+        };
+
+        // set some variables.
+        Auth::login($this->user);
+
+        $this->centre = $this->user->centre;
 
         // create the test families asked for by Faith and Karl
         foreach ($this->familiesData() as $familyData) {
@@ -66,6 +79,7 @@ class RegistrationsSeeder extends Seeder
         if (is_null($centre)) {
             $centre = factory(Centre::class)->create();
         }
+
         $registrations = [];
 
         $eligibilities = config('arc.reg_eligibilities');
@@ -125,7 +139,7 @@ class RegistrationsSeeder extends Seeder
 
         $family->children()->saveMany($children);
 
-        return Registration::create(
+        $registration = Registration::create(
             [
                 'centre_id' => $centre->id,
                 'family_id' => $family->id,
@@ -133,6 +147,48 @@ class RegistrationsSeeder extends Seeder
                 'consented_on' => $familyData['joined_on'],
             ]
         );
+
+        $pri_carer = $registration->family->carers->first();
+
+        foreach ($familyData['collection'] as $voucherCollection) {
+
+            // Get/make the current bundle
+            /** @var Bundle $bundle */
+            $bundle = $registration->currentBundle();
+            // Create three random vouchers and transition to dispatched, then deliver the bundle
+            /** @var Collection $vs */
+            $vs1 = factory(Voucher::class, 'printed', 3)
+                ->create()
+                ->each(function (Voucher $v) {
+                    $v->applyTransition('dispatch');
+                });
+
+            // Generate a corresponding delivery
+            $delivery = factory(Delivery::class)->create([
+                // Using the reg centre id but it won't match with voucher sponsor since they are random
+                'centre_id' => $registration->centre->id,
+                'dispatched_at' => $voucherCollection['date']->copy()->subDays(10),
+                // These are random and will not be a proper range, but should be identifiable with this.
+                'range' => $vs1[0]->code . '-' . $vs1[2]->code,
+            ]);
+
+            $delivery->vouchers()->saveMany($vs1);
+
+            // Ask bundle to add these vouchers.
+            $bundle->addVouchers($vs1->pluck('code')->toArray());
+
+            // "Collect" it on collection date, by hand as the methods don't really exist, yet
+            $bundle->disbursed_at = $voucherCollection['date'];
+            $bundle->disbursingCentre()->associate($registration->centre);
+            $bundle->collectingCarer()->associate($pri_carer);
+            $bundle->disbursingUser()->associate($this->user);
+            $bundle->save();
+
+            // Again, the current bundle, should be blank as we just saved one.
+            /** @var Bundle $bundle2 */
+            $registration->currentBundle();
+        }
+        return $registration;
     }
 
     /**
