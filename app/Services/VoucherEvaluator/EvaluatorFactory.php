@@ -5,18 +5,13 @@ namespace App\Services\VoucherEvaluator;
 use App\Registration;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostOne;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostPrimarySchoolAge;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostSecondarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsBetweenOneAndPrimarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsPrimarySchoolAge;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsSecondarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderOne;
-use App\Services\VoucherEvaluator\Evaluations\FamilyHasNoEligibleChildren;
-use App\Services\VoucherEvaluator\Evaluations\FamilyHasUnverifiedChildren;
 use App\Services\VoucherEvaluator\Evaluations\FamilyIsPregnant;
 use App\Services\VoucherEvaluator\Evaluators\VoucherEvaluator;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Log;
 
 class EvaluatorFactory
 {

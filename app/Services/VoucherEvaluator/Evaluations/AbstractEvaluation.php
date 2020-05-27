@@ -38,7 +38,6 @@ abstract class AbstractEvaluation implements IEvaluation
 
     protected function fail()
     {
-        \Log::info("ran test, called fail");
         return null;
     }
 
