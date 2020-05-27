@@ -51,15 +51,13 @@ class DeliverySeeder extends Seeder
                     $shortcode . "01" . $key . "050"
                 );
                 // Turn those into vouchers
-                $vs = factory(Voucher::class, 'requested', count($codes))
+                $vs = factory(Voucher::class, 'printed', count($codes))
                     ->create([
                         'code' => function () use (&$codes) {
                             return array_pop($codes);
                         },
                     ])
                     ->each(function (Voucher $v) {
-                        $v->applyTransition('order');
-                        $v->applyTransition('print');
                         $v->applyTransition('dispatch');
                     });
                 $delivery->vouchers()->saveMany($vs);

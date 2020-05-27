@@ -66,11 +66,9 @@ class VoucherManagerTest extends StoreTestCase
         Auth::login($this->fmUser);
 
         foreach ($this->testCodes as $testCode) {
-            $voucher = factory(Voucher::class, 'requested')->create([
+            $voucher = factory(Voucher::class, 'printed')->create([
                 'code' => $testCode
             ]);
-            $voucher->applyTransition('order');
-            $voucher->applyTransition('print');
             $voucher->applyTransition('dispatch');
         }
 

@@ -59,16 +59,23 @@ class BundleSeeder extends Seeder
         /** @var Bundle $bundle */
         $bundle = $registration->currentBundle();
 
-        // Create three random vouchers and transition to printed, then bundle
+        // Create three random vouchers and transition to dispatched, then deliver and bundle.
         /** @var Collection $vs */
-        $vs1 = factory(Voucher::class, 'requested', 3)
+        $vs1 = factory(Voucher::class, 'printed', 3)
             ->create()
             ->each(function (Voucher $v) {
-                $v->applyTransition('order');
-
-                $v->applyTransition('print');
                 $v->applyTransition('dispatch');
             });
+
+        // Generate a corresponding delivery
+        $delivery = factory(App\Delivery::class)->create([
+            // Using the reg centre id but it won't match with voucher sponsor since they are random
+            'centre_id' => $registration->centre->id,
+            'dispatched_at' => Carbon::now(),
+            // These are random and will not be a proper range, but should be identifiable with this.
+            'range' => $vs1[0]->code . '-' . $vs1[2]->code,
+        ]);
+        $delivery->vouchers()->saveMany($vs1);
 
         // Ask bundle to add these vouchers.
         $bundle->addVouchers($vs1->pluck('code')->toArray());
@@ -101,15 +108,23 @@ class BundleSeeder extends Seeder
         /** @var Bundle $bundle */
         $bundle = $registration->currentBundle();
 
-        // Create three random vouchers and transition to dispatched, then bundle
+        // Create three random vouchers and transition to dispatched, then deliver then bundle
         /** @var Collection $vs */
-        $vs1 = factory(Voucher::class, 'requested', 3)
+        $vs1 = factory(Voucher::class, 'printed', 3)
             ->create()
             ->each(function (Voucher $v) {
-                $v->applyTransition('order');
-                $v->applyTransition('print');
                 $v->applyTransition('dispatch');
             });
+
+        // Generate a corresponding delivery
+        $delivery = factory(App\Delivery::class)->create([
+            // Using the reg centre id but it won't match with voucher sponsor since they are random
+            'centre_id' => $registration->centre->id,
+            'dispatched_at' => Carbon::now(),
+            // These are random and will not be a proper range, but should be identifiable with this.
+            'range' => $vs1[0]->code . '-' . $vs1[2]->code,
+        ]);
+        $delivery->vouchers()->saveMany($vs1);
 
         // Ask bundle to add these vouchers.
         $bundle->addVouchers($vs1->pluck('code')->toArray());

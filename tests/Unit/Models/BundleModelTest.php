@@ -52,11 +52,9 @@ class BundleModelTest extends TestCase
         $carer = factory(Carer::class)->create(['name'=>'Bob','family_id'=>$family->id]);
 
         //create three vouchers and transition to collected.
-        $vs = factory('App\Voucher', 'requested', 3)
+        $vs = factory('App\Voucher', 'printed', 3)
             ->create()
             ->each(function ($v) {
-                $v->applyTransition('order');
-                $v->applyTransition('print');
                 $v->applyTransition('dispatch');
                 $v->applyTransition('collect');
                 $v->bundle()->associate($this->bundle);
@@ -84,12 +82,10 @@ class BundleModelTest extends TestCase
         $user = factory('App\CentreUser')->create();
         Auth::login($user);
 
-        // Create three vouchers and transition to printed.
-        $vs = factory('App\Voucher', 'requested', 3)
+        // Create three vouchers.
+        $vs = factory('App\Voucher', 'printed', 3)
             ->create()
             ->each(function ($v) {
-                $v->applyTransition('order');
-                $v->applyTransition('print');
                 $v->bundle()->associate($this->bundle);
                 $v->save();
             });
@@ -135,11 +131,9 @@ class BundleModelTest extends TestCase
         $disbursedBundle = factory(Bundle::class)->create();
 
         // Make some vouchers and add those to it.
-        $vs = factory('App\Voucher', 'requested', 3)
+        $vs = factory('App\Voucher', 'printed', 3)
             ->create()
             ->each(function ($v) use ($disbursedBundle) {
-                $v->applyTransition('order');
-                $v->applyTransition('print');
                 $v->applyTransition('dispatch');
                 $v->bundle()->associate($disbursedBundle);
                 $v->save();

@@ -111,13 +111,11 @@ class TestActiveUsersSeeder extends Seeder
                 /** @var Bundle $bundle */
                 $bundle = $reg->currentBundle();
 
-                // Create three random vouchers and transition to printed, then bundle
+                // Create three random vouchers and transition to dispatched, then bundle
                 /** @var Collection $vs */
-                $vs = factory(Voucher::class, 'requested', 3)
+                $vs = factory(Voucher::class, 'printed', 3)
                     ->create()
                     ->each(function (Voucher $v) {
-                        $v->applyTransition('order');
-                        $v->applyTransition('print');
                         $v->applyTransition('dispatch');
                     });
 

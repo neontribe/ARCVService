@@ -57,7 +57,6 @@ class CreateMasterVoucherLogReport extends Command
     private $headers = [
         'Voucher Number',
         'Voucher Area',
-        'Date Printed',
         'Date Distributed',
         'Distributed to Centre',
         'Distributed to Area',
@@ -88,10 +87,9 @@ class CreateMasterVoucherLogReport extends Command
 SELECT
   vouchers.code AS 'Voucher Number',
   voucher_sponsor.name AS 'Voucher Area',
-  (select created_at from voucher_states where vouchers.id = voucher_id and `to` = 'printed' order by id desc limit 1) AS 'Date Printed',
   deliveries.dispatched_at as 'Date Distributed',
   delivery_centres.name AS 'Distributed to Centre',
-  delivery_areas.name AS 'Distributed to Area',      
+  delivery_areas.name AS 'Distributed to Area',
   CASE
       WHEN (disbursed_at is null) AND (pri_carer_name is not null) THEN 'True'
       WHEN (disbursed_at is not null) AND (pri_carer_name is not null) THEN 'False'
@@ -108,7 +106,7 @@ SELECT
   (select min(voucher_states.created_at)
     FROM voucher_states
     WHERE voucher_states.`to` = 'payment_pending'
-    and vouchers.id = voucher_id 
+    and vouchers.id = voucher_id
     group by voucher_id
     limit 1) AS 'Date Received for Reimbursement',
   (select created_at from voucher_states where vouchers.id = voucher_id and `to` = 'reimbursed' order by id desc limit 1) AS 'Reimbursed Date',

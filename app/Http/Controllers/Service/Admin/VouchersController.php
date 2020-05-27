@@ -195,7 +195,6 @@ class VouchersController extends Controller
                         STR_PAD_LEFT
                     );
                 $v->sponsor_id = $sponsor->id;
-                // Set straight to printed; we're faking the process for speed.
                 $v->currentstate = 'printed';
                 $v->created_at = $now_time;
                 $v->updated_at = $now_time;
@@ -205,45 +204,6 @@ class VouchersController extends Controller
             // Batch insert raw vouchers.
             // Todo : there's NO "this voucher already exists" checking!!
             Voucher::insert($new_vouchers);
-
-            // For each ID we just made
-            $vouchers = Voucher::where('created_at', '=', $now_time)
-                ->where('updated_at', '=', $now_time)
-                ->where('currentstate', '=', 'requested')
-            ;
-            $states = [];
-
-            // Build a set of big arrays to insert in one go
-            foreach ($vouchers as $voucher) {
-                // create VoucherState
-                $s = new VoucherState();
-
-                // Set initial attributes
-                $s->transition = 'order';
-                $s->from = 'requested';
-                $s->voucher_id = $voucher->id;
-                $s->to = 'ordered';
-                $s->created_at = $now_time;
-                $s->updated_at = $now_time;
-                $s->source = "";
-                $s->user_id = $user_id; // the user ID
-                $s->user_type = $user_type; // the type of user
-
-                // Add them to the array.
-                $states[] = $s->attributesToArray();
-
-                // Update attributes
-                $s->transition = 'print';
-                $s->from = 'ordered';
-                $s->to = 'printed';
-
-                // Add them to the array again
-                $states[] = $s->attributesToArray();
-                unset($s);
-            }
-            // Insert states
-            VoucherState::insert($states);
-            // printed vouchers should now be redeemable.
         }
 
         $notification_msg = trans('service.messages.vouchers_create.success', [
