@@ -175,11 +175,11 @@ class VoucherEvaluatorTest extends TestCase
 
         $evaluation = $evaluator->evaluate($family);
 
-        dd($evaluation->valuations);
+ //       dd($evaluation->valuations);
         // Check it can find eligible children (0 vouchers)
         // - because no under primary school-ers validate the primary school-ers.
         // dd($evaluation->getCreditReasons());
- //       $this->assertTrue($evaluation->getEligibility());
+        $this->assertTrue($evaluation->getEligibility());
         $this->assertEquals('3', $evaluation->getEntitlement());
     }
 

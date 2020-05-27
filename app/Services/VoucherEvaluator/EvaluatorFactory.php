@@ -62,17 +62,14 @@ class EvaluatorFactory
                 'credits' => [
                     "ChildIsUnderOne" => new ChildIsUnderOne($offsetDate, 6),
                     "ChildIsBetweenOneAndPrimarySchoolAge" => new ChildIsBetweenOneAndPrimarySchoolAge($offsetDate, 3),
-                    "ChildIsPrimarySchoolAge" => new ChildIsPrimarySchoolAge($offsetDate, null),
                 ],
                 'notices' => [
                     "ChildIsAlmostOne" => new ChildIsAlmostOne($offsetDate, 0),
                     "ChildIsAlmostPrimarySchoolAge" => new ChildIsAlmostPrimarySchoolAge($offsetDate, 0),
-                    "ChildIsAlmostSecondarySchoolAge" => new ChildIsAlmostSecondarySchoolAge($offsetDate, null),
                 ],
                 'relations' => [],
                 'disqualifiers' => [
                     "ChildIsPrimarySchoolAge" => new ChildIsPrimarySchoolAge($offsetDate, 0),
-                    "ChildIsSecondarySchoolAge" => new ChildIsSecondarySchoolAge($offsetDate, null)
                 ],
             ],
             "App\Family" => [
@@ -80,11 +77,8 @@ class EvaluatorFactory
                     "FamilyIsPregnant" => new FamilyIsPregnant($offsetDate, 3)
                 ],
                 'notices' => [
-                    "FamilyHasUnverifiedChildren" => new FamilyHasUnverifiedChildren($offsetDate, null),
                 ],
-                'disqualifiers' => [
-                    "FamilyHasNoEligibleChildren" => new FamilyHasNoEligibleChildren($offsetDate, null),
-                ],
+                'disqualifiers' => [],
                 'relations' => ['children'],
             ],
             "App\Registration" => [
