@@ -40,6 +40,10 @@ class VoucherEvaluator extends AbstractEvaluator
         return $verifying;
     }
 
+    /**
+     * Lazy way to check a specific rules case
+     * @return bool
+     */
     public function isCreditingPrimaryKids()
     {
         $crediting = false;

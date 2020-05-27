@@ -86,7 +86,7 @@ class EvaluatorFactory
         // Iterate over the modEvaluations and replace/add them
         foreach ($modEvaluations as $mod) {
             $className = $namespace . '\\' . $mod->name;
-            // Check we can
+            // Check we have the correct, existing class
             if (class_exists($mod->entity) &&
                 class_exists($className)
             ) {
