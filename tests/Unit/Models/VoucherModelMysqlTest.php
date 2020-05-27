@@ -77,31 +77,6 @@ class VoucherModelMysqlTest extends StoreTestCase
         Auth::login($this->user);
     }
 
-    /** @test */
-    public function testItCanGetVoidableVouchersByShortcode()
-    {
-        // Make vouchers from them
-        foreach ($this->rangeCodes as $rangeCode) {
-            $voucher = factory(Voucher::class, 'printed')->create([
-                'code' => $rangeCode,
-                'sponsor_id' => $this->sponsor->id,
-            ]);
-            $voucher->applyTransition('dispatch');
-        }
-
-        // Make a range to check
-        $inBoundsRange = Voucher::createRangeDefFromVoucherCodes('TST0102', 'TST0104');
-
-        // Check it.
-        $ranges = Voucher::getVoidableVoucherRangesByShortCode($inBoundsRange->shortcode);
-        $this->assertCount(3, $ranges);
-        $this->assertEquals(101, $ranges[0]->start);
-        $this->assertEquals(105, $ranges[0]->end);
-        $this->assertEquals(201, $ranges[1]->start);
-        $this->assertEquals(205, $ranges[1]->end);
-        $this->assertEquals(301, $ranges[2]->start);
-        $this->assertEquals(305, $ranges[2]->end);
-    }
 
     /** @test */
     public function testItCanGetDeliverableVouchersByShortcode()

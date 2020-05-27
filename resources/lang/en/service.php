@@ -5,9 +5,9 @@ return [
         'vouchers_create' => [
             'success' => 'Created and activated :shortcode :start to :shortcode :end',
         ],
-        'vouchers_batchtransition' => [
-            'blocked' => 'The voucher range given contains some vouchers that are not voidable',
-            'success' => 'Vouchers :shortcode :start to :shortcode :end have been :transition_to',
+        'vouchers_batchretiretransition' => [
+            'blocked' => 'The voucher range given does not contain any vouchers that are voidable',
+            'success' => ':success_codes have been :transition_to. :fail_code_details',
         ],
         'vouchers_delivery' => [
             'blocked' => 'The voucher range given contains some vouchers that have already been delivered',

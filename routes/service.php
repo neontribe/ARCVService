@@ -50,8 +50,8 @@ Route::group(['middleware' => 'auth:admin'], function () {
     ]);
     // ...patch because changing state of a partial collection of vouchers.
     Route::patch('vouchers', [
-        'as' => 'admin.vouchers.updatebatch',
-        'uses' => 'Admin\VouchersController@updateBatch',
+        'as' => 'admin.vouchers.retirebatch',
+        'uses' => 'Admin\VouchersController@retireBatch',
     ]);
 
     // Worker Management
