@@ -1,5 +1,6 @@
 <?php
 
+use App\Evaluation;
 use Illuminate\Database\Seeder;
 
 class SponsorsSeeder extends Seeder
@@ -12,8 +13,56 @@ class SponsorsSeeder extends Seeder
     public function run()
     {
         //create RVNT sponsor for tests
-        $sponsor = ['name' => "Real Virtual Project", "shortcode" =>"RVNT"];
-        factory(App\Sponsor::class)->create($sponsor);
+        $sponsor = factory(App\Sponsor::class)->create(['name' => "Real Virtual Project", "shortcode" =>"RVNT"]);
+
+        $noticesUnverifiedKids = new Evaluation([
+            "name" => "FamilyHasUnverifiedChildren",
+            "value" => 0,
+            "purpose" => "notices",
+            "entity" => "App\Family",
+            "sponsor_id" => $sponsor->id,
+        ]);
+        $noticesUnverifiedKids->save();
+
+        $sponsor->evaluations()->saveMany([
+            // warn when primary schoolers are approaching end of school
+            new Evaluation([
+                "name" => "ChildIsAlmostSecondarySchoolAge",
+                "value" => "0",
+                "purpose" => "notices",
+                "entity" => "App\Child",
+            ]),
+            // credit primary schoolers
+            new Evaluation([
+                "name" => "ChildIsPrimarySchoolAge",
+                "value" => "3",
+                "purpose" => "credits",
+                "entity" => "App\Child",
+            ]),
+            // don't disqualify primary schoolers
+            new Evaluation([
+                "name" => "ChildIsPrimarySchoolAge",
+                "value" => null,
+                "purpose" => "disqualifiers",
+                "entity" => "App\Child",
+            ]),
+            // do secondary schoolers instead
+            new Evaluation([
+                "name" => "ChildIsSecondarySchoolAge",
+                "value" => 0,
+                "purpose" => "disqualifiers",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "FamilyHasNoEligibleChildren",
+                "value" => 0,
+                "purpose" => "disqualifiers",
+                "entity" => "App\Family",
+            ]),
+        ]);
+
+
+
 
         // And 5 default factory models to be able to mirror live data
         factory(App\Sponsor::class, 5)->create();

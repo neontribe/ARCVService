@@ -21,7 +21,7 @@ class CreateEvaluationsTable extends Migration
             $table->string('purpose');
             $table->integer('value')->nullable();
             $table->timestamps();
-            $table->unique(['sponsor_id','name'], 'unique_sponsor_name');
+            $table->unique(['sponsor_id','name', 'purpose'], 'unique_sponsor_name');
         });
     }
 

@@ -4,6 +4,7 @@ namespace Tests;
 use App\Centre;
 use App\CentreUser;
 use App\Child;
+use App\Evaluation;
 use App\Family;
 use App\Registration;
 use App\Sponsor;
@@ -101,12 +102,19 @@ class VoucherManagerTest extends StoreTestCase
          * - with kids who havn't been checked for ID.
          */
 
-        // Make a sponsor
-        $sponsor = factory(Sponsor::class)->create();
+        // Make a sponsor with a rule for checking kids
+        $sponsor = factory(Sponsor::class)
+            ->create();
 
-        // Set the verification and extended rules to match it.
-        Config::set('arc.verifies_children', [$sponsor->shortcode]);
-        Config::set('arc.extended_sponsors', [$sponsor->shortcode]);
+        $eval = new Evaluation([
+            "name" => "FamilyHasUnverifiedChildren",
+            "value" => 0,
+            "purpose" => "notices",
+            "entity" => "App\Family",
+            "sponsor_id" => $sponsor->id
+        ]);
+        $eval->save();
+        $sponsor->fresh();
 
         // Make a Centre in it.
         $centre =  factory(Centre::class)->create([

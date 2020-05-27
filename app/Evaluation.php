@@ -20,4 +20,12 @@ class Evaluation extends Model
         'entity',
         'sponsor_id'
     ];
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function sponsor()
+    {
+        return $this->belongsTo('App\Sponsor');
+    }
 }
