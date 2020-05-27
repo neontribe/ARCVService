@@ -16,6 +16,7 @@ use App\Services\VoucherEvaluator\Evaluations\FamilyIsPregnant;
 use App\Services\VoucherEvaluator\Evaluators\VoucherEvaluator;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Log;
 
 class EvaluatorFactory
 {
@@ -92,27 +93,25 @@ class EvaluatorFactory
                 'relations' => ['family'],
             ],
         ];
-
         $namespace = "App\Services\VoucherEvaluator\Evaluations";
         // Iterate over the modEvaluations and replace/add them
         foreach ($modEvaluations as $mod) {
-            $name = $namespace . '\\' . $mod->name;
+            $className = $namespace . '\\' . $mod->name;
             // Check we can
             if (class_exists($mod->entity) &&
-                class_exists($name)
+                class_exists($className)
             ) {
                 $config = [
                     $mod->entity => [
                         $mod->purpose => [
                             // Calling the string to instantiate a class that exists
-                            $mod->name => new $name($offsetDate, $mod->value)
+                            $mod->name => new $className($offsetDate, $mod->value)
                         ]
                     ]
                 ];
                 $evaluations = array_replace_recursive($evaluations, $config);
             }
         }
-        dd($evaluations);
         return $evaluations;
     }
 }

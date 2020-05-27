@@ -54,10 +54,14 @@ class VoucherEvaluator extends AbstractEvaluator
          * @var AbstractEvaluation $outcome
          */
         if (array_key_exists($ruleKey, $rules)) {
+            \Log::info("\n testing " . get_class($subject) . " " . $ruleKey);
             foreach ($rules[$ruleKey] as $rule) {
                 $outcome = $rule->test($subject);
                 if ($outcome) {
                     $results[] = $outcome->toReason();
+                    \Log::info(" passed ". $rule->reason . " with '" . $rule->value . "'");
+                } else {
+                    \Log::info(" failed ". $rule->reason);
                 }
             }
         }
