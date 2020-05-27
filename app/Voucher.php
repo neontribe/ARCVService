@@ -175,12 +175,6 @@ class Voucher extends Model
         return (object) $rangeDef;
     }
 
-    public static function collectionHasVoidable($currentstates)
-    {
-        $voidable_states = ['printed', 'dispatched'];
-        return true;
-    }
-
     /**
      * Determines if the given voucher range contains entries already delivered
      *
