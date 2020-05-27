@@ -10,7 +10,7 @@ use App\Services\VoucherEvaluator\Valuation;
 class VoucherEvaluator extends AbstractEvaluator
 {
     /** @var array $evaluations */
-    private $evaluations = [];
+    public $evaluations = [];
 
     /**
      * VoucherEvaluator constructor.
@@ -21,6 +21,35 @@ class VoucherEvaluator extends AbstractEvaluator
     {
         // Use the factory to make one of these
         $this->evaluations = $evaluations;
+    }
+
+    /**
+     * Lazy way to query a specific rules case
+     * @return bool
+     */
+    public function isVerifyingChildren()
+    {
+        $verifying = false;
+        // Inelegant: asking the valuation by blunt path.
+        if (isset($valuation->evaluations["App\Family"]["notices"]["FamilyHasUnverifiedChildren"])) {
+            $evaluation = $valuation->evaluations["App\Family"]["notices"]["FamilyHasUnverifiedChildren"];
+            if (!is_null($evaluation->value)) {
+                $verifying = true;
+            }
+        }
+        return $verifying;
+    }
+
+    public function isCreditingPrimaryKids()
+    {
+        $crediting = false;
+        if (isset($valuation->evaluations["App\Child"]["credits"]["ChildIsPrimarySchoolAge"])) {
+            $evaluation = $valuation->evaluations["App\Child"]["credits"]["ChildIsPrimarySchoolAge"];
+            if (!is_null($evaluation->value)) {
+                $crediting = true;
+            }
+        }
+        return $crediting;
     }
 
     /**

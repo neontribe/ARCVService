@@ -137,7 +137,7 @@
                                 {{--
                                 TODO : This is not scalable; if this breaks or has to be extended, look at a better abstraction.
                                 --}}
-                                @if (in_array($registration->centre->sponsor->shortcode, config('arc.extended_sponsors')))
+                                @if ($registration->getEvaluator()->isCreditingPrimaryKids())
                                     <li>Primary school to secondary school start - 3 vouchers<br>
                                         <small>(Only if family has a child still under primary school age too)</small>
                                     </li>
