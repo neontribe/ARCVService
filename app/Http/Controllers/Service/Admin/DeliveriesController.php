@@ -93,10 +93,10 @@ class DeliveriesController extends Controller
 
                 // Bulk update VoucherStates for speed.
                 foreach ($transitions as $transitionDef) {
-                    DB::enableQueryLog();
                     Voucher::select('id')
                         ->whereNull('delivery_id')
-                        ->withRangedVouchersInState($rangeDef, 'printed')
+                        ->inDefinedRange($rangeDef)
+                        ->inOneOfStates(['printed'])
                         ->chunk(
                             // should be big enough chunks to avoid memory problems
                             10000,
