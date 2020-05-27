@@ -2,6 +2,9 @@
 
 namespace Tests\Unit\Routes;
 
+use App\Centre;
+use App\Delivery;
+use Carbon\Carbon;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use App\Voucher;
@@ -21,7 +24,7 @@ class ApiRoutesTest extends TestCase
     {
         parent::setUp();
         $this->trader = factory(Trader::class)->create();
-        $this->vouchers = factory(Voucher::class, 'requested', 10)->create();
+        $this->vouchers = factory(Voucher::class, 'printed', 10)->create();
         $this->user = factory(User::class)->create();
 
         // Set up password client
@@ -42,11 +45,20 @@ class ApiRoutesTest extends TestCase
             'passport.password_client_secret' => $this->client->secret,
         ]);
 
+        // Setup a centre
+        $centre = factory(Centre::class)->create();
+
+        // Make a delivery
+        $deliveryDate = Carbon::today();
+        $delivery = factory(Delivery::class)->create([
+            'centre_id' => $centre->id,
+            'dispatched_at' => $deliveryDate,
+        ]);
+
         // Set up voucher states.
         Auth::login($this->user);
         foreach ($this->vouchers as $v) {
-            $v->applyTransition('order');
-            $v->applyTransition('print');
+            $v->delivery_id = $delivery->id;
             $v->applyTransition('dispatch');
         }
         $this->vouchers[1]->trader_id = 1;
@@ -150,7 +162,7 @@ class ApiRoutesTest extends TestCase
         $this->actingAs($this->user, 'api')
             ->json('POST', route('api.voucher.transition'), $payload)
             ->assertStatus(200)
-            ->assertJson(['error' => trans('api.errors.voucher_invalid')])
+            ->assertJson(['error' => trans('api.errors.voucher_unavailable')])
         ;
     }
 
@@ -201,6 +213,52 @@ class ApiRoutesTest extends TestCase
                     'code' => $code
                 ])
             ])
+        ;
+    }
+
+    public function testCollectUndeliveredVouchersAfterDeliveriesRoute()
+    {
+        $created_at = Carbon::parse(config('arc.first_delivery_date'))->addDay();
+        $this->vouchers[2]->created_at = $created_at;
+        $this->vouchers[2]->delivery_id = null;
+        $this->vouchers[2]->save();
+
+        $code = $this->vouchers[2]->code;
+
+        $payload = [
+            'transition' => 'collect',
+            'trader_id' => 1,
+            'vouchers' => [
+                $code,
+            ]
+        ];
+        $this->user->traders()->sync([1]);
+        $this->actingAs($this->user, 'api')
+            ->json('POST', route('api.voucher.transition'), $payload)
+            ->assertStatus(200)
+            ->assertJson(['warning' => trans('api.errors.voucher_unavailable')])
+        ;
+    }
+
+    public function testCollectUndeliveredVouchersFromBeforeDeliveriesRoute()
+    {
+        $created_at = Carbon::parse(config('arc.first_delivery_date'))->subDays(1);
+        $this->vouchers[2]->created_at = $created_at;
+        $this->vouchers[2]->save();
+        $code = $this->vouchers[2]->code;
+
+        $payload= [
+            'transition' => 'collect',
+            'trader_id' => 1,
+            'vouchers' => [
+                $code,
+            ]
+        ];
+        $this->user->traders()->sync([1]);
+        $this->actingAs($this->user, 'api')
+            ->json('POST', route('api.voucher.transition'), $payload)
+            ->assertStatus(200)
+            ->assertJson(['message' => trans('api.messages.voucher_success_add')])
         ;
     }
 

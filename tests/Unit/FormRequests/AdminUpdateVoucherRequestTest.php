@@ -48,14 +48,14 @@ class AdminUpdateVoucherRequestTest extends StoreTestCase
 
         // Batch make those vouchers
         foreach ($rangeCodes as $rangeCode) {
-            factory(Voucher::class, 'requested')->create([
+            factory(Voucher::class, 'printed')->create([
                 'code' => $rangeCode,
                 'sponsor_id' => $sponsor->id,
             ]);
         }
 
         // Make the error voucher
-        factory(Voucher::class, 'requested')->create([
+        factory(Voucher::class, 'printed')->create([
             'code' => 'ERR0105',
             'sponsor_id' => $err_sponsor->id,
         ]);

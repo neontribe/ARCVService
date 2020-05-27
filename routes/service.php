@@ -43,7 +43,7 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.vouchers.void',
         'uses' => 'Admin\VouchersController@void',
     ]);
-    // ...transition to printed
+    // ...store batch of printed
     Route::post('vouchers', [
         'as' => 'admin.vouchers.storebatch',
         'uses' => 'Admin\VouchersController@storeBatch',
