@@ -500,7 +500,7 @@ $factory->defineAs(App\Child::class, 'readyForSecondarySchool', function (Faker\
 });
 
 // Child - over Primary School Age
-$factory->defineAs(App\Child::class, 'isOverPrimarySchoolAge', function (Faker\Generator $faker) {
+$factory->defineAs(App\Child::class, 'isSecondarySchoolAge', function (Faker\Generator $faker) {
 
     $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-17 years', '-12 years')->getTimestamp());
     $dob = $dob->startOfMonth();

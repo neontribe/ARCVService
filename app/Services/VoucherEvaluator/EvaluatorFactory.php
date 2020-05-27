@@ -79,10 +79,10 @@ class EvaluatorFactory
                     "FamilyIsPregnant" => new FamilyIsPregnant($offsetDate, 3)
                 ],
                 'notices' => [
-                    "FamilyHasUnverifiedChildren" =>new FamilyHasUnverifiedChildren($offsetDate, null),
+                    "FamilyHasUnverifiedChildren" => new FamilyHasUnverifiedChildren($offsetDate, null),
                 ],
                 'disqualifiers' => [
-                    "FamilyHasNoEligibleChildren" =>new FamilyHasNoEligibleChildren($offsetDate, null),
+                    "FamilyHasNoEligibleChildren" => new FamilyHasNoEligibleChildren($offsetDate, null),
                 ],
                 'relations' => ['children'],
             ],
@@ -93,23 +93,26 @@ class EvaluatorFactory
             ],
         ];
 
+        $namespace = "App\Services\VoucherEvaluator\Evaluations";
         // Iterate over the modEvaluations and replace/add them
         foreach ($modEvaluations as $mod) {
+            $name = $namespace . '\\' . $mod->name;
             // Check we can
             if (class_exists($mod->entity) &&
-                class_exists($mod->name)
+                class_exists($name)
             ) {
                 $config = [
                     $mod->entity => [
                         $mod->purpose => [
                             // Calling the string to instantiate a class that exists
-                            $mod->name => new $mod["name"]($offsetDate, $mod->value)
+                            $mod->name => new $name($offsetDate, $mod->value)
                         ]
                     ]
                 ];
                 $evaluations = array_replace_recursive($evaluations, $config);
             }
         }
+        dd($evaluations);
         return $evaluations;
     }
 }
