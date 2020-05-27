@@ -24,7 +24,43 @@ class SponsorsSeeder extends Seeder
         ]);
         $noticesUnverifiedKids->save();
 
-        $sponsor->evaluations()->saveMany([
+        $sponsor->evaluations()->saveMany($this->qualifyPrimarySchoolers());
+        $sponsor->evaluations()->saveMany($this->veryfiesKids());
+
+        // And 5 default factory models to be able to mirror live data
+        factory(App\Sponsor::class, 5)->create();
+
+        // Gets the SK rules
+        $sponsor2 = App\Sponsor::find(2);
+        $sponsor2->evaluations()->saveMany($this->qualifyPrimarySchoolers());
+        $sponsor2->evaluations()->saveMany($this->veryfiesKids());
+
+
+        // Gets SK rules, without the primary school disqualification
+        $sponsor3 = App\Sponsor::find(3);
+        $sponsor3->evaluations()->saveMany($this->allowPrimarySchoolers());
+        $sponsor3->evaluations()->saveMany($this->veryfiesKids());
+
+        // only gets verifications
+        $sponsor4 = App\Sponsor::find(4);
+        $sponsor4->evaluations()->saveMany($this->veryfiesKids());
+    }
+
+    public function veryfiesKids()
+    {
+        return [
+            new Evaluation([
+                "name" => "FamilyHasNoEligibleChildren",
+                "value" => 0,
+                "purpose" => "disqualifiers",
+                "entity" => "App\Family",
+            ])
+        ];
+    }
+
+    public function allowPrimarySchoolers()
+    {
+        return [
             // warn when primary schoolers are approaching end of school
             new Evaluation([
                 "name" => "ChildIsAlmostSecondarySchoolAge",
@@ -52,19 +88,19 @@ class SponsorsSeeder extends Seeder
                 "value" => 0,
                 "purpose" => "disqualifiers",
                 "entity" => "App\Child",
-            ]),
-            new Evaluation([
+            ])
+        ];
+    }
+
+    public function qualifyPrimarySchoolers()
+    {
+        $primarySchoolers = $this->allowPrimarySchoolers();
+        $primarySchoolers[] = new Evaluation([
                 "name" => "FamilyHasNoEligibleChildren",
                 "value" => 0,
                 "purpose" => "disqualifiers",
                 "entity" => "App\Family",
-            ]),
-        ]);
-
-
-
-
-        // And 5 default factory models to be able to mirror live data
-        factory(App\Sponsor::class, 5)->create();
+            ]);
+        return $primarySchoolers;
     }
 }
