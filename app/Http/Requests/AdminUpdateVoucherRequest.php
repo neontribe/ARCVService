@@ -30,7 +30,7 @@ class AdminUpdateVoucherRequest extends FormRequest
             // MUST be present, string, exists
             'voucher-start' => 'required|string|exists:vouchers,code',
             // MUST be present, string, exists, greater/equal to start and same sponsor as start
-            'voucher-end' => 'required|string|exists:vouchers,code|codeGreaterThan:voucher-start|sameSponsor:voucher-start',
+            'voucher-end' => 'required|string|exists:vouchers,code|codeGreaterOrEqual:voucher-start|sameSponsor:voucher-start',
             // MUST be present AND be in a subset of transitions
             'transition' => [
                 'required',

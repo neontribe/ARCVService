@@ -149,6 +149,7 @@ class Voucher extends Model
         return null;
     }
 
+
     /**
      * Creates a rangeDef structure
      * TODO: convert to class?
@@ -188,19 +189,6 @@ class Voucher extends Model
     }
 
     /**
-     * Determines if the given voucher range cannot be voided
-     *
-     * @param $rangeDef object { 'start', 'end', 'shortcode', 'sponsor_id' }
-     * @return bool
-     */
-    public static function rangeIsVoidable($rangeDef)
-    {
-        $ranges = self::getVoidableVoucherRangesByShortCode($rangeDef->shortcode);
-        $range = self::getContainingRange($rangeDef->start, $rangeDef->end, $ranges);
-        return (!is_null($range) && is_object($range));
-    }
-
-    /**
      * Splits a voucher code up
      *
      * @param string $code
@@ -218,96 +206,6 @@ class Voucher extends Model
              return $matches;
         } else {
             return false;
-        }
-    }
-
-    /**
-     * Gets ranges of the vouchers that *can* be voided, by a Sponsor's shortcode.
-     *
-     * @param string $shortcode
-     * @return array
-     */
-    public static function getVoidableVoucherRangesByShortCode(string $shortcode)
-    {
-        try {
-            return DB::transaction(function () use ($shortcode) {
-                // Set some important variables for the query. breaks SQLlite.
-                DB::statement(DB::raw('SET @initial_id=0, @start=0, @previous=0;'));
-
-                /* This seems to be the fastest way to find the start and end of each "range" of vouchers;
-                 * in this case specified by vouchers that are not in deliveries.
-                 * returns an array of stdClass objects with
-                 * - serial; the final serial number in the range
-                 * - start; the initial serial in the range
-                 * - final_code; the code associated with serial
-                 * - initial_code; the code associated with the start
-                 * - id; the voucher id of the serial
-                 * - initial_id; the voucher id of the start
-                 */
-                // TODO: convert to eloquent
-                return DB::select(
-                    "
-                    SELECT
-                        t1.*,
-                        v1.code as intitial_code,
-                        v2.code as final_code
-                    FROM (
-
-                        SELECT
-                            @start := if(end - @previous = 1, @start, end) as start,
-                            @initial_id := if(end - @previous = 1, @initial_id, id) as initial_id,
-                            @previous := end as end,
-                            id as final_id
-                        FROM (
-
-                            SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as end
-                            FROM vouchers
-                            WHERE code REGEXP '^{$shortcode}[0-9]+\$'
-                              AND currentstate = 'dispatched'
-                            ORDER BY end
-
-                        ) as t5
-
-                    ) AS t1
-                        INNER JOIN (
-
-                            SELECT start, max(end) as final
-                            FROM (
-
-                                 SELECT
-                                     @start := if(end - @previous = 1, @start, end) as start,
-                                     @initial_id := if(end - @previous = 1, @initial_id, id) as initial_id,
-                                     @previous := end as end,
-                                     id
-                                 FROM (
-
-                                    SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as end
-                                    FROM vouchers
-                                    WHERE code REGEXP '^{$shortcode}[0-9]+\$'
-                                      AND currentstate = 'dispatched'
-                                    ORDER BY end
-
-                                 ) as t4
-
-                            ) as t3
-                            GROUP BY start
-
-                        ) as t2
-                        ON t1.start = t2.start
-                          AND t1.end = t2.final
-
-                    LEFT JOIN vouchers as v1
-                        ON initial_id = v1.id
-
-                    LEFT JOIN vouchers as v2
-                        ON final_id = v2.id
-                    "
-                );
-            });
-        } catch (Throwable $e) {
-            Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
-            Log::error($e->getTraceAsString());
-            return [];
         }
     }
 
@@ -538,22 +436,51 @@ class Voucher extends Model
     }
 
     /**
-     * Gets a set of vouchers that share a shortcode and currentstate in a sponsor
+     * Gets a set of vouchers in a range using shortcode, sponsor and voucher number.
      *
      * @param Builder $query
      * @param object $rangeDef
-     * @param string $state State if interest
      * @return Builder
      */
-    public function scopeWithRangedVouchersInState(Builder $query, $rangeDef, $state)
+    public function scopeInDefinedRange($query, $rangeDef)
     {
         return $query
-            ->where('currentstate', $state)
             ->where('code', 'REGEXP', "^{$rangeDef->shortcode}[0-9]+\$") // Just vouchers that start with our shortcode
             ->where('sponsor_id', $rangeDef->sponsor_id) // that are in the sponsor (performance, using the index)
             ->whereBetween(
                 DB::raw("cast(replace(code, '{$rangeDef->shortcode}', '') as signed)"),
                 [$rangeDef->start, $rangeDef->end]
             );
+
     }
+
+    /**
+     * Gets a set of vouchers that are in one of given states.
+     *
+     * @param Builder $query
+     * @param array $states
+     * @return Builder
+     */
+    public function scopeInOneOfStates(Builder $query, $states)
+    {
+        return $query
+            ->whereIn('currentstate', $states)
+        ;
+    }
+
+    /**
+     * Gets a set of vouchers that are voidable.
+     *
+     * @param Builder $query
+     * @param array $states
+     * @return Builder
+     */
+    public function scopeInVoidableState(Builder $query)
+    {
+        $voidable_states = ['dispatched'];
+        return $query
+            ->inOneOfStates($voidable_states)
+        ;
+    }
+
 }
