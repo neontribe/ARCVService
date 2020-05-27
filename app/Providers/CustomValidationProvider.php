@@ -37,18 +37,18 @@ class CustomValidationProvider extends ServiceProvider
          */
         Validator::extend('codeGreaterThan', function ($attribute, $value, $parameters, $validator) {
             // Grab the regex matched array
-            $val = Voucher::splitShortcodeNumeric($value);
+            $code = Voucher::splitShortcodeNumeric($value);
 
             // Grab the content of the parameter we pass the rule in a roundabout fashion
-            $otherVal = array_get(
+            $secondCode = array_get(
                 $validator->getData(),
                 $parameters[0]
             );
 
-            if (!empty($otherVal)) {
-                $other = Voucher::splitShortcodeNumeric($otherVal);
-                if (is_numeric($val["number"]) && is_numeric($other["number"])) {
-                    return intval($val["number"]) > intval($other["number"]);
+            if (!empty($secondCode)) {
+                $other = Voucher::splitShortcodeNumeric($secondCode);
+                if (is_numeric($code["number"]) && is_numeric($other["number"])) {
+                    return intval($code["number"]) > intval($other["number"]);
                 }
             }
             // Else "Nope"!
@@ -64,18 +64,18 @@ class CustomValidationProvider extends ServiceProvider
          */
         Validator::extend('codeGreaterOrEqual', function ($attribute, $value, $parameters, $validator) {
             // Grab the regex matched array
-            $val = Voucher::splitShortcodeNumeric($value);
+            $code = Voucher::splitShortcodeNumeric($value);
 
             // Grab the content of the parameter we pass the rule in a roundabout fashion
-            $otherVal = array_get(
+            $secondCode = array_get(
                 $validator->getData(),
                 $parameters[0]
             );
 
-            if (!empty($otherVal)) {
-                $other = Voucher::splitShortcodeNumeric($otherVal);
-                if (is_numeric($val["number"]) && is_numeric($other["number"])) {
-                    return intval($val["number"]) >= intval($other["number"]);
+            if (!empty($secondCode)) {
+                $other = Voucher::splitShortcodeNumeric($secondCode);
+                if (is_numeric($code["number"]) && is_numeric($other["number"])) {
+                    return intval($code["number"]) >= intval($other["number"]);
                 }
             }
             // Else "Nope"!
