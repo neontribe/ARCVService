@@ -12,17 +12,9 @@ class SponsorsSeeder extends Seeder
      */
     public function run()
     {
-        //create RVNT sponsor for tests
+        // create RVNT sponsor for tests
+        // also used by 3MAY20-VC1-CH6-HAS-112019
         $sponsor = factory(App\Sponsor::class)->create(['name' => "Real Virtual Project", "shortcode" =>"RVNT"]);
-
-        $noticesUnverifiedKids = new Evaluation([
-            "name" => "FamilyHasUnverifiedChildren",
-            "value" => 0,
-            "purpose" => "notices",
-            "entity" => "App\Family",
-            "sponsor_id" => $sponsor->id,
-        ]);
-        $noticesUnverifiedKids->save();
 
         $sponsor->evaluations()->saveMany($this->qualifyPrimarySchoolers());
         $sponsor->evaluations()->saveMany($this->veryfiesKids());
@@ -31,28 +23,34 @@ class SponsorsSeeder extends Seeder
         factory(App\Sponsor::class, 5)->create();
 
         // Gets the SK rules
+        // used by 2MAY20-VC1-CH2-HI-122018
         $sponsor2 = App\Sponsor::find(2);
         $sponsor2->evaluations()->saveMany($this->qualifyPrimarySchoolers());
         $sponsor2->evaluations()->saveMany($this->veryfiesKids());
 
 
         // Gets SK rules, without the primary school disqualification
+        // used by 5MAY20-VC1-CH3-HA-112015
         $sponsor3 = App\Sponsor::find(3);
         $sponsor3->evaluations()->saveMany($this->allowPrimarySchoolers());
         $sponsor3->evaluations()->saveMany($this->veryfiesKids());
 
         // only gets verifications
+        // used by 6MAY-20-VC1-CH2-032020
         $sponsor4 = App\Sponsor::find(4);
         $sponsor4->evaluations()->saveMany($this->veryfiesKids());
+
+        // 4MAY20-VC1-CH1P-HA-012020 is in sponsor 5, unmodified
+        // 1MAY20a-VC2-CH1-HI-042019 is in sponsor 5, unmodified
     }
 
     public function veryfiesKids()
     {
         return [
             new Evaluation([
-                "name" => "FamilyHasNoEligibleChildren",
+                "name" => "FamilyHasUnverifiedChildren",
                 "value" => 0,
-                "purpose" => "disqualifiers",
+                "purpose" => "notices",
                 "entity" => "App\Family",
             ])
         ];
