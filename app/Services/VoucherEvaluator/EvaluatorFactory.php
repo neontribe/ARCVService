@@ -46,11 +46,11 @@ class EvaluatorFactory
     /**
      * Combines the standard evaluations with specific modifications.
      *
-     * @param Collection $modEvaluations
+     * @param Collection $modifiers
      * @param Carbon $offsetDate
      * @return array
      */
-    public static function generateEvaluations(Collection $modEvaluations, Carbon $offsetDate)
+    public static function generateEvaluations(Collection $modifiers, Carbon $offsetDate)
     {
         $evaluations = [
             "App\Child" => [
@@ -82,19 +82,22 @@ class EvaluatorFactory
                 'relations' => ['family'],
             ],
         ];
+
+        // the namespace for making fully qualified Evaluation classes
         $namespace = "App\Services\VoucherEvaluator\Evaluations";
-        // Iterate over the modEvaluations and replace/add them
-        foreach ($modEvaluations as $mod) {
-            $className = $namespace . '\\' . $mod->name;
+
+        // Iterate over the modifying evaluations and replace/add them to the default template.
+        foreach ($modifiers as $modifier) {
+            $className = $namespace . '\\' . $modifier->name;
             // Check we have the correct, existing class
-            if (class_exists($mod->entity) &&
+            if (class_exists($modifier->entity) &&
                 class_exists($className)
             ) {
                 $config = [
-                    $mod->entity => [
-                        $mod->purpose => [
+                    $modifier->entity => [
+                        $modifier->purpose => [
                             // Calling the string to instantiate a class that exists
-                            $mod->name => new $className($offsetDate, $mod->value)
+                            $modifier->name => new $className($offsetDate, $modifier->value)
                         ]
                     ]
                 ];

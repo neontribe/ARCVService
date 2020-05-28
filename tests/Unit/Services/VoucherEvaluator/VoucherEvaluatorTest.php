@@ -39,7 +39,7 @@ class VoucherEvaluatorTest extends TestCase
         parent::setUp();
 
         // Changes for "extended age".
-        $this->rulesMods["credit-extended"] = [
+        $this->rulesMods["credit-primary"] = [
             // warn when primary schoolers are approaching end of school
             new Evaluation([
                 "name" => "ChildIsAlmostSecondarySchoolAge",
@@ -71,8 +71,8 @@ class VoucherEvaluatorTest extends TestCase
         ];
 
         // this one is a decoration of the above
-        $this->rulesMods["credit-extended-qualified"] = array_merge(
-            $this->rulesMods["credit-extended"],
+        $this->rulesMods["credit-primary-qualified"] = array_merge(
+            $this->rulesMods["credit-primary"],
             [
                 // Turn on disqualifier
                 new Evaluation([
@@ -83,8 +83,6 @@ class VoucherEvaluatorTest extends TestCase
                 ]),
             ]
         );
-
-        //dd($this->rulesMods["credit-extended-qualified"]);
 
         // This one can be standalone; combine with others in test
         $this->rulesMods["notice-unverified-kids"] = [
@@ -157,7 +155,7 @@ class VoucherEvaluatorTest extends TestCase
     public function itCreditsUnrestrictedPrimarySchoolChildren()
     {
         // get rules mods
-        $rulesMods = collect($this->rulesMods["credit-extended"]);
+        $rulesMods = collect($this->rulesMods["credit-primary"]);
 
         // Make evaluator
         $evaluator = EvaluatorFactory::make($rulesMods);
@@ -185,7 +183,7 @@ class VoucherEvaluatorTest extends TestCase
     public function itCreditsQualifiedPrimarySchoolChildrenButNotUnqualifiedOnes()
     {
         // get rules mods
-        $rulesMods = collect($this->rulesMods["credit-extended-qualified"]);
+        $rulesMods = collect($this->rulesMods["credit-primary-qualified"]);
 
         // Make evaluator
         $evaluator = EvaluatorFactory::make($rulesMods);
@@ -193,7 +191,7 @@ class VoucherEvaluatorTest extends TestCase
         // Make our family
         $family = factory(Family::class)->create();
 
-        // Make a set of ineligible kids (no under primary school age)
+        // Make a set of ineligible kids (no under primary school age qualifiers)
         $isPrimarySchool = factory(Child::class, 'isPrimarySchoolAge')->make();
         $isOverPrimarySchool = factory(Child::class, 'isSecondarySchoolAge')->make();
 
@@ -208,7 +206,7 @@ class VoucherEvaluatorTest extends TestCase
         $this->assertFalse($evaluation->getEligibility());
         $this->assertEquals('0', $evaluation->getEntitlement());
 
-        // Add a kid that will make the child at primary school age qualified.
+        // Now, add a kid that will make the child at primary school age qualified.
         $underPrimarySchool = factory(Child::class, 'betweenOneAndPrimarySchoolAge')->make();
 
         // Re-save
@@ -264,7 +262,7 @@ class VoucherEvaluatorTest extends TestCase
         $this->assertEquals(1, count($credits));
 
         // Check the correct credit type is applied.
-        $this->assertContains(self::CREDIT_TYPES['ChildIsBetweenOneAndPrimarySchoolAge'], $credits, '');
+        $this->assertContains(self::CREDIT_TYPES['ChildIsBetweenOneAndPrimarySchoolAge'], $credits);
         $this->assertEquals(3, $evaluation->getEntitlement());
     }
 
@@ -274,7 +272,7 @@ class VoucherEvaluatorTest extends TestCase
         // Make a Secondary school child
         $child = factory(Child::class, 'isSecondarySchoolAge')->make();
 
-        $rulesMod = collect($this->rulesMods["credit-extended"]);
+        $rulesMod = collect($this->rulesMods["credit-primary"]);
 
         // Make extended evaluator
         $evaluator = EvaluatorFactory::make($rulesMod);
@@ -283,12 +281,6 @@ class VoucherEvaluatorTest extends TestCase
 
         // Check there's none, because child is not primary or under.
         $this->assertEquals(0, count($credits));
-
-        // Check the correct credit type is applied.
-        $this->assertNotContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits);
-        $this->assertNotContains(self::CREDIT_TYPES['ChildIsBetweenOneAndPrimarySchoolAge'], $credits);
-        $this->assertNotContains(self::CREDIT_TYPES['ChildIsPrimarySchoolAge'], $credits);
-        $this->assertNotContains(self::CREDIT_TYPES['FamilyIsPregnant'], $credits);
         $this->assertEquals(0, $evaluation->getEntitlement());
     }
 
@@ -342,7 +334,7 @@ class VoucherEvaluatorTest extends TestCase
         $child = factory(Child::class, 'readyForSecondarySchool')->make();
 
         // Get Rules Mods
-        $rulesMod = collect($this->rulesMods["credit-extended"]);
+        $rulesMod = collect($this->rulesMods["credit-primary"]);
 
         // Make standard evaluator
         $evaluator = EvaluatorFactory::make($rulesMod);
