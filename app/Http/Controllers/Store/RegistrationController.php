@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreNewRegistrationRequest;
 use App\Http\Requests\StoreUpdateRegistrationRequest;
 use App\Registration;
+use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\Valuation;
 use App\User;
 use Auth;
@@ -160,7 +161,9 @@ class RegistrationController extends Controller
 
         // Check if we verify, based on the currently logged in user's context
         // as we have no registration to refer to yet.
-        $verifying = in_array($user->centre->sponsor->shortcode, config('arc.verifies_children'));
+        $sponsor = $user->centre->sponsor;
+        $evaluator = EvaluatorFactory::make($sponsor->evaluations);
+        $verifying = $evaluator->isVerifyingChildren();
 
         $data = [
             "user_name" => $user->name,
@@ -200,9 +203,6 @@ class RegistrationController extends Controller
         // Grab carers copy for shift)ing without altering family->carers
         $carers = $registration->family->carers->all();
 
-        // Check if we verify, based on the existing registration's context
-        $verifying = in_array($registration->centre->sponsor->shortcode, config('arc.verifies_children'));
-
         return view('store.edit_registration', array_merge(
             $data,
             [
@@ -213,7 +213,7 @@ class RegistrationController extends Controller
                 'children' => $registration->family->children,
                 'noticeReasons' => $valuation->getNoticeReasons(),
                 'entitlement' => $valuation->getEntitlement(),
-                'verifying' => $verifying
+                'verifying' => $registration->getEvaluator()->isVerifyingChildren()
             ]
         ));
     }

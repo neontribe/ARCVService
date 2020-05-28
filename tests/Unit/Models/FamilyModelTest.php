@@ -129,8 +129,8 @@ class FamilyModelTest extends TestCase
             ->saveMany(
                 collect([
                     factory(Child::class, 'underOne', 2)->make(),
-                    factory(Child::class, 'underSchoolAge')->make(),
-                    factory(Child::class, 'overSchoolAge')->make(),
+                    factory(Child::class, 'betweenOneAndPrimarySchoolAge')->make(),
+                    factory(Child::class, 'isSecondarySchoolAge')->make(),
                 ])->flatten()
             );
         // Test we've not got an expecting date
@@ -144,8 +144,8 @@ class FamilyModelTest extends TestCase
                 collect([
                     $pregnancy,
                     factory(Child::class, 'underOne', 2)->make(),
-                    factory(Child::class, 'underSchoolAge')->make(),
-                    factory(Child::class, 'overSchoolAge')->make(),
+                    factory(Child::class, 'betweenOneAndPrimarySchoolAge')->make(),
+                    factory(Child::class, 'isSecondarySchoolAge')->make(),
                 ])->flatten()
             );
         // Test we've not got an expecting date

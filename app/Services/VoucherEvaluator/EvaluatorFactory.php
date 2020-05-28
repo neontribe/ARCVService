@@ -2,46 +2,33 @@
 
 namespace App\Services\VoucherEvaluator;
 
-use App\Child;
-use App\Family;
 use App\Registration;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostSecondarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostOne;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostSchoolAge;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsSchoolAge;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsSecondarySchoolAge;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderSecondarySchoolAge;
+use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostPrimarySchoolAge;
+use App\Services\VoucherEvaluator\Evaluations\ChildIsBetweenOneAndPrimarySchoolAge;
+use App\Services\VoucherEvaluator\Evaluations\ChildIsPrimarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderOne;
-use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderSchoolAge;
-use App\Services\VoucherEvaluator\Evaluations\FamilyHasNoEligibleChildren;
-use App\Services\VoucherEvaluator\Evaluations\FamilyHasUnverifiedChildren;
 use App\Services\VoucherEvaluator\Evaluations\FamilyIsPregnant;
 use App\Services\VoucherEvaluator\Evaluators\VoucherEvaluator;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class EvaluatorFactory
 {
     /**
      * Factory method that makes the evaluator with the correct rules
      *
-     * @param null $type
+     * @param Collection|null $modEvaluations
      * @param Carbon|null $offsetDate
      * @return VoucherEvaluator
      */
-    public static function make($type = null, Carbon $offsetDate = null)
+    public static function make(Collection $modEvaluations = null, Carbon $offsetDate = null)
     {
+        $modEvaluations = $modEvaluations ?? collect([]);
         $offsetDate = $offsetDate ?? Carbon::today()->startOfDay();
-
-        switch ($type) {
-            case "extended_age":
-                $evaluations = self::createExtendedEvaluations($offsetDate);
-                break;
-            default:
-                $evaluations = self::createStandardEvaluations($offsetDate);
-        }
+        $evaluations = self::generateEvaluations($modEvaluations, $offsetDate);
         return new VoucherEvaluator($evaluations);
     }
-
     /**
      * Factory method that uses the Registration for the correct context
      *
@@ -51,106 +38,72 @@ class EvaluatorFactory
      */
     public static function makeFromRegistration(Registration $registration, $offsetDate = null)
     {
-        // Get the list of extended sponsors from config
-        // TODO: when we have more variations of rulessets, make this better
-        $extended_sponsors = config('arc.extended_sponsors');
-
-        return (in_array($registration->centre->sponsor->shortcode, $extended_sponsors))
-            ? self::make('extended_age', $offsetDate)
-            : self::make(null, $offsetDate)
-        ;
+        // Look up Sponsor rules specific to our Registration
+        $evaluations = $registration->centre->sponsor->evaluations;
+        return self::make($evaluations, $offsetDate);
     }
 
     /**
-     * Creates the correct rules for a "standard" Evaluation
+     * Combines the standard evaluations with specific modifications.
      *
+     * @param Collection $modifiers
      * @param Carbon $offsetDate
      * @return array
      */
-    private static function createStandardEvaluations(Carbon $offsetDate)
+    public static function generateEvaluations(Collection $modifiers, Carbon $offsetDate)
     {
-        return $evaluations = [
-            Child::class => [
+        $evaluations = [
+            "App\Child" => [
                 'credits' => [
-                    new ChildIsUnderOne($offsetDate, 3),
-                    new ChildIsUnderSchoolAge($offsetDate, 3)
+                    "ChildIsUnderOne" => new ChildIsUnderOne($offsetDate, 6),
+                    "ChildIsBetweenOneAndPrimarySchoolAge" => new ChildIsBetweenOneAndPrimarySchoolAge($offsetDate, 3),
                 ],
                 'notices' => [
-                    new ChildIsAlmostOne($offsetDate),
-                    new ChildIsAlmostSchoolAge($offsetDate),
+                    "ChildIsAlmostOne" => new ChildIsAlmostOne($offsetDate, 0),
+                    "ChildIsAlmostPrimarySchoolAge" => new ChildIsAlmostPrimarySchoolAge($offsetDate, 0),
                 ],
                 'relations' => [],
                 'disqualifiers' => [
-                    new ChildIsSchoolAge($offsetDate)
-                ]
-            ],
-            Family::class => [
-                'credits' => [
-                    new FamilyIsPregnant(null, 3)
+                    "ChildIsPrimarySchoolAge" => new ChildIsPrimarySchoolAge($offsetDate, 0),
                 ],
-                'notices' => [],
+            ],
+            "App\Family" => [
+                'credits' => [
+                    "FamilyIsPregnant" => new FamilyIsPregnant($offsetDate, 3)
+                ],
+                'notices' => [
+                ],
+                'disqualifiers' => [],
                 'relations' => ['children'],
             ],
-            Registration::class => [
+            "App\Registration" => [
                 'credits' => [],
                 'notices' => [],
                 'relations' => ['family'],
             ],
         ];
-    }
 
-    /**
-     * Creates the correct rule for an "extended age" evaluation
-     *
-     * @param Carbon $offsetDate
-     * @return array
-     */
-    private static function createExtendedEvaluations(Carbon $offsetDate)
-    {
-        return $evaluations = [
-            Child::class => [
-                'credits' => [
-                    new ChildIsUnderOne($offsetDate, 3),
-                    new ChildIsUnderSecondarySchoolAge($offsetDate, 3)
-                ],
-                'notices' => [
-                    // warn if we're almost 1yo
-                    new ChildIsAlmostOne($offsetDate),
+        // the namespace for making fully qualified Evaluation classes
+        $namespace = "App\Services\VoucherEvaluator\Evaluations";
 
-                    // ... or if under school age; turns out we don't need this here!
-                    # new ChildIsUnderSchoolAge($offsetDate),
-
-                    // ... or if almost primary school age
-                    new ChildIsAlmostSchoolAge($offsetDate),
-
-                    // ... or if actually primary school age; turns out we don't need this here!
-                    # new ChildIsSchoolAge($offsetDate)
-
-                    // ... or if almost secondary school age
-                    new ChildIsAlmostSecondarySchoolAge($offsetDate),
-                ],
-                'relations' => [],
-                'disqualifiers' => [
-                    new ChildIsSecondarySchoolAge($offsetDate)
-                ],
-            ],
-            Family::class => [
-                'credits' => [
-                    new FamilyIsPregnant(null, 3)
-                ],
-                'notices' => [
-                    new FamilyHasUnverifiedChildren($offsetDate),
-                ],
-                'disqualifiers' => [
-                    new FamilyHasNoEligibleChildren($offsetDate),
-                ],
-                'relations' => ['children'],
-            ],
-            Registration::class => [
-                'credits' => [],
-                'notices' => [],
-                'relations' => ['family'],
-            ],
-        ];
+        // Iterate over the modifying evaluations and replace/add them to the default template.
+        foreach ($modifiers as $modifier) {
+            $className = $namespace . '\\' . $modifier->name;
+            // Check we have the correct, existing class
+            if (class_exists($modifier->entity) &&
+                class_exists($className)
+            ) {
+                $config = [
+                    $modifier->entity => [
+                        $modifier->purpose => [
+                            // Calling the string to instantiate a class that exists
+                            $modifier->name => new $className($offsetDate, $modifier->value)
+                        ]
+                    ]
+                ];
+                $evaluations = array_replace_recursive($evaluations, $config);
+            }
+        }
+        return $evaluations;
     }
 }

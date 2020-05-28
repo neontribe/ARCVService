@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Sponsor extends Model
@@ -32,7 +33,7 @@ class Sponsor extends Model
     /**
      * Get the vouchers associated with this Sponsor.
      *
-     * @return App\Voucher Collection
+     * @return HasMany
      */
     public function vouchers()
     {
@@ -42,10 +43,20 @@ class Sponsor extends Model
     /**
      * Get the Sponsor's Centres
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function centres()
     {
         return $this->hasMany('App\Centre');
+    }
+
+    /**
+     * Get this list of evaluations that this sponsor uses
+     *
+     * @return HasMany
+     */
+    public function evaluations()
+    {
+        return $this->hasMany('App\Evaluation');
     }
 }

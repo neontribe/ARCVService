@@ -13,10 +13,11 @@ class FamilyHasUnverifiedChildren extends BaseFamilyEvaluation
     /**
      * FamilyHasUnverifiedChildren constructor.
      * @param Carbon|null $offsetDate
+     * @param int|null $value
      */
-    public function __construct(Carbon $offsetDate = null)
+    public function __construct(Carbon $offsetDate = null, int $value = null)
     {
-        parent::__construct($offsetDate);
+        parent::__construct($offsetDate, $value);
 
         // Child is Verified specification
         $this->specification = new IsVerified();

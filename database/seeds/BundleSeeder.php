@@ -163,7 +163,7 @@ class BundleSeeder extends Seeder
             $family->lockToCentre($centre);
             $family->save();
             $family->carers()->saveMany(factory(Carer::class, $numCarers)->make());
-            $family->children()->save(factory(Child::class, 'underSchoolAge')->make());
+            $family->children()->save(factory(Child::class, 'betweenOneAndPrimarySchoolAge')->make());
 
             $registrations[] = App\Registration::create(
                 [

@@ -222,8 +222,8 @@ class RegistrationsSeeder extends Seeder
                 ],
                 'children' => [
                     ['age' => 'underOne', 'state' => 'unverified'],
-                    ['age' => 'underSchoolAge', 'state' => 'unverified'],
-                    ['age' => 'overSchoolAge', 'state' => 'unverified'],
+                    ['age' => 'betweenOneAndPrimarySchoolAge', 'state' => 'unverified'],
+                    ['age' => 'isPrimarySchoolAge', 'state' => 'unverified'],
                 ],
                 'joined_on' => Carbon::create(2018, 12, 14),
                 'collection' => [
@@ -249,12 +249,12 @@ class RegistrationsSeeder extends Seeder
                     ['name' => '3MAY20-VC1-CH6-HAS-112019'],
                 ],
                 'children' => [
-                    ['age' => 'underSchoolAge', 'state' => 'verified'],
-                    ['age' => 'underSchoolAge', 'state' => 'verified'],
-                    ['age' => 'readyForSchool', 'state' => 'unverified'],
-                    ['age' => 'overSchoolAge', 'state' => 'unverified'],
-                    ['age' => 'overSchoolAge', 'state' => 'verified'],
-                    ['age' => 'overSchoolAge', 'state' => 'verified'],
+                    ['age' => 'betweenOneAndPrimarySchoolAge', 'state' => 'verified'],
+                    ['age' => 'betweenOneAndPrimarySchoolAge', 'state' => 'verified'],
+                    ['age' => 'readyForPrimarySchool', 'state' => 'unverified'],
+                    ['age' => 'isPrimarySchoolAge', 'state' => 'unverified'],
+                    ['age' => 'isPrimarySchoolAge', 'state' => 'verified'],
+                    ['age' => 'isPrimarySchoolAge', 'state' => 'verified'],
                 ],
                 'joined_on' => Carbon::create(2019, 11, 22),
                 'collection' => [
@@ -276,7 +276,7 @@ class RegistrationsSeeder extends Seeder
                     ['name' => '4MAY20-VC1-CH1P-HA-012020'],
                 ],
                 'children' => [
-                    ['age' => 'underSchoolAge'],
+                    ['age' => 'betweenOneAndPrimarySchoolAge'],
                     ['age' => 'unbornChild'],
                 ],
                 'joined_on' => Carbon::create(2020, 1, 30),
@@ -292,9 +292,9 @@ class RegistrationsSeeder extends Seeder
                     ['name' => '5MAY20-VC1-CH3-HA-112015'],
                 ],
                 'children' => [
-                    ['age' => 'overSchoolAge', 'state' => 'unverified'],
-                    ['age' => 'overSchoolAge', 'state' => 'unverified'],
-                    ['age' => 'underSchoolAge', 'state' => 'unverified'],
+                    ['age' => 'isPrimarySchoolAge', 'state' => 'unverified'],
+                    ['age' => 'isPrimarySchoolAge', 'state' => 'unverified'],
+                    ['age' => 'betweenOneAndPrimarySchoolAge', 'state' => 'unverified'],
                 ],
                 'joined_on' => Carbon::create(2019, 11, 12),
                 'collection' => [
@@ -318,7 +318,7 @@ class RegistrationsSeeder extends Seeder
                 ],
                 'children' => [
                     ['age' => 'underOne', 'state' => 'unverified'],
-                    ['age' => 'underSchoolAge', 'state' => 'verified'],
+                    ['age' => 'betweenOneAndPrimarySchoolAge', 'state' => 'verified'],
                 ],
                 'joined_on' => Carbon::create(2020, 4, 1),
                 'collection' => [

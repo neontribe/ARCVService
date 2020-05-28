@@ -16,7 +16,12 @@ abstract class AbstractEvaluation implements IEvaluation
     /** @var Carbon $offsetDate */
     protected $offsetDate;
 
-    public function __construct(Carbon $offsetDate = null, $value = null)
+    /**
+     * AbstractEvaluation constructor.
+     * @param Carbon|null $offsetDate
+     * @param int|null $value
+     */
+    public function __construct(Carbon $offsetDate = null, int $value = null)
     {
         $this->value = $value;
         $this->offsetDate = (isset($offsetDate) && $offsetDate != null)

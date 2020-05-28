@@ -8,12 +8,17 @@ use Carbon\Carbon;
 use Chalcedonyt\Specification\AndSpec;
 use Chalcedonyt\Specification\NotSpec;
 
-class ChildIsSchoolAge extends BaseChildEvaluation
+class ChildIsPrimarySchoolAge extends BaseChildEvaluation
 {
     public $reason = 'primary school age';
     private $specification;
 
-    public function __construct(Carbon $offsetDate = null, $value = 3)
+    /**
+     * ChildIsPrimarySchoolAge constructor.
+     * @param Carbon|null $offsetDate
+     * @param int|null $value
+     */
+    public function __construct(Carbon $offsetDate = null, int $value = null)
     {
         parent::__construct($offsetDate, $value);
 

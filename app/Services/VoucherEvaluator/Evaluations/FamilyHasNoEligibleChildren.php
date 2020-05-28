@@ -16,10 +16,11 @@ class FamilyHasNoEligibleChildren extends BaseFamilyEvaluation
     /**
      * FamilyIsPregnant constructor.
      * @param Carbon|null $offsetDate
+     * @param int|null $value
      */
-    public function __construct(Carbon $offsetDate = null)
+    public function __construct(Carbon $offsetDate = null, int $value = null)
     {
-        parent::__construct($offsetDate);
+        parent::__construct($offsetDate, $value);
 
         // Pregnancies or under school age.
         $this->specification = new OrSpec(
