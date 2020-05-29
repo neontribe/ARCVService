@@ -394,17 +394,16 @@ class VoucherEvaluatorTest extends TestCase
         $registration->save();
 
         $pregnancy = factory(Child::class, 'unbornChild')->make();
-        $family->children()->save($pregnancy);
-        $underOneChild = $pregnancy = factory(Child::class, 'underOne')->make();
-        $family->children()->save($underOneChild);
+        $underOneChild = factory(Child::class, 'underOne')->make();
         $toddler = factory(Child::class, 'betweenOneAndPrimarySchoolAge')->make();
-        $family->children()->save($toddler);
         $kidInPrimarySchool = factory(Child::class, 'isPrimarySchoolAge')->make();
-        $family->children()->save($kidInPrimarySchool);
+        $children = [$pregnancy, $underOneChild, $toddler, $kidInPrimarySchool];
+
+        $family->children()->saveMany($children);
+        $this->assertEquals(4, $family->children->count());
 
         $evaluator = EvaluatorFactory::make();
         $evaluation = $evaluator->evaluate($family);
-        $credits = $evaluation["credits"];
 
         $this->assertEquals(12, $evaluation->getEntitlement());
     }
