@@ -2,9 +2,11 @@
 
 namespace Tests;
 
+use App\Centre;
 use App\Child;
 use App\Evaluation;
 use App\Family;
+use App\Registration;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
 use Carbon\Carbon;
 use Config;
@@ -49,10 +51,10 @@ class VoucherEvaluatorTest extends TestCase
             ]),
             // credit primary schoolers
             new Evaluation([
-               "name" => "ChildIsPrimarySchoolAge",
-               "value" => "3",
-               "purpose" => "credits",
-               "entity" => "App\Child",
+                "name" => "ChildIsPrimarySchoolAge",
+                "value" => "3",
+                "purpose" => "credits",
+                "entity" => "App\Child",
             ]),
             // don't disqualify primary schoolers
             new Evaluation([
@@ -168,7 +170,7 @@ class VoucherEvaluatorTest extends TestCase
         $isOverPrimarySchool = factory(Child::class, 'isSecondarySchoolAge')->make();
 
         // Add the kids and check they saved
-        $family->children()->saveMany([$isPrimarySchool ,$isOverPrimarySchool]);
+        $family->children()->saveMany([$isPrimarySchool, $isOverPrimarySchool]);
         $this->assertEquals(2, $family->children()->count());
 
         $evaluation = $evaluator->evaluate($family);
@@ -196,7 +198,7 @@ class VoucherEvaluatorTest extends TestCase
         $isOverPrimarySchool = factory(Child::class, 'isSecondarySchoolAge')->make();
 
         // Add the kids and check they saved
-        $family->children()->saveMany([$isPrimarySchool ,$isOverPrimarySchool]);
+        $family->children()->saveMany([$isPrimarySchool, $isOverPrimarySchool]);
         $this->assertEquals(2, $family->children()->count());
 
         // Run the evaluation
@@ -210,7 +212,7 @@ class VoucherEvaluatorTest extends TestCase
         $underPrimarySchool = factory(Child::class, 'betweenOneAndPrimarySchoolAge')->make();
 
         // Re-save
-        $family->children()->saveMany([$underPrimarySchool, $isPrimarySchool ,$isOverPrimarySchool]);
+        $family->children()->saveMany([$underPrimarySchool, $isPrimarySchool, $isOverPrimarySchool]);
         $family = $family->fresh();
 
         // Check we've saved the children correctly
@@ -377,5 +379,33 @@ class VoucherEvaluatorTest extends TestCase
             $credits = $evaluation["credits"];
             $this->assertEquals($expected, array_sum(array_column($credits, "value")));
         }
+    }
+
+    /** @test */
+    public function itHasADefaultSetOfRules()
+    {
+        $family = factory(Family::class)->create();
+        $centre = factory(Centre::class)->create();
+
+        $registration = new Registration();
+        $registration->centre_id = $centre->id;
+        $registration->eligibility = "other";
+        $registration->family_id = $family->id;
+        $registration->save();
+
+        $pregnancy = factory(Child::class, 'unbornChild')->make();
+        $family->children()->save($pregnancy);
+        $underOneChild = $pregnancy = factory(Child::class, 'underOne')->make();
+        $family->children()->save($underOneChild);
+        $toddler = factory(Child::class, 'betweenOneAndPrimarySchoolAge')->make();
+        $family->children()->save($toddler);
+        $kidInPrimarySchool = factory(Child::class, 'isPrimarySchoolAge')->make();
+        $family->children()->save($kidInPrimarySchool);
+
+        $evaluator = EvaluatorFactory::make();
+        $evaluation = $evaluator->evaluate($family);
+        $credits = $evaluation["credits"];
+
+        $this->assertEquals(12, $evaluation->getEntitlement());
     }
 }
