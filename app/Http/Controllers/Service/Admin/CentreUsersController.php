@@ -223,7 +223,8 @@ class CentreUsersController extends Controller
 
     public function download()
     {
-        $workers = CentreUser::get()->sortBy('homeCentre.name');
+        $workers = CentreUser::get()->sortBy('name')->sortBy('homeCentre.name');
+
         $csvExporter = new Export();
 
         /**
