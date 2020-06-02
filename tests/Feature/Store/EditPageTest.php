@@ -6,7 +6,10 @@ use App\Carer;
 use App\Centre;
 use App\Child;
 use App\CentreUser;
+use App\Evaluation;
 use App\Registration;
+use App\Services\VoucherEvaluator\Evaluations\ChildIsPrimarySchoolAge;
+use App\Services\VoucherEvaluator\Evaluations\FamilyHasNoEligibleChildren;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use URL;
@@ -327,13 +330,55 @@ class EditPageTest extends StoreTestCase
 
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', $this->registration->id));
-        // We can see the advice box
-        $this->see("Voucher suggestions per week for this area:");
-        // The advice box has the correct number of credits in it
-        dd($this->crawler->filter('ul#creditables'));
-        $this->assertCount(count($evals), $this->crawler->filter('ul#creditables li'));
-        // Add a rule to the defaults
 
-        //
+        // We can see the advice box
+        $this->see("Voucher credit suggestions per week for this area:");
+
+        // The advice box has the correct number of credits in it
+        $startingEvalCount = count($evals);
+        $this->assertCount($startingEvalCount, $this->crawler->filter('ul#creditables li'));
+
+        // Add a credit rule to the defaults it doesn't have
+        $this->centre->sponsor->evaluations()->save(
+            new Evaluation([
+                'name' => 'ChildIsPrimarySchoolAge',
+                'purpose' => 'credits',
+                'entity' => 'App\Child',
+                'value' => 4
+            ])
+        );
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.edit', $this->registration->id));
+
+        // See it has increased by one
+        $this->assertCount($startingEvalCount+1, $this->crawler->filter('ul#creditables li'));
+        // See the reason
+        $rule = new ChildIsPrimarySchoolAge();
+        $this->see($rule->reason);
+
+        // See a single disqualifier, that the system gets anyway
+        $this->see("Don't credit :");
+        $this->assertCount(1, $this->crawler->filter('ul#disqualifiers li'));
+
+        // Add a disqualifier to the defaults it doesn't have
+        $this->centre->sponsor->evaluations()->save(
+            new Evaluation([
+                'name' => 'FamilyHasNoEligibleChildren',
+                'purpose' => 'disqualifiers',
+                'entity' => 'App\Family',
+                'value' => 0
+            ])
+        );
+
+        // Reload page
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.edit', $this->registration->id));
+
+        // See another disqualifier
+        $this->assertCount(2, $this->crawler->filter('ul#disqualifiers li'));
+
+        // See the reason
+        $rule = new FamilyHasNoEligibleChildren();
+        $this->see($rule->reason);
     }
 }

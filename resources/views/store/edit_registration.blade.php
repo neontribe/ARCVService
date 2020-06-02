@@ -131,7 +131,7 @@
                         <li class="collapsed" id="more-family-info">
                             <p>Voucher credit suggestions per week for this area: </p>
                             <ul id="creditables">
-                                @foreach($registration->getEvaluator()->getPurposeFilteredEvaluations("credits") as $creditable)
+                                @foreach($evaluations["creditables"] as $creditable)
                                     <li>
                                         Where {{ strtolower(class_basename($creditable::SUBJECT)) }}
                                         is {{ $creditable->reason }} :
@@ -139,14 +139,16 @@
                                     </li>
                                 @endforeach
                             </ul>
-                            <p> Don't credit :</p>
-                            <ul id="disqualifiers">
-                                @foreach($registration->getEvaluator()->getPurposeFilteredEvaluations("disqualifiers") as $disqualifier)
-                                    <li>
-                                        Where {{ strtolower(class_basename($disqualifier::SUBJECT)) }} is {{ $disqualifier->reason }}
-                                    </li>
-                                @endforeach
-                            </ul>
+                            @if(count($evaluations["disqualifiers"]) > 0)
+                                <p> Don't credit :</p>
+                                <ul id="disqualifiers">
+                                    @foreach($evaluations["disqualifiers"] as $disqualifier)
+                                        <li>
+                                            Where {{ strtolower(class_basename($disqualifier::SUBJECT)) }} is {{ $disqualifier->reason }}
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
                         </li>
                     </ul>
                 </div>
