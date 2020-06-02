@@ -79,6 +79,7 @@ class EvaluatorFactory
             "App\Registration" => [
                 'credits' => [],
                 'notices' => [],
+                'disqualifiers' => [],
                 'relations' => ['family'],
             ],
         ];
@@ -86,22 +87,31 @@ class EvaluatorFactory
         // the namespace for making fully qualified Evaluation classes
         $namespace = "App\Services\VoucherEvaluator\Evaluations";
 
-        // Iterate over the modifying evaluations and replace/add them to the default template.
+        // Iterate over the modifying evaluations and replace/add/remove on the default template.
         foreach ($modifiers as $modifier) {
             $className = $namespace . '\\' . $modifier->name;
             // Check we have the correct, existing class
             if (class_exists($modifier->entity) &&
                 class_exists($className)
             ) {
-                $config = [
-                    $modifier->entity => [
-                        $modifier->purpose => [
-                            // Calling the string to instantiate a class that exists
-                            $modifier->name => new $className($offsetDate, $modifier->value)
+                // If this is an enabled rule
+                if (!is_null($modifier->value)) {
+                    $config = [
+                        $modifier->entity => [
+                            $modifier->purpose => [
+                                // Calling the string to instantiate a class that exists
+                                $modifier->name => new $className($offsetDate, $modifier->value)
+                            ]
                         ]
-                    ]
-                ];
-                $evaluations = array_replace_recursive($evaluations, $config);
+                    ];
+                    // merge it in.
+                    $evaluations = array_replace_recursive($evaluations, $config);
+                } else {
+                    // this is a disabling rule, remove it, if it exists.
+                    if (isset($evaluations[$modifier->entity][$modifier->purpose][$modifier->name])) {
+                        unset($evaluations[$modifier->entity][$modifier->purpose][$modifier->name]);
+                    }
+                }
             }
         }
         return $evaluations;

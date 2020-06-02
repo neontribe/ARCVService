@@ -24,36 +24,27 @@ class VoucherEvaluator extends AbstractEvaluator
     }
 
     /**
+     * Creates a flat array of the evaluations filtered by purpose
+     * purpose = "credits", "notices" etc.
+     * @param String $purpose
+     * @return array
+     */
+    public function getPurposeFilteredEvaluations(String $purpose)
+    {
+        $flatEvaluations = [];
+        foreach ($this->evaluations as $entity) {
+            array_merge($flatEvaluations, $entity[$purpose]);
+        }
+        return $flatEvaluations;
+    }
+
+    /**
      * Lazy way to query a specific rules case
      * @return bool
      */
     public function isVerifyingChildren()
     {
-        $verifying = false;
-        // Inelegant: asking the valuation by blunt path.
-        if (isset($this->evaluations["App\Family"]["notices"]["FamilyHasUnverifiedChildren"])) {
-            $evaluation = $this->evaluations["App\Family"]["notices"]["FamilyHasUnverifiedChildren"];
-            if (!is_null($evaluation->value)) {
-                $verifying = true;
-            }
-        }
-        return $verifying;
-    }
-
-    /**
-     * Lazy way to check a specific rules case
-     * @return bool
-     */
-    public function isCreditingPrimaryKids()
-    {
-        $crediting = false;
-        if (isset($this->evaluations["App\Child"]["credits"]["ChildIsPrimarySchoolAge"])) {
-            $evaluation = $this->evaluations["App\Child"]["credits"]["ChildIsPrimarySchoolAge"];
-            if (!is_null($evaluation->value)) {
-                $crediting = true;
-            }
-        }
-        return $crediting;
+        return (isset($this->evaluations["App\Family"]["notices"]["FamilyHasUnverifiedChildren"]));
     }
 
     /**
@@ -88,12 +79,9 @@ class VoucherEvaluator extends AbstractEvaluator
          */
         if (array_key_exists($ruleKey, $rules)) {
             foreach ($rules[$ruleKey] as $rule) {
-                // Dont process a rule if it's value is null (off)
-                if (!is_null($rule->value)) {
-                    $outcome = $rule->test($subject);
-                    if ($outcome) {
-                        $results[] = $outcome->toReason();
-                    }
+                $outcome = $rule->test($subject);
+                if ($outcome) {
+                    $results[] = $outcome->toReason();
                 }
             }
         }
