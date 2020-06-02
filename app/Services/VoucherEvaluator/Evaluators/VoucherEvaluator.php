@@ -33,7 +33,7 @@ class VoucherEvaluator extends AbstractEvaluator
     {
         $flatEvaluations = [];
         foreach ($this->evaluations as $entity) {
-            array_merge($flatEvaluations, $entity[$purpose]);
+            $flatEvaluations = array_merge($flatEvaluations, $entity[$purpose]);
         }
         return $flatEvaluations;
     }

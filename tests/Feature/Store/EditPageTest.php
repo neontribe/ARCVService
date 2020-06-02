@@ -317,4 +317,23 @@ class EditPageTest extends StoreTestCase
             ->seePageIs(route('store.registration.index'))
         ;
     }
+
+    /** @test */
+    public function itShowsTheCorrectEvaluatingRules()
+    {
+        $evals = $this->registration
+            ->getEvaluator()
+            ->getPurposeFilteredEvaluations('credits');
+
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.edit', $this->registration->id));
+        // We can see the advice box
+        $this->see("Voucher suggestions per week for this area:");
+        // The advice box has the correct number of credits in it
+        dd($this->crawler->filter('ul#creditables'));
+        $this->assertCount(count($evals), $this->crawler->filter('ul#creditables li'));
+        // Add a rule to the defaults
+
+        //
+    }
 }
