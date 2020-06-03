@@ -42,8 +42,10 @@ class CreateVouchersTable extends Migration
     public function down()
     {
         Schema::table('vouchers', function (Blueprint $table) {
-            $table->dropForeign(['trader_id']);
-            $table->dropForeign(['sponsor_id']);
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropForeign(['trader_id']);
+                $table->dropForeign(['sponsor_id']);
+            }
         });
         Schema::dropIfExists('vouchers');
     }

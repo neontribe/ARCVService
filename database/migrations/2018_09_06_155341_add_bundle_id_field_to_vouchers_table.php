@@ -27,7 +27,9 @@ class AddBundleIdFieldToVouchersTable extends Migration
     public function down()
     {
         Schema::table('vouchers', function (Blueprint $table) {
-            $table->dropForeign(['bundle_id']);
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropForeign(['bundle_id']);
+            }
             $table->dropColumn('bundle_id');
         });
     }

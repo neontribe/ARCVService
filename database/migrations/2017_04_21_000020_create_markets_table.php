@@ -37,7 +37,9 @@ class CreateMarketsTable extends Migration
     public function down()
     {
         Schema::table('markets', function (Blueprint $table) {
-            $table->dropForeign(['sponsor_id']);
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropForeign(['sponsor_id']);
+            }
         });
         Schema::dropIfExists('markets');
     }

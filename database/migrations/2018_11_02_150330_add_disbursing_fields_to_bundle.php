@@ -15,7 +15,9 @@ class AddDisbursingFieldsToBundle extends Migration
     {
         // We can drop the allocating_centre, it's not a thing
         Schema::table('bundles', function (Blueprint $table) {
-            $table->dropForeign('bundles_allocating_centre_id_foreign');
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropForeign('bundles_allocating_centre_id_foreign');
+            }
             $table->dropColumn('allocating_centre_id');
         });
 
@@ -49,8 +51,10 @@ class AddDisbursingFieldsToBundle extends Migration
     public function down()
     {
         Schema::table('bundles', function (Blueprint $table) {
-            $table->dropForeign('bundles_disbursing_user_id_foreign');
-            $table->dropForeign('bundles_collecting_carer_id_foreign');
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropForeign('bundles_disbursing_user_id_foreign');
+                $table->dropForeign('bundles_collecting_carer_id_foreign');
+            }
             $table->dropColumn(['disbursing_user_id', 'collecting_carer_id']);
         });
     }
