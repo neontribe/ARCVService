@@ -12,6 +12,8 @@ class RoutesTest extends TestCase
 {
     use DatabaseMigrations;
 
+    public $mockConsoleOutput = false;
+
     protected $user;
     protected $client;
 
