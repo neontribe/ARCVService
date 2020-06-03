@@ -39,7 +39,7 @@ class StateHistoryManagerTest extends TestCase
         Auth::login($this->centreUser);
         $v->applyTransition('dispatch');
 
-        $state = $v->history()->get(null)->last();
+        $state = $v->history()->get("*")->last();
         $this->assertEquals(Auth::user()->id, $state->user_id);
         $this->assertEquals(class_basename(Auth::user()), $state->user_type);
 
@@ -47,7 +47,7 @@ class StateHistoryManagerTest extends TestCase
         Auth::login($this->user);
         $v->applyTransition('collect');
 
-        $state = $v->history()->get(null)->last();
+        $state = $v->history()->get("*")->last();
         $this->assertEquals(Auth::user()->id, $state->user_id);
         $this->assertEquals(class_basename(Auth::user()), $state->user_type);
     }
