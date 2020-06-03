@@ -14,7 +14,7 @@ class CentreUserModelTest extends TestCase
 
     protected $centreUser;
     protected $notes;
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->centreUser = factory(CentreUser::class)->create()->fresh();

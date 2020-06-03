@@ -35,7 +35,7 @@ class VoucherManagerTest extends StoreTestCase
 
     private $registration;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

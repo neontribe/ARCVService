@@ -22,7 +22,7 @@ class AdminNewCentreRequestTest extends StoreTestCase
     /** @var Centre $existingCentre */
     private $existingCentre;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->validator = app()->get('validator');

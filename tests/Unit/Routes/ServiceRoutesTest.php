@@ -49,7 +49,7 @@ class ServiceRoutesTest extends StoreTestCase
     private $adminUser;
     private $centreUser;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->adminUser = factory(AdminUser::class)->create();

@@ -19,7 +19,7 @@ class StateHistoryManagerTest extends TestCase
     protected $centreUser;
     protected $user;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 

@@ -20,7 +20,7 @@ class VoucherModelTest extends TestCase
     use DatabaseMigrations;
 
     protected $voucher;
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->voucher = factory(Voucher::class, 'dispatched')->create();

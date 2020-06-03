@@ -12,7 +12,7 @@ class DeliveryModelTest extends TestCase
 
     /** @var Delivery delivery */
     protected $delivery;
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         // create a blank factory

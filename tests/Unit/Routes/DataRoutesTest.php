@@ -13,7 +13,7 @@ class DataRoutesTest extends TestCase
 
     protected $vouchers;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->vouchers = factory(\App\Voucher::class, 10)->create();

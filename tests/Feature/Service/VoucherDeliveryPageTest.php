@@ -19,7 +19,7 @@ class VoucherDeliveryPageTest extends StoreTestCase
 
     private $voucherDeliveryRoute;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

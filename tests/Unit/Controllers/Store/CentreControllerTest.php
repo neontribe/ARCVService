@@ -30,7 +30,7 @@ class CentreControllerTest extends StoreTestCase
 
     protected $dashboard_route;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

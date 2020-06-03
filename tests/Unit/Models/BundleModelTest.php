@@ -18,7 +18,7 @@ class BundleModelTest extends TestCase
 
     /** @var Bundle bundle */
     protected $bundle;
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         // create a blank factory

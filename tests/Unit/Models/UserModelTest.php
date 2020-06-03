@@ -13,7 +13,7 @@ class UserModelTest extends TestCase
 
     protected $users;
     protected $traders;
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->users = factory(User::class, 2)->create();

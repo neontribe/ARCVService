@@ -17,7 +17,7 @@ class RoutesTest extends TestCase
     protected $user;
     protected $client;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->user = factory(User::class)->create();

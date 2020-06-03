@@ -43,7 +43,7 @@ class StoreRoutesTest extends StoreTestCase
 
     private $dashboardRoute;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

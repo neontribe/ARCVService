@@ -19,7 +19,7 @@ class ForgotPasswordPageTest extends StoreTestCase
     private $centre;
     private $centreUser;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

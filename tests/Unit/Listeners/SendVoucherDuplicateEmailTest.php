@@ -24,7 +24,7 @@ class SendVoucherDuplicateEmailTest extends TestCase
     protected $voucher;
     protected $user;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->voucher = factory(Voucher::class)->create();

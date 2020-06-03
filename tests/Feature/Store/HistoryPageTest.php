@@ -21,7 +21,7 @@ class HistoryPageTest extends StoreTestCase
     private $centreUser;
     private $registration;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
