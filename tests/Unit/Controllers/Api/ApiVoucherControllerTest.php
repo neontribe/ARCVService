@@ -21,7 +21,7 @@ class ApiVoucherControllerTest extends TestCase
     protected $user;
     protected $vouchers;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

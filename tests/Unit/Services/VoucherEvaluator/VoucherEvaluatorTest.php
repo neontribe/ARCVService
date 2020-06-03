@@ -47,7 +47,7 @@ class VoucherEvaluatorTest extends TestCase
     private $readyForPrimarySchool;
     private $readyForSecondarySchool;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 

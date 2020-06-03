@@ -21,7 +21,7 @@ class VoucherStateModelTest extends TestCase
     protected $marketUser;
     protected $adminUser;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->marketUser = factory(User::class)->create();

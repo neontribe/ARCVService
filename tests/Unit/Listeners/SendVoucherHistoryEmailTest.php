@@ -26,7 +26,7 @@ class SendVoucherHistoryEmailTest extends TestCase
     protected $vouchers;
     protected $user;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->traders = factory(Trader::class, 2)->create();

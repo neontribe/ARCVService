@@ -34,7 +34,7 @@ class ServiceWorkersPageTest extends StoreTestCase
 
     private $workersRoute;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

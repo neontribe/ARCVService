@@ -25,7 +25,7 @@ class BundleControllerTest extends StoreTestCase
     protected $registration;
     protected $bundle;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->centre = factory(Centre::class)->create();

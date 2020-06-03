@@ -25,7 +25,7 @@ class CentreUserControllerTest extends StoreTestCase
     /** @var array $data */
     private $data;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->adminUser = factory(AdminUser::class)->create();

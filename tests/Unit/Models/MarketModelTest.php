@@ -13,7 +13,7 @@ class MarketModelTest extends TestCase
 
     protected $market;
     protected $sponsor;
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->market = factory(Market::class)->create();

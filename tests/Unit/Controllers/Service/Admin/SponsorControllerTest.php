@@ -19,7 +19,7 @@ class SponsorControllerTest extends StoreTestCase
     /** @var Sponsor */
     private $existingSponsor;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->validator = app()->get('validator');

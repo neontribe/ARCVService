@@ -14,7 +14,7 @@ class SponsorModelTest extends TestCase
     use DatabaseMigrations;
 
     protected $sponsor;
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->sponsor = factory(Sponsor::class)->create();

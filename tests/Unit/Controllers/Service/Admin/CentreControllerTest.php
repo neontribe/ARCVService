@@ -26,7 +26,7 @@ class CentreControllerTest extends StoreTestCase
     /** @var Generator $faker */
     private $faker;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->faker = Factory::create(config('app.locale'));

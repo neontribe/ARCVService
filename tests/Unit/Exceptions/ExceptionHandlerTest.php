@@ -15,7 +15,7 @@ class ExceptionHandlerTest extends StoreTestCase
 
     private $exceptions = [];
 
-    protected function setUp()
+    protected function setUp(): void
     {
         // Tests reach into the container, and get upset when run in bulk with other tests.
         $this->createApplication();

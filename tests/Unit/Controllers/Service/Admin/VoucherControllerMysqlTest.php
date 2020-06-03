@@ -23,7 +23,7 @@ class VoucherControllerMysqlTest extends StoreTestCase
     // TODO : Consider pulling this out to a config option or environment variable
     private const TESTING_MYSQL_FALLBACK = 'testing-mysql';
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 

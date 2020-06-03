@@ -22,7 +22,7 @@ class EditWorkerPageTest extends StoreTestCase
     /** @var Collection $altCentres */
     private $altCentres;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->adminUser = factory(AdminUser::class)->create();

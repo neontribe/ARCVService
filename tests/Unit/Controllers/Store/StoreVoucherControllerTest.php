@@ -43,7 +43,7 @@ class StoreVoucherControllerTest extends StoreTestCase
     /** @var string $export_route */
     private $export_route;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

@@ -15,7 +15,7 @@ class TraderModelTest extends TestCase
     use DatabaseMigrations;
 
     protected $trader;
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->trader = factory(Trader::class, 'withnullable')->create();

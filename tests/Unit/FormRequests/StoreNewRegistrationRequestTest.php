@@ -14,7 +14,7 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
     /** @var Validator */
     private $validator;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->validator = app()->get('validator');

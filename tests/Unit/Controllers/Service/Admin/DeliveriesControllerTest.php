@@ -20,7 +20,7 @@ class DeliveriesControllerTest extends TestCase
 
     private $vouchersDeliveryroute;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
