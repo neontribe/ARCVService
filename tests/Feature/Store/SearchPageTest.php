@@ -263,10 +263,11 @@ class SearchPageTest extends StoreTestCase
         ]);
 
         // Visit search page, make sure next page link is present and works
+        // <a class="page-link" href="http://arcv-store.test/registrations?page=2" rel="next" aria-label="Next »">›</a>
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
-            ->see('<a href="' . URL::route('store.base') . '/registrations?page=2' . '" rel="next">»</a>')
-            ->click('»')
+            ->see('<a class="page-link" href="' . URL::route('store.base') . '/registrations?page=2' . '" rel="next" aria-label="Next »">›</a>')
+            ->click('›')
             ->seePageIs(URL::route('store.base') . '/registrations?page=2');
     }
 
@@ -356,10 +357,10 @@ class SearchPageTest extends StoreTestCase
         $selector = 'ul.pagination li';
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
-            ->seeInElementAtPos($selector, "«", 0)
+            ->seeInElementAtPos($selector, "‹", 0)
             ->seeInElementAtPos($selector, "1", 1)
             ->seeInElementAtPos($selector, "2", 2)
-            ->seeInElementAtPos($selector, "»", 3)
+            ->seeInElementAtPos($selector, "›", 3)
         ;
     }
 

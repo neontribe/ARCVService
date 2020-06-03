@@ -94,6 +94,7 @@ class ApiRoutesTest extends TestCase
 
         $this->assertEquals(json_decode($response, true), [
             'error' => 'invalid_credentials',
+            'error_description' => 'The user credentials were incorrect.',
             'message' => 'The user credentials were incorrect.',
         ]);
     }
