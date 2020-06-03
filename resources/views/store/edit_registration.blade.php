@@ -129,20 +129,26 @@
                             <span class="clickable-span">(more)</span>
                         </li>
                         <li class="collapsed" id="more-family-info">
-                            <p>Vouchers per week per child:</p>
-                            <ul>
-                                <li>Pregnancy to birth - 3 vouchers</li>
-                                <li>Birth up to 1 year - 6 vouchers</li>
-                                <li>1 year up to primary school - 3 vouchers</li>
-                                {{--
-                                TODO : This is not scalable; if this breaks or has to be extended, look at a better abstraction.
-                                --}}
-                                @if ($registration->getEvaluator()->isCreditingPrimaryKids())
-                                    <li>Primary school to secondary school start - 3 vouchers<br>
-                                        <small>(Only if family has a child still under primary school age too)</small>
-                                    </li>
-                                @endif
+                            <p>[cCc] Voucher credit suggestions per week for this area: [cCc]</p>
+                            <ul id="creditables">
+                                @foreach($evaluations["creditables"] as $creditable)
+                                    <li>[cCc]
+                                        Where {{ strtolower(class_basename($creditable::SUBJECT)) }}
+                                        is {{ $creditable->reason }} :
+                                        {{ $creditable->value }} {{ str_plural('voucher', $creditable->value) }}
+                                    [cCc]</li>
+                                @endforeach
                             </ul>
+                            @if(count($evaluations["disqualifiers"]) > 0)
+                                <p>[cCc] Don't credit :[cCc]</p>
+                                <ul id="disqualifiers">
+                                    @foreach($evaluations["disqualifiers"] as $disqualifier)
+                                        <li>
+                                            [cCc]Where {{ strtolower(class_basename($disqualifier::SUBJECT)) }} is {{ $disqualifier->reason }}[cCc]
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
                         </li>
                     </ul>
                 </div>

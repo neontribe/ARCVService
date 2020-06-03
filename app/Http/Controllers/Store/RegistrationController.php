@@ -203,6 +203,9 @@ class RegistrationController extends Controller
         // Grab carers copy for shift)ing without altering family->carers
         $carers = $registration->family->carers->all();
 
+        $evaluations["creditables"] = $registration->getEvaluator()->getPurposeFilteredEvaluations("credits");
+        $evaluations["disqualifiers"] = $registration->getEvaluator()->getPurposeFilteredEvaluations("disqualifiers");
+
         return view('store.edit_registration', array_merge(
             $data,
             [
@@ -213,7 +216,8 @@ class RegistrationController extends Controller
                 'children' => $registration->family->children,
                 'noticeReasons' => $valuation->getNoticeReasons(),
                 'entitlement' => $valuation->getEntitlement(),
-                'verifying' => $registration->getEvaluator()->isVerifyingChildren()
+                'verifying' => $registration->getEvaluator()->isVerifyingChildren(),
+                'evaluations' => $evaluations,
             ]
         ));
     }
