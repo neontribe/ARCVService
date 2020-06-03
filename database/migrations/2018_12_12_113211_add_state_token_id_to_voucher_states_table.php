@@ -34,7 +34,9 @@ class AddStateTokenIdToVoucherStatesTable extends Migration
     public function down()
     {
         Schema::table('voucher_states', function (Blueprint $table) {
-            $table->dropForeign('voucher_states_state_token_id_foreign');
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropForeign('voucher_states_state_token_id_foreign');
+            }
             $table->dropColumn('state_token_id');
         });
     }

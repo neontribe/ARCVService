@@ -16,6 +16,8 @@ class ApiRoutesTest extends TestCase
 {
     use DatabaseMigrations;
 
+    public $mockConsoleOutput = false;
+
     protected $trader;
     protected $vouchers;
     protected $user;

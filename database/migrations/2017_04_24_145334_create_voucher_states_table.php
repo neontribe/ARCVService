@@ -44,8 +44,10 @@ class CreateVoucherStatesTable extends Migration
     public function down()
     {
         Schema::table('voucher_states', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->dropForeign(['voucher_id']);
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropForeign(['user_id']);
+                $table->dropForeign(['voucher_id']);
+            }
         });
         Schema::dropIfExists('voucher_states');
     }

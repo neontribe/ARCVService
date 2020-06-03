@@ -27,7 +27,9 @@ class AddDeliveryIdToVoucher extends Migration
     public function down()
     {
         Schema::table('vouchers', function (Blueprint $table) {
-            $table->dropForeign(['delivery_id']);
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropForeign(['delivery_id']);
+            }
             $table->dropColumn('delivery_id');
         });
     }

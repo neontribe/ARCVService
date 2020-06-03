@@ -29,8 +29,10 @@ class CreateTraderUserPivotTable extends Migration
     public function down()
     {
         Schema::table('trader_user', function ($table) {
-            $table->dropForeign(['trader_id']);
-            $table->dropForeign(['user_id']);
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropForeign(['trader_id']);
+                $table->dropForeign(['user_id']);
+            }
         });
 
         Schema::drop('trader_user');
