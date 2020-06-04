@@ -401,7 +401,7 @@ class RegistrationController extends Controller
         Log::info('Registration ' . $registration->id . ' created by service user ' . Auth::id());
         // and go to the edit page for the new registration
         return redirect()
-            ->route('store.registration.edit', ['id' => $registration->id])
+            ->route('store.registration.edit', ['registration' => $registration->id])
             ->with('message', 'Registration created.');
     }
 

@@ -82,7 +82,7 @@ class VoucherManagerTest extends StoreTestCase
         // Check we can see the Collection History div
         // Check we can see the Allocate Vouchers div
         $this->actingAs($this->fmUser, 'store')
-            ->visit(URL::route('store.registration.voucher-manager', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.voucher-manager', [ 'registration' => $this->registration ]))
             ->seeElement("#this-family")
             ->seeElement("#collection-history")
             ->seeElement("#allocate-vouchers");
@@ -142,7 +142,7 @@ class VoucherManagerTest extends StoreTestCase
 
         // Navigate to the page as that user.
         $this->actingAs($ccUser, 'store')
-            ->visit(URL::route('store.registration.voucher-manager', [ 'id' => $registration ]))
+            ->visit(URL::route('store.registration.voucher-manager', [ 'registration' => $registration ]))
         ;
 
         // We can see the warnings area
@@ -165,19 +165,19 @@ class VoucherManagerTest extends StoreTestCase
 
         // Check edit family link
         $this->actingAs($this->fmUser, 'store')
-            ->visit(URL::route('store.registration.voucher-manager', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.voucher-manager', [ 'registration' => $this->registration ]))
             ->click('edit-family-link')
             ->assertResponseOk();
 
         // Check find another family link
         $this->actingAs($this->fmUser, 'store')
-            ->visit(URL::route('store.registration.voucher-manager', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.voucher-manager', [ 'registration' => $this->registration ]))
             ->click('edit-family-link')
             ->assertResponseOk();
 
         // check full collection link
         $this->actingAs($this->fmUser, 'store')
-            ->visit(URL::route('store.registration.voucher-manager', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.voucher-manager', [ 'registration' => $this->registration ]))
             ->click('full-collection-link')
             ->assertResponseOk();
     }
@@ -187,11 +187,11 @@ class VoucherManagerTest extends StoreTestCase
     {
         // check we can bulk add vouchers
         $this->actingAs($this->fmUser, 'store')
-            ->visit(URL::route('store.registration.voucher-manager', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.voucher-manager', [ 'registration' => $this->registration ]))
             ->type('tst09999', 'start')
             ->type('tst10001', 'end')
             ->press('range-add')
-            ->seePageIs(URL::route('store.registration.voucher-manager', [ 'id' => $this->registration ]))
+            ->seePageIs(URL::route('store.registration.voucher-manager', [ 'registration' => $this->registration ]))
             ->see('TST09999')
             ->see('TST10000')
             ->see('TST10001')
@@ -210,10 +210,10 @@ class VoucherManagerTest extends StoreTestCase
     {
         // check we can add a single voucher
         $this->actingAs($this->fmUser, 'store')
-            ->visit(URL::route('store.registration.voucher-manager', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.voucher-manager', [ 'registration' => $this->registration ]))
             ->type('tst09999', 'start')
             ->press('add-button')
-            ->seePageIs(URL::route('store.registration.voucher-manager', [ 'id' => $this->registration ]))
+            ->seePageIs(URL::route('store.registration.voucher-manager', [ 'registration' => $this->registration ]))
             ->see('TST09999')
         ;
         // One voucher and the delete all button.

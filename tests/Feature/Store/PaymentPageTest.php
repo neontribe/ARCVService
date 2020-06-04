@@ -46,7 +46,7 @@ class PaymentPageTest extends StoreTestCase
     public function itShowsAnErrorWhenPaymentLinkBad()
     {
         // A poorly formed uuid should show the page, but with an error message in place of the voucher table
-        $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-made-up-uuid' ]))
+        $this->visit(URL::route('store.payment-request.show', [ 'paymentUuid' => 'a-made-up-uuid' ]))
             ->seeInElement('p[class="content-warning center"]', 'This payment request is invalid, or has expired.')
             ->dontSeeElement('table')
         ;
@@ -56,7 +56,7 @@ class PaymentPageTest extends StoreTestCase
     public function itShowsPaymentRequestDetailsOnlyForValidPaymentUUIDs()
     {
         // A real uuid will display the data table
-        $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-real-uuid' ]))
+        $this->visit(URL::route('store.payment-request.show', [ 'paymentUuid' => 'a-real-uuid' ]))
             ->seeElement('table')
             ->see('Voucher Code')
             ->see('Status')
@@ -64,7 +64,7 @@ class PaymentPageTest extends StoreTestCase
         ;
 
         // A made up uuid uuid will not display the data table
-        $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-made-up-uuid' ]))
+        $this->visit(URL::route('store.payment-request.show', [ 'paymentUuid' => 'a-made-up-uuid' ]))
             ->dontseeElement('table')
             ->dontsee('Voucher Code')
             ->dontsee('Status')
@@ -76,7 +76,7 @@ class PaymentPageTest extends StoreTestCase
     public function itShowsPayButtonWhenOnlyPaymentIsUnpaid()
     {
         // A real unpaid uuid will display the pay button
-        $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-real-uuid' ]))
+        $this->visit(URL::route('store.payment-request.show', [ 'paymentUuid' => 'a-real-uuid' ]))
             ->seeInElement('button[type="submit"]', 'Pay')
         ;
 
@@ -84,7 +84,7 @@ class PaymentPageTest extends StoreTestCase
         $this->voucher->applyTransition('payout');
 
         // A real paid uuid will not display the pay button
-        $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-real-uuid' ]))
+        $this->visit(URL::route('store.payment-request.show', [ 'paymentUuid' => 'a-real-uuid' ]))
             ->dontSeeInElement('button[type="submit"]', 'Pay')
         ;
     }
@@ -93,13 +93,13 @@ class PaymentPageTest extends StoreTestCase
     public function itShowsTheCorrectVoucherStatus()
     {
         // A made up uuid will display no statuses
-        $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-made-up-uuid' ]))
+        $this->visit(URL::route('store.payment-request.show', [ 'paymentUuid' => 'a-made-up-uuid' ]))
             ->dontSeeInElement('span[class="status requested"]', 'Requested')
             ->dontSeeInElement('span[class="status paid"]', 'Paid')
         ;
 
         // A real unpaid uuid will display requested status
-        $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-real-uuid' ]))
+        $this->visit(URL::route('store.payment-request.show', [ 'paymentUuid' => 'a-real-uuid' ]))
             ->seeInElement('span[class="status requested"]', 'Requested')
         ;
 
@@ -107,7 +107,7 @@ class PaymentPageTest extends StoreTestCase
         $this->voucher->applyTransition('payout');
 
         // A real paid uuid will display paid status
-        $this->visit(URL::route('store.payment-request.show', [ 'id' => 'a-real-uuid' ]))
+        $this->visit(URL::route('store.payment-request.show', [ 'paymentUuid' => 'a-real-uuid' ]))
             ->seeInElement('span[class="status paid"]', 'Paid')
         ;
     }

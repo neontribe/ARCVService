@@ -53,7 +53,7 @@ class EditPageTest extends StoreTestCase
     {
         $pri_carer = $this->registration->family->carers->first();
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
             ->seeElement('input[id="carer"][value="'. $pri_carer->name .'"]')
         ;
     }
@@ -62,7 +62,7 @@ class EditPageTest extends StoreTestCase
     public function itShowsASecondaryCarerInput()
     {
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
             ->seeElement('input[name="carer_adder_input"]')
             ->seeElement('button[id="add-dob"]')
         ;
@@ -89,7 +89,7 @@ class EditPageTest extends StoreTestCase
 
         // Find the edit page
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
         ;
         // See the names in the page
         foreach ($carers as $sec_carer) {
@@ -104,7 +104,7 @@ class EditPageTest extends StoreTestCase
     public function itShowsAChildInputComplex()
     {
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
             ->seeElement('input[name="dob-month"]')
             ->seeElement('input[name="dob-year"]')
             ->seeElement('button[id="add-dob"]')
@@ -129,7 +129,7 @@ class EditPageTest extends StoreTestCase
 
         // Find the edit page
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
         ;
         // See the names in the page
         foreach ($children as $child) {
@@ -144,7 +144,7 @@ class EditPageTest extends StoreTestCase
     public function itShowsALogoutButton()
     {
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
             ->seeInElement('button[type=submit]', 'Log out')
         ;
     }
@@ -153,7 +153,7 @@ class EditPageTest extends StoreTestCase
     public function itShowsAFormSaveButton()
     {
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
             ->seeInElement('button[type=submit]', 'Save Changes')
         ;
     }
@@ -174,7 +174,7 @@ class EditPageTest extends StoreTestCase
     public function itShowsTheLoggedInUserDetails()
     {
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration->id ]))
+            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration->id ]))
             ->see($this->centreUser->name)
             ->see($this->centreUser->centre->name)
         ;
@@ -184,7 +184,7 @@ class EditPageTest extends StoreTestCase
     public function itShowsTheLeavingFormIfFamilyIsOnScheme()
     {
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', $this->registration->id))
+            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration->id ]))
             ->see('Remove this family')
         ;
     }
@@ -197,7 +197,7 @@ class EditPageTest extends StoreTestCase
         $family->leaving_reason = config('arc.leaving_reasons')[0];
         $family->save();
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', $this->registration->id))
+            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration->id ]))
             ->dontSee('Remove this family')
         ;
     }
@@ -243,7 +243,7 @@ class EditPageTest extends StoreTestCase
 
         // Test that entering children's DOB's gives the expected age.
         $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'id' => $family->id ]))
+            ->visit(URL::route('store.registration.edit', [ 'registration' => $family->id ]))
             ->see('<td class="age-col">1 yr, 1 mo</td>')
             ->see('<td class="age-col">1 yr, 0 mo</td>')
             ->see('<td class="age-col">0 yr, 11 mo</td>')

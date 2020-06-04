@@ -139,7 +139,7 @@ class RegistrationPageTest extends StoreTestCase
             ->type('Test Carer', 'carer')
             ->check('consent')
             ->press('Save Family')
-            ->seePageIs(URL::route('store.registration.edit', [ 'id' => 1 ]))
+            ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
         ;
 
         // There is now a Registration.

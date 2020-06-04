@@ -111,7 +111,7 @@ class DashboardPageTest extends StoreTestCase
     public function itShowsTheLoggedInUserDetails()
     {
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'id' => $this->registration->id ]))
+            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
             ->see($this->centreUser->name)
             ->see($this->centreUser->centre->name)
         ;

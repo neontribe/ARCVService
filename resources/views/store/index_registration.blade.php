@@ -67,13 +67,13 @@
                     <td class="center">{{ $registration->family->rvid }}</td>
                     <td class="right no-wrap">
                         @if( !isset($registration->family->leaving_on) )
-                        <a href="{{ route('store.registration.voucher-manager', ['id'=> $registration->id ]) }}"
+                        <a href="{{ route('store.registration.voucher-manager', ['registration'=> $registration->id ]) }}"
                             class="link inline-link-button">
                             <div class="link-button">
                                 <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Vouchers
                             </div>
                         </a>
-                        <a href="{{ route('store.registration.edit', ['id'=> $registration->id ]) }}" class="link
+                        <a href="{{ route('store.registration.edit', ['registration'=> $registration->id ]) }}" class="link
                             inline-link-button">
                             <div class="link-button">
                                 <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Edit

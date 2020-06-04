@@ -68,7 +68,7 @@ class SearchPageTest extends StoreTestCase
 
         // Check we can see the edit link with the registration ID in it.
         foreach ($registrations as $registration) {
-            $edit_url_string = URL::route('store.registration.edit', [ 'id' => $registration->id]);
+            $edit_url_string = URL::route('store.registration.edit', [ 'registration' => $registration->id]);
             $this->see($edit_url_string);
         }
     }
@@ -103,7 +103,7 @@ class SearchPageTest extends StoreTestCase
 
         // Check we can see the edit link with the registration ID in it.
         foreach ($registrations as $registration) {
-            $edit_url_string = URL::route('store.registration.edit', [ 'id' => $registration->id]);
+            $edit_url_string = URL::route('store.registration.edit', [ 'registration' => $registration->id]);
             $this->see($edit_url_string);
         }
     }

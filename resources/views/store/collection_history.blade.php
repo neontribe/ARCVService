@@ -9,7 +9,7 @@
     <div class="content history">
         <div>
             <h3>{{ $pri_carer->name }}</h3>
-            <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
+            <a href="{{ route("store.registration.voucher-manager", ['registration' => $registration->id ]) }}" class="link">
             <div class="link-button link-button-large">
                 <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
             </div>

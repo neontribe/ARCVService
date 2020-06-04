@@ -28,7 +28,7 @@
                     </div>
                 </div>
                 @includeWhen(!empty($noticeReasons), 'store.partials.notice_box', ['noticeReasons' => $noticeReasons])
-                <a href="{{ route("store.registration.edit", ['id' => $registration->id ]) }}" class="link" id='edit-family-link'>
+                <a href="{{ route("store.registration.edit", ['registration' => $registration->id ]) }}" class="link" id='edit-family-link'>
                     <div class="link-button link-button-large">
                         <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Go to edit family
                     </div>
@@ -60,7 +60,7 @@
                         </div>
                     @endif
                 </div>
-                <a href="{{ route("store.registration.collection-history", ['id' => $registration->id ]) }}" class="link" id='full-collection-link'>
+                <a href="{{ route("store.registration.collection-history", ['registration' => $registration->id ]) }}" class="link" id='full-collection-link'>
                     <div class="link-button link-button-large">
                         <i class="fa fa-clock-o button-icon" aria-hidden="true"></i>
                         Full Collection History
@@ -191,7 +191,7 @@
                         </button>
                     </div>
                 </form>
-                <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
+                <a href="{{ route("store.registration.voucher-manager", ['registration' => $registration->id ]) }}" class="link">
                     <div class="link-button link-button-large">
                         <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Change allocated vouchers
                     </div>

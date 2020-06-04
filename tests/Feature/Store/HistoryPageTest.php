@@ -45,7 +45,7 @@ class HistoryPageTest extends StoreTestCase
     public function itShowsAlertWhenRegistrationHasNoBundlesAssigned()
     {
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.collection-history', [ 'id' => $this->registration ]))
+            ->visit(URL::route('store.registration.collection-history', [ 'registration' => $this->registration ]))
             ->see('This family has not collected.')
         ;
     }

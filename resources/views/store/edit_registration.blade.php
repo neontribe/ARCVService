@@ -7,7 +7,7 @@
     @include('store.partials.navbar', ['headerTitle' => 'Check, update or print'])
 
     <div class="content flex">
-        <form action="{{ URL::route("store.registration.update",['id' => $registration->id]) }}" method="post">
+        <form action="{{ URL::route("store.registration.update",['registration' => $registration]) }}" method="post">
             {{ method_field('PUT') }}
             {!! csrf_field() !!}
             <input type="hidden" name="registration" value="{{ $registration->id }}">
@@ -169,10 +169,10 @@
                 <button class="long-button submit" type="submit">Save Changes</button>
                 <div><hr class="col-break"></div>
                 <button class="long-button"
-                        onclick="window.open( '{{ URL::route("store.registration.print", ["id" => $registration->id]) }}'); return false">
+                        onclick="window.open( '{{ URL::route("store.registration.print", ["registration" => $registration]) }}'); return false">
                     Print a 4 week collection sheet for this family
                 </button>
-                <a href="{{ route("store.registration.voucher-manager", ['id' => $registration->id ]) }}" class="link">
+                <a href="{{ route("store.registration.voucher-manager", ['registration' => $registration ]) }}" class="link">
                     <div class="link-button link-button-large">
                         <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
                     </div>
@@ -181,7 +181,7 @@
         </form>
 
         @if (!isset($registration->family->leaving_on) )
-            <form action="{{ URL::route('store.registration.family',['id' => $registration->id]) }}" method="post"
+            <form action="{{ URL::route('store.registration.family',['registration' => $registration]) }}" method="post"
                   id="leaving">
                 {{ method_field('PUT') }}
                 {!! csrf_field() !!}
