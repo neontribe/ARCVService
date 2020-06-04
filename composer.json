@@ -5,23 +5,29 @@
     "keywords": [],
     "license": "",
     "type": "project",
+    "repositories": [
+      {
+        "type": "git",
+        "url": "https://github.com/neontribe/laravel-specification.git"
+      }
+    ],
     "require": {
         "barryvdh/laravel-cors": "^0.11",
         "barryvdh/laravel-debugbar": "^3.2",
         "barryvdh/laravel-dompdf": "^0.8.1",
-        "chalcedonyt/laravel-specification": "^1.0",
         "doctrine/dbal": "^2.5",
         "fzaninotto/faker": "~1.4",
-        "laravel/framework": "5.8.*",
+        "laravel/framework": "^6.0",
+        "laravel/helpers": "^1.2",
         "laravel/passport": "^7.0",
         "laravel/tinker": "~1.0",
-        "maatwebsite/excel": "^2.1",
         "maennchen/zipstream-php": "^1.2",
         "moontoast/math": "^1.1",
-        "optimus/api-consumer": "0.2.*",
+        "neontribe/laravel-specification": "dev-master",
+        "phpoffice/phpexcel": "^1.8",
         "ramsey/uuid": "^3.6",
         "sebdesign/laravel-state-machine": "^2.0",
-        "symfony/event-dispatcher": "4.2.11",
+        "symfony/event-dispatcher": "^4.3",
         "tom-lingham/searchy": "2.*",
         "usmanhalalit/laracsv": "^2.0"
     },

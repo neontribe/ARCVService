@@ -206,7 +206,7 @@ return [
         /*
          * Extra packages
          */
-        Optimus\ApiConsumer\Provider\LaravelServiceProvider::class, //Passport assistance
+        // Optimus\ApiConsumer\Provider\LaravelServiceProvider::class, //Passport assistance
         Chalcedonyt\Specification\Providers\SpecificationServiceProvider::class
 
         // Auto-discovery on
