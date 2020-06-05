@@ -11,7 +11,7 @@ use Chalcedonyt\Specification\OrSpec;
 
 class FamilyHasNoEligibleChildren extends BaseFamilyEvaluation
 {
-    public $reason = 'has one or more primary school age children and they require at least one sibling under primary school age to qualify them';
+    public $reason = 'has no child under primary school age then children of primary school age get no vouchers';
     private $specification;
     /**
      * FamilyIsPregnant constructor.
