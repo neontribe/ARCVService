@@ -14,8 +14,8 @@ return [
     'errors' => [
         'invalid_credentials' => 'The user credentials were incorrect.',
         'voucher_own_dupe' => 'You have already submitted voucher code :code.',
-        'voucher_other_dupe' => '[cCc]It looks like the code (:code) has been used already, please double check and try again. If you are still unable to add the voucher code, don\'t worry you will still be paid. Please email admin@alexandrarose.org.uk to let us know that this happened and give the voucher number.[cCc]',
+        'voucher_other_dupe' => 'It looks like the code (:code) has been used already, please double check and try again. If you are still unable to add the voucher code, don\'t worry you will still get paid. Please email info@alexandrarose.org.uk to let us know that this has happened and please include the voucher code in the email.',
         'voucher_failed_reject' => 'I\'m sorry, we couldn\'t undo that for you at this time. Let us know about this code when you send in your vouchers.',
-        'voucher_unavailable' => '[cCc]Sorry that code is not available. Please check the code including the letters. You can change the letters when you enter the code by using the backspace key.[cCc]',
+        'voucher_unavailable' => 'The voucher code you have added is incorrect. Please check the numbers and the letters and try again.',
     ]
 ];
