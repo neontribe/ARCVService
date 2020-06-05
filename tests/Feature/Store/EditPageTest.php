@@ -357,7 +357,7 @@ class EditPageTest extends StoreTestCase
         $this->see($rule->reason);
 
         // See a single disqualifier, that the system gets anyway
-        $this->see("Don't credit :");
+        $this->see("Don't credit:");
         $this->assertCount(1, $this->crawler->filter('ul#disqualifiers li'));
 
         // Add a disqualifier to the defaults it doesn't have
