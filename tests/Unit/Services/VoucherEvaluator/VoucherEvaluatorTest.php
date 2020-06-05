@@ -29,7 +29,7 @@ class VoucherEvaluatorTest extends TestCase
     // This has a | in the reason field because we want to carry the entity with it.
     const CREDIT_TYPES = [
         'ChildIsUnderOne' => ['reason' => 'Child|under 1 year old', 'value' => 6],
-        'ChildIsBetweenOneAndPrimarySchoolAge' => ['reason' => 'Child|between 1 and primary school age', 'value' => 3],
+        'ChildIsBetweenOneAndPrimarySchoolAge' => ['reason' => 'Child|between 1 and start of primary school age', 'value' => 3],
         'ChildIsPrimarySchoolAge' => ['reason' => 'Child|primary school age', 'value' => 3],
         'FamilyIsPregnant' => ['reason' => 'Family|pregnant', 'value' => 3],
     ];

@@ -129,22 +129,22 @@
                             <span class="clickable-span">(more)</span>
                         </li>
                         <li class="collapsed" id="more-family-info">
-                            <p>[cCc] Voucher credit suggestions per week for this area: [cCc]</p>
+                            <p>Voucher credit suggestions per week for this area:</p>
                             <ul id="creditables">
                                 @foreach($evaluations["creditables"] as $creditable)
-                                    <li>[cCc]
+                                    <li>
                                         Where {{ strtolower(class_basename($creditable::SUBJECT)) }}
                                         is {{ $creditable->reason }} :
                                         {{ $creditable->value }} {{ str_plural('voucher', $creditable->value) }}
-                                    [cCc]</li>
+                                    </li>
                                 @endforeach
                             </ul>
                             @if(count($evaluations["disqualifiers"]) > 0)
-                                <p>[cCc] Don't credit :[cCc]</p>
+                                <p>Don't credit:</p>
                                 <ul id="disqualifiers">
                                     @foreach($evaluations["disqualifiers"] as $disqualifier)
                                         <li>
-                                            [cCc]Where {{ strtolower(class_basename($disqualifier::SUBJECT)) }} is {{ $disqualifier->reason }}[cCc]
+                                            Where {{ strtolower(class_basename($disqualifier::SUBJECT)) }} {{ $disqualifier->reason }}
                                         </li>
                                     @endforeach
                                 </ul>
