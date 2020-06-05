@@ -144,7 +144,7 @@
                                 <ul id="disqualifiers">
                                     @foreach($evaluations["disqualifiers"] as $disqualifier)
                                         <li>
-                                            If {{ strtolower(class_basename($disqualifier::SUBJECT)) }} {{ $disqualifier->reason }}
+                                            If {{ strtolower(class_basename($disqualifier::SUBJECT)) }} {{ $disqualifier->reason }} {{ $disqualifier->value}} {{ str_plural('voucher', $disqualifier->value) }}
                                         </li>
                                     @endforeach
                                 </ul>
