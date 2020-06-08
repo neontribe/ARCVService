@@ -11,7 +11,7 @@ use Chalcedonyt\Specification\NotSpec;
 
 class ChildIsBetweenOneAndPrimarySchoolAge extends BaseChildEvaluation
 {
-    public $reason = 'between 1 and start of primary school age';
+    public $reason = 'is between 1 and start of primary school age';
     private $specification;
 
     /**

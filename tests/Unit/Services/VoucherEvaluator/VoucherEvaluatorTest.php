@@ -18,20 +18,20 @@ class VoucherEvaluatorTest extends TestCase
 
     // This has a | in the reason field because we want to carry the entity with it.
     const NOTICE_TYPES = [
-        'ChildIsAlmostOne' => ['reason' => 'Child|almost 1 year old'],
-        'ChildIsAlmostPrimarySchoolAge' => ['reason' => 'Child|almost primary school age'],
-        'ChildIsAlmostSecondarySchoolAge' => ['reason' => 'Child|almost secondary school age'],
-        'ChildIsPrimarySchoolAge' => ['reason' => 'Child|primary school age'],
-        'ChildIsSecondarySchoolAge' => ['reason' => 'Child|secondary school age'],
+        'ChildIsAlmostOne' => ['reason' => 'Child|is almost 1 year old'],
+        'ChildIsAlmostPrimarySchoolAge' => ['reason' => 'Child|is almost primary school age'],
+        'ChildIsAlmostSecondarySchoolAge' => ['reason' => 'Child|is almost secondary school age'],
+        'ChildIsPrimarySchoolAge' => ['reason' => 'Child|is primary school age'],
+        'ChildIsSecondarySchoolAge' => ['reason' => 'Child|is secondary school age'],
         'FamilyHasUnverifiedChildren' => ['reason' => 'Family|has one or more children that you haven\'t checked ID for yet']
     ];
 
     // This has a | in the reason field because we want to carry the entity with it.
     const CREDIT_TYPES = [
-        'ChildIsUnderOne' => ['reason' => 'Child|under 1 year old', 'value' => 6],
-        'ChildIsBetweenOneAndPrimarySchoolAge' => ['reason' => 'Child|between 1 and start of primary school age', 'value' => 3],
-        'ChildIsPrimarySchoolAge' => ['reason' => 'Child|primary school age', 'value' => 3],
-        'FamilyIsPregnant' => ['reason' => 'Family|pregnant', 'value' => 3],
+        'ChildIsUnderOne' => ['reason' => 'Child|is under 1 year old', 'value' => 6],
+        'ChildIsBetweenOneAndPrimarySchoolAge' => ['reason' => 'Child|is between 1 and start of primary school age', 'value' => 3],
+        'ChildIsPrimarySchoolAge' => ['reason' => 'Child|is primary school age', 'value' => 3],
+        'FamilyIsPregnant' => ['reason' => 'Family|is pregnant', 'value' => 3],
     ];
 
     private $rulesMods = [];
