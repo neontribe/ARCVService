@@ -19,5 +19,4 @@ npm-debug.log
 /public/css
 /public/fonts
 /public/js
-/resources/fonts/dompdf_font_family_cache.php
-resources/fonts/4257d307977490af6455ee7fc9e36b9b.ttf resources/fonts/4257d307977490af6455ee7fc9e36b9b.ufm resources/fonts/4257d307977490af6455ee7fc9e36b9b.ufm.php resources/fonts/658fccc2ea95579d9a08f28d55643893.ttf resources/fonts/658fccc2ea95579d9a08f28d55643893.ufm resources/fonts/9411557d5a93f1acc12dbda200158f2a.ttf resources/fonts/9411557d5a93f1acc12dbda200158f2a.ufm resources/fonts/9411557d5a93f1acc12dbda200158f2a.ufm.php resources/fonts/dompdf_font_family_cache.php resources/fonts/fontawesome-normal_3ab02371fcdcb50f50a860084f7b0e1b.ttf resources/fonts/fontawesome-normal_3ab02371fcdcb50f50a860084f7b0e1b.ufm resources/fonts/fontawesome-normal_3ab02371fcdcb50f50a860084f7b0e1b.ufm.php resources/fonts/Helvetica-Bold.afm.php resources/fonts/Lato resources/fonts/lato-normal_29d5b677c886f2174ede1236ece8bf48.ttf resources/fonts/lato-normal_29d5b677c886f2174ede1236ece8bf48.ufm resources/fonts/lato-normal_29d5b677c886f2174ede1236ece8bf48.ufm.php resources/fonts/roboto-slab-normal_7d3ab749461b8c135bc134b5e1f175fd.ttf resources/fonts/roboto-slab-normal_7d3ab749461b8c135bc134b5e1f175fd.ufm
+/resources/fonts/*
