@@ -76,10 +76,10 @@
                     {!! csrf_field() !!}
                     <div class="alongside-container">
                         <label>First voucher
-                            <input id="first-voucher" name="start" type="text" autofocus class="uppercase">
+                            <input id="first-voucher" name="start" type="text" autofocus class="uppercase" autocomplete="off">
                         </label>
                         <label>Last voucher
-                            <input id="last-voucher" name="end" type="text" class="uppercase">
+                            <input id="last-voucher" name="end" type="text" class="uppercase" autocomplete="off">
                         </label>
                         <button id="range-add" class="add-button" type="submit" name="range-add">
                             <i class="fa fa-plus" aria-hidden="true"></i>
@@ -91,7 +91,7 @@
                 {!! csrf_field() !!}
                     <div class="single-container">
                         <label for="single-voucher">Add individual vouchers
-                            <input id="single-voucher" name="start" type="text" class="uppercase">
+                            <input id="single-voucher" name="start" type="text" class="uppercase" autocomplete="off">
                         </label>
                         <button id="single-add" class="add-button" type="submit" name="add-button">
                             <i class="fa fa-plus" aria-hidden="true"></i>
