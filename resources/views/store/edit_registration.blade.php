@@ -134,7 +134,7 @@
                                 @foreach($evaluations["creditables"] as $creditable)
                                     <li>
                                         If {{ strtolower(class_basename($creditable::SUBJECT)) }}
-                                        is {{ $creditable->reason }} :
+                                        {{ $creditable->reason }} :
                                         {{ $creditable->value }} {{ str_plural('voucher', $creditable->value) }}
                                     </li>
                                 @endforeach
