@@ -75,7 +75,7 @@
                         <tbody id="child_wrapper">
                             @if(is_array(old('children')) || (!empty(old('children'))))
                                 @foreach (old('children') as $old_child )
-                                <tr class="js-old-child" data-dob={{ $old_child['dob'] }} data-verified={{ $old_child['verified'] or 0 }}></tr>
+                                <tr class="js-old-child" data-dob={{ $old_child['dob'] }} data-verified={{ $old_child['verified'] ?? 0 }}></tr>
                                 @endforeach
                             @endif
                         </tbody>

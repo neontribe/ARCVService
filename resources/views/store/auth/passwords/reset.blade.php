@@ -16,7 +16,7 @@
             {{ csrf_field() }}
             <input type="hidden" name="token" value="{{ $token }}">
             <label for="email">Email Address</label>
-            <input id="email" type="email" name="email" class="login-input email" value="{{ $email or old('email') }}" required autofocus>
+            <input id="email" type="email" name="email" class="login-input email" value="{{ $email ?? old('email') }}" required autofocus>
             @if ($errors->has('email'))
                 <span>
                     <strong>{{ $errors->first('email') }}</strong>
