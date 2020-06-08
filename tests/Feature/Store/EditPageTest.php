@@ -332,7 +332,7 @@ class EditPageTest extends StoreTestCase
             ->visit(URL::route('store.registration.edit', $this->registration->id));
 
         // We can see the advice box
-        $this->see("Voucher credit suggestions per week for this area:");
+        $this->see("The system gives these vouchers per week:");
 
         // The advice box has the correct number of credits in it
         $startingEvalCount = count($evals);
@@ -357,7 +357,7 @@ class EditPageTest extends StoreTestCase
         $this->see($rule->reason);
 
         // See a single disqualifier, that the system gets anyway
-        $this->see("Don't credit :");
+        $this->see("Reminders:");
         $this->assertCount(1, $this->crawler->filter('ul#disqualifiers li'));
 
         // Add a disqualifier to the defaults it doesn't have
