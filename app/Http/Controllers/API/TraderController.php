@@ -7,10 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Trader;
 use App\Voucher;
 use Auth;
-use Carbon\Carbon;
-use DB;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use Illuminate\Http\Request;
 
 class TraderController extends Controller
@@ -161,9 +157,10 @@ class TraderController extends Controller
     /**
      * Helper to create a list of Trader Vouchers file.
      *
-     * @param  \App\Trader  $trader
-     * @param Collection \App\Voucher $vouchers
-     * @param String $report_type
+     * @param \App\Trader $trader
+     * @param $vouchers
+     * @param $title
+     * @param null $date
      * @return txt/csv File
      */
     public function createVoucherListFile(Trader $trader, $vouchers, $title, $date = null)
@@ -195,57 +192,21 @@ class TraderController extends Controller
             }
         }
 
-        $spreadsheet = $this->createExcel($data);
-        $writer = new Csv($spreadsheet);
-
-        $csvFile = tempnam("/tmp", "vouchers_");
-        $writer->save('/tmp/uniq');
-        $csv = file_get_contents($csvFile);
-        unlink($csvFile);
+        $tmp = fopen('php://temp', 'r+');
+        foreach ($data['vouchers'] as $voucher) {
+            fputcsv(
+                $tmp,
+                [
+                    $voucher['pended_on'],
+                    $voucher['code'],
+                    $voucher['added_on']
+                ]
+            );
+        }
+        rewind($tmp);
+        $csv = stream_get_contents($tmp);
+        fclose($tmp);
 
         return $csv;
-    }
-
-    /**
-     * Helper to create Excel and csv files.
-     * There may be a better place for this but fine for now.
-     *
-     * @param Array $data
-     *
-     * @return PhpOffice\PhpSpreadsheet\Spreadsheet
-     */
-    private function createExcel($data)
-    {
-        $time = Carbon::now()->format('Y-m-d_Hi');
-        $filename = str_slug($data['trader'] . '-vouchers-' . $time);
-
-        $spreadsheet = new Spreadsheet();
-        $spreadsheet->getProperties()
-            ->setTitle($data['trader'] . 'Voucher Records')
-            ->setCompany($data['user'])
-            ->setDescription($data['report_title']);
-
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue(
-            "A1",
-            sprintf("Vouchers submitted by %s for payment on behalf of %s from %s",
-                $data['user'], $data['trader'], $data['market']
-            )
-        );
-
-        $sheet->setCellValue("A2", "Payment Request Date");
-        $sheet->setCellValue("B2", "Voucher Code");
-        $sheet->setCellValue("C2", "Date Added");
-
-        // Next row to populate
-        $row = 3;
-        foreach ($data['vouchers'] as $voucher) {
-            $sheet->setCellValue("A" . $row, $voucher['pended_on']);
-            $sheet->setCellValue("B" . $row, $voucher['code']);
-            $sheet->setCellValue("C" . $row, $voucher['added_on']);
-            $row++;
-        }
-
-        return $spreadsheet;
     }
 }

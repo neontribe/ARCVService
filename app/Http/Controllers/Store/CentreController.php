@@ -9,12 +9,9 @@ use App\Registration;
 use App\Services\VoucherEvaluator\Valuation;
 use Auth;
 use Carbon\Carbon;
-use Excel;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Exceptions\LaravelExcelException;
-use Maatwebsite\Excel\Writers\LaravelExcelWriter;
 use PDF;
 
 class CentreController extends Controller
@@ -92,8 +89,26 @@ class CentreController extends Controller
                 ->with('error_message', 'No Registrations in that centre.');
         }
 
-        return $this->streamFile(
-            $this->writeExcelDoc($summary)
+        $tmp = fopen('php://temp', 'r+');
+        fputcsv($tmp, $headers);
+        foreach ($rows as $row) {
+            fputcsv($tmp, $row);
+        }
+        rewind($tmp);
+        $csv = stream_get_contents($tmp);
+        fclose($tmp);
+
+        return response(
+            $csv,
+            200,
+            [
+                'Content-Type' => "text/csv",
+                'Content-Disposition' => 'attachment; filename="RegSummary_' . Carbon::now()->format('YmdHis') . '.csv"',
+                'Expires' => Carbon::createFromTimestamp(0)->format('D, d M Y H:i:s'),
+                'Last-Modified' => Carbon::now()->format('D, d M Y H:i:s'),
+                'Cache-Control' => 'cache, must-revalidate',
+                'Pragma' => 'public',
+            ]
         );
     }
 
@@ -125,14 +140,7 @@ class CentreController extends Controller
             ->with(['centre', 'centre.sponsor'])
             ->get();
 
-        // set blank rows for laravel-excel
         $rows = [];
-
-        // Looks like Laravel-PHPExcel can't auto-generate headers
-        // by collating all the row keys and normalising.
-        // So we have to do it by hand.
-
-        // Initialise base headers
         $headers = [];
 
         // Per registration...
@@ -255,85 +263,10 @@ class CentreController extends Controller
             foreach ($headers as $header) {
                 $sparse_row[$header] = (array_key_exists($header, $row)) ? $row[$header] : null;
             }
-            // Key/value order matters to laravel-excel
+            // Key/value order matters to laravel-excel - Does this still matter?
             $rows[$index] = $sparse_row;
         }
 
         return [$rows, $headers];
-    }
-
-    /**
-     * Returns a configured writer for the file
-     * @param array $summary
-     * @return LaravelExcelWriter
-     */
-    private function writeExcelDoc(array $summary)
-    {
-        // Get user
-        /** @var CentreUser $user */
-        $user = Auth::user();
-
-        // Destructure summary
-        list($rows, $headers) = $summary;
-
-        // Get now()
-        $now = Carbon::now();
-
-        /** @var LaravelExcelWriter $excel_doc */
-        $excel_doc = Excel::create(
-            'RegSummary_' . $now->format('YmdHis'),
-            function ($excel) use ($user, $rows, $headers) {
-                $excel->setTitle('Registration Summary');
-                $excel->setDescription('Summary of Registrations from Centres available to ' . $user->name);
-                $excel->setManager($user->name);
-                $excel->setCompany(env('APP_URL'));
-                $excel->setCreator(env('APP_NAME'));
-                $excel->setKeywords([]);
-                $excel->sheet(
-                    'Registrations',
-                    function ($sheet) use ($rows, $headers) {
-                        $sheet->setOrientation('landscape');
-                        $sheet->row(1, $headers);
-                        $sheet->cells('A1', function ($cells) {
-                            $cells->setBackground('#6495ED')
-                                ->setFontWeight('bold');
-                        });
-                        $letters = range('A', 'Z');
-                        $sheet->cells('B1:' . $letters[count($headers) - 1] . '1', function ($cells) {
-                            $cells->setBackground('#9ACD32')
-                                ->setFontWeight('bold');
-                        });
-                        $sheet->fromArray($rows, null, 'A2', false, false);
-                    }
-                );
-            }
-        );
-        return $excel_doc;
-    }
-
-    /**
-     * Writes and returns file to client
-     * @param LaravelExcelWriter $excel_doc
-     * @return ResponseFactory|\Symfony\Component\HttpFoundation\Response
-     */
-    private function streamFile(LaravelExcelWriter $excel_doc)
-    {
-        // This appears to help with a PHPUnit/Laravel-excel file download issue.
-        $excel_ident = app('excel.identifier');
-        $format = $excel_ident->getFormatByExtension('csv');
-        $contentType = $excel_ident->getContentTypeByFormat($format);
-
-        try {
-            return response($excel_doc->string('csv'), 200, [
-                'Content-Type' => $contentType,
-                'Content-Disposition' => 'attachment; filename="' . $excel_doc->getFileName() . '.csv"',
-                'Expires' => Carbon::createFromTimestamp(0)->format('D, d M Y H:i:s'),
-                'Last-Modified' => Carbon::now()->format('D, d M Y H:i:s'),
-                'Cache-Control' => 'cache, must-revalidate',
-                'Pragma' => 'public',
-            ]);
-        } catch (LaravelExcelException $e) {
-            abort(500, 'Unable to create document');
-        }
     }
 }

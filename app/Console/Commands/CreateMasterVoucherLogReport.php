@@ -4,12 +4,10 @@ namespace App\Console\Commands;
 
 use Carbon\Carbon;
 use DB;
-use Excel;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Console\Command;
 use Log;
-use Maatwebsite\Excel\Writers\LaravelExcelWriter;
 use PDO;
 use ZipStream\Exception\OverflowException;
 use ZipStream\Option\Archive;
@@ -254,9 +252,14 @@ EOD;
             Log::info("beginning file write, mem:" . memory_get_usage());
 
             // Create and write a sheet for all data.
-            $excelDoc = $this->createWorkSheet('ALL', $rows);
-            $this->writeOutput($excelDoc, $za);
-
+            $fileHandleAll = fopen('php://temp', 'r+');
+            foreach ($rows as $row) {
+                fputcsv($fileHandleAll, $row);
+            }
+            rewind($fileHandleAll);
+            $this->writeOutput('ALL', stream_get_contents($fileHandleAll), $za);
+            fclose($fileHandleAll);
+            
             // Split up the rows into separate areas.
             $areas = [];
             // We're going to use "&" references to avoid memory issues - Hang on to your hat.
@@ -271,8 +274,13 @@ EOD;
 
             // Make sheets for each area and write them
             foreach ($areas as $area => $areaRows) {
-                $excelDoc = $this->createWorkSheet($area, $areaRows);
-                $this->writeOutput($excelDoc, $za);
+                $fileHandleArea = fopen('php://temp', 'r+');
+                foreach ($areaRows as $row) {
+                    fputcsv($fileHandleArea, $row);
+                }
+                rewind($fileHandleArea);
+                $this->writeOutput($area, stream_get_contents($fileHandleArea), $za);
+                fclose($fileHandleArea);
             }
 
             if ($za) {
@@ -315,63 +323,17 @@ EOD;
     }
 
     /**
-     * Creates an excel file from an array of data.
-     *
-     * @param $name
-     * @param $rows
-     * @return LaravelExcelWriter
-     */
-
-    public function createWorkSheet($name, $rows)
-    {
-        $now = Carbon::now();
-
-        /** @var LaravelExcelWriter $excelDoc */
-        $excelDoc = Excel::create(
-            preg_replace('/\s+/', '_', $name),
-            function ($excel) use ($name, $rows, $now) {
-                $excel->setTitle('MVL - ' . $name);
-                $excel->setDescription('generated at:' . $now->format('Y-m-d H:i:s'));
-                $excel->setManager('ARC');
-                $excel->setCompany(env('APP_URL'));
-                $excel->setCreator(env('APP_NAME'));
-                $excel->setKeywords([]);
-
-                // First, produce entire sheet.
-                $excel->sheet(
-                    $name,
-                    function ($sheet) use ($rows) {
-                        // Format page
-                        $sheet->setOrientation('landscape');
-                        $sheet->row(1, $this->headers);
-                        $sheet->fromArray($rows, null, 'A2', false, false);
-                    }
-                );
-            }
-        );
-        return $excelDoc;
-    }
-
-    /**
      * Encrypts and stashes files.
      *
-     * @param LaravelExcelWriter $excelDoc
+     * @param String $name
+     * @param String $csv
      * @param ZipStream|null $za
      * @return bool
      */
-    public function writeOutput(LaravelExcelWriter $excelDoc, ZipStream $za = null)
+    public function writeOutput(String $name, String $fileContents, ZipStream $za = null)
     {
         try {
-            $excelDoc->ext = 'csv';
-
-            /*
-             * TODO: If we move to a spreadsheet library that gives us an output stream, we need never hold the entire
-             * contents of the resulting file in memory; it could be streamed directly through the zip.
-             */
-            $fileContents = $excelDoc->string($excelDoc->ext); // Throws Exception
-            $filename = preg_replace('/\s+/', '_', $excelDoc->getSheet()->getTitle()) .
-                "." .
-                $excelDoc->ext;
+            $filename = sprintf("%s.csv", preg_replace('/\s+/', '_', $name));
 
             if ($za) {
                 // Encryption, if enabled, is handled at the creation of our ZipStream. The stream is directed through
@@ -389,7 +351,7 @@ EOD;
         } catch (Exception $e) {
             // Could be Storage or LaravelExcelWriterException related
             Log::error($e->getMessage());
-            Log::error(class_basename($this) . ": Failed to write file for '" . $excelDoc->getTitle() . "'");
+            Log::error(class_basename($this) . ": Failed to write file for '" . $csv->getTitle() . "'");
             exit(1);
         }
         return true;

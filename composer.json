@@ -24,7 +24,6 @@
         "maennchen/zipstream-php": "^2.0",
         "moontoast/math": "^1.1",
         "neontribe/laravel-specification": "dev-master",
-        "phpoffice/phpspreadsheet": "^1.13",
         "ramsey/uuid": "^3.6",
         "sebdesign/laravel-state-machine": "^2.0",
         "symfony/event-dispatcher": "^4.3",
