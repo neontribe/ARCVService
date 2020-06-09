@@ -50,9 +50,10 @@ class VoucherPaymentRequestEmail extends Mailable
             ->with($data)
             ->subject('Rose Voucher Payment Request')
             ->text('api.emails.voucher_payrequest_email_textonly')
-            ->attach($this->file['full'], [
-                'as' => $this->file['file'],
-                'mime' => 'text/csv',
-            ]);
+            ->attachData(
+                $this->file,
+                'Rose Voucher Payment Request',
+                ['mime' => 'text/csv']
+            );
     }
 }
