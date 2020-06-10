@@ -106,7 +106,7 @@ class TraderControllerTest extends TestCase
         $this->assertCount(3, $data[0]->vouchers);
         // Check a few values as expected - just for fun.
         $this->assertEquals($this->vouchers[0]->code, $data[0]->vouchers[0]->code);
-        $this->assertEquals($data[0]->vouchers[0]->reimbursed_on, '');
+        $this->assertEquals('', $data[0]->vouchers[0]->reimbursed_on);
         $this->assertEquals($data[0]->vouchers[1]->recorded_on, $today);
         $this->assertEquals($data[0]->vouchers[2]->reimbursed_on, $today);
     }
