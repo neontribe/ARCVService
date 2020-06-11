@@ -511,7 +511,7 @@ class RegistrationController extends Controller
         Log::info('Registration ' . $registration->id . ' updated by service user ' . Auth::id());
         // and go back to edit page for the changed registration
         return redirect()
-            ->route('store.registration.edit', ['id' => $registration->id])
+            ->route('store.registration.edit', ['registration' => $registration->id])
             ->with('message', 'Registration updated.');
     }
 
