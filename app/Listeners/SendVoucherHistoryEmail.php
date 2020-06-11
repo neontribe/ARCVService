@@ -39,8 +39,8 @@ class SendVoucherHistoryEmail
                 $event->file
             ))
         ;
-        Log::info($event->file['file'] . ' emailed.');
+        Log::info($event->file . ' emailed.');
         File::delete($event->file);
-        Log::info($event->file['file'] . ' deleted.');
+        Log::info($event->file . ' deleted.');
     }
 }
