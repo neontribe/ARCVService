@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\API\Auth;
 
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Route;
 use Log;
 use App\User;
 
@@ -10,7 +12,6 @@ class LoginProxy
 {
     const REFRESH_TOKEN = 'refresh_token';
 
-    private $apiConsumer;
     private $auth;
     private $cookie;
     private $db;
@@ -20,7 +21,6 @@ class LoginProxy
     public function __construct(Application $app, User $user)
     {
         $this->user = $user;
-        $this->apiConsumer = $app->make('apiconsumer');
         $this->auth = $app->make('auth');
         $this->cookie = $app->make('cookie');
         $this->db = $app->make('db');
@@ -82,7 +82,8 @@ class LoginProxy
             'scope' => '',
         ]);
 
-        $response = $this->apiConsumer->post('/oauth/token', $data); 
+        $request = Request::create('/oauth/token', 'POST', $data);
+        $response = Route::dispatch($request);
 
         if (!$response->isSuccessful()) {
             return $response;
