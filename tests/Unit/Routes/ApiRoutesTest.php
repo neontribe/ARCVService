@@ -69,10 +69,12 @@ class ApiRoutesTest extends TestCase
 
     public function testGetAccessTokenWithGoodCredentials()
     {
-        $this->post(route('api.login'), [
+        $response = $this->post(route('api.login'), [
             'username' => $this->user->email,
             'password' => 'secret',
-        ])->assertJsonStructure(['access_token', 'expires_in', 'refresh_token']);
+        ]);
+        $content = $response->getContent();
+        $response->assertJsonStructure(['access_token', 'expires_in', 'refresh_token']);
     }
 
     public function testDontGetAccessTokenWithBadUsername()
@@ -95,9 +97,10 @@ class ApiRoutesTest extends TestCase
         ])->getContent();
 
         $this->assertEquals(json_decode($response, true), [
-            'error' => 'invalid_credentials',
-            'error_description' => 'The user credentials were incorrect.',
-            'message' => 'The user credentials were incorrect.',
+            "error" => "unsupported_grant_type",
+            "error_description" => "The authorization grant type is not supported by the authorization server.",
+            "hint" => "Check that all required parameters have been provided",
+            "message" => "The authorization grant type is not supported by the authorization server."
         ]);
     }
 

@@ -118,8 +118,9 @@ class BundleControllerTest extends StoreTestCase
             $field = array_keys($set['outcome'])[0];
 
             // Dig out errors from Session
-            $response->seeInSession('errors');
-            $errors = Session::get("errors")->get($field);
+            $all = session()->all();
+            self::assertArrayHasKey("errors", $all);
+            $errors = session("errors")->get($field);
 
             // Check our specific message is present
             $this->assertContains($set['outcome'][$field], $errors);
