@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\API\Auth;
 
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Route;
-use Log;
 use App\User;
+use Illuminate\Foundation\Application;
+use Log;
+use Symfony\Component\HttpFoundation\Request;
 
 class LoginProxy
 {
@@ -78,12 +77,18 @@ class LoginProxy
             'client_id'     => (int) config('passport.password_client'),
             'client_secret' => config('passport.password_client_secret'),
             'grant_type'    => $grantType,
-            // All users equal for now. No scopes.
-            'scope' => '',
+            'scope' => '*',
         ]);
 
+        // make the request
         $request = Request::create('/oauth/token', 'POST', $data);
-        $response = Route::dispatch($request);
+
+        // get the app;
+        $app = app();
+        // get the router
+        $router = $app['router'];
+        // get the response
+        $response = $router->prepareResponse($request, $app->handle($request));
 
         if (!$response->isSuccessful()) {
             return $response;

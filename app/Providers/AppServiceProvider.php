@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,6 +33,9 @@ class AppServiceProvider extends ServiceProvider
         Builder::macro('orderBySubDesc', function (Builder $query) {
             return $this->orderBySub($query, 'desc');
         });
+
+        // Needed because we're still serialising cookies!
+        Passport::withCookieSerialization();
     }
 
     /**

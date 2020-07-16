@@ -97,10 +97,9 @@ class ApiRoutesTest extends TestCase
         ])->getContent();
 
         $this->assertEquals(json_decode($response, true), [
-            "error" => "unsupported_grant_type",
-            "error_description" => "The authorization grant type is not supported by the authorization server.",
-            "hint" => "Check that all required parameters have been provided",
-            "message" => "The authorization grant type is not supported by the authorization server."
+            'error' => 'invalid_credentials',
+            'error_description' => 'The user credentials were incorrect.',
+            'message' => 'The user credentials were incorrect.',
         ]);
     }
 
