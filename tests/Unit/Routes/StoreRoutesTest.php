@@ -261,7 +261,7 @@ class StoreRoutesTest extends StoreTestCase
             $this->actingAs($this->unrelatedUser, 'store')
                 ->visit($route);
         } catch (\Exception $e) {
-            $this->assertContains('Received status code [403]', $e->getMessage());
+            $this->assertStringContainsString('Received status code [403]', $e->getMessage());
         }
     }
 
@@ -314,7 +314,7 @@ class StoreRoutesTest extends StoreTestCase
                     [] // should erase the vouchers.
                 );
         } catch (\Exception $e) {
-            $this->assertContains('Received status code [403]', $e->getMessage());
+            $this->assertStringContainsString('Received status code [403]', $e->getMessage());
         }
     }
 
@@ -482,7 +482,7 @@ class StoreRoutesTest extends StoreTestCase
                     ['leaving_reason' => 'found employment']
                 );
         } catch (\Exception $e) {
-            $this->assertContains('Received status code [403]', $e->getMessage());
+            $this->assertStringContainsString('Received status code [403]', $e->getMessage());
         }
     }
 

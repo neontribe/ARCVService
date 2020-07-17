@@ -60,10 +60,10 @@ class VoucherStateModelTest extends TestCase
 
     /**
      * @test
-     * @expectedException \SM\SMException
      */
     public function testInvalidTransition()
     {
+        $this->expectException(\SM\SMException::class);
         // We need an auth's user to progress the voucher states.
         Auth::login($this->marketUser);
 

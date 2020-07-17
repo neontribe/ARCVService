@@ -30,7 +30,7 @@ class TraderModelTest extends TestCase
         $this->assertNotNull($t->name);
         $this->assertNotNull($t->pic_url);
         $this->assertNotNull($t->market_id);
-        $this->assertInternalType('integer', $t->market_id);
+        $this->assertIsInt($t->market_id);
     }
 
     public function testSoftDeleteTrader()

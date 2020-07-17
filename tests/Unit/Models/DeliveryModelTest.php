@@ -24,7 +24,7 @@ class DeliveryModelTest extends TestCase
     {
         $d = $this->delivery;
         $this->assertInstanceOf(Delivery::class, $d);
-        $this->assertInternalType('integer', $d->centre_id);
+        $this->assertIsInt($d->centre_id);
         $this->assertNotNull($d->dispatched_at);
         $this->assertInstanceOf(Carbon::class, $d->dispatched_at);
         // a blank delivery needn't have vouchers, nor range
@@ -54,7 +54,7 @@ class DeliveryModelTest extends TestCase
         $dispatchedBundle->dispatched_at = Carbon::now()->startOfDay();
         $dispatchedBundle->centre = $centre->id;
 
-        $this->assertInternalType('integer', $dispatchedBundle->centre_id);
+        $this->assertIsInt($dispatchedBundle->centre_id);
         $this->assertInstanceOf(Carbon::class, $dispatchedBundle->dispatched_at);
         $this->assertNotEmpty($dispatchedBundle->vouchers);
     }

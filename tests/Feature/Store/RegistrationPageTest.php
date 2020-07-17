@@ -112,11 +112,11 @@ class RegistrationPageTest extends StoreTestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
      * @test
      */
     public function logoDoesntRedirectMeToDashboard()
     {
+        $this->expectException(InvalidArgumentException::class);
         // Create some centres
         factory(App\Centre::class, 4)->create();
 

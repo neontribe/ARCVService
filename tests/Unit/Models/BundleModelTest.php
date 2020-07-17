@@ -29,8 +29,8 @@ class BundleModelTest extends TestCase
     {
         $b = $this->bundle;
         $this->assertInstanceOf(Bundle::class, $b);
-        $this->assertInternalType('integer', $b->registration_id);
-        $this->assertInternalType('integer', $b->entitlement);
+        $this->assertIsInt($b->registration_id);
+        $this->assertIsInt($b->entitlement);
         // a blank bundle hasn't been disbursed.
         $this->assertNull($b->collecting_carer_id);
         $this->assertNull($b->disbursing_centre_id);
@@ -70,9 +70,9 @@ class BundleModelTest extends TestCase
         $disbursedBundle->disbursing_centre_id = $family->initial_centre_id;
         $disbursedBundle->disbursing_user_id = $user->id;
 
-        $this->assertInternalType('integer', $disbursedBundle->collecting_carer_id);
-        $this->assertInternalType('integer', $disbursedBundle->disbursing_centre_id);
-        $this->assertInternalType('integer', $disbursedBundle->disbursing_user_id);
+        $this->assertIsInt($disbursedBundle->collecting_carer_id);
+        $this->assertIsInt($disbursedBundle->disbursing_centre_id);
+        $this->assertIsInt($disbursedBundle->disbursing_user_id);
         $this->assertInstanceOf(Carbon::class, $disbursedBundle->disbursed_at);
         $this->assertNotEmpty($disbursedBundle->vouchers);
     }

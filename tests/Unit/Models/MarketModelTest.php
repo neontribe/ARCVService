@@ -31,7 +31,7 @@ class MarketModelTest extends TestCase
         $this->assertNotNull($m->payment_message);
         $this->assertNotNull($m->sponsor_shortcode);
         $this->assertNotNull($m->sponsor_id);
-        $this->assertInternalType('integer', $m->sponsor_id);
+        $this->assertIsInt($m->sponsor_id);
     }
 
     public function testMarketBelongsToSponsor()

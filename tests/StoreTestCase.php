@@ -17,7 +17,7 @@ abstract class StoreTestCase extends BaseTestCase
     public function seeInElementAtPos($selector, $text, $pos)
     {
         $element_text = trim($this->crawler->filter($selector)->eq($pos)->text());
-        $this->assertContains($text, $element_text);
+        $this->assertStringContainsString($text, $element_text);
         return $this;
     }
 }

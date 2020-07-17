@@ -77,7 +77,7 @@ class StoreVoucherControllerTest extends StoreTestCase
         }
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         parent::tearDown();
         // Remove any file left around

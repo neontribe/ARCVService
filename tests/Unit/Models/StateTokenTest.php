@@ -30,12 +30,11 @@ class StateTokenModelTest extends TestCase
         $this->assertEquals($uuid, $specifiedToken->uuid);
     }
 
-    /** @test
-     * @expectedException \Illuminate\Database\QueryException
-     * @expectedExceptionMessage Integrity constraint violation: 19 UNIQUE constraint failed: state_tokens.uuid
-     */
+    /** @test */
     public function testItCannotSaveADuplicateUUID()
     {
+        $this->expectExceptionMessage("Integrity constraint violation: 19 UNIQUE constraint failed: state_tokens.uuid");
+        $this->expectException(\Illuminate\Database\QueryException::class);
         // Create a StateToken, should make a random, unique uuid
         $token = factory(StateToken::class)->create();
 

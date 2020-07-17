@@ -36,12 +36,12 @@ class VoucherModelTest extends TestCase
         $this->assertNotNull($v->code);
         $this->assertTrue(in_array($v->currentstate, config('state-machine.Voucher.states')));
         $this->assertNotNull($v->sponsor_id);
-        $this->assertInternalType('integer', $v->sponsor_id);
+        $this->assertIsInt($v->sponsor_id);
 
         // Add optional trader_id and check type.
         $v->trader_id = 1;
         $v->save();
-        $this->assertInternalType('integer', $v->trader_id);
+        $this->assertIsInt($v->trader_id);
     }
 
     /** @test */
@@ -244,12 +244,12 @@ class VoucherModelTest extends TestCase
         $validRangeDef = Voucher::createRangeDefFromVoucherCodes(reset($vouchers)->code, end($vouchers)->code);
 
         $this->assertEquals($sponsor->id, $validRangeDef->sponsor_id);
-        $this->assertInternalType('integer', $validRangeDef->sponsor_id);
+        $this->assertIsInt($validRangeDef->sponsor_id);
         $this->assertEquals($sponsor->shortcode, $validRangeDef->shortcode);
         $this->assertEquals(10, $validRangeDef->start);
-        $this->assertInternalType('integer', $validRangeDef->start);
+        $this->assertIsInt($validRangeDef->start);
         $this->assertEquals(1000, $validRangeDef->end);
-        $this->assertInternalType('integer', $validRangeDef->end);
+        $this->assertIsInt($validRangeDef->end);
 
         // If you pass it a duff shortcode, it takes exception
         $this->expectException(ModelNotFoundException::class);
