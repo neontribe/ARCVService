@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests;
+namespace Tests\Unit\Models;
 
 use App\Child;
 use App\Family;
 use Carbon\Carbon;
-use Config;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\TestCase;
 
 class ChildModelTest extends TestCase
 {

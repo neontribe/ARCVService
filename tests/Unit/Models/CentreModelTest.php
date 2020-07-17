@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests;
+namespace Tests\Unit\Models;
 
 use App\Centre;
 use App\Registration;
@@ -8,6 +8,7 @@ use App\Sponsor;
 use App\CentreUser;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Collection;
+use Tests\TestCase;
 
 class CentreModelTest extends TestCase
 {
@@ -35,7 +36,7 @@ class CentreModelTest extends TestCase
     public function itCanHaveRegistrations()
     {
         $centre = factory(Centre::class)->create();
-        $registrations = factory(Registration::class, 3)->create([
+        factory(Registration::class, 3)->create([
             'centre_id' => $centre->id,
         ]);
         $registrations = $centre->registrations;

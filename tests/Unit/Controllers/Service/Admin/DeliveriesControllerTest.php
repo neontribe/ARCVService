@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Controllers\Service\Admin;
+namespace Tests\Unit\Controllers\Service\Admin;
 
 use App\AdminUser;
 use App\Centre;

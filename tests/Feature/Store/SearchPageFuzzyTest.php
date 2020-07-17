@@ -1,13 +1,19 @@
 <?php
+namespace Tests\Feature\Store;
 
 use App\Carer;
 use App\Centre;
 use App\CentreUser;
 use App\Child;
+use App\Family;
 use App\Registration;
+use Carbon\Carbon;
+use Config;
+use Exception;
 use Tests\CreatesApplication;
 use Tests\StoreTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use URL;
 
 class SearchPageFuzzyTest extends StoreTestCase
 {
@@ -126,7 +132,7 @@ class SearchPageFuzzyTest extends StoreTestCase
      */
     private function createRegWithCarer(string $name) {
         // Make and save a family in our centre
-        $family = factory(App\Family::class)->make();
+        $family = factory(Family::class)->make();
         $family->lockToCentre($this->centre);
         $family->save();
 
@@ -137,7 +143,7 @@ class SearchPageFuzzyTest extends StoreTestCase
         // Make and save a registration and attach it to our family and centre
         $registration = new Registration([
             'eligibility' => 'healthy-start',
-            'consented_on' => Carbon\Carbon::now(),
+            'consented_on' => Carbon::now(),
         ]);
         $registration->family()->associate($family);
         $registration->centre()->associate($this->centre);

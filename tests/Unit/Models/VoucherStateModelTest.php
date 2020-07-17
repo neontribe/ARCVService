@@ -1,9 +1,10 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\Models;
 
 use App\AdminUser;
 use Carbon\Carbon;
+use SM\SMException;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -63,7 +64,7 @@ class VoucherStateModelTest extends TestCase
      */
     public function testInvalidTransition()
     {
-        $this->expectException(\SM\SMException::class);
+        $this->expectException(SMException::class);
         // We need an auth's user to progress the voucher states.
         Auth::login($this->marketUser);
 

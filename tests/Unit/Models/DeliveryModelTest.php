@@ -1,10 +1,11 @@
 <?php
 
-namespace Tests;
+namespace Tests\Unit\Models;
 
 use App\Delivery;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\TestCase;
 
 class DeliveryModelTest extends TestCase
 {

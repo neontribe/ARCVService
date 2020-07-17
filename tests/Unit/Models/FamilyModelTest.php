@@ -1,7 +1,6 @@
 <?php
 
-namespace Tests;
-
+namespace Tests\Unit\Models;
 
 use App\Carer;
 use App\Child;
@@ -9,6 +8,7 @@ use App\Centre;
 use App\Family;
 use App\Registration;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\TestCase;
 
 class FamilyModelTest extends TestCase
 {

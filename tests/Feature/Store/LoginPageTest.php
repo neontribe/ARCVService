@@ -1,7 +1,11 @@
 <?php
+namespace Tests\Feature\Store;
 
 use Tests\StoreTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use App\Centre;
+use App\CentreUser;
+use URL;
 
 class LoginPageTest extends StoreTestCase
 {
@@ -15,10 +19,10 @@ class LoginPageTest extends StoreTestCase
     {
         parent::setUp();
 
-        $this->centre = factory(App\Centre::class)->create();
+        $this->centre = factory(Centre::class)->create();
 
         // Create a CentreUser
-        $this->centreUser =  factory(App\CentreUser::class)->create([
+        $this->centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),

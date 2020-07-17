@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests;
+namespace Tests\Unit\Services\VoucherEvaluator;
 
 use App\Centre;
 use App\Child;
@@ -11,6 +11,7 @@ use App\Services\VoucherEvaluator\EvaluatorFactory;
 use Carbon\Carbon;
 use Config;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\TestCase;
 
 class VoucherEvaluatorTest extends TestCase
 {
@@ -296,7 +297,7 @@ class VoucherEvaluatorTest extends TestCase
     public function itNoticesWhenAChildIsAlmostPrimarySchoolAge()
     {
         // Need to change the values we use for school start to next month's integer
-        Config::set('arc.school_month', Carbon::now()->addMonth(1)->month);
+        Config::set('arc.school_month', Carbon::now()->addMonth()->month);
 
         // Make standard evaluator
         $evaluator = EvaluatorFactory::make();
@@ -315,7 +316,7 @@ class VoucherEvaluatorTest extends TestCase
     public function itNoticesWhenAChildIsAlmostSecondarySchoolAge()
     {
         // Need to change the values we use for school start to next month's integer
-        Config::set('arc.school_month', Carbon::now()->addMonth(1)->month);
+        Config::set('arc.school_month', Carbon::now()->addMonth()->month);
 
         // Get Rules Mods
         $rulesMod = collect($this->rulesMods["credit-primary"]);

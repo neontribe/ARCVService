@@ -1,7 +1,6 @@
 <?php
 
-namespace Tests;
-
+namespace Tests\Unit\Models;
 
 use App\Carer;
 use App\Family;
@@ -9,7 +8,9 @@ use Auth;
 use App\Bundle;
 use App\Registration;
 use Carbon\Carbon;
+use Faker\Factory;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\TestCase;
 
 class BundleModelTest extends TestCase
 {
@@ -99,7 +100,7 @@ class BundleModelTest extends TestCase
         $registration = factory(Registration::class)->create();
 
         // Grab a Faker to make some random stuff later
-        $faker = \Faker\Factory::create();
+        $faker = Factory::create();
 
         // Add a disbursed bundle history
         $disbursedBundles = factory('App\Bundle', 4)->create([

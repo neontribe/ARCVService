@@ -1,8 +1,14 @@
 <?php
+namespace Tests\Feature\Store;
 
+use App\Centre;
+use App\CentreUser;
+use App\Registration;
+use App\Sponsor;
 use Carbon\Carbon;
 use Tests\StoreTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use URL;
 
 class SearchPageTest extends StoreTestCase
 {
@@ -12,10 +18,10 @@ class SearchPageTest extends StoreTestCase
     public function itShowsTheLoggedInUser()
     {
         // Create some centres
-        factory(App\Centre::class, 4)->create();
+        factory(Centre::class, 4)->create();
 
         // Create a CentreUser
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -32,10 +38,10 @@ class SearchPageTest extends StoreTestCase
     public function itShowsRegistrationsFromNeighbourCentres()
     {
         // Create a single Sponsor
-        $sponsor = factory(App\Sponsor::class)->create();
+        $sponsor = factory(Sponsor::class)->create();
 
         // Create centres
-        $centres = factory(App\Centre::class, 2)->create([
+        $centres = factory(Centre::class, 2)->create([
             "sponsor_id" => $sponsor->id,
         ]);
 
@@ -43,7 +49,7 @@ class SearchPageTest extends StoreTestCase
         $centre2 = $centres->last();
 
         // Create a CentreUser in Centre 1
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -51,12 +57,12 @@ class SearchPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre1->id, ['homeCentre' => true]);
 
         // Make centre1 some registrations
-        $registrations1 = factory(App\Registration::class, 4)->create([
+        $registrations1 = factory(Registration::class, 4)->create([
             "centre_id" => $centre1->id,
         ]);
 
         // Make centre2 some registrations
-        $registrations2 = factory(App\Registration::class, 4)->create([
+        $registrations2 = factory(Registration::class, 4)->create([
             "centre_id" => $centre2->id,
         ]);
 
@@ -78,15 +84,15 @@ class SearchPageTest extends StoreTestCase
     public function itShowsRegistrationsFromMyCentre()
     {
         // Create a single Sponsor
-        $sponsor = factory(App\Sponsor::class)->create();
+        $sponsor = factory(Sponsor::class)->create();
 
         // Create centre
-        $centre = factory(App\Centre::class)->create([
+        $centre = factory(Centre::class)->create([
             "sponsor_id" => $sponsor->id,
         ]);
 
         // Create a CentreUser in Centre
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -94,7 +100,7 @@ class SearchPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // Make centre some registrations
-        $registrations = factory(App\Registration::class, 4)->create([
+        $registrations = factory(Registration::class, 4)->create([
             "centre_id" => $centre->id,
         ]);
 
@@ -112,22 +118,22 @@ class SearchPageTest extends StoreTestCase
     public function itDoesNotShowRegistrationsFromUnrelatedCentres()
     {
         // Create a single Sponsor
-        $sponsor = factory(App\Sponsor::class)->create();
+        $sponsor = factory(Sponsor::class)->create();
 
         // Create centres
-        $neighbour_centres = factory(App\Centre::class, 2)->create([
+        $neighbour_centres = factory(Centre::class, 2)->create([
             "sponsor_id" => $sponsor->id,
         ]);
 
-        $alien_centre = factory(App\Centre::class, 2)->create([
-            "sponsor_id" => factory(App\Sponsor::class)->create()->id,
+        $alien_centre = factory(Centre::class, 2)->create([
+            "sponsor_id" => factory(Sponsor::class)->create()->id,
         ]);
 
         $centre1 = $neighbour_centres->first();
         $centre2 = $neighbour_centres->last();
 
         // Create a CentreUser in Centre 1
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -135,17 +141,17 @@ class SearchPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre1->id, ['homeCentre' => true]);
 
         // make centre1 some registrations
-        factory(App\Registration::class, 4)->create([
+        factory(Registration::class, 4)->create([
             "centre_id" => $centre1->id,
         ]);
 
         // Make centre2 some registrations
-        factory(App\Registration::class, 4)->create([
+        factory(Registration::class, 4)->create([
             "centre_id" => $centre2->id,
         ]);
 
         // Make alien_centre some registrations
-        $registrations3 = factory(App\Registration::class, 4)->create([
+        $registrations3 = factory(Registration::class, 4)->create([
             "centre_id" => $alien_centre->id,
         ]);
 
@@ -164,10 +170,10 @@ class SearchPageTest extends StoreTestCase
     {
 
         // Create a Centre (and, implicitly a random Sponsor)
-        $centre = factory(App\Centre::class)->create();
+        $centre = factory(Centre::class)->create();
 
         // Create a CentreUser
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -175,7 +181,7 @@ class SearchPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // Create a random registration.
-        $registration = factory(App\Registration::class)->create([
+        $registration = factory(Registration::class)->create([
             "centre_id" => $centre->id,
         ]);
 
@@ -192,10 +198,10 @@ class SearchPageTest extends StoreTestCase
     public function itShowsTheRVID()
     {
         // Create a Centre
-        $centre = factory(App\Centre::class)->create();
+        $centre = factory(Centre::class)->create();
 
         // Create a CentreUser
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -203,7 +209,7 @@ class SearchPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // Create a random registration with our centre.
-        $registration = factory(App\Registration::class)->create([
+        $registration = factory(Registration::class)->create([
             "centre_id" => $centre->id,
         ]);
 
@@ -217,10 +223,10 @@ class SearchPageTest extends StoreTestCase
     public function itShowsTheVoucherEntitlement()
     {
         // Create a Centre
-        $centre = factory(App\Centre::class)->create();
+        $centre = factory(Centre::class)->create();
 
         // Create a CentreUser
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -228,7 +234,7 @@ class SearchPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // Create a random registration with our centre.
-        $registration = factory(App\Registration::class)->create([
+        $registration = factory(Registration::class)->create([
             "centre_id" => $centre->id,
         ]);
 
@@ -242,15 +248,15 @@ class SearchPageTest extends StoreTestCase
     public function itPaginatesWhenRequired()
     {
         // Create a single Sponsor
-        $sponsor = factory(App\Sponsor::class)->create();
+        $sponsor = factory(Sponsor::class)->create();
 
         // Create centre
-        $centre = factory(App\Centre::class)->create([
+        $centre = factory(Centre::class)->create([
             "sponsor_id" => $sponsor->id,
         ]);
 
         // Create a CentreUser in Centre
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -258,7 +264,7 @@ class SearchPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // Make centre some registrations
-        $registrations = factory(App\Registration::class, 20)->create([
+        factory(Registration::class, 20)->create([
             "centre_id" => $centre->id,
         ]);
 
@@ -275,10 +281,10 @@ class SearchPageTest extends StoreTestCase
     public function itShowsFamilyPrimaryCarersAlphabetically()
     {
         // Create a Centre (and, implicitly a random Sponsor)
-        $centre = factory(App\Centre::class)->create();
+        $centre = factory(Centre::class)->create();
 
         // Create a centreUser
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -286,7 +292,7 @@ class SearchPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // Create a random registration or 5, which should be well under the limit.
-        $registrations = factory(App\Registration::class, 5)->create([
+        $registrations = factory(Registration::class, 5)->create([
             "centre_id" => $centre->id,
         ]);
 
@@ -310,10 +316,10 @@ class SearchPageTest extends StoreTestCase
     /** @test */
     public function itHasTheExpectedResultsPerPage()
     {
-        $centre = factory(App\Centre::class)->create();
+        $centre = factory(Centre::class)->create();
 
         // Create a CentreUser
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -321,7 +327,7 @@ class SearchPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // Create 25 random registrations, which should be well over the pagination limit.
-        $registrations = factory(App\Registration::class, 25)->create([
+        factory(Registration::class, 25)->create([
             "centre_id" => $centre->id,
         ]);
 
@@ -338,10 +344,10 @@ class SearchPageTest extends StoreTestCase
     /** @test */
     public function itCanPaginateWithNumberedPages()
     {
-        $centre = factory(App\Centre::class)->create();
+        $centre = factory(Centre::class)->create();
 
         // Create a CentreUser
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -349,7 +355,7 @@ class SearchPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // Create 11 random registrations, which should be over the 10 per-page pagination limit.
-        $registrations = factory(App\Registration::class, 11)->create([
+        factory(Registration::class, 11)->create([
             "centre_id" => $centre->id,
         ]);
 
@@ -368,18 +374,18 @@ class SearchPageTest extends StoreTestCase
     public function itShowsCentreLabelsForUsersByDefault()
     {
         // Create some centres
-        $centre1 = factory(App\Centre::class)->create([
+        $centre1 = factory(Centre::class)->create([
             "name" => "Tatooine"
         ]);
-        $centre2 = factory(App\Centre::class)->create([
+        $centre2 = factory(Centre::class)->create([
             "name" => "Dagobah"
         ]);
-        $centre3 = factory(App\Centre::class)->create([
+        $centre3 = factory(Centre::class)->create([
             "name" => "Coruscant"
         ]);
 
         // Create a Centre User
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -387,13 +393,13 @@ class SearchPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre1->id, ['homeCentre' => true]);
 
         // Create some registrations in different centres
-        $registrations = factory(App\Registration::class, 4)->create([
+        factory(Registration::class, 4)->create([
             "centre_id" => $centre1->id,
         ]);
-        $registrations = factory(App\Registration::class, 3)->create([
+        factory(Registration::class, 3)->create([
             "centre_id" => $centre2->id,
         ]);
-        $registrations = factory(App\Registration::class, 2)->create([
+        factory(Registration::class, 2)->create([
             "centre_id" => $centre3->id,
         ]);
 
@@ -412,18 +418,18 @@ class SearchPageTest extends StoreTestCase
     public function itCanFilterUsersByCentre()
     {
         // Create some centres
-        $centre1 = factory(App\Centre::class)->create([
+        $centre1 = factory(Centre::class)->create([
             "name" => "Tatooine"
         ]);
-        $centre2 = factory(App\Centre::class)->create([
+        $centre2 = factory(Centre::class)->create([
             "name" => "Dagobah"
         ]);
-        $centre3 = factory(App\Centre::class)->create([
+        $centre3 = factory(Centre::class)->create([
             "name" => "Coruscant"
         ]);
 
         // Create a Centre User
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -431,13 +437,13 @@ class SearchPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre1->id, ['homeCentre' => true]);
 
         // Create some registrations in different centres
-        $registrations = factory(App\Registration::class, 4)->create([
+        factory(Registration::class, 4)->create([
             "centre_id" => $centre1->id,
         ]);
-        $registrations = factory(App\Registration::class, 3)->create([
+        factory(Registration::class, 3)->create([
             "centre_id" => $centre2->id,
         ]);
-        $registrations = factory(App\Registration::class, 2)->create([
+        factory(Registration::class, 2)->create([
             "centre_id" => $centre3->id,
         ]);
 
@@ -455,10 +461,10 @@ class SearchPageTest extends StoreTestCase
     /** @test */
     public function itDoesNotShowLeftFamiliesByDefault()
     {
-        $centre = factory(App\Centre::class)->create();
+        $centre = factory(Centre::class)->create();
 
         // Create a Centre User
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -466,7 +472,7 @@ class SearchPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // Create 10 random registrations, which should be the per-page pagination limit.
-        $registrations = factory(App\Registration::class, 10)->create([
+        $registrations = factory(Registration::class, 10)->create([
             "centre_id" => $centre->id,
         ]);
 
@@ -485,10 +491,10 @@ class SearchPageTest extends StoreTestCase
     /** @test */
     public function itShowsLeftFamilyRegistrationsAsDistinct()
     {
-        $centre = factory(App\Centre::class)->create();
+        $centre = factory(Centre::class)->create();
 
         // Create a Centre User
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -496,7 +502,7 @@ class SearchPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // Create 10 random registrations, which should be the per-page pagination limit.
-        $registrations = factory(App\Registration::class, 10)->create([
+        $registrations = factory(Registration::class, 10)->create([
             "centre_id" => $centre->id,
         ]);
 
@@ -518,10 +524,10 @@ class SearchPageTest extends StoreTestCase
     /** @test */
     public function itPreventsAccessToLeftFamilyRegistrations()
     {
-        $centre = factory(App\Centre::class)->create();
+        $centre = factory(Centre::class)->create();
 
         // Create a CentreUser
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -529,7 +535,7 @@ class SearchPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // Create 10 random registrations, which should be the per-page pagination limit.
-        $registrations = factory(App\Registration::class, 10)->create([
+        $registrations = factory(Registration::class, 10)->create([
             "centre_id" => $centre->id,
         ]);
 
@@ -555,10 +561,10 @@ class SearchPageTest extends StoreTestCase
     public function aVouchersButtonIsPresent()
     {
         // Create a Centre
-        $centre = factory(App\Centre::class)->create();
+        $centre = factory(Centre::class)->create();
 
         // Create a CentreUser
-        $centreUser =  factory(App\CentreUser::class)->create([
+        $centreUser =  factory(CentreUser::class)->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -566,7 +572,7 @@ class SearchPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // Create a random registration with our centre.
-        $registration = factory(App\Registration::class)->create([
+        factory(Registration::class)->create([
             "centre_id" => $centre->id,
         ]);
 

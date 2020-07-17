@@ -1,12 +1,11 @@
 <?php
 
-namespace Tests\Unit\Password;
+namespace Tests\Unit\Passport;
 
 use Tests\TestCase;
-use Illuminate\Console\Application;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use App\User;
-use Auth;
+use DB;
 
 class RoutesTest extends TestCase
 {
@@ -27,7 +26,7 @@ class RoutesTest extends TestCase
         ]);
 
         // fetch client for id and secret
-        $this->client = \DB::table('oauth_clients')
+        $this->client = DB::table('oauth_clients')
             ->where('password_client', 1)
             ->first()
         ;

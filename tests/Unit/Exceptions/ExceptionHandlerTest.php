@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Controllers\Store;
+namespace Tests\Unit\Exceptions;
 
 use App\Exceptions\Handler;
 use Illuminate\Container\Container;

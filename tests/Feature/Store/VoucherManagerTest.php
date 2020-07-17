@@ -1,6 +1,7 @@
 <?php
-namespace Tests;
+namespace Tests\Feature\Store;
 
+use Tests\StoreTestCase;
 use App\Centre;
 use App\CentreUser;
 use App\Child;
@@ -10,7 +11,6 @@ use App\Registration;
 use App\Sponsor;
 use App\Voucher;
 use Auth;
-use Config;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use URL;
 

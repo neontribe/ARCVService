@@ -1,10 +1,13 @@
 <?php
+namespace Tests\Feature\Store;
 
 use App\Centre;
 use App\Registration;
 use App\CentreUser;
+use InvalidArgumentException;
 use Tests\StoreTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use URL;
 
 class RegistrationPageTest extends StoreTestCase
 {
@@ -118,7 +121,7 @@ class RegistrationPageTest extends StoreTestCase
     {
         $this->expectException(InvalidArgumentException::class);
         // Create some centres
-        factory(App\Centre::class, 4)->create();
+        factory(Centre::class, 4)->create();
 
         //Test that clicking on a (non)link throws an Error
         //and remains on the registration page.

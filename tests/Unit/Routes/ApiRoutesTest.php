@@ -11,6 +11,7 @@ use App\Voucher;
 use App\Trader;
 use App\User;
 use Auth;
+use DB;
 
 class ApiRoutesTest extends TestCase
 {
@@ -36,7 +37,7 @@ class ApiRoutesTest extends TestCase
         ]);
 
         // fetch client for id and secret
-        $this->client = \DB::table('oauth_clients')
+        $this->client = DB::table('oauth_clients')
             ->where('password_client', 1)
             ->first()
         ;
@@ -73,7 +74,6 @@ class ApiRoutesTest extends TestCase
             'username' => $this->user->email,
             'password' => 'secret',
         ]);
-        $content = $response->getContent();
         $response->assertJsonStructure(['access_token', 'expires_in', 'refresh_token']);
     }
 
@@ -328,7 +328,7 @@ class ApiRoutesTest extends TestCase
 
     public function testUserCanSeeOwnTraders()
     {
-        $traders = factory(Trader::class, 5)->create();
+        factory(Trader::class, 5)->create();
         $this->user->traders()->sync([1,2,3]);
         $this->actingAs($this->user, 'api')
             ->json('GET', route('api.traders'))

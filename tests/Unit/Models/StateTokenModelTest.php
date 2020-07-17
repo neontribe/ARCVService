@@ -3,6 +3,7 @@
 namespace Tests\Unit\Models;
 
 use App\StateToken;
+use Illuminate\Database\QueryException;
 use Ramsey\Uuid\Uuid;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -34,7 +35,7 @@ class StateTokenModelTest extends TestCase
     public function testItCannotSaveADuplicateUUID()
     {
         $this->expectExceptionMessage("Integrity constraint violation: 19 UNIQUE constraint failed: state_tokens.uuid");
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
         // Create a StateToken, should make a random, unique uuid
         $token = factory(StateToken::class)->create();
 

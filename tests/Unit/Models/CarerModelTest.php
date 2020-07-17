@@ -1,10 +1,11 @@
 <?php
 
-namespace Tests;
+namespace Tests\Unit\Models;
 
 use App\Carer;
 use App\Family;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\TestCase;
 
 class CarerModelTest extends TestCase
 {

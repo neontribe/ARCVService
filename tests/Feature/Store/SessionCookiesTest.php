@@ -4,7 +4,6 @@ namespace Tests\Feature\Store;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Auth;
 use App\Centre;
 use App\CentreUser;
 

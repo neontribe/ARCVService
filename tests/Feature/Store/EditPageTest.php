@@ -1,7 +1,8 @@
 <?php
 
-namespace Tests;
+namespace Tests\Feature\Store;
 
+use Tests\StoreTestCase;
 use App\Carer;
 use App\Centre;
 use App\Child;

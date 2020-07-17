@@ -1,4 +1,5 @@
 <?php
+namespace Tests\Feature\Store;
 
 use App\Centre;
 use App\CentreUser;

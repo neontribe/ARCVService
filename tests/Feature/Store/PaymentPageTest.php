@@ -1,15 +1,13 @@
 <?php
 
-namespace Tests;
+namespace Tests\Feature\Store;
 
 use Tests\StoreTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use App\Voucher;
-use App\VoucherState;
 use App\StateToken;
 use App\Trader;
 use URL;
-
 
 class PaymentPageTest extends StoreTestCase
 {
