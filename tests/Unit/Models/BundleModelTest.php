@@ -150,7 +150,11 @@ class BundleModelTest extends TestCase
 
         // See errors
         $this->assertArrayHasKey("disbursed", $errors);
-        $this->assertArraySubset($vs->pluck("code")->toArray(), $errors["disbursed"]);
+
+        $codes = $vs->pluck("code")->toArray();
+        foreach ($codes as $value) {
+            $this->assertContains($value, $errors["disbursed"]);
+        }
 
         // See it has the vouchers still
         $this->assertEquals(3, $disbursedBundle->vouchers()->count());
@@ -160,8 +164,11 @@ class BundleModelTest extends TestCase
 
         // See errors.
         $this->assertArrayHasKey("disbursed", $errors);
-        $this->assertArraySubset($vs->pluck("code")->toArray(), $errors["disbursed"]);
 
+        $codes = $vs->pluck("code")->toArray();
+        foreach ($codes as $value) {
+            $this->assertContains($value, $errors["disbursed"]);
+        }
         // See it has the vouchers still.
         $this->assertEquals(3, $disbursedBundle->vouchers()->count());
 
