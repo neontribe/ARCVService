@@ -7,7 +7,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Passport\HasApiTokens;
 use App\Notifications\ApiPasswordResetNotification;
-use App\Trader;
 
 class User extends Authenticatable
 {
@@ -35,7 +34,7 @@ class User extends Authenticatable
     /**
      * Get the user's traders.
      *
-     * @return App\Trader Collection.
+     * @return Trader Collection.
      */
     public function traders()
     {
@@ -45,7 +44,7 @@ class User extends Authenticatable
     /**
      * Check if the trader belongs to the user.
      *
-     * @param App\Trader $trader
+     * @param Trader $trader
      *
      * @return boolean
      */

@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\FormRequests;
 
-use App\Registration;
 use App\Http\Requests\StoreUpdateRegistrationRequest;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Validation\Validator;

@@ -57,7 +57,7 @@
                     {{ method_field('PUT') }}
                     {!! csrf_field() !!}
                     <button class="submit" type="submit">
-                    </i><i class="fa fa-money button-icon" aria-hidden="true"></i>Pay <b>{{ $number_to_pay }}</b> Vouchers
+                    <i class="fa fa-money button-icon" aria-hidden="true"></i>Pay <b>{{ $number_to_pay }}</b> Vouchers
                     </button>
                 </form>
             @endif

@@ -13,7 +13,7 @@
             <input type="hidden" name="registration" value="{{ $registration->id }}">
             <div class="col fit-height">
                 <div>
-                    <img src="{{ asset('store/assets/group-light.svg') }}" name="logo">
+                    <img src="{{ asset('store/assets/group-light.svg') }}" alt="logo">
                     <h2>Voucher collectors</h2>
                 </div>
                 <input type="hidden" name="registration" value="{{ $registration->id }}">
@@ -57,7 +57,7 @@
 
             <div class="col fit-height">
                 <div>
-                    <img src="{{ asset('store/assets/pregnancy-light.svg') }}" name="logo">
+                    <img src="{{ asset('store/assets/pregnancy-light.svg') }}" alt="logo">
                     <h2>Children or pregnancy</h2>
                 </div>
                 @include('store.partials.add_child_form', ['verifying' => $verifying] )
@@ -103,7 +103,7 @@
 
             <div class="col collect short-height">
                 <div>
-                    <img src="{{ asset('store/assets/info-light.svg') }}" name="logo">
+                    <img src="{{ asset('store/assets/info-light.svg') }}" alt="logo">
                     <h2>This family</h2>
                 </div>
                 <div>

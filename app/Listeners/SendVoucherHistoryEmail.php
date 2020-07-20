@@ -4,8 +4,6 @@ namespace App\Listeners;
 
 use App\Events\VoucherHistoryEmailRequested;
 use App\Mail\VoucherHistoryEmail;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use File;
 use Log;
 use Mail;

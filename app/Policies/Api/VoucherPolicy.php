@@ -3,9 +3,7 @@
 namespace App\Policies\Api;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Http\Request;
 use App\User;
-use App\Voucher;
 use App\Trader;
 
 class VoucherPolicy

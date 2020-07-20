@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Service;
 
 use App\Http\Controllers\Controller;
 use App\Voucher;
+use Illuminate\Http\Response;
 
 class VoucherController extends Controller
 {
@@ -22,8 +23,8 @@ class VoucherController extends Controller
      * Display the specified Voucher.
      * Todo this will change
      *
-     * @param  App\Voucher $voucher
-     * @return \Illuminate\Http\Response
+     * @param  Voucher $voucher
+     * @return Response
      */
     public function show(Voucher $voucher)
     {

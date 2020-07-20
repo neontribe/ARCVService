@@ -97,10 +97,10 @@
                     $target.closest("tr").find(".rotate").toggleClass("up");
                     if ( $target.closest("tr").hasClass("bundle-row")) {
                        $target.slideUp();
-                    } else if ( $target.closest("tr").next().hasClass("bundle-row")){
-                       $target.closest("tr").nextUntil(".week-row", ".bundle-row").slideToggle();
                     } else {
-                       return;
+                        if ($target.closest("tr").next().hasClass("bundle-row")) {
+                            $target.closest("tr").nextUntil(".week-row", ".bundle-row").slideToggle();
+                        }
                     }
                 });
             }

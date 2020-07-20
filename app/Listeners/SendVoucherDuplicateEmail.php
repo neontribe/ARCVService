@@ -4,8 +4,6 @@ namespace App\Listeners;
 
 use App\Events\VoucherDuplicateEntered;
 use App\Mail\VoucherDuplicateEnteredEmail;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Mail;
 
 class SendVoucherDuplicateEmail

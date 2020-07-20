@@ -2,11 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Http\Request;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Registration;
-use Log;
 
 class StoreUpdateRegistrationFamilyRequest extends FormRequest
 {

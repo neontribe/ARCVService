@@ -9,7 +9,6 @@ use App\CentreUser;
 use App\Registration;
 use App\Sponsor;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Support\Collection;
 use URL;
 use Tests\StoreTestCase;
 

@@ -10,7 +10,6 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Config;
 use Exception;
 use Tests\StoreTestCase;
-use Log;
 
 class VoucherControllerMysqlTest extends StoreTestCase
 {

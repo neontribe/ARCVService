@@ -8,12 +8,10 @@ use App\CentreUser;
 use App\Registration;
 use App\Sponsor;
 use App\Voucher;
-use Auth;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\StoreTestCase;
-use URL;
 
 class CentreControllerTest extends StoreTestCase
 {

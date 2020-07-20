@@ -41,7 +41,7 @@
             </tbody>
         </table>
         <div>
-            <p>{{ $vouchers->links() }} </p
+            <p>{{ $vouchers->links() }}</p>
             <p>Total : {{ $vouchers->total() }}</p>
         </div>
     </div>

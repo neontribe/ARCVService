@@ -32,7 +32,7 @@
 
                     <!-- Logo -->
                     <a href="{{ url('/') }}">
-                        <img src="{{ url('/') }}/assets/logo.png" class="logo" alt="ARC Voucher logo">
+                        <img src="{{ url('/assets/logo.png') }}" class="logo" alt="ARC Voucher logo">
                     </a>
                 </div>
 

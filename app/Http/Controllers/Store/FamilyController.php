@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Store;
 
 use App\Http\Requests\StoreUpdateRegistrationFamilyRequest;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Registration;
 use App\Family;

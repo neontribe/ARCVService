@@ -2,7 +2,6 @@
 
 namespace App;
 
-use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;

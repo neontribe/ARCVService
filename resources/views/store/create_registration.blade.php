@@ -9,7 +9,7 @@
             {!! csrf_field() !!}
             <div class="col">
                 <div>
-                    <img src="{{ asset('store/assets/group-light.svg') }}" name="logo">
+                    <img src="{{ asset('store/assets/group-light.svg') }}" alt="logo">
                     <h2>Adding voucher collectors</h2>
                 </div>
                 <div>
@@ -51,7 +51,7 @@
             </div>
             <div class="col">
                 <div>
-                    <img src="{{ asset('store/assets/pregnancy-light.svg') }}" name="logo">
+                    <img src="{{ asset('store/assets/pregnancy-light.svg') }}" alt="logo">
                     <h2>Adding children or pregnancies</h2>
                 </div>
                 <div>
@@ -84,7 +84,7 @@
             </div>
             <div class="col">
                 <div>
-                    <img src="{{ asset('store/assets/info-light.svg') }}" name="logo">
+                    <img src="{{ asset('store/assets/info-light.svg') }}" alt="logo">
                     <h2>Other information</h2>
                 </div>
                 <div>
@@ -179,7 +179,7 @@
 
         // If enter is pressed, keyboard is hidden on iPad and form submit is disabled
         $('#carer').on('keyup keypress', function(e) {
-            if(e.which == 13) {
+            if(e.which === 13) {
                 e.preventDefault();
                 document.activeElement.blur();
                 $("input").blur();

@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\Routes;
 
-use Auth;
 use Config;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;

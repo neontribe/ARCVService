@@ -6,6 +6,7 @@ use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 class Trader extends Model
 {
@@ -43,7 +44,7 @@ class Trader extends Model
     /**
      * Get the vouchers belonging to this trader.
      *
-     * @return App\Voucher collection
+     * @return Voucher collection
      */
     public function vouchers()
     {
@@ -53,7 +54,7 @@ class Trader extends Model
     /**
      * Get the market this trader belongs to.
      *
-     * @return App\Market
+     * @return Market
      */
     public function market()
     {
@@ -64,7 +65,7 @@ class Trader extends Model
      * Vouchers that have been submitted for payment on behalf of this trader.
      * They will have currentstate: payment_pending or reimbursed.
      *
-     * @return Collection App\Voucher
+     * @return Collection
      */
     public function vouchersConfirmed()
     {
@@ -74,7 +75,7 @@ class Trader extends Model
     /**
      * Vouchers submitted by this trader that have a given status.
      * @param null $status
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public function vouchersWithStatus($status = null)
     {

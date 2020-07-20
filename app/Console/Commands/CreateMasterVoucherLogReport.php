@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use Carbon\Carbon;
 use DB;
 use Exception;
 use Illuminate\Support\Facades\Storage;
@@ -38,14 +37,14 @@ class CreateMasterVoucherLogReport extends Command
      *
      * @var string $disk
      */
-    private $disk = '';
+    private $disk;
 
     /**
      * The default archive name.
      *
      * @var string $archiveName
      */
-    private $archiveName = '';
+    private $archiveName;
 
     /**
      * The sheet headers.
@@ -200,7 +199,8 @@ EOD;
             $lookups = 0;
             $chunkSize = 50000;
 
-            Log::info("starting query, mem :" . memory_get_usage());
+            $mem = memory_get_usage();
+            Log::info("starting query, mem :" . $mem);
 
             while ($continue) {
                 $chunk = $this->execQuery($chunkSize, $chunkSize * $lookups);
@@ -330,7 +330,7 @@ EOD;
      * @param ZipStream|null $za
      * @return bool
      */
-    public function writeOutput(String $name, String $fileContents, ZipStream $za = null)
+    public function writeOutput(String $name, String $csv, ZipStream $za = null)
     {
         try {
             $filename = sprintf("%s.csv", preg_replace('/\s+/', '_', $name));
@@ -338,11 +338,11 @@ EOD;
             if ($za) {
                 // Encryption, if enabled, is handled at the creation of our ZipStream. The stream is directed through
                 // an encrypted wrapper before it writes to the disk.
-                $za->addFile($filename, $fileContents);
+                $za->addFile($filename, $csv);
             } else {
                 // Ensure that the user intends to write the output plain to the disk. This is highly unlikely in production.
                 if ($this->option('plain')) {
-                    Storage::disk($this->disk)->put($filename, $fileContents);
+                    Storage::disk($this->disk)->put($filename, $csv);
                 } else {
                     // TODO : Consider redesigning the CLI such that this is not even possible to express.
                     Log::error('Encrypted output is not supported with --no-zip, consider adding --plain if you\'re SURE you want to write this data to the disk unencrypted.');
