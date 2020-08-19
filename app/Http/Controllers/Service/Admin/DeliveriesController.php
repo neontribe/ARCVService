@@ -99,7 +99,7 @@ class DeliveriesController extends Controller
                         ->inOneOfStates(['printed'])
                         ->chunk(
                             // should be big enough chunks to avoid memory problems
-                            10000,
+                            5000,
                             // Closure only has 1 param...
                             function ($vouchers) use ($now_time, $user_id, $user_type, $transitionDef, $delivery) {
                                 // ... but method needs 'em.
