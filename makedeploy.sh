@@ -37,17 +37,20 @@ tar -cvzf ${SRCNAME}.tgz  \
     --exclude="${SRCNAME}/.nvmrc" \
     --exclude="${SRCNAME}/.phpstorm.meta.php" \
     --exclude="${SRCNAME}/_ide_helper.php" \
+    --exclude="${SRCNAME}/_ide_helper_models.php" \
     --exclude="${SRCNAME}/yarn.lock" \
     --exclude="${SRCNAME}/composer.lock" \
     --exclude="${SRCNAME}/staging_rsa.enc" \
     --exclude="${SRCNAME}/.travis.yml" \
     --exclude="${SRCNAME}/docker-compose.yml" \
     --exclude="${SRCNAME}/README.md" \
+    --exclude="${SRCNAME}/UPGRADE.md" \
     --exclude="${SRCNAME}/Docker.md" \
     --exclude="${SRCNAME}/makedeploy.sh" \
     --exclude="${SRCNAME}/Makefile" \
     --exclude="${SRCNAME}/phpunit.xml" \
     --exclude="${SRCNAME}/webpack.mix.js" \
+    --exclude="${SRCNAME}/.phpunit.result.cache" \
     "${SRCNAME}"
 
 cd ${SRCNAME}
