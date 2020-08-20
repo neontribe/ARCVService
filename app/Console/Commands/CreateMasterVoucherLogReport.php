@@ -253,6 +253,7 @@ EOD;
 
             // Create and write a sheet for all data.
             $fileHandleAll = fopen('php://temp', 'r+');
+            fputcsv($fileHandleAll, $this->headers);
             foreach ($rows as $row) {
                 fputcsv($fileHandleAll, $row);
             }
@@ -275,6 +276,7 @@ EOD;
             // Make sheets for each area and write them
             foreach ($areas as $area => $areaRows) {
                 $fileHandleArea = fopen('php://temp', 'r+');
+                fputcsv($fileHandleArea, $this->headers);
                 foreach ($areaRows as $row) {
                     fputcsv($fileHandleArea, $row);
                 }
