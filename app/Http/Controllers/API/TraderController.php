@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Trader;
 use App\Voucher;
 use Auth;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -94,7 +95,7 @@ EOD;
             $formatted_vouchers[] = [
                 // In fixtures.
                 'code' => $v->code,
-                'updated_at' => $v->updated_at->format('d-m-Y'),
+                'updated_at' => Carbon::createFromFormat('Y-m-d H:i:s', $v->updated_at)->format('d-m-Y'),
             ];
         }
         return response()->json($formatted_vouchers, 200);
@@ -118,17 +119,17 @@ EOD;
         $data = [];
 
         foreach ($histories as $history) {
-            $pended_on = date('d-m-Y', strtotime($history[1]));
+            $pended_on = Carbon::createFromFormat('Y-m-d H:i:s', $history[1])->format('d-m-Y');
             $record = [
                 'pended_on' => $pended_on,
                 'vouchers' => [
                     [
                         'code' => $history[0],
                         'recorded_on' => $history[2]
-                            ? date('d-m-Y', strtotime($history[2]))
+                            ? Carbon::createFromFormat('Y-m-d H:i:s', $history[2])->format('d-m-Y')
                             : '',
                         'reimbursed_on' => $history[3]
-                            ? date('d-m-Y', strtotime($history[3]))
+                            ? Carbon::createFromFormat('Y-m-d H:i:s', $history[3])->format('d-m-Y')
                             : '',
                     ],
                 ],
