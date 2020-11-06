@@ -7,14 +7,43 @@ use App\Http\Controllers\Controller;
 use App\Trader;
 use App\Voucher;
 use Auth;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use PDO;
 
 class TraderController extends Controller
 {
+    // TODO: replace with equivalent eloquent statements
+    private static $traderVoucherHistory = <<<EOD
+SELECT
+    vouchers.code,
+    voucher_states.created_at as 'payment_pending',
+    (select voucher_states.created_at
+     FROM voucher_states
+     WHERE voucher_states.`to` = 'recorded'
+       and vouchers.id = voucher_id
+     order by id desc
+     limit 1) AS 'recorded',
+    (select voucher_states.created_at
+     from voucher_states
+     where vouchers.id = voucher_id
+       and `to` = 'reimbursed'
+     order by id desc
+     limit 1) AS 'reimbursed'
+FROM
+    vouchers left join voucher_states on vouchers.id = voucher_states.voucher_id
+WHERE
+    voucher_states.`to` = 'payment_pending'
+AND
+    vouchers.trader_id = ?
+ORDER BY payment_pending DESC, recorded DESC
+EOD;
+
     /**
      * A list of traders belonging to auth's user.
      *
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public function index()
     {
@@ -31,8 +60,8 @@ class TraderController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Trader  $trader
-     * @return \Illuminate\Http\Response
+     * @param Trader $trader
+     * @return JsonResponse
      */
     public function show(Trader $trader)
     {
@@ -43,8 +72,8 @@ class TraderController extends Controller
      * Display the vouchers associated with the trader.
      * Optionally include query param 'status' to filter results by state.
      *
-     * @param  \App\Trader  $trader
-     * @return \Illuminate\Http\Response
+     * @param Trader $trader
+     * @return JsonResponse
      */
     public function showVouchers(Trader $trader)
     {
@@ -74,54 +103,54 @@ class TraderController extends Controller
     /**
      * Display the Trader's Voucher history.
      *
-     * @param  \App\Trader  $trader
-     * @return \Illuminate\Http\Response
+     * @param Trader $trader
+     * @return JsonResponse
      */
     public function showVoucherHistory(Trader $trader)
     {
-        // TODO: this is still a stopgap; find a way to subselect/pivot in one go not per voucher at the DB layer.
-        $vouchers = $trader->vouchersConfirmed;
+        $query = DB::connection()
+            ->getPdo()
+            ->prepare(self::$traderVoucherHistory);
+        $query->execute([$trader->id]);
+
+        $histories = $query->fetchAll(PDO::FETCH_NUM);
 
         $data = [];
-        $vouchers->each(function ($v) use (&$data) {
-            $history = $v->history()->pluck('created_at', 'to')->toArray();
-            if (array_key_exists('payment_pending', $history)) {
-                $pended_day = $history['payment_pending']->format('d-m-Y');
 
-                $data[$pended_day][] = [
-                    'code' => $v->code,
-                    'recorded_on' => (array_key_exists('recorded', $history))
-                        ? $history["recorded"]->format('d-m-Y')
-                        : '',
-                    'reimbursed_on' => (array_key_exists('reimbursed', $history))
-                        ? $history["reimbursed"]->format('d-m-Y')
-                        : ''
-                ];
-            }
-        });
-
-        $voucher_history = [];
-
-        foreach ($data as $pended_day => $vs) {
-            // TODO : is the client using this ordering? We could avoid the uksort by using ISO dates from Carbon
-            $voucher_history[$pended_day] = [
-                'pended_on' => $pended_day,
-                'vouchers' => $vs,
+        foreach ($histories as $history) {
+            $pended_on = date('d-m-Y', strtotime($history[1]));
+            $record = [
+                'pended_on' => $pended_on,
+                'vouchers' => [
+                    [
+                        'code' => $history[0],
+                        'recorded_on' => $history[2]
+                            ? date('d-m-Y', strtotime($history[2]))
+                            : '',
+                        'reimbursed_on' => $history[3]
+                            ? date('d-m-Y', strtotime($history[3]))
+                            : '',
+                    ],
+                ],
             ];
+
+            if (isset($data[$pended_on])) {
+                // append the vouchers
+                $data[$pended_on]['vouchers'] = array_merge($data[$pended_on]['vouchers'], $record['vouchers']);
+            } else {
+                // set one
+                $data[$pended_on] = $record;
+            }
         }
-
-        uksort($voucher_history, function ($a, $b) {
-            return strtotime($b) - strtotime($a);
-        });
-
-        return response()->json(array_values($voucher_history), 200);
+        return response()->json(array_values($data), 200);
     }
 
     /**
      * Email the Trader's Voucher history.
      *
-     * @param  \App\Trader  $trader
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param Trader $trader
+     * @return JsonResponse
      */
     public function emailVoucherHistory(Request $request, Trader $trader)
     {
@@ -146,7 +175,7 @@ class TraderController extends Controller
             $response_text = trans(
                 'api.messages.email_voucher_history_date',
                 [
-                    'date' => $date
+                    'date' => $date,
                 ]
             );
         }
@@ -157,11 +186,11 @@ class TraderController extends Controller
     /**
      * Helper to create a list of Trader Vouchers file.
      *
-     * @param \App\Trader $trader
+     * @param Trader $trader
      * @param $vouchers
      * @param $title
      * @param null $date
-     * @return txt/csv File
+     * @return false|string
      */
     public function createVoucherListFile(Trader $trader, $vouchers, $title, $date = null)
     {
@@ -171,8 +200,8 @@ class TraderController extends Controller
             'trader' => $trader->name,
             // This is currently a nullable relation.
             'market' => $trader->market
-                 ? $trader->market->name
-                 : 'no associated market',
+                ? $trader->market->name
+                : 'no associated market',
             'vouchers' => [],
         ];
         foreach ($vouchers as $v) {
@@ -199,7 +228,7 @@ class TraderController extends Controller
                 [
                     $voucher['pended_on'],
                     $voucher['code'],
-                    $voucher['added_on']
+                    $voucher['added_on'],
                 ]
             );
         }
