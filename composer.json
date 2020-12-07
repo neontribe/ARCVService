@@ -20,7 +20,7 @@
     "fzaninotto/faker": "^1.9.1",
     "laravel/framework": "^6.19",
     "laravel/helpers": "^1.2",
-    "laravel/passport": "^7.0",
+    "laravel/passport": "^9.3.0",
     "laravel/tinker": "^2.0",
     "maennchen/zipstream-php": "^2.0",
     "moontoast/math": "^1.1",

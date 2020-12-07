@@ -97,9 +97,10 @@ class ApiRoutesTest extends TestCase
         ])->getContent();
 
         $this->assertEquals(json_decode($response, true), [
-            'error' => 'invalid_credentials',
-            'error_description' => 'The user credentials were incorrect.',
-            'message' => 'The user credentials were incorrect.',
+            'error' => 'invalid_grant',
+            'error_description' => 'The provided authorization grant (e.g., authorization code, resource owner credentials) or refresh token is invalid, expired, revoked, does not match the redirection URI used in the authorization request, or was issued to another client.',
+            'hint' => '',
+            'message' => 'The provided authorization grant (e.g., authorization code, resource owner credentials) or refresh token is invalid, expired, revoked, does not match the redirection URI used in the authorization request, or was issued to another client.',
         ]);
     }
 
