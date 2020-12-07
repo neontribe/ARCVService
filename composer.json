@@ -1,95 +1,95 @@
 {
-    "name": "neontribe/arcvservice",
-    "description": "ARCV Service",
-    "version": "1.11.0",
-    "keywords": [],
-    "license": "",
-    "type": "project",
-    "repositories": [
-      {
-        "type": "git",
-        "url": "https://github.com/neontribe/laravel-specification.git"
-      }
-    ],
-    "require": {
-        "php": "^7.2",
-        "barryvdh/laravel-debugbar": "^3.2",
-        "barryvdh/laravel-dompdf": "^0.8.1",
-        "doctrine/dbal": "^2.5",
-        "fruitcake/laravel-cors": "^2.0",
-        "fzaninotto/faker": "^1.9.1",
-        "laravel/framework": "^6.2",
-        "laravel/helpers": "^1.2",
-        "laravel/passport": "^7.0",
-        "laravel/tinker": "^2.0",
-        "maennchen/zipstream-php": "^2.0",
-        "moontoast/math": "^1.1",
-        "neontribe/laravel-specification": "dev-master",
-        "ramsey/uuid": "^3.7",
-        "sebdesign/laravel-state-machine": "^2.0",
-        "symfony/event-dispatcher": "^4.3",
-        "tom-lingham/searchy": "2.*",
-        "usmanhalalit/laracsv": "^2.0",
-        "ext-json": "*",
-        "ext-pdo": "*",
-        "ext-sodium": "*",
-        "ext-zip": "*"
-    },
-    "require-dev": {
-        "barryvdh/laravel-ide-helper": "^2.4",
-        "filp/whoops": "~2.0",
-        "laracasts/generators": "^1.1",
-        "laravel/browser-kit-testing": "~5.0",
-        "mockery/mockery": "^1.0",
-        "nunomaduro/collision": "^3.0",
-        "phpunit/phpunit": "^8.0",
-        "spinen/laravel-mail-assertions": "^1.0"
-    },
-    "autoload": {
-        "classmap": [
-            "database"
-        ],
-        "psr-4": {
-            "App\\": "app/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "App\\": "app/",
-            "Tests\\": "tests/"
-        }
-    },
-    "scripts": {
-        "post-root-package-install": [
-            "php -r \"file_exists('.env') || copy('.env.example', '.env');\""
-        ],
-        "post-create-project-cmd": [
-            "php artisan key:generate"
-        ],
-        "post-install-cmd": [
-            "Illuminate\\Foundation\\ComposerScripts::postInstall"
-        ],
-        "post-update-cmd": [
-            "Illuminate\\Foundation\\ComposerScripts::postUpdate",
-            "php artisan ide-helper:generate",
-            "php artisan ide-helper:meta"
-        ],
-        "post-autoload-dump": [
-            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover"
-        ]
-    },
-    "config": {
-        "preferred-install": "dist",
-        "sort-packages": true,
-        "optimize-autoloader": true,
-        "platform": {
-            "php" : "7.2"
-        }
-    },
-    "extra": {
-        "laravel": {
-            "dont-discover": []
-        }
+  "name": "neontribe/arcvservice",
+  "description": "ARCV Service",
+  "version": "1.11.0",
+  "keywords": [],
+  "license": "",
+  "type": "project",
+  "repositories": [
+    {
+      "type": "git",
+      "url": "https://github.com/neontribe/laravel-specification.git"
     }
+  ],
+  "require": {
+    "php": "^7.2",
+    "barryvdh/laravel-debugbar": "^3.2",
+    "barryvdh/laravel-dompdf": "^0.8.1",
+    "doctrine/dbal": "^2.5",
+    "fruitcake/laravel-cors": "^2.0",
+    "fzaninotto/faker": "^1.9.1",
+    "laravel/framework": "^6.19",
+    "laravel/helpers": "^1.2",
+    "laravel/passport": "^7.0",
+    "laravel/tinker": "^2.0",
+    "maennchen/zipstream-php": "^2.0",
+    "moontoast/math": "^1.1",
+    "neontribe/laravel-specification": "dev-master",
+    "ramsey/uuid": "^3.7",
+    "sebdesign/laravel-state-machine": "^2.0",
+    "symfony/event-dispatcher": "^4.3",
+    "tom-lingham/searchy": "2.*",
+    "usmanhalalit/laracsv": "^2.0",
+    "ext-json": "*",
+    "ext-pdo": "*",
+    "ext-sodium": "*",
+    "ext-zip": "*"
+  },
+  "require-dev": {
+    "barryvdh/laravel-ide-helper": "^2.4",
+    "filp/whoops": "~2.0",
+    "laracasts/generators": "^1.1",
+    "laravel/browser-kit-testing": "~5.0",
+    "mockery/mockery": "^1.0",
+    "nunomaduro/collision": "^3.0",
+    "phpunit/phpunit": "^8.0",
+    "spinen/laravel-mail-assertions": "^1.0"
+  },
+  "autoload": {
+    "classmap": [
+      "database"
+    ],
+    "psr-4": {
+      "App\\": "app/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "App\\": "app/",
+      "Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "post-root-package-install": [
+      "php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+    ],
+    "post-create-project-cmd": [
+      "php artisan key:generate"
+    ],
+    "post-install-cmd": [
+      "Illuminate\\Foundation\\ComposerScripts::postInstall"
+    ],
+    "post-update-cmd": [
+      "Illuminate\\Foundation\\ComposerScripts::postUpdate",
+      "php artisan ide-helper:generate",
+      "php artisan ide-helper:meta"
+    ],
+    "post-autoload-dump": [
+      "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+      "@php artisan package:discover"
+    ]
+  },
+  "config": {
+    "preferred-install": "dist",
+    "sort-packages": true,
+    "optimize-autoloader": true,
+    "platform": {
+      "php": "7.2.22"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "dont-discover": []
+    }
+  }
 }
