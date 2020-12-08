@@ -44,7 +44,7 @@ It also requires PHP's `zip` extension installed and enabled.
 
 
 ### Styling
-#### Service 
+#### Service
 - Service styling is in `resources/assets/sass/app.scss`
 - When amending the styles in development, switching to a new branch or pulling code, run `yarn watch` to watch for changes
 - Service is compiled from Sass with `yarn prod`
@@ -74,23 +74,23 @@ It also requires PHP's `zip` extension installed and enabled.
 # Copyright
 This project was developed by :
 
-Neontribe Ltd (registered in England and Wales #06165574) 
+Neontribe Ltd (registered in England and Wales #06165574)
 
 Under contract for
 
-Alexandra Rose Charity (registered in England and Wales #00279157) 
+Alexandra Rose Charity (registered in England and Wales #00279157)
 
-As such, unless otherwise specified in the appropriate component source, associated file or compiled asset, files in this project repository are Copyright &copy; (2020), Alexandra Rose Charity. All rights reserved.
+As such, unless otherwise specified in the appropriate component source, associated file or compiled asset, files in this project repository are Copyright &copy; (2021), Alexandra Rose Charity. All rights reserved.
 
 If you wish to discuss copyright or licensing issues, please contact:
 
 Alexandra Rose Charity
 
-c/o Wise & Co, 
-Wey Court West, 
-Union Road, 
-Farnham, 
-Surrey, 
+c/o Wise & Co,
+Wey Court West,
+Union Road,
+Farnham,
+Surrey,
 England,
 GU9 7PT
 
@@ -104,7 +104,7 @@ Framework - Laravel https://github.com/laravel/laravel \
 Licence - The Laravel framework is open-sourced software licensed under the MIT license.
 
 Third Party Packages
-- https://github.com/barryvdh/laravel-cors MIT Licence https://github.com/barryvdh/laravel-cors/blob/master/LICENSE 
+- https://github.com/barryvdh/laravel-cors MIT Licence https://github.com/barryvdh/laravel-cors/blob/master/LICENSE
 - https://github.com/barryvdh/laravel-dompdf MIT Licence https://opensource.org/licenses/MIT
 - https://github.com/doctrine/dbal MIT Licence https://github.com/doctrine/dbal/blob/master/LICENSE
 - https://github.com/Maatwebsite/Laravel-Excel LGPL https://docs.laravel-excel.com/2.1/getting-started/license.html
