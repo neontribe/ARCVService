@@ -24,7 +24,7 @@ class ChildIsSecondarySchoolAge extends BaseChildEvaluation
 
         $this->specification = new AndSpec(
             new IsBorn(),
-            new notSpec(new IsUnderStartDate($this->offsetDate, 12, config('arc.school_month')))
+            new NotSpec(new IsUnderStartDate($this->offsetDate, 12, config('arc.school_month')))
         );
     }
 

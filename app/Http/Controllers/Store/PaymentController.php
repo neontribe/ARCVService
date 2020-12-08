@@ -95,7 +95,9 @@ class PaymentController extends Controller
 
             // Transition the vouchers
             foreach ($vouchers as $v) {
-                $v->applyTransition('payout');
+                if ($v->transitionAllowed('payout')) {
+                    $v->applyTransition('payout');
+                }
             }
 
             // Count the payable vouchers
