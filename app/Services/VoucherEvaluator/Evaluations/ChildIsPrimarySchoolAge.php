@@ -26,7 +26,7 @@ class ChildIsPrimarySchoolAge extends BaseChildEvaluation
             new IsBorn(),
             new AndSpec(
                 // Not under primary school age ...
-                new notSpec(
+                new NotSpec(
                     new IsUnderStartDate($this->offsetDate, 5, config('arc.school_month'))
                 ),
                 // but _is_ under secondary school age
