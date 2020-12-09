@@ -79,9 +79,10 @@ class Trader extends Model
      */
     public function vouchersWithStatus($status = null)
     {
-        /** @var HasMany $q */
-        // Reminder; $q is going to be a builder object.
-        $q = $this->vouchers();
+        $q = DB::table('vouchers')->select('*')
+            ->where('trader_id', $this->id)
+            ->orderBy('updated_at', 'desc')
+        ;
 
         if (!empty($status)) {
             // Get the vouchers with given status, mapped to these states.
@@ -96,19 +97,20 @@ class Trader extends Model
                     $stateCondition = null;
                     break;
             }
-            // Get all the trader's vouchers that have a state record of $stateCondition
-            // Narrow down results to only distinct Ids
-            $statedVoucherIDs = DB::table('vouchers')->select('vouchers.id')->distinct()
-                ->leftJoin('voucher_states', 'vouchers.id', '=', 'voucher_states.voucher_id')
-                ->where('vouchers.trader_id', '=', $this->id)
-                ->where('voucher_states.to', $stateCondition)
-                ->pluck('id')->toArray();
 
-            // subtract them from the collected ones
-            $q = $q->whereNotIn('id', $statedVoucherIDs);
+            if ($stateCondition) {
+                $statedVoucherQuery = DB::table('vouchers')
+                    ->select('vouchers.id')
+                    ->distinct()
+                    ->leftJoin('voucher_states', 'vouchers.id', '=', 'voucher_states.voucher_id')
+                    ->where('vouchers.trader_id', $this->id)
+                    ->where('voucher_states.to', $stateCondition);
+
+                $q = $q->leftJoinSub($statedVoucherQuery, 'stated_vouchers', function ($join) {
+                    $join->on('vouchers.id', '=', 'stated_vouchers.id');
+                })->whereNull('stated_vouchers.id');
+            }
         }
-
-        // Finally, return our vouchers.
-        return $q->orderBy('updated_at', 'desc')->get();
+        return $q->get();
     }
 }
