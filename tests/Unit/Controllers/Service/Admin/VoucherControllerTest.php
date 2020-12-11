@@ -23,7 +23,8 @@ class VoucherControllerTest extends TestCase
         $this->market = factory(Market::class)->create();
     }
 
-    public function testStoreBatchWithoutStartEndSponsor() {
+    public function testStoreBatchWithoutStartEndSponsor()
+    {
         $this->actingAs($this->admin_user, 'admin')
             ->post(route('admin.vouchers.storebatch'), [
                 'sponsor_id' => '',
@@ -36,11 +37,11 @@ class VoucherControllerTest extends TestCase
                 'start' => 'The start field is required.',
                 'end' => 'The end field is required.',
                 'sponsor_id' => 'The sponsor id field is required.',
-            ])
-        ;
+            ]);
     }
 
-    public function testStoreBatchStartEndSwapped() {
+    public function testStoreBatchStartEndSwapped()
+    {
         $this->actingAs($this->admin_user, 'admin')
             ->post(route('admin.vouchers.storebatch'), [
                 'sponsor_id' => $this->market->sponsor_id,
@@ -51,11 +52,11 @@ class VoucherControllerTest extends TestCase
             ->assertSessionMissing('notification')
             ->assertSessionHasErrors([
                 'end-serial' => 'The end must be greater than or equal to start.',
-            ])
-        ;
+            ]);
     }
 
-    public function testStoreBatchInvalidSponsor() {
+    public function testStoreBatchInvalidSponsor()
+    {
         $this->actingAs($this->admin_user, 'admin')
             ->post(route('admin.vouchers.storebatch'), [
                 'sponsor_id' => $this->market->sponsor_id + 1,
@@ -64,15 +65,15 @@ class VoucherControllerTest extends TestCase
             ->assertSessionMissing('notification')
             ->assertSessionHasErrors([
                 'sponsor_id' => 'The selected sponsor id is invalid.',
-            ])
-        ;
+            ]);
     }
 
-    public function testStoreBatchSuccessMsg() {
+    public function testStoreBatchSuccessMsg()
+    {
         $shortcode = $this->market->sponsor_shortcode;
         $start = '1';
         $end = '10';
-        $notification_msg = trans('service.messages.vouchers_create.success',[
+        $notification_msg = trans('service.messages.vouchers_create.success', [
             'shortcode' => $shortcode,
             'start' => $start,
             'end' => $end,
@@ -84,11 +85,11 @@ class VoucherControllerTest extends TestCase
                 'end' => $end,
             ])
             ->assertStatus(302)
-            ->assertSessionHas('notification', $notification_msg)
-        ;
+            ->assertSessionHas('notification', $notification_msg);
     }
 
-    public function testStoreBatch() {
+    public function testStoreBatch()
+    {
         $shortcode = $this->market->sponsor_shortcode;
         $this->actingAs($this->admin_user, 'admin')
             ->post(route('admin.vouchers.storebatch'), [
@@ -96,14 +97,13 @@ class VoucherControllerTest extends TestCase
                 'start' => '50',
                 'end' => '59',
             ])
-            ->assertStatus(302)
-        ;
+            ->assertStatus(302);
 
         $vouchers = Voucher::all();
 
         // Assert that eleven vouchers have been made and are in the expected state and land within the expected range.
         $this->assertCount(10, $vouchers);
-        foreach($vouchers as $voucher) {
+        foreach ($vouchers as $voucher) {
             $this->assertEquals('printed', $voucher->currentstate);
 
             // Assert that the voucher code starts with the Sponsor shortcode.
@@ -114,4 +114,29 @@ class VoucherControllerTest extends TestCase
         }
     }
 
+    public function testItCanStoreZeroPaddedVouchersCorrectly()
+    {
+        $shortcode = $this->market->sponsor_shortcode;
+        $this->actingAs($this->admin_user, 'admin')
+            ->post(route('admin.vouchers.storebatch'), [
+                'sponsor_id' => $this->market->sponsor_id,
+                'start' => '9999',
+                'end' => '10001',
+            ])
+            ->assertStatus(302);
+
+        $vouchers = Voucher::all();
+
+        // Assert that 3 vouchers have been made and are in the expected state and land within the expected range.
+        $this->assertCount(3, $vouchers);
+        foreach ($vouchers as $voucher) {
+            $this->assertEquals('printed', $voucher->currentstate);
+
+            // Assert that the voucher code starts with the Sponsor shortcode.
+            $this->assertStringStartsWith($shortcode, $voucher->code);
+
+            // the voucher code must be padded to 5
+            $this->assertRegExp('/'. $shortcode . '(09999|10000|10001)$/', $voucher->code);
+        }
+    }
 }
