@@ -136,7 +136,7 @@ class VoucherControllerTest extends TestCase
             $this->assertStringStartsWith($shortcode, $voucher->code);
 
             // the voucher code must be padded to 5
-            $this->assertRegExp('/'. $shortcode . '(09999|10000|10001)$/', $voucher->code);
+            $this->assertRegExp('/' . $shortcode . '(09999|10000|10001)$/', $voucher->code);
         }
     }
 }
