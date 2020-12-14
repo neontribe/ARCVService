@@ -148,7 +148,7 @@ class VouchersController extends Controller
 
 
     /**
-     * Store Voucher range.
+     * Store a new Voucher range.
      *
      * @param AdminNewVoucherRequest $request
      * @return RedirectResponse
@@ -157,11 +157,10 @@ class VouchersController extends Controller
     {
         // Setup some variables
         $input = $request->all();
-        $user_id = auth()->id();
-        $user_type = class_basename(auth()->user());
         $sponsor = Sponsor::findOrFail($input['sponsor_id']);
         $now_time = Carbon::now();
         $maxStep = 1000;
+        // We're going to ignore what they typed and use the calculated serials.
         $start = $input['start-serial'];
         $end = $input['end-serial'];
 
@@ -201,10 +200,10 @@ class VouchersController extends Controller
             foreach ($currentChunk as $c) {
                 $v = new Voucher();
                 $v->code = $sponsor->shortcode .
-                // left pad the code to the length of the raw "end" with zeros.
+                // String pad to *5* places, eg 00001 to 09999 to 10000 to 10001
                     str_pad(
                         $c,
-                        strlen($input['end']),
+                        5,
                         "0",
                         STR_PAD_LEFT
                     );
