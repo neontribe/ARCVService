@@ -296,7 +296,7 @@ class Voucher extends Model
                     LEFT JOIN vouchers as v2
                         ON final_id = v2.id  
                         
-                    ORDER BY t1.start DESC
+                    ORDER BY t1.start
                     "
                 );
             });
