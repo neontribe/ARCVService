@@ -27,7 +27,7 @@ class AdminNewVoucherRequest extends FormRequest
         return  [
             // MUST be present, and exist in table
             'sponsor_id' => 'required|exists:sponsors,id',
-            // MUST be present, and a zero padded number string
+            // MUST be present, and an optionally zero padded number string
             'start' =>' required|string|regex:/^[0-9]+$/',
             'end' => 'required|string|regex:/^[0-9]+$/',
             // MUST be present, and integer and between 1 and 99999999
@@ -37,7 +37,7 @@ class AdminNewVoucherRequest extends FormRequest
         ];
     }
 
-    // We need to premangle before validating rules
+    // We need to pre-mangle before validating rules
     public function prepareForValidation()
     {
         // create integer versions to be checked
