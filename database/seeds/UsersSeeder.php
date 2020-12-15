@@ -60,5 +60,8 @@ class UsersSeeder extends Seeder
 
         // So we reliably have one user who can act on behalf of all traders.
         $users[3]->traders()->sync($traders);
+
+        // So we reliably have a specific user who cannot access the tap page
+        $users[1]->traders()->sync($traders[6]);
     }
 }
