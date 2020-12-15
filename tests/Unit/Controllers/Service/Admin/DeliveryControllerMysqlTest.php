@@ -3,6 +3,7 @@
 namespace Tests\Unit\Controllers\Service\Admin;
 
 use App\Centre;
+use App\Delivery;
 use App\Sponsor;
 use App\User;
 use App\Voucher;
@@ -17,6 +18,7 @@ class DeliveryControllerMysqlTest extends MysqlStoreTestCase
     protected $sponsor;
     protected $rangeCodes;
     protected $requestData;
+    protected $now;
 
     protected function setUp(): void
     {
@@ -42,15 +44,6 @@ class DeliveryControllerMysqlTest extends MysqlStoreTestCase
             'TST0305',
         ];
 
-        // set some data
-        $now = Carbon::today()->format('Y-m-d');
-        $this->requestData["TST0102-TST0104"] = [
-            'centre' => $this->centre->id,
-            'voucher-start' => 'TST0102',
-            'voucher-end' => 'TST0104',
-            'date-sent' => $now,
-        ];
-
         // Make a sponsor to match
         $this->sponsor = factory(Sponsor::class)->create(
             ['shortcode' => 'TST']
@@ -62,6 +55,14 @@ class DeliveryControllerMysqlTest extends MysqlStoreTestCase
         ]);
 
         $this->user = factory(User::class)->create();
+
+        $this->now = Carbon::today()->format('Y-m-d');
+        $this->requestData["TST0102-TST0104"] = [
+            'centre' => $this->centre->id,
+            'voucher-start' => 'TST0102',
+            'voucher-end' => 'TST0104',
+            'date-sent' => $this->now,
+        ];
 
         Auth::login($this->user);
 
@@ -106,21 +107,50 @@ class DeliveryControllerMysqlTest extends MysqlStoreTestCase
         // Check there are 3.
         $this->assertCount(3, $vouchers);
 
-        $vouchers->each(function ($v) use ($now) {
+        $vouchers->each(function ($v) {
             $this->assertNotNull($v->delivery);
             $this->assertEquals($this->centre->id, $v->delivery->centre->id);
-            $this->assertEquals($now, $v->delivery->dispatched_at->format('Y-m-d'));
+            $this->assertEquals($this->now, $v->delivery->dispatched_at->format('Y-m-d'));
         });
     }
 
     /** @test */
     public function testItCannotMakeADeliveryBecauseAVoucherIsDelivered()
     {
-        // Record a voucher
+        // Record a voucher on a delivery
         $v = Voucher::findByCode("TST0103");
+        $d = new Delivery([
+            'centre_id' => $this->centre->id,
+            'range' =>'TST0103-TST0103',
+            'dispatched_at' => $this->now,
+        ]);
+        $d->save();
+        $d->vouchers()->save($v);
 
-        // Add a spurious delivery number
-        $v->delivery_id = "10";
+
+        // Set some routes
+        $formRoute = route('admin.deliveries.create');
+        $requestRoute = route('admin.deliveries.store');
+
+        // Set the message to look for
+        $msg = trans('service.messages.vouchers_delivery.blocked');
+
+        // Make the patch
+        $this->actingAs($this->user, 'admin')
+            ->visit($formRoute)
+            ->post($requestRoute, $this->requestData["TST0102-TST0104"])
+            ->followRedirects()
+            ->seePageIs($formRoute)
+            ->see($msg)
+        ;
+    }
+
+    /** @test */
+    public function testItCannotMakeADeliveryBecauseAVoucherIsNotPrinted()
+    {
+        // Record a voucher that is recorded
+        $v = Voucher::findByCode("TST0103");
+        $v->currentstate="recorded";
         $v->save();
 
         // Set some routes
@@ -128,14 +158,14 @@ class DeliveryControllerMysqlTest extends MysqlStoreTestCase
         $requestRoute = route('admin.deliveries.store');
 
         // Set the message to look for
-        $msg = trans('service.messages.vouchers_delivery.failure');
+        $msg = trans('service.messages.vouchers_delivery.blocked');
 
         // Make the patch
         $this->actingAs($this->user, 'admin')
             ->visit($formRoute)
             ->post($requestRoute, $this->requestData["TST0102-TST0104"])
             ->followRedirects()
-            ->seePageIs($requestRoute)
+            ->seePageIs($formRoute)
             ->see($msg)
         ;
     }
