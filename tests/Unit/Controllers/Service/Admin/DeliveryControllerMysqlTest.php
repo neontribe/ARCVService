@@ -8,45 +8,19 @@ use App\User;
 use App\Voucher;
 use Auth;
 use Carbon\Carbon;
-use Config;
-use Exception;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Tests\StoreTestCase;
+use Tests\MysqlStoreTestCase;
 
-class DeliveryControllerMysqlTest extends StoreTestCase
+class DeliveryControllerMysqlTest extends MysqlStoreTestCase
 {
-    use DatabaseMigrations;
-
     protected $centre;
     protected $user;
     protected $sponsor;
     protected $rangeCodes;
-
-    // TODO : Consider pulling this out to a config option or environment variable
-    private const TESTING_MYSQL_FALLBACK = 'testing-mysql';
+    protected $requestData;
 
     protected function setUp(): void
     {
         parent::setUp();
-
-        // Fallback to the MySQL testing database if the default testing database doesn't use the MySQL driver
-        $connection = config('database.default');
-        $driver = config("database.connections.{$connection}.driver");
-        if ($driver !== 'mysql') {
-            $connection = self::TESTING_MYSQL_FALLBACK;
-            Config::set('database.default', $connection);
-        }
-
-        // Check we can connect to the database before we test. This test is effectively optional, so it would be rude
-        // to just error out
-        try {
-            $this->runDatabaseMigrations();
-        } catch (Exception $exception) {
-            $this->markTestSkipped(
-                'Raw queries with specific functions need the MySQL database "' . $connection .
-                '", but it was unavailable: ' . $exception->getMessage()
-            );
-        }
 
         $this->rangeCodes = [
             'TST0101',
@@ -68,6 +42,15 @@ class DeliveryControllerMysqlTest extends StoreTestCase
             'TST0305',
         ];
 
+        // set some data
+        $now = Carbon::today()->format('Y-m-d');
+        $this->requestData["TST0102-TST0104"] = [
+            'centre' => $this->centre->id,
+            'voucher-start' => 'TST0102',
+            'voucher-end' => 'TST0104',
+            'date-sent' => $now,
+        ];
+
         // Make a sponsor to match
         $this->sponsor = factory(Sponsor::class)->create(
             ['shortcode' => 'TST']
@@ -83,7 +66,7 @@ class DeliveryControllerMysqlTest extends StoreTestCase
         Auth::login($this->user);
 
         foreach ($this->rangeCodes as $rangeCode) {
-            $voucher = factory(Voucher::class, 'printed')->create([
+            factory(Voucher::class, 'printed')->create([
                 'code' => $rangeCode,
                 'sponsor_id' => $this->sponsor->id,
             ]);
@@ -95,15 +78,6 @@ class DeliveryControllerMysqlTest extends StoreTestCase
     /** @test */
     public function testItCanMakeADelivery()
     {
-        // The post data
-        $now = Carbon::today()->format('Y-m-d');
-
-        $data = [
-            'centre' => $this->centre->id,
-            'voucher-start' => 'TST0102',
-            'voucher-end' => 'TST0104',
-            'date-sent' => $now,
-        ];
 
         // Set some routes
         $formRoute = route('admin.deliveries.create');
@@ -118,7 +92,7 @@ class DeliveryControllerMysqlTest extends StoreTestCase
         // Make the patch
         $this->actingAs($this->user, 'admin')
             ->visit($formRoute)
-            ->post($requestRoute, $data)
+            ->post($requestRoute, $this->requestData["TST0102-TST0104"])
             ->followRedirects()
             ->seePageIs($successRoute)
             ->see($msg)
@@ -137,5 +111,32 @@ class DeliveryControllerMysqlTest extends StoreTestCase
             $this->assertEquals($this->centre->id, $v->delivery->centre->id);
             $this->assertEquals($now, $v->delivery->dispatched_at->format('Y-m-d'));
         });
+    }
+
+    /** @test */
+    public function testItCannotMakeADeliveryBecauseAVoucherIsDelivered()
+    {
+        // Record a voucher
+        $v = Voucher::findByCode("TST0103");
+
+        // Add a spurious delivery number
+        $v->delivery_id = "10";
+        $v->save();
+
+        // Set some routes
+        $formRoute = route('admin.deliveries.create');
+        $requestRoute = route('admin.deliveries.store');
+
+        // Set the message to look for
+        $msg = trans('service.messages.vouchers_delivery.failure');
+
+        // Make the patch
+        $this->actingAs($this->user, 'admin')
+            ->visit($formRoute)
+            ->post($requestRoute, $this->requestData["TST0102-TST0104"])
+            ->followRedirects()
+            ->seePageIs($requestRoute)
+            ->see($msg)
+        ;
     }
 }

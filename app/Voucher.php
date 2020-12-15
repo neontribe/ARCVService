@@ -135,16 +135,18 @@ class Voucher extends Model
      *
      * @return object|null
      */
-    private static function getContainingRange($start, $end, array $ranges)
+    private static function getContainingRange($start, $end, array $ranges): ?object
     {
         /** @var object $range */
         foreach ($ranges as $range) {
             // Are Start and End both in the range?
-            if ($start >= $range->start &&
-                $end <= $range->end &&
-                $start <= $end ) {
+            if ($start <= $end &&           // query is properly formed
+                $start >= $range->start &&  // our start is gte range start
+                $end <= $range->end         // our end is lte range end
+                ) {
+                // early return on success
                 return $range;
-            };
+            }
         }
         return null;
     }
@@ -183,9 +185,9 @@ class Voucher extends Model
      */
     public static function rangeIsDeliverable($rangeDef)
     {
-        $ranges = self::getDeliverableVoucherRangesByShortCode($rangeDef->shortcode);
-        $range = self::getContainingRange($rangeDef->start, $rangeDef->end, $ranges);
-        return (!is_null($range) && is_object($range));
+        $freeRangesArray = self::getDeliverableVoucherRangesByShortCode($rangeDef->shortcode);
+        $containingRange = self::getContainingRange($rangeDef->start, $rangeDef->end, $freeRangesArray);
+        return (!is_null($containingRange) && is_object($containingRange));
     }
 
     /**
@@ -454,7 +456,6 @@ class Voucher extends Model
                 DB::raw("cast(replace(code, '{$rangeDef->shortcode}', '') as signed)"),
                 [$rangeDef->start, $rangeDef->end]
             );
-
     }
 
     /**
