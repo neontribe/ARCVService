@@ -1,16 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\Service;
+namespace App\Http\Controllers\Service\Data;
 
 use App\Trader;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Collection;
 
 class TraderController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Trader[]|Collection
      */
     public function index()
     {

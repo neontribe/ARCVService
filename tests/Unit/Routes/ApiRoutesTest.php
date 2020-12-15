@@ -17,8 +17,6 @@ class ApiRoutesTest extends TestCase
 {
     use DatabaseMigrations;
 
-    public $mockConsoleOutput = false;
-
     protected $trader;
     protected $vouchers;
     protected $user;
@@ -26,6 +24,7 @@ class ApiRoutesTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->withoutMockingConsoleOutput();
         $this->trader = factory(Trader::class)->create();
         $this->vouchers = factory(Voucher::class, 'printed', 10)->create();
         $this->user = factory(User::class)->create();
