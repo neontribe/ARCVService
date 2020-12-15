@@ -6,6 +6,7 @@ use App\Market;
 use App\Voucher;
 use App\Trader;
 use App\User;
+use App\Sponsor;
 use App\Http\Controllers\API\TraderController;
 use Auth;
 use Carbon\Carbon;
@@ -56,20 +57,25 @@ class TraderControllerTest extends TestCase
      *
      * Asserts that the correct JSON structure is returned along with the correct market data.
      */
-    public function testTradersControllerIndex() {
+    public function testTradersControllerIndex()
+    {
         $trader = factory(Trader::class)->create(
             [
-                'market_id' => factory(Market::class)->create()->id,
+                'market_id' => factory(Market::class)->create([
+                    'sponsor_id' => factory(Sponsor::class)->create(["can_tap" => false])->id,
+                ])->id,
             ]
         );
 
         $this->user->traders()->sync([$trader->id]);
+
         $response = $this->actingAs($this->user, 'api')
             ->get(route('api.traders', $trader->id));
         $response->assertStatus(200);
-        // This is not as good as the assertJsonStructure but that requires phpunit 7.5
-        // And the mail assertions won't let us upgrade.  This will need to be revisited
-        // in the future.
+        /**
+         * TODO: This is not as good as the assertJsonStructure but that requires phpunit 7.5
+         * * And the mail assertions won't let us upgrade.  This will need to be revisited in the future.
+        */
         $response->assertJsonPath("0.id", 3);
         $response->assertJsonPath("0.market_id", 1);
         $response->assertJsonPath("0.id", 3);
@@ -135,7 +141,8 @@ class TraderControllerTest extends TestCase
             ->assertStatus(202)
             ->assertJson([
                 'message' => trans(
-                    'api.messages.email_voucher_history_date', [
+                    'api.messages.email_voucher_history_date',
+                    [
                         'date' => $date,
                     ]
                 )
