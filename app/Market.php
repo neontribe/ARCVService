@@ -3,6 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Market extends Model
@@ -37,15 +39,6 @@ class Market extends Model
     ];
 
     /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
-    protected $hidden = [
-        'sponsor',
-    ];
-
-    /**
      * The attributes to append to the model's array form.
      *
      * @var array
@@ -55,13 +48,23 @@ class Market extends Model
     ];
 
     /**
-     * Get the sponsor belonging to this market.
+     * Get the sponsor this market belongs to.
      *
-     * @return \App\Sponsor
+     * @return BelongsTo
      */
     public function sponsor()
     {
-        return $this->belongsTo('App\Sponsor');
+        return $this->belongsTo(Sponsor::class);
+    }
+
+    /**
+     * Get the traders this market has.
+     *
+     * @return HasMany
+     */
+    public function traders()
+    {
+        return $this->hasMany(Trader::class);
     }
 
     /**

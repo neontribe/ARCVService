@@ -17,6 +17,8 @@
                 <tr>
                     <th>Name</th>
                     <th>Area</th>
+                    <th>Traders</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -24,6 +26,22 @@
                     <tr>
                         <td>{{ $market->name }}</td>
                         <td>{{ $market->sponsor->name }}</td>
+                        <td>
+                            @if ($market->traders()->count() > 0)
+                            <ul>
+                            @foreach ($market->traders as $trader)
+                                <li>{{ $trader->name }}</li>
+                            @endforeach
+                            </ul>
+                            @endif
+                        </td>
+                        <td>
+                            <a href="{{ route('admin.markets.edit', ['id' => $market->id ]) }}" class="link">
+                                <div class="link-button link-button-small">
+                                    <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Edit
+                                </div>
+                            </a>
+                        </td>
                     </tr>
                 @endforeach
             </tbody>

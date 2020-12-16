@@ -10,7 +10,7 @@ class MarketsController extends Controller
 {
     public function index()
     {
-        $markets = Market::get();
+        $markets = Market::with(['sponsor', 'traders'])->get();
         return view('service.markets.index', compact('markets'));
     }
 
