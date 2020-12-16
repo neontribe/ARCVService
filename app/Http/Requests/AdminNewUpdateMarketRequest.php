@@ -30,7 +30,7 @@ class AdminNewUpdateMarketRequest extends FormRequest
             // MUST be present, integer, in table
             'sponsor' => 'required|integer|exists:sponsors,id',
             // MUST be present, string, 160 max length
-            'payment_pending' => 'required|string|max:160',
+            'payment_message' => 'required|string|max:160',
         ];
     }
 }
