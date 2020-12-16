@@ -8,20 +8,14 @@ use App\Child;
 use App\Family;
 use App\Registration;
 use Carbon\Carbon;
-use Config;
 use Exception;
 use Tests\CreatesApplication;
-use Tests\StoreTestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\MysqlStoreTestCase;
 use URL;
 
-class SearchPageFuzzyTest extends StoreTestCase
+class SearchPageFuzzyTest extends MysqlStoreTestCase
 {
     use CreatesApplication;
-    use DatabaseMigrations;
-
-    // TODO : Consider pulling this out to a config option or environment variable
-    private const TESTING_MYSQL_FALLBACK = 'testing-mysql';
 
     // A centre and user to make registrations for and search with
     private $centre;
@@ -30,25 +24,6 @@ class SearchPageFuzzyTest extends StoreTestCase
     public function setUp(): void
     {
         parent::setUp();
-
-        // Fallback to the MySQL testing database if the default testing database doesn't use the MySQL driver
-        $connection = config('database.default');
-        $driver = config("database.connections.{$connection}.driver");
-        if ($driver !== 'mysql') {
-            $connection = self::TESTING_MYSQL_FALLBACK;
-            Config::set('database.default', $connection);
-        }
-
-        // Check we can connect to the database before we test. This test is effectively optional, so it would be rude
-        // to just error out
-        try {
-            $this->runDatabaseMigrations();
-        } catch (Exception $exception) {
-            $this->markTestSkipped(
-                'Fuzzy searching with TomLingham/Laravel-Searchy needs the MySQL database "' . $connection .
-                '", owing to complex conditionals, but it was unavailable: ' . $exception->getMessage()
-            );
-        }
 
         // Create a centre and user that we can act as
         $this->centre = factory(Centre::class)->create();
@@ -61,13 +36,11 @@ class SearchPageFuzzyTest extends StoreTestCase
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
     }
 
-    /** @test */
     public function itCanSearchForExactMatches()
     {
         $this->markTestIncomplete("This test has not been implemented but likely can be");
     }
 
-    /** @test */
     public function itCanSearchForStartOfStringMatches()
     {
         $this->markTestIncomplete("This test has not been implemented yet but likely can be");
@@ -97,25 +70,21 @@ class SearchPageFuzzyTest extends StoreTestCase
         $this->dontSee("Ivan Raimi");
     }
 
-    /** @test */
     public function itCanSearchForConsecutiveMatches()
     {
         $this->markTestIncomplete("This test has not been implemented yet but likely can be");
     }
 
-    /** @test */
     public function itCanSearchForStarOfWordMarches()
     {
         $this->markTestIncomplete("This test has not been implemented yet but likely can be");
     }
 
-    /** @test */
     public function itCanSearchForStudlyCaseMatches()
     {
         $this->markTestIncomplete("This test has not been implemented yet but likely can be");
     }
 
-    /** @test */
     public function itCanSearchForSubstringMatches()
     {
         $this->markTestIncomplete("This test has not been implemented yet but likely can be");

@@ -62,7 +62,6 @@ class DeliveriesController extends Controller
         // Check the voucher range is clear to be delivered.
         if (!Voucher::rangeIsDeliverable($rangeDef)) {
             // Whoops! Some of the vouchers may have been delivered
-            // TODO : report problem voucher ranges.
             return redirect()
                 ->route('admin.deliveries.create')
                 ->withInput()
