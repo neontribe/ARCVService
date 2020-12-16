@@ -54,6 +54,16 @@ EOD;
         }
 
         $traders = Auth::user()->traders;
+        foreach ($traders as $trader) {
+            $sponsor = $trader->market->sponsor;
+            if ($sponsor->can_tap === false) {
+                $trader->featureOverride = (object)[
+                    "pageAccess" => (object)[
+                        "tap" => false
+                    ]
+                ];
+            }
+        }
 
         return response()->json($traders, 200);
     }

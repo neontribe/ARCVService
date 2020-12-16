@@ -10,6 +10,8 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use App\Voucher;
 use App\Trader;
 use App\User;
+use App\Market;
+use App\Sponsor;
 use Auth;
 use DB;
 
@@ -105,10 +107,8 @@ class ApiRoutesTest extends TestCase
     }
 
     /** REQUIRES AUTH ------------------------------------------------- */
-
     public function testShowTraderVouchersRoute()
     {
-
         // This user is not associated with Trader 1.
         $this->actingAs($this->user, 'api')
             ->json('GET', route('api.trader.vouchers', 1))
@@ -120,7 +120,7 @@ class ApiRoutesTest extends TestCase
         $this->actingAs($this->user, 'api')
             ->json('GET', route('api.trader.vouchers', 1))
             ->assertHeader('Content-Type', 'application/json')
-            ->assertJsonStructure([ 0 => [
+            ->assertJsonStructure([0 => [
                 'code', 'updated_at'
             ]])
         ;
@@ -138,7 +138,7 @@ class ApiRoutesTest extends TestCase
     {
         // Get a valid code.
         $code = $this->vouchers[0]->code;
-        $payload= [
+        $payload = [
             'transition' => 'collect',
             'trader_id' => 1,
             'vouchers' => [
@@ -157,7 +157,7 @@ class ApiRoutesTest extends TestCase
     {
         // Make up a bogus code.
         $code = 'BAD88888888';
-        $payload= [
+        $payload = [
             'transition' => 'collect',
             'trader_id' => 1,
             'vouchers' => [
@@ -176,7 +176,7 @@ class ApiRoutesTest extends TestCase
     {
         // Get the code already in recorded state.
         $code = $this->vouchers[1]->code;
-        $payload= [
+        $payload = [
             'transition' => 'collect',
             'trader_id' => 1,
             'vouchers' => [
@@ -188,8 +188,7 @@ class ApiRoutesTest extends TestCase
             ->json('POST', route('api.voucher.transition'), $payload)
             ->assertStatus(200)
             ->assertJson([
-                'warning'
-                => trans('api.errors.voucher_own_dupe', [
+                'warning' => trans('api.errors.voucher_own_dupe', [
                     'code' => $code
                 ])
             ])
@@ -202,7 +201,7 @@ class ApiRoutesTest extends TestCase
         $this->vouchers[1]->trader_id = 2;
         $this->vouchers[1]->save();
         $code = $this->vouchers[1]->code;
-        $payload= [
+        $payload = [
             'transition' => 'collect',
             'trader_id' => 1,
             'vouchers' => [
@@ -214,8 +213,7 @@ class ApiRoutesTest extends TestCase
             ->json('POST', route('api.voucher.transition'), $payload)
             ->assertStatus(200)
             ->assertJson([
-                'warning'
-                => trans('api.errors.voucher_other_dupe', [
+                'warning' => trans('api.errors.voucher_other_dupe', [
                     'code' => $code
                 ])
             ])
@@ -253,7 +251,7 @@ class ApiRoutesTest extends TestCase
         $this->vouchers[2]->save();
         $code = $this->vouchers[2]->code;
 
-        $payload= [
+        $payload = [
             'transition' => 'collect',
             'trader_id' => 1,
             'vouchers' => [
@@ -272,7 +270,7 @@ class ApiRoutesTest extends TestCase
     {
         // Get a valid code.
         $code = $this->vouchers[0]->code;
-        $payload= [
+        $payload = [
             'transition' => 'collect',
             'trader_id' => 1,
             'vouchers' => [
@@ -296,7 +294,7 @@ class ApiRoutesTest extends TestCase
 
     public function testUnauthenticatedDontCollectVoucherRoute()
     {
-        $payload= [
+        $payload = [
             'transition' => 'collect',
             'trader_id' => 1,
             'vouchers' => [
@@ -311,7 +309,7 @@ class ApiRoutesTest extends TestCase
 
     public function testCantCollectVoucherOnBehalfOfNotOwnTraderRoute()
     {
-        $payload= [
+        $payload = [
             'transition' => 'collect',
             'trader_id' => 1,
             'vouchers' => [
@@ -329,8 +327,16 @@ class ApiRoutesTest extends TestCase
 
     public function testUserCanSeeOwnTraders()
     {
-        factory(Trader::class, 5)->create();
-        $this->user->traders()->sync([1,2,3]);
+        $sponsor = factory(Sponsor::class)->create();
+        $market = factory(Market::class)->create(["sponsor_id" => $sponsor->id]);
+        $traders = factory(Trader::class, 5)->create()->each(
+            function ($t) use ($market) {
+                $t->market_id = $market->id;
+                $t->save();
+            }
+        );
+
+        $this->user->traders()->sync($traders);
         $this->actingAs($this->user, 'api')
             ->json('GET', route('api.traders'))
             ->assertJsonStructure([['id', 'name', 'pic_url', 'market_id']])
