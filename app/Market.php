@@ -10,7 +10,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Market extends Model
 {
     use SoftDeletes;
+
     protected $dates = ['deleted_at'];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -21,12 +23,6 @@ class Market extends Model
         'location',
         'sponsor_id',
         'payment_message',
-    ];
-
-    protected $rules = [
-        'payment_message' => [
-            'required',
-        ],
     ];
 
     /**

@@ -11,8 +11,6 @@ use Auth;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\StoreTestCase;
 
-// Base on this for laravel browser kit testing.
-
 class ServiceRoutesTest extends StoreTestCase
 {
     use DatabaseMigrations;
@@ -46,9 +44,11 @@ class ServiceRoutesTest extends StoreTestCase
             'admin.centreusers.store' => [],
             'admin.centres.store' => [],
             'admin.deliveries.store' => [],
+            'admin.markets.store' => [],
         ],
         'PUT' => [
             'admin.centreusers.update' => ['id' => 1],
+            'admin.markets.update' => ['id' => 1],
         ],
     ];
 
