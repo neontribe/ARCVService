@@ -11,7 +11,8 @@ return [
         ],
         'vouchers_delivery' => [
             'blocked' => 'The voucher range given contains some vouchers that have already been delivered',
-            'success' => 'Delivery to :centre_name created'
+            'success' => 'Delivery to :centre_name created',
+            'failure' => 'Database error, unable to create a delivery'
         ],
     ],
 ];
