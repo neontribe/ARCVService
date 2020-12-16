@@ -29,10 +29,12 @@
                 </div>
             </div>
             <div class="horizontal-container">
-                <label for="payment_message">Voucher return message</label>
-                <textarea id="payment_message" name="payment_message">Please post your vouchers to the project office marked with your stall name and today's date.</textarea>
+                <div>
+                    <label for="payment_message" class="required">Voucher return message</label>
+                    <textarea id="payment_message" name="payment_message" rows=5 maxlength=160>Please post your vouchers to the project office marked with your stall name and today's date.</textarea>
+                </div>
             </div>
-            <button type="submit" id="createMarket">Save Market</button>
+            <button type="submit" id="updateMarket">Save Market</button>
         </form>
     </div>
 </div>

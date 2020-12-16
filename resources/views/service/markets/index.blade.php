@@ -20,7 +20,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($centres as $centre)
+                @foreach ($markets as $market)
                     <tr>
                         <td>{{ $market->name }}</td>
                         <td>{{ $market->sponsor->name }}</td>

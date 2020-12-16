@@ -77,6 +77,21 @@ h1 {
   .select {
     margin-bottom: 2em;
   }
+
+  textarea {
+    border: 2px solid $arc_border;
+    background-color: $arc_white;
+    border-radius: 3px;
+    font-size: 1em;
+    margin-bottom: 2em;
+    line-height: 20px;
+    padding: 0 10px;
+    &:focus {
+      border: 2px solid $arc_focus;
+      outline: none;
+    }
+  }
+
   .checkbox-group {
     position: relative;
     padding-left: 55px;

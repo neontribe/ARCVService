@@ -9,17 +9,19 @@
 
             <p>Edit a Market</p>
 
-            <form role="form" class="styled-form" method="POST" action="{{ route('admin.markets.update') }}">
+            <form role="form" class="styled-form" method="POST"
+                  action="{{ route('admin.markets.update', ['id' => $market->id]) }}">
                 @method('put')
                 @csrf
                 <div class="horizontal-container">
                     <div class="select">
                         <label for="sponsor">Area</label>
-                        <select name="sponsor" id="sponsor" class="{{ $errors->has('sponsor') ? 'error' : '' }}" required>
+                        <select name="sponsor" id="sponsor" class="{{ $errors->has('sponsor') ? 'error' : '' }}"
+                                required>
                             <option value="">Choose one</option>
                             @foreach ($sponsors as $sponsor)
                                 <option value="{{ $sponsor->id }}"
-                                    @if($sponsor->selected === true)
+                                        @if($sponsor->id === $market->sponsor->id)
                                         selected
                                     @endif
                                 >{{ $sponsor->name }}</option>
@@ -35,10 +37,12 @@
                     </div>
                 </div>
                 <div class="horizontal-container">
-                    <label for="payment_message">Voucher return message</label>
-                    <textarea id="payment_message" name="payment_message">{{ $market->payment_message }} </textarea>
+                    <div>
+                        <label for="payment_message" class="required">Voucher return message</label>
+                        <textarea id="payment_message" name="payment_message" rows=5 maxlength=160>{{ $market->payment_message }}</textarea>
+                    </div>
                 </div>
-                <button type="submit" id="createMarket">Save Market</button>
+                <button type="submit" id="updateMarket">Save Market</button>
             </form>
         </div>
     </div>
