@@ -72,6 +72,11 @@ class TraderControllerTest extends TestCase
         $response = $this->actingAs($this->user, 'api')
             ->get(route('api.traders', $trader->id));
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            [
+                "id", "name", "pic_url", "market_id", "featureOverride"
+            ]
+        ]);
         /**
          * TODO: This is not as good as the assertJsonStructure but that requires phpunit 7.5
          * * And the mail assertions won't let us upgrade.  This will need to be revisited in the future.
@@ -85,7 +90,6 @@ class TraderControllerTest extends TestCase
             'sponsor_shortcode' => $trader->market->sponsor_shortcode,
             'payment_message' => $trader->market->payment_message,
         ]);
-        dd($response);
     }
 
     public function testShowVoucherHistoryCompilesListOfPaymentHistory()
