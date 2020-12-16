@@ -85,6 +85,7 @@ class TraderControllerTest extends TestCase
             'sponsor_shortcode' => $trader->market->sponsor_shortcode,
             'payment_message' => $trader->market->payment_message,
         ]);
+        dd($response);
     }
 
     public function testShowVoucherHistoryCompilesListOfPaymentHistory()
