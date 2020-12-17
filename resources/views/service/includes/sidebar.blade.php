@@ -16,6 +16,8 @@
         <li><a href="{{ url('/sponsors/create') }}"><span class="glyphicon glyphicon-plus"></span>Add areas</a></li>
         <li><a href="{{ url('/markets') }}"><span class="glyphicon glyphicon-th-list"></span>View markets</a></li>
         <li><a href="{{ url('/markets/create') }}"><span class="glyphicon glyphicon-plus"></span>Add markets</a></li>
+        <li><a href="{{ url('/traders') }}"><span class="glyphicon glyphicon-th-list"></span>View traders</a></li>
+        <li><a href="{{ url('/traders/create') }}"><span class="glyphicon glyphicon-plus"></span>Add traders</a></li>
 
         @unless(Config('app.url') === 'https://voucher-admin.alexandrarose.org.uk')
         <li>{{ Session::get('message') }}</li>

@@ -61,7 +61,6 @@ class TradersController extends Controller
      */
     public function create()
     {
-        // Get our list of markets, like centres
         $marketsBySponsor = Sponsor::with(['markets:sponsor_id,id,name'])->get(['id', 'name']);
         return view('service.traders.create', compact('marketsBySponsor'));
     }
@@ -69,12 +68,12 @@ class TradersController extends Controller
     /**
      * Show the edit form
      *
-     * @param $id
+     * @param int $id
      * @return Application|Factory|View
      */
-    public function edit($id)
+    public function edit(int $id)
     {
-        $trader = Trader::findOrFail($id)->with('users');
+        $trader = Trader::with(['users','market'])->find($id);
         $marketsBySponsor = Sponsor::with(['markets:sponsor_id,id,name'])->get(['id', 'name']);
         return view('service.traders.edit', compact('marketsBySponsor', 'trader'));
     }
