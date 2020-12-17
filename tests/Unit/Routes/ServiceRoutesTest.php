@@ -5,9 +5,10 @@ namespace Tests\Unit\Routes;
 use App\AdminUser;
 use App\Centre;
 use App\CentreUser;
+use App\Market;
+use App\Sponsor;
 use Auth;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-// Base on this for laravel browser kit testing.
 use Tests\StoreTestCase;
 
 class ServiceRoutesTest extends StoreTestCase
@@ -34,20 +35,27 @@ class ServiceRoutesTest extends StoreTestCase
             'admin.centre_neighbours.index' => ['id' => 1],
             'admin.sponsors.index' => [],
             'admin.sponsors.create' => [],
+            'admin.markets.index' => [],
+            'admin.markets.create' => [],
+            'admin.markets.edit' => ['id' => 1],
         ],
         'POST' => [
             'admin.vouchers.storebatch' => [],
             'admin.centreusers.store' => [],
             'admin.centres.store' => [],
             'admin.deliveries.store' => [],
+            'admin.markets.store' => [],
         ],
         'PUT' => [
             'admin.centreusers.update' => ['id' => 1],
-        ]
+            'admin.markets.update' => ['id' => 1],
+        ],
     ];
 
     private $adminUser;
     private $centreUser;
+    private $sponsor;
+    private $market;
 
     public function setUp(): void
     {
@@ -58,6 +66,10 @@ class ServiceRoutesTest extends StoreTestCase
         // Map centres on.
         $this->centreUser->centres()->sync([$centres->shift()->id => ['homeCentre' => true]]);
         $this->centreUser->centres()->sync($centres->pluck('id')->all(), false);
+
+        // Add a sponsor and some markets
+        $this->sponsor = factory(Sponsor::class)->create();
+        $this->market = factory(Market::class)->create(['sponsor_id' => $this->sponsor->id]);
     }
 
     /** @test */
@@ -66,16 +78,14 @@ class ServiceRoutesTest extends StoreTestCase
         $this->actingAs($this->adminUser, 'admin')
             ->post(route('admin.logout'))
             ->followRedirects()
-            ->seeRouteIs('admin.login')
-        ;
+            ->seeRouteIs('admin.login');
     }
 
     /** @test */
     public function testServiceLoginPageRoute()
     {
         $this->get(route('admin.login'))
-            ->assertResponseStatus(200)
-        ;
+            ->assertResponseStatus(200);
     }
 
     /** @test */
@@ -85,7 +95,7 @@ class ServiceRoutesTest extends StoreTestCase
 
         foreach ($this->authAdminRoutes as $method => $routes) {
             foreach ($routes as $route => $params) {
-                // Check an unauth'd user can't get there
+                // Check an unauthenticated user can't get there
                 Auth::logout();
                 $response = $this
                     ->makeRequest($method, route($route, $params))
@@ -100,8 +110,7 @@ class ServiceRoutesTest extends StoreTestCase
                 // Check an auth'd user can get there.
                 $response = $this->actingAs($this->adminUser, 'admin')
                     ->followRedirects()
-                    ->call($method, route($route, $params))
-                ;
+                    ->call($method, route($route, $params));
 
                 // And it's not 403, 404, 500, or a redirect-to-login.
                 $this->assertFalse($response->isNotFound());

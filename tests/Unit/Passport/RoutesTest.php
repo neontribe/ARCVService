@@ -11,14 +11,14 @@ class RoutesTest extends TestCase
 {
     use DatabaseMigrations;
 
-    public $mockConsoleOutput = false;
-
     protected $user;
     protected $client;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->withoutMockingConsoleOutput();
+
         $this->user = factory(User::class)->create();
         $this->artisan('passport:client', [
             '--no-interaction' => true,

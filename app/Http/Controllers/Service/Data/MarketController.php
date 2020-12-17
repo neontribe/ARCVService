@@ -1,16 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\Service;
+namespace App\Http\Controllers\Service\Data;
 
 use App\Market;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Collection;
 
 class MarketController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Market[]|Collection
      */
     public function index()
     {

@@ -2,6 +2,11 @@
 
 namespace Tests\Unit\Routes;
 
+use App\AdminUser;
+use App\Market;
+use App\Trader;
+use App\User;
+use App\Voucher;
 use Config;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
@@ -11,21 +16,25 @@ class DataRoutesTest extends TestCase
     use DatabaseMigrations;
 
     protected $vouchers;
+    protected $users;
+    protected $markets;
+    protected $traders;
+    protected $admin;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->vouchers = factory(\App\Voucher::class, 10)->create();
-        $this->users = factory(\App\User::class, 2)->create();
-        $this->markets = factory(\App\Market::class, 2)->create();
-        $this->traders = factory(\App\Trader::class, 5)->create();
-        $this->admin = factory(\App\AdminUser::class)->create();
+        $this->vouchers = factory(Voucher::class, 10)->create();
+        $this->users = factory(User::class, 2)->create();
+        $this->markets = factory(Market::class, 2)->create();
+        $this->traders = factory(Trader::class, 5)->create();
+        $this->admin = factory(AdminUser::class)->create();
     }
 
     // These routes are not public.
     public function testVouchersIndexRouteNotAuthd()
     {
-        $this->get(route('vouchers.index'))
+        $this->get(route('data.vouchers.index'))
             ->assertStatus(302);
     }
 
@@ -33,7 +42,7 @@ class DataRoutesTest extends TestCase
     public function testVouchersIndexRouteAuthdAdmin()
     {
         $this->actingAs($this->admin, 'admin')
-            ->get(route('vouchers.index'))
+            ->get(route('data.vouchers.index'))
             ->assertStatus(200)
             ->assertJsonStructure([0 => [
                 'id', 'trader_id', 'code', 'currentstate', 'sponsor_id'
@@ -44,7 +53,7 @@ class DataRoutesTest extends TestCase
     public function testVouchersIndexRouteAuthdApi()
     {
         $this->actingAs($this->users[0], 'api')
-            ->get(route('vouchers.index'))
+            ->get(route('data.vouchers.index'))
             ->assertStatus(302);
     }
 
@@ -52,7 +61,7 @@ class DataRoutesTest extends TestCase
     public function testVouchersShowRoute()
     {
         $this->actingAs($this->admin, 'admin')
-            ->get(route('vouchers.show', $this->vouchers[0]))
+            ->get(route('data.vouchers.show', $this->vouchers[0]))
             ->assertStatus(200)
             ->assertJsonStructure([
                 'id', 'trader_id', 'code', 'currentstate', 'sponsor_id'
@@ -62,7 +71,7 @@ class DataRoutesTest extends TestCase
     public function testUsersIndexRoute()
     {
         $this->actingAs($this->admin, 'admin')
-            ->get(route('users.index'))
+            ->get(route('data.users.index'))
             ->assertStatus(200)
             ->assertJsonStructure([0 => [
                 'id', 'name', 'email'
@@ -72,7 +81,7 @@ class DataRoutesTest extends TestCase
     public function testMarketsIndexRoute()
     {
         $this->actingAs($this->admin, 'admin')
-            ->get(route('markets.index'))
+            ->get(route('data.markets.index'))
             ->assertStatus(200)
             ->assertJsonStructure([0 => [
                 'id', 'name', 'location', 'sponsor_id'
@@ -82,7 +91,7 @@ class DataRoutesTest extends TestCase
     public function testTradersIndexRoute()
     {
         $this->actingAs($this->admin, 'admin')
-            ->get(route('traders.index'))
+            ->get(route('data.traders.index'))
             ->assertStatus(200)
             ->assertJsonStructure([0 => [
                 'id', 'name', 'pic_url', 'market_id'
@@ -96,10 +105,10 @@ class DataRoutesTest extends TestCase
         $models = ['vouchers', 'users', 'markets', 'traders'];
         foreach ($models as $model) {
             $this->actingAs($this->admin, 'admin')
-                ->get(route($model . '.index'))
+                ->get(route('data.' . $model . '.index'))
                 ->assertStatus(418);
         }
-        $this->get(route('vouchers.show', $this->vouchers[0]))
+        $this->get(route('data.vouchers.show', $this->vouchers[0]))
                 ->assertStatus(418);
     }
 }
