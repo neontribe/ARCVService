@@ -4,6 +4,8 @@ namespace App;
 
 use DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
@@ -11,6 +13,7 @@ use Illuminate\Support\Collection;
 class Trader extends Model
 {
     use SoftDeletes;
+
     protected $dates = ['deleted_at'];
 
     /**
@@ -38,27 +41,27 @@ class Trader extends Model
      * @var array
      */
     protected $with = [
-        'market'
+        'market',
     ];
-
-    /**
-     * Get the vouchers belonging to this trader.
-     *
-     * @return Voucher collection
-     */
-    public function vouchers()
-    {
-        return $this->hasMany('App\Voucher');
-    }
 
     /**
      * Get the market this trader belongs to.
      *
-     * @return Market
+     * @return BelongsTo
      */
     public function market()
     {
-        return $this->belongsTo('App\Market');
+        return $this->belongsTo(Market::class);
+    }
+
+    /**
+     * Get the users this trader employs
+     *
+     * @return BelongsToMany
+     */
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
     }
 
     /**
@@ -73,6 +76,16 @@ class Trader extends Model
     }
 
     /**
+     * Get the vouchers belonging to this trader.
+     *
+     * @return HasMany
+     */
+    public function vouchers()
+    {
+        return $this->hasMany(Voucher::class);
+    }
+
+    /**
      * Vouchers submitted by this trader that have a given status.
      * @param null $status
      * @return Collection
@@ -81,8 +94,7 @@ class Trader extends Model
     {
         $q = DB::table('vouchers')->select('*')
             ->where('trader_id', $this->id)
-            ->orderBy('updated_at', 'desc')
-        ;
+            ->orderBy('updated_at', 'desc');
 
         if (!empty($status)) {
             // Get the vouchers with given status, mapped to these states.

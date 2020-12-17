@@ -47,7 +47,17 @@ class Sponsor extends Model
      */
     public function centres()
     {
-        return $this->hasMany('App\Centre');
+        return $this->hasMany(Centre::class);
+    }
+
+    /**
+     * Get the Sponsors Markets
+     *
+     * @return HasMany
+     */
+    public function markets()
+    {
+        return $this->hasMany(Market::class);
     }
 
     /**
