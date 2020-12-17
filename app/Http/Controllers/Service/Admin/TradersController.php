@@ -7,7 +7,6 @@ use App\Http\Requests\AdminNewTraderRequest;
 use App\Http\Requests\AdminUpdateTraderRequest;
 use App\Trader;
 use App\Sponsor;
-use Exception;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
@@ -43,7 +42,7 @@ class TradersController extends Controller
             $trader = DB::transaction(function () use ($request) {
                 // do store
             });
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             // Oops! Log that
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getTraceAsString());
@@ -82,18 +81,18 @@ class TradersController extends Controller
 
     /**
      * Update the trader AND set the users
+     *
      * @param AdminUpdateTraderRequest $request
-     * @param $id
+     * @param int $id
      * @return RedirectResponse
-     * @throws Throwable
      */
-    public function update(AdminUpdateTraderRequest $request, $id)
+    public function update(AdminUpdateTraderRequest $request, int $id)
     {
         try {
             $trader = DB::transaction(function () use ($request, $id) {
                 // Do update
             });
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             // Oops! Log that
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getTraceAsString());
