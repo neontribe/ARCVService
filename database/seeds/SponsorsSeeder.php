@@ -42,6 +42,10 @@ class SponsorsSeeder extends Seeder
 
         // 4MAY20-VC1-CH1P-HA-012020 is in sponsor 5, unmodified
         // 1MAY20a-VC2-CH1-HI-042019 is in sponsor 5, unmodified
+
+        $noTapSponsor = factory(App\Sponsor::class)->create(['name' => "No Tap Project", "can_tap" => false]);
+        $noTapSponsor->evaluations()->saveMany($this->qualifyPrimarySchoolers());
+        $noTapSponsor->evaluations()->saveMany($this->veryfiesKids());
     }
 
     public function veryfiesKids()

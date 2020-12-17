@@ -135,16 +135,18 @@ class Voucher extends Model
      *
      * @return object|null
      */
-    private static function getContainingRange($start, $end, array $ranges)
+    private static function getContainingRange($start, $end, array $ranges): ?object
     {
         /** @var object $range */
         foreach ($ranges as $range) {
             // Are Start and End both in the range?
-            if ($start >= $range->start &&
-                $end <= $range->end &&
-                $start <= $end ) {
+            if ($start <= $end &&           // query is properly formed
+                $start >= $range->start &&  // our start is gte range start
+                $end <= $range->end         // our end is lte range end
+                ) {
+                // early return on success
                 return $range;
-            };
+            }
         }
         return null;
     }
@@ -183,9 +185,9 @@ class Voucher extends Model
      */
     public static function rangeIsDeliverable($rangeDef)
     {
-        $ranges = self::getDeliverableVoucherRangesByShortCode($rangeDef->shortcode);
-        $range = self::getContainingRange($rangeDef->start, $rangeDef->end, $ranges);
-        return (!is_null($range) && is_object($range));
+        $freeRangesArray = self::getDeliverableVoucherRangesByShortCode($rangeDef->shortcode);
+        $containingRange = self::getContainingRange($rangeDef->start, $rangeDef->end, $freeRangesArray);
+        return (!is_null($containingRange) && is_object($containingRange));
     }
 
     /**
@@ -221,7 +223,7 @@ class Voucher extends Model
             return DB::transaction(function () use ($shortcode) {
 
                 // Set some important variables for the query. breaks SQLlite.
-                DB::statement(DB::raw('SET @initial_id=0, @start=0, @previous=0;'));
+                DB::statement(DB::raw('SET @t5initialId=0, @t5start=0, @t5previous=0, @t4initialId=0, @t4start=0, @t4previous=0;'));
 
                 /* This seems to be the fastest way to find the start and end of each "range" of vouchers;
                  * in this case specified by vouchers that are not in deliveries.
@@ -232,6 +234,7 @@ class Voucher extends Model
                  * - initial_code; the code associated with the start
                  * - id; the voucher id of the end
                  * - initial_id; the voucher id of the start
+                 * - size; the number of vouchers in the range
                  */
                 // TODO: convert to eloquent
                 return DB::select(
@@ -239,49 +242,49 @@ class Voucher extends Model
                     SELECT
                         # Resolves the sub-queries operation to a table of ranges
                         t1.*,
-                        v1.code as intitial_code,
-                        v2.code as final_code
+                        v1.code as initial_code,
+                        v2.code as final_code,
+                        (t1.end - t1.start) + 1 as size 
                     FROM (
                         SELECT
                             # Variables! allows us to compare the _actual_ start ranges of vouchers.
-                            @start := if(end - @previous = 1, @start, end) as start,
-                            @initial_id := if(end - @previous = 1, @initial_id, id) as initial_id,
-                            @previous := end as end,
+                            @t5start := if(end - @t5previous = 1, @t5start, end) as start,
+                            @t5initialId := if(end - @t5previous = 1, @t5initialId, id) as initial_id,
+                            @t5previous := end as end,
                             id as final_id
                         FROM (
-                            # sub-query that gets the vouchers in a state we want under a specific shortcode.
-                            SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as end
+                            # T5 sub-query that gets the vouchers in a state we want under a specific shortcode.
+                            SELECT cast(replace(code, '{$shortcode}', '') as signed) as end, id
                             FROM vouchers
                             WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                               AND currentstate = 'printed'
                               AND delivery_id is null
-                            ORDER BY end
-
+                            ORDER BY end, id
                         ) as t5
-
+                        ORDER by start, end
                     ) AS t1
                         INNER JOIN (
                             # Bit of a self join going on in this one to find the end values.
                             SELECT start, max(end) as final
                             FROM (
-                                 # Look familiar? should do, it's the same as the above, for a comaprative join.
+                                 # Look familiar? should do, it's the same as the above, for a comparative join.
                                  SELECT
-                                     @start := if(end - @previous = 1, @start, end) as start,
-                                     @initial_id := if(end - @previous = 1, @initial_id, id) as initial_id,
-                                     @previous := end as end,
+                                     @t4start := if(end - @t4previous = 1, @t4start, end) as start,
+                                     @t4initialId := if(end - @t4previous = 1, @t4initialId, id) as initial_id,
+                                     @t4previous := end as end,
                                      id
                                  FROM (
-                                      SELECT id, cast(replace(code, '{$shortcode}', '') as signed) as end
+                                      SELECT cast(replace(code, '{$shortcode}', '') as signed) as end, id
                                       FROM vouchers
                                       WHERE code REGEXP '^{$shortcode}[0-9]+\$'
                                         AND currentstate = 'printed'
                                         AND delivery_id is null
-                                      ORDER BY end
-
+                                      ORDER BY end, id
                                  ) as t4
 
                             ) as t3
                             GROUP BY start
+                            ORDER BY start
 
                         ) as t2
                         ON t1.start = t2.start
@@ -291,7 +294,9 @@ class Voucher extends Model
                         ON initial_id = v1.id
 
                     LEFT JOIN vouchers as v2
-                        ON final_id = v2.id
+                        ON final_id = v2.id  
+                        
+                    ORDER BY t1.start
                     "
                 );
             });
@@ -451,7 +456,6 @@ class Voucher extends Model
                 DB::raw("cast(replace(code, '{$rangeDef->shortcode}', '') as signed)"),
                 [$rangeDef->start, $rangeDef->end]
             );
-
     }
 
     /**
