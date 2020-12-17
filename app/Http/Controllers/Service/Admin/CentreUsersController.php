@@ -34,17 +34,30 @@ class CentreUsersController extends Controller
         $field = $request->input('orderBy', null);
         $direction = $request->input('direction', null);
 
-        if ($field === 'name') {
-            //sort the orderby
-            $workers = CentreUser::orderByField([
-                'orderBy' => $field,
-                'direction' => $direction
-            ])->get();
-        } elseif ($field === 'homeCentre' && $direction === 'desc') {
-            $workers = CentreUser::get()->sortByDesc('homeCentre.name');
-        } else {
-            $workers = CentreUser::get()->sortBy('homeCentre.name');
+        switch (true) {
+            case ($field === 'name'):
+                $workers = CentreUser::orderByField([
+                    'orderBy' => $field,
+                    'direction' => $direction
+                ])->get();
+                break;
+            case ($field === 'homeCentreArea' and $direction === 'desc'):
+                $workers = CentreUser::get()->sortByDesc('homeCentre.sponsor.name');
+                break;
+            case ($field === 'homeCentreArea' and $direction === 'asc'):
+                $workers = CentreUser::get()->sortBy('homeCentre.sponsor.name');
+                break;
+            case ($field === 'homeCentre' and $direction === 'desc'):
+                $workers = CentreUser::get()->sortByDesc('homeCentre.name');
+                break;
+            default:
+                $workers = CentreUser::get()->sortBy(function ($item) {
+                    $homeCentre = $item->homeCentre;
+                    return $homeCentre->sponsor->name . '#' . $homeCentre->name . '#' . $item->name;
+                });
         }
+
+        $sponsors = Sponsor::get();
 
         $page = LengthAwarePaginator::resolveCurrentPage();
         $perPage = 15;
@@ -60,7 +73,7 @@ class CentreUsersController extends Controller
             ]
         );
 
-        return view('service.centreusers.index', compact('workers'));
+        return view('service.centreusers.index', compact('workers', 'sponsors'));
     }
 
     /**

@@ -91,6 +91,7 @@ class ServiceWorkersPageTest extends StoreTestCase
             ->seeInElement('h1', 'Workers')
             ->seeInElement('th', 'Name')
             ->seeInElement('th', 'Email Address')
+            ->seeInElement('th', 'Home Centre Area')
             ->seeInElement('th', 'Home Centre')
             ->seeInElement('th', 'Alternative Centres')
             ->seeInElement('th', 'Edit')
