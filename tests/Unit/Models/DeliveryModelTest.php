@@ -53,7 +53,7 @@ class DeliveryModelTest extends TestCase
         $dispatchedBundle = $this->delivery;
 
         $dispatchedBundle->dispatched_at = Carbon::now()->startOfDay();
-        $dispatchedBundle->centre = $centre->id;
+        $dispatchedBundle->centre_id = $centre->id;
 
         $this->assertIsInt($dispatchedBundle->centre_id);
         $this->assertInstanceOf(Carbon::class, $dispatchedBundle->dispatched_at);

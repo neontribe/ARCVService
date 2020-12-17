@@ -1,17 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\Service;
+namespace App\Http\Controllers\Service\Data;
 
 use App\Http\Controllers\Controller;
 use App\Voucher;
-use Illuminate\Http\Response;
 
 class VoucherController extends Controller
 {
     /**
      * Display a listing of Vouchers.
      *
-     * @return json
+     * @return mixed
      */
     public function index()
     {
@@ -21,10 +20,9 @@ class VoucherController extends Controller
 
     /**
      * Display the specified Voucher.
-     * Todo this will change
      *
-     * @param  Voucher $voucher
-     * @return Response
+     * @param Voucher $voucher
+     * @return Voucher
      */
     public function show(Voucher $voucher)
     {
