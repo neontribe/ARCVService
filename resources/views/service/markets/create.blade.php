@@ -31,7 +31,7 @@
             <div class="horizontal-container">
                 <div>
                     <label for="payment_message" class="required">Voucher return message</label>
-                    <textarea id="payment_message" name="payment_message" rows=5 maxlength=160>Please post your vouchers to the project office marked with your stall name and today's date.</textarea>
+                    <textarea id="payment_message" name="payment_message" rows=5 maxlength=160 class="{{ $errors->has('payment_message') ? 'error' : '' }}">Please post your vouchers to the project office marked with your stall name and today's date.</textarea>
                 </div>
             </div>
             <button type="submit" id="updateMarket">Save Market</button>
