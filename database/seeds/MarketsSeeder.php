@@ -38,6 +38,12 @@ class MarketsSeeder extends Seeder
                 'name' => "Cedar Terrace",
                 'payment_message' => 'Please mark your vouchers with the stall name and return to the office.',
             ],
+            [
+                'name' => "No Tap Farm",
+                'location' => 'Happy Farm',
+                'sponsor_id' => 7,
+                'payment_message' => 'Please post your vouchers to the office.',
+            ],
         ];
 
         foreach ($marketsData as $market) {

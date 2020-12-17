@@ -20,6 +20,7 @@ class Sponsor extends Model
     protected $fillable = [
         'name',
         'shortcode',
+        'can_tap'
     ];
 
     /**
@@ -28,6 +29,15 @@ class Sponsor extends Model
      * @var array
      */
     protected $hidden = [
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'can_tap' => 'boolean',
     ];
 
     /**

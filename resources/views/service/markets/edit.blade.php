@@ -7,7 +7,7 @@
 
             <h1>Edit Market</h1>
 
-            <p>Edit a Market</p>
+            <p>Change a market's name, area and payment message.</p>
 
             <form role="form" class="styled-form" method="POST"
                   action="{{ route('admin.markets.update', ['id' => $market->id]) }}">
