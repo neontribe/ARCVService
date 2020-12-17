@@ -7,6 +7,7 @@ use App\Centre;
 use App\CentreUser;
 use App\Market;
 use App\Sponsor;
+use App\Trader;
 use Auth;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\StoreTestCase;
@@ -38,6 +39,9 @@ class ServiceRoutesTest extends StoreTestCase
             'admin.markets.index' => [],
             'admin.markets.create' => [],
             'admin.markets.edit' => ['id' => 1],
+            'admin.traders.index' => [],
+            'admin.traders.create' => [],
+            'admin.traders.edit' => ['id' => 1],
         ],
         'POST' => [
             'admin.vouchers.storebatch' => [],
@@ -45,10 +49,12 @@ class ServiceRoutesTest extends StoreTestCase
             'admin.centres.store' => [],
             'admin.deliveries.store' => [],
             'admin.markets.store' => [],
+            'admin.traders.store' => [],
         ],
         'PUT' => [
             'admin.centreusers.update' => ['id' => 1],
             'admin.markets.update' => ['id' => 1],
+            'admin.traders.update' => ['id' => 1],
         ],
     ];
 
@@ -56,6 +62,7 @@ class ServiceRoutesTest extends StoreTestCase
     private $centreUser;
     private $sponsor;
     private $market;
+    private $trader;
 
     public function setUp(): void
     {
@@ -67,9 +74,10 @@ class ServiceRoutesTest extends StoreTestCase
         $this->centreUser->centres()->sync([$centres->shift()->id => ['homeCentre' => true]]);
         $this->centreUser->centres()->sync($centres->pluck('id')->all(), false);
 
-        // Add a sponsor and some markets
+        // Add a sponsor, markets and a trader
         $this->sponsor = factory(Sponsor::class)->create();
         $this->market = factory(Market::class)->create(['sponsor_id' => $this->sponsor->id]);
+        $this->trader = factory(Trader::class)->create(['market_id' => $this->market->id]);
     }
 
     /** @test */
