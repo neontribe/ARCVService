@@ -36,6 +36,10 @@ class TradersSeeder extends Seeder
                 'name' => "Sally's Fruit Stall",
                 'market_id' => 5,
             ],
+            [
+                'name' => "Jane's Farm Produce",
+                'market_id' => 6
+            ],
         ];
 
         foreach ($tradersData as $trader) {

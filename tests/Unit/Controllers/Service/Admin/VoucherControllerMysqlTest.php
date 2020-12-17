@@ -6,44 +6,17 @@ use App\Sponsor;
 use App\User;
 use App\Voucher;
 use Auth;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Config;
-use Exception;
-use Tests\StoreTestCase;
+use Tests\MysqlStoreTestCase;
 
-class VoucherControllerMysqlTest extends StoreTestCase
+class VoucherControllerMysqlTest extends MysqlStoreTestCase
 {
-    use DatabaseMigrations;
-
     protected $user;
     protected $sponsor;
     protected $rangeCodes;
 
-    // TODO : Consider pulling this out to a config option or environment variable
-    private const TESTING_MYSQL_FALLBACK = 'testing-mysql';
-
     protected function setUp(): void
     {
         parent::setUp();
-
-        // Fallback to the MySQL testing database if the default testing database doesn't use the MySQL driver
-        $connection = config('database.default');
-        $driver = config("database.connections.{$connection}.driver");
-        if ($driver !== 'mysql') {
-            $connection = self::TESTING_MYSQL_FALLBACK;
-            Config::set('database.default', $connection);
-        }
-
-        // Check we can connect to the database before we test. This test is effectively optional, so it would be rude
-        // to just error out
-        try {
-            $this->runDatabaseMigrations();
-        } catch (Exception $exception) {
-            $this->markTestSkipped(
-                'Raw queries with specific functions need the MySQL database "' . $connection .
-                '", but it was unavailable: ' . $exception->getMessage()
-            );
-        }
 
         $this->rangeCodes = [
             'TST0101',
