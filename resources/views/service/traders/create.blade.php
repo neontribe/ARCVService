@@ -58,8 +58,9 @@
                         >
                         @include('service.partials.validationMessages', ['inputName' => 'location'])
                     </div>
-                    <hr>
                 </div>
+                <hr>
+                @include('service.partials.addTraderUser')
                 <button type="submit" id="updateMarket">Save Trader</button>
             </form>
         </div>
