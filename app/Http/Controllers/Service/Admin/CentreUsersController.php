@@ -57,8 +57,6 @@ class CentreUsersController extends Controller
                 });
         }
 
-        $sponsors = Sponsor::get();
-
         $page = LengthAwarePaginator::resolveCurrentPage();
         $perPage = 15;
         $offset = ($page * $perPage) - $perPage;
@@ -73,7 +71,7 @@ class CentreUsersController extends Controller
             ]
         );
 
-        return view('service.centreusers.index', compact('workers', 'sponsors'));
+        return view('service.centreusers.index', compact('workers'));
     }
 
     /**
@@ -236,7 +234,10 @@ class CentreUsersController extends Controller
 
     public function download()
     {
-        $workers = CentreUser::get()->sortBy('name')->sortBy('homeCentre.name');
+        $workers = CentreUser::get()->sortBy(function ($item) {
+                    $homeCentre = $item->homeCentre;
+                    return $homeCentre->sponsor->name . '#' . $homeCentre->name . '#' . $item->name;
+                });
 
         $csvExporter = new Export();
 
@@ -257,6 +258,7 @@ class CentreUsersController extends Controller
         $header = [
             'name' => 'Name',
             'email' => 'E-mail Address',
+            'homeCentre.sponsor.name' => 'Home Centre Area',
             'homeCentre.name' => 'Home Centre',
             'alternative_centres' => 'Alternative Centre',
             'downloaderRole' => 'Downloader'

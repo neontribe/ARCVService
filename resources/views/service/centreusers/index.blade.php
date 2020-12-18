@@ -47,11 +47,7 @@
                 <tr>
                     <td>{{ $worker->name }}</td>
                     <td>{{ $worker->email }}</td>
-                    @foreach ($sponsors as $sponsor)
-                    @if ($worker->homeCentre->sponsor_id === $sponsor->id)
-                    <td> {{ $sponsor->name}}</td>
-                    @endif
-                    @endforeach
+                    <td> {{ $worker->homeCentre->sponsor->name }}</td>
                     <td>{{ $worker->homeCentre->name }}</td>
                     <td>
                         <ul class="table-list">
