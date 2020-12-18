@@ -3,12 +3,16 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Market extends Model
 {
     use SoftDeletes;
+
     protected $dates = ['deleted_at'];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -21,12 +25,6 @@ class Market extends Model
         'payment_message',
     ];
 
-    protected $rules = [
-        'payment_message' => [
-            'required',
-        ],
-    ];
-
     /**
      * The attributes that should be cast to native types.
      *
@@ -34,15 +32,6 @@ class Market extends Model
      */
     protected $casts = [
         'sponsor_id' => 'int',
-    ];
-
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
-    protected $hidden = [
-        'sponsor',
     ];
 
     /**
@@ -55,13 +44,23 @@ class Market extends Model
     ];
 
     /**
-     * Get the sponsor belonging to this market.
+     * Get the sponsor this market belongs to.
      *
-     * @return \App\Sponsor
+     * @return BelongsTo
      */
     public function sponsor()
     {
-        return $this->belongsTo('App\Sponsor');
+        return $this->belongsTo(Sponsor::class);
+    }
+
+    /**
+     * Get the traders this market has.
+     *
+     * @return HasMany
+     */
+    public function traders()
+    {
+        return $this->hasMany(Trader::class);
     }
 
     /**

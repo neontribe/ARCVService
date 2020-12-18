@@ -130,4 +130,26 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.deliveries.store',
         'uses' => 'Admin\DeliveriesController@store',
     ]);
+
+    // Market Management
+    Route::get('markets', [
+        'as' => 'admin.markets.index',
+        'uses' => 'Admin\MarketsController@index',
+    ]);
+    Route::get('markets/create', [
+        'as' => 'admin.markets.create',
+        'uses' => 'Admin\MarketsController@create',
+    ]);
+    Route::post('markets', [
+        'as' => 'admin.markets.store',
+        'uses' => 'Admin\MarketsController@store',
+    ]);
+    Route::get('markets/{id}/edit', [
+        'as' => 'admin.markets.edit',
+        'uses' => 'Admin\MarketsController@edit',
+    ]);
+    Route::put('markets/{id}', [
+        'as' => 'admin.markets.update',
+        'uses' => 'Admin\MarketsController@update',
+    ]);
 });

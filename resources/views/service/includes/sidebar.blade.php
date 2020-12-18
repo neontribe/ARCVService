@@ -14,15 +14,17 @@
         <li><a href="{{ url('/centres/create') }}"><span class="glyphicon glyphicon-plus"></span>Add children's centres</a></li>
         <li><a href="{{ url('/sponsors') }}"><span class="glyphicon glyphicon-th-list"></span>View areas</a></li>
         <li><a href="{{ url('/sponsors/create') }}"><span class="glyphicon glyphicon-plus"></span>Add areas</a></li>
+        <li><a href="{{ url('/markets') }}"><span class="glyphicon glyphicon-th-list"></span>View markets</a></li>
+        <li><a href="{{ url('/markets/create') }}"><span class="glyphicon glyphicon-plus"></span>Add markets</a></li>
 
         @unless(Config('app.url') === 'https://voucher-admin.alexandrarose.org.uk')
         <li>{{ Session::get('message') }}</li>
         <li>Service data endpoints</li>
-        <li><a href="{{ route('vouchers.index') }}"><span class="glyphicon glyphicon-cog"></span>Vouchers</a></li>
-        <li><a href="{{ route('users.index') }}"><span class="glyphicon glyphicon-cog"></span>Users</a></li>
-        <li><a href="{{ route('traders.index') }}"><span class="glyphicon glyphicon-cog"></span>Traders</a></li>
-        <li><a href="{{ route('markets.index') }}"><span class="glyphicon glyphicon-cog"></span>Markets</a></li>
-        <li class="danger"><a href="{{ url('/data/reset-data') }}"><span class="glyphicon glyphicon-cog"></span>Reset data</a></li>
+        <li><a href="{{ route('data.vouchers.index') }}"><span class="glyphicon glyphicon-cog"></span>Vouchers</a></li>
+        <li><a href="{{ route('data.users.index') }}"><span class="glyphicon glyphicon-cog"></span>Users</a></li>
+        <li><a href="{{ route('data.traders.index') }}"><span class="glyphicon glyphicon-cog"></span>Traders</a></li>
+        <li><a href="{{ route('data.markets.index') }}"><span class="glyphicon glyphicon-cog"></span>Markets</a></li>
+        <li class="danger"><a href="{{ route('data.reset') }} }}"><span class="glyphicon glyphicon-cog"></span>Reset data</a></li>
         @endUnless
     </ul>
 

@@ -4,6 +4,8 @@ namespace Tests\Unit\Models;
 
 use App\Market;
 use App\Sponsor;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
@@ -36,7 +38,13 @@ class MarketModelTest extends TestCase
 
     public function testMarketBelongsToSponsor()
     {
+        $this->assertInstanceOf(BelongsTo::class, $this->market->sponsor());
         $this->assertInstanceOf(Sponsor::class, $this->market->sponsor);
+    }
+
+    public function testMarketCanHaveManyTraders()
+    {
+        $this->assertInstanceOf(HasMany::class, $this->market->traders());
     }
 
     public function testGetSponsorShortcodeAttribute()
