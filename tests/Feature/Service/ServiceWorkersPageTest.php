@@ -109,12 +109,12 @@ class ServiceWorkersPageTest extends StoreTestCase
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->workersRoute)
-            ->seeInElementAtPos('tbody tr', $this->userHomeCentreNoAlt['name'], 0)
-            ->seeInElementAtPos('tbody tr td', $this->userHomeCentreNoAlt['email'], 1)
-            ->seeInElementAtPos('tbody tr', $this->userHomeCentreTwoAlt['name'], 1)
-            ->seeInElementAtPos('tbody tr td', $this->userHomeCentreTwoAlt['email'], 7)
-            ->seeInElementAtPos('tbody tr', $this->downloaderUser['name'], 2)
-            ->seeInElementAtPos('tbody tr td', $this->downloaderUser['email'], 13)
+            ->seeInElementAtPos('tbody tr', $this->downloaderUser['name'], 0)
+            ->seeInElementAtPos('tbody tr td', $this->downloaderUser['email'], 1)
+            ->seeInElementAtPos('tbody tr', $this->userHomeCentreNoAlt['name'], 1)
+            ->seeInElementAtPos('tbody tr td', $this->userHomeCentreNoAlt['email'], 8)
+            ->seeInElementAtPos('tbody tr', $this->userHomeCentreTwoAlt['name'], 2)
+            ->seeInElementAtPos('tbody tr td', $this->userHomeCentreTwoAlt['email'], 15)
         ;
     }
 

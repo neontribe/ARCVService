@@ -235,9 +235,9 @@ class CentreUsersController extends Controller
     public function download()
     {
         $workers = CentreUser::get()->sortBy(function ($item) {
-                    $homeCentre = $item->homeCentre;
-                    return $homeCentre->sponsor->name . '#' . $homeCentre->name . '#' . $item->name;
-                });
+            $homeCentre = $item->homeCentre;
+            return $homeCentre->sponsor->name . '#' . $homeCentre->name . '#' . $item->name;
+        });
 
         $csvExporter = new Export();
 
@@ -250,7 +250,8 @@ class CentreUsersController extends Controller
             $worker->downloaderRole = $worker->downloader ? 'Yes' : 'No';
             foreach ($worker->centres as $centre) {
                 if ($centre->id !== $worker->homeCentre->id) {
-                    $worker->alternative_centres = $centre->name;
+                    $centreNames[] = $centre->name;
+                    $worker->alternative_centres = implode(', ', $centreNames);
                 }
             }
         });
