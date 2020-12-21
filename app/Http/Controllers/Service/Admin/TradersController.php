@@ -11,6 +11,7 @@ use App\User;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -115,10 +116,17 @@ class TradersController extends Controller
      *
      * @return Application|Factory|View
      */
-    public function create()
+    public function create(Request $request)
     {
+        // Do a quick validate
+        $validData = $request->validate([
+            'market' => 'integer|exists:markets,id',
+        ]);
+
+        $preselected = $validData['market'] ?? null;
+
         $marketsBySponsor = Sponsor::with(['markets:sponsor_id,id,name'])->get(['id', 'name']);
-        return view('service.traders.create', compact('marketsBySponsor'));
+        return view('service.traders.create', compact('marketsBySponsor', 'preselected'));
     }
 
     /**

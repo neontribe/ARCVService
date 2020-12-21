@@ -27,7 +27,11 @@
                             @foreach ($marketsBySponsor as $sponsor)
                                 <optgroup label="{{ $sponsor->name }}">
                                     @foreach ($sponsor->markets as $market)
-                                        <option value="{{ $market->id }}">{{ $market->name }}</option>
+                                        <option value="{{ $market->id }}"
+                                            @if(is_numeric($preselected) && (int)$preselected === $market->id)
+                                                SELECTED
+                                            @endif
+                                        >{{ $market->name }}</option>
                                     @endforeach
                                 </optgroup>
                             @endforeach
@@ -52,7 +56,7 @@
                 @include('service.partials.addTraderUser')
                 <hr>
                 <div class="horizontal-container">
-                    <button type="submit" id="updateMarket">Save Trader</button>
+                    <button type="submit" id="updateMarket">Save Trader  {{ $preselected }}</button>
                 </div>
             </form>
         </div>
