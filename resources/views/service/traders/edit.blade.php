@@ -59,7 +59,7 @@
                                id="location"
                                name="location"
                                value="{{ $trader->location }}"
-                               class="{{ $errors->has('name') ? 'error' : '' }}"
+                               class="{{ $errors->has('trader') ? 'error' : '' }}"
                                maxlength="160"
                                required
                         >

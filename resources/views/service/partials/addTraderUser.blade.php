@@ -25,6 +25,7 @@
     </div>
 </div>
 <div id="trader-users-list" class="horizontal-container callout" >
+    @if(!empty($users))
     @foreach ($users as $user)
         <span class="user-array">
             <input name="users[ {{ $user->id }} ][id]" type="hidden" value="{{ $user->id }}" >
@@ -37,6 +38,7 @@
             </div>
         </span>
     @endforeach
+    @endif
 </div>
 
 

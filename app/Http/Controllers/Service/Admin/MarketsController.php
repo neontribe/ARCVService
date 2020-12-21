@@ -60,7 +60,7 @@ class MarketsController extends Controller
             return redirect()->route('admin.markets.create')->withErrors('Creation failed - DB Error.');
         }
         return redirect()
-            ->route('admin.marketa.index')
+            ->route('admin.markets.index')
             ->with('message', 'Market ' . $market->name . ' created');
     }
 
