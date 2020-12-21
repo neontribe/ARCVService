@@ -21,7 +21,8 @@
                         <select name="sponsor"
                                 id="sponsor"
                                 class="{{ $errors->has('sponsor') ? 'error' : '' }}"
-                                required>
+                                required
+                        >
                             <option value="">Choose one</option>
                             @foreach ($sponsors as $sponsor)
                                 <option value="{{ $sponsor->id }}"
