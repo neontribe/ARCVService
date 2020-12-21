@@ -72,6 +72,27 @@ class MarketsPageTest extends StoreTestCase
     }
 
     /** @test */
+    public function eachMarketHasAnAddTraderButton()
+    {
+        $this->actingAs($this->adminUser, 'admin')
+            ->visit($this->marketsRoute);
+
+        $sortedMarkets = $this->markets->sortBy(function ($market) {
+            return $market->sponsor->name . '#' .
+                $market->name;
+        })->values();
+
+        foreach ($sortedMarkets as $mindex => $market) {
+            $this->seeInElement(
+                'tbody tr:nth-child(' .
+                ($mindex + 1) .
+                ') td:nth-child(3)',
+                route('admin.traders.create', ['market' => $market->id])
+            );
+        }
+    }
+
+    /** @test */
     public function itShowsCorrectTradersForEachMarket()
     {
         $this->actingAs($this->adminUser, 'admin')
