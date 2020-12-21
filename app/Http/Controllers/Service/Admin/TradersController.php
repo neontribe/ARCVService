@@ -48,7 +48,6 @@ class TradersController extends Controller
                 // make a trader
                 $t = Trader::create([
                     'name' => $request->name,
-                    'location' => $request->location,
                     'market_id' => $m->id,
                 ]);
 
@@ -148,8 +147,12 @@ class TradersController extends Controller
                 $t->fill([
                     'name' => $request->input('name'),
                     'email' => $request->input('email'),
-                    'location' => $request->input('location')
                 ])->save();
+
+                // get our trader's original user IDs.
+                $origUserIds = $t->users()
+                    ->pluck('id')
+                    ->toArray();
 
                 // get our updated or new users as ids
                 $userIds = $this->createOrUpdateUsersFromInput(
@@ -157,19 +160,18 @@ class TradersController extends Controller
                     (array)$request->get('users')
                 );
 
-                // get our trader's original user IDs.
-                $origUserIds = $t->users()
-                    ->pluck('id')
-                    ->toArray();
-
                 // users should be an array; sync them to our trader
                 $t->users()->sync($userIds);
 
-                // remove any users that have just been deleted and have *no other* traders
-                User::whereIn('id', $origUserIds)
-                    ->withCount("traders")
+                // find any users that have just been deleted and have *no other* traders
+                $orphanUsers = User::whereIn('id', $origUserIds)
+                    ->withCount('traders')
                     ->having('traders_count', '=', 0)
-                    ->delete();
+                    ->pluck('id')
+                    ->toArray();
+
+                // remove them
+                User::whereIn('id', $orphanUsers)->delete();
 
                 return $t;
             });

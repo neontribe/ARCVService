@@ -47,17 +47,6 @@
                         >
                         @include('service.partials.validationMessages', ['inputName' => 'name'])
                     </div>
-                    <div>
-                        <label for="name" class="required">Trader Stall Location</label>
-                        <input type="text"
-                               id="location"
-                               name="location"
-                               class="{{ $errors->has('name') ? 'error' : '' }}"
-                               maxlength="160"
-                               required
-                        >
-                        @include('service.partials.validationMessages', ['inputName' => 'location'])
-                    </div>
                 </div>
                 <hr>
                 @include('service.partials.addTraderUser')

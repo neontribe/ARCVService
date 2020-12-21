@@ -12,7 +12,7 @@
             <form role="form"
                   class="styled-form"
                   method="POST"
-                  action="{{ route('admin.traders.store') }}"
+                  action="{{ route('admin.traders.update', ["id" => $trader->id]) }}"
             >
                 @csrf
                 @method('put')
@@ -52,18 +52,6 @@
                                required
                         >
                         @include('service.partials.validationMessages', ['inputName' => 'name'])
-                    </div>
-                    <div>
-                        <label for="name" class="required">Trader Stall Location</label>
-                        <input type="text"
-                               id="location"
-                               name="location"
-                               value="{{ $trader->location }}"
-                               class="{{ $errors->has('trader') ? 'error' : '' }}"
-                               maxlength="160"
-                               required
-                        >
-                        @include('service.partials.validationMessages', ['inputName' => 'location'])
                     </div>
                     <hr>
                 </div>
