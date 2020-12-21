@@ -152,7 +152,6 @@ class TradersController extends Controller
                 $t->fill([
                     'market_id' => $request->input('market'),
                     'name' => $request->input('name'),
-                    'email' => $request->input('email'),
                 ])->save();
 
                 // get our trader's original user IDs.
