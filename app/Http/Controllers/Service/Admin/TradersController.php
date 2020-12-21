@@ -12,7 +12,6 @@ use App\User;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -53,19 +52,19 @@ class TradersController extends Controller
                     'market_id' => $m->id,
                 ]);
 
-                // get our updated or new users as a model collection
-                $users = $this->createOrUpdateUsersFromInput(
-                    // pull the users as an array from the input
+                // get our updated or new users as ids
+                $userIds = $this->createOrUpdateUsersFromInput(
                     (array)$request->get('users')
                 );
 
-                // users should be a collection; sync them to our trader
-                $t->users()->sync($users);
+                // users should be an array; sync them to our trader
+                $t->users()->sync($userIds);
                 return $t;
             });
         } catch (Throwable $e) {
             // Oops! Log that
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+            Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
             // Throw it back to the user
             return redirect()->route('admin.traders.create')->withErrors('Creation failed - DB Error.');
@@ -76,35 +75,35 @@ class TradersController extends Controller
     }
 
     /**
-     * @param array $users
-     * @return Collection
+     * @param array $userData
+     * @return array|int[]
      */
-    private function createOrUpdateUsersFromInput(array $users = [])
+    private function createOrUpdateUsersFromInput(array $userData = [])
     {
-        return collect(array_map(function ($data) {
+        return array_map(function ($data) {
             // check if it exists by email.
             $user = User::firstWhere('email', $data['email']);
 
             // if so...
             if ($user) {
                 // and the name has changed...
-                if ($user->name !== $user["name"]) {
+                if ($user->name !== $data["name"]) {
                     // update it...
-                    $user->name = $user["name"];
+                    $user->name = $data["name"];
                     $user->save();
                 }
                 // then return it.
-                return $user;
+                return $user->id;
             } else {
                 // or just make a new one.
-                return User::create([
-                    'name' => $user['name'],
-                    'email' => $user['email'],
-                    // didn't supply a password? make one.
-                    'password' => bcrypt($user['password'] ?? md5(rand())),
+                $user = User::create([
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'password' => bcrypt($data['password'] ?? md5(rand()))
                 ]);
+                return $user->id;
             }
-        }, $users));
+        }, $userData);
     }
 
     /**
@@ -152,8 +151,8 @@ class TradersController extends Controller
                     'location' => $request->input('location')
                 ])->save();
 
-                // get our updated or new users as a model collection
-                $users = $this->createOrUpdateUsersFromInput(
+                // get our updated or new users as ids
+                $userIds = $this->createOrUpdateUsersFromInput(
                     // pull the users as an array from the input
                     (array)$request->get('users')
                 );
@@ -163,8 +162,8 @@ class TradersController extends Controller
                     ->pluck('id')
                     ->toArray();
 
-                // sync the current users to our trader.
-                $t->users()->sync($users);
+                // users should be an array; sync them to our trader
+                $t->users()->sync($userIds);
 
                 // remove any users that have just been deleted and have *no other* traders
                 User::whereIn('id', $origUserIds)
@@ -177,6 +176,7 @@ class TradersController extends Controller
         } catch (Throwable $e) {
             // Oops! Log that
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+            Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
             // Throw it back to the user
             return redirect()
