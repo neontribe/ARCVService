@@ -61,7 +61,10 @@
                 </div>
                 <hr>
                 @include('service.partials.addTraderUser')
-                <button type="submit" id="updateMarket">Save Trader</button>
+                <hr>
+                <div class="horizontal-container">
+                    <button type="submit" id="updateMarket">Save Trader</button>
+                </div>
             </form>
         </div>
     </div>

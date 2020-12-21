@@ -1,32 +1,30 @@
 <div class="horizontal-container">
     <div>
-        <label for="user-name"
+        <label for="new-user-name"
                class="required"
         >User Name</label>
         <input type="text"
-               id="user-name"
+               id="new-user-name"
                value=""
                class=""
                maxlength="160"
-               required
         >
     </div>
     <div>
-        <label for="user-email"
+        <label for="new-user-email"
                class="required"
         >User Email</label>
         <input type="email"
-               id="user-email"
+               id="new-user-email"
                value=""
                class=""
-               required
         >
     </div>
     <div style="width: auto; justify-content: center">
         <button type="button" id="add-user">Add User</button>
     </div>
 </div>
-<div id="trader-users-list" class="callout" ></div>
+<div id="trader-users-list" class="horizontal-container callout" ></div>
 
 
 <script>
@@ -40,38 +38,44 @@
             $(addUserButton).click(function (e) {
                 e.preventDefault();
 
-                // Grab the elements
-                var userNameEl = $('#user-name');
-                var userEmailEl = $('#user-email');
+                // grab the elements
+                var newUserNameEl = $('#new-user-name');
+                var newUserEmailEl = $('#new-user-email');
 
                 // get the values;
-                var userName = userNameEl.val();
-                var userEmail = userEmailEl.val();
-                console.log([userName,userEmail]);
+                var newUserName = newUserNameEl.val();
+                var newUserEmail = newUserEmailEl.val();
 
-                var nameInput = '<input name="" type="text" value="' + userName + '" >';
-                var emailInput = '<input name="" type="email" value="' + userEmail + '" >';
-                /*
-                var childKey = Math.random();
-                var nameColumn = '<td class="name-col"><input name="children[' + childKey + '][name-col]" type="hidden" value="' + userName + '" >' + innerTextDate + '</td>';
-                var idColumn = (idCheckedEl.length)
-                    ? '<td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][verified]" id="child' + childKey + '" ' + displayVerified + ' value="' + verifiedValue + '"><label for="child' + childKey + '"><span class="visually-hidden">Toggle ID checked</span></label>' + '</td>'
-                    : '<td class="verified-col relative"></td>';
-                var removeColumn = '<td class="remove-col"><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>';
-                */
+                // key, made of microseconds; very unlikely to be duped.
+                var key = Date.now();
+
+                // make some fields
+                var userIdInput = '<input name="users[' + key + '][id]" type="hidden" value="" >';
+                var nameInput = '<input required name="users[' + key + '][name]" type="text" value="' + newUserName + '" >';
+                var emailInput = '<input required name="users[' + key + '][email]" type="email" value="' + newUserEmail + '" >';
+                var userDelControl = '<button type="button" class="remove-row"><i class="glyphicon glyphicon-minus" aria-hidden="true"></i></button>';
+
+                // add the new field and controls
                 var el = $('#trader-users-list');
-                console.log(el);
-                $(el).append('<div class="horizontal-container"><div>' + nameInput + '</div><div>' + emailInput +'</div></div>');
+                $(el).append(
+                    '<span class="user-array">' +
+                    userIdInput +
+                    nameInput +
+                    emailInput +
+                    '<div style="display: inline-block; width: 7em; justify-content: center">' + userDelControl + '</div>' +
+                    '</span>'
+                );
 
                 // reset form
-                userEmailEl.val('');
-                userNameEl.val('');
-                userNameEl.focus();
+                newUserEmailEl.val('');
+                newUserNameEl.val('');
+                newUserNameEl.focus();
             });
 
-            $(el).on("click", ".remove_date_field", function (e) {
+            // bind removal function
+            $(document).on("click", "button.remove-row", function (e) {
                 e.preventDefault();
-                $(this).closest('tr').remove();
+                $(this).closest('span.user-array').remove();
                 return false;
             });
         }
