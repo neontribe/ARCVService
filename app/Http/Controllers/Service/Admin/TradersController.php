@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Service\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminNewTraderRequest;
 use App\Http\Requests\AdminUpdateTraderRequest;
-use App\Trader;
+use App\Market;
 use App\Sponsor;
+use App\Trader;
+use App\User;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -40,7 +43,25 @@ class TradersController extends Controller
     {
         try {
             $trader = DB::transaction(function () use ($request) {
-                // do store
+                // find our market or die
+                $m = Market::findOrFail($request->input('market'));
+
+                // make a trader
+                $t = Trader::create([
+                    'name' => $request->name,
+                    'location' => $request->location,
+                    'market_id' => $m->id,
+                ]);
+
+                // get our updated or new users as a model collection
+                $users = $this->createOrUpdateUsersFromInput(
+                    // pull the users as an array from the input
+                    (array)$request->get('users')
+                );
+
+                // users should be a collection; sync them to our trader
+                $t->users()->sync($users);
+                return $t;
             });
         } catch (Throwable $e) {
             // Oops! Log that
@@ -52,6 +73,38 @@ class TradersController extends Controller
         return redirect()
             ->route('admin.traders.index')
             ->with('message', 'Trader ' . $trader->name . ' created');
+    }
+
+    /**
+     * @param array $users
+     * @return Collection
+     */
+    private function createOrUpdateUsersFromInput(array $users = [])
+    {
+        return collect(array_map(function ($data) {
+            // check if it exists by email.
+            $user = User::firstWhere('email', $data['email']);
+
+            // if so...
+            if ($user) {
+                // and the name has changed...
+                if ($user->name !== $user["name"]) {
+                    // update it...
+                    $user->name = $user["name"];
+                    $user->save();
+                }
+                // then return it.
+                return $user;
+            } else {
+                // or just make a new one.
+                return User::create([
+                    'name' => $user['name'],
+                    'email' => $user['email'],
+                    // didn't supply a password? make one.
+                    'password' => bcrypt($user['password'] ?? md5(rand())),
+                ]);
+            }
+        }, $users));
     }
 
     /**
@@ -73,7 +126,7 @@ class TradersController extends Controller
      */
     public function edit(int $id)
     {
-        $trader = Trader::with(['users','market'])->find($id);
+        $trader = Trader::with(['users', 'market'])->find($id);
         $marketsBySponsor = Sponsor::with(['markets:sponsor_id,id,name'])->get(['id', 'name']);
         return view('service.traders.edit', compact('marketsBySponsor', 'trader'));
     }
@@ -89,7 +142,37 @@ class TradersController extends Controller
     {
         try {
             $trader = DB::transaction(function () use ($request, $id) {
-                // Do update
+                // find the trader
+                $t = Trader::findOrFail($id);
+
+                // Update it
+                $t->fill([
+                    'name' => $request->input('name'),
+                    'email' => $request->input('email'),
+                    'location' => $request->input('location')
+                ])->save();
+
+                // get our updated or new users as a model collection
+                $users = $this->createOrUpdateUsersFromInput(
+                    // pull the users as an array from the input
+                    (array)$request->get('users')
+                );
+
+                // get our trader's original user IDs.
+                $origUserIds = $t->users()
+                    ->pluck('id')
+                    ->toArray();
+
+                // sync the current users to our trader.
+                $t->users()->sync($users);
+
+                // remove any users that have just been deleted and have *no other* traders
+                User::whereIn('id', $origUserIds)
+                    ->withCount("traders")
+                    ->having('traders_count', '=', 0)
+                    ->delete();
+
+                return $t;
             });
         } catch (Throwable $e) {
             // Oops! Log that
