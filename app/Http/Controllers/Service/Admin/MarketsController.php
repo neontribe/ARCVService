@@ -25,6 +25,11 @@ class MarketsController extends Controller
     public function index()
     {
         $markets = Market::with(['sponsor', 'traders'])->get();
+        // TODO : efficiency
+        $markets = $markets->sortBy(function ($market) {
+            return $market->sponsor->name . '#' .
+                $market->name;
+        });
         return view('service.markets.index', compact('markets'));
     }
 

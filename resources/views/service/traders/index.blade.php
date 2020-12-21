@@ -31,7 +31,7 @@
                         <td>
                             @if ($trader->users->count() > 0)
                                 <ul>
-                                    @foreach ($trader->users as $user)
+                                    @foreach ($trader->users->sortBy('name') as $user)
                                         <li>{{ $user->name }}</li>
                                     @endforeach
                                 </ul>

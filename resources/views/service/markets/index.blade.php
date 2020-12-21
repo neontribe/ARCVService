@@ -29,7 +29,7 @@
                         <td>
                             @if ($market->traders()->count() > 0)
                             <ul>
-                            @foreach ($market->traders as $trader)
+                            @foreach ($market->traders->sortBy('name') as $trader)
                                 <li>{{ $trader->name }}</li>
                             @endforeach
                             </ul>
