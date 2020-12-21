@@ -28,6 +28,12 @@ class TradersController extends Controller
     public function index()
     {
         $traders = Trader::with(['users', 'market'])->get();
+        // TODO : efficiency
+        $traders = $traders->sortBy(function ($trader) {
+            return $trader->market->sponsor->name . '#' .
+                $trader->market->name . '#' .
+                $trader->name;
+        });
         return view('service.traders.index', compact('traders'));
     }
 
