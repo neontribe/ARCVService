@@ -32,7 +32,7 @@
                                 </optgroup>
                             @endforeach
                         </select>
-                        @include('service.partials.validationMessages', array('inputName' => 'market'))
+                        @include('service.partials.validationMessages', ['inputName' => 'market'])
                     </div>
                     <div>
                         <label for="name"
@@ -45,7 +45,7 @@
                                maxlength="160"
                                required
                         >
-                        @include('service.partials.validationMessages', array('inputName' => 'name'))
+                        @include('service.partials.validationMessages', ['inputName' => 'name'])
                     </div>
                     <div>
                         <label for="name" class="required">Trader Stall Location</label>

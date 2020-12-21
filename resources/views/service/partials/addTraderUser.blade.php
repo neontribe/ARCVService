@@ -24,7 +24,20 @@
         <button type="button" id="add-user">Add User</button>
     </div>
 </div>
-<div id="trader-users-list" class="horizontal-container callout" ></div>
+<div id="trader-users-list" class="horizontal-container callout" >
+    @foreach ($users as $user)
+        <span class="user-array">
+            <input name="users[ {{ $user->id }} ][id]" type="hidden" value="{{ $user->id }}" >
+            <input required name="users[ {{ $user->id }} ][name]" type="text" value="{{ $user->name }}" >
+            <input required name="users[ {{ $user->id }} ][email]" type="email" value="{{ $user->email }}" >
+            <div style="display: inline-block; width: 7em; justify-content: center">
+                <button type="button" class="remove-row">
+                    <i class="glyphicon glyphicon-minus" aria-hidden="true"></i>
+                </button>
+            </div>
+        </span>
+    @endforeach
+</div>
 
 
 <script>
