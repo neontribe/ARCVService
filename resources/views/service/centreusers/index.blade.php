@@ -24,6 +24,14 @@
                     </th>
                     <th>Email Address</th>
                     <th>
+                        Home Centre Area
+                        <span>
+                            @include('service.partials.sortableChevron', ['route' =>
+                            'admin.centreusers.index', 'orderBy' => 'homeCentreArea', 'direction' => request('direction')
+                            ])
+                        </span>
+                    </th>
+                    <th>
                         Home Centre
                         <span>@include('service.partials.sortableChevron', ['route' =>
                             'admin.centreusers.index', 'orderBy' => 'homeCentre', 'direction' => request('direction')
@@ -39,6 +47,7 @@
                 <tr>
                     <td>{{ $worker->name }}</td>
                     <td>{{ $worker->email }}</td>
+                    <td> {{ $worker->homeCentre->sponsor->name }}</td>
                     <td>{{ $worker->homeCentre->name }}</td>
                     <td>
                         <ul class="table-list">
