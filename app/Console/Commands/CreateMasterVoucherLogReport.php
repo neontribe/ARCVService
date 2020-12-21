@@ -84,7 +84,7 @@ class CreateMasterVoucherLogReport extends Command
 SELECT
   vouchers.code AS 'Voucher Number',
   voucher_sponsor.name AS 'Voucher Area',
-  deliveries.dispatched_at as 'Date Distributed',
+  DATE_FORMAT(deliveries.dispatched_at, '%d/%m/%Y') as 'Date Distributed',
   delivery_centres.name AS 'Distributed to Centre',
   delivery_areas.name AS 'Distributed to Area',
   CASE
@@ -92,21 +92,21 @@ SELECT
       WHEN (disbursed_at is not null) AND (pri_carer_name is not null) THEN 'False'
   END
   AS 'Waiting for collection',
-  disbursed_at AS 'Date Issued',
+  DATE_FORMAT(disbursed_at, '%d/%m/%Y') AS 'Date Issued',
   rvid AS 'RVID',
   pri_carer_name AS 'Main Carer',
   disbursing_centre AS 'Disbursing Centre',
-  (select created_at from voucher_states where vouchers.id = voucher_id and `to` = 'recorded' order by id desc limit 1)  AS 'Date Trader Recorded Voucher',
+  (select date_format(created_at, '%d/%m/%Y') from voucher_states where vouchers.id = voucher_id and `to` = 'recorded' order by id desc limit 1)  AS 'Date Trader Recorded Voucher',
   trader_name AS 'Retailer Name',
   market_name AS 'Retail Outlet',
   market_area AS 'Trader\'s Area',
-  (select min(voucher_states.created_at)
+  (select min(date_format(voucher_states.created_at, '%d/%m/%Y'))
     FROM voucher_states
     WHERE voucher_states.`to` = 'payment_pending'
     and vouchers.id = voucher_id
     group by voucher_id
     limit 1) AS 'Date Received for Reimbursement',
-  (select created_at from voucher_states where vouchers.id = voucher_id and `to` = 'reimbursed' order by id desc limit 1) AS 'Reimbursed Date',
+  (select date_format(created_at, '%d/%m/%Y') from voucher_states where vouchers.id = voucher_id and `to` = 'reimbursed' order by id desc limit 1) AS 'Reimbursed Date',
   (select created_at from voucher_states where vouchers.id = voucher_id and `to` = 'retired' order by id desc limit 1)  AS 'Void Voucher Date',
   (select created_at from voucher_states where vouchers.id = voucher_id and `to` in ('expired', 'voided') order by id desc limit 1) AS 'Void Reason',
   CURDATE() AS 'Date file was Downloaded'
@@ -260,7 +260,7 @@ EOD;
             rewind($fileHandleAll);
             $this->writeOutput('ALL', stream_get_contents($fileHandleAll), $za);
             fclose($fileHandleAll);
-            
+
             // Split up the rows into separate areas.
             $areas = [];
             // We're going to use "&" references to avoid memory issues - Hang on to your hat.
