@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Service\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AdminNewTraderRequest;
-use App\Http\Requests\AdminUpdateTraderRequest;
+use App\Http\Requests\AdminNewUpdateTraderRequest;
 use App\Market;
 use App\Sponsor;
 use App\Trader;
@@ -40,11 +39,11 @@ class TradersController extends Controller
     /**
      * Store a new Trader
      *
-     * @param AdminNewTraderRequest $request
+     * @param AdminNewUpdateTraderRequest $request
      * @return RedirectResponse
      * @throws Throwable
      */
-    public function store(AdminNewTraderRequest $request)
+    public function store(AdminNewUpdateTraderRequest $request)
     {
         try {
             $trader = DB::transaction(function () use ($request) {
@@ -138,11 +137,11 @@ class TradersController extends Controller
     /**
      * Update the trader AND set the users
      *
-     * @param AdminUpdateTraderRequest $request
+     * @param AdminNewUpdateTraderRequest $request
      * @param int $id
      * @return RedirectResponse
      */
-    public function update(AdminUpdateTraderRequest $request, int $id)
+    public function update(AdminNewUpdateTraderRequest $request, int $id)
     {
         try {
             $trader = DB::transaction(function () use ($request, $id) {
@@ -151,6 +150,7 @@ class TradersController extends Controller
 
                 // Update it
                 $t->fill([
+                    'market_id' => $request->input('market'),
                     'name' => $request->input('name'),
                     'email' => $request->input('email'),
                 ])->save();
