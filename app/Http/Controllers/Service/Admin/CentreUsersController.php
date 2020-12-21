@@ -34,16 +34,27 @@ class CentreUsersController extends Controller
         $field = $request->input('orderBy', null);
         $direction = $request->input('direction', null);
 
-        if ($field === 'name') {
-            //sort the orderby
-            $workers = CentreUser::orderByField([
-                'orderBy' => $field,
-                'direction' => $direction
-            ])->get();
-        } elseif ($field === 'homeCentre' && $direction === 'desc') {
-            $workers = CentreUser::get()->sortByDesc('homeCentre.name');
-        } else {
-            $workers = CentreUser::get()->sortBy('homeCentre.name');
+        switch (true) {
+            case ($field === 'name'):
+                $workers = CentreUser::orderByField([
+                    'orderBy' => $field,
+                    'direction' => $direction
+                ])->get();
+                break;
+            case ($field === 'homeCentreArea' and $direction === 'desc'):
+                $workers = CentreUser::get()->sortByDesc('homeCentre.sponsor.name');
+                break;
+            case ($field === 'homeCentreArea' and $direction === 'asc'):
+                $workers = CentreUser::get()->sortBy('homeCentre.sponsor.name');
+                break;
+            case ($field === 'homeCentre' and $direction === 'desc'):
+                $workers = CentreUser::get()->sortByDesc('homeCentre.name');
+                break;
+            default:
+                $workers = CentreUser::get()->sortBy(function ($item) {
+                    $homeCentre = $item->homeCentre;
+                    return $homeCentre->sponsor->name . '#' . $homeCentre->name . '#' . $item->name;
+                });
         }
 
         $page = LengthAwarePaginator::resolveCurrentPage();
@@ -223,7 +234,10 @@ class CentreUsersController extends Controller
 
     public function download()
     {
-        $workers = CentreUser::get()->sortBy('name')->sortBy('homeCentre.name');
+        $workers = CentreUser::get()->sortBy(function ($item) {
+            $homeCentre = $item->homeCentre;
+            return $homeCentre->sponsor->name . '#' . $homeCentre->name . '#' . $item->name;
+        });
 
         $csvExporter = new Export();
 
@@ -236,7 +250,8 @@ class CentreUsersController extends Controller
             $worker->downloaderRole = $worker->downloader ? 'Yes' : 'No';
             foreach ($worker->centres as $centre) {
                 if ($centre->id !== $worker->homeCentre->id) {
-                    $worker->alternative_centres = $centre->name;
+                    $centreNames[] = $centre->name;
+                    $worker->alternative_centres = implode(', ', $centreNames);
                 }
             }
         });
@@ -244,6 +259,7 @@ class CentreUsersController extends Controller
         $header = [
             'name' => 'Name',
             'email' => 'E-mail Address',
+            'homeCentre.sponsor.name' => 'Home Centre Area',
             'homeCentre.name' => 'Home Centre',
             'alternative_centres' => 'Alternative Centre',
             'downloaderRole' => 'Downloader'
