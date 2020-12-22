@@ -74,7 +74,7 @@ class ServiceRoutesTest extends StoreTestCase
         $this->centreUser->centres()->sync([$centres->shift()->id => ['homeCentre' => true]]);
         $this->centreUser->centres()->sync($centres->pluck('id')->all(), false);
 
-        // Add a sponsor, markets and a trader
+        // Add a sponsor, market and a trader
         $this->sponsor = factory(Sponsor::class)->create();
         $this->market = factory(Market::class)->create(['sponsor_id' => $this->sponsor->id]);
         $this->trader = factory(Trader::class)->create(['market_id' => $this->market->id]);

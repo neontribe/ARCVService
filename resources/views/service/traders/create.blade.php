@@ -56,7 +56,7 @@
                 @include('service.partials.addTraderUser')
                 <hr>
                 <div class="horizontal-container">
-                    <button type="submit" id="updateMarket">Save Trader  {{ $preselected }}</button>
+                    <button type="submit" id="updateMarket">Save Trader</button>
                 </div>
             </form>
         </div>

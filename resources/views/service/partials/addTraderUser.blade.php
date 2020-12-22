@@ -5,8 +5,6 @@
         >User Name</label>
         <input type="text"
                id="new-user-name"
-               value=""
-               class=""
                maxlength="160"
         >
     </div>
@@ -16,8 +14,6 @@
         >User Email</label>
         <input type="email"
                id="new-user-email"
-               value=""
-               class=""
         >
     </div>
     <div style="width: auto; justify-content: center">

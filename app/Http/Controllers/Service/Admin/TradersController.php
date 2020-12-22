@@ -104,7 +104,7 @@ class TradersController extends Controller
                 $user = User::create([
                     'name' => $data['name'],
                     'email' => $data['email'],
-                    'password' => bcrypt($data['password'] ?? md5(rand()))
+                    'password' => bcrypt($data['password'] ?? md5(rand())),
                 ]);
                 return $user->id;
             }
