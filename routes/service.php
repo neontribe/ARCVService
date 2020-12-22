@@ -174,5 +174,8 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.traders.update',
         'uses' => 'Admin\TradersController@update',
     ]);
-
+    Route::get('traders/download', [
+        'as' => 'admin.traders.download',
+        'uses' => 'Admin\TradersController@download',
+    ]);
 });

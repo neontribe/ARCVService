@@ -60,7 +60,7 @@
                     </td>
                     <td>{{ $worker->downloader ? 'Yes' : 'No' }}</td>
                     <td>
-                        <a href="{{ route('admin.centreusers.edit', ['id' => $worker->id ]) }}" class="link">
+                        <a href="{{ route('admin.centreusers.edit', ['id' => $worker->id]) }}" class="link">
                             <div class="link-button link-button-small">
                                 <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Edit
                             </div>
@@ -71,7 +71,7 @@
             </tbody>
         </table>
         <a href="{{ URL::route('admin.centreusers.download')}}" class="link" target="_blank">
-            <div class="link-button download-worker-list">
+            <div class="link-button download-list">
                 Download Worker List
             </div>
         </a>

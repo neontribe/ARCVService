@@ -8,6 +8,7 @@ use App\Market;
 use App\Sponsor;
 use App\Trader;
 use App\User;
+use Debugbar;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use Laracsv\Export;
 use Throwable;
 
 class TradersController extends Controller
@@ -27,13 +29,7 @@ class TradersController extends Controller
      */
     public function index()
     {
-        $traders = Trader::with(['users', 'market'])->get();
-        // TODO : efficiency
-        $traders = $traders->sortBy(function ($trader) {
-            return $trader->market->sponsor->name . '#' .
-                $trader->market->name . '#' .
-                $trader->name;
-        });
+        $traders = $this->getTraders();
         return view('service.traders.index', compact('traders'));
     }
 
@@ -201,5 +197,50 @@ class TradersController extends Controller
         return redirect()
             ->route('admin.traders.index')
             ->with('message', 'Trader ' . $trader->name . ' updated');
+    }
+
+    public function download()
+    {
+        $traders = $this->getTraders();
+        $csvExporter = new Export();
+        $csvExporter->beforeEach(function ($trader) {
+            foreach ($trader->users->sortBy('name') as $user) {
+                $userNames[] = $user->name;
+                $trader->users = implode(', ', $userNames);
+            }
+        });
+
+        $header = [
+            'name' => 'Name',
+            'market.name' => 'Market',
+            'market.sponsor.name' => 'Area',
+            'users' => 'Users',
+        ];
+
+        $fileName = 'active_traders.csv';
+        $buildFile = $csvExporter->build($traders, $header);
+
+        /**
+         * * have to disable the debugbar on local on the fly as it conflicts with LaraCSV
+         * * that is not yet fixed https://github.com/usmanhalalit/laracsv/issues/34
+         */
+        if (Debugbar::isEnabled()) {
+            app('debugbar')->disable();
+        }
+
+        $buildFile->download($fileName);
+    }
+
+    private function getTraders()
+    {
+        $traders = Trader::with(['users', 'market'])->get();
+        // TODO : efficiency
+        $traders = $traders->sortBy(function ($trader) {
+            return $trader->market->sponsor->name . '#' .
+                $trader->market->name . '#' .
+                $trader->name;
+        });
+
+        return $traders;
     }
 }
