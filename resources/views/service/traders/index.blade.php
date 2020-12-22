@@ -48,7 +48,7 @@
                 @endforeach
                 </tbody>
             </table>
-            <a href="{{ route('admin.traders.download') }}" class="link" target="_blank">
+            <a href="{{ route('admin.traders.download') }}" class="link" target="_blank" rel="noopener noreferrer">
             <div class="link-button download-list">
                 Download Trader List
             </div>

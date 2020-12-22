@@ -215,6 +215,8 @@ class TradersController extends Controller
             'market.name' => 'Market',
             'market.sponsor.name' => 'Area',
             'users' => 'Users',
+            'created_at' => 'Join Date',
+            'deleted_at' => 'Leaving Date'
         ];
 
         $fileName = 'active_traders.csv';
