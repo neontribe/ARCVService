@@ -27,17 +27,22 @@
                         <td>{{ $market->name }}</td>
                         <td>{{ $market->sponsor->name }}</td>
                         <td>
+                            <a href="{{ route('admin.traders.create', ["market" => $market->id]) }}" class="link">
+                                <div style="width:5em;" class="link-button link-button-small">
+                                    <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Add
+                                </div>
+                            </a>
                             @if ($market->traders()->count() > 0)
                             <ul>
-                            @foreach ($market->traders as $trader)
+                            @foreach ($market->traders->sortBy('name') as $trader)
                                 <li>{{ $trader->name }}</li>
                             @endforeach
                             </ul>
                             @endif
                         </td>
-                        <td>
+                        <td >
                             <a href="{{ route('admin.markets.edit', ['id' => $market->id ]) }}" class="link">
-                                <div class="link-button link-button-small">
+                                <div style="width:5em;" class="link-button link-button-small">
                                     <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Edit
                                 </div>
                             </a>

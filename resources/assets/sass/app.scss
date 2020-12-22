@@ -218,6 +218,18 @@ h1 {
     }
   }
 }
+
+div.callout {
+  background-color: $arc_gray ;
+  border: 2px solid $arc_border;
+  display: inline-block;
+  padding: .8em;
+}
+
+span.user-array > input {
+  margin-right: 0.8em;
+}
+
 .link-button {
 	background-color: #a74e94;
 	border-radius: 3px;

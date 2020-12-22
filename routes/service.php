@@ -152,4 +152,27 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.markets.update',
         'uses' => 'Admin\MarketsController@update',
     ]);
+
+    // Trader Management
+    Route::get('traders', [
+        'as' => 'admin.traders.index',
+        'uses' => 'Admin\TradersController@index',
+    ]);
+    Route::get('traders/create', [
+        'as' => 'admin.traders.create',
+        'uses' => 'Admin\TradersController@create',
+    ]);
+    Route::post('traders', [
+        'as' => 'admin.traders.store',
+        'uses' => 'Admin\TradersController@store',
+    ]);
+    Route::get('traders/{id}/edit', [
+        'as' => 'admin.traders.edit',
+        'uses' => 'Admin\TradersController@edit',
+    ]);
+    Route::put('traders/{id}', [
+        'as' => 'admin.traders.update',
+        'uses' => 'Admin\TradersController@update',
+    ]);
+
 });

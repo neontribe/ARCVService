@@ -25,6 +25,11 @@ class MarketsController extends Controller
     public function index()
     {
         $markets = Market::with(['sponsor', 'traders'])->get();
+        // TODO : efficiency
+        $markets = $markets->sortBy(function ($market) {
+            return $market->sponsor->name . '#' .
+                $market->name;
+        });
         return view('service.markets.index', compact('markets'));
     }
 
@@ -60,7 +65,7 @@ class MarketsController extends Controller
             return redirect()->route('admin.markets.create')->withErrors('Creation failed - DB Error.');
         }
         return redirect()
-            ->route('admin.marketa.index')
+            ->route('admin.markets.index')
             ->with('message', 'Market ' . $market->name . ' created');
     }
 
@@ -110,7 +115,7 @@ class MarketsController extends Controller
                     'name' => $request->input('name'),
                     'sponsor_id' => $sponsor->id,
                     'location' => $sponsor->name,
-                    'payment_message' => $request->input('payment_pending')
+                    'payment_message' => $request->input('payment_message')
                 ]);
                 $m->save();
 
