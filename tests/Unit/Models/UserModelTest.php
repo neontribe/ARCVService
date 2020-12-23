@@ -39,7 +39,7 @@ class UserModelTest extends TestCase
     public function testCheckIfTraderBelongsToUser()
     {
         $trader = $this->traders[0];
-        $this->assertTrue($this->users[0]->hasTrader($trader));
-        $this->assertFalse($this->users[1]->hasTrader($trader));
+        $this->assertTrue($this->users[0]->hasEnabledTrader($trader));
+        $this->assertFalse($this->users[1]->hasEnabledTrader($trader));
     }
 }

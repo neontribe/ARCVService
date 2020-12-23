@@ -34,7 +34,16 @@ class LoginProxy
      */
     public function attemptLogin($email, $password)
     {
-        $user = User::where('email', $email)->first();
+        // fetch the users with the email
+        $user = User::where('email', $email)
+            // that have at least one enabled
+            ->withCount([
+                'traders' => function ($query) {
+                    return $query->whereNull('traders.disabled_at');
+                },
+            ])
+            ->where('traders_count', '>', 0)
+            ->first();
 
         if (!is_null($user)) {
             return $this->proxy('password', [
