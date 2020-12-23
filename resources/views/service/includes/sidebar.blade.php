@@ -26,7 +26,7 @@
         <li><a href="{{ route('data.users.index') }}"><span class="glyphicon glyphicon-cog"></span>Users</a></li>
         <li><a href="{{ route('data.traders.index') }}"><span class="glyphicon glyphicon-cog"></span>Traders</a></li>
         <li><a href="{{ route('data.markets.index') }}"><span class="glyphicon glyphicon-cog"></span>Markets</a></li>
-        <li class="danger"><a href="{{ route('data.reset') }} }}"><span class="glyphicon glyphicon-cog"></span>Reset data</a></li>
+        <li class="danger"><a href="{{ route('data.reset') }}"><span class="glyphicon glyphicon-cog"></span>Reset data</a></li>
         @endUnless
     </ul>
 
