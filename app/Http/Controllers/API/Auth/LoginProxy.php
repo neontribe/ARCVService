@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\API\Auth;
 
 use App\User;
+use Exception;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Log;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -17,6 +21,12 @@ class LoginProxy
     private $request;
     private $user;
 
+    /**
+     * LoginProxy constructor.
+     *
+     * @param Application $app
+     * @param User $user
+     */
     public function __construct(Application $app, User $user)
     {
         $this->user = $user;
@@ -28,9 +38,9 @@ class LoginProxy
 
     /**
      * Attempt to create an access token using user credentials
-     *
-     * @param string $email
-     * @param string $password
+     * @param $email
+     * @param $password
+     * @return \Illuminate\Contracts\Foundation\Application|ResponseFactory|JsonResponse|Response|\Symfony\Component\HttpFoundation\Response
      */
     public function attemptLogin($email, $password)
     {
@@ -64,6 +74,9 @@ class LoginProxy
     /**
      * Attempt to refresh the access token used a refresh token that
      * has been saved in a cookie
+     *
+     * @return JsonResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws Exception
      */
     public function attemptRefresh()
     {
@@ -77,8 +90,10 @@ class LoginProxy
     /**
      * Proxy a request to the OAuth server.
      *
-     * @param string $grantType what type of grant type should be proxied
-     * @param array $data the data to send to the server
+     * @param $grantType
+     * @param array $data
+     * @return JsonResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws Exception
      */
     public function proxy($grantType, array $data = [])
     {

@@ -14,7 +14,7 @@ class VoucherPolicy
      * Determine whether the user can collect the voucher.
      *
      * @param User $user
-     * @return mixed
+     * @return bool
      */
     public function collect(User $user)
     {

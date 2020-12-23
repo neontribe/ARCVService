@@ -15,7 +15,7 @@ class TraderPolicy
      *
      * @param User $user
      * @param Trader $trader
-     * @return mixed
+     * @return bool
      */
     public function view(User $user, Trader $trader)
     {
