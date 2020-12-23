@@ -51,7 +51,7 @@ class MarketsController extends Controller
                     'name' => $request->input('name'),
                     'sponsor_id' => $sponsor->id,
                     'location' => $sponsor->name,
-                    'payment_message' => $request->input('payment_pending')
+                    'payment_message' => $request->input('payment_message')
                 ]);
                 $m->save();
 
