@@ -76,6 +76,38 @@ class AdminNewUpdateTraderRequestTest extends StoreTestCase
                     'market' => 1,
                 ]
             ],
+            'requestShouldSucceedWhenOptionalProvidedAsBooleanInt' => [
+                'passed' => true,
+                'data' => [
+                    'name' => 'Test Trader',
+                    'market' => 1,
+                    'disabled' => 1,
+                ]
+            ],
+            'requestShouldSucceedWhenOptionalDataProvidedAsNull' => [
+                'passed' => true,
+                'data' => [
+                    'name' => 'Test Trader',
+                    'market' => 1,
+                    'disabled' => null,
+                ]
+            ],
+            'requestShouldSucceedWhenOptionalDataProvidedAsBoolean' => [
+                'passed' => true,
+                'data' => [
+                    'name' => 'Test Trader',
+                    'market' => 1,
+                    'disabled' => false,
+                ]
+            ],
+            'requestShouldSucceedWhenOptionalDataProvidedAsBooleanText' => [
+                'passed' => true,
+                'data' => [
+                    'name' => 'Test Trader',
+                    'market' => 1,
+                    'disabled' => "0",
+                ]
+            ],
             'requestShouldFailWhenNameIsMissing' => [
                 'passed' => false,
                 'data' => [

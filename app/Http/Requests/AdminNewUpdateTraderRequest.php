@@ -29,6 +29,8 @@ class AdminNewUpdateTraderRequest extends FormRequest
             'name' => 'required|string|max:160',
             // MUST be present, integer, in table
             'market' => 'required|integer|exists:markets,id',
+            // Optional, can be null, can be boolean [0,1,true,false,"0","1"]
+            'disabled' => 'nullable|boolean',
             // MAY be present, min 1
             'users' => 'array|min:1',
             // MUST be present if email is, string, 160
