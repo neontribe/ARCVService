@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\Carbon;
+use Symfony\Component\Process\Process;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,8 +34,11 @@ Route::name('data.')
         // Temp route for demo only.
         Route::name('reset')
             ->get('reset', function () {
-                Artisan::call('php ../artisan migrate:refresh --seed --force');
-                Artisan::call('php ../artisan passport:install');
+                $process = new Process('php ../artisan migrate:refresh --seed --force');
+                $process->run();
+                $process = new Process('php ../artisan passport:install');
+                $process->run();
+
                 $new_secret = DB::table('oauth_clients')->where('id', 2)->pluck('secret')[0];
                 $env_file_path = base_path('.env');
                 $old_secret = env('PASSWORD_CLIENT_SECRET');
