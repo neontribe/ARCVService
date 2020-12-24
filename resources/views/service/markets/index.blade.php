@@ -35,7 +35,11 @@
                             @if ($market->traders()->count() > 0)
                             <ul>
                             @foreach ($market->traders->sortBy('name') as $trader)
-                                <li>{{ $trader->name }}</li>
+
+                                <li class="{{ isset($trader->disabled_at)
+                                    ? 'inactive'
+                                    : 'active' }}"
+                                >{{ $trader->name }}</li>
                             @endforeach
                             </ul>
                             @endif
