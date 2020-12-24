@@ -6,10 +6,11 @@
         <div id="main-content">
 
             <h1>Edit Trader</h1>
-            <p>Edit "{{ $trader->name }}", and maybe it's users</p>
+            <p>Edit "{{ $trader->name }}" and it's users or market</p>
+
             @if(isset($trader->disabled_at))
                 <div class="alert alert-warning">
-                    <i class="glyphicon glyphicon-warning-sign"></i>This trader is currently disabled.
+                    This trader is currently disabled.
                 </div>
             @endif
 
@@ -63,7 +64,7 @@
                         <input type="checkbox"
                                id="disable-toggle"
                                name="disabled"
-                               class="{{ $errors->has('disabled') ? 'error' : '' }}"
+                               class="checkbox {{ $errors->has('disabled') ? 'error' : '' }}"
                                @if(isset($trader->disabled_at))
                                    CHECKED
                                @endif
