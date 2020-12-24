@@ -153,14 +153,27 @@ class TradersController extends Controller
                 // find the trader
                 $t = Trader::findOrFail($id);
 
-                // Update it
-                $t->fill([
+                // make an array of things to fill
+                $fillArray = [
                     'market_id' => $request->input('market'),
                     'name' => $request->input('name'),
-                    'disabled_at' => $request->input('disabled')
+                ];
+
+                // If Input and Trader are in different states
+                if (boolval($request->input('disabled')) xor
+                    boolval($t->disabled_at)
+                ) {
+                    // ... then something's changed... set by input
+                    $fillArray['disabled_at'] = (boolVal($request->input('disabled')))
+                        // true-ish, make a date
                         ? Carbon::now()
-                        : null,
-                ])->save();
+                        // false-ish, set it null
+                        : null;
+                }
+                // or do nowt with owt
+
+                // Update trader and save
+                $t->fill($fillArray)->save();
 
                 // get our trader's original user IDs.
                 $origUserIds = $t->users()
@@ -176,6 +189,35 @@ class TradersController extends Controller
                 // users should be an array; sync them to our trader
                 $t->users()->sync($userIds);
 
+                // did we disable a trader up there?
+                if (array_key_exists('disabled_at', $fillArray) &&
+                    !is_null($fillArray['disabled_at'])
+                ) {
+                    // force log-out any users who are or were in a newly *disabled* trader
+                    $affectedUserIds = array_unique(array_merge($origUserIds, $userIds));
+
+                    User::with(['tokens'])
+                        ->whereIn('id', $affectedUserIds)
+                        ->each(function ($user) {
+                            // knicked from the loginProxy
+                            $accessToken = $user->token();
+                            if ($accessToken) {
+                                Log::info('removing refresh tokens'. $accessToken);
+                                // Revoke the refreshToken.
+                                DB::table('oauth_refresh_tokens')
+                                    ->where('access_token_id', $accessToken->id)
+                                    ->update([
+                                        'revoked' => true,
+                                    ]);
+
+                                Log::info('removing token'. $accessToken);
+                                $accessToken->revoke();
+                            } else {
+                                Log::info('no tokens to revoke');
+                            }
+                        });
+                }
+
                 // find any users that have just been deleted and have *no other* traders
                 $orphanUsers = User::whereIn('id', $origUserIds)
                     ->withCount('traders')
@@ -183,8 +225,9 @@ class TradersController extends Controller
                     ->pluck('id')
                     ->toArray();
 
-                // remove them
+                // ... and soft-deleter them, since they are orphans
                 User::whereIn('id', $orphanUsers)->delete();
+
 
                 return $t;
             });
@@ -220,7 +263,7 @@ class TradersController extends Controller
             'market.sponsor.name' => 'Area',
             'users' => 'Users',
             'created_at' => 'Join Date',
-            'deleted_at' => 'Leaving Date'
+            'deleted_at' => 'Leaving Date',
         ];
 
         $fileName = 'active_traders.csv';
