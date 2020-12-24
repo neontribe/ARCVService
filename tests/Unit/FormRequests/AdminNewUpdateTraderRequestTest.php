@@ -97,7 +97,7 @@ class AdminNewUpdateTraderRequestTest extends StoreTestCase
                 'data' => [
                     'name' => 'Test Trader',
                     'market' => 1,
-                    'disabled' => false,
+                    'disabled' => true,
                 ]
             ],
             'requestShouldSucceedWhenOptionalDataProvidedAsBooleanText' => [
@@ -105,7 +105,7 @@ class AdminNewUpdateTraderRequestTest extends StoreTestCase
                 'data' => [
                     'name' => 'Test Trader',
                     'market' => 1,
-                    'disabled' => "0",
+                    'disabled' => "on",
                 ]
             ],
             'requestShouldFailWhenNameIsMissing' => [

@@ -8,6 +8,7 @@ use App\Market;
 use App\Sponsor;
 use App\Trader;
 use App\User;
+use Carbon\Carbon;
 use Debugbar;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -156,6 +157,9 @@ class TradersController extends Controller
                 $t->fill([
                     'market_id' => $request->input('market'),
                     'name' => $request->input('name'),
+                    'disabled_at' => $request->input('disabled')
+                        ? Carbon::now()
+                        : null,
                 ])->save();
 
                 // get our trader's original user IDs.

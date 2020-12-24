@@ -6,8 +6,12 @@
         <div id="main-content">
 
             <h1>Edit Trader</h1>
-
-            <p>Edit a trader, and maybe it's users</p>
+            <p>Edit "{{ $trader->name }}", and maybe it's users</p>
+            @if(isset($trader->disabled_at))
+                <div class="alert alert-warning">
+                    <i class="glyphicon glyphicon-warning-sign"></i>This trader is currently disabled.
+                </div>
+            @endif
 
             <form role="form"
                   class="styled-form"
@@ -52,6 +56,19 @@
                                required
                         >
                         @include('service.partials.validationMessages', ['inputName' => 'name'])
+                    </div>
+                    <div>
+                        <label for="disable-toggle"
+                        >Disabled</label>
+                        <input type="checkbox"
+                               id="disable-toggle"
+                               name="disabled"
+                               class="{{ $errors->has('disabled') ? 'error' : '' }}"
+                               @if(isset($trader->disabled_at))
+                                   CHECKED
+                               @endif
+                        >
+                        @include('service.partials.validationMessages', ['inputName' => 'disabled'])
                     </div>
                     <hr>
                 </div>

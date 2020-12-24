@@ -26,6 +26,7 @@ class Trader extends Model
         'name',
         'pic_url',
         'market_id',
+        'disabled_at'
     ];
 
     /**
