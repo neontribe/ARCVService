@@ -69,8 +69,39 @@ class ApiRoutesTest extends TestCase
         $this->vouchers[1]->applyTransition('collect');
     }
 
+    public function testMustHaveAtLeastOneEnabledTraderToLogin()
+    {
+        // create 2 traders and add them to the user
+        $traders = factory(Trader::class, 2)->create();
+        $this->user->traders()->sync($traders);
+
+        // disable one
+        $traders->first()->disable();
+        $response = $this->post(route('api.login'), [
+            'username' => $this->user->email,
+            'password' => 'secret',
+        ]);
+        $response->assertJsonStructure(['access_token', 'expires_in', 'refresh_token']);
+
+        // disable the second too
+        $traders->last()->disable();
+        $response = $this->post(route('api.login'), [
+            'username' => $this->user->email,
+            'password' => 'secret',
+        ]);
+
+        $response->assertStatus(401)
+            ->assertJson([
+                'error' => 'invalid_credentials',
+                'message' => 'The user credentials were incorrect.',
+            ]);
+    }
+
     public function testGetAccessTokenWithGoodCredentials()
     {
+        $traders = factory(Trader::class)->create();
+        $this->user->traders()->sync($traders);
+
         $response = $this->post(route('api.login'), [
             'username' => $this->user->email,
             'password' => 'secret',
@@ -92,6 +123,9 @@ class ApiRoutesTest extends TestCase
 
     public function testDontGetAccessTokenWithBadUserPassword()
     {
+        $traders = factory(Trader::class)->create();
+        $this->user->traders()->sync($traders);
+
         $response = $this->post(route('api.login'), [
             'username' => $this->user->email,
             'password' => 'notthesecret',

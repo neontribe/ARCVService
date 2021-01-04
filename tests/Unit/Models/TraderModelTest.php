@@ -2,19 +2,21 @@
 
 namespace Tests\Unit\Models;
 
-use Auth;
 use App\Market;
 use App\Trader;
 use App\User;
 use App\Voucher;
-use Tests\TestCase;
+use Auth;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\TestCase;
 
 class TraderModelTest extends TestCase
 {
     use DatabaseMigrations;
 
     protected $trader;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -31,6 +33,7 @@ class TraderModelTest extends TestCase
         $this->assertNotNull($t->pic_url);
         $this->assertNotNull($t->market_id);
         $this->assertIsInt($t->market_id);
+        $this->assertNull($t->disabled_at);
     }
 
     public function testSoftDeleteTrader()
@@ -40,7 +43,19 @@ class TraderModelTest extends TestCase
         $this->assertCount(0, Trader::all());
     }
 
-    public function testTraderBelongsToMarket() {
+    public function testItCanBeDisabledAndEnabled()
+    {
+        $this->trader->disable();
+        $this->trader->refresh();
+        $this->assertInstanceOf(Carbon::class, $this->trader->disabled_at);
+
+        $this->trader->enable();
+        $this->trader->refresh();
+        $this->assertNull($this->trader->disabled_at);
+    }
+
+    public function testTraderBelongsToMarket()
+    {
         $this->assertInstanceOf(Market::class, $this->trader->market);
     }
 
@@ -50,7 +65,7 @@ class TraderModelTest extends TestCase
             'trader_id' => $this->trader->id,
         ]);
         factory(Voucher::class, 2)->create([
-            'trader_id' => $this->trader->id +1,
+            'trader_id' => $this->trader->id + 1,
         ]);
         $this->assertCount(10, $this->trader->vouchers);
         $this->assertNotEquals($this->trader->vouchers, Voucher::all());

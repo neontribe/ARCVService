@@ -2,8 +2,8 @@
 
 namespace App\Policies\Api;
 
-use App\User;
 use App\Trader;
+use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class TraderPolicy
@@ -13,13 +13,13 @@ class TraderPolicy
     /**
      * Determine whether the api user can view the trader.
      *
-     * @param  \App\User  $user
-     * @param  \App\Trader  $trader
-     * @return mixed
+     * @param User $user
+     * @param Trader $trader
+     * @return bool
      */
     public function view(User $user, Trader $trader)
     {
         // Only if the Trader belongs to the user.
-        return $user->hasTrader($trader);
+        return $user->hasEnabledTrader($trader);
     }
 }

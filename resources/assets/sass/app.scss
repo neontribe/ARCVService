@@ -237,10 +237,11 @@ span.user-array > input {
 	box-sizing: border-box;
 	color: white;
 	font-size: 1.5rem;
+    font-style: normal;
 	line-height: 2.5rem;
 	min-height: 2.5rem;
 	text-align: center;
-  vertical-align: top;
+    vertical-align: top;
 }
 
 .download-list {
@@ -309,6 +310,11 @@ span.user-array > input {
   background-color: $arc_bg;
   flex: 1;
   padding: 2em 4em;
+}
+
+.inactive {
+    color: #757575;
+    font-style: italic;
 }
 
 .table-list {

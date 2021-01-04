@@ -24,7 +24,7 @@
                 </thead>
                 <tbody>
                 @foreach ($traders as $trader)
-                    <tr>
+                    <tr class="{{ isset($trader->disabled_at) ? 'inactive' : 'active' }}">
                         <td>{{ $trader->name }}</td>
                         <td>{{ $trader->market->name }}</td>
                         <td>{{ $trader->market->sponsor->name }}</td>

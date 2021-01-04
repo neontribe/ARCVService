@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +15,7 @@ class Trader extends Model
 {
     use SoftDeletes;
 
-    protected $dates = ['deleted_at'];
+    protected $dates = ['deleted_at', 'disabled_at'];
 
     /**
      * The attributes that are mass assignable.
@@ -25,6 +26,7 @@ class Trader extends Model
         'name',
         'pic_url',
         'market_id',
+        'disabled_at'
     ];
 
     /**
@@ -63,6 +65,25 @@ class Trader extends Model
     {
         return $this->belongsToMany(User::class);
     }
+
+    /**
+     * Disable the Trader
+     */
+    public function disable()
+    {
+        $this->disabled_at = Carbon::now();
+        $this->save();
+    }
+
+    /**
+     * Disable the Trader
+     */
+    public function enable()
+    {
+        $this->disabled_at = null;
+        $this->save();
+    }
+
 
     /**
      * Vouchers that have been submitted for payment on behalf of this trader.

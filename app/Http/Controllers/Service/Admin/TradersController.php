@@ -8,6 +8,7 @@ use App\Market;
 use App\Sponsor;
 use App\Trader;
 use App\User;
+use Carbon\Carbon;
 use Debugbar;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -152,11 +153,27 @@ class TradersController extends Controller
                 // find the trader
                 $t = Trader::findOrFail($id);
 
-                // Update it
-                $t->fill([
+                // make an array of things to fill
+                $fillArray = [
                     'market_id' => $request->input('market'),
                     'name' => $request->input('name'),
-                ])->save();
+                ];
+
+                // If form's disabled input and Trader's disabled_at are in different states
+                if (boolval($request->input('disabled')) xor
+                    boolval($t->disabled_at)
+                ) {
+                    // ... then something's changed... set by input
+                    $fillArray['disabled_at'] = (boolVal($request->input('disabled')))
+                        // true-ish, make a date
+                        ? Carbon::now()
+                        // false-ish, set it null
+                        : null;
+                }
+                // ... otherwise don't alter it.
+
+                // Update trader and save
+                $t->fill($fillArray)->save();
 
                 // get our trader's original user IDs.
                 $origUserIds = $t->users()
@@ -172,6 +189,35 @@ class TradersController extends Controller
                 // users should be an array; sync them to our trader
                 $t->users()->sync($userIds);
 
+                // did we disable a trader up there?
+                if (array_key_exists('disabled_at', $fillArray) &&
+                    !is_null($fillArray['disabled_at'])
+                ) {
+                    // force log-out any users who are or were in a newly *disabled* trader
+                    $affectedUserIds = array_unique(array_merge($origUserIds, $userIds));
+
+                    User::with(['tokens'])
+                        ->whereIn('id', $affectedUserIds)
+                        ->each(function ($user) {
+                            // nicked from the loginProxy
+                            $accessToken = $user->token();
+                            if ($accessToken) {
+                                Log::info('removing refresh tokens for user' . $user->id);
+                                // Revoke the refreshToken.
+                                DB::table('oauth_refresh_tokens')
+                                    ->where('access_token_id', $accessToken->id)
+                                    ->update([
+                                        'revoked' => true,
+                                    ]);
+
+                                Log::info('removing token for user '. $user->id);
+                                $accessToken->revoke();
+                            } else {
+                                Log::info('no tokens to revoke');
+                            }
+                        });
+                }
+
                 // find any users that have just been deleted and have *no other* traders
                 $orphanUsers = User::whereIn('id', $origUserIds)
                     ->withCount('traders')
@@ -179,8 +225,9 @@ class TradersController extends Controller
                     ->pluck('id')
                     ->toArray();
 
-                // remove them
+                // ... and soft-delete them, since they are orphans
                 User::whereIn('id', $orphanUsers)->delete();
+
 
                 return $t;
             });
@@ -216,7 +263,7 @@ class TradersController extends Controller
             'market.sponsor.name' => 'Area',
             'users' => 'Users',
             'created_at' => 'Join Date',
-            'deleted_at' => 'Leaving Date'
+            'deleted_at' => 'Leaving Date',
         ];
 
         $fileName = 'active_traders.csv';

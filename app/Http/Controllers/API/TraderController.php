@@ -48,24 +48,32 @@ EOD;
      */
     public function index()
     {
-        // We won't be here if not because of the api middleware but...
+        // we won't be here if not because of the api middleware but...
         if (!Auth::user()) {
             abort(401);
         }
 
-        $traders = Auth::user()->traders;
-        foreach ($traders as $trader) {
+        // get the enabled traders and some deep relations
+        $enabledTraders = Auth::user()
+            ->traders()
+            ->with(['market.sponsor'])
+            ->whereNull('disabled_at')
+            ->get();
+
+        // append the featureOverride attribute
+        foreach ($enabledTraders as $trader) {
+            // TODO: this could be a computed attribute on the Trader
             $sponsor = $trader->market->sponsor;
             if ($sponsor->can_tap === false) {
                 $trader->featureOverride = (object)[
                     "pageAccess" => (object)[
-                        "tap" => false
-                    ]
+                        "tap" => false,
+                    ],
                 ];
             }
         }
 
-        return response()->json($traders, 200);
+        return response()->json($enabledTraders, 200);
     }
 
     /**
