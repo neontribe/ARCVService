@@ -199,10 +199,10 @@ class TradersController extends Controller
                     User::with(['tokens'])
                         ->whereIn('id', $affectedUserIds)
                         ->each(function ($user) {
-                            // knicked from the loginProxy
+                            // nicked from the loginProxy
                             $accessToken = $user->token();
                             if ($accessToken) {
-                                Log::info('removing refresh tokens'. $accessToken);
+                                Log::info('removing refresh tokens for user' . $user->id);
                                 // Revoke the refreshToken.
                                 DB::table('oauth_refresh_tokens')
                                     ->where('access_token_id', $accessToken->id)
@@ -210,7 +210,7 @@ class TradersController extends Controller
                                         'revoked' => true,
                                     ]);
 
-                                Log::info('removing token'. $accessToken);
+                                Log::info('removing token for user '. $user->id);
                                 $accessToken->revoke();
                             } else {
                                 Log::info('no tokens to revoke');
