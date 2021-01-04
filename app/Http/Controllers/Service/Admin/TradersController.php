@@ -159,7 +159,7 @@ class TradersController extends Controller
                     'name' => $request->input('name'),
                 ];
 
-                // If Input and Trader are in different states
+                // If form's disabled input and Trader's disabled_at are in different states
                 if (boolval($request->input('disabled')) xor
                     boolval($t->disabled_at)
                 ) {
@@ -170,7 +170,7 @@ class TradersController extends Controller
                         // false-ish, set it null
                         : null;
                 }
-                // or do nowt with owt
+                // ... otherwise don't alter it.
 
                 // Update trader and save
                 $t->fill($fillArray)->save();
@@ -225,7 +225,7 @@ class TradersController extends Controller
                     ->pluck('id')
                     ->toArray();
 
-                // ... and soft-deleter them, since they are orphans
+                // ... and soft-delete them, since they are orphans
                 User::whereIn('id', $orphanUsers)->delete();
 
 

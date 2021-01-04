@@ -6,7 +6,7 @@
         <div id="main-content">
 
             <h1>Edit Trader</h1>
-            <p>Edit "{{ $trader->name }}" and it's users or market</p>
+            <p>Edit <em>{{ $trader->name }}</em> and its users or market</p>
 
             @if(isset($trader->disabled_at))
                 <div class="alert alert-warning">
