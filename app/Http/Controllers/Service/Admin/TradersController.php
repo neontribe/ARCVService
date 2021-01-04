@@ -221,6 +221,8 @@ class TradersController extends Controller
                 // find any users that have just been deleted and have *no other* traders
                 $orphanUsers = User::whereIn('id', $origUserIds)
                     ->withCount('traders')
+                    // to keep SQLite happy
+                    ->groupBy('id')
                     ->having('traders_count', '=', 0)
                     ->pluck('id')
                     ->toArray();
