@@ -44,6 +44,11 @@ class LoginProxy
      */
     public function attemptLogin($email, $password)
     {
+        /*
+         * So SQLLite and MySQL treat "having" differently
+         * - SQLLite requires a "group by" for a "having"
+         * - MySQL is happy to assume a single group if unspecified.
+         */
         // fetch the users with the email
         $user = User::where('email', $email)
             // that have at least one enabled
@@ -52,7 +57,9 @@ class LoginProxy
                     return $query->whereNull('traders.disabled_at');
                 },
             ])
-            ->where('traders_count', '>', 0)
+            // group on email to keep SQLlite happy
+            ->groupBy('email')
+            ->having('traders_count', '>', 0)
             ->first();
 
         if (!is_null($user)) {
