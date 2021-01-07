@@ -231,7 +231,7 @@ class TradersController extends Controller
                 $orphanUsers->each(function ($orphanUser) {
                     // make a Uuid for the email, which has a unique constraint
                     $hash = Uuid::uuid4()->toString();
-                    // localhost - it gets emailed, somehow, it'll be looped back to the box.
+                    // localhost - if it gets emailed, somehow, it'll be looped back to the box.
                     $orphanUser->update(['email' => $hash . '@localhost']);
                     // ... and soft-delete them, since they are orphaned
                     $orphanUser->delete();
