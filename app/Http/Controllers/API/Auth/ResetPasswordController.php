@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\API\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Contracts\Auth\Guard;
+use Illuminate\Contracts\Auth\PasswordBroker;
+use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class ResetPasswordController extends Controller
@@ -27,19 +32,17 @@ class ResetPasswordController extends Controller
     /**
      * Get the guard to be used during password reset.
      *
-     * @return Guard
+     * @return Guard|StatefulGuard
      */
     protected function guard()
     {
         return Auth::guard('api');
     }
 
-
-
     /**
      * Get the broker to be used during password reset.
      *
-     * @return \Illuminate\Contracts\Auth\PasswordBroker
+     * @return PasswordBroker
      */
     public function broker()
     {
@@ -50,8 +53,8 @@ class ResetPasswordController extends Controller
     /**
      * Reset the given user's password.
      *
-     * @param  \Illuminate\Contracts\Auth\CanResetPassword  $user
-     * @param  string  $password
+     * @param CanResetPassword $user
+     * @param string $password
      * @return void
      */
     protected function resetPassword($user, $password)
@@ -65,14 +68,14 @@ class ResetPasswordController extends Controller
         // $this->guard()->login($user);
     }
 
-
-    /*
-    * Get the response for after a successful password reset.
-    *
-    * @param string $response
-    * @return \Symfony\Component\HttpFoundation\Response
-    */
-    protected function sendResetResponse($response)
+    /**
+     * Get the response for after a successful password reset.
+     *
+     * @param Request $request
+     * @param $response
+     * @return JsonResponse
+     */
+    protected function sendResetResponse(Request $request, $response)
     {
         return response()->json(['status' => trans($response)]);
     }
@@ -82,7 +85,7 @@ class ResetPasswordController extends Controller
      *
      * @param Request $request
      * @param string $response
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return JsonResponse
      */
     protected function sendResetFailedResponse(Request $request, $response)
     {
