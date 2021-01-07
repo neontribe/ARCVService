@@ -64,16 +64,14 @@
                         <input type="checkbox"
                                id="disable-toggle"
                                name="disabled"
-                               class="checkbox {{ $errors->has('disabled') ? 'error' : '' }}"
+                               class="styled-checkbox {{ $errors->has('disabled') ? 'error' : '' }}"
                                @if(isset($trader->disabled_at))
                                    CHECKED
                                @endif
                         >
                         @include('service.partials.validationMessages', ['inputName' => 'disabled'])
                     </div>
-                    <hr>
                 </div>
-                <hr>
                 @include('service.partials.addTraderUser', ['users' => $trader->users ])
                 <button type="submit" id="updateMarket">Update All</button>
             </form>

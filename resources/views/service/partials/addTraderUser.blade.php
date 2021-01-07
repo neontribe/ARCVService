@@ -1,26 +1,19 @@
 <div class="horizontal-container">
     <div>
-        <label for="new-user-name"
-               class="required"
-        >User Name</label>
-        <input type="text"
-               id="new-user-name"
-               maxlength="160"
-        >
+        <label for="new-user-name" class="required">
+            User Name
+        </label>
+        <input type="text" id="new-user-name" maxlength="160">
     </div>
     <div>
-        <label for="new-user-email"
-               class="required"
-        >User Email</label>
-        <input type="email"
-               id="new-user-email"
-        >
+        <label for="new-user-email" class="required">
+            User Email
+        </label>
+        <input type="email" id="new-user-email">
     </div>
-    <div style="width: auto; justify-content: center">
-        <button type="button" id="add-user">Add User</button>
-    </div>
+    <button type="button" id="add-user">Add User</button>
 </div>
-<div id="trader-users-list" class="horizontal-container callout" >
+<div id="trader-users-list" class="horizontal-container callout">
     @if(!empty($users))
     @foreach ($users as $user)
         <span class="user-array">

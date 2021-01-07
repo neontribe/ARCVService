@@ -6,7 +6,7 @@
         <div id="main-content">
 
             <h1>Add Trader</h1>
-            <p>Add a trader and its users, to a market</p>
+            <p>Add a trader and its users to a market</p>
 
             <form role="form"
                   class="styled-form"
@@ -51,12 +51,10 @@
                         @include('service.partials.validationMessages', ['inputName' => 'name'])
                     </div>
                 </div>
-                <hr>
+
                 @include('service.partials.addTraderUser')
-                <hr>
-                <div class="horizontal-container">
-                    <button type="submit" id="updateMarket">Save Trader</button>
-                </div>
+
+                <button type="submit" id="updateMarket">Save Trader</button>
             </form>
         </div>
     </div>
