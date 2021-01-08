@@ -58,22 +58,19 @@
                         >
                         @include('service.partials.validationMessages', ['inputName' => 'name'])
                     </div>
-                    <div>
-                        <label for="disable-toggle"
-                        >Disabled</label>
+                    <div class="disable-checkbox">
                         <input type="checkbox"
                                id="disable-toggle"
                                name="disabled"
-                               class="checkbox {{ $errors->has('disabled') ? 'error' : '' }}"
+                               class="styled-checkbox {{ $errors->has('disabled') ? 'error' : '' }}"
                                @if(isset($trader->disabled_at))
                                    CHECKED
                                @endif
                         >
+                        <label for="disable-toggle">Disabled</label>
                         @include('service.partials.validationMessages', ['inputName' => 'disabled'])
                     </div>
-                    <hr>
                 </div>
-                <hr>
                 @include('service.partials.addTraderUser', ['users' => $trader->users ])
                 <button type="submit" id="updateMarket">Update All</button>
             </form>
