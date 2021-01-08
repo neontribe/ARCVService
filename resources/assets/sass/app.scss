@@ -136,7 +136,7 @@ h1 {
         content: '✔';
         position: absolute;
         top: 2.6em;
-        left: 12px;
+        left: 0.9em;
         border: 0;
       }
     }
@@ -146,8 +146,8 @@ h1 {
       &:before {
         content: '';
         background: #ffffff;
-        width: 34px;
-        height: 34px;
+        width: 2.5em;
+        height: 2.5em;
         border: 1px solid #ececec;
         position: absolute;
         left: 0;
