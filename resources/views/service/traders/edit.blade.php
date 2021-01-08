@@ -58,9 +58,7 @@
                         >
                         @include('service.partials.validationMessages', ['inputName' => 'name'])
                     </div>
-                    <div>
-                        <label for="disable-toggle"
-                        >Disabled</label>
+                    <div class="disable-checkbox">
                         <input type="checkbox"
                                id="disable-toggle"
                                name="disabled"
@@ -69,6 +67,7 @@
                                    CHECKED
                                @endif
                         >
+                        <label for="disable-toggle">Disabled</label>
                         @include('service.partials.validationMessages', ['inputName' => 'disabled'])
                     </div>
                 </div>

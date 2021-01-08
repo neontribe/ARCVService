@@ -126,6 +126,36 @@ h1 {
     }
   }
 
+  .disable-checkbox {
+    position: relative;
+    > input {
+      cursor: pointer;
+      opacity: 0;
+
+      &:checked + label:after {
+        content: '✔';
+        position: absolute;
+        top: 2.6em;
+        left: 12px;
+        border: 0;
+      }
+    }
+    > label {
+      cursor: pointer;
+      margin-left: 3em;
+      &:before {
+        content: '';
+        background: #ffffff;
+        width: 34px;
+        height: 34px;
+        border: 1px solid #ececec;
+        position: absolute;
+        left: 0;
+        cursor: pointer;
+      }
+    }
+  }
+
   input {
     margin-bottom: 1em;
     border: 2px solid $arc_border;
