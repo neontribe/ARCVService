@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Laracsv\Export;
+use Ramsey\Uuid\Uuid;
 use Throwable;
 
 class TradersController extends Controller
@@ -224,12 +225,17 @@ class TradersController extends Controller
                     // to keep SQLite happy
                     ->groupBy('id')
                     ->having('traders_count', '=', 0)
-                    ->pluck('id')
-                    ->toArray();
+                    ->get();
 
-                // ... and soft-delete them, since they are orphans
-                User::whereIn('id', $orphanUsers)->delete();
-
+                // this is a slow iteration, but we don't expect too many users/trader
+                $orphanUsers->each(function ($orphanUser) {
+                    // make a Uuid for the email, which has a unique constraint
+                    $hash = Uuid::uuid4()->toString();
+                    // localhost - if it gets emailed, somehow, it'll be looped back to the box.
+                    $orphanUser->update(['email' => $hash . '@localhost']);
+                    // ... and soft-delete them, since they are orphaned
+                    $orphanUser->delete();
+                });
 
                 return $t;
             });
