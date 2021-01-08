@@ -230,6 +230,7 @@ h1 {
     }
     &#add-user {
       align-self: center;
+      margin-top: 0.6em;
     }
   }
   // remove dotted outline/borders in Firefox
@@ -266,6 +267,9 @@ span.user-array {
   flex: 100%;
   > input {
     margin-right: 0.8em;
+  }
+  > div {
+    display: inline-block;
   }
 }
 

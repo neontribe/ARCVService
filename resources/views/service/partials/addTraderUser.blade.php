@@ -29,7 +29,7 @@
                    type="email"
                    value="{{ $user->email }}"
             >
-            <div style="display: inline-block; width: 7em; justify-content: center">
+            <div>
                 <button type="button" class="remove-row">
                     <i class="glyphicon glyphicon-minus" aria-hidden="true"></i>
                 </button>
