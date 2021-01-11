@@ -210,7 +210,7 @@ class TradersController extends Controller
                                         'revoked' => true,
                                     ]);
 
-                                Log::info('removing token for user '. $user->id);
+                                Log::info('removing token for user ' . $user->id);
                                 $accessToken->revoke();
                             } else {
                                 Log::info('no tokens to revoke');
@@ -229,7 +229,6 @@ class TradersController extends Controller
 
                 // ... and soft-delete them, since they are orphans
                 User::whereIn('id', $orphanUsers)->delete();
-
 
                 return $t;
             });
@@ -253,6 +252,8 @@ class TradersController extends Controller
         $traders = $this->getTraders();
         $csvExporter = new Export();
         $csvExporter->beforeEach(function ($trader) {
+            $trader->joined = $trader->created_at->format('d-m-Y');
+            $trader->disabled = $trader->disabled_at ? $trader->disabled_at->format('d-m-Y') : $trader->disabled_at;
             foreach ($trader->users->sortBy('name') as $user) {
                 $userNames[] = $user->name;
                 $trader->users = implode(', ', $userNames);
@@ -264,8 +265,8 @@ class TradersController extends Controller
             'market.name' => 'Market',
             'market.sponsor.name' => 'Area',
             'users' => 'Users',
-            'created_at' => 'Join Date',
-            'deleted_at' => 'Leaving Date',
+            'joined' => 'Join Date',
+            'disabled' => 'Disabled',
         ];
 
         $fileName = 'active_traders.csv';
