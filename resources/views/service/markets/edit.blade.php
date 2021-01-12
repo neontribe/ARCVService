@@ -58,6 +58,7 @@
                                   rows=5
                                   maxlength=160
                         >{{ $market->payment_message }}</textarea>
+                        @include('service.partials.validationMessages', array('inputName' => 'payment_message'))
                     </div>
                 </div>
                 <button type="submit" id="updateMarket">Save Market</button>
