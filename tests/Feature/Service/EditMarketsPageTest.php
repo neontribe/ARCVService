@@ -12,9 +12,6 @@ class EditMarketsPageTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
-    /** @var Sponsor $sponsor */
-    private $sponsor;
-
     /** @var AdminUser $adminUser */
     private $adminUser;
 
@@ -24,9 +21,6 @@ class EditMarketsPageTest extends StoreTestCase
     /** @var string $updateRoute */
     private $updateRoute;
 
-    /** @var Market $market */
-    private $market;
-
     /** @var array $postData */
     private $postData;
 
@@ -34,27 +28,27 @@ class EditMarketsPageTest extends StoreTestCase
     {
         parent::setUp();
         $this->adminUser = factory(AdminUser::class)->create();
-        $this->sponsor = factory(Sponsor::class)->create();
+        $sponsor = factory(Sponsor::class)->create();
         // make a market
-        $this->market = factory(Market::class)->create([
-            'sponsor_id' => $this->sponsor->id,
+        $market = factory(Market::class)->create([
+            'sponsor_id' => $sponsor->id,
             'name' => 'Test Market',
             'payment_message' => 'Thanks, we got that market'
         ]);
-        $this->editRoute = route('admin.markets.edit', ['id' => $this->market->id]);
-        $this->updateRoute = route('admin.markets.update', ['id' => $this->market->id]);
+        $this->editRoute = route('admin.markets.edit', ['id' => $market->id]);
+        $this->updateRoute = route('admin.markets.update', ['id' => $market->id]);
 
         // set the template to edit that.
         $this->postData = [
             '_method' => 'put',
-            'sponsor' => $this->sponsor->id,
+            'sponsor' => $sponsor->id,
             'name' => 'Test Market',
             'payment_message' => 'Thanks, we got that market',
         ];
     }
 
     /** @test */
-    public function testItShowsAMarketCreatePage()
+    public function testItShowsAMarketEditPage()
     {
         $this->actingAs($this->adminUser, 'admin')
             ->get($this->editRoute)

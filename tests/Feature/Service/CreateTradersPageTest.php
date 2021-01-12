@@ -4,10 +4,11 @@ namespace Tests\Feature\Service;
 
 use App\AdminUser;
 use App\Sponsor;
+use App\Market;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\StoreTestCase;
 
-class CreateMarketsPageTest extends StoreTestCase
+class CreateTradersPageTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
@@ -28,8 +29,14 @@ class CreateMarketsPageTest extends StoreTestCase
         parent::setUp();
         $this->adminUser = factory(AdminUser::class)->create();
         $sponsor = factory(Sponsor::class)->create();
-        $this->createRoute = route('admin.markets.create');
-        $this->storeRoute = route('admin.markets.store');
+        // make a market
+        $market = factory(Market::class)->create([
+            'sponsor_id' => $sponsor->id,
+            'name' => 'Test Market',
+            'payment_message' => 'Thanks, we got that market'
+        ]);
+        $this->createRoute = route('admin.traders.create');
+        $this->storeRoute = route('admin.traders.store');
 
         $this->postData = [
             'sponsor' => $sponsor->id,
@@ -39,75 +46,52 @@ class CreateMarketsPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function testItShowsAMarketCreatePage()
+    public function testItShowsATraderCreatePage()
     {
         $this->actingAs($this->adminUser, 'admin')
             ->get($this->createRoute)
             ->assertResponseOk()
             ->seePageIs($this->createRoute)
-            ->seeInElement('h1', 'Add Market')
+            ->seeInElement('h1', 'Add Trader')
             ->seeElement('form')
-            ->seeInElement('label[for="sponsor"]', 'Area')
-            ->seeElement('select[name="sponsor"]')
+            ->seeInElement('label[for="market"]', 'Market')
+            ->seeElement('select[name="market"]')
             ->seeInElement('label[for="name"]', 'Name')
             ->seeElement('input[name="name"]')
-            ->seeInElement('label[for="payment_message"]', 'Voucher return message')
-            ->seeElement('textarea[name="payment_message"]')
-            ->seeInElement('button[id="updateMarket"]', 'Save Market')
+            ->seeInElement('label[for="new-user-name"]', 'User Name')
+            ->seeElement('input[id="new-user-name"]')
+            ->seeInElement('label[for="new-user-email"]', 'User Email')
+            ->seeElement('input[id="new-user-email"]')
+            ->seeInElement('button[id="updateTrader"]', 'Save Trader')
             ->dontSeeElement('label[role="alert"]')
         ;
     }
 
     /** @test */
-    public function testItShowsAnErrorForBadPaymentMessage()
-    {
-        $this->actingAs($this->adminUser, 'admin')
-            ->visit($this->createRoute)
-            ->assertResponseOk()
-        ;
-
-        $postData = array_merge(
-            $this->postData,
-            [
-                'payment_message' => '',
-                '_token' => session('_token'),
-            ]
-        );
-
-        $this->post($this->storeRoute, $postData)
-            ->followRedirects()
-            ->seePageIs($this->createRoute)
-            ->seeElement('label[role="alert"][for="payment_message"]')
-        ;
-    }
-
-    /** @test */
-    public function testItShowsAnErrorForBadSponsor()
-    {
-        $this->actingAs($this->adminUser, 'admin')
-            ->visit($this->createRoute)
-            ->assertResponseOk()
-        ;
-
-        // set an impossible sponsor
-        $postData = array_merge(
-            $this->postData,
-            [
-                'sponsor' => 2,
-                '_token' => session('_token'),
-            ]
-        );
-
-        // see an error box for it
-        $this->post($this->storeRoute, $postData)
-            ->followRedirects()
-            ->seePageIs($this->createRoute)
-            ->seeElement('label[role="alert"][for="sponsor"]')
-        ;
-    }
-
-    /** @test */
     public function testItShowsAnErrorForBadMarket()
+    {
+        $this->actingAs($this->adminUser, 'admin')
+            ->visit($this->createRoute)
+            ->assertResponseOk()
+        ;
+
+        $postData = array_merge(
+            $this->postData,
+            [
+                'market' => 999,
+                '_token' => session('_token'),
+            ]
+        );
+
+        $this->post($this->storeRoute, $postData)
+            ->followRedirects()
+            ->seePageIs($this->createRoute)
+            ->seeElement('label[role="alert"][for="market"]')
+        ;
+    }
+
+    /** @test */
+    public function testItShowsAnErrorForBadTraderName()
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->createRoute)
