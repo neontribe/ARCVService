@@ -3,11 +3,12 @@
 namespace Tests\Feature\Service;
 
 use App\AdminUser;
+use App\Market;
 use App\Sponsor;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\StoreTestCase;
 
-class CreateMarketsPageTest extends StoreTestCase
+class EditMarketsPageTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
@@ -17,11 +18,14 @@ class CreateMarketsPageTest extends StoreTestCase
     /** @var AdminUser $adminUser */
     private $adminUser;
 
-    /** @var string $createRoute */
-    private $createRoute;
+    /** @var string $editRoute */
+    private $editRoute;
 
-    /** @var string $storeRoute */
-    private $storeRoute;
+    /** @var string $updateRoute */
+    private $updateRoute;
+
+    /** @var Market $market */
+    private $market;
 
     /** @var array $postData */
     private $postData;
@@ -31,10 +35,18 @@ class CreateMarketsPageTest extends StoreTestCase
         parent::setUp();
         $this->adminUser = factory(AdminUser::class)->create();
         $this->sponsor = factory(Sponsor::class)->create();
-        $this->createRoute = route('admin.markets.create');
-        $this->storeRoute = route('admin.markets.store');
+        // make a market
+        $this->market = factory(Market::class)->create([
+            'sponsor_id' => $this->sponsor->id,
+            'name' => 'Test Market',
+            'payment_message' => 'Thanks, we got that market'
+        ]);
+        $this->editRoute = route('admin.markets.edit', ['id' => $this->market->id]);
+        $this->updateRoute = route('admin.markets.update', ['id' => $this->market->id]);
 
+        // set the template to edit that.
         $this->postData = [
+            '_method' => 'put',
             'sponsor' => $this->sponsor->id,
             'name' => 'Test Market',
             'payment_message' => 'Thanks, we got that market',
@@ -45,10 +57,10 @@ class CreateMarketsPageTest extends StoreTestCase
     public function testItShowsAMarketCreatePage()
     {
         $this->actingAs($this->adminUser, 'admin')
-            ->get($this->createRoute)
+            ->get($this->editRoute)
             ->assertResponseOk()
-            ->seePageIs($this->createRoute)
-            ->seeInElement('h1', 'Add Market')
+            ->seePageIs($this->editRoute)
+            ->seeInElement('h1', 'Edit Market')
             ->seeElement('form')
             ->seeInElement('label[for="sponsor"]', 'Area')
             ->seeElement('select[name="sponsor"]')
@@ -65,7 +77,7 @@ class CreateMarketsPageTest extends StoreTestCase
     public function testItShowsAnErrorForBadPaymentMessage()
     {
         $this->actingAs($this->adminUser, 'admin')
-            ->visit($this->createRoute)
+            ->visit($this->editRoute)
             ->assertResponseOk()
         ;
 
@@ -77,9 +89,9 @@ class CreateMarketsPageTest extends StoreTestCase
             ]
         );
 
-        $this->post($this->storeRoute, $postData)
+        $this->post($this->updateRoute, $postData)
             ->followRedirects()
-            ->seePageIs($this->createRoute)
+            ->seePageIs($this->editRoute)
             ->seeElement('label[role="alert"][for="payment_message"]')
         ;
     }
@@ -88,7 +100,7 @@ class CreateMarketsPageTest extends StoreTestCase
     public function testItShowsAnErrorForBadSponsor()
     {
         $this->actingAs($this->adminUser, 'admin')
-            ->visit($this->createRoute)
+            ->visit($this->editRoute)
             ->assertResponseOk()
         ;
 
@@ -102,9 +114,9 @@ class CreateMarketsPageTest extends StoreTestCase
         );
 
         // see an error box for it
-        $this->post($this->storeRoute, $postData)
+        $this->post($this->updateRoute, $postData)
             ->followRedirects()
-            ->seePageIs($this->createRoute)
+            ->seePageIs($this->editRoute)
             ->seeElement('label[role="alert"][for="sponsor"]')
         ;
     }
@@ -113,7 +125,7 @@ class CreateMarketsPageTest extends StoreTestCase
     public function testItShowsAnErrorForBadMarket()
     {
         $this->actingAs($this->adminUser, 'admin')
-            ->visit($this->createRoute)
+            ->visit($this->editRoute)
             ->assertResponseOk()
         ;
 
@@ -127,9 +139,9 @@ class CreateMarketsPageTest extends StoreTestCase
         );
 
         // see an error box for it
-        $this->post($this->storeRoute, $postData)
+        $this->post($this->updateRoute, $postData)
             ->followRedirects()
-            ->seePageIs($this->createRoute)
+            ->seePageIs($this->editRoute)
             ->seeElement('label[role="alert"][for="name"]')
         ;
     }
