@@ -27,7 +27,8 @@ class AdminNewUpdateMarketRequest extends FormRequest
     {
         // Get the ID off the route
         $id = $this->route('id') ?? null;
-        $sponsor_id = $this->only('sponsor');
+        // Get the sponsor out of the data
+        $sponsor_id = $this->input('sponsor') ?? null;
 
         return [
             // MUST be present, string, and not a duplicate of another name in same sponsor.

@@ -25,9 +25,10 @@ class AdminNewUpdateTraderRequest extends FormRequest
      */
     public function rules()
     {
-        // Get the ID off the route
+        // Get the ID off the route params
         $id = $this->route('id') ?? null;
-        $market_id = $this->only('market');
+        // Get the market out of the data
+        $market_id = $this->input('market') ?? null;
 
         return [
             // MUST be present, string, and not a duplicate of another name in same market.
