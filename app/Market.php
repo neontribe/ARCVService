@@ -72,9 +72,4 @@ class Market extends Model
     {
         return $this->sponsor->shortcode;
     }
-
-    public function getPaymentMessageAttribute($value)
-    {
-        return trans('api.messages.voucher_payment_requested', ['payment_request_message' => $value]);
-    }
 }
