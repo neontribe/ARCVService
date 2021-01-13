@@ -5,10 +5,11 @@ namespace Tests\Feature\Service;
 use App\AdminUser;
 use App\Sponsor;
 use App\Market;
+use App\Trader;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\StoreTestCase;
 
-class CreateTradersPageTest extends StoreTestCase
+class EditTradersPageTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
@@ -35,24 +36,31 @@ class CreateTradersPageTest extends StoreTestCase
             'name' => 'Test Market',
             'payment_message' => 'Thanks, we got that market'
         ]);
-        $this->createRoute = route('admin.traders.create');
-        $this->storeRoute = route('admin.traders.store');
+        // trader without users
+        $trader = factory(Trader::class)->create([
+            'market_id' => $market->id,
+            'name' => 'Test Trader',
+        ]);
 
-        // template for trader
+        $this->createRoute = route('admin.traders.edit', ['id' => $trader->id]);
+        $this->storeRoute = route('admin.traders.update', ['id' => $trader->id]);
+
+        // template for trader updates
         $this->postData = [
+            '_method' => 'PUT',
             'market' => $market->id,
-            'name' => 'Test Trader'
+            'name' => 'Test Trader',
         ];
     }
 
     /** @test */
-    public function testItShowsATraderCreatePage()
+    public function testItShowsATraderEditPage()
     {
         $this->actingAs($this->adminUser, 'admin')
             ->get($this->createRoute)
             ->assertResponseOk()
             ->seePageIs($this->createRoute)
-            ->seeInElement('h1', 'Add Trader')
+            ->seeInElement('h1', 'Edit Trader')
             ->seeElement('form')
             ->seeInElement('label[for="market"]', 'Market')
             ->seeElement('select[name="market"]')
@@ -62,7 +70,9 @@ class CreateTradersPageTest extends StoreTestCase
             ->seeElement('input[id="new-user-name"]')
             ->seeInElement('label[for="new-user-email"]', 'User Email')
             ->seeElement('input[id="new-user-email"]')
-            ->seeInElement('button[id="updateTrader"]', 'Save Trader')
+            ->seeInElement('label[for="disable-toggle"]', 'Disabled')
+            ->seeElement('input[type="checkbox"][id="disable-toggle"]')
+            ->seeInElement('button[id="updateTrader"]', 'Update All')
             ->dontSeeElement('label[role="alert"]')
         ;
     }
@@ -78,7 +88,6 @@ class CreateTradersPageTest extends StoreTestCase
         $postData = array_merge(
             $this->postData,
             [
-                // shouldn't exist
                 'market' => 999,
                 '_token' => session('_token'),
             ]
@@ -99,7 +108,7 @@ class CreateTradersPageTest extends StoreTestCase
             ->assertResponseOk()
         ;
 
-        // set an impossible Trader name
+        // set an impossible sponsor
         $postData = array_merge(
             $this->postData,
             [
@@ -113,6 +122,29 @@ class CreateTradersPageTest extends StoreTestCase
             ->followRedirects()
             ->seePageIs($this->createRoute)
             ->seeElement('label[role="alert"][for="name"]')
+        ;
+    }
+
+    /** @test */
+    public function testItShowsAnErrorForBadDisabledCheckbox()
+    {
+        $this->actingAs($this->adminUser, 'admin')
+            ->visit($this->createRoute)
+            ->assertResponseOk()
+        ;
+
+        $postData = array_merge(
+            $this->postData,
+            [
+                'disabled' => 'Not a bool-a-like value',
+                '_token' => session('_token'),
+            ]
+        );
+
+        $this->post($this->storeRoute, $postData)
+            ->followRedirects()
+            ->seePageIs($this->createRoute)
+            ->seeElement('label[role="alert"][for="disabled"]')
         ;
     }
 }
