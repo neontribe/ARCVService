@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class AdminNewUpdateMarketRequest extends FormRequest
 {
@@ -24,9 +25,21 @@ class AdminNewUpdateMarketRequest extends FormRequest
      */
     public function rules()
     {
+        // Get the ID off the route
+        $id = $this->route('id') ?? null;
+        $sponsor_id = $this->only('sponsor');
+
         return [
-            // MUST be present, string
-            'name' => 'required|string',
+            // MUST be present, string, and not a duplicate of another name in same sponsor.
+            'name' => [
+                'required',
+                'string',
+                Rule::unique('markets', 'name')
+                    ->ignore($id)
+                    ->where(function ($q) use ($sponsor_id) {
+                        return $q->where('sponsor_id', $sponsor_id);
+                    })
+            ],
             // MUST be present, integer, in table
             'sponsor' => 'required|integer|exists:sponsors,id',
             // MUST be present, string, 160 max length
