@@ -72,7 +72,7 @@
                     </div>
                 </div>
                 @include('service.partials.addTraderUser', ['users' => $trader->users ])
-                <button type="submit" id="updateMarket">Update All</button>
+                <button type="submit" id="updateTrader">Update All</button>
             </form>
         </div>
     </div>

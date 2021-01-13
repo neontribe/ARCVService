@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class AdminNewUpdateTraderRequest extends FormRequest
 {
@@ -24,9 +25,23 @@ class AdminNewUpdateTraderRequest extends FormRequest
      */
     public function rules()
     {
+        // Get the ID off the route params
+        $id = $this->route('id') ?? null;
+        // Get the market out of the data
+        $market_id = $this->input('market') ?? null;
+
         return [
-            // MUST be present, string
-            'name' => 'required|string|max:160',
+            // MUST be present, string, and not a duplicate of another name in same market.
+            'name' => [
+                'required',
+                'string',
+                'max:160',
+                Rule::unique('traders', 'name')
+                    ->ignore($id)
+                    ->where(function ($q) use ($market_id) {
+                        return $q->where('market_id', $market_id);
+                    })
+            ],
             // MUST be present, integer, in table
             'market' => 'required|integer|exists:markets,id',
             // Optional, can be null, can be [yes,on,1,true]

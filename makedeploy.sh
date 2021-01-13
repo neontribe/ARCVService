@@ -1,5 +1,5 @@
 #!/bin/bash
-
+RELVER=$1
 # get the right version of npm using nvm
 source ~/.nvm/nvm.sh
 source ~/.profile
@@ -22,7 +22,7 @@ SRCNAME=${PWD##*/}
 cd ..
 # pack it up without most of the dev extras
 rm -f ${SRCNAME}.tgz
-tar -cvzf ${SRCNAME}.tgz  \
+tar -cvzf ${SRCNAME}_${RELVER}.tgz  \
     --exclude="${SRCNAME}/.docker" \
     --exclude="${SRCNAME}/.git" \
     --exclude="${SRCNAME}/.gitattributes" \

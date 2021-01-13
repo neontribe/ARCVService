@@ -54,7 +54,7 @@
 
                 @include('service.partials.addTraderUser')
 
-                <button type="submit" id="updateMarket">Save Trader</button>
+                <button type="submit" id="updateTrader">Save Trader</button>
             </form>
         </div>
     </div>
