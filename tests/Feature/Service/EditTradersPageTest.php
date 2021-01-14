@@ -72,7 +72,7 @@ class EditTradersPageTest extends StoreTestCase
             ->seeElement('input[id="new-user-email"]')
             ->seeInElement('label[for="disable-toggle"]', 'Disabled')
             ->seeElement('input[type="checkbox"][id="disable-toggle"]')
-            ->seeInElement('button[id="updateTrader"]', 'Update All')
+            ->seeInElement('button[class="updateTrader"]', 'Update All')
             ->dontSeeElement('label[role="alert"]')
         ;
     }
