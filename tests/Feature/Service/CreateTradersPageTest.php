@@ -62,7 +62,7 @@ class CreateTradersPageTest extends StoreTestCase
             ->seeElement('input[id="new-user-name"]')
             ->seeInElement('label[for="new-user-email"]', 'User Email')
             ->seeElement('input[id="new-user-email"]')
-            ->seeInElement('button[id="updateTrader"]', 'Save Trader')
+            ->seeInElement('button[class="updateTrader"]', 'Save Trader')
             ->dontSeeElement('label[role="alert"]')
         ;
     }
