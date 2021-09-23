@@ -115,6 +115,7 @@ class Trader extends Model
     {
         $q = DB::table('vouchers')->select('*')
             ->where('trader_id', $this->id)
+            ->where ('updated_at', '>=', Carbon::now()->subMonths(6))
             ->orderBy('updated_at', 'desc');
 
         if (!empty($status)) {
