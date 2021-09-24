@@ -138,6 +138,8 @@ class Trader extends Model
                     ->distinct()
                     ->leftJoin('voucher_states', 'vouchers.id', '=', 'voucher_states.voucher_id')
                     ->where('vouchers.trader_id', $this->id)
+                    ->where('vouchers.updated_at', '>=', Carbon::now()->subMonths(6))
+                    ->where('voucher_states.created_at', '>=', Carbon::now()->subMonths(6))
                     ->where('voucher_states.to', $stateCondition);
 
                 $q = $q->leftJoinSub($statedVoucherQuery, 'stated_vouchers', function ($join) {
