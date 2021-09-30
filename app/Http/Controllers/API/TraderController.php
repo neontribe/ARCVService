@@ -105,7 +105,10 @@ EOD;
         // that have current voucher_state of given currentstate.
 
         $status = request()->input('status');
-        $vouchers = $trader->vouchersWithStatus($status, ['code', DB::raw('DATE_FORMAT("updated_at", "%d-%m-%Y ) as updated_at')]);
+        $vouchers = $trader->vouchersWithStatus($status, [
+                'code',
+                DB::raw('DATE_FORMAT("updated_at", "%d-%m-%Y") as updated_at')
+            ]);
         return response()->json($vouchers, 200);
     }
 
