@@ -109,11 +109,12 @@ class Trader extends Model
     /**
      * Vouchers submitted by this trader that have a given status.
      * @param null $status
+     * @param array $columns
      * @return Collection
      */
-    public function vouchersWithStatus($status = null)
+    public function vouchersWithStatus($status = null, $columns = ['*'])
     {
-        $q = DB::table('vouchers')->select('*')
+        $q = DB::table('vouchers')->select($columns)
             ->where('trader_id', $this->id)
             ->orderBy('updated_at', 'desc');
 
