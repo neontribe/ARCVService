@@ -2,7 +2,6 @@
 
 namespace App;
 
-use App\Http\Controllers\Store\PaymentController;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Eloquent\Model;
@@ -113,7 +112,7 @@ class Trader extends Model
      * @param array $columns
      * @return Collection
      */
-    public function vouchersWithStatus($status = null, $columns = ['*'])
+    public function vouchersWithStatus($status = null, array $columns = ['*'])
     {
         if (!empty($status)) {
             // Get the vouchers with given status, mapped to these states.
@@ -129,6 +128,8 @@ class Trader extends Model
                     break;
             }
 
+            // get the cutoff for 6 calendar months of data.
+            $cutOff = Carbon::today()->subMonths(6)->startOfMonth()->format('Y-m-d H:i:s');
             $query =  "select " . implode(',', $columns) . " from (
                 select vouchers.id,
                         vouchers.code,
@@ -138,14 +139,14 @@ class Trader extends Model
                         select `to`
                             from voucher_states
                             where voucher_states.voucher_id = vouchers.id
-                            and voucher_states.created_at >= DATE_SUB(now(), INTERVAL 6 MONTH)
+                            and voucher_states.created_at >= '$cutOff'
                             order by updated_at desc
                             limit 1
                         ) as state
                             from vouchers
-                            where trader_id = " . $this->id ." 
+                            where trader_id = '$this->id'
                     ) as v
-                where v.state = '". $stateCondition ."'
+                where v.state = '$stateCondition'
                 order by id desc, updated_at desc;"
             ;
 

@@ -42,8 +42,10 @@
     "laravel/browser-kit-testing": "~5.0",
     "mockery/mockery": "^1.0",
     "nunomaduro/collision": "^3.0",
+    "phpmd/phpmd": "^2.11",
     "phpunit/phpunit": "^8.0",
-    "spinen/laravel-mail-assertions": "^1.0"
+    "spinen/laravel-mail-assertions": "^1.0",
+    "squizlabs/php_codesniffer": "3.6.2"
   },
   "autoload": {
     "classmap": [
