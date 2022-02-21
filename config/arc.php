@@ -47,7 +47,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'links' => [
-        'privacy_policy' => 'https://www.alexandrarose.org.uk/Handlers/Download.ashx?IDMF=e15ec914-aac7-4afe-a9a2-be911ccf1a4e',
+        'privacy_policy' => 'https://www.alexandrarose.org.uk/arc-childrens-centre-information-sharing-policy',
     ],
 
     /*
