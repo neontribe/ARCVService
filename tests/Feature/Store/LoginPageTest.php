@@ -28,6 +28,14 @@ class LoginPageTest extends StoreTestCase
             "password" => bcrypt('test_user_pass'),
         ]);
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+
+        // Create a deleted CentreUser
+        $this->deletedcu = factory(CentreUser::class)->create([
+            'name' => "testman",
+            'email' => "deletedtestman@test.co.uk",
+            "password" => bcrypt('deleted_user_pass'),
+            'deleted_at' => date("Y-m-d H:i:s")
+        ]);
     }
 
     /** @test */
@@ -98,6 +106,18 @@ class LoginPageTest extends StoreTestCase
         $this->visit(URL::route('store.login'))
             ->type('notauser@example.com', 'email')
             ->type('bad_user_pass', 'password')
+            ->press('Log In')
+            ->seePageIs(URL::route('store.login'))
+            ->see(trans('auth.failed'))
+        ;
+    }
+
+    /** @test */
+    public function itForbidsADeletedUserToLogin()
+    {
+        $this->visit(URL::route('store.login'))
+            ->type($this->deletedcu->email, 'email')
+            ->type('deleted_user_pass', 'password')
             ->press('Log In')
             ->seePageIs(URL::route('store.login'))
             ->see(trans('auth.failed'))
