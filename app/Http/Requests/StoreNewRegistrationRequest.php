@@ -45,7 +45,7 @@ class StoreNewRegistrationRequest extends FormRequest
             // MAY be present, Min 1
             'children' => 'array|min:1',
             // MAY be present alone; MUST be present if child verified, MUST be a date format of '2017-07'
-            'children.*.dob' => 'required_if:children.*.verified,!=,null|date_format:Y-m',
+            'children.*.dob' => 'required_if:children.*.verified,=,true|date_format:Y-m',
             // MAY be present; MUST be a boolean
             'children.*.verified' => 'boolean',
         ];
