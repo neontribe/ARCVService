@@ -69,6 +69,10 @@
             </div>
             <button type="submit" id="updateWorker">Update worker</button>
         </form>
+        <form role="form" class="styled-form" method="GET"
+            action="{{ route('admin.centreusers.delete', ['id' => $worker->id]) }}">
+          <button type="submit" id="deleteWorker">Delete worker</button>
+        </form>
         <script>
             function buildCheckboxes() {
                 // Setup data for checkboxes
