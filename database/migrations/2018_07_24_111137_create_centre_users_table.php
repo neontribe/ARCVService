@@ -22,6 +22,7 @@ class CreateCentreUsersTable extends Migration
             $table->rememberToken();
             $table->integer('centre_id')->unsigned()->nullable();// Not all Users may have a CC e.g. Admins
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('centre_id')
                 ->references('id')
