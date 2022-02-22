@@ -132,7 +132,7 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                     'carer' => 'A String',
                     'eligibility' => 'other',
                     'carers' => [1,2,3,4],
-               ]
+                ]
             ],
             'requestShouldSucceedWithMinimalChildren' => [
                 'passed' => true,
