@@ -64,5 +64,10 @@ class CentreUsersSeeder extends Seeder
                 }
                 $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
             });
+
+        // 2 deleted users
+        $deletedUsers = factory(App\CentreUser::class, 2)->create([
+            "deleted_at"  => date("Y-m-d H:i:s"),
+        ]);
     }
 }
