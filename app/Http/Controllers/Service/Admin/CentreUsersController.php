@@ -288,6 +288,7 @@ class CentreUsersController extends Controller
     public function delete($id): RedirectResponse
     {
       $centreUser = CentreUser::findOrFail($id);
+      $centreUser->centre->centreUsers()->detach($id);
       $centreUser->delete();
       return redirect()
           ->route('admin.centreusers.index')
