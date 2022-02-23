@@ -28,7 +28,7 @@ class ChangePasswordPageTest extends StoreTestCase
         $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // Create a token for testing.
-        $token = 'abcdefabcdefabcdef';
+        $token = '1fee2254b64595ef575545dbb2b937df4b7d09a5b04c1dd45124a9be13164e44';
 
         // Create a password reset.
         // NOTE : the token is stored as a hash!
@@ -85,14 +85,9 @@ class ChangePasswordPageTest extends StoreTestCase
         // Has it saved the original password against the centreuser?
         $this->assertTrue(Hash::check('test_user_pass', $centreUser->password));
 
-        // Se if the page exists.
-        $this->visit(route('store.password.reset', [ 'token' => 'NotAHashedToken' ]))
-            ->see('Reset Password')
-            ->type($centreUser->email, 'email')
-            ->type('mynewpassword', 'password')
-            ->type('mynewpassword', 'password_confirmation')
-            ->press('Reset Password')
-            ->see(trans('passwords.token'));
+        $this->actingAs($centreUser)
+            ->get(route('store.password.reset', ['token' => 'NotAHashedToken']))
+            ->assertResponseStatus(404)
         ;
         // Load the centreuser again.
         $centreUser->fresh();

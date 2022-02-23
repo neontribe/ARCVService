@@ -24,6 +24,7 @@ Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail'
 ;
 Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')
     ->name('admin.password.reset')
+    ->where('token', '[0-9a-f]{80}');
 ;
 Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 
@@ -70,11 +71,11 @@ Route::group(['middleware' => 'auth:admin'], function () {
     Route::put('workers/{id}', [
         'as' => 'admin.centreusers.update',
         'uses' => 'Admin\CentreUsersController@update',
-    ]);
+    ])->where('id', '^[0-9]+$');
     Route::get('workers/{id}/edit', [
         'as' => 'admin.centreusers.edit',
         'uses' => 'Admin\CentreUsersController@edit',
-    ]);
+    ])->where('id', '^[0-9]+$');
     Route::get('workers/download', [
         'as' => 'admin.centreusers.download',
         'uses' => 'Admin\CentreUsersController@download',
@@ -92,7 +93,7 @@ Route::group(['middleware' => 'auth:admin'], function () {
     Route::get('centres/{id}/neighbours', [
         'as' => 'admin.centre_neighbours.index',
         'uses' => 'Admin\CentresController@getNeighboursAsJson'
-    ]);
+    ])->where('id', '^[0-9]+$');
     Route::post('centres', [
         'as' => 'admin.centres.store',
         'uses' => 'Admin\CentresController@store',
@@ -147,11 +148,11 @@ Route::group(['middleware' => 'auth:admin'], function () {
     Route::get('markets/{id}/edit', [
         'as' => 'admin.markets.edit',
         'uses' => 'Admin\MarketsController@edit',
-    ]);
+    ])->where('id', '^[0-9]+$');
     Route::put('markets/{id}', [
         'as' => 'admin.markets.update',
         'uses' => 'Admin\MarketsController@update',
-    ]);
+    ])->where('id', '^[0-9]+$');
 
     // Trader Management
     Route::get('traders', [
@@ -169,11 +170,11 @@ Route::group(['middleware' => 'auth:admin'], function () {
     Route::get('traders/{id}/edit', [
         'as' => 'admin.traders.edit',
         'uses' => 'Admin\TradersController@edit',
-    ]);
+    ])->where('id', '^[0-9]+$');
     Route::put('traders/{id}', [
         'as' => 'admin.traders.update',
         'uses' => 'Admin\TradersController@update',
-    ]);
+    ])->where('id', '^[0-9]+$');
     Route::get('traders/download', [
         'as' => 'admin.traders.download',
         'uses' => 'Admin\TradersController@download',
