@@ -71,6 +71,7 @@
         </form>
         <form role="form" id="deleteForm" class="styled-form" method="GET"
             action="{{ route('admin.centreusers.delete', ['id' => $worker->id]) }}">
+            {!! csrf_field() !!}
           <button type="submit" id="deleteWorker">Delete worker</button>
         </form>
         <script>
