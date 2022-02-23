@@ -69,6 +69,11 @@
             </div>
             <button type="submit" id="updateWorker">Update worker</button>
         </form>
+        <form role="form" id="deleteForm" class="styled-form" method="GET"
+            action="{{ route('admin.centreusers.delete', ['id' => $worker->id]) }}">
+            {!! csrf_field() !!}
+          <button type="submit" id="deleteWorker">Delete worker</button>
+        </form>
         <script>
             function buildCheckboxes() {
                 // Setup data for checkboxes
@@ -158,8 +163,15 @@
                     // show the boxes when we load
                     buildCheckboxes();
                 });
+                $('#deleteWorker').on('click', function (evt) {
+                  evt.preventDefault();
+                  var deleteForm = document.getElementById('deleteForm');
+                  var areYouSure = confirm('Are you sure you want to delete this worker account?');
+                  if (areYouSure === true) {
+                    deleteForm.submit();
+                  };
+                });
         </script>
     </div>
 </div>
-
 @endsection

@@ -278,4 +278,20 @@ class CentreUsersController extends Controller
 
         $buildFile->download($fileName);
     }
+
+    /**
+     * Handle deleting a centre user.
+     *
+     * @param CentreUser $organisation
+     * @return RedirectResponse
+     */
+    public function delete($id): RedirectResponse
+    {
+      $centreUser = CentreUser::findOrFail($id);
+      $centreUser->centre->centreUsers()->detach($id);
+      $centreUser->delete();
+      return redirect()
+          ->route('admin.centreusers.index')
+          ->with('message', 'Worker ' . $centreUser->name . ' deleted');
+    }
 }
