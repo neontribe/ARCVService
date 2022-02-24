@@ -32,6 +32,9 @@ class UpdateRegistrationsTable extends Migration
         DB::update("UPDATE registrations SET eligibility_hsbs = 'healthy-start-receiving-not-eligible-or-rejected'
             WHERE eligibility = 'other'
         ");
+        DB::update("UPDATE registrations SET eligibility_hsbs = 'healthy-start-receiving-not-eligible-or-rejected'
+            WHERE eligibility = 'no-recourse-to-public-funds'
+        ");
         DB::update("UPDATE registrations SET eligibility_nrpf = 'Yes'
             WHERE eligibility = 'no-recourse-to-public-funds'
         ");
