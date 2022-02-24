@@ -25,7 +25,8 @@ class VouchersController extends Controller
      */
     public function index()
     {
-        $vouchers = Voucher::all();
+        // $vouchers = Voucher::all();
+        $vouchers = Voucher::whereNotIn('currentstate', ['retired', 'voided'])->get();
         return view('service.vouchers.index', compact('vouchers'));
     }
 
