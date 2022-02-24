@@ -420,7 +420,8 @@ class RegistrationController extends Controller
         $registration = ($registration) ?? Registration::findOrFail($request->get('registration'));
 
         // Fetch eligibility
-        $eligibility = $request->get('eligibility');
+        $eligibility_hsbs = $request->get('eligibility-hsbs');
+        $eligibility_nrpf = $request->get('eligibility-nrpf');
 
         // NOTE: Following refactor where we needed to retain Carer ids.
         // Possible that we might want to add flag to carer to distinguish Main from Secondary,
@@ -475,7 +476,7 @@ class RegistrationController extends Controller
 
         // Try to transact, so we can roll it back
         try {
-            DB::transaction(function () use ($registration, $family, $amendedCarers, $newCarers, $carersKeysToDelete, $children, $eligibility) {
+            DB::transaction(function () use ($registration, $family, $amendedCarers, $newCarers, $carersKeysToDelete, $children, $eligibility_hsbs, $eligibility_nrpf) {
 
                 // delete the missing carers
                 Carer::whereIn('id', $carersKeysToDelete)->delete();
@@ -495,7 +496,8 @@ class RegistrationController extends Controller
                 );
 
                 // update eligibility
-                $registration->eligibility = $eligibility;
+                $registration->eligibility_hsbs = $eligibility_hsbs;
+                $registration->eligibility_nrpf = $eligibility_nrpf;
 
                 // save changes to registration.
                 $registration->save();
