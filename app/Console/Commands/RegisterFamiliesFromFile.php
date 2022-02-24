@@ -66,7 +66,7 @@ class RegisterFamiliesFromFile extends Command
      */
     protected $signature = 'arc:registerFamiliesFromFile
                                 {file : CSV file of family registrations to import, one per line}
-                                {prefix : the children\'s centre prefix}  
+                                {prefix : the children\'s centre prefix}
                                 {email : email address of CentreUser who\'s responsible for this}
                                 ';
 
@@ -140,7 +140,8 @@ class RegisterFamiliesFromFile extends Command
 
             $registration = new Registration([
                 'consented_on' => $signup_date,
-                'eligibility' => 'other',
+                'eligibility-hsbs' => 'healthy-start-applying',
+                'eligibility-nrpf' => 'no'
             ]);
 
             // Make a new family.

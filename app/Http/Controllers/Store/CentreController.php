@@ -209,8 +209,9 @@ class CentreController extends Controller
             $row['Leaving Date'] = $reg->family->leaving_on ? $reg->family->leaving_on->format($dateFormats['leave']) : null;
             // Would be confusing if an old reason was left in - so check leaving date is there.
             $row["Leaving Reason"] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
-            $row["Family Eligibility"] = ($reg->eligibility) ?? null ;
-          
+            $row["Family Eligibility (HSBS)"] = ($reg->eligibility_hsbs) ?? null ;
+            $row["Family Eligibility (NRPF)"] = ($reg->eligibility_nrpf) ?? null ;
+
             // Create the Date Downloaded column if this user can export registrations
             if (!in_array('Date file was Downloaded', $excludeColumns, true)) {
                 $row['Date file was Downloaded'] = Carbon::today()->toDateString();

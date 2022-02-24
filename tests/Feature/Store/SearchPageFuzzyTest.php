@@ -111,7 +111,8 @@ class SearchPageFuzzyTest extends MysqlStoreTestCase
 
         // Make and save a registration and attach it to our family and centre
         $registration = new Registration([
-            'eligibility' => 'healthy-start',
+            'eligibility-hsbs' => 'healthy-start-applying',
+            'eligibility-nrpf' => 'yes',
             'consented_on' => Carbon::now(),
         ]);
         $registration->family()->associate($family);
