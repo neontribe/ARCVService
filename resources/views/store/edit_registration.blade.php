@@ -159,7 +159,7 @@
                     <select name="eligibility-hsbs" id="eligibility-hsbs">
                         @foreach (config('arc.reg_eligibilities_hsbs') as $reg_eligibility)
                             <option value="{{ $reg_eligibility }}"
-                                    @if($registration->eligibility == $reg_eligibility) selected="selected" @endif
+                                    @if($registration->eligibility_hsbs == $reg_eligibility) selected="selected" @endif
                             >@lang('arc.reg_eligibilities_hsbs.' . $reg_eligibility)
                             </option>
                         @endforeach
@@ -172,7 +172,7 @@
                     <select name="eligibility-nrpf" id="eligibility-nrpf">
                         @foreach (config('arc.reg_eligibilities_nrpf') as $reg_eligibility)
                             <option value="{{ $reg_eligibility }}"
-                                    @if($registration->eligibility == $reg_eligibility) selected="selected" @endif
+                                    @if($registration->eligibility_nrpf == $reg_eligibility) selected="selected" @endif
                             >@lang('arc.reg_eligibilities_nrpf.' . $reg_eligibility)
                             </option>
                         @endforeach
