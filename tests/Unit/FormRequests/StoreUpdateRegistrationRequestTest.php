@@ -61,7 +61,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 'passed' => true,
                 'data' => [
                     'pri_carer' => ['A String'],
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ],
             ],
             'requestShouldFailWhenEligibilityIsMissing' => [
@@ -78,21 +79,24 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 'passed' => false,
                 'data' => [
                     'pri_carer' => ['A String', 'B String'],
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldFailWhenNoPriCarers' => [
                 'passed' => false,
                 'data' => [
                     'pri_carer' => [],
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldFailWhenNonStringPriCarers' => [
                 'passed' => false,
                 'data' => [
                     'pri_carer' => [1],
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldSucceedWithSecondaryCarers' => [
@@ -100,7 +104,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'pri_carer' => ['A String'],
                     'sec_carers' => ['B String', 'C String'],
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldFailWithEmptySecondaryCarers' => [
@@ -108,7 +113,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'pri_carer' => ['A String'],
                     'sec_carers' => [],
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldFailWithNonStringSecondaryCarers' => [
@@ -116,7 +122,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'pri_carer' => ['A String'],
                     'sec_carers' => [1,2,3,4],
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldSucceedWithNewCarers' => [
@@ -124,7 +131,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'pri_carer' => ['A String'],
                     'new_carers' => ['B String', 'C String'],
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldFailWithEmptyNewCarers' => [
@@ -132,7 +140,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'pri_carer' => ['A String'],
                     'new_carers' => [],
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldFailWithNonStringNewCarers' => [
@@ -140,7 +149,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'pri_carer' => ['A String'],
                     'new_carers' => [1,2,3,4],
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldSucceedWithMinimalChildren' => [
@@ -150,7 +160,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                     'children' => [
                         0 => ['dob' => '2017-09']
                     ],
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldFailWithChildInvalidDobFormat' => [
@@ -160,7 +171,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                     'children' => [
                         0 => ['dob' => '2017-09-01']
                     ],
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldFailWithEmptyChildren' => [
@@ -179,7 +191,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                         1 => ['dob' => '2016-08'],
                         2 => ['dob' => '2015-07']
                     ],
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldSucceedWithManyVerifiableChildren' => [
@@ -200,7 +213,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                             'verified' => false
                         ],
                     ],
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldFailWhenAVerifiableChildHasNoDoB' => [
@@ -221,7 +235,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                             'verified' => false
                         ]
                     ],
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
         ];

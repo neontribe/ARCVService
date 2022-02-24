@@ -62,7 +62,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'consent' => 'yes',
                     'carer' => 'A String',
-                    'eligibility' => 'other'
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldFailWhenRequiredDataIsMissing' => [
@@ -73,7 +74,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'passed' => false,
                 'data' => [
                     'carer' => 'A String',
-                    'eligibility' => 'other'
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldFailWhenEligibilityIsMissing' => [
@@ -88,7 +90,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'consent' => true,
                     'carer' => 1,
-                    'eligibility' => 'other'
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldFailWhenEligibilityIsNotInEnum' => [
@@ -96,7 +99,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'consent' => 'yes',
                     'carer' => 'A String',
-                    'eligibility' => 'hello'
+                    'eligibility-hsbs' => 'hello',
+                    'eligibility-nrpf' => 'hello'
                 ]
             ],
             'requestShouldFailWhenConsentIsNotTruthy' => [
@@ -104,7 +108,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'consent' => 2,
                     'carer' => 'A String',
-                    'eligibility' => 'healthy-start'
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldSucceedWithSecondaryCarers' => [
@@ -112,7 +117,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'consent' => 1,
                     'carer' => 'A String',
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes',
                     'carers' => ['B String', 'C String'],
                 ]
             ],
@@ -121,7 +127,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'consent' => 1,
                     'carer' => 'A String',
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes',
                     'carers' => [],
                 ]
             ],
@@ -130,7 +137,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'consent' => 1,
                     'carer' => 'A String',
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes',
                     'carers' => [1,2,3,4],
                 ]
             ],
@@ -139,7 +147,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'consent' => 1,
                     'carer' => 'A String',
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes',
                     'children' => [
                         0 => ['dob' => '2017-09']
                     ],
@@ -150,7 +159,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'consent' => 1,
                     'carer' => 'A String',
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes',
                     'children' => [
                         0 => ['dob' => '2017-09-01']
                     ],
@@ -161,7 +171,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'consent' => 1,
                     'carer' => 'A String',
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes',
                     'children' => [],
                 ]
             ],
@@ -170,7 +181,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'consent' => 1,
                     'carer' => 'A String',
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes',
                     'children' => [
                         0 => ['dob' => '2017-09'],
                         1 => ['dob' => '2016-08'],
@@ -183,7 +195,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'consent' => 1,
                     'carer' => 'A String',
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes',
                     'children' => [
                         0 => [
                             'dob' => '2017-09',
@@ -205,7 +218,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'data' => [
                     'consent' => 1,
                     'carer' => 'A String',
-                    'eligibility' => 'other',
+                    'eligibility-hsbs' => 'healthy-start-applying',
+                    'eligibility-nrpf' => 'yes',
                     'children' => [
                         0 => [
                             'dob' => '2017-09',

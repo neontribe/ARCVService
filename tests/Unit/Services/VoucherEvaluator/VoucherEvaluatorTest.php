@@ -372,7 +372,8 @@ class VoucherEvaluatorTest extends TestCase
 
         $registration = new Registration();
         $registration->centre_id = $centre->id;
-        $registration->eligibility = "other";
+        $registration->eligibility_hsbs = "healthy-start-applying";
+        $registration->eligibility_nrpf = "no";
         $registration->family_id = $this->family->id;
         $registration->save();
 

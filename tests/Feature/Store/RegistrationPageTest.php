@@ -79,10 +79,11 @@ class RegistrationPageTest extends StoreTestCase
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
-            ->seeElement('#eligibility-reason>option[value="healthy-start-applying"][selected]')
-            ->seeElement('#eligibility-reason>option[value="healthy-start-receiving"]')
-            ->seeElement('#eligibility-reason>option[value="no-recourse-to-public-funds"]')
-            ->seeElement('#eligibility-reason>option[value="other"]')
+            ->seeElement('#eligibility-hsbs>option[value="healthy-start-applying"][selected]')
+            ->seeElement('#eligibility-hsbs>option[value="healthy-start-receiving"]')
+            ->seeElement('#eligibility-hsbs>option[value="healthy-start-receiving-not-eligible-or-rejected"]')
+            ->seeElement('#eligibility-nrpf>option[value="yes"]')
+            ->seeElement('#eligibility-nrpf>option[value="no"]')
         ;
     }
 
@@ -151,7 +152,8 @@ class RegistrationPageTest extends StoreTestCase
         $registration =  Registration::find(1);
 
         $this->assertNotNull($registration->consented_on);
-        $this->assertNotNull($registration->eligibility);
+        $this->assertNotNull($registration->eligibility_hsbs);
+        $this->assertNotNull($registration->eligibility_nrpf);
         $this->assertNotNull($registration->family);
         $this->assertNotNull($registration->family->carers);
         $this->assertEquals('Test Carer', $registration->family->carers->first()->name);

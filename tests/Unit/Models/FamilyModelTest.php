@@ -27,13 +27,15 @@ class FamilyModelTest extends TestCase
         $registration1 = new Registration();
         $registration1->family_id = $family->id;
         $registration1->centre_id = factory(Centre::class)->create()->id;
-        $registration1->eligibility = "other";
+        $registration1->eligibility_hsbs = "healthy-start-applying";
+        $registration1->eligibility_nrpf = "yes";
         $registration1->save();
 
         $registration2 = new Registration();
         $registration2->family_id = $family->id;
         $registration2->centre_id = factory(Centre::class)->create()->id;
-        $registration2->eligibility = "other";
+        $registration2->eligibility_hsbs = "healthy-start-applying";
+        $registration2->eligibility_nrpf = "yes";
         $registration2->save();
 
         $registrations = [$registration1, $registration2];
