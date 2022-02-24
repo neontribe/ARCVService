@@ -25,7 +25,7 @@ class VouchersController extends Controller
      */
     public function index()
     {
-        $vouchers = Voucher::orderBy('id', 'desc')->paginate(50);
+        $vouchers = Voucher::all();
         return view('service.vouchers.index', compact('vouchers'));
     }
 
@@ -50,6 +50,21 @@ class VouchersController extends Controller
     public function void()
     {
         return view('service.vouchers.void');
+    }
+
+    /**
+     * Show the edit Vouchers form
+     *
+     * @return Factory|view
+     */
+    public function viewOne($id)
+    {
+        $voucher = Voucher::where('id', $id)
+            ->with('history')
+            ->first()
+        ;
+        \Log::info($voucher);
+        return view('service.vouchers.edit', ['voucher' => $voucher]);
     }
 
     /**
