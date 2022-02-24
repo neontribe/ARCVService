@@ -147,7 +147,8 @@ class BundleSeeder extends Seeder
         }
         $registrations = [];
 
-        $eligibilities = config('arc.reg_eligibilities');
+        $eligibilities_hsbs = config('arc.reg_eligibilities_hsbs');
+        $eligibilities_nrpf = config('arc.reg_eligibilities_nrpf');
 
         foreach (range(1, $quantity) as $q) {
             try {
@@ -169,7 +170,8 @@ class BundleSeeder extends Seeder
                 [
                     'centre_id' => $centre->id,
                     'family_id' => $family->id,
-                    'eligibility' => $eligibilities[mt_rand(0, count($eligibilities) - 1)],
+                    'eligibility_hsbs' => $eligibilities_hsbs[mt_rand(0, count($eligibilities_hsbs) - 1)],
+                    'eligibility_nrpf' => $eligibilities_nrpf[mt_rand(0, count($eligibilities_nrpf) - 1)],
                     'consented_on' => Carbon::now(),
                 ]
             );

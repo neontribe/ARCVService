@@ -33,9 +33,13 @@ class StoreNewRegistrationRequest extends FormRequest
             // MUST be present; MUST be in "yes, on, 1, or true"
             'consent' => 'required|accepted',
             // MUST be present; MUST be in listed states
-            'eligibility' => [
+            'eligibility-hsbs' => [
                 'required',
-                Rule::in(config('arc.reg_eligibilities')),
+                Rule::in(config('arc.reg_eligibilities_hsbs')),
+            ],
+            'eligibility-nrpf' => [
+                'required',
+                Rule::in(config('arc.reg_eligibilities_nrpf')),
             ],
             // MUST be present; MUST be a not-null string
             'carer' => 'required|string',

@@ -371,7 +371,8 @@ class RegistrationController extends Controller
         // Create Registration
         $registration = new Registration([
             'consented_on' => Carbon::now(),
-            'eligibility' => $request->get('eligibility')
+            'eligibility_hsbs' => $request->get('eligibility-hsbs'),
+            'eligibility_nrpf' => $request->get('eligibility-nrpf')
         ]);
 
         // Duplicate families are fine at this point.
