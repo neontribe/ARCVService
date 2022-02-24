@@ -35,9 +35,9 @@
                 <div class="select">
                     <label for="print_pref">Printed Form</label>
                     <select name="print_pref" id="print_pref" class="{{ $errors->has('print_pref') ? 'error' : '' }}" required>
-                        <option value="" disabled selected>Choose one</option>
+                        <option value="" disabled>Choose one</option>
                         @foreach (config('arc.print_preferences') as $pref)
-                            <option value="{{ $pref }}">{{ ucwords($pref) }}</option>
+                            <option value="{{ $pref }}" {{$pref == 'collection' ? 'selected' : ''}} >{{ ucwords($pref) }}</option>
                         @endforeach
                     </select>
                 </div>
