@@ -81,7 +81,6 @@ class VouchersController extends Controller
             ->with('history')
             ->first()
         ;
-        \Log::info($voucher);
         return view('service.vouchers.edit', ['voucher' => $voucher]);
     }
 
