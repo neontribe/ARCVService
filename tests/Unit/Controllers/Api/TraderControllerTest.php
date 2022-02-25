@@ -8,6 +8,7 @@ use App\Trader;
 use App\User;
 use App\Sponsor;
 use App\Http\Controllers\API\TraderController;
+use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -20,6 +21,24 @@ class TraderControllerTest extends TestCase
     protected $traders;
     protected $vouchers;
     protected $user;
+
+    protected $states = [
+        [
+            'transition' => 'dispatch',
+            'from' => 'printed',
+            'to' => 'dispatched',
+        ],
+        [
+            'transition' => 'collect',
+            'from' => 'dispatched',
+            'to' => 'recorded',
+        ],
+        [
+            'transition' => 'confirm',
+            'from' => 'recorded',
+            'to' => 'payment_pending',
+        ],
+    ];
 
     protected function setUp(): void
     {
@@ -96,20 +115,61 @@ class TraderControllerTest extends TestCase
     {
         $traderController = new TraderController;
         $data = json_decode(
-            $traderController
-            ->showVoucherHistory($this->traders[0])->getContent()
+            $traderController->showVoucherHistory($this->traders[0])->getContent(),
+            false
         );
+
         $today = Carbon::now()->format('d-m-Y');
 
         // We should have one group of pended_on vouchers x3.
         $this->assertCount(1, $data);
         $this->assertEquals($data[0]->pended_on, $today);
         $this->assertCount(3, $data[0]->vouchers);
+
         // Check a few values as expected - just for fun.
         $this->assertEquals($this->vouchers[0]->code, $data[0]->vouchers[0]->code);
         $this->assertEquals('', $data[0]->vouchers[0]->reimbursed_on);
         $this->assertEquals($data[0]->vouchers[1]->recorded_on, $today);
         $this->assertEquals($data[0]->vouchers[2]->reimbursed_on, $today);
+    }
+
+    public function testItPaginatesTheVoucherHistory()
+    {
+        $date = Carbon::now()->subMonths(3);
+
+        // create 47 vouchers to bring the total to 50
+        $newVouchers = factory(Voucher::class, 'printed', 47)->create([
+            'trader_id' => $this->traders[0]->id,
+            'created_at' => $date,
+            'updated_at' => $date,
+            'currentstate' => 'payment_pending'
+        ])->each(function ($v) use (&$date) {
+            // add a day to it
+            $date->addDay();
+            foreach ($this->states as $state) {
+                $base = [
+                    'voucher_id' => $v->id,
+                    'created_at' => $date->addSeconds(10)->format('Y-m-d H:i:s')
+                ];
+                $attribs = array_merge($base, $state);
+                factory(VoucherState::class)->create($attribs);
+            }
+        });
+
+        dd($this->traders[0]->vouchers()->with('history')->get()->toArray());
+
+        // fire up the controller and ask for some things.
+        $traderController = new TraderController;
+        $response = $traderController->showVoucherHistory($this->traders[0]);
+        $data = json_decode(
+            $response->getContent(),
+            false
+        );
+
+        dd($data);
+
+        // see there are 15 items in the body
+        $this->assertCount(3, $data[0]->vouchers);
     }
 
     /**
