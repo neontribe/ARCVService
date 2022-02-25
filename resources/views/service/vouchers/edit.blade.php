@@ -4,7 +4,7 @@
 
   <div id="main-content">
       <h1>Voucher Code: {{ $voucher->code }}</h1>
-
+      <button class="link-button link-button-small"><a style="color:white;text-decoration:none;" href="{{ route('admin.vouchers.index') }}">Back</a></button>
       <table class="table table-striped">
           <thead>
               <tr>
