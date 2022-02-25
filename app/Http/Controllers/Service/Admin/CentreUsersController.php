@@ -56,21 +56,6 @@ class CentreUsersController extends Controller
                     return $homeCentre->sponsor->name . '#' . $homeCentre->name . '#' . $item->name;
                 });
         }
-
-        $page = LengthAwarePaginator::resolveCurrentPage();
-        $perPage = 15;
-        $offset = ($page * $perPage) - $perPage;
-        $workers = new LengthAwarePaginator(
-            $workers->slice($offset, $perPage),
-            $workers->count(),
-            $perPage,
-            $page,
-            [
-                'path' => LengthAwarePaginator::resolveCurrentPath(),
-                'query' => array_except($request->query(), 'page'),
-            ]
-        );
-
         return view('service.centreusers.index', compact('workers'));
     }
 
