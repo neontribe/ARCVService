@@ -18,7 +18,7 @@
                           <input type="text" name="voucher_code" id="voucher_code" autocomplete="off" autocorrect="off"
                               spellcheck="false" placeholder="Enter voucher code" aria-label="Voucher Code">
                           <button name="search" aria-label="Search" class="link-button link-button-small">Search</button>
-                          <button class="link-button link-button-small"><a style="color:white;text-decoration:none;" href="{{ route('admin.vouchers.index') }}">Reset</a></button>
+                          <button class="link-button link-button-small"><a name="reset" style="color:white;text-decoration:none;" href="{{ route('admin.vouchers.index') }}">Reset</a></button>
                       </div>
                   </div>
               </form>
@@ -58,7 +58,7 @@
                           <td>{{ $voucher->updated_at }}</td>
                           <td>{{ $voucher->deleted_at }}</td>
                           <td>
-                              <a href="{{ route('service.vouchers.viewone', $voucher->id) }}" class="link">
+                              <a href="{{ route('service.vouchers.viewone', $voucher->id) }}" name="edit" class="link">
                                   <div class="link-button link-button-small">
                                       Edit
                                   </div>
