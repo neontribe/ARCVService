@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Service\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminNewVoucherRequest;
 use App\Http\Requests\AdminUpdateVoucherRequest;
+use App\Http\Requests\VoucherSearchRequest;
 use App\Sponsor;
 use App\Voucher;
 use App\VoucherState;
@@ -13,6 +14,7 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Log;
 
@@ -25,9 +27,24 @@ class VouchersController extends Controller
      */
     public function index()
     {
-        // $vouchers = Voucher::all();
-        $vouchers = Voucher::whereNotIn('currentstate', ['retired', 'voided'])->get();
+        $vouchers = Voucher::orderBy('id', 'desc')->paginate(50);
         return view('service.vouchers.index', compact('vouchers'));
+    }
+
+    /**
+     * Display a single Vouchers.
+     *
+     * @return View
+     */
+    public function search(VoucherSearchRequest $request)
+    {
+      if(isset($request['search'])) {
+        $voucher_code = $request->get('voucher_code');
+        $vouchers = Voucher::where('code', $voucher_code)->get();
+      } else if(isset($request['reset'])) {
+        $vouchers = Voucher::orderBy('id', 'desc')->paginate(50);
+      }
+      return view('service.vouchers.index', compact('vouchers'));
     }
 
     /**

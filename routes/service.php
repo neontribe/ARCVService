@@ -61,6 +61,11 @@ Route::group(['middleware' => 'auth:admin'], function () {
 
     Route::view('/service/vouchers/edit', 'edit');
 
+    Route::get('vouchers/search', [
+        'as' => 'admin.vouchers.search',
+        'uses' => 'Admin\VouchersController@search',
+    ]);
+
     // Worker Management
     Route::get('workers', [
         'as' => 'admin.centreusers.index',

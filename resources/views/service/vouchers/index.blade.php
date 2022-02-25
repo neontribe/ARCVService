@@ -7,6 +7,29 @@
 
     <div id="main-content">
         <h1>View live vouchers</h1>
+        <div class="content search">
+            <div class="control-container">
+              <form action="{{ URL::route('admin.vouchers.search') }}" method="GET" id="searchform">
+                  {!! csrf_field() !!}
+                  {{-- Voucher search --}}
+                  <div class="search-control">
+                      <label for="voucher_code">Search by voucher code</label>
+                      <div class="search-actions">
+                          <input type="text" name="voucher_code" id="voucher_code" autocomplete="off" autocorrect="off"
+                              spellcheck="false" placeholder="Enter voucher code" aria-label="Voucher Code">
+                          <button name="search" aria-label="Search" class="link-button link-button-small">Search</button>
+                          <button class="link-button link-button-small"><a style="color:white;text-decoration:none;" href="{{ route('admin.vouchers.index') }}">Reset</a></button>
+                      </div>
+                  </div>
+              </form>
+            </div>
+          </div>
+            @if($vouchers instanceof \Illuminate\Pagination\LengthAwarePaginator)
+              <div>
+                <p>{{ $vouchers->links() }}</p>
+                <p>Total : {{ $vouchers->total() }}</p>
+              </div>
+            @endif
         <div>
         </div>
         <table id='liveVoucherTable' class="table table-striped">
@@ -45,16 +68,15 @@
                   @endforeach
             </tbody>
         </table>
+        @if($vouchers instanceof \Illuminate\Pagination\LengthAwarePaginator)
+          <div>
+            <p>{{ $vouchers->links() }}</p>
+            <p>Total : {{ $vouchers->total() }}</p>
+          </div>
+        @endif
         <div>
         </div>
     </div>
 
 </div>
-<script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
-<script>
-  $(document).ready( function () {
-    $('#liveVoucherTable').DataTable();
-  } );
-</script>
 @endsection
