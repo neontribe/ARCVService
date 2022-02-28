@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Controllers\Service\Admin;
 
+use App\AdminUser;
 use App\Sponsor;
 use App\User;
 use App\Voucher;
@@ -259,5 +260,26 @@ class VoucherControllerMysqlTest extends MysqlStoreTestCase
                 $this->assertEquals(1, $v->history->where('to', 'retired')->count());
             });
         }
+    }
+
+    /** @test */
+    public function testAdminCanVoidASingleVoucher()
+    {
+        $this->adminUser = factory(AdminUser::class)->create();
+        $this->voucherToVoid = factory(Voucher::class, 'dispatched')->create();
+        $this->actingAs($this->adminUser, 'admin')
+            ->visit(route('admin.vouchers.index'))
+            ->seeInElement('td', $this->voucherToVoid->code)
+            ->type($this->voucherToVoid->code, 'voucher_code')
+            ->press('Search')
+            ->seeInElement('td', $this->voucherToVoid->code)
+            ->click('edit')
+            ->seeInElement('h1', "Voucher Code: " . $this->voucherToVoid->code)
+            ->press('transition')
+            ;
+            $this->seeInDatabase('vouchers', [
+                'code' => $this->voucherToVoid->code,
+                'currentstate' => 'retired'
+            ]);
     }
 }

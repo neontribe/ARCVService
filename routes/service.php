@@ -54,6 +54,15 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.vouchers.retirebatch',
         'uses' => 'Admin\VouchersController@retireBatch',
     ]);
+    Route::get('vouchers/{id}', [
+        'as' => 'service.vouchers.viewone',
+        'uses' => 'Admin\VouchersController@viewOne',
+    ])->where('id', '^[0-9]+$');
+
+    Route::get('vouchers/search', [
+        'as' => 'admin.vouchers.search',
+        'uses' => 'Admin\VouchersController@search',
+    ]);
 
     // Worker Management
     Route::get('workers', [
