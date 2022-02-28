@@ -30,7 +30,6 @@ class ServiceLiveVouchersPageTest extends StoreTestCase
 
     public function testAdminCanSearchASingleLiveVoucher()
     {
-        $this->rules = (new VoucherSearchRequest())->rules();
         $this->adminUser = factory(AdminUser::class)->create();
         $this->voucherToSearch = factory(Voucher::class, 'dispatched')->create();
         $this->otherVoucher = factory(Voucher::class, 'dispatched')->create();
@@ -42,13 +41,11 @@ class ServiceLiveVouchersPageTest extends StoreTestCase
             ->press('Search')
             ->seeInElement('td', $this->voucherToSearch->code)
             ->dontSeeInElement('td', $this->otherVoucher->code)
-            ->assertTrue(Validator::make(['voucher_code' => $this->voucherToSearch->code], $this->rules)->passes())
             ;
     }
 
     public function testAdminCannotSearchWithBadVoucherCode()
     {
-        $this->rules = (new VoucherSearchRequest())->rules();
         $this->adminUser = factory(AdminUser::class)->create();
         $badSearch = "<script type='javascript'>alert();</script>";
         $this->voucher = factory(Voucher::class, 'dispatched')->create();
@@ -58,7 +55,6 @@ class ServiceLiveVouchersPageTest extends StoreTestCase
             ->type($badSearch, 'voucher_code')
             ->press('Search')
             ->seeInElement('h1', 'View live vouchers')
-            ->assertFalse(Validator::make(['voucher_code' => $badSearch], $this->rules)->passes())
             ;
     }
 
