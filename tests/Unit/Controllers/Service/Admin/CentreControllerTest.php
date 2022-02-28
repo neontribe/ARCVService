@@ -87,8 +87,8 @@ class CentreControllerTest extends StoreTestCase
           'name' => $centre->name
       ]);
       $this->actingAs($this->adminUser, 'admin')
-        ->post(
-            route('admin.centres.update'),
+        ->put(
+            route('admin.centres.update', ['id' => $centre->id]),
             $data
         );
       $this->seeInDatabase('centres', [

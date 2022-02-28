@@ -108,7 +108,7 @@ class CentresController extends Controller
      */
     public function edit($id)
     {
-        $centre = Centre::where('id', $id)->first();
+        $centre = Centre::find($id);
         return view('service.centres.edit', compact('centre'));
     }
 
@@ -117,18 +117,17 @@ class CentresController extends Controller
      *
      * @return Factory|View
      */
-    public function update(AdminUpdateCentreRequest $request)
+    public function update(AdminUpdateCentreRequest $request, Centre $id)
     {
       try {
-          $centre = DB::transaction(function () use ($request) {
-            $c = Centre::findOrFail($request->input('id'));
+          $centre = DB::transaction(function () use ($request, $id) {
             // Update the system
-            $c->fill([
+            $id->fill([
                 'name' => $request->input('name'),
             ]);
-              $c->save();
+              $id->save();
 
-              return $c;
+              return $id;
           });
       } catch (Exception $e) {
           // Oops! Log that

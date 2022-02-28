@@ -10,7 +10,8 @@
                 {{ Session::get('message') }}
             </div>
         @endif
-        <form role="form" method="POST" action="{{ route('admin.centres.update') }}">
+        <form role="form" method="POST" action="{{ route('admin.centres.update', ['id' => $centre->id]) }}">
+          @method('put')
           @csrf
           <input type="hidden" id="id" name="id" value="{{ $centre->id }}">
           <table class="table table-striped">
