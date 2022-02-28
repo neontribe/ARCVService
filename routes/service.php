@@ -102,6 +102,14 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.centres.store',
         'uses' => 'Admin\CentresController@store',
     ]);
+    Route::post('centres/update', [
+        'as' => 'admin.centres.update',
+        'uses' => 'Admin\CentresController@update',
+    ]);
+    Route::get('centres/{id}/edit', [
+        'as' => 'admin.centres.edit',
+        'uses' => 'Admin\CentresController@edit',
+    ])->where('id', '^[0-9]+$');
 
     // Sponsor Management
     Route::get('sponsors', [
