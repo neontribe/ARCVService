@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Service\Admin;
 use App\Centre;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminNewCentreRequest;
+use App\Http\Requests\AdminUpdateCentreRequest;
 use Auth;
 use DB;
 use Exception;
@@ -98,5 +99,48 @@ class CentresController extends Controller
         return redirect()
             ->route('admin.centres.index')
             ->with('message', 'Centre ' . $centre->name . ' created');
+    }
+
+    /**
+     * Show the form for editing a Centre.
+     *
+     * @return Factory|View
+     */
+    public function edit($id)
+    {
+        $centre = Centre::where('id', $id)->first();
+        return view('service.centres.edit', compact('centre'));
+    }
+
+    /**
+     * Show the form for editing a Centre's name.
+     *
+     * @return Factory|View
+     */
+    public function update(AdminUpdateCentreRequest $request)
+    {
+      try {
+          $centre = DB::transaction(function () use ($request) {
+            $c = Centre::findOrFail($request->input('id'));
+            // Update the system
+            $c->fill([
+                'name' => $request->input('name'),
+            ]);
+              $c->save();
+
+              return $c;
+          });
+      } catch (Exception $e) {
+          // Oops! Log that
+          Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+          Log::error($e->getTraceAsString());
+          // Throw it back to the user
+          return redirect()
+              ->route('admin.centres.create')
+              ->withErrors('Creation failed - DB Error.');
+      }
+      return redirect()
+          ->route('admin.centres.index')
+          ->with('message', 'Centre ' . $centre->name . ' edited');
     }
 }
