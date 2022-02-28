@@ -12,6 +12,7 @@ use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Http\JsonResponse;
 use Tests\TestCase;
 
 class TraderControllerTest extends TestCase
@@ -133,12 +134,12 @@ class TraderControllerTest extends TestCase
         $this->assertEquals($data[0]->vouchers[2]->reimbursed_on, $today);
     }
 
-    public function testItPaginatesTheVoucherHistory()
+    public function testItLimitsTheVoucherHistoryTo15()
     {
         $date = Carbon::now()->subMonths(3);
 
-        // create 47 vouchers to bring the total to 50
-        $newVouchers = factory(Voucher::class, 'printed', 47)->create([
+        // create 49 vouchers to bring the total of payment_pending to 50
+        factory(Voucher::class, 'printed', 49)->create([
             'trader_id' => $this->traders[0]->id,
             'created_at' => $date,
             'updated_at' => $date,
@@ -156,8 +157,6 @@ class TraderControllerTest extends TestCase
             }
         });
 
-        dd($this->traders[0]->vouchers()->with('history')->get()->toArray());
-
         // fire up the controller and ask for some things.
         $traderController = new TraderController;
         $response = $traderController->showVoucherHistory($this->traders[0]);
@@ -165,11 +164,62 @@ class TraderControllerTest extends TestCase
             $response->getContent(),
             false
         );
-
-        dd($data);
-
         // see there are 15 items in the body
-        $this->assertCount(3, $data[0]->vouchers);
+        $this->assertCount(15, $data);
+    }
+
+    public function testItPutsPaginationInTheVoucherHistory()
+    {
+        $date = Carbon::now()->subMonths(3);
+
+        // create 49 vouchers to bring the total of payment_pending to 50
+        factory(Voucher::class, 'printed', 49)->create([
+            'trader_id' => $this->traders[0]->id,
+            'created_at' => $date,
+            'updated_at' => $date,
+            'currentstate' => 'payment_pending'
+        ])->each(function ($v) use (&$date) {
+            // add a day to it
+            $date->addDay();
+            foreach ($this->states as $state) {
+                $base = [
+                    'voucher_id' => $v->id,
+                    'created_at' => $date->addSeconds(10)->format('Y-m-d H:i:s')
+                ];
+                $attribs = array_merge($base, $state);
+                factory(VoucherState::class)->create($attribs);
+            }
+        });
+
+        // fire up the controller and ask for some things.
+        $traderController = new TraderController;
+
+        $response = $traderController->showVoucherHistory($this->traders[0]);
+
+        $headers = $response->headers;
+
+        // there is a links header
+        $this->assertArrayHasKey('links', $headers->all());
+        $links = $this->linkHeaderToArray($headers->get('links'));
+
+        // see the keys are first, prev, next, last
+        $this->assertEquals(['current', 'first', 'prev', 'next', 'last'], array_keys($links));
+
+        // first is page 1
+        $this->assertEquals(1, $links['first']['page']);
+        $this->assertTrue((bool)filter_var($links['first']['link'], FILTER_VALIDATE_URL));
+
+        // there is no previous page
+        $this->assertNull($links["prev"]["page"]);
+        $this->assertFalse((bool)filter_var($links['prev']['link'], FILTER_VALIDATE_URL));
+
+        // there is a next page
+        $this->assertEquals(2, $links['next']['page']);
+        $this->assertTrue((bool)filter_var($links['next']['link'], FILTER_VALIDATE_URL));
+
+        // see there are 4 pages, total
+        $this->assertEquals(4, $links['last']['page']);
+        $this->assertTrue((bool)filter_var($links['last']['link'], FILTER_VALIDATE_URL));
     }
 
     /**
@@ -226,5 +276,34 @@ class TraderControllerTest extends TestCase
             ])
             ->assertStatus(403)
         ;
+    }
+
+    /**
+     * @param string $header
+     * @return array
+     */
+    private function linkHeaderToArray(string $header)
+    {
+        $values = [];
+        foreach (explode(',', $header) as $link)
+        {
+            $values = array_merge($values, $this->extractLinkData($link));
+        }
+        return $values;
+    }
+
+    /**
+     * @param string $linkHeader
+     * @return array[]
+     */
+    private function extractLinkData(string $linkHeader)
+    {
+        preg_match('/<(.*?(?:(?:\?|\&)page=(\d+).*)?)>.*rel="(.*)"/', $linkHeader, $matches, PREG_UNMATCHED_AS_NULL);
+        return [
+            $matches[3] => [
+                'link' => $matches[1],
+                'page' => $matches[2],
+            ],
+        ];
     }
 }

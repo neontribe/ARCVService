@@ -106,14 +106,14 @@ class TraderController extends Controller
     public function showVoucherHistory(Trader $trader)
     {
         // get days we pended on as a LengthAwarePaginator data array.
-        $pgSubDates = DB::table(static function ($query) use ($trader) {
-                $query->select(DB::raw("SUBSTR(voucher_states.created_at, 1, 10) as day"))
+        $pgSubDates = DB::table(function ($query) use ($trader) {
+                $query->selectRaw("SUBSTR(`voucher_states`.`created_at`, 1, 10) as pendedOn")
                     ->from('vouchers')
                     ->leftJoin('voucher_states', 'vouchers.id', 'voucher_states.voucher_id')
                     ->where('voucher_states.to', 'payment_pending')
                     ->where('vouchers.trader_id', $trader->id)
-                    ->groupBy('payment_pending')
-                    ->orderByDesc('payment_pending');
+                    ->groupBy('pendedOn')
+                    ->orderByDesc('pendedOn');
         }, 'daysFromQuery')
             ->paginate()
             ->toArray();
@@ -123,8 +123,8 @@ class TraderController extends Controller
             $data = [];
         } else {
             // get the first and last dates from that.
-            $toDate = Arr::first($pgSubDates["data"])->day . ' 23:59:59';
-            $fromDate = Arr::last($pgSubDates["data"])->day . ' 00:00:00';
+            $toDate = Arr::first($pgSubDates["data"])->pendedOn . ' 23:59:59';
+            $fromDate = Arr::last($pgSubDates["data"])->pendedOn . ' 00:00:00';
 
             // get histories between those dates.
             $histories = self::paymentHistoryBetweenDateTimes($trader, $fromDate, $toDate)->all();
@@ -134,10 +134,11 @@ class TraderController extends Controller
         }
 
         $links = implode(',', [
-            "<" . urlencode($pgSubDates["first_page_url"]) . '>; rel="first"',
-            "<" . urlencode($pgSubDates["prev_page_url"]) . '>; rel="prev"',
-            "<" . urlencode($pgSubDates["next_page_url"]) . '>; rel="next"',
-            "<" . urlencode($pgSubDates["last_page_url"]) . '>; rel="last"',
+            '<' . $pgSubDates['path'] . '?page=' . $pgSubDates['current_page'] . '>; rel="current"',
+            '<' . $pgSubDates['first_page_url'] . '>; rel="first"',
+            '<' . $pgSubDates['prev_page_url'] . '>; rel="prev"',
+            '<' . $pgSubDates['next_page_url'] . '>; rel="next"',
+            '<' . $pgSubDates['last_page_url'] . '>; rel="last"',
         ]);
 
         return response()
