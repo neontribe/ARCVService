@@ -153,14 +153,27 @@
                     </ul>
                 </div>
                 <div>
-                    <label for="eligibility-reason">
-                        Reason for receiving Rose Vouchers
+                    <label for="eligibility-hsbs">
+                        Are you receiving Healthy Start or Best Start?
                     </label>
-                    <select name="eligibility" id="eligibility-reason">
-                        @foreach (config('arc.reg_eligibilities') as $reg_eligibility)
+                    <select name="eligibility-hsbs" id="eligibility-hsbs">
+                        @foreach (config('arc.reg_eligibilities_hsbs') as $reg_eligibility)
                             <option value="{{ $reg_eligibility }}"
-                                    @if($registration->eligibility == $reg_eligibility) selected="selected" @endif
-                            >@lang('arc.reg_eligibilities.' . $reg_eligibility)
+                                    @if($registration->eligibility_hsbs == $reg_eligibility) selected="selected" @endif
+                            >@lang('arc.reg_eligibilities_hsbs.' . $reg_eligibility)
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label for="eligibility-nrpf">
+                        No recourse to public funds family?
+                    </label>
+                    <select name="eligibility-nrpf" id="eligibility-nrpf">
+                        @foreach (config('arc.reg_eligibilities_nrpf') as $reg_eligibility)
+                            <option value="{{ $reg_eligibility }}"
+                                    @if($registration->eligibility_nrpf == $reg_eligibility) selected="selected" @endif
+                            >@lang('arc.reg_eligibilities_nrpf.' . $reg_eligibility)
                             </option>
                         @endforeach
                     </select>

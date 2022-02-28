@@ -21,7 +21,8 @@ class Registration extends Model implements IEvaluee
      * @var array
      */
     protected $fillable = [
-        'eligibility',
+        'eligibility_hsbs',
+        'eligibility_nrpf',
         'consented_on'
     ];
 

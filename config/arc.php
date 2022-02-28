@@ -72,11 +72,14 @@ return [
     | List of reasons families can be eligible.
     |--------------------------------------------------------------------------
     */
-    'reg_eligibilities' => [
+    'reg_eligibilities_hsbs' => [
         'healthy-start-applying',
         'healthy-start-receiving',
-        'no-recourse-to-public-funds',
-        'other',
+        'healthy-start-receiving-not-eligible-or-rejected'
+    ],
+    'reg_eligibilities_nrpf' => [
+        'yes',
+        'no'
     ],
 
     /*

@@ -90,18 +90,37 @@
                     <h2>Other information</h2>
                 </div>
                 <div>
-                    <label for="eligibility-reason">
-                        Reason for receiving Rose Vouchers
+                    <label for="eligibility-hsbs">
+                        Are you receiving Healthy Start or Best Start?
                     </label>
-                    <select name="eligibility" id="eligibility-reason">
-                        @foreach (config('arc.reg_eligibilities') as $index => $reg_eligibility)
+                    <select name="eligibility-hsbs" id="eligibility-hsbs">
+                        <option value=0>Please select</option>
+                        @foreach (config('arc.reg_eligibilities_hsbs') as $index => $reg_eligibility)
                             <option value="{{ $reg_eligibility }}"
                                     @if(
-                                        (empty(old('eligibility')) && $index === 0) ||
-                                        old('eligibility') === "healthy-start-receiving"
+                                        (empty(old('eligibility-hsbs')) && $index === 0) ||
+                                        old('eligibility-hsbs') === "healthy-start-receiving"
                                         ) selected="selected"
                                     @endif
-                            >@lang('arc.reg_eligibilities.' . $reg_eligibility)
+                            >@lang('arc.reg_eligibilities_hsbs.' . $reg_eligibility)
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label for="eligibility-nrpf">
+                        No recourse to public funds family?
+                    </label>
+                    <select name="eligibility-nrpf" id="eligibility-nrpf">
+                        <option value=0>Please select</option>
+                        @foreach (config('arc.reg_eligibilities_nrpf') as $index => $reg_eligibility)
+                            <option value="{{ $reg_eligibility }}"
+                                    @if(
+                                        (empty(old('eligibility-nrpf')) && $index === 0) ||
+                                        old('eligibility-nrpf') === "healthy-start-receiving"
+                                        ) selected="selected"
+                                    @endif
+                            >@lang('arc.reg_eligibilities_nrpf.' . $reg_eligibility)
                             </option>
                         @endforeach
                     </select>

@@ -320,7 +320,8 @@ $factory->define(App\Centre::class, function (Faker\Generator $faker) {
 // Registration
 $factory->define(App\Registration::class, function (Faker\Generator $faker, $attributes) {
 
-    $eligibilities = ['healthy-start', 'other'];
+  $eligibilities_hsbs = config('arc.reg_eligibilities_hsbs');
+  $eligibilities_nrpf = config('arc.reg_eligibilities_nrpf');
 
     if (!empty($attributes['centre_id'])) {
         // Use the passed centre id.
@@ -357,7 +358,8 @@ $factory->define(App\Registration::class, function (Faker\Generator $faker, $att
     return [
         'centre_id' => $centre->id,
         'family_id' => $family->id,
-        'eligibility' => $eligibilities[mt_rand(0, count($eligibilities) - 1)],
+        'eligibility_hsbs' => $eligibilities_hsbs[mt_rand(0, count($eligibilities_hsbs) - 1)],
+        'eligibility_nrpf' => $eligibilities_nrpf[mt_rand(0, count($eligibilities_nrpf) - 1)],
         'consented_on' => Carbon::now(),
     ];
 });

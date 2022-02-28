@@ -1,11 +1,13 @@
 <?php
 
 return [
-    'reg_eligibilities' => [
-        'healthy-start-applying' => 'Applying for Healthy Start',
-        'healthy-start-receiving' => 'Receiving Healthy Start',
-        'no-recourse-to-public-funds' => 'No recourse to public funds',
-        'other' => 'Other Local Criteria',
-    ],
-
+  'reg_eligibilities_hsbs' => [
+      'healthy-start-applying' => 'Applying',
+      'healthy-start-receiving' => 'Receiving',
+      'healthy-start-receiving-not-eligible-or-rejected' => 'Not eligible or rejected'
+  ],
+  'reg_eligibilities_nrpf' => [
+      'yes' => 'Yes',
+      'no' => 'No',
+  ],
 ];
