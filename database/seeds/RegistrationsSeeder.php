@@ -67,7 +67,7 @@ class RegistrationsSeeder extends Seeder
     }
 
     /**
-     * This is horrible and there's a better way to mke seeds, imagine.
+     * This is horrible and there's a better way to make seeds, imagine.
      * @param $quantity
      * @param Centre $centre
      * @return Collection
@@ -92,14 +92,20 @@ class RegistrationsSeeder extends Seeder
             $family->save();
             $family->carers()->saveMany(factory(Carer::class, random_int(1, 3))->make());
             $family->children()->saveMany(factory(Child::class, random_int(0, 4))->make());
+            $eligibility_hsbs = $eligibilities_hsbs[mt_rand(0, count($eligibilities_hsbs) - 1)];
+            $eligible_from = null;
+            if ($eligibility_hsbs === 'healthy-start-receiving') {
+              $eligible_from = Carbon::now();
+            }
 
             $registrations[] = Registration::create(
                 [
                     'centre_id' => $centre->id,
                     'family_id' => $family->id,
-                    'eligibility_hsbs' => $eligibilities_hsbs[mt_rand(0, count($eligibilities_hsbs) - 1)],
+                    'eligibility_hsbs' => $eligibility_hsbs,
                     'eligibility_nrpf' => $eligibilities_nrpf[mt_rand(0, count($eligibilities_nrpf) - 1)],
                     'consented_on' => Carbon::now(),
+                    'eligible_from' => $eligible_from
                 ]
             );
         }

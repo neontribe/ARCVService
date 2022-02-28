@@ -368,11 +368,18 @@ class RegistrationController extends Controller
             (array)$request->get('children')
         );
 
+        $hsbs = $request->get('eligibility-hsbs');
+        $eligible_from = null;
+        if ($hsbs === 'healthy-start-receiving') {
+          $eligible_from = Carbon::now();
+        }
+
         // Create Registration
         $registration = new Registration([
             'consented_on' => Carbon::now(),
             'eligibility_hsbs' => $request->get('eligibility-hsbs'),
-            'eligibility_nrpf' => $request->get('eligibility-nrpf')
+            'eligibility_nrpf' => $request->get('eligibility-nrpf'),
+            'eligible_from' => $eligible_from
         ]);
 
         // Duplicate families are fine at this point.
@@ -498,6 +505,11 @@ class RegistrationController extends Controller
                 // update eligibility
                 $registration->eligibility_hsbs = $eligibility_hsbs;
                 $registration->eligibility_nrpf = $eligibility_nrpf;
+                $eligible_from = null;
+                if ($eligibility_hsbs === 'healthy-start-receiving') {
+                  $eligible_from = Carbon::now();
+                }
+                $registration->eligible_from = $eligible_from;
 
                 // save changes to registration.
                 $registration->save();

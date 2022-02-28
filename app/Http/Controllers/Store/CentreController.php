@@ -127,7 +127,8 @@ class CentreController extends Controller
             'due' => 'd/m/Y',
             'dob' => 'd/m/Y',
             'join' => 'd/m/Y',
-            'leave' => 'd/m/Y'
+            'leave' => 'd/m/Y',
+            'eligible_from' => 'd/m/Y'
         ], $dateFormats);
 
         // Get registrations decorated - may no longer be terribly efficient.
@@ -211,6 +212,7 @@ class CentreController extends Controller
             $row["Leaving Reason"] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
             $row["Family Eligibility (HSBS)"] = ($reg->eligibility_hsbs) ?? null ;
             $row["Family Eligibility (NRPF)"] = ($reg->eligibility_nrpf) ?? null ;
+            $row["Eligible From"] = ($reg->eligible_from) ? $reg->eligible_from->format($dateFormats['eligible_from']): null ;
 
             // Create the Date Downloaded column if this user can export registrations
             if (!in_array('Date file was Downloaded', $excludeColumns, true)) {
