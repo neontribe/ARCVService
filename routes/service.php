@@ -54,10 +54,10 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.vouchers.retirebatch',
         'uses' => 'Admin\VouchersController@retireBatch',
     ]);
-    Route::get('vouchers/{voucher}', [
+    Route::get('vouchers/{id}', [
         'as' => 'service.vouchers.viewone',
         'uses' => 'Admin\VouchersController@viewOne',
-    ])->where('voucher', '^[0-9]+$');
+    ])->where('id', '^[0-9]+$');
 
     Route::get('vouchers/search', [
         'as' => 'admin.vouchers.search',
