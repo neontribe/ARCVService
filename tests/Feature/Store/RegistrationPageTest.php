@@ -196,4 +196,90 @@ class RegistrationPageTest extends StoreTestCase
         // There is still not a Registration.
         $this->assertEquals(0, Registration::get()->count());
     }
+
+    /** @test */
+    public function selectingReceivingHSPutsDateInTable()
+    {
+        $this->assertEquals(0, Registration::get()->count());
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.create'))
+            ->type('Test Carer', 'carer')
+            ->check('consent')
+            ->select('healthy-start-receiving', 'eligibility-hsbs')
+            ->press('Save Family')
+            ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
+        ;
+        $this->assertEquals(1, Registration::get()->count());
+        $registration = Registration::first();
+        $this->assertNotNull($registration->eligible_from);
+    }
+
+    /** @test */
+    public function selectingNotReceivingHSPutsNullInTable()
+    {
+        $this->assertEquals(0, Registration::get()->count());
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.create'))
+            ->type('Test Carer', 'carer')
+            ->check('consent')
+            ->select('healthy-start-applying', 'eligibility-hsbs')
+            ->press('Save Family')
+            ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
+        ;
+        $this->assertEquals(1, Registration::get()->count());
+        $registration = Registration::first();
+        $this->assertNull($registration->eligible_from);
+    }
+
+    /** @test */
+    public function changingToNotReceivingHSPutsNullInTable()
+    {
+        $this->assertEquals(0, Registration::get()->count());
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.create'))
+            ->type('Test Carer', 'carer')
+            ->check('consent')
+            ->select('healthy-start-receiving', 'eligibility-hsbs')
+            ->press('Save Family')
+            ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
+        ;
+        $this->assertEquals(1, Registration::get()->count());
+        $registration = Registration::first();
+        $this->assertNotNull($registration->eligible_from);
+
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.edit', [ 'registration' => 1 ]))
+            ->select('healthy-start-applying', 'eligibility-hsbs')
+            ->press('Save Changes')
+            ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
+        ;
+        $registration = Registration::first();
+        $this->assertNull($registration->eligible_from);
+    }
+
+    /** @test */
+    public function updatingOtherFieldsDoesNotChangeEligibiltyDate()
+    {
+        $this->assertEquals(0, Registration::get()->count());
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.create'))
+            ->type('Test Carer', 'carer')
+            ->check('consent')
+            ->select('healthy-start-receiving', 'eligibility-hsbs')
+            ->press('Save Family')
+            ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
+        ;
+        $this->assertEquals(1, Registration::get()->count());
+        $registration = Registration::first();
+        $this->assertNotNull($registration->eligible_from);
+        $originalDate = $registration->eligible_from;
+
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.edit', [ 'registration' => 1 ]))
+            ->press('Save Changes')
+            ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
+        ;
+        $registration = Registration::first();
+        $this->assertEquals($registration->eligible_from, $originalDate);
+    }
 }
