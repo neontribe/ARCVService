@@ -429,6 +429,13 @@ class RegistrationController extends Controller
         // Fetch eligibility
         $eligibility_hsbs = $request->get('eligibility-hsbs');
         $eligibility_nrpf = $request->get('eligibility-nrpf');
+        $eligible_from = $registration->eligible_from;
+        //Prevent the date changing if you're just editing a different field
+        if ($registration->eligible_from == null && $eligibility_hsbs === 'healthy-start-receiving') {
+          $eligible_from = Carbon::now();
+        } else if ($eligibility_hsbs !== 'healthy-start-receiving') {
+          $eligible_from = null;
+        }
 
         // NOTE: Following refactor where we needed to retain Carer ids.
         // Possible that we might want to add flag to carer to distinguish Main from Secondary,
@@ -483,7 +490,7 @@ class RegistrationController extends Controller
 
         // Try to transact, so we can roll it back
         try {
-            DB::transaction(function () use ($registration, $family, $amendedCarers, $newCarers, $carersKeysToDelete, $children, $eligibility_hsbs, $eligibility_nrpf) {
+            DB::transaction(function () use ($registration, $family, $amendedCarers, $newCarers, $carersKeysToDelete, $children, $eligibility_hsbs, $eligibility_nrpf, $eligible_from) {
 
                 // delete the missing carers
                 Carer::whereIn('id', $carersKeysToDelete)->delete();
@@ -505,10 +512,6 @@ class RegistrationController extends Controller
                 // update eligibility
                 $registration->eligibility_hsbs = $eligibility_hsbs;
                 $registration->eligibility_nrpf = $eligibility_nrpf;
-                $eligible_from = null;
-                if ($eligibility_hsbs === 'healthy-start-receiving') {
-                  $eligible_from = Carbon::now();
-                }
                 $registration->eligible_from = $eligible_from;
 
                 // save changes to registration.
