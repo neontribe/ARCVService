@@ -12,7 +12,6 @@ use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Http\JsonResponse;
 use Tests\TestCase;
 
 class TraderControllerTest extends TestCase
