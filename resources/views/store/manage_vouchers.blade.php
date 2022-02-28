@@ -171,6 +171,7 @@
                             <i class="fa fa-calendar"></i>
                             <div>
                                 <label for="collected-on">Collected on:</label>
+                                <div id="dateError" style="display:none;"></div>
                                 <input id="collected-on" name="collected_on" value="<?php echo date('Y-m-d');?>" type="date">
                             </div>
                         </div>
@@ -270,6 +271,21 @@
                     collectedOn.datepicker({dateFormat: 'dd-mm-yyyy'}).val();
                 }
                 collectedOn.valueAsDate = new Date();
+
+                $("#collected-on").change(function() {
+                  var chosenDate = $(this).val();
+                  var chosenDateJS = new Date(chosenDate);
+                  var sixWeeks = new Date();
+                  sixWeeks.setDate(sixWeeks.getDate() + 42);
+                  if (chosenDateJS > sixWeeks) {
+                    $('#dateError').text('Please choose a date within six weeks of today');
+                    $('#dateError').css('font-size', '12px');
+                    $('#dateError').css('color', 'red');
+                    $('#dateError').show();
+                  } else {
+                    $('#dateError').hide();
+                  }
+                });
             }
         );
     </script>
