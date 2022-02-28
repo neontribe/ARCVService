@@ -60,4 +60,45 @@ class CentreControllerTest extends StoreTestCase
         $c = Centre::where('prefix', $this->data['rvid_prefix'])->first();
         $this->assertNotNull($c);
     }
+
+    /** @test */
+    public function testICanSeeAnEditButtonOnTheListOfCentres()
+    {
+      $centre = factory(Centre::class)->create([]);
+      $this->actingAs($this->adminUser, 'admin')
+          ->get(route('admin.centres.index'))
+          ->assertResponseOk()
+          ->seeInElement('h1', 'Children\'s Centres')
+          ->seeInElement('td', $centre->name)
+          ->seeInElement('a', 'Edit')
+          ;
+    }
+
+    /** @test */
+    public function testICanUpdateACentreName()
+    {
+      $centre = factory(Centre::class)->create([]);
+      $data = [
+        'id' => $centre->id,
+        'name' => 'New Centre Name'
+      ];
+      $this->seeInDatabase('centres', [
+          'id' => $centre->id,
+          'name' => $centre->name
+      ]);
+      $this->actingAs($this->adminUser, 'admin')
+        ->post(
+            route('admin.centres.update'),
+            $data
+        );
+      $this->seeInDatabase('centres', [
+          'id' => $centre->id,
+          'name' => 'New Centre Name'
+      ]);
+      $this->dontSeeInDatabase('centres', [
+          'id' => $centre->id,
+          'name' => $centre->name
+      ]);
+
+    }
 }
