@@ -12,31 +12,13 @@
             {{ Session::get('message') }}
         </div>
         @endif
-        <p>{{ $workers->links() }}</p>
-        <table class="table table-striped sortable">
+        <table id="workersTable" class="table table-striped sortable">
             <thead>
                 <tr>
-                    <th>
-                        Name
-                        <span>@include('service.partials.sortableChevron', ['route' =>
-                            'admin.centreusers.index', 'orderBy' => 'name', 'direction' => request('direction')
-                            ])</span>
-                    </th>
+                    <th>Name</th>
                     <th>Email Address</th>
-                    <th>
-                        Home Centre Area
-                        <span>
-                            @include('service.partials.sortableChevron', ['route' =>
-                            'admin.centreusers.index', 'orderBy' => 'homeCentreArea', 'direction' => request('direction')
-                            ])
-                        </span>
-                    </th>
-                    <th>
-                        Home Centre
-                        <span>@include('service.partials.sortableChevron', ['route' =>
-                            'admin.centreusers.index', 'orderBy' => 'homeCentre', 'direction' => request('direction')
-                            ])</span>
-                    </th>
+                    <th>Home Centre Area</th>
+                    <th>Home Centre</th>
                     <th>Alternative Centres</th>
                     <th>Downloader</th>
                     <th>Edit</th>
@@ -78,5 +60,11 @@
     </div>
 
 </div>
-
+<script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+<script>
+  $(document).ready( function () {
+    $('#workersTable').DataTable();
+  } );
+</script>
 @endsection
