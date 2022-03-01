@@ -12,13 +12,14 @@
                 {{ Session::get('message') }}
             </div>
         @endif
-        <table class="table table-striped">
+        <table id='centresTable' class="table table-striped">
             <thead>
                 <tr>
                     <th>Name</th>
                     <th>RVID Prefix</th>
                     <th>Area</th>
                     <th>Form</th>
+                    <th>Edit</th>
                 </tr>
             </thead>
             <tbody>
@@ -28,12 +29,22 @@
                         <td>{{ $centre->prefix }}</td>
                         <td>{{ $centre->sponsor->name }}</td>
                         <td>{{ ucwords($centre->print_pref) }}</td>
+                        <td>
+                            <a href="{{ route('admin.centres.edit', ['id' => $centre->id]) }}" style="padding:5px;" class="link-button">
+                              Edit
+                            </a>
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
-
 </div>
-
+<script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+<script>
+  $(document).ready(function () {
+    $('#centresTable').DataTable();
+  });
+</script>
 @endsection
