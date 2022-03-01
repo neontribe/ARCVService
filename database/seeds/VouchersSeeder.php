@@ -1,9 +1,27 @@
 <?php
 
+use App\VoucherState;
 use Illuminate\Database\Seeder;
 
 class VouchersSeeder extends Seeder
 {
+    protected $states = [
+        [
+            'transition' => 'dispatch',
+            'from' => 'printed',
+            'to' => 'dispatched',
+        ],
+        [
+            'transition' => 'collect',
+            'from' => 'dispatched',
+            'to' => 'recorded',
+        ],
+        [
+            'transition' => 'confirm',
+            'from' => 'recorded',
+            'to' => 'payment_pending',
+        ],
+    ];
     /**
      * Run the database seeds.
      *
@@ -93,5 +111,28 @@ class VouchersSeeder extends Seeder
             'range' => 'RVNT0000-RVNT0099',
         ]);
         $delivery->vouchers()->saveMany($rvnt4);
+
+        $user = App\User::where('name', 'Rolf Billabong')->first();
+        \Log::info($user);
+        $date = Carbon\Carbon::now()->subMonths(3);
+        // Create 50 vouchers that have a state of payment_pending
+        // and attach to Rolf Billabong
+        factory(App\Voucher::class, 'printed', 50)->create([
+            'trader_id' => $user->traders[0]->id,
+            'created_at' => $date,
+            'updated_at' => $date,
+            'currentstate' => 'payment_pending'
+        ])->each(function ($v) use (&$date) {
+            // add a day to it
+            $date->addDay();
+            foreach ($this->states as $state) {
+                $base = [
+                    'voucher_id' => $v->id,
+                    'created_at' => $date->addSeconds(10)->format('Y-m-d H:i:s'),
+                ];
+                $attribs = array_merge($base, $state);
+                factory(VoucherState::class)->create($attribs);
+            }
+        });
     }
 }
