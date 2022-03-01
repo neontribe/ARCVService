@@ -46,6 +46,11 @@ class SponsorsSeeder extends Seeder
         $noTapSponsor = factory(App\Sponsor::class)->create(['name' => "No Tap Project", "can_tap" => false]);
         $noTapSponsor->evaluations()->saveMany($this->qualifyPrimarySchoolers());
         $noTapSponsor->evaluations()->saveMany($this->veryfiesKids());
+
+
+        $scottishRulesSponser = factory(App\Sponsor::class)->create(['name' => "Scottish Rules Project"]);
+        $scottishRulesSponser->evaluations()->saveMany($this->scottishFamilyOverrides());
+        $scottishRulesSponser->evaluations()->saveMany($this->veryfiesKids());
     }
 
     public function veryfiesKids()
@@ -57,6 +62,50 @@ class SponsorsSeeder extends Seeder
                 "purpose" => "notices",
                 "entity" => "App\Family",
             ])
+        ];
+    }
+
+    public function scottishFamilyOverrides()
+    {
+        return [
+            new Evaluation([
+                "name" => "FamilyIsPregnant",
+                "value" => 4,
+                "purpose" => "credits",
+                "entity" => "App\Family",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsBetweenOneAndPrimarySchoolAge",
+                "value" => 4,
+                "purpose" => "credits",
+                "entity" => "App\Child",
+            ]),
+            // credit primary schoolers
+            new Evaluation([
+                "name" => "ChildIsPrimarySchoolAge",
+                "value" => "4",
+                "purpose" => "credits",
+                "entity" => "App\Child",
+            ]),
+            // don't disqualify primary schoolers
+            new Evaluation([
+                "name" => "ChildIsPrimarySchoolAge",
+                "value" => null,
+                "purpose" => "disqualifiers",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                    "name" => "FamilyHasNoEligibleChildren",
+                    "value" => 0,
+                    "purpose" => "disqualifiers",
+                    "entity" => "App\Family",
+            ]),
+            new Evaluation([
+                    "name" => "ChildIsAlmostPrimarySchoolAge",
+                    "value" => 0,
+                    "purpose" => "notices",
+                    "entity" => "App\Child",
+            ]),
         ];
     }
 
