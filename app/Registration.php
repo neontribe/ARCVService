@@ -23,7 +23,8 @@ class Registration extends Model implements IEvaluee
     protected $fillable = [
         'eligibility_hsbs',
         'eligibility_nrpf',
-        'consented_on'
+        'consented_on',
+        'eligible_from'
     ];
 
     /**
@@ -44,6 +45,7 @@ class Registration extends Model implements IEvaluee
         'created_at',
         'updated_at',
         'consented_on',
+        'eligible_from'
     ];
 
     /**
