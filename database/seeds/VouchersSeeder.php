@@ -113,7 +113,6 @@ class VouchersSeeder extends Seeder
         $delivery->vouchers()->saveMany($rvnt4);
 
         $user = App\User::where('name', 'Rolf Billabong')->first();
-        \Log::info($user);
         $date = Carbon\Carbon::now()->subMonths(3);
         // Create 50 vouchers that have a state of payment_pending
         // and attach to Rolf Billabong
