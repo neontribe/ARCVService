@@ -101,8 +101,14 @@ class SponsorsSeeder extends Seeder
                     "entity" => "App\Family",
             ]),
             new Evaluation([
-                    "name" => "ChildIsAlmostPrimarySchoolAge",
+                    "name" => "ScottishChildIsAlmostPrimarySchoolAge",
                     "value" => 0,
+                    "purpose" => "notices",
+                    "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                    "name" => "ChildIsAlmostPrimarySchoolAge",
+                    "value" => NULL,
                     "purpose" => "notices",
                     "entity" => "App\Child",
             ]),
