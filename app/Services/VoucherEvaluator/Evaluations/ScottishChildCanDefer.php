@@ -39,6 +39,9 @@ class ScottishChildCanDefer extends BaseChildEvaluation
         $age = $candidate->getAgeString($format);
         $arr = explode(",", $age, 2);
         $year = $arr[0];
+        if ($arr[0] == 'P') {
+          return $this->fail();
+        }
         $month = $arr[1];
         $canDefer = false;
         if ($year == 4 && $month <= 6) {

@@ -34,6 +34,10 @@ class ScottishChildIsAlmostPrimarySchoolAge extends BaseChildEvaluation
         $format = '%y,%m';
         $age = $candidate->getAgeString($format);
         $arr = explode(",", $age, 2);
+        \Log::info($arr[0]);
+        if ($arr[0] == 'P') {
+          return $this->fail();
+        }
         $year = $arr[0];
         $month = $arr[1];
         $canStartSchool = false;
