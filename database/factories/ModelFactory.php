@@ -474,7 +474,7 @@ $factory->defineAs(App\Child::class, 'readyForPrimarySchool', function (Faker\Ge
     ];
 });
 
-// Child - ready for Primary School when the school_month rolls around
+// Child - ready for Primary School when the school_month rolls around ( QUESTION )
 $factory->defineAs(App\Child::class, 'readyForScottishPrimarySchool', function (Faker\Generator $faker) {
 
     // Make a child who's four now, and thus due to start school soon(ish)

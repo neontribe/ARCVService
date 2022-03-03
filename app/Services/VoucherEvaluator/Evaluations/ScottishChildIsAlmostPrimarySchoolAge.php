@@ -22,6 +22,7 @@ class ScottishChildIsAlmostPrimarySchoolAge extends BaseChildEvaluation
         parent::__construct($offsetDate, $value);
 
         $this->specification = new AndSpec(
+          // ( QUESTION ) - Is this worth having?
             new IsBorn()
         );
     }

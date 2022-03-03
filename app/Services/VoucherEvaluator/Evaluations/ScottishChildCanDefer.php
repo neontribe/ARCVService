@@ -23,6 +23,7 @@ class ScottishChildCanDefer extends BaseChildEvaluation
 
         $this->specification = new AndSpec(
             new IsBorn()
+            // ( QUESTION - Is this bit worth having at all?)
             // This doesn't matter, because down there we check they are the right age to start school
             // Child school start date is coming up in a month (eg today is august-ish)
             // new IsAlmostStartDate($this->offsetDate, 5, config('arc.school_month'))

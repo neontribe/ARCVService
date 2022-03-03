@@ -68,14 +68,12 @@ class ScottishVoucherEvaluatorTest extends TestCase
                 "purpose" => "credits",
                 "entity" => "App\Child",
             ]),
-            // credit primary schoolers
             new Evaluation([
                 "name" => "ChildIsPrimarySchoolAge",
                 "value" => "4",
                 "purpose" => "credits",
                 "entity" => "App\Child",
             ]),
-            // don't disqualify primary schoolers
             new Evaluation([
                 "name" => "ChildIsPrimarySchoolAge",
                 "value" => null,

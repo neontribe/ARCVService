@@ -147,6 +147,7 @@ class RegistrationsSeeder extends Seeder
             $family->lockToCentre($centre);
             $family->save();
             $family->carers()->saveMany(factory(Carer::class, random_int(1, 3))->make());
+            // ( QUESTION - Which ones do we need? )
             // $family->children()->save(factory(Child::class, 'unbornChild')->make());
             // $family->children()->save(factory(Child::class, 'isPrimarySchoolAge')->make());
             // $family->children()->save(factory(Child::class, 'isSecondarySchoolAge')->make());
