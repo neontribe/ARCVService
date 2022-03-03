@@ -112,6 +112,12 @@ class SponsorsSeeder extends Seeder
                     "purpose" => "notices",
                     "entity" => "App\Child",
             ]),
+            new Evaluation([
+                    "name" => "ScottishChildCanDefer",
+                    "value" => 0,
+                    "purpose" => "notices",
+                    "entity" => "App\Child",
+            ]),
         ];
     }
 
