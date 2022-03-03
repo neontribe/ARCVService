@@ -7,13 +7,13 @@ use App\Specifications\IsAlmostStartDate;
 use Carbon\Carbon;
 use Chalcedonyt\Specification\AndSpec;
 
-class ScottishChildIsAlmostPrimarySchoolAge extends BaseChildEvaluation
+class ScottishChildCanDefer extends BaseChildEvaluation
 {
-    public $reason = 'is almost primary school age (SCOTLAND)';
+    public $reason = 'is able to defer (SCOTLAND)';
     private $specification;
 
     /**
-     * ScottishChildIsAlmostPrimarySchoolAge constructor.
+     * ScottishChildCanDefer constructor.
      * @param Carbon|null $offsetDate
      * @param int|null $value
      */
@@ -23,6 +23,9 @@ class ScottishChildIsAlmostPrimarySchoolAge extends BaseChildEvaluation
 
         $this->specification = new AndSpec(
             new IsBorn()
+            // This doesn't matter, because down there we check they are the right age to start school
+            // Child school start date is coming up in a month (eg today is august-ish)
+            // new IsAlmostStartDate($this->offsetDate, 5, config('arc.school_month'))
         );
     }
 
@@ -30,17 +33,18 @@ class ScottishChildIsAlmostPrimarySchoolAge extends BaseChildEvaluation
     {
         parent::test($candidate);
         // Is at least 4 years and 0 months NOW
+        // Is not more than 4 years and 6 months NOW
         $format = '%y,%m';
         $age = $candidate->getAgeString($format);
         $arr = explode(",", $age, 2);
         $year = $arr[0];
         $month = $arr[1];
-        $canStartSchool = false;
-        if ($year == 4) {
-          $canStartSchool = true;
+        $canDefer = false;
+        if ($year == 4 && $month <= 6) {
+          $canDefer = true;
         }
-
-        return ($this->specification->isSatisfiedBy($candidate) && $canStartSchool)
+        \Log::info($canDefer);
+        return ($this->specification->isSatisfiedBy($candidate) && $canDefer)
             ? $this->success()
             : $this->fail()
         ;
