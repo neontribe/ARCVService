@@ -288,11 +288,12 @@ class ScottishVoucherEvaluatorTest extends TestCase
         $notices = $evaluation["notices"];
 
         // Check there's one, because no other event is pending.
-        $this->assertEquals(1, count($notices));
+        $this->assertEquals(2, count($notices));
 
         // Check the correct credit type is applied.
         $this->assertNotContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $notices);
         $this->assertContains(self::NOTICE_TYPES['ScottishChildIsAlmostPrimarySchoolAge'], $notices);
+        $this->assertContains(self::NOTICE_TYPES['ScottishChildCanDefer'], $notices);
     }
 
     /** @test */
