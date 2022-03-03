@@ -156,6 +156,7 @@ class RegistrationsSeeder extends Seeder
             // $family->children()->save(factory(Child::class, 'almostOne')->make());
             $family->children()->save(factory(Child::class, 'readyForPrimarySchool')->make());
             $family->children()->save(factory(Child::class, 'canDefer')->make());
+            $family->children()->save(factory(Child::class, 'canNotDefer')->make());
             // $family->children()->save(factory(Child::class, 'readyForSecondarySchool')->make());
             $eligibility_hsbs = $eligibilities_hsbs[mt_rand(0, count($eligibilities_hsbs) - 1)];
             $eligible_from = null;

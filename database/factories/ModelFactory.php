@@ -486,7 +486,7 @@ $factory->defineAs(App\Child::class, 'readyForScottishPrimarySchool', function (
     ];
 });
 
-// Child - ready for Primary School when the school_month rolls around
+// Child - ready for Primary School in Scotland, but will still be four.
 $factory->defineAs(App\Child::class, 'canDefer', function (Faker\Generator $faker) {
 
     // Make a child who's four now, and thus due to start school soon(ish)
@@ -494,6 +494,21 @@ $factory->defineAs(App\Child::class, 'canDefer', function (Faker\Generator $fake
     $year = $now->year;
     $dob = Carbon::now();
     $dob->year($year)->month(1)->day(1);
+
+    return [
+        'born' => $dob->isPast(),
+        'dob' => $dob->toDateTimeString(),
+    ];
+});
+
+// Child - ready for Primary School in Scotland, but won't be four.
+$factory->defineAs(App\Child::class, 'canNotDefer', function (Faker\Generator $faker) {
+
+    // Make a child who's four now, and thus due to start school soon(ish)
+    $now = Carbon::now()->startOfMonth()->subYears(5);
+    $year = $now->year;
+    $dob = Carbon::now();
+    $dob->year($year)->month(6)->day(1);
 
     return [
         'born' => $dob->isPast(),

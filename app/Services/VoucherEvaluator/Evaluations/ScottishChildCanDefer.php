@@ -43,7 +43,7 @@ class ScottishChildCanDefer extends BaseChildEvaluation
         if ($year == 4 && $month <= 6) {
           $canDefer = true;
         }
-        \Log::info($canDefer);
+
         return ($this->specification->isSatisfiedBy($candidate) && $canDefer)
             ? $this->success()
             : $this->fail()
