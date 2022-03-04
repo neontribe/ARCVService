@@ -19,9 +19,19 @@ class ScottishChildIsAlmostPrimarySchoolAge extends BaseChildEvaluation
      */
     public function __construct(Carbon $offsetDate = null, int $value = null)
     {
+        if (config('app.env') == 'local' || config('app.env') == 'staging') {
+            $schoolStartMonth = config('arc.scottish_school_month');
+            $offsetDate = Carbon::now()->month($schoolStartMonth - 1);
+        }
         parent::__construct($offsetDate, $value);
 
-        $this->specification = new IsBorn();
+
+
+        $this->specification = new AndSpec(
+            new IsBorn(),
+            // Child school start date is coming up in a month (eg today is july-ish)
+            new IsAlmostStartDate($this->offsetDate, 5, config('arc.scottish_school_month'))
+        );
     }
 
     public function test($candidate)
