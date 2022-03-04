@@ -147,18 +147,9 @@ class RegistrationsSeeder extends Seeder
             $family->lockToCentre($centre);
             $family->save();
             $family->carers()->saveMany(factory(Carer::class, random_int(1, 3))->make());
-            // ( QUESTION - Which ones do we need? )
-            // $family->children()->save(factory(Child::class, 'unbornChild')->make());
-            // $family->children()->save(factory(Child::class, 'isPrimarySchoolAge')->make());
-            // $family->children()->save(factory(Child::class, 'isSecondarySchoolAge')->make());
-            // $family->children()->save(factory(Child::class, 'betweenOneAndPrimarySchoolAge')->make());
-            // $family->children()->save(factory(Child::class, 'underOne')->make());
-            // $family->children()->save(factory(Child::class, 'isSecondarySchoolAge')->make());
-            // $family->children()->save(factory(Child::class, 'almostOne')->make());
             $family->children()->save(factory(Child::class, 'readyForPrimarySchool')->make());
             $family->children()->save(factory(Child::class, 'canDefer')->make());
             $family->children()->save(factory(Child::class, 'canNotDefer')->make());
-            // $family->children()->save(factory(Child::class, 'readyForSecondarySchool')->make());
             $eligibility_hsbs = $eligibilities_hsbs[mt_rand(0, count($eligibilities_hsbs) - 1)];
             $eligible_from = null;
             if ($eligibility_hsbs === 'healthy-start-receiving') {

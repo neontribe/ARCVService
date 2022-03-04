@@ -138,39 +138,6 @@ class ScottishVoucherEvaluatorTest extends TestCase
     }
 
     /** @test */
-    public function itNoticesWhenAFamilyStillRequiresIDForChildren()
-    {
-        $unverifiedKids = factory(Child::class, 3)->states('unverified')->make();
-        $this->family->children()->saveMany($unverifiedKids);
-
-        // Get rules Mods
-        $rulesMods = collect($this->rulesMods["notice-unverified-kids"]);
-
-        // Make extended evaluator
-        $evaluator = EvaluatorFactory::make($rulesMods);
-
-        // Evaluate the family
-        $evaluation = $evaluator->evaluate($this->family);
-        $notices = $evaluation["notices"];
-
-        // There should be a notice reason of 'FamilyHasUnverifiedChildren'
-        $this->assertContains(self::NOTICE_TYPES['FamilyHasUnverifiedChildren'], $notices);
-
-        // Set them all verified
-        $this->family->children->each(function ($child) {
-            $child->verified = true;
-            $child->save();
-        });
-
-        // Evaluate the family again.
-        $evaluation2 = $evaluator->evaluate($this->family);
-        $notices = $evaluation2["notices"];
-
-        // There should NOT be a notice reason of 'FamilyHasUnverifiedChildren'
-        $this->assertNotContains(self::NOTICE_TYPES['FamilyHasUnverifiedChildren'], $notices);
-    }
-
-    /** @test */
     public function itCreditsWhenAFamilyIsPregnant()
     {
         $this->family->children()->save($this->pregnancy);
@@ -261,20 +228,6 @@ class ScottishVoucherEvaluatorTest extends TestCase
         $this->assertEquals(4, $evaluation->getEntitlement());
     }
 
-    /** @test */
-    public function itDoesNotCreditWhenAChildisSecondarySchoolAge()
-    {
-        $rulesMod = collect($this->rulesMods["credit-primary"]);
-
-        // Make extended evaluator
-        $evaluator = EvaluatorFactory::make($rulesMod);
-        $evaluation = $evaluator->evaluate($this->isSecondarySchoolAge);
-        $credits = $evaluation["credits"];
-
-        // Check there's none, because child is not primary or under.
-        $this->assertEquals(0, count($credits));
-        $this->assertEquals(0, $evaluation->getEntitlement());
-    }
 
     /** @test */
     public function itNoticesWhenAChildIsAlmostPrimarySchoolAge()
@@ -294,25 +247,6 @@ class ScottishVoucherEvaluatorTest extends TestCase
         $this->assertNotContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $notices);
         $this->assertContains(self::NOTICE_TYPES['ScottishChildIsAlmostPrimarySchoolAge'], $notices);
         $this->assertContains(self::NOTICE_TYPES['ScottishChildCanDefer'], $notices);
-    }
-
-    /** @test */
-    public function itNoticesWhenAChildIsAlmostSecondarySchoolAge()
-    {
-        // Need to change the values we use for school start to next month's integer
-        Config::set('arc.school_month', Carbon::now()->addMonth()->month);
-
-        $rulesMod = collect($this->rulesMods["credit-primary"]);
-        $evaluator = EvaluatorFactory::make($rulesMod);
-        $evaluation = $evaluator->evaluate($this->readyForSecondarySchool);
-        $notices = $evaluation["notices"];
-
-        // Check there's one
-        $this->assertEquals(1, count($notices));
-
-        // Check the correct credit type is applied.
-        $this->assertNotContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $notices);
-        $this->assertContains(self::NOTICE_TYPES['ChildIsAlmostSecondarySchoolAge'], $notices);
     }
 
     /** @test */

@@ -89,14 +89,13 @@ class SponsorsSeeder extends Seeder
                 "purpose" => "credits",
                 "entity" => "App\Child",
             ]),
-            // Get rid of this rule ( QUESTION )
+            // Turn off ChildIsPrimarySchoolAge rule
             new Evaluation([
                 "name" => "ChildIsPrimarySchoolAge",
                 "value" => null,
                 "purpose" => "disqualifiers",
                 "entity" => "App\Child",
             ]),
-            // ( QUESTION )
             new Evaluation([
                     "name" => "FamilyHasNoEligibleChildren",
                     "value" => 0,

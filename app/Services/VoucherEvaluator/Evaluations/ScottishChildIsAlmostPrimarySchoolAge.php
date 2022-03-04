@@ -21,10 +21,7 @@ class ScottishChildIsAlmostPrimarySchoolAge extends BaseChildEvaluation
     {
         parent::__construct($offsetDate, $value);
 
-        $this->specification = new AndSpec(
-          // ( QUESTION ) - Is this worth having?
-            new IsBorn()
-        );
+        $this->specification = new IsBorn();
     }
 
     public function test($candidate)
@@ -34,7 +31,6 @@ class ScottishChildIsAlmostPrimarySchoolAge extends BaseChildEvaluation
         $format = '%y,%m';
         $age = $candidate->getAgeString($format);
         $arr = explode(",", $age, 2);
-        \Log::info($arr[0]);
         if ($arr[0] == 'P') {
           return $this->fail();
         }
