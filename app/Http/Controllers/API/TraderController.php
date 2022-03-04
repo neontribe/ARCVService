@@ -6,41 +6,18 @@ use App\Events\VoucherHistoryEmailRequested;
 use App\Http\Controllers\Controller;
 use App\Trader;
 use App\Voucher;
+use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use PDO;
 
 class TraderController extends Controller
 {
-    // TODO: replace with equivalent eloquent statements
-    private static $traderVoucherHistory = <<<EOD
-SELECT
-    vouchers.code,
-    voucher_states.created_at as 'payment_pending',
-    (select voucher_states.created_at
-     FROM voucher_states
-     WHERE voucher_states.`to` = 'recorded'
-       and vouchers.id = voucher_id
-     order by id desc
-     limit 1) AS 'recorded',
-    (select voucher_states.created_at
-     from voucher_states
-     where vouchers.id = voucher_id
-       and `to` = 'reimbursed'
-     order by id desc
-     limit 1) AS 'reimbursed'
-FROM
-    vouchers left join voucher_states on vouchers.id = voucher_states.voucher_id
-WHERE
-    voucher_states.`to` = 'payment_pending'
-AND
-    vouchers.trader_id = ?
-ORDER BY payment_pending DESC, recorded DESC
-EOD;
-
     /**
      * A list of traders belonging to auth's user.
      *
@@ -119,6 +96,7 @@ EOD;
         return response()->json($formatted_vouchers, 200);
     }
 
+
     /**
      * Display the Trader's Voucher history.
      *
@@ -127,41 +105,44 @@ EOD;
      */
     public function showVoucherHistory(Trader $trader)
     {
-        $query = DB::connection()
-            ->getPdo()
-            ->prepare(self::$traderVoucherHistory);
-        $query->execute([$trader->id]);
+        // get days we pended on as a LengthAwarePaginator data array.
+        $pgSubDates = DB::table(function ($query) use ($trader) {
+                $query->selectRaw("SUBSTR(`voucher_states`.`created_at`, 1, 10) as pendedOn")
+                    ->from('vouchers')
+                    ->leftJoin('voucher_states', 'vouchers.id', 'voucher_states.voucher_id')
+                    ->where('voucher_states.to', 'payment_pending')
+                    ->where('vouchers.trader_id', $trader->id)
+                    ->groupBy('pendedOn')
+                    ->orderByDesc('pendedOn');
+        }, 'daysFromQuery')
+            ->paginate()
+            ->toArray();
 
-        $histories = $query->fetchAll(PDO::FETCH_NUM);
+        // if there are any, make a query
+        if ($pgSubDates["total"] === 0) {
+            $data = [];
+        } else {
+            // get the first and last dates from that.
+            $toDate = Arr::first($pgSubDates["data"])->pendedOn . ' 23:59:59';
+            $fromDate = Arr::last($pgSubDates["data"])->pendedOn . ' 00:00:00';
 
-        $data = [];
+            // get histories between those dates.
+            $histories = self::paymentHistoryBetweenDateTimes($trader, $fromDate, $toDate)->all();
 
-        foreach ($histories as $history) {
-            $pended_on = Carbon::createFromFormat('Y-m-d H:i:s', $history[1])->format('d-m-Y');
-            $record = [
-                'pended_on' => $pended_on,
-                'vouchers' => [
-                    [
-                        'code' => $history[0],
-                        'recorded_on' => $history[2]
-                            ? Carbon::createFromFormat('Y-m-d H:i:s', $history[2])->format('d-m-Y')
-                            : '',
-                        'reimbursed_on' => $history[3]
-                            ? Carbon::createFromFormat('Y-m-d H:i:s', $history[3])->format('d-m-Y')
-                            : '',
-                    ],
-                ],
-            ];
-
-            if (isset($data[$pended_on])) {
-                // append the vouchers
-                $data[$pended_on]['vouchers'] = array_merge($data[$pended_on]['vouchers'], $record['vouchers']);
-            } else {
-                // set one
-                $data[$pended_on] = $record;
-            }
+            // process the data into an array
+            $data = self::historyGroupByDate($histories);
         }
-        return response()->json(array_values($data), 200);
+
+        $links = implode(',', [
+            '<' . $pgSubDates['path'] . '?page=' . $pgSubDates['current_page'] . '>; rel="current"',
+            '<' . $pgSubDates['first_page_url'] . '>; rel="first"',
+            '<' . $pgSubDates['prev_page_url'] . '>; rel="prev"',
+            '<' . $pgSubDates['next_page_url'] . '>; rel="next"',
+            '<' . $pgSubDates['last_page_url'] . '>; rel="last"',
+        ]);
+
+        return response()
+            ->json(array_values($data), 200, ['Links' => $links]);
     }
 
     /**
@@ -256,5 +237,72 @@ EOD;
         fclose($tmp);
 
         return $csv;
+    }
+
+    /**
+     * returns a collection of the Trader's vouchers with payment pending between two datetimes.
+     * @param Trader $trader
+     * @param string $fromDate
+     * @param string $toDate
+     * @return Collection
+     */
+    public static function paymentHistoryBetweenDateTimes(Trader $trader, string $fromDate, string $toDate) : Collection
+    {
+         return DB::table('vouchers')
+            ->select(['vouchers.code', 'voucher_states.created_at as payment_pending'])
+            ->addSelect([
+                'recorded' => VoucherState::select('created_at')
+                    ->whereColumn('voucher_id', 'vouchers.id')
+                    ->where('to', 'recorded')
+                    ->orderByDesc('id')
+                    ->limit(1),
+                'reimbursed' => VoucherState::select('created_at')
+                    ->whereColumn('voucher_id', 'vouchers.id')
+                    ->where('to', 'reimbursed')
+                    ->orderByDesc('id')
+                    ->limit(1),
+            ])
+            ->leftJoin('voucher_states', 'vouchers.id', 'voucher_states.voucher_id')
+            ->where('voucher_states.to', 'payment_pending')
+            ->where('vouchers.trader_id', $trader->id)
+            ->whereBetween('voucher_states.created_at', [$fromDate, $toDate])
+            ->orderByDesc('recorded')
+            ->get();
+    }
+
+    /**
+     * Creates a nested array of data from the histories
+     * @param array $histories
+     * @return array
+     */
+    public static function historyGroupByDate(array $histories) : array
+    {
+        $data = [];
+        foreach ($histories as $history) {
+            // create a record for this voucher
+            $voucher = [
+                    'code' => $history->code,
+                    'recorded_on' => $history->recorded
+                        ? Carbon::createFromFormat('Y-m-d H:i:s', $history->recorded)->format('d-m-Y')
+                        : '',
+                    'reimbursed_on' => $history->reimbursed
+                        ? Carbon::createFromFormat('Y-m-d H:i:s', $history->reimbursed)->format('d-m-Y')
+                        : '',
+                ];
+
+            // work out the d-m-Y it belongs to.
+            $pended_on = Carbon::createFromFormat('Y-m-d H:i:s', $history->payment_pending)->format('d-m-Y');
+
+            // if there's not a d-m-Y record to hold it, make one
+            if (!isset($data[$pended_on])) {
+                $data[$pended_on] = [
+                    'pended_on' => $pended_on,
+                    'vouchers' => []
+                ];
+            }
+            // append the new record voucher to the d-m-Y place vouchers on the tree.
+            $data[$pended_on]['vouchers'][] = $voucher;
+        }
+        return $data;
     }
 }
