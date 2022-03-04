@@ -48,7 +48,7 @@ class SponsorsSeeder extends Seeder
         $noTapSponsor->evaluations()->saveMany($this->veryfiesKids());
 
         // Create a Sponser that will have the Scottish evaluations applied
-        $scottishRulesSponser = factory(App\Sponsor::class)->create(['name' => "Scottish Rules Project"]);
+        $scottishRulesSponser = factory(App\Sponsor::class)->create(['name' => "Scottish Rules Project", 'is_scotland' => 1]);
         $scottishRulesSponser->evaluations()->saveMany($this->scottishFamilyOverrides());
         $scottishRulesSponser->evaluations()->saveMany($this->veryfiesKids());
     }

@@ -47,6 +47,7 @@ class SponsorsController extends Controller
         $sponsor = new Sponsor([
             'name' => $request->input('name'),
             'shortcode' => $request->input('voucher_prefix'),
+            'is_scotland' => $request->input('is_scotland') == 'on' ? 1 : 0
         ]);
         // Atomic action,don't need to transact it
         if (!$sponsor->save()) {
