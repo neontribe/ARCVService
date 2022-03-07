@@ -26,7 +26,6 @@ class ScottishChildIsAlmostPrimarySchoolAge extends BaseChildEvaluation
 
     public function test($candidate)
     {
-      \Log::info('ScottishChildIsAlmostPrimarySchoolAge');
         parent::test($candidate);
         // Is at least 4 years and 0 months NOW
         $format = '%y,%m';
@@ -38,7 +37,6 @@ class ScottishChildIsAlmostPrimarySchoolAge extends BaseChildEvaluation
         $year = $arr[0];
         $month = $arr[1];
         $canStartSchool = false;
-        \Log::info('age ' . $age);
         if (config('app.env') == 'local' || config('app.env') == 'staging') {
           if (($year == 4 && $month >=5) || ($year == 5 && $month <= 4)) {
             $canStartSchool = true;
@@ -48,8 +46,6 @@ class ScottishChildIsAlmostPrimarySchoolAge extends BaseChildEvaluation
             $canStartSchool = true;
           }
         }
-        \Log::info('spec ' . $this->specification->isSatisfiedBy($candidate));
-        \Log::info('canStartSchool ' . $canStartSchool);
 
         // 1 March 2017 - 28 February 2018 - for AUG
         // 5 0 - 4 1 = AGE NOW
