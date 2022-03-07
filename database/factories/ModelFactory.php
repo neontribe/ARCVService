@@ -478,7 +478,7 @@ $factory->defineAs(App\Child::class, 'readyForPrimarySchool', function (Faker\Ge
 $factory->defineAs(App\Child::class, 'readyForScottishPrimarySchool', function (Faker\Generator $faker) {
 
     // Make a child who's four now, and thus due to start school soon(ish)
-    $dob = Carbon::now()->startOfMonth()->subYears(4);
+    $dob = Carbon::now()->month(1)->startOfMonth()->subYears(4);
 
     return [
         'born' => $dob->isPast(),
