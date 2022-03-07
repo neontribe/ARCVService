@@ -22,10 +22,10 @@
                     <input type="text" id="voucher_prefix" name="voucher_prefix" class="{{ $errors->has('voucher_prefix') ? 'error ' : '' }} uppercase" required>
                     @include('service.partials.validationMessages', array('inputName' => 'voucher_prefix'))
                 </div>
-                <div class="select">
+                {{-- <div class="select">
                     <label for="is_scotland">Centre is in Scotland?</label>
                     <input type="checkbox" class="scotlandCheckbox" id="is_scotland" name="is_scotland" @if( old('is_scotland') ) checked @endif/>
-                </div>
+                </div> --}}
             </div>
             <button type="submit" id="createSponsor">Save</button>
         </form>

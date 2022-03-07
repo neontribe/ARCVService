@@ -21,7 +21,7 @@ class Sponsor extends Model
         'name',
         'shortcode',
         'can_tap',
-        'is_scotland',
+        // 'is_scotland',
     ];
 
     /**
@@ -39,7 +39,7 @@ class Sponsor extends Model
      */
     protected $casts = [
         'can_tap' => 'boolean',
-        'is_scotland' => 'boolean'
+        // 'is_scotland' => 'boolean'
     ];
 
     /**

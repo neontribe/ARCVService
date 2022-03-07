@@ -17,7 +17,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Voucher Prefix</th>
-                    <th>Scottish Centre</th>
+                    {{-- <th>Scottish Centre</th> --}}
                 </tr>
             </thead>
             <tbody>
@@ -25,7 +25,7 @@
                     <tr>
                         <td>{{ $sponsor->name }}</td>
                         <td>{{ $sponsor->shortcode }}</td>
-                        <td>{{ $sponsor->is_scotland ? 'Yes' : 'No' }}</td>
+                        {{-- <td>{{ $sponsor->is_scotland ? 'Yes' : 'No' }}</td> --}}
                     </tr>
                 @endforeach
             </tbody>
