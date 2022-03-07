@@ -133,7 +133,7 @@ class TraderController extends Controller
             $data = self::historyGroupByDate($histories);
         }
 
-        $links = implode(',', [
+        $links = implode(', ', [
             '<' . $pgSubDates['path'] . '?page=' . $pgSubDates['current_page'] . '>; rel="current"',
             '<' . $pgSubDates['first_page_url'] . '>; rel="first"',
             '<' . $pgSubDates['prev_page_url'] . '>; rel="prev"',
