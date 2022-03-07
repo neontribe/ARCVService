@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Service\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminNewSponsorRequest;
-// use App\Evaluation;
+use App\Evaluation;
 use App\Sponsor;
 use Auth;
 use Illuminate\Contracts\View\Factory;
@@ -71,7 +71,7 @@ class SponsorsController extends Controller
             ->with('message', 'Sponsor ' . $sponsor->name . ' created.');
     }
 
-    public function scottishFamilyOverrides()
+    public static function scottishFamilyOverrides()
     {
         return [
             // Scotland has 4 not 3
