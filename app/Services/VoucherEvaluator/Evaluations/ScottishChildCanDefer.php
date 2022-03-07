@@ -46,8 +46,14 @@ class ScottishChildCanDefer extends BaseChildEvaluation
         }
         $month = $arr[1];
         $canDefer = false;
-        if ($year == 4 && $month <= 6) {
-          $canDefer = true;
+        if (config('app.env') == 'local' || config('app.env') == 'staging') {
+          if ($year == 4 && ($month >= 4 && $month <= 10)) {
+            $canDefer = true;
+          }
+        } else {
+          if ($year == 4 && ($month >= 1 && $month <= 6)) {
+            $canDefer = true;
+          }
         }
 
         return ($this->specification->isSatisfiedBy($candidate) && $canDefer)
