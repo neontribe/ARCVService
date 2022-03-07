@@ -9,6 +9,7 @@ use App\Family;
 use App\Registration;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Config;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
@@ -233,7 +234,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
     public function itNoticesWhenAChildIsAlmostPrimarySchoolAge()
     {
         // Need to change the values we use for school start to next month's integer
-        Config::set('arc.school_month', Carbon::now()->addMonth()->month);
+        Config::set('arc.scottish_school_month', Carbon::now()->addMonth()->month);
 
         $rulesMod = collect($this->rulesMods["credit-primary"]);
         $evaluator = EvaluatorFactory::make($rulesMod);
@@ -253,7 +254,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
     public function itNoticesWhenAChildCanDefer()
     {
         // Need to change the values we use for school start to next month's integer
-        Config::set('arc.school_month', Carbon::now()->addMonth()->month);
+        Config::set('arc.scottish_school_month', Carbon::now()->addMonth()->month);
 
         $rulesMod = collect($this->rulesMods["credit-primary"]);
         $evaluator = EvaluatorFactory::make($rulesMod);
@@ -273,7 +274,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
     public function itWontDeferAChildWhoIsOverFourAtSchoolStart()
     {
         // Need to change the values we use for school start to next month's integer
-        Config::set('arc.school_month', Carbon::now()->addMonth()->month);
+        Config::set('arc.scottish_school_month', Carbon::now()->addMonth()->month);
 
         $rulesMod = collect($this->rulesMods["credit-primary"]);
         $evaluator = EvaluatorFactory::make($rulesMod);
@@ -288,4 +289,35 @@ class ScottishVoucherEvaluatorTest extends TestCase
         $this->assertNotContains(self::NOTICE_TYPES['ScottishChildCanDefer'], $notices);
         $this->assertContains(self::NOTICE_TYPES['ScottishChildIsAlmostPrimarySchoolAge'], $notices);
     }
+
+    // /** @test */
+    // public function allScottishChildrenGivenCorrectVouchersAndMessages()
+    // {
+    //     // Need to change the values we use for school start to next month's integer
+    //     Config::set('arc.scottish_school_month', Carbon::now()->addMonth()->month);
+    //     $rulesMod = collect($this->rulesMods["credit-primary"]);
+    //     $family = factory(Family::class)->create();
+    //
+    //     $from = '2017-03-01';
+    //     $to = '2018-06-01';
+    //     $period = CarbonPeriod::create($from, '1 month', $to);
+    //     foreach($period as $dt) {
+    //         factory(Child::class, 1)->create([
+    //             'dob' => $dt->format("Y-m-d"),
+    //             'family_id' => $family->id
+    //         ]);
+    //     }
+    //
+    //     // $evaluator = EvaluatorFactory::make($rulesMod);
+    //     // $evaluation = $evaluator->evaluate($this->canNotDefer);
+    //     // $notices = $evaluation["notices"];
+    //     //
+    //     // // Check there's one
+    //     // $this->assertEquals(1, count($notices));
+    //     //
+    //     // // Check the correct credit type is applied.
+    //     // $this->assertNotContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $notices);
+    //     // $this->assertNotContains(self::NOTICE_TYPES['ScottishChildCanDefer'], $notices);
+    //     // $this->assertContains(self::NOTICE_TYPES['ScottishChildIsAlmostPrimarySchoolAge'], $notices);
+    // }
 }
