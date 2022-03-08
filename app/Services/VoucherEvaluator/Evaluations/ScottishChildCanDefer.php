@@ -28,14 +28,10 @@ class ScottishChildCanDefer extends BaseChildEvaluation
     {
         parent::test($candidate);
         $monthNow = Carbon::now()->month;
-        if (config('app.env') == 'local' || config('app.env') == 'staging') {
-          $schoolStartMonth = $monthNow + 1;
-        } else {
-          $schoolStartMonth = config('arc.scottish_school_month');
-        }
+        $schoolStartMonth = config('arc.scottish_school_month');
         // Check we're in the start month or the one before.
         if ($schoolStartMonth - $monthNow > 1) {
-          $this->fail();
+          return $this->fail();
         }
         $format = '%y,%m';
         $age = $candidate->getAgeString($format);
