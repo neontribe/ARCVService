@@ -8,12 +8,6 @@ use Illuminate\Support\Facades\Cookie;
 
 class VersionController extends Controller
 {
-    public function index()
-    {
-        // accept_cookies are deprecated, remove for anyone who has one set
-        return response(view('welcome'))->cookie(Cookie::forget('accept_cookies'));
-    }
-
     public function version(): JsonResponse
     {
         /** @noinspection PhpComposerExtensionStubsInspection */
