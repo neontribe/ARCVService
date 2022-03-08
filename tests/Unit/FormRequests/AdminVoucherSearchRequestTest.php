@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Unit\FormRequests;
 
 use App\AdminUser;
 use App\Voucher;
