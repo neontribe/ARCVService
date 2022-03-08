@@ -209,6 +209,29 @@ EOD;
                     $continue = false;
                 }
 
+                foreach ($chunk as $k => $voucher) {
+                  if ($this->containsOnlyNull($voucher)) {
+                    unset($chunk[$k]);
+                    continue;
+                  }
+                  if (!is_null($voucher['Void Voucher Date'])) {
+                    unset($chunk[$k]);
+                    continue;
+                  }
+                  if (!is_null($voucher['Date Trader Recorded Voucher'])
+                        && (strtotime($voucher['Date Trader Recorded Voucher']) < strtotime('2020-01-01'))
+                      ) {
+                    unset($chunk[$k]);
+                    continue;
+                  }
+                  if (!is_null($voucher['Date Issued'])
+                        && (strtotime($voucher['Date Issued']) < strtotime('2020-01-01'))
+                      ) {
+                    unset($chunk[$k]);
+                    continue;
+                  }
+                }
+
                 $rows = array_merge($rows, $chunk);
                 $lookups++;
                 $chunk = null;
@@ -355,6 +378,20 @@ EOD;
             Log::error($e->getMessage());
             Log::error(class_basename($this) . ": Failed to write file for '" . $csv->getTitle() . "'");
             exit(1);
+        }
+        return true;
+    }
+
+        // Adapted from https://stackoverflow.com/a/67977923
+        function containsOnlyNull(array $array): bool
+    {
+        foreach ($array as $key => $value) {
+
+            if ($key != 'Voucher Number' && $key != 'Voucher Area' && $key != 'Date file was Downloaded') {
+              if ($value != null) {
+                  return false;
+              }
+            }
         }
         return true;
     }
