@@ -15,6 +15,7 @@ npm-debug.log
 .env
 .prettierignore
 .vscode
+.DS_STORE
 
 # webpack results
 /public/css

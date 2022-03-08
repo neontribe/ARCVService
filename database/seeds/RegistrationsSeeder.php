@@ -45,6 +45,7 @@ class RegistrationsSeeder extends Seeder
 
         // create 3 regs for a *new* centre (with no users)
         $this->createRegistrationForCentre(3);
+        $this->createRegistrationForScottishCentre(1);
 
         // create a registration with a bundle
         $bundle = factory(Bundle::class)->create();
@@ -92,6 +93,63 @@ class RegistrationsSeeder extends Seeder
             $family->save();
             $family->carers()->saveMany(factory(Carer::class, random_int(1, 3))->make());
             $family->children()->saveMany(factory(Child::class, random_int(0, 4))->make());
+            $eligibility_hsbs = $eligibilities_hsbs[mt_rand(0, count($eligibilities_hsbs) - 1)];
+            $eligible_from = null;
+            if ($eligibility_hsbs === 'healthy-start-receiving') {
+              $eligible_from = Carbon::now();
+            }
+
+            $registrations[] = Registration::create(
+                [
+                    'centre_id' => $centre->id,
+                    'family_id' => $family->id,
+                    'eligibility_hsbs' => $eligibility_hsbs,
+                    'eligibility_nrpf' => $eligibilities_nrpf[mt_rand(0, count($eligibilities_nrpf) - 1)],
+                    'consented_on' => Carbon::now(),
+                    'eligible_from' => $eligible_from
+                ]
+            );
+        }
+        // Return the collection in case anyone needs it.
+        return collect($registrations);
+    }
+
+    /**
+     * @param $quantity
+     * @param Centre $centre
+     * @return Collection
+     */
+    public function createRegistrationForScottishCentre($quantity, Centre $centre = null)
+    {
+        // set the loop and centre
+        $quantity = ($quantity) ? $quantity : 1;
+        if (is_null($centre)) {
+            $centre = factory(Centre::class)->create([
+              'sponsor_id' => 8
+            ]);
+        }
+        $user = CentreUser::where('name', 'ARC CC User')->first();
+        if (!$user) {
+            $user = factory(CentreUser::class)->create(['name' => 'ARC CC User']);
+        };
+        $user->centres()->attach([
+            $centre->id => ['homeCentre' => false]
+        ]);
+
+        $registrations = [];
+
+        $eligibilities_hsbs = config('arc.reg_eligibilities_hsbs');
+        $eligibilities_nrpf = config('arc.reg_eligibilities_nrpf');
+
+        foreach (range(1, $quantity) as $q) {
+            // create a family and set it up.
+            $family = factory(Family::class)->make();
+            $family->lockToCentre($centre);
+            $family->save();
+            $family->carers()->saveMany(factory(Carer::class, random_int(1, 3))->make());
+            $family->children()->save(factory(Child::class, 'readyForPrimarySchool')->make());
+            $family->children()->save(factory(Child::class, 'canDefer')->make());
+            $family->children()->save(factory(Child::class, 'canNotDefer')->make());
             $eligibility_hsbs = $eligibilities_hsbs[mt_rand(0, count($eligibilities_hsbs) - 1)];
             $eligible_from = null;
             if ($eligibility_hsbs === 'healthy-start-receiving') {

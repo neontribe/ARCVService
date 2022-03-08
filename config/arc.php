@@ -24,6 +24,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'school_month' => env('ARC_SCHOOL_MONTH', 9), // Default to September.
+    'scottish_school_month' => env('ARC_SCOTTISH_SCHOOL_MONTH', 8), // Default to August.
 
     /*
     |--------------------------------------------------------------------------

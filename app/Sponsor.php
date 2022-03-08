@@ -20,7 +20,8 @@ class Sponsor extends Model
     protected $fillable = [
         'name',
         'shortcode',
-        'can_tap'
+        'can_tap',
+        // 'is_scotland',
     ];
 
     /**
@@ -38,6 +39,7 @@ class Sponsor extends Model
      */
     protected $casts = [
         'can_tap' => 'boolean',
+        // 'is_scotland' => 'boolean'
     ];
 
     /**
