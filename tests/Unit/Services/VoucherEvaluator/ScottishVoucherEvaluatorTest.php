@@ -47,7 +47,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
     private $underOne;
     private $isSecondarySchoolAge;
     private $isAlmostOne;
-    private $readyForPrimarySchool;
+    private $readyForScottishPrimarySchool;
     private $readyForSecondarySchool;
     private $canDefer;
 
@@ -132,7 +132,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
         $this->underOne = factory(Child::class, 'underOne')->make();
         $this->isSecondarySchoolAge = factory(Child::class, 'isSecondarySchoolAge')->make();
         $this->isAlmostOne = factory(Child::class, 'almostOne')->make();
-        $this->readyForPrimarySchool = factory(Child::class, 'readyForScottishPrimarySchool')->make();
+        $this->readyForScottishPrimarySchool = factory(Child::class, 'readyForScottishPrimarySchool')->make();
         $this->readyForSecondarySchool = factory(Child::class, 'readyForSecondarySchool')->make();
         $this->canDefer = factory(Child::class, 'canDefer')->make();
         $this->canNotDefer = factory(Child::class, 'canNotDefer')->make();
@@ -238,7 +238,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
 
         $rulesMod = collect($this->rulesMods["credit-primary"]);
         $evaluator = EvaluatorFactory::make($rulesMod);
-        $evaluation = $evaluator->evaluate($this->readyForPrimarySchool);
+        $evaluation = $evaluator->evaluate($this->readyForScottishPrimarySchool);
         $notices = $evaluation["notices"];
 
         // Check there's one, because no other event is pending.
