@@ -27,8 +27,16 @@ class ScottishChildCanDefer extends BaseChildEvaluation
     public function test($candidate)
     {
         parent::test($candidate);
-        // Is at least 4 years and 0 months NOW
-        // Is not more than 4 years and 6 months NOW
+        $monthNow = Carbon::now()->month;
+        if (config('app.env') == 'local' || config('app.env') == 'staging') {
+          $schoolStartMonth = $monthNow + 1;
+        } else {
+          $schoolStartMonth = config('arc.scottish_school_month');
+        }
+        // Check we're in the start month or the one before.
+        if ($schoolStartMonth - $monthNow > 1) {
+          $this->fail();
+        }
         $format = '%y,%m';
         $age = $candidate->getAgeString($format);
         $arr = explode(",", $age, 2);
@@ -38,14 +46,8 @@ class ScottishChildCanDefer extends BaseChildEvaluation
         }
         $month = $arr[1];
         $canDefer = false;
-        if (config('app.env') == 'local' || config('app.env') == 'staging') {
-          if ($year == 4 && ($month >= 4 && $month <= 10)) {
-            $canDefer = true;
-          }
-        } else {
-          if ($year == 4 && ($month >= 1 && $month <= 6)) {
-            $canDefer = true;
-          }
+        if ($year == 4 && ($month >= 1 && $month <= 6)) {
+          $canDefer = true;
         }
 
         return ($this->specification->isSatisfiedBy($candidate) && $canDefer)

@@ -27,7 +27,17 @@ class ScottishChildIsAlmostPrimarySchoolAge extends BaseChildEvaluation
     public function test($candidate)
     {
         parent::test($candidate);
-        // Is at least 4 years and 0 months NOW
+        $monthNow = Carbon::now()->month;
+        if (config('app.env') == 'local' || config('app.env') == 'staging') {
+          $schoolStartMonth = $monthNow + 1;
+        } else {
+          $schoolStartMonth = config('arc.scottish_school_month');
+        }
+        // Check we're in the start month or the one before.
+        if ($schoolStartMonth - $monthNow > 1) {
+          $this->fail();
+        }
+
         $format = '%y,%m';
         $age = $candidate->getAgeString($format);
         $arr = explode(",", $age, 2);
@@ -37,21 +47,9 @@ class ScottishChildIsAlmostPrimarySchoolAge extends BaseChildEvaluation
         $year = $arr[0];
         $month = $arr[1];
         $canStartSchool = false;
-        if (config('app.env') == 'local' || config('app.env') == 'staging') {
-          if (($year == 4 && $month >=5) || ($year == 5 && $month <= 4)) {
-            $canStartSchool = true;
-          }
-        } else {
-          if (($year == 4 && $month >=1) || ($year == 5 && $month = 0)) {
-            $canStartSchool = true;
-          }
+        if (($year == 4 && $month >=1) || ($year == 5 && $month = 0)) {
+          $canStartSchool = true;
         }
-
-        // 1 March 2017 - 28 February 2018 - for AUG
-        // 5 0 - 4 1 = AGE NOW
-        // 1 Nov 2016 - 28 Oct 2017 - for APR (testing purposes)
-        // 5 4 - 4 5 = AGE NOW
-
 
         return ($this->specification->isSatisfiedBy($candidate) && $canStartSchool)
             ? $this->success()
