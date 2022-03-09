@@ -97,7 +97,7 @@ class SponsorsController extends Controller
             ]),
             // Turn off ChildIsPrimarySchoolAge rule
             new Evaluation([
-                "name" => "ChildIsPrimarySchoolAge",
+                "name" => "ScottishChildIsPrimarySchoolAge",
                 "value" => null,
                 "purpose" => "disqualifiers",
                 "entity" => "App\Child",

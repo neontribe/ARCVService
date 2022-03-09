@@ -30,18 +30,22 @@ class ScottishChildIsPrimarySchoolAge extends BaseChildEvaluation
         parent::test($candidate);
         $monthNow = Carbon::now()->month;
         $schoolStartMonth = config('arc.scottish_school_month');
-        // Has the start month gone?
+        $format = '%y,%m';
+        $age = $candidate->getAgeString($format);
+        $arr = explode(",", $age, 2);
+        $year = $arr[0];
+        $month = $arr[1];
+        if ($year == 'P') {
+          return $this->fail();
+        }
+        if ($year >= 5) {
+          return $this->success();
+        }
+        // Otherwise, check if the start month has gone.
         if ($schoolStartMonth - $monthNow < 0) {
-          $format = '%y,%m';
-          $age = $candidate->getAgeString($format);
-          $arr = explode(",", $age, 2);
-          if ($arr[0] == 'P') {
-            return $this->fail();
-          }
-          $year = $arr[0];
-          $month = $arr[1];
           $isAtSchool = false;
-          if ((($year == 4 && $month >=1) || $year >= 5) && !$candidate->deferred) {
+          // Are they still between 4 1 and 4 11 and not deferred OR are they over 5?
+          if (((($year == 4 && $month >=1) || $year < 5) && !$candidate->deferred) || $year >= 5) {
             $isAtSchool = true;
           }
         } else {
