@@ -791,10 +791,6 @@ EDIT PAGE
 	height: calc(80vh - 2rem);
 }
 
-.col.short-height {
-	height: 67vh;
-}
-
 .collect {
 	background-color: #dff2ce;
 }
@@ -860,7 +856,7 @@ EDIT PAGE
 }
 
 #expandable p {
-	margin-bottom: 10px;
+	margin: 1rem 0 0.5rem 0;
 }
 
 .collapsed {
