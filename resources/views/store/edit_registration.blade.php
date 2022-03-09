@@ -70,6 +70,7 @@
                             @if ( $verifying )
                             <td class="verified-col">ID</td>
                             @endif
+                            <td class="can-defer-col">Defer</td>
                             <td class="remove-col"></td>
                         </tr>
                         </thead>
@@ -80,6 +81,11 @@
                                 <td class="dob-col">{{ $child->getDobAsString() }}</td>
                                 @if ( $verifying )
                                 <td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[{{ $child->id }}][verified]" id="child{{ $child->id }}" {{ $child->verified ? "checked" : null }} value="1"><label for="child{{ $child->id }}"><span class="visually-hidden">Toggle ID checked</span></label></td>
+                                @endif
+                                @if ( $child->can_defer )
+                                  <td class="can-defer-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[{{ $child->id }}][deferred]" id="child{{ $child->id }}deferred" {{ $child->deferred ? "checked" : null }} value="1"><label for="child{{ $child->id }}deferred"><span class="visually-hidden">Toggle canDefer checked</span></label></td>
+                                @else
+                                  <td></td>
                                 @endif
                                 <td class="remove-col">
                                     <input type="hidden" name="children[{{ $child->id }}][dob]"
