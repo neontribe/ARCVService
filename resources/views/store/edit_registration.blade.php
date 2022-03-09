@@ -86,7 +86,7 @@
                                 @endif
                                 @if ( $child->can_defer && $can_change_defer)
                                   <td class="can-defer-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[{{ $child->id }}][deferred]" id="child{{ $child->id }}deferred" {{ $child->deferred ? "checked" : null }} value="1"><label for="child{{ $child->id }}deferred"><span class="visually-hidden">Toggle canDefer checked</span></label></td>
-                                @elseif ($child->can_defer && !$can_change_defer)
+                                @elseif ($child->deferred && !$can_change_defer)
                                   <td>{{ $child->deferred ? 'Y' : 'N' }}</td>
                                 @else
                                   <td></td>
