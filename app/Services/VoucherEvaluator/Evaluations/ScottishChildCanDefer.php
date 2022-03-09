@@ -30,7 +30,7 @@ class ScottishChildCanDefer extends BaseChildEvaluation
         $monthNow = Carbon::now()->month;
         $schoolStartMonth = config('arc.scottish_school_month');
         // Check we're in the start month or the one before.
-        if ($schoolStartMonth - $monthNow > 1) {
+        if (($schoolStartMonth - $monthNow > 1) || ($schoolStartMonth - $monthNow < 0)) {
           return $this->fail();
         }
         $format = '%y,%m';
