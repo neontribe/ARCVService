@@ -85,9 +85,9 @@ class SponsorsSeeder extends Seeder
             ]),
             // Scotland has 4 not 3
             new Evaluation([
-                "name" => "ChildIsPrimarySchoolAge",
-                "value" => "4",
-                "purpose" => "credits",
+                "name" => "ScottishChildIsPrimarySchoolAge",
+                "value" => 0,
+                "purpose" => "disqualifiers",
                 "entity" => "App\Child",
             ]),
             // Turn off ChildIsPrimarySchoolAge rule
