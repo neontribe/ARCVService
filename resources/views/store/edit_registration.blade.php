@@ -70,7 +70,9 @@
                             @if ( $verifying )
                             <td class="verified-col">ID</td>
                             @endif
+                            @if ( $is_scottish )
                             <td class="can-defer-col">Defer</td>
+                            @endif
                             <td class="remove-col"></td>
                         </tr>
                         </thead>
