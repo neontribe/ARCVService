@@ -157,6 +157,10 @@ class Child extends Model implements IEvaluee
      */
     public function getCanDeferAttribute()
     {
+      $notices = $this->family->registrations[0]->getEvaluator()->evaluations["App\Child"]["notices"];
+      if (!array_key_exists('ScottishChildCanDefer', $notices)) {
+        return false;
+      }
       $rule = [
         new Evaluation([
               "name" => "ScottishChildCanDefer",
