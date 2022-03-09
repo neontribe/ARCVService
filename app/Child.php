@@ -2,7 +2,9 @@
 
 namespace App;
 
+use App\Evaluation;
 use App\Services\VoucherEvaluator\AbstractEvaluator;
+use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\IEvaluee;
 use App\Traits\Evaluable;
 use Carbon\Carbon;
@@ -17,7 +19,7 @@ class Child extends Model implements IEvaluee
      * @var array
      */
     protected $fillable = [
-        'dob','born', 'verified'
+        'dob','born', 'verified', 'deferred'
     ];
 
     /**
@@ -39,13 +41,22 @@ class Child extends Model implements IEvaluee
     ];
 
     /**
+     * The attributes that should be appended.
+     *
+     * @var array
+     */
+    protected $appends = ['can_defer'];
+
+    /**
      * Get's the family's preferred evaluator
      *
      * @return AbstractEvaluator
      */
     public function getEvaluator()
     {
-        return $this->family->evaluator;
+      $this->_evaluator = ($this->_evaluator) ?? EvaluatorFactory::make();
+      return $this->_evaluator;
+        // return $this->family->getEvaluator();
     }
 
     /*
@@ -55,6 +66,7 @@ class Child extends Model implements IEvaluee
      */
     protected $casts = [
         'verified' => 'boolean',
+        'deferred' => 'boolean',
     ];
 
     /**
@@ -136,5 +148,30 @@ class Child extends Model implements IEvaluee
     public function family()
     {
         return $this->belongsTo('App\Family');
+    }
+
+    /**
+     * Get info about whether child can defer
+     *
+     * @return boolean
+     */
+    public function getCanDeferAttribute()
+    {
+      $rule = [
+        new Evaluation([
+              "name" => "ScottishChildCanDefer",
+              "value" => 0,
+              "purpose" => "notices",
+              "entity" => "App\Child",
+        ])
+      ];
+      $rulesMods = collect($rule);
+      $evaluator = EvaluatorFactory::make($rulesMods);
+      $evaluation = $evaluator->evaluate($this);
+      $notices = $evaluation["notices"];
+      if (count($notices)) {
+        return true;
+      }
+      return false;
     }
 }
