@@ -333,7 +333,6 @@ input[type="text"].invalid,
 }
 
 .content {
-	background-color: #f9f9f9;
 	overflow: auto;
 	height: 80%;
 }
@@ -457,7 +456,6 @@ SUBNAV
 
 .subnav {
 	width: 100%;
-	box-shadow: 0 3px 12px -1px rgba(0,0,0,.15);
 	position: relative;
 	height: 8%;
 	display: flex;
