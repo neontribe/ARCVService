@@ -202,6 +202,11 @@ class RegistrationController extends Controller
             $is_scottish = true;
           }
         }
+        $can_change_defer = true;
+        $this_month = Carbon::now()->month;
+        if ($this_month > config('arc.scottish_school_month')) {
+          $can_change_defer = false;
+        }
 
         // Get the valuation
         /** @var Valuation $valuation */
@@ -225,7 +230,8 @@ class RegistrationController extends Controller
                 'entitlement' => $valuation->getEntitlement(),
                 'verifying' => $registration->getEvaluator()->isVerifyingChildren(),
                 'evaluations' => $evaluations,
-                'is_scottish' => $is_scottish
+                'is_scottish' => $is_scottish,
+                'can_change_defer' => $can_change_defer
             ]
         ));
     }
