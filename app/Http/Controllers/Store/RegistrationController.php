@@ -195,6 +195,13 @@ class RegistrationController extends Controller
         } else {
             abort(404, 'Registration not found.');
         }
+        $evaluations = $registration->centre->sponsor->evaluations;
+        $is_scottish = false;
+        foreach ($evaluations as $key => $evaluation) {
+          if ($evaluation['name'] == 'ScottishChildCanDefer') {
+            $is_scottish = true;
+          }
+        }
 
         // Get the valuation
         /** @var Valuation $valuation */
@@ -218,6 +225,7 @@ class RegistrationController extends Controller
                 'entitlement' => $valuation->getEntitlement(),
                 'verifying' => $registration->getEvaluator()->isVerifyingChildren(),
                 'evaluations' => $evaluations,
+                'is_scottish' => $is_scottish
             ]
         ));
     }
