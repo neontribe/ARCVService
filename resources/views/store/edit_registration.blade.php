@@ -179,7 +179,7 @@
                     </select>
                 </div>
                 @includeWhen(!empty($noticeReasons), 'store.partials.notice_box', ['noticeReasons' => $noticeReasons])
-                <button class="long-button submit" type="submit">Save Changes</button>
+                <button class="long-button submit" type="submit" formnovalidate>Save Changes</button>
                 <!-- Button commented out in case it needs to be reinstated -->
                 <!-- <button class="long-button"
                         onclick="window.open( '{{ URL::route("store.registration.print", ["registration" => $registration]) }}'); return false">
@@ -192,7 +192,6 @@
                 </a>
                 
                 @if (!isset($registration->family->leaving_on) )
-
                 <button class="remove long-button" type="button">Remove this family</button>
                 <div id="expandable" class="collapsed confirm-leaving">
                     <div class="reason">
@@ -208,11 +207,10 @@
                     </div>
                     <p>Are you sure?</p>
                     <div class="confirmation-buttons">
-                        <button type="submit" class="submit">Yes</button>
+                        <button type="submit" class="submit" formaction="{{ URL::route('store.registration.family',['registration' => $registration]) }}">Yes</button>
                         <button id="cancel">Cancel</button>
                     </div>
                 </div>
-                
                 @endif
                         
               </div>
