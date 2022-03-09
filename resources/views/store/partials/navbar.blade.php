@@ -5,7 +5,7 @@
         @else
           <div class="left"></div>
         @endif
-        <h1>{{ $headerTitle }}</h1>
+        <h1 @if ( Request::route()->getName() !== 'store.dashboard' ) class="small-title" @endif>{{ $headerTitle }}</h1>
         @if ( Request::route()->getName() == 'store.registration.edit' )
             <li class="right"><a href="{{ URL::route('store.registration.index') }}"><i class="fa fa-search" aria-hidden="true"></i> Find another family</a></li>
         @else
