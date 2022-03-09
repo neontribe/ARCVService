@@ -1370,6 +1370,7 @@ ADD CHILD FORM PARTIAL
 
 .dob-input-container {
     display: flex;
+    flex-wrap: wrap;
     margin: 1rem;
 }
 
@@ -1385,51 +1386,43 @@ ADD CHILD FORM PARTIAL
     border: 2px solid #ffffff;
     font-size: 1.5rem;
     margin-right: 1rem;
-    width: 3ch;
     text-align: center;
+    width: 3ch;
 }
 
 #dob-year {
     border: 2px solid #ffffff;
     font-size: 1.5rem;
-    margin-right: 1rem;
-    width: 5ch;
+    margin-right: 3rem;
     text-align: center;
+    width: 5ch;
 }
 
-/* dob-verified styling leverages the .styled-checkbox styling,
-with overrides to display with a label above rather than inline */
 #dob-verified {
-    position: absolute;
-	top: 20px;
+    margin: 0;
+    width: 34px;
 }
 
 #dob-verified + label {
-    margin-left: 0px;
+    display: inline-block;
+    height: 28px;
+    margin: 0;
+    margin-left: 5px;
+    width: auto;
 }
 
 #dob-verified + label::before {
-    top: 20px;
+    bottom: 0;
+    border: 0;
 }
 
-/* on Firefox, this element is slightly misaligned at 20px */
-@-moz-document url-prefix() {
-	#dob-verified + label::before {
-		top: 21px;
-	}
+.dob-input.relative {
+    align-self: flex-end;
+    margin-top: 1.5rem;
 }
-
-/* >=Safari 10.1+ <= Safari 13 */
-/* need this to fix a browser rendering issue where the checkbox is misaligned in Safari 12.4 and lower */
-@media not all and (min-resolution:.001dpcm)
-{ @supports (-webkit-appearance:none) {
-	#dob-verified + label::before {
-		top: 22px;
-	}
-}}
 
 #dob-verified:checked + label::after {
-    top: 30px;
+    top: 3px;
 }
 
 .inline-dob {
