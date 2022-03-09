@@ -15,6 +15,11 @@ Route::post('login', 'Auth\LoginController@login');
 
 Route::get('/', 'AdminController@index')->name('admin.dashboard');
 
+Route::get('version', [
+    'as' => 'version',
+    'uses' => 'VersionController@version',
+]);
+
 // Admin (Service) Password Reset Routes...
 Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')
     ->name('admin.password.request')

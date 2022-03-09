@@ -27,5 +27,8 @@ class CentresSeeder extends Seeder
         factory(App\Centre::class)->create(["sponsor_id" => 3]);
         factory(App\Centre::class)->create(["sponsor_id" => 4]);
         factory(App\Centre::class)->create(["sponsor_id" => 6]);
+
+        // Scottish centre
+        factory(App\Centre::class)->create(["sponsor_id" => 8]);
     }
 }
