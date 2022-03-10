@@ -85,7 +85,7 @@
                                 <td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[{{ $child->id }}][verified]" id="child{{ $child->id }}" {{ $child->verified ? "checked" : null }} value="1"><label for="child{{ $child->id }}"><span class="visually-hidden">Toggle ID checked</span></label></td>
                                 @endif
                                 @if ( $child->can_defer && $can_change_defer)
-                                  <td class="can-defer-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[{{ $child->id }}][deferred]" id="child{{ $child->id }}deferred" {{ $child->deferred ? "checked" : null }} value="1"><label for="child{{ $child->id }}deferred"><span class="visually-hidden">Toggle canDefer checked</span></label></td>
+                                  <td class="can-defer-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[{{ $child->id }}][deferred]" id="children[{{ $child->id }}][deferred]" {{ $child->deferred ? "checked" : null }} value="1"><label for="children[{{ $child->id }}][deferred]"><span class="visually-hidden">Toggle canDefer checked</span></label></td>
                                 @elseif ($child->deferred && !$can_change_defer)
                                   <td>{{ $child->deferred ? 'Y' : 'N' }}</td>
                                 @else
