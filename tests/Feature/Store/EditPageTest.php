@@ -494,4 +494,30 @@ class EditPageTest extends StoreTestCase
       $rule2 = new ScottishChildIsAlmostPrimarySchoolAge();
       $this->see($rule2->reason);
     }
+
+    /** @test */
+    public function AfterSchoolStartsICantChangeADeferral()
+    {
+      $schoolStartMonth = config('arc.scottish_school_month');
+      Carbon::setTestNow(Carbon::now()->month($schoolStartMonth + 1)->startOfDay());
+      $hasDeferred = factory(Child::class)->create([
+        'deferred' => 1,
+        'family_id' => $this->scottishFamily->id
+      ]);
+      $this->scottishFamily->children()->save($hasDeferred);
+      $inputID = "children[" . $hasDeferred->id . "][deferred]";
+      $selector = 'input[id=\'' . $inputID . '\']';
+      $this->actingAs($this->scottishCentreUser, 'store')
+        ->visit(URL::route('store.registration.edit', $this->scottishRegistration->id))
+        ->see('<td class="age-col">'. $hasDeferred->getAgeString() .'</td>')
+        ->see('<td class="dob-col">'. $hasDeferred->getDobAsString() .'</td>')
+        ->seeElement('input[type="hidden"][value="'. $hasDeferred->dob->format('Y-m') .'"]')
+        ->dontSeeElement($selector)
+        ->see('<td>Y</td>')
+      ;
+      $rule = new ScottishChildCanDefer();
+      $this->dontSee($rule->reason);
+      $rule2 = new ScottishChildIsAlmostPrimarySchoolAge();
+      $this->dontSee($rule2->reason);
+    }
 }
