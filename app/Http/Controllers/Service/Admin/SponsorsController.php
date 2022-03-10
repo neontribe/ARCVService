@@ -91,13 +91,13 @@ class SponsorsController extends Controller
             // Scotland has 4 not 3
             new Evaluation([
                 "name" => "ScottishChildIsPrimarySchoolAge",
-                "value" => 0,
-                "purpose" => "disqualifiers",
+                "value" => "4",
+                "purpose" => "credits",
                 "entity" => "App\Child",
             ]),
             // Turn off ChildIsPrimarySchoolAge rule
             new Evaluation([
-                "name" => "ScottishChildIsPrimarySchoolAge",
+                "name" => "ChildIsPrimarySchoolAge",
                 "value" => null,
                 "purpose" => "disqualifiers",
                 "entity" => "App\Child",
@@ -134,7 +134,13 @@ class SponsorsController extends Controller
                 "value" => 0,
                 "purpose" => "notices",
                 "entity" => "App\Family",
-            ])
+            ]),
+            new Evaluation([
+                    "name" => "ChildIsSecondarySchoolAge",
+                    "value" => 0,
+                    "purpose" => "disqualifiers",
+                    "entity" => "App\Child",
+            ]),
         ];
     }
 }

@@ -76,7 +76,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
                 "entity" => "App\Child",
             ]),
             new Evaluation([
-                "name" => "ScottishChildIsPrimarySchoolAge",
+                "name" => "ChildIsPrimarySchoolAge",
                 "value" => null,
                 "purpose" => "disqualifiers",
                 "entity" => "App\Child",
@@ -109,6 +109,12 @@ class ScottishVoucherEvaluatorTest extends TestCase
                     "name" => "ScottishChildCanDefer",
                     "value" => 0,
                     "purpose" => "notices",
+                    "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                    "name" => "ChildIsSecondarySchoolAge",
+                    "value" => 0,
+                    "purpose" => "disqualifiers",
                     "entity" => "App\Child",
             ]),
         ];
@@ -195,7 +201,9 @@ class ScottishVoucherEvaluatorTest extends TestCase
         // Re-save with a kid that will make the child at primary school age qualified
         $this->family->children()->saveMany([$this->underPrimarySchool, $this->isPrimarySchool, $this->isOverPrimarySchool]);
         $family = $this->family->fresh();
-
+\Log::info('$this->underPrimarySchool ' . $this->underPrimarySchool->dob);
+\Log::info('$this->isPrimarySchool ' . $this->isPrimarySchool->dob);
+\Log::info('$this->isOverPrimarySchool ' . $this->isOverPrimarySchool->dob);
         // Check we've saved the children correctly
         $this->assertEquals(3, $family->children->count());
 
@@ -207,7 +215,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
         // We have :
         // - one child between 1 and primary school age (4 vouchers)
         // - who enables one child at primary school age (4 vouchers)
-        // - but not one child who is overage (0 vouchers)
+        // - and one child who is overage (0 vouchers)
 
         $this->assertEquals('8', $evaluation->getEntitlement());
     }
