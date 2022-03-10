@@ -34,10 +34,11 @@ class ScottishChildIsPrimarySchoolAge extends BaseChildEvaluation
         $age = $candidate->getAgeString($format);
         $arr = explode(",", $age, 2);
         $year = $arr[0];
-        $month = $arr[1];
         if ($year == 'P') {
           return $this->fail();
         }
+        $month = $arr[1];
+
         if ($year >= 5) {
           return $this->success();
         }
