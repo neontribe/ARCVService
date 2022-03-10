@@ -517,7 +517,6 @@ class RegistrationController extends Controller
                 // save the new ones!
                 $family->carers()->saveMany($newCarers);
                 $family->children()->saveMany($children);
-                \Log::info($children);
 
                 // save changes to the changed names
                 collect($amendedCarers)->each(
