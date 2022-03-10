@@ -431,12 +431,14 @@ class EditPageTest extends StoreTestCase
     {
       $canDefer = factory(Child::class, 'canDefer')->make();
       $this->scottishFamily->children()->save($canDefer);
+      $inputID = "children[" . $canDefer->id . "][deferred]";
+      $selector = 'input[id=\'' . $inputID . '\']';
       $this->actingAs($this->scottishCentreUser, 'store')
         ->visit(URL::route('store.registration.edit', $this->scottishRegistration->id))
         ->see('<td class="age-col">'. $canDefer->getAgeString() .'</td>')
         ->see('<td class="dob-col">'. $canDefer->getDobAsString() .'</td>')
         ->seeElement('input[type="hidden"][value="'. $canDefer->dob->format('Y-m') .'"]')
-        ->seeElement("#child" . $canDefer->id . "deferred")
+        ->seeElement($selector)
       ;
       // It should tell us they can start school AND they can defer
       $rule = new ScottishChildCanDefer();
