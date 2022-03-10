@@ -12,7 +12,7 @@
             <div class="col">
                 <div>
                     <img src="{{ asset('store/assets/group-light.svg') }}" alt="logo">
-                    <h2>Adding voucher collectors</h2>
+                    <h2>Voucher collectors</h2>
                 </div>
                 <div>
                     <label for="carer">Main carer's full name</label>
@@ -54,7 +54,7 @@
             <div class="col">
                 <div>
                     <img src="{{ asset('store/assets/pregnancy-light.svg') }}" alt="logo">
-                    <h2>Adding children or pregnancies</h2>
+                    <h2>Children or pregnancies</h2>
                 </div>
                 <div>
                 <p>To add a child or pregnancy, complete the boxes below with their month and year of birth (or due date) in numbers, e.g. '06 2017' for June 2017.

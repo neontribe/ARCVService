@@ -267,11 +267,10 @@ strong {
 .logout-button {
 	width: 125px;
 	min-height: 35px;
-	margin: 0 0 3rem 1rem;
 }
 
 .logo {
-	width: 200px;
+	height: 3.5rem;
 }
 
 .warning p,
@@ -302,13 +301,13 @@ input[type="text"].invalid,
 }
 
 .header {
-	height: 12%;
+	align-items: center;
 	box-shadow: 0 3px 12px -1px rgba(0,0,0,.15);
 	display: flex;
-	align-items: center;
-	text-align: center;
-	position: relative;
 	justify-content: space-between;
+  padding: 0.5rem 1rem;
+	position: relative;
+	text-align: center;
 }
 
 .header-section {
@@ -317,7 +316,6 @@ input[type="text"].invalid,
 
 .header ul {
 	padding: 0;
-	margin-right: 1rem;
 	text-align: right;
 }
 
@@ -335,9 +333,9 @@ input[type="text"].invalid,
 }
 
 .content {
-	background-color: #f9f9f9;
 	overflow: auto;
 	height: 80%;
+  padding: 0 1rem;
 }
 
 .no-margin {
@@ -458,11 +456,9 @@ SUBNAV
 */
 
 .subnav {
-	width: 100%;
-	box-shadow: 0 3px 12px -1px rgba(0,0,0,.15);
 	position: relative;
-	height: 8%;
 	display: flex;
+  padding: 0.2rem 1rem;
 }
 
 .subnav ul {
@@ -492,6 +488,10 @@ SUBNAV
 
 .subnav .right {
 	justify-content: flex-end;
+}
+
+.small-title {
+  font-size: 1.2rem;
 }
 
 /*
@@ -649,23 +649,24 @@ REGISTER PAGE
 .col {
 	width: 100%;
 	background: #eeeeee;
-	margin: 1rem;
 	min-width: 25%;
 	overflow: auto;
 }
 
+.col+.col{
+  margin-left:1rem;
+}
+
 .col > div:first-child {
+	align-items: center;
 	background-color: #63c669;
-	margin: 0;
 	color: white;
+	display: -ms-flexbox;
+	display: flex;
+	margin: 0;
 	min-height: 60px;
 	padding: 0.5rem 0;
-	min-height: 60px;
-	display: flex;
-	display: -ms-flexbox;
-	-ms-flex-direction: column;
 	text-align: center;
-	align-items: center;
 }
 
 .col > div:first-child > img {
@@ -790,10 +791,6 @@ EDIT PAGE
 	height: calc(80vh - 2rem);
 }
 
-.col.short-height {
-	height: 67vh;
-}
-
 .collect {
 	background-color: #dff2ce;
 }
@@ -859,7 +856,7 @@ EDIT PAGE
 }
 
 #expandable p {
-	margin-bottom: 10px;
+	margin: 1rem 0 0.5rem 0;
 }
 
 .collapsed {

@@ -101,7 +101,7 @@
                 </div>
             </div>
 
-            <div class="col collect short-height">
+            <div class="col collect fit-height">
                 <div>
                     <img src="{{ asset('store/assets/info-light.svg') }}" alt="logo">
                     <h2>This family</h2>
@@ -179,48 +179,42 @@
                     </select>
                 </div>
                 @includeWhen(!empty($noticeReasons), 'store.partials.notice_box', ['noticeReasons' => $noticeReasons])
-                <button class="long-button submit" type="submit">Save Changes</button>
-                <div><hr class="col-break"></div>
-                <button class="long-button"
+                <button class="long-button submit" type="submit" formnovalidate>Save Changes</button>
+                <!-- Button commented out in case it needs to be reinstated -->
+                <!-- <button class="long-button"
                         onclick="window.open( '{{ URL::route("store.registration.print", ["registration" => $registration]) }}'); return false">
                     Print a 4 week collection sheet for this family
-                </button>
+                </button> -->
                 <a href="{{ route("store.registration.voucher-manager", ['registration' => $registration ]) }}" class="link">
                     <div class="link-button link-button-large">
                         <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
                     </div>
                 </a>
-            </div>
-        </form>
-
-        @if (!isset($registration->family->leaving_on) )
-            <form action="{{ URL::route('store.registration.family',['registration' => $registration]) }}" method="post"
-                  id="leaving">
-                {{ method_field('PUT') }}
-                {!! csrf_field() !!}
-                <div class="full-width flex-col">
-                    <button class="remove long-button" type="button">Remove this family</button>
-                    <div id="expandable" class="collapsed confirm-leaving">
-                        <div class="reason">
-                            <label for="reason-for-leaving">
-                                Reason for leaving
-                            </label>
-                            <select id="reason-for-leaving" name="leaving_reason" required>
-                                <option value="" disabled selected>Select a reason...</option>
-                                @foreach(Config::get('arc.leaving_reasons') as $reason)
-                                    <option value="{{ $reason }}"> {{ $reason }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <p>Are you sure?</p>
-                        <div class="confirmation-buttons">
-                            <button type="submit" class="submit">Yes</button>
-                            <button id="cancel">Cancel</button>
-                        </div>
+                
+                @if (!isset($registration->family->leaving_on) )
+                <button class="remove long-button" type="button">Remove this family</button>
+                <div id="expandable" class="collapsed confirm-leaving">
+                    <div class="reason">
+                        <label for="reason-for-leaving">
+                            Reason for leaving
+                        </label>
+                        <select id="reason-for-leaving" name="leaving_reason" required>
+                            <option value="" disabled selected>Select a reason...</option>
+                            @foreach(Config::get('arc.leaving_reasons') as $reason)
+                                <option value="{{ $reason }}"> {{ $reason }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <p>Are you sure?</p>
+                    <div class="confirmation-buttons">
+                        <button type="submit" class="submit" formaction="{{ URL::route('store.registration.family',['registration' => $registration]) }}">Yes</button>
+                        <button id="cancel">Cancel</button>
                     </div>
                 </div>
-            </form>
-        @endif
+                @endif
+                        
+              </div>
+        </form>
     </div>
 
     <script>
@@ -286,14 +280,12 @@
         $('.remove').click(function (e) {
             $('#expandable').removeClass('collapsed');
             $('#leaving').addClass('expanded');
-            $(".short-height").css("height", "47vh");
             e.preventDefault();
         });
 
         $('#cancel').click(function (e) {
             $('#expandable').addClass('collapsed');
             $('#leaving').removeClass('expanded');
-            $(".short-height").css("height", "67vh");
             e.preventDefault();
         });
 
