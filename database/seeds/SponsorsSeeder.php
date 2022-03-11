@@ -78,8 +78,14 @@ class SponsorsSeeder extends Seeder
             ]),
             // Scotland has 4 not 3
             new Evaluation([
-                "name" => "ChildIsBetweenOneAndPrimarySchoolAge",
+                "name" => "ScottishChildIsBetweenOneAndPrimarySchoolAge",
                 "value" => 4,
+                "purpose" => "credits",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsBetweenOneAndPrimarySchoolAge",
+                "value" => null,
                 "purpose" => "credits",
                 "entity" => "App\Child",
             ]),
@@ -96,8 +102,14 @@ class SponsorsSeeder extends Seeder
                 "entity" => "App\Child",
             ]),
             new Evaluation([
-                    "name" => "FamilyHasNoEligibleChildren",
+                    "name" => "ScottishFamilyHasNoEligibleChildren",
                     "value" => 0,
+                    "purpose" => "disqualifiers",
+                    "entity" => "App\Family",
+            ]),
+            new Evaluation([
+                    "name" => "FamilyHasNoEligibleChildren",
+                    "value" => null,
                     "purpose" => "disqualifiers",
                     "entity" => "App\Family",
             ]),
