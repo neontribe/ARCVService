@@ -42,6 +42,9 @@ class ScottishChildIsPrimarySchoolAge extends BaseChildEvaluation
         if ($year >= 5) {
           return $this->success();
         }
+        if ($year < 4) {
+          return $this->fail();
+        }
         // Otherwise, check if the start month has gone.
         if ($schoolStartMonth - $monthNow < 0) {
           $isAtSchool = false;

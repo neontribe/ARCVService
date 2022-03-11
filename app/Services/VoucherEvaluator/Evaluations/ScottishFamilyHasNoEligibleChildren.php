@@ -50,6 +50,9 @@ class ScottishFamilyHasNoEligibleChildren extends BaseFamilyEvaluation
                 // We satisfy them
                 $isAtSchool = $this->isScottishChildAtSchool($child);
                 $basicSpec = $this->specification->isSatisfiedBy($child);
+                // \Log::info('dob' . $child->dob);
+                // \Log::info('$isAtSchool' . $isAtSchool);
+                // \Log::info('$basicSpec' . $basicSpec);
                 if ($basicSpec && $isAtSchool) {
                   return false;
                 } else {
@@ -83,6 +86,9 @@ class ScottishFamilyHasNoEligibleChildren extends BaseFamilyEvaluation
 
       if ($year >= 5) {
         return true;
+      }
+      if ($year < 4) {
+        return false;
       }
       // Otherwise, check if the start month has gone.
       if ($schoolStartMonth - $monthNow < 0) {
