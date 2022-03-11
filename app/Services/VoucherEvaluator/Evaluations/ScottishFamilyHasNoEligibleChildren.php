@@ -61,11 +61,9 @@ class ScottishFamilyHasNoEligibleChildren extends BaseFamilyEvaluation
         // Check if there are kids who might qualify others ...
         if (!$satisfiers) {
             // ... there are none, pass this rule
-            \Log::info('success');
             return $this->success();
         } else {
             // ... there are some, fail this rule.
-            \Log::info('fail');
             return $this->fail();
         }
     }
