@@ -1,4 +1,4 @@
-# ARCVService
+# ARCV Service
 ## About ARC Voucher Service/API
 ARCV Service is the service portal and API for ARCV Market.
 
@@ -41,10 +41,11 @@ It also requires PHP's `zip` extension installed and enabled.
 
  - Reseed with `php artisan migrate:refresh --seed`
  - Run tests with `phpunit`
-
-
+ 
 ### Styling
+
 #### Service
+
 - Service styling is in `resources/assets/sass/app.scss`
 - When amending the styles in development, switching to a new branch or pulling code, run `yarn watch` to watch for changes
 - Service is compiled from Sass with `yarn prod`
@@ -54,31 +55,18 @@ It also requires PHP's `zip` extension installed and enabled.
 
 ## Deployment
 
-1. Travis will build and test with every push to the repo.
-2. Travis will deploy to staging `https://arcvservice-prealpha.neontribe.org` with every merge to default branch. When default branch is updated, change value in `.travis.yml`.
-
-## CI deploy with Travis set up notes
-
-1. Install travis cli tool wih `gem install travis`
-2. Log in to travis cli with `travis login` using git token or creds
-3. Create a `.env.travis` that is in `local` env with user `travis` and no password for database.
-4. Create `.travis.yml` as per one in this repo without the `env:global:secure:` vars and without the openssl encrypted info. If you are setting up a new config - we need to encrypt and add those values.
-5. Use the Travis CLI to add secret environment variables: e.g. `travis encrypt STAGING_USER=mickeymouse --add` for `$STAGING_USER` and `$STAGING_IP`.
-6. Create an SSH key pair.
-  **WARNING:** Do NOT commit the private key to the repository unencrypted, ever. Be very careful staging files after this step.
-7. Copy the public key to the server: e.g. `ssh-copy-id -i staging_key.pub`.
-8. Use the Travis CLI to add and encrypt the private key: e.g. `travis encrypt-file staging_key --add`.
-9. Delete the public key and unencrypted private key locally.
-
+1. `./makedeploy.sh ARCVService_v<x.y.z>(-[beta|RC]X)`
+2. copy the tgz file up to the server
+3. login and move to the correct folder
+4. `./deploy-service ARCVService_v<x.y.z>(-[beta|RC]X).tgz service_v<x.y.z>(-[beta|RC]X)` 
+5. update the `.env` file
 
 # Copyright
 This project was developed by :
 
 Neontribe Ltd (registered in England and Wales #06165574)
 
-Under contract for
-
-Alexandra Rose Charity (registered in England and Wales #00279157)
+Under contract for Alexandra Rose Charity (registered in England and Wales #00279157)
 
 As such, unless otherwise specified in the appropriate component source, associated file or compiled asset, files in this project repository are Copyright &copy; (2022), Alexandra Rose Charity. All rights reserved.
 
@@ -86,18 +74,18 @@ If you wish to discuss copyright or licensing issues, please contact:
 
 Alexandra Rose Charity
 
-c/o Wise & Co,
-Wey Court West,
-Union Road,
-Farnham,
-Surrey,
-England,
+c/o Wise & Co,\
+Wey Court West,\
+Union Road,\
+Farnham,\
+Surrey,\
+England,\
 GU9 7PT
 
 # Licensing and use of Third Party Applications
 These are the languages and packages used to create ARCV Service and where available the licences associated with them.
 
-ARCV Service 1.12
+ARCV Service 1.13
 
 Programming Language - PHP\
 Framework - Laravel https://github.com/laravel/laravel \

@@ -31,8 +31,14 @@
 	      to: /home/vagrant/code/ARCVService/public
 	      php: "add php version number"
 ```
-7. In your `/etc/hosts` add `192.168.10.10 arcv-service.test arcv-store.test`
-8. Once you have edited the `Homestead.yaml` to your liking, run the **`vagrant up`** command from your Homestead directory
+7. If using VirtualBox, you may need to create a `/etc/vbox/networks.conf` containing
+
+```
+* 192.168.10.0/24
+```
+
+8. In your `/etc/hosts` add `192.168.10.10 arcv-service.test arcv-store.test`
+9. Once you have edited the `Homestead.yaml` to your liking, run the **`vagrant up`** command from your Homestead directory
 
 ***
 
@@ -62,5 +68,4 @@ Do the steps below:
 13. Check the browser's developer tools console and network tabs for errors
 
 ## Resources
-1. [Laravel Homestead official documentation](https://laravel.com/docs/5.5/homestead)
-2. [ARC Service Readme file](https://github.com/neontribe/ARCVService/blob/1.9/release/README.md)
+1. [Laravel Homestead official documentation](https://laravel.com/docs/6.x/homestead)
