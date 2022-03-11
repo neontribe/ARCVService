@@ -50,9 +50,6 @@ class ScottishFamilyHasNoEligibleChildren extends BaseFamilyEvaluation
                 // We satisfy them
                 $isAtSchool = $this->isScottishChildAtSchool($child);
                 $basicSpec = $this->specification->isSatisfiedBy($child);
-                // \Log::info('dob' . $child->dob);
-                // \Log::info('$isAtSchool' . $isAtSchool);
-                // \Log::info('$basicSpec' . $basicSpec);
                 if ($basicSpec && $isAtSchool) {
                   return false;
                 } else {
