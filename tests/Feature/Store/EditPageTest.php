@@ -18,6 +18,7 @@ use App\Services\VoucherEvaluator\Evaluations\ScottishChildCanDefer;
 use App\Services\VoucherEvaluator\Evaluations\ScottishChildIsAlmostPrimarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ScottishChildIsPrimarySchoolAge;
 use Carbon\Carbon;
+use Config;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use URL;
 
@@ -429,6 +430,7 @@ class EditPageTest extends StoreTestCase
     /** @test */
     public function ICanSeeAScottishChildCanBeDeferred()
     {
+      Config::set('arc.scottish_school_month', Carbon::now()->month + 1);
       $canDefer = factory(Child::class, 'canDefer')->make();
       $this->scottishFamily->children()->save($canDefer);
       $inputID = "children[" . $canDefer->id . "][deferred]";
@@ -450,6 +452,7 @@ class EditPageTest extends StoreTestCase
     /** @test */
     public function ICanDeferAScottishChild()
     {
+      Config::set('arc.scottish_school_month', Carbon::now()->month + 1);
       $canDefer = factory(Child::class, 'canDefer')->make();
       $this->scottishFamily->children()->save($canDefer);
       $this->seeInDatabase('children', [
@@ -482,6 +485,7 @@ class EditPageTest extends StoreTestCase
     /** @test */
     public function ItWontOfferDeferForAnIneligibleScottishChild()
     {
+      Config::set('arc.scottish_school_month', Carbon::now()->month + 1);
       $canNotDefer = factory(Child::class, 'canNotDefer')->make();
       $this->scottishFamily->children()->save($canNotDefer);
       $this->actingAs($this->scottishCentreUser, 'store')
@@ -500,11 +504,13 @@ class EditPageTest extends StoreTestCase
     /** @test */
     public function AfterSchoolStartsICantChangeADeferral()
     {
+      Config::set('arc.scottish_school_month', Carbon::now()->month);
       $schoolStartMonth = config('arc.scottish_school_month');
       Carbon::setTestNow(Carbon::now()->month($schoolStartMonth + 1)->startOfDay());
       $hasDeferred = factory(Child::class)->create([
         'deferred' => 1,
-        'family_id' => $this->scottishFamily->id
+        'family_id' => $this->scottishFamily->id,
+        'dob' => '2017-10-01 00:00:00'
       ]);
       $this->scottishFamily->children()->save($hasDeferred);
       $inputID = "children[" . $hasDeferred->id . "][deferred]";

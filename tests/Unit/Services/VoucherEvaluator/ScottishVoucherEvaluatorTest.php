@@ -32,7 +32,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
     // This has a | in the reason field because we want to carry the entity with it.
     const CREDIT_TYPES = [
         'ChildIsUnderOne' => ['reason' => 'Child|is under 1 year old', 'value' => 6],
-        'ScottishChildIsBetweenOneAndPrimarySchoolAge' => ['reason' => 'Child|is between 1 and start of primary school age', 'value' => 4],
+        'ScottishChildIsBetweenOneAndPrimarySchoolAge' => ['reason' => 'Child|is between 1 and start of primary school age (SCOTLAND)', 'value' => 4],
         'ChildIsPrimarySchoolAge' => ['reason' => 'Child|is primary school age', 'value' => 4],
         'FamilyIsPregnant' => ['reason' => 'Family|is pregnant', 'value' => 4],
     ];
@@ -213,9 +213,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
         // Re-save with a kid that will make the child at primary school age qualified
         $this->family->children()->saveMany([$this->underPrimarySchool, $this->isPrimarySchool, $this->isOverPrimarySchool]);
         $family = $this->family->fresh();
-\Log::info('$this->underPrimarySchool ' . $this->underPrimarySchool->dob);
-\Log::info('$this->isPrimarySchool ' . $this->isPrimarySchool->dob);
-\Log::info('$this->isOverPrimarySchool ' . $this->isOverPrimarySchool->dob);
+
         // Check we've saved the children correctly
         $this->assertEquals(3, $family->children->count());
 
