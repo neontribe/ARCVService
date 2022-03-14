@@ -12,11 +12,12 @@ use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Log;
+use Throwable;
 
 class VouchersController extends Controller
 {
@@ -32,19 +33,19 @@ class VouchersController extends Controller
     }
 
     /**
-     * Display a single Vouchers.
+     * Display a single Voucher.
      *
-     * @return View
+     * @return Application|Factory|View
      */
     public function search(VoucherSearchRequest $request)
     {
-      if(isset($request['search'])) {
-        $voucher_code = $request->get('voucher_code');
-        $vouchers = Voucher::where('code', $voucher_code)->get();
-      } else if(isset($request['reset'])) {
-        $vouchers = Voucher::orderBy('id', 'desc')->paginate(50);
-      }
-      return view('service.vouchers.index', compact('vouchers'));
+        if (isset($request['search'])) {
+            $voucher_code = $request->get('voucher_code');
+            $vouchers = Voucher::where('code', $voucher_code)->get();
+        } elseif (isset($request['reset'])) {
+            $vouchers = Voucher::orderBy('id', 'desc')->paginate(50);
+        }
+        return view('service.vouchers.index', compact('vouchers'));
     }
 
     /**
@@ -79,8 +80,7 @@ class VouchersController extends Controller
     {
         $voucher = Voucher::where('id', $id)
             ->with('history')
-            ->first()
-        ;
+            ->first();
         return view('service.vouchers.edit', ['voucher' => $voucher]);
     }
 
@@ -90,11 +90,12 @@ class VouchersController extends Controller
      * @param AdminUpdateVoucherRequest $request
      * @return RedirectResponse
      */
-    public function retireBatch(AdminUpdateVoucherRequest $request)
+    public function retireBatch(AdminUpdateVoucherRequest $request): RedirectResponse
     {
         // Make a rangeDef & get the vouchers in it.
         $rangeDef = Voucher::createRangeDefFromVoucherCodes(
-            $request->input('voucher-start'), $request->input('voucher-end')
+            $request->input('voucher-start'),
+            $request->input('voucher-end')
         );
 
         $voidableVouchers = Voucher::inDefinedRange($rangeDef)->inVoidableState()->pluck('code');
@@ -104,12 +105,10 @@ class VouchersController extends Controller
         if ($voidableVouchers->count() === 0) {
             // Whoops! None of the vouchers are voidable
             return redirect()
-              ->route('admin.vouchers.void')
-              ->withInput()
-              ->with('error_message', trans('service.messages.vouchers_batchretiretransition.blocked'));
-            return;
-        };
-
+                ->route('admin.vouchers.void')
+                ->withInput()
+                ->with('error_message', trans('service.messages.vouchers_batchretiretransition.blocked'));
+        }
 
         // Create and reset the transitions route to start point
         $transitions[] = Voucher::createTransitionDef("dispatched", $request->input("transition"));
@@ -118,7 +117,7 @@ class VouchersController extends Controller
 
         // Update vouchers or roll back
         try {
-            DB::transaction(function () use ($rangeDef, $transitions) {
+            DB::transaction(static function () use ($rangeDef, $transitions) {
 
                 // Some things we'll be using.
                 $now_time = Carbon::now();
@@ -141,11 +140,10 @@ class VouchersController extends Controller
                                 Voucher::whereIn('id', $vouchers->pluck('id'))
                                     ->update(['currentState' => $transitionDef->to]);
                             }
-                        )
-                    ;
+                        );
                 }
             });
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Oops! Log that
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getMessage()); // Log original error message too
@@ -174,10 +172,8 @@ class VouchersController extends Controller
         // Send it.
         return redirect()
             ->route('admin.vouchers.index')
-            ->with('notification', $notification_msg)
-        ;
+            ->with('notification', $notification_msg);
     }
-
 
     /**
      * Store a new Voucher range.
@@ -185,7 +181,7 @@ class VouchersController extends Controller
      * @param AdminNewVoucherRequest $request
      * @return RedirectResponse
      */
-    public function storeBatch(AdminNewVoucherRequest $request)
+    public function storeBatch(AdminNewVoucherRequest $request): RedirectResponse
     {
         // Setup some variables
         $input = $request->all();
@@ -232,7 +228,7 @@ class VouchersController extends Controller
             foreach ($currentChunk as $c) {
                 $v = new Voucher();
                 $v->code = $sponsor->shortcode .
-                // String pad to *5* places, eg 00001 to 09999 to 10000 to 10001
+                    // String pad to *5* places, eg 00001 to 09999 to 10000 to 10001
                     str_pad(
                         $c,
                         5,
@@ -259,7 +255,6 @@ class VouchersController extends Controller
 
         return redirect()
             ->route('admin.vouchers.index')
-            ->with('notification', $notification_msg)
-            ;
+            ->with('notification', $notification_msg);
     }
 }
