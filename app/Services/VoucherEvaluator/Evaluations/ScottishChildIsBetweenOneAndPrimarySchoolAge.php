@@ -66,7 +66,7 @@ class ScottishChildIsBetweenOneAndPrimarySchoolAge extends BaseChildEvaluation
       if ($schoolStartMonth - $monthNow < 0) {
         $isAtSchool = false;
         // Are they still between 4 1 and 4 11 and not deferred OR are they over 5?
-        if (((($year === 4 && $month >=1) || $year < 5) && !$candidate->deferred) || $year >= 5) {
+        if (((($year === '4' && $month >=1) || $year < 5) && !$candidate->deferred) || $year >= 5) {
           $isAtSchool = true;
         }
       } else {
