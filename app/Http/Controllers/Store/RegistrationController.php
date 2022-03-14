@@ -196,10 +196,10 @@ class RegistrationController extends Controller
             abort(404, 'Registration not found.');
         }
         $evaluations = $registration->centre->sponsor->evaluations;
-        $is_scottish = false;
+        $deferrable = false;
         foreach ($evaluations as $key => $evaluation) {
           if ($evaluation['name'] == 'ScottishChildCanDefer') {
-            $is_scottish = true;
+            $deferrable = true;
           }
         }
         $can_change_defer = true;
@@ -230,7 +230,7 @@ class RegistrationController extends Controller
                 'entitlement' => $valuation->getEntitlement(),
                 'verifying' => $registration->getEvaluator()->isVerifyingChildren(),
                 'evaluations' => $evaluations,
-                'is_scottish' => $is_scottish,
+                '$deferrable' => $deferrable,
                 'can_change_defer' => $can_change_defer
             ]
         ));

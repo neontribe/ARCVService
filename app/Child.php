@@ -173,7 +173,7 @@ class Child extends Model implements IEvaluee
       $evaluator = EvaluatorFactory::make($rulesMods);
       $evaluation = $evaluator->evaluate($this);
       $notices = $evaluation["notices"];
-      if (count($notices)) {
+      if (count($notices) > 0 && array_key_exists('ScottishChildCanDefer', $notices)) {
         return true;
       }
       return false;

@@ -43,7 +43,7 @@ class ScottishChildIsAlmostPrimarySchoolAge extends BaseChildEvaluation
         $year = $arr[0];
         $month = $arr[1];
         $canStartSchool = false;
-        if (($year == 4 && $month >=1) || ($year == 5 && $month = 0)) {
+        if (($year === 4 && $month >=1) || ($year == 5 && $month = 0)) {
           $canStartSchool = true;
         }
 

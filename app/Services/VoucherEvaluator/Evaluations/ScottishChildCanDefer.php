@@ -42,7 +42,7 @@ class ScottishChildCanDefer extends BaseChildEvaluation
         }
         $month = $arr[1];
         $canDefer = false;
-        if ($year == 4 && ($month >= 1 && $month <= 6)) {
+        if ($year === 4 && ($month >= 1 && $month <= 6)) {
           $canDefer = true;
         }
 
