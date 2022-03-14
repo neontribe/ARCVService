@@ -54,9 +54,11 @@ class Child extends Model implements IEvaluee
      */
     public function getEvaluator()
     {
-      // $this->_evaluator = ($this->_evaluator) ?? EvaluatorFactory::make();
-      // return $this->_evaluator;
-        return $this->family->getEvaluator();
+        if ($this->has('family')) {
+            return $this->family->getEvaluator();
+        }
+        $this->_evaluator = ($this->_evaluator) ?? EvaluatorFactory::make();
+        return $this->_evaluator;
     }
 
     /*

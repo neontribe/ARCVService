@@ -58,7 +58,12 @@ class Family extends Model implements IEvaluee
      */
     public function getEvaluator()
     {
-        return $this->registrations()->first()->evaluator;
+        if ($this->has('registrations')) {
+            return $this->registrations()->first()->getEvaluator();
+        }
+
+        $this->_evaluator = ($this->_evaluator) ?? EvaluatorFactory::make();
+        return $this->_evaluator;
     }
 
     /**
