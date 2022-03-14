@@ -230,7 +230,7 @@ class RegistrationController extends Controller
                 'entitlement' => $valuation->getEntitlement(),
                 'verifying' => $registration->getEvaluator()->isVerifyingChildren(),
                 'evaluations' => $evaluations,
-                '$deferrable' => $deferrable,
+                'deferrable' => $deferrable,
                 'can_change_defer' => $can_change_defer
             ]
         ));
