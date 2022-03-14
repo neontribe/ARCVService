@@ -195,6 +195,18 @@ class RegistrationController extends Controller
         } else {
             abort(404, 'Registration not found.');
         }
+        $evaluations = $registration->centre->sponsor->evaluations;
+        $deferrable = false;
+        foreach ($evaluations as $key => $evaluation) {
+          if ($evaluation['name'] == 'ScottishChildCanDefer') {
+            $deferrable = true;
+          }
+        }
+        $can_change_defer = true;
+        $this_month = Carbon::now()->month;
+        if ($this_month > config('arc.scottish_school_month')) {
+          $can_change_defer = false;
+        }
 
         // Get the valuation
         /** @var Valuation $valuation */
@@ -218,6 +230,8 @@ class RegistrationController extends Controller
                 'entitlement' => $valuation->getEntitlement(),
                 'verifying' => $registration->getEvaluator()->isVerifyingChildren(),
                 'evaluations' => $evaluations,
+                'deferrable' => $deferrable,
+                'can_change_defer' => $can_change_defer
             ]
         ));
     }
@@ -379,7 +393,7 @@ class RegistrationController extends Controller
             'consented_on' => Carbon::now(),
             'eligibility_hsbs' => $request->get('eligibility-hsbs'),
             'eligibility_nrpf' => $request->get('eligibility-nrpf'),
-            'eligible_from' => $eligible_from
+            'eligible_from' => $eligible_from,
         ]);
 
         // Duplicate families are fine at this point.
@@ -430,6 +444,8 @@ class RegistrationController extends Controller
         $eligibility_hsbs = $request->get('eligibility-hsbs');
         $eligibility_nrpf = $request->get('eligibility-nrpf');
         $eligible_from = $registration->eligible_from;
+        $deferred = $request->get('deferred');
+
         //Prevent the date changing if you're just editing a different field
         if ($registration->eligible_from == null && $eligibility_hsbs === 'healthy-start-receiving') {
           $eligible_from = Carbon::now();
@@ -553,10 +569,17 @@ class RegistrationController extends Controller
                 $verified = boolval($child['verified']);
             }
 
+            // Check and set deferred, or null
+            $deferred = 0;
+            if (array_key_exists('deferred', $child)) {
+                $deferred = boolval($child['deferred']);
+            }
+
             return new Child([
                 'born' => $month_of_birth->isPast(),
                 'dob' => $month_of_birth->toDateTimeString(),
-                'verified' => $verified
+                'verified' => $verified,
+                'deferred' => $deferred
             ]);
         },
         $children);

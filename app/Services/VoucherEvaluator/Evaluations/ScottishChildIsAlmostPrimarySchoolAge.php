@@ -30,20 +30,20 @@ class ScottishChildIsAlmostPrimarySchoolAge extends BaseChildEvaluation
         $monthNow = Carbon::now()->month;
         $schoolStartMonth = config('arc.scottish_school_month');
         // Check we're in the start month or the one before.
-        if ($schoolStartMonth - $monthNow > 1) {
+        if (($schoolStartMonth - $monthNow > 1) || ($schoolStartMonth - $monthNow < 0)) {
           return $this->fail();
         }
 
         $format = '%y,%m';
         $age = $candidate->getAgeString($format);
         $arr = explode(",", $age, 2);
-        if ($arr[0] == 'P') {
+        if ($arr[0] === 'P') {
           return $this->fail();
         }
         $year = $arr[0];
         $month = $arr[1];
         $canStartSchool = false;
-        if (($year == 4 && $month >=1) || ($year == 5 && $month = 0)) {
+        if (($year === '4' && $month >= '1') || ($year === '5' && $month === '0')) {
           $canStartSchool = true;
         }
 

@@ -3,17 +3,18 @@
 namespace App\Services\VoucherEvaluator\Evaluations;
 
 use App\Specifications\IsBorn;
-use App\Specifications\IsAlmostStartDate;
+use App\Specifications\IsUnderStartDate;
 use Carbon\Carbon;
 use Chalcedonyt\Specification\AndSpec;
+use Chalcedonyt\Specification\NotSpec;
 
-class ScottishChildCanDefer extends BaseChildEvaluation
+class ScottishChildIsPrimarySchoolAge extends BaseChildEvaluation
 {
-    public $reason = 'is able to defer (SCOTLAND)';
+    public $reason = 'is primary school age (SCOTLAND)';
     private $specification;
 
     /**
-     * ScottishChildCanDefer constructor.
+     * ScottishChildIsPrimarySchoolAge constructor.
      * @param Carbon|null $offsetDate
      * @param int|null $value
      */
@@ -29,24 +30,33 @@ class ScottishChildCanDefer extends BaseChildEvaluation
         parent::test($candidate);
         $monthNow = Carbon::now()->month;
         $schoolStartMonth = config('arc.scottish_school_month');
-        // Check we're in the start month or the one before.
-        if (($schoolStartMonth - $monthNow > 1) || ($schoolStartMonth - $monthNow < 0)) {
-          return $this->fail();
-        }
         $format = '%y,%m';
         $age = $candidate->getAgeString($format);
         $arr = explode(",", $age, 2);
         $year = $arr[0];
-        if ($arr[0] == 'P') {
+        if ($year == 'P') {
           return $this->fail();
         }
         $month = $arr[1];
-        $canDefer = false;
-        if ($year === '4' && ($month >= 1 && $month <= 6)) {
-          $canDefer = true;
+
+        if ($year >= 5) {
+          return $this->success();
+        }
+        if ($year < 4) {
+          return $this->fail();
+        }
+        // Otherwise, check if the start month has gone.
+        if ($schoolStartMonth - $monthNow < 0) {
+          $isAtSchool = false;
+          // Are they still between 4 1 and 4 11 and not deferred OR are they over 5?
+          if (((($year === '4' && $month >=1) || $year < 5) && !$candidate->deferred) || $year >= 5) {
+            $isAtSchool = true;
+          }
+        } else {
+          return $this->fail();
         }
 
-        return ($this->specification->isSatisfiedBy($candidate) && $canDefer)
+        return ($this->specification->isSatisfiedBy($candidate) && $isAtSchool)
             ? $this->success()
             : $this->fail()
         ;

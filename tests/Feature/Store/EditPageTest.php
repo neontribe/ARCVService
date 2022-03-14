@@ -8,10 +8,17 @@ use App\Centre;
 use App\Child;
 use App\CentreUser;
 use App\Evaluation;
+use App\Family;
 use App\Registration;
+use App\Sponsor;
+use App\Http\Controllers\Service\Admin\SponsorsController;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsPrimarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\FamilyHasNoEligibleChildren;
+use App\Services\VoucherEvaluator\Evaluations\ScottishChildCanDefer;
+use App\Services\VoucherEvaluator\Evaluations\ScottishChildIsAlmostPrimarySchoolAge;
+use App\Services\VoucherEvaluator\Evaluations\ScottishChildIsPrimarySchoolAge;
 use Carbon\Carbon;
+use Config;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use URL;
 
@@ -28,6 +35,11 @@ class EditPageTest extends StoreTestCase
     private $centreUser;
     private $registration;
     private $faker;
+    private $scottishRulesSponsor;
+    private $scottishFamily;
+    private $scottishCentre;
+    private $scottishCentreUser;
+    private $scottishRegistration;
 
     public function setUp(): void
     {
@@ -47,6 +59,37 @@ class EditPageTest extends StoreTestCase
         $this->registration = factory(Registration::class)->create([
             "centre_id" => $this->centre->id,
         ]);
+
+        $scottishRules = SponsorsController::scottishFamilyOverrides();
+        $this->scottishRulesSponsor = factory(Sponsor::class)->create();
+        $this->scottishRulesSponsor->evaluations()->saveMany($scottishRules);
+        $this->scottishCentre = factory(Centre::class)->create([
+          'sponsor_id' => $this->scottishRulesSponsor
+        ]);
+
+        // Create a CentreUser
+        $this->scottishCentreUser =  factory(CentreUser::class)->create([
+            "name"  => "scottish test user",
+            "email" => "scottishtestuser@example.com",
+            "password" => bcrypt('scottish_test_user_pass'),
+        ]);
+        $this->scottishCentreUser->centres()->attach($this->scottishCentre->id, ['homeCentre' => true]);
+        $this->scottishFamily = factory(Family::class)->create();
+        // $this->underPrimarySchool = factory(Child::class, 'betweenOneAndPrimarySchoolAge')->make();
+        // $this->isPrimarySchool = factory(Child::class, 'isPrimarySchoolAge')->make();
+        // $this->isOverPrimarySchool = factory(Child::class, 'isSecondarySchoolAge')->make();
+        // $this->readyForScottishPrimarySchool = factory(Child::class, 'readyForScottishPrimarySchool')->make();
+        // $this->canDefer = factory(Child::class, 'canDefer')->make();
+        // $this->canNotDefer = factory(Child::class, 'canNotDefer')->make();
+
+        $this->scottishRegistration = factory(Registration::class)->create([
+            "centre_id" => $this->scottishCentre->id,
+            "family_id" => $this->scottishFamily->id,
+        ]);
+        // The registration factory gives the family kids, so get rid of them
+        // so we can be more specific.
+        $this->scottishFamily->children()->delete();
+
     }
 
     /** @test */
@@ -382,5 +425,107 @@ class EditPageTest extends StoreTestCase
         // See the reason
         $rule = new FamilyHasNoEligibleChildren();
         $this->see($rule->reason);
+    }
+
+    /** @test */
+    public function ICanSeeAScottishChildCanBeDeferred()
+    {
+      Config::set('arc.scottish_school_month', Carbon::now()->month + 1);
+      $canDefer = factory(Child::class, 'canDefer')->make();
+      $this->scottishFamily->children()->save($canDefer);
+      $inputID = "children[" . $canDefer->id . "][deferred]";
+      $selector = 'input[id=\'' . $inputID . '\']';
+      $this->actingAs($this->scottishCentreUser, 'store')
+        ->visit(URL::route('store.registration.edit', $this->scottishRegistration->id))
+        ->see('<td class="age-col">'. $canDefer->getAgeString() .'</td>')
+        ->see('<td class="dob-col">'. $canDefer->getDobAsString() .'</td>')
+        ->seeElement('input[type="hidden"][value="'. $canDefer->dob->format('Y-m') .'"]')
+        ->seeElement($selector)
+      ;
+      // It should tell us they can start school AND they can defer
+      $rule = new ScottishChildCanDefer();
+      $this->see($rule->reason);
+      $rule2 = new ScottishChildIsAlmostPrimarySchoolAge();
+      $this->see($rule2->reason);
+    }
+
+    /** @test */
+    public function ICanDeferAScottishChild()
+    {
+      Config::set('arc.scottish_school_month', Carbon::now()->month + 1);
+      $canDefer = factory(Child::class, 'canDefer')->make();
+      $this->scottishFamily->children()->save($canDefer);
+      $this->seeInDatabase('children', [
+          'id' => $canDefer->id,
+          'deferred' => 0
+      ]);
+
+      // This is what happens when you have square brackets in ids.
+      $inputID = "children[" . $canDefer->id . "][deferred]";
+      $selector = 'input[id=\'' . $inputID . '\']';
+
+      $this->actingAs($this->scottishCentreUser, 'store')
+        ->visit(URL::route('store.registration.edit', $this->scottishRegistration->id))
+        ->see('<td class="age-col">'. $canDefer->getAgeString() .'</td>')
+        ->see('<td class="dob-col">'. $canDefer->getDobAsString() .'</td>')
+        ->seeElement('input[type="hidden"][value="'. $canDefer->dob->format('Y-m') .'"]')
+        ->seeElement($selector)
+        ->check($inputID)
+        ->press('Save Changes')
+        ->seePageIs(URL::route('store.registration.edit', [ 'registration' => $this->scottishRegistration->id ]))
+      ;
+      // Saving changes deletes the children and re-adds them,
+      // so we can't use the same id. Since we only made one kid,
+      // we'll need to trust that this check is fine.
+      $this->seeInDatabase('children', [
+          'deferred' => 1
+      ]);
+    }
+
+    /** @test */
+    public function ItWontOfferDeferForAnIneligibleScottishChild()
+    {
+      Config::set('arc.scottish_school_month', Carbon::now()->month + 1);
+      $canNotDefer = factory(Child::class, 'canNotDefer')->make();
+      $this->scottishFamily->children()->save($canNotDefer);
+      $this->actingAs($this->scottishCentreUser, 'store')
+        ->visit(URL::route('store.registration.edit', $this->scottishRegistration->id))
+        ->see('<td class="age-col">'. $canNotDefer->getAgeString() .'</td>')
+        ->see('<td class="dob-col">'. $canNotDefer->getDobAsString() .'</td>')
+        ->seeElement('input[type="hidden"][value="'. $canNotDefer->dob->format('Y-m') .'"]')
+      ;
+      // It should tell us they can start school BUT they can't defer
+      $rule = new ScottishChildCanDefer();
+      $this->dontSee($rule->reason);
+      $rule2 = new ScottishChildIsAlmostPrimarySchoolAge();
+      $this->see($rule2->reason);
+    }
+
+    /** @test */
+    public function AfterSchoolStartsICantChangeADeferral()
+    {
+      Config::set('arc.scottish_school_month', Carbon::now()->month);
+      $schoolStartMonth = config('arc.scottish_school_month');
+      Carbon::setTestNow(Carbon::now()->month($schoolStartMonth + 1)->startOfDay());
+      $hasDeferred = factory(Child::class)->create([
+        'deferred' => 1,
+        'family_id' => $this->scottishFamily->id,
+        'dob' => '2017-10-01 00:00:00'
+      ]);
+      $this->scottishFamily->children()->save($hasDeferred);
+      $inputID = "children[" . $hasDeferred->id . "][deferred]";
+      $selector = 'input[id=\'' . $inputID . '\']';
+      $this->actingAs($this->scottishCentreUser, 'store')
+        ->visit(URL::route('store.registration.edit', $this->scottishRegistration->id))
+        ->see('<td class="age-col">'. $hasDeferred->getAgeString() .'</td>')
+        ->see('<td class="dob-col">'. $hasDeferred->getDobAsString() .'</td>')
+        ->seeElement('input[type="hidden"][value="'. $hasDeferred->dob->format('Y-m') .'"]')
+        ->dontSeeElement($selector)
+        ->see('<td>Y</td>')
+      ;
+      $rule = new ScottishChildCanDefer();
+      $this->dontSee($rule->reason);
+      $rule2 = new ScottishChildIsAlmostPrimarySchoolAge();
+      $this->dontSee($rule2->reason);
     }
 }

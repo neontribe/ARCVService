@@ -78,19 +78,23 @@ class SponsorsSeeder extends Seeder
             ]),
             // Scotland has 4 not 3
             new Evaluation([
-                "name" => "ChildIsBetweenOneAndPrimarySchoolAge",
+                "name" => "ScottishChildIsBetweenOneAndPrimarySchoolAge",
                 "value" => 4,
                 "purpose" => "credits",
                 "entity" => "App\Child",
             ]),
-            // Scotland has 4 not 3
             new Evaluation([
-                "name" => "ChildIsPrimarySchoolAge",
+                "name" => "ChildIsBetweenOneAndPrimarySchoolAge",
+                "value" => null,
+                "purpose" => "credits",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "ScottishChildIsPrimarySchoolAge",
                 "value" => "4",
                 "purpose" => "credits",
                 "entity" => "App\Child",
             ]),
-            // Turn off ChildIsPrimarySchoolAge rule
             new Evaluation([
                 "name" => "ChildIsPrimarySchoolAge",
                 "value" => null,
@@ -98,8 +102,14 @@ class SponsorsSeeder extends Seeder
                 "entity" => "App\Child",
             ]),
             new Evaluation([
-                    "name" => "FamilyHasNoEligibleChildren",
+                    "name" => "ScottishFamilyHasNoEligibleChildren",
                     "value" => 0,
+                    "purpose" => "disqualifiers",
+                    "entity" => "App\Family",
+            ]),
+            new Evaluation([
+                    "name" => "FamilyHasNoEligibleChildren",
+                    "value" => null,
                     "purpose" => "disqualifiers",
                     "entity" => "App\Family",
             ]),
@@ -122,6 +132,12 @@ class SponsorsSeeder extends Seeder
                     "name" => "ScottishChildCanDefer",
                     "value" => 0,
                     "purpose" => "notices",
+                    "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                    "name" => "ChildIsSecondarySchoolAge",
+                    "value" => 0,
+                    "purpose" => "disqualifiers",
                     "entity" => "App\Child",
             ]),
         ];

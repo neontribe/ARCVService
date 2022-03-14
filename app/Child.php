@@ -2,7 +2,9 @@
 
 namespace App;
 
+use App\Evaluation;
 use App\Services\VoucherEvaluator\AbstractEvaluator;
+use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\IEvaluee;
 use App\Traits\Evaluable;
 use Carbon\Carbon;
@@ -17,7 +19,7 @@ class Child extends Model implements IEvaluee
      * @var array
      */
     protected $fillable = [
-        'dob','born', 'verified'
+        'dob','born', 'verified', 'deferred'
     ];
 
     /**
@@ -39,13 +41,24 @@ class Child extends Model implements IEvaluee
     ];
 
     /**
+     * The attributes that should be appended.
+     *
+     * @var array
+     */
+    protected $appends = ['can_defer'];
+
+    /**
      * Get's the family's preferred evaluator
      *
      * @return AbstractEvaluator
      */
     public function getEvaluator()
     {
-        return $this->family->evaluator;
+        if ($this->has('family')) {
+            return $this->family->getEvaluator();
+        }
+        $this->_evaluator = ($this->_evaluator) ?? EvaluatorFactory::make();
+        return $this->_evaluator;
     }
 
     /*
@@ -55,6 +68,7 @@ class Child extends Model implements IEvaluee
      */
     protected $casts = [
         'verified' => 'boolean',
+        'deferred' => 'boolean',
     ];
 
     /**
@@ -136,5 +150,29 @@ class Child extends Model implements IEvaluee
     public function family()
     {
         return $this->belongsTo('App\Family');
+    }
+
+    /**
+     * Get info about whether child can defer
+     *
+     * @return boolean
+     */
+    public function getCanDeferAttribute()
+    {
+      $notices = $this->getEvaluator()->evaluations["App\Child"]["notices"] ?? [];
+      if (!array_key_exists('ScottishChildCanDefer', $notices)) {
+        return false;
+      }
+      $evaluation = $this->getEvaluator()->evaluate($this);
+      $notices = $evaluation['notices'];
+
+      if (count($notices) > 0) {
+        foreach ($notices as $key => $notice) {
+          if (array_key_exists('reason', $notice) && $notice['reason'] === 'Child|is able to defer (SCOTLAND)') {
+            return true;
+          }
+        }
+      }
+      return false;
     }
 }

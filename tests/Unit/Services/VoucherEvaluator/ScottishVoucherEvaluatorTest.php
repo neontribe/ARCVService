@@ -23,7 +23,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
         'ChildIsAlmostOne' => ['reason' => 'Child|is almost 1 year old'],
         'ScottishChildIsAlmostPrimarySchoolAge' => ['reason' => 'Child|is almost primary school age (SCOTLAND)'],
         'ChildIsAlmostSecondarySchoolAge' => ['reason' => 'Child|is almost secondary school age'],
-        'ChildIsPrimarySchoolAge' => ['reason' => 'Child|is primary school age'],
+        'ChildIsPrimarySchoolAge' => ['reason' => 'Child|is primary school age (SCOTLAND)'],
         'ChildIsSecondarySchoolAge' => ['reason' => 'Child|is secondary school age'],
         'FamilyHasUnverifiedChildren' => ['reason' => 'Family|has one or more children that you haven\'t checked ID for yet'],
         'ScottishChildCanDefer' => ['reason' => 'Child|is able to defer (SCOTLAND)'],
@@ -32,7 +32,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
     // This has a | in the reason field because we want to carry the entity with it.
     const CREDIT_TYPES = [
         'ChildIsUnderOne' => ['reason' => 'Child|is under 1 year old', 'value' => 6],
-        'ChildIsBetweenOneAndPrimarySchoolAge' => ['reason' => 'Child|is between 1 and start of primary school age', 'value' => 4],
+        'ScottishChildIsBetweenOneAndPrimarySchoolAge' => ['reason' => 'Child|is between 1 and start of primary school age (SCOTLAND)', 'value' => 4],
         'ChildIsPrimarySchoolAge' => ['reason' => 'Child|is primary school age', 'value' => 4],
         'FamilyIsPregnant' => ['reason' => 'Family|is pregnant', 'value' => 4],
     ];
@@ -64,13 +64,19 @@ class ScottishVoucherEvaluatorTest extends TestCase
                 "entity" => "App\Family",
             ]),
             new Evaluation([
-                "name" => "ChildIsBetweenOneAndPrimarySchoolAge",
+                "name" => "ScottishChildIsBetweenOneAndPrimarySchoolAge",
                 "value" => 4,
                 "purpose" => "credits",
                 "entity" => "App\Child",
             ]),
             new Evaluation([
-                "name" => "ChildIsPrimarySchoolAge",
+                "name" => "ChildIsBetweenOneAndPrimarySchoolAge",
+                "value" => null,
+                "purpose" => "credits",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "ScottishChildIsPrimarySchoolAge",
                 "value" => "4",
                 "purpose" => "credits",
                 "entity" => "App\Child",
@@ -82,8 +88,14 @@ class ScottishVoucherEvaluatorTest extends TestCase
                 "entity" => "App\Child",
             ]),
             new Evaluation([
-                    "name" => "FamilyHasNoEligibleChildren",
+                    "name" => "ScottishFamilyHasNoEligibleChildren",
                     "value" => 0,
+                    "purpose" => "disqualifiers",
+                    "entity" => "App\Family",
+            ]),
+            new Evaluation([
+                    "name" => "FamilyHasNoEligibleChildren",
+                    "value" => null,
                     "purpose" => "disqualifiers",
                     "entity" => "App\Family",
             ]),
@@ -109,6 +121,12 @@ class ScottishVoucherEvaluatorTest extends TestCase
                     "name" => "ScottishChildCanDefer",
                     "value" => 0,
                     "purpose" => "notices",
+                    "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                    "name" => "ChildIsSecondarySchoolAge",
+                    "value" => 0,
+                    "purpose" => "disqualifiers",
                     "entity" => "App\Child",
             ]),
         ];
@@ -207,7 +225,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
         // We have :
         // - one child between 1 and primary school age (4 vouchers)
         // - who enables one child at primary school age (4 vouchers)
-        // - but not one child who is overage (0 vouchers)
+        // - and one child who is overage (0 vouchers)
 
         $this->assertEquals('8', $evaluation->getEntitlement());
     }
@@ -225,7 +243,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
         $this->assertEquals(1, count($credits));
 
         // Check the correct credit type is applied.
-        $this->assertContains(self::CREDIT_TYPES['ChildIsBetweenOneAndPrimarySchoolAge'], $credits);
+        $this->assertContains(self::CREDIT_TYPES['ScottishChildIsBetweenOneAndPrimarySchoolAge'], $credits);
         $this->assertEquals(4, $evaluation->getEntitlement());
     }
 
