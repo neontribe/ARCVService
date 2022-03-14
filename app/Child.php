@@ -159,30 +159,19 @@ class Child extends Model implements IEvaluee
      */
     public function getCanDeferAttribute()
     {
-      // $notices = $this->family->registrations[0]->getEvaluator()->evaluations["App\Child"]["notices"];
       $notices = $this->getEvaluator()->evaluations["App\Child"]["notices"] ?? [];
-      // $notices = $this->getEvaluator()->getNoticeReasons();
-      \Log::info($notices);
-
       if (!array_key_exists('ScottishChildCanDefer', $notices)) {
         return false;
       }
-      // $rule = [
-      //   new Evaluation([
-      //         "name" => "ScottishChildCanDefer",
-      //         "value" => 0,
-      //         "purpose" => "notices",
-      //         "entity" => "App\Child",
-      //   ])
-      // ];
-      // $rulesMods = collect($rule);
-      // $evaluator = EvaluatorFactory::make($rulesMods);
       $evaluation = $this->getEvaluator()->evaluate($this);
-      $notices = $this->family->registrations[0]->getEvaluator()->getNoticeReasons();
-      // \Log::info($evaluation);
-      \Log::info($notices);
+      $notices = $evaluation['notices'];
+
       if (count($notices) > 0) {
-        return true;
+        foreach ($notices as $key => $notice) {
+          if (array_key_exists('reason', $notice) && $notice['reason'] === 'Child|is able to defer (SCOTLAND)') {
+            return true;
+          }
+        }
       }
       return false;
     }
