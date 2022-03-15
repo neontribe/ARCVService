@@ -98,7 +98,7 @@ class ApiTransitionVoucherRequestTest extends StoreTestCase
                     'vouchers' => ['code1', 'code2'],
                 ]
             ],
-            'requestShouldFailWhentransitionIsMissing' => [
+            'requestShouldFailWhenTransitionIsMissing' => [
                 'passed' => false,
                 'data' => [
                     'trader_id' => 1,
