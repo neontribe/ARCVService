@@ -2,6 +2,7 @@
 
 use App\Evaluation;
 use Illuminate\Database\Seeder;
+use PHPMD\RuleSet;
 
 class SponsorsSeeder extends Seeder
 {
@@ -22,7 +23,7 @@ class SponsorsSeeder extends Seeder
         // And 5 default factory models to be able to mirror live data
         factory(App\Sponsor::class, 5)->create();
 
-        // Gets the SK rules
+        // Gets the SK rules (OLD SK SPONSOR RULES)
         // used by 2MAY20-VC1-CH2-HI-122018
         $sponsor2 = App\Sponsor::find(2);
         $sponsor2->evaluations()->saveMany($this->qualifyPrimarySchoolers());
@@ -39,6 +40,14 @@ class SponsorsSeeder extends Seeder
         // used by 6MAY-20-VC1-CH2-032020
         $sponsor4 = App\Sponsor::find(4);
         $sponsor4->evaluations()->saveMany($this->veryfiesKids());
+
+
+        // NEW SK SPONSPOR RuleSet
+        $sponsor6 = App\Sponsor::find(6);
+        $sponsor6->name = "Southwark";
+        $sponsor6->save();
+        $sponsor6->evaluations()->saveMany($this->southwarkFamilyOverrides());
+        $sponsor6->evaluations()->saveMany($this->veryfiesKids());
 
         // 4MAY20-VC1-CH1P-HA-012020 is in sponsor 5, unmodified
         // 1MAY20a-VC2-CH1-HI-042019 is in sponsor 5, unmodified
@@ -140,6 +149,54 @@ class SponsorsSeeder extends Seeder
                     "purpose" => "disqualifiers",
                     "entity" => "App\Child",
             ]),
+        ];
+    }
+
+    public function southwarkFamilyOverrides()
+    {
+        return [
+            new Evaluation([
+                "name" => "FamilyIsPregnant",
+                "value" => 4,
+                "purpose" => "credits",
+                "entity" => "App\Family",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsAlmostSecondarySchoolAge",
+                "value" => 0,
+                "purpose" => "notices",
+                "entity" => "App\Family",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsPrimarySchoolAge",
+                "value" => "4",
+                "purpose" => "credits",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsPrimarySchoolAge",
+                "value" => null,
+                "purpose" => "disqualifiers",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsSecondarySchoolAge",
+                "value" => 0,
+                "purpose" => "disqualifiers",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "FamilyHasNoEligibleChildren",
+                "value" => 0,
+                "purpose" => "disqualifiers",
+                "entity" => "App\Family",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsBetweenOneAndPrimarySchoolAge",
+                "value" => 4,
+                "purpose" => "credits",
+                "entity" => "App\Child",
+            ])
         ];
     }
 
