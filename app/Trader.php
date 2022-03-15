@@ -30,14 +30,6 @@ class Trader extends Model
     ];
 
     /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
-    protected $hidden = [
-    ];
-
-    /**
      * The relations to eager load on every query.
      *
      * @var array
@@ -51,7 +43,7 @@ class Trader extends Model
      *
      * @return BelongsTo
      */
-    public function market()
+    public function market(): BelongsTo
     {
         return $this->belongsTo(Market::class);
     }
@@ -61,15 +53,16 @@ class Trader extends Model
      *
      * @return BelongsToMany
      */
-    public function users()
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
     }
 
     /**
      * Disable the Trader
+     * @return void
      */
-    public function disable()
+    public function disable(): void
     {
         $this->disabled_at = Carbon::now();
         $this->save();
@@ -77,19 +70,19 @@ class Trader extends Model
 
     /**
      * Disable the Trader
+     * @return void
      */
-    public function enable()
+    public function enable(): void
     {
         $this->disabled_at = null;
         $this->save();
     }
 
-
     /**
      * Vouchers that have been submitted for payment on behalf of this trader.
      * They will have currentstate: payment_pending or reimbursed.
      *
-     * @return Collection
+     * @return mixed
      */
     public function vouchersConfirmed()
     {
@@ -101,16 +94,16 @@ class Trader extends Model
      *
      * @return HasMany
      */
-    public function vouchers()
+    public function vouchers(): HasMany
     {
         return $this->hasMany(Voucher::class);
     }
 
     /**
      * Vouchers submitted by this trader that have a given status.
-     * @param null $status
+     * @param $status
      * @param array $columns
-     * @return Collection
+     * @return array|Collection
      */
     public function vouchersWithStatus($status = null, array $columns = ['*'])
     {

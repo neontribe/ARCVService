@@ -14,16 +14,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use PDO;
 
 class TraderController extends Controller
 {
     /**
-     * A list of traders belonging to auth's user.
+     * A list of traders belonging to authenticated user.
      *
      * @return JsonResponse
      */
-    public function index()
+    public function index(): JsonResponse
     {
         // we won't be here if not because of the api middleware but...
         if (!Auth::user()) {
@@ -39,7 +38,6 @@ class TraderController extends Controller
 
         // append the featureOverride attribute
         foreach ($enabledTraders as $trader) {
-            // TODO: this could be a computed attribute on the Trader
             $sponsor = $trader->market->sponsor;
             if ($sponsor->can_tap === false) {
                 $trader->featureOverride = (object)[
@@ -50,7 +48,7 @@ class TraderController extends Controller
             }
         }
 
-        return response()->json($enabledTraders, 200);
+        return response()->json($enabledTraders);
     }
 
     /**
@@ -59,9 +57,9 @@ class TraderController extends Controller
      * @param Trader $trader
      * @return JsonResponse
      */
-    public function show(Trader $trader)
+    public function show(Trader $trader): JsonResponse
     {
-        return response()->json($trader, 200);
+        return response()->json($trader);
     }
 
     /**
@@ -71,11 +69,11 @@ class TraderController extends Controller
      * @param Trader $trader
      * @return JsonResponse
      */
-    public function showVouchers(Trader $trader)
+    public function showVouchers(Trader $trader): JsonResponse
     {
         // GET api/traders/{trader}/vouchers?status=unpaid
         // Find all vouchers that belong to {trader}
-        // that have not had a GIVEN status as a voucher_state IN THIER LIVES.
+        // that have not had a GIVEN status as a voucher_state IN THEIR LIVES.
 
         // Could be extended to incorporate ?currentstate=
         // Find all the vouchers that belong to {trader}
@@ -86,7 +84,7 @@ class TraderController extends Controller
             'code',
             \DB::raw('DATE_FORMAT(updated_at,"%d-%m-%Y") as updated_at')
         ]);
-        return response()->json($vouchers, 200);
+        return response()->json($vouchers);
     }
 
 
@@ -96,10 +94,10 @@ class TraderController extends Controller
      * @param Trader $trader
      * @return JsonResponse
      */
-    public function showVoucherHistory(Trader $trader)
+    public function showVoucherHistory(Trader $trader): JsonResponse
     {
         // get days we pended on as a LengthAwarePaginator data array.
-        $pgSubDates = DB::table(function ($query) use ($trader) {
+        $pgSubDates = DB::table(static function ($query) use ($trader) {
                 $query->selectRaw("SUBSTR(`voucher_states`.`created_at`, 1, 10) as pendedOn")
                     ->from('vouchers')
                     ->leftJoin('voucher_states', 'vouchers.id', 'voucher_states.voucher_id')
@@ -145,17 +143,17 @@ class TraderController extends Controller
      * @param Trader $trader
      * @return JsonResponse
      */
-    public function emailVoucherHistory(Request $request, Trader $trader)
+    public function emailVoucherHistory(Request $request, Trader $trader): JsonResponse
     {
         $vouchers = $trader->vouchersConfirmed;
         $title = 'A report containing voucher history.';
         // Request date string as dd-mm-yyyy
-        $date = $request->submission_date ? $request->submission_date : null;
+        $date = $request->submission_date ?: null;
         $file = $this->createVoucherListFile($trader, $vouchers, $title, $date);
 
         // If all vouchers are requested attempt to get the minimum and maximum dates for the report.
         if (is_null($date)) {
-            list($min_date, $max_date) = Voucher::getMinMaxVoucherDates($vouchers);
+            [$min_date, $max_date] = Voucher::getMinMaxVoucherDates($vouchers);
             event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file, $min_date, $max_date));
         } else {
             event(new VoucherHistoryEmailRequested(Auth::user(), $trader, $file, $date));
