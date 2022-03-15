@@ -5,8 +5,6 @@ namespace Tests\Unit\FormRequests;
 
 use App\Http\Requests\ApiTransitionVoucherRequest;
 use App\Trader;
-use App\User;
-use App\Voucher;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Validation\Validator;
 use Tests\StoreTestCase;
@@ -31,11 +29,11 @@ class ApiTransitionVoucherRequestTest extends StoreTestCase
 
     /**
      * General validator
-     * @param $mockedRequestData
-     * @param $rules
-     * @return mixed
+     * @param array $mockedRequestData
+     * @param array $rules
+     * @return bool
      */
-    protected function validate($mockedRequestData, $rules)
+    protected function validate(array $mockedRequestData, array $rules)
     {
         return $this->validator->make($mockedRequestData, $rules)->passes();
     }
@@ -45,8 +43,9 @@ class ApiTransitionVoucherRequestTest extends StoreTestCase
      * @dataProvider storeValidationProvider
      * @param bool $shouldPass
      * @param array $mockedRequestData
+     * @return void
      */
-    public function testICannotSubmitInvalidValues($shouldPass, $mockedRequestData)
+    public function testICannotSubmitInvalidValues(bool $shouldPass, array $mockedRequestData): void
     {
         // Copy the rules out of the FormRequest.
         $rules = (new ApiTransitionVoucherRequest())->rules();
@@ -61,7 +60,7 @@ class ApiTransitionVoucherRequestTest extends StoreTestCase
      * must return hardcoded values
      * @return array
      */
-    public function storeValidationProvider()
+    public function storeValidationProvider(): array
     {
         return [
             'requestShouldSucceedWhenRequiredDataIsProvided' => [

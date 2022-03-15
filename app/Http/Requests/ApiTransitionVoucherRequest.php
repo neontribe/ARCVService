@@ -13,7 +13,7 @@ class ApiTransitionVoucherRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -23,7 +23,7 @@ class ApiTransitionVoucherRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         /* expecting a body of type application/json; a collect transition looks like
         {
@@ -49,7 +49,7 @@ class ApiTransitionVoucherRequest extends FormRequest
      * custom messages for response
      * @return string[]
      */
-    public function messages()
+    public function messages(): array
     {
         return [
             'trader_id.required' => 'No trader id',
@@ -61,11 +61,11 @@ class ApiTransitionVoucherRequest extends FormRequest
     }
 
     /**
-     * respond with a 400
+     * On failed validation, respond with a 400
      * @param Validator $validator
      * @return void
      */
-    protected function failedValidation(Validator $validator)
+    protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(response($validator->errors()->first(), 400));
     }
@@ -74,8 +74,8 @@ class ApiTransitionVoucherRequest extends FormRequest
      * The data to be validated should be processed as JSON.
      * @return array
      */
-    public function validationData()
+    public function validationData(): array
     {
-        return $this->json()->all();
+        return json_decode($this->getContent(), true) ?? [];
     }
 }
