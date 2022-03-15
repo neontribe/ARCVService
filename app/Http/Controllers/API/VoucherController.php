@@ -54,13 +54,14 @@ class VoucherController extends Controller
 
         $transition = $request->input('transition');
 
+        // If 'confirm', we'll need a StateToken for Later
+        $stateToken = ($transition === 'confirm')
+            ? factory(StateToken::class)->create()
+            : null
+        ;
+
         // Fetch the date we start to care about deliveries
         $collect_delivery_date = Carbon::parse(config('arc.first_delivery_date'));
-
-        if ($transition === 'confirm') {
-            // We'll need a StateToken for Later
-            $stateToken = factory(StateToken::class)->create();
-        }
 
         /** @var Voucher $voucher */
         foreach ($vouchers as $voucher) {
@@ -87,43 +88,46 @@ class VoucherController extends Controller
             }
 
             // Can we do a transition already?
-            if ($voucher->transitionAllowed($transition)) {
-                // Was the _original_ transition "reject" (now reject-to-...)
-                if ($request->input('transition') === 'reject') {
-                    $voucher->trader_id = null;
-                    $responses['success_reject'][] = $voucher->code;
+            if (!$voucher->transitionAllowed($transition)) {
+                // No; drop vouchers into a relevant bin
+                if ($voucher->trader_id === $trader->id) {
+                    // Trader has already submitted this voucher
+                    $responses['own_duplicate'][] = $voucher->code;
                 } else {
-                    $voucher->trader_id = $trader->id;
-                    $responses['success_add'][] = $voucher->code;
+                    // Another trader has mistakenly submitted this voucher,
+                    // Or the transition isn't valid (i.e expired state)
+                    $responses['other_duplicate'][] = $voucher->code;
                 }
+                continue;
+            }
 
-                // This saves the model too.
-                $voucher->applyTransition($transition);
-
-                // If this is a 'confirm' transition - add to a list
-                // for sending to ARC admin. This is a request for payment.
-                if ($transition === 'confirm') {
-                    $vouchers_for_payment[] = $voucher;
-
-                    // Fetch the last transition and add the state
-                    $voucher->getPriorState()
-                        ->stateToken()
-                        ->associate($stateToken)
-                        ->save();
-                }
-            } elseif ($voucher->trader_id === $trader->id) {
-                // Trader has already submitted this voucher
-                $responses['own_duplicate'][] = $voucher->code;
+            // Was the _original_ transition "reject" (now reject-to-...)
+            if ($request->input('transition') === 'reject') {
+                $voucher->trader_id = null;
+                $responses['success_reject'][] = $voucher->code;
             } else {
-                // Another trader has mistakenly submitted this voucher,
-                // Or the transition isn't valid (i.e expired state)
-                $responses['other_duplicate'][] = $voucher->code;
+                $voucher->trader_id = $trader->id;
+                $responses['success_add'][] = $voucher->code;
+            }
+
+            // Transitioning also saves model changes above
+            $voucher->applyTransition($transition);
+
+            // If this is a 'confirm' transition - add to a list
+            // for sending to ARC admin. This is a request for payment.
+            if ($transition === 'confirm') {
+                $vouchers_for_payment[] = $voucher;
+
+                // Fetch the last transition and add the state
+                $voucher->getPriorState()
+                    ->stateToken()
+                    ->associate($stateToken)
+                    ->save();
             }
         }
 
         // If there are any confirmed ones... trigger the email.
         if (!empty($vouchers_for_payment)) {
-            // This email *could* fail; However, ARC admin will eventually be able to see a list of voucher states.
             $this->emailVoucherPaymentRequest($trader, $stateToken, $vouchers_for_payment);
         }
 
