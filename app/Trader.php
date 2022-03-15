@@ -3,7 +3,7 @@
 namespace App;
 
 use Carbon\Carbon;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -26,7 +26,7 @@ class Trader extends Model
         'name',
         'pic_url',
         'market_id',
-        'disabled_at'
+        'disabled_at',
     ];
 
     /**
@@ -123,29 +123,34 @@ class Trader extends Model
 
             // get the cutoff for 6 calendar months of data.
             $cutOff = Carbon::today()->subMonths(6)->startOfMonth()->format('Y-m-d H:i:s');
-            $query =  "select " . implode(',', $columns) . " from (
-                select vouchers.id,
-                        vouchers.code,
-                        vouchers.updated_at,
-                        vouchers.currentstate,
-                        (
-                        select `to`
-                            from voucher_states
-                            where voucher_states.voucher_id = vouchers.id
-                            and voucher_states.created_at >= '$cutOff'
-                            order by updated_at desc
-                            limit 1
-                        ) as state
-                            from vouchers
-                            where trader_id = '$this->id'
-                    ) as v
-                where v.state = '$stateCondition'
-                order by id desc, updated_at desc;"
-            ;
+            $trader_id = $this->id;
 
-            $q = DB::select(DB::raw($query));
+            $q = DB::table(
+                static function ($query) use ($cutOff, $trader_id) {
+                    $query->select([
+                        'vouchers.id',
+                        'vouchers.code',
+                        'vouchers.updated_at',
+                        'vouchers.currentstate',
+                    ])->addSelect([
+                        'state' => VoucherState::select('to')
+                            ->whereColumn('voucher_states.voucher_id', 'vouchers.id')
+                            ->where('voucher_states.created_at', '>=', $cutOff)
+                            ->orderByDesc('voucher_states.updated_at')
+                            ->limit(1),
+                    ])->from('vouchers')
+                        ->where('vouchers.trader_id', $trader_id);
+                },
+                'innerQuery'
+            )->select($columns)
+                ->where('innerQuery.state', $stateCondition)
+                ->orderByDesc('id')
+                ->orderByDesc('updated_at')
+                ->get();
         } else {
-            $q = DB::table('vouchers')->select($columns)
+            // get all the vouchers
+            $q = DB::table('vouchers')
+                ->select($columns)
                 ->where('trader_id', $this->id)
                 ->orderBy('updated_at', 'desc')
                 ->get();
