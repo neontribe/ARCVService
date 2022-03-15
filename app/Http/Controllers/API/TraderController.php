@@ -82,18 +82,11 @@ class TraderController extends Controller
         // that have current voucher_state of given currentstate.
 
         $status = request()->input('status');
-        $vouchers = $trader->vouchersWithStatus($status);
-
-        // Get date into display format.
-        $formatted_vouchers = [];
-        foreach ($vouchers as $v) {
-            $formatted_vouchers[] = [
-                // In fixtures.
-                'code' => $v->code,
-                'updated_at' => Carbon::createFromFormat('Y-m-d H:i:s', $v->updated_at)->format('d-m-Y'),
-            ];
-        }
-        return response()->json($formatted_vouchers, 200);
+        $vouchers = $trader->vouchersWithStatus($status, [
+            'code',
+            \DB::raw('DATE_FORMAT(updated_at,"%d-%m-%Y") as updated_at')
+        ]);
+        return response()->json($vouchers, 200);
     }
 
 
