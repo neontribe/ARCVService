@@ -75,14 +75,18 @@ class TraderController extends Controller
         // Find all vouchers that belong to {trader}
         // that have not had a GIVEN status as a voucher_state IN THEIR LIVES.
 
-        // Could be extended to incorporate ?currentstate=
-        // Find all the vouchers that belong to {trader}
-        // that have current voucher_state of given currentstate.
+        // horrid mangler to make sqlite tests work because it functions differ
+        // worth the performance increase though
+        $connection = config('database.default');
+        $dateMangler = config("database.connections.{$connection}.driver") === "sqlite"
+            ? "STRFTIME('%d-%m-%Y', updated_at) as updated_at"
+            : 'DATE_FORMAT(updated_at,"%d-%m-%Y") as updated_at'
+        ;
 
         $status = request()->input('status');
         $vouchers = $trader->vouchersWithStatus($status, [
             'code',
-            \DB::raw('DATE_FORMAT(updated_at,"%d-%m-%Y") as updated_at')
+            \DB::raw($dateMangler)
         ]);
         return response()->json($vouchers);
     }

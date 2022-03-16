@@ -155,9 +155,7 @@ class ApiRoutesTest extends TestCase
         $this->actingAs($this->user, 'api')
             ->json('GET', route('api.trader.vouchers', 1))
             ->assertHeader('Content-Type', 'application/json')
-            ->assertJsonStructure([0 => [
-                'code', 'updated_at'
-            ]])
+            ->assertJsonStructure([0 => ['code', 'updated_at']])
         ;
     }
 

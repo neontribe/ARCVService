@@ -123,7 +123,7 @@ class TraderModelTest extends TestCase
         $vouchers[2]->applyTransition('confirm');
 
         // 6 vouchers. 1x reimbursed ($vouchers[0]), 2x payment_pending, 3x recorded.
-        $unpaid_codes = [
+        $reference_codes = [
             $vouchers[1]->code => $vouchers[1]->currentstate,
             $vouchers[2]->code => $vouchers[2]->currentstate,
             $vouchers[3]->code => $vouchers[3]->currentstate,
@@ -131,10 +131,24 @@ class TraderModelTest extends TestCase
             $vouchers[5]->code => $vouchers[5]->currentstate,
         ];
 
-        // Vouchers the trader has submitted for payment but have not been reimbursed.
+        // 2 Vouchers in payment_pending state
         $vc = $this->trader->vouchersWithStatus('unpaid');
-        $this->assertCount(5, $vc);
-        $vc_code_states = $vc->pluck('currentstate', 'code')->toArray();
-        $this->assertEquals($unpaid_codes, $vc_code_states);
+        $this->assertCount(2, $vc);
+
+        // and they're the expected ones.
+        $code_states = $vc->pluck('currentstate', 'code')->toArray();
+        foreach ($code_states as $code => $state) {
+            $this->assertEquals($reference_codes[$code], $state);
+        }
+
+        // 3 Vouchers in recorded
+        $vc = $this->trader->vouchersWithStatus('unconfirmed');
+        $this->assertCount(3, $vc);
+
+        // and they're the expected ones.
+        $code_states = $vc->pluck('currentstate', 'code')->toArray();
+        foreach ($code_states as $code => $state) {
+            $this->assertEquals($reference_codes[$code], $state);
+        }
     }
 }
