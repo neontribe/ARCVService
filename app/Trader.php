@@ -149,17 +149,13 @@ class Trader extends Model
             )->select($columns)
                 // only pick those where the last state was $stateCondition.
                 ->where('innerQuery.state', $stateCondition)
-                ->orderByDesc('id')
-                ->orderByDesc('updated_at')
-                ->get();
+                ;
         } else {
             // get all the vouchers
             $q = DB::table('vouchers')
                 ->select($columns)
-                ->where('trader_id', $this->id)
-                ->orderBy('updated_at', 'desc')
-                ->get();
+                ->where('trader_id', $this->id);
         }
-        return $q;
+        return $q->orderByDesc('updated_at')->orderByDesc('id')->get();
     }
 }
