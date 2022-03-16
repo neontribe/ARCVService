@@ -156,6 +156,6 @@ class Trader extends Model
                 ->select($columns)
                 ->where('trader_id', $this->id);
         }
-        return $q->orderByDesc('updated_at')->orderByDesc('id')->get();
+        return $q->orderByDesc('updated_at')->get();
     }
 }
