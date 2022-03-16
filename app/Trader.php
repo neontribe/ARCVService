@@ -127,22 +127,27 @@ class Trader extends Model
 
             $q = DB::table(
                 static function ($query) use ($cutOff, $trader_id) {
+                    // get the voucher's details
                     $query->select([
                         'vouchers.id',
                         'vouchers.code',
                         'vouchers.updated_at',
                         'vouchers.currentstate',
                     ])->addSelect([
+                        // including the last state activity newer than $cutoff
+                        // because we don't want to fetch vouchers with last activity older than 6 months
                         'state' => VoucherState::select('to')
                             ->whereColumn('voucher_states.voucher_id', 'vouchers.id')
                             ->where('voucher_states.created_at', '>=', $cutOff)
                             ->orderByDesc('voucher_states.updated_at')
+                            ->orderByDesc('id')
                             ->limit(1),
                     ])->from('vouchers')
                         ->where('vouchers.trader_id', $trader_id);
                 },
                 'innerQuery'
             )->select($columns)
+                // only pick those where the last state was $stateCondition.
                 ->where('innerQuery.state', $stateCondition)
                 ->orderByDesc('id')
                 ->orderByDesc('updated_at')
