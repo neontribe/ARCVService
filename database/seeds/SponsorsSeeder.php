@@ -2,7 +2,6 @@
 
 use App\Evaluation;
 use Illuminate\Database\Seeder;
-use PHPMD\RuleSet;
 
 class SponsorsSeeder extends Seeder
 {
@@ -165,7 +164,7 @@ class SponsorsSeeder extends Seeder
                 "name" => "ChildIsAlmostSecondarySchoolAge",
                 "value" => 0,
                 "purpose" => "notices",
-                "entity" => "App\Family",
+                "entity" => "App\Child",
             ]),
             new Evaluation([
                 "name" => "ChildIsPrimarySchoolAge",
