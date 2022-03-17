@@ -92,7 +92,7 @@
                 <div>
                     <label for="eligibility-hsbs">
                         Are you receiving Healthy Start or Best Start?
-                    </label>
+                    </label><br>
                     <select name="eligibility-hsbs" id="eligibility-hsbs">
                         <option value=0>Please select</option>
                         @foreach (config('arc.reg_eligibilities_hsbs') as $index => $reg_eligibility)
@@ -110,7 +110,7 @@
                 <div>
                     <label for="eligibility-nrpf">
                         No recourse to public funds family?
-                    </label>
+                    </label><br>
                     <select name="eligibility-nrpf" id="eligibility-nrpf">
                         <option value=0>Please select</option>
                         @foreach (config('arc.reg_eligibilities_nrpf') as $index => $reg_eligibility)

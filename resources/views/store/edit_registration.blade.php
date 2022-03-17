@@ -165,7 +165,7 @@
                 <div>
                     <label for="eligibility-hsbs">
                         Are you receiving Healthy Start or Best Start?
-                    </label>
+                    </label><br>
                     <select name="eligibility-hsbs" id="eligibility-hsbs">
                         @foreach (config('arc.reg_eligibilities_hsbs') as $reg_eligibility)
                             <option value="{{ $reg_eligibility }}"
@@ -178,7 +178,7 @@
                 <div>
                     <label for="eligibility-nrpf">
                         No recourse to public funds family?
-                    </label>
+                    </label><br>
                     <select name="eligibility-nrpf" id="eligibility-nrpf">
                         @foreach (config('arc.reg_eligibilities_nrpf') as $reg_eligibility)
                             <option value="{{ $reg_eligibility }}"
@@ -200,7 +200,7 @@
                         <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
                     </div>
                 </a>
-                
+
                 @if (!isset($registration->family->leaving_on) )
                 <button class="remove long-button" type="button">Remove this family</button>
                 <div id="expandable" class="collapsed confirm-leaving">
@@ -222,7 +222,7 @@
                     </div>
                 </div>
                 @endif
-                        
+
               </div>
         </form>
     </div>
