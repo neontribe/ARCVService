@@ -109,7 +109,7 @@
                 </div>
                 <div>
                     <label for="eligibility-nrpf">
-                        No recourse to public funds family?
+                        No recourse to public funds (NPFR) family?
                     </label><br>
                     <select name="eligibility-nrpf" id="eligibility-nrpf">
                         <option value=0>Please select</option>
