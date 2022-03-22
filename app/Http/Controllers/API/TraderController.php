@@ -107,6 +107,8 @@ class TraderController extends Controller
                     ->leftJoin('voucher_states', 'vouchers.id', 'voucher_states.voucher_id')
                     ->where('voucher_states.to', 'payment_pending')
                     ->where('vouchers.trader_id', $trader->id)
+                    // cut down the recorded
+                    ->where('voucher.currentstate', '!=', 'recorded')
                     ->groupBy('pendedOn')
                     ->orderByDesc('pendedOn');
         }, 'daysFromQuery')
