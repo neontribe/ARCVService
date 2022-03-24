@@ -104,14 +104,16 @@ class TraderController extends Controller
         $pgSubDates = DB::table(static function ($query) use ($trader) {
                 $query->selectRaw("SUBSTR(`voucher_states`.`created_at`, 1, 10) as pendedOn")
                     ->from('vouchers')
-                    ->leftJoin('voucher_states', 'vouchers.id', 'voucher_states.voucher_id')
+                    // use inner join
+                    ->join('voucher_states', 'vouchers.id', 'voucher_states.voucher_id')
                     ->where('voucher_states.to', 'payment_pending')
                     ->where('vouchers.trader_id', $trader->id)
                     // cut down the recorded
-                    ->where('vouchers.currentstate', '!=', 'recorded')
+                    ->whereNotIn('vouchers.currentstate', '!=', 'recorded')
                     ->groupBy('pendedOn')
                     ->orderByDesc('pendedOn');
         }, 'daysFromQuery')
+            ->select('pendedOn')
             ->paginate()
             ->toArray();
 
@@ -259,7 +261,8 @@ class TraderController extends Controller
                     ->orderByDesc('id')
                     ->limit(1),
             ])
-            ->leftJoin('voucher_states', 'vouchers.id', 'voucher_states.voucher_id')
+             // use inner join
+            ->join('voucher_states', 'vouchers.id', 'voucher_states.voucher_id')
             ->where('voucher_states.to', 'payment_pending')
             ->where('vouchers.trader_id', $trader->id)
             ->whereBetween('voucher_states.created_at', [$fromDate, $toDate])
