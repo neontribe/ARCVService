@@ -74,19 +74,12 @@ class TraderController extends Controller
         // GET api/traders/{trader}/vouchers?status=unpaid
         // Find all vouchers that belong to {trader}
         // that have not had a GIVEN status as a voucher_state IN THEIR LIVES.
-
-        // horrid mangler to make sqlite tests work because it functions differ
-        // worth the performance increase though
-        $connection = config('database.default');
-        $dateMangler = config("database.connections.{$connection}.driver") === "sqlite"
-            ? "STRFTIME('%d-%m-%Y', updated_at) as updated_at"
-            : 'DATE_FORMAT(updated_at,"%d-%m-%Y") as updated_at'
-        ;
+        $updated_at_sql = self::dateMangler('updated_at', '%d-%m-%Y', 'updated_at');
 
         $status = request()->input('status');
         $vouchers = $trader->vouchersWithStatus($status, [
             'code',
-            \DB::raw($dateMangler)
+            \DB::raw($updated_at_sql)
         ]);
         return response()->json($vouchers);
     }
@@ -109,7 +102,7 @@ class TraderController extends Controller
                     ->where('voucher_states.to', 'payment_pending')
                     ->where('vouchers.trader_id', $trader->id)
                     // cut down the recorded
-                    ->whereNotIn('vouchers.currentstate', '!=', 'recorded')
+                    ->where('vouchers.currentstate', '!=', 'recorded')
                     ->groupBy('pendedOn')
                     ->orderByDesc('pendedOn');
         }, 'daysFromQuery')
@@ -130,6 +123,7 @@ class TraderController extends Controller
 
             // process the data into an array
             $data = self::historyGroupByDate($histories);
+            $json = json_encode($data);
         }
 
         $links = implode(', ', [
@@ -247,15 +241,19 @@ class TraderController extends Controller
      */
     public static function paymentHistoryBetweenDateTimes(Trader $trader, string $fromDate, string $toDate) : Collection
     {
+        $created_at_sql = self::dateMangler('created_at', '%d-%m-%Y', 'created_at');
+        $pended_on = self::dateMangler('voucher_states.created_at', '%d-%m-%Y', 'pended_on');
+        $pended_on_ymd = self::dateMangler('voucher_states.created_at', '%Y-%m-%d', 'pended_on_ymd');
+
          return DB::table('vouchers')
-            ->select(['vouchers.code', 'voucher_states.created_at as payment_pending'])
+            ->select(DB::raw("code, $pended_on_ymd, $pended_on"))
             ->addSelect([
-                'recorded' => VoucherState::select('created_at')
+                'recorded_on' => VoucherState::select(DB::raw($created_at_sql))
                     ->whereColumn('voucher_id', 'vouchers.id')
                     ->where('to', 'recorded')
                     ->orderByDesc('id')
                     ->limit(1),
-                'reimbursed' => VoucherState::select('created_at')
+                'reimbursed_on' => VoucherState::select(DB::raw($created_at_sql))
                     ->whereColumn('voucher_id', 'vouchers.id')
                     ->where('to', 'reimbursed')
                     ->orderByDesc('id')
@@ -266,7 +264,7 @@ class TraderController extends Controller
             ->where('voucher_states.to', 'payment_pending')
             ->where('vouchers.trader_id', $trader->id)
             ->whereBetween('voucher_states.created_at', [$fromDate, $toDate])
-            ->orderByDesc('recorded')
+            ->orderByDesc('pended_on_ymd')
             ->get();
     }
 
@@ -279,30 +277,44 @@ class TraderController extends Controller
     {
         $data = [];
         foreach ($histories as $history) {
-            // create a record for this voucher
-            $voucher = [
-                    'code' => $history->code,
-                    'recorded_on' => $history->recorded
-                        ? Carbon::createFromFormat('Y-m-d H:i:s', $history->recorded)->format('d-m-Y')
-                        : '',
-                    'reimbursed_on' => $history->reimbursed
-                        ? Carbon::createFromFormat('Y-m-d H:i:s', $history->reimbursed)->format('d-m-Y')
-                        : '',
-                ];
-
             // work out the d-m-Y it belongs to.
-            $pended_on = Carbon::createFromFormat('Y-m-d H:i:s', $history->payment_pending)->format('d-m-Y');
+            $pended_on_ymd = $history->pended_on_ymd;
+            $pended_on = $history->pended_on;
 
             // if there's not a d-m-Y record to hold it, make one
-            if (!isset($data[$pended_on])) {
-                $data[$pended_on] = [
+            if (!isset($data[$pended_on_ymd])) {
+                $data[$pended_on_ymd] = [
                     'pended_on' => $pended_on,
                     'vouchers' => []
                 ];
             }
             // append the new record voucher to the d-m-Y place vouchers on the tree.
-            $data[$pended_on]['vouchers'][] = $voucher;
+            $data[$pended_on_ymd]['vouchers'][] = [
+                'code' => $history->code,
+                'recorded_on' => $history->recorded_on,
+                'reimbursed_on' => $history->reimbursed_on,
+            ];
         }
         return $data;
+    }
+
+    /**
+     * Horrid mangler to make sqlite tests work because it functions differ.
+     * worth the performance increase though
+     * @param string $field
+     * @param string $format
+     * @return string
+     */
+    public static function dateMangler(string $field, string $format, string $alias = null): string
+    {
+        $connection = config('database.default');
+        $format =  config("database.connections.{$connection}.driver") === "sqlite"
+            ? "STRFTIME('$format', $field)"
+            : "DATE_FORMAT($field, \"$format\")"
+        ;
+        return (isset($alias))
+            ? "$format as $alias"
+            : $format
+        ;
     }
 }
