@@ -190,11 +190,10 @@
                 </div>
                 @includeWhen(!empty($noticeReasons), 'store.partials.notice_box', ['noticeReasons' => $noticeReasons])
                 <button class="long-button submit" type="submit" formnovalidate>Save Changes</button>
-                <!-- Button commented out in case it needs to be reinstated -->
-                <!-- <button class="long-button"
+                <button class="long-button"
                         onclick="window.open( '{{ URL::route("store.registration.print", ["registration" => $registration]) }}'); return false">
                     Print a 4 week collection sheet for this family
-                </button> -->
+                </button>
                 <a href="{{ route("store.registration.voucher-manager", ['registration' => $registration ]) }}" class="link">
                     <div class="link-button link-button-large">
                         <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
