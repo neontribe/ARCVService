@@ -109,7 +109,7 @@ class TraderController extends Controller
                     ->where('voucher_states.to', 'payment_pending')
                     ->where('vouchers.trader_id', $trader->id)
                     // cut down the recorded
-                    ->whereNotIn('vouchers.currentstate', '!=', 'recorded')
+                    ->where('vouchers.currentstate', '!=', 'recorded')
                     ->groupBy('pendedOn')
                     ->orderByDesc('pendedOn');
         }, 'daysFromQuery')
