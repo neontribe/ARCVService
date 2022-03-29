@@ -13,6 +13,11 @@ Route::post('logout', [
     'uses' => 'Auth\LoginController@logout',
 ]);
 
+Route::get('whitelabel', [
+    'as' => 'store.whitelabel',
+    'uses' => 'WhiteLabelController@index',
+]);
+
 // Admin (Store) Password Reset Routes...
 Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')
     ->name('store.password.request')
