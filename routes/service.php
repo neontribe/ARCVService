@@ -34,6 +34,16 @@ Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm
 Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 
 Route::group(['middleware' => 'auth:admin'], function () {
+    // Rules Management
+    Route::get('rules', [
+        'as' => 'admin.rules.index',
+        'uses' => 'Admin\RulesController@index',
+    ]);
+    // ...create form
+    Route::get('rules/create', [
+        'as' => 'admin.rules.create',
+        'uses' => 'Admin\RulesController@create',
+    ]);
     // Voucher Management
     Route::get('vouchers', [
         'as' => 'admin.vouchers.index',

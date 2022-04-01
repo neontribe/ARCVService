@@ -3,6 +3,7 @@
     <ul>
         <li>Admin Dashboard</li>
         <li><a href="{{ url('/') }}"><span class="glyphicon glyphicon-home"></span>Dashboard</a></li>
+        <li><a href="{{ url('/rules') }}"><span class="glyphicon glyphicon-plus"></span>Add/View rules</a></li>
         <li><a href="{{ url('/vouchers/create') }}"><span class="glyphicon glyphicon-plus"></span>Add voucher codes</a></li>
         <li><a href="{{ url('/vouchers') }}"><span class="glyphicon glyphicon-th-list"></span>View live vouchers</a></li>
         <li><a href="{{ url('/deliveries') }}"><span class="glyphicon glyphicon-th-list"></span>View sent vouchers</a></li>
