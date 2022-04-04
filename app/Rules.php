@@ -20,7 +20,7 @@ class Rules extends Model
           break;
         case 'family':
           $desc = "If family exists";
-          $desc .= " award " . $rule->value . " voucher(s).";
+          $desc .= " award " . $rule->value . " voucher(s) per member.";
           return $desc;
           break;
         case 'prescription':
