@@ -1,36 +1,22 @@
 <form action="{{ URL::route("admin.rules.create") }}" method="post">
     {!! csrf_field() !!}
-<i>AGE</i>
+<i>FAMILY</i>
 
 <div>
   <input id="name" name="name" type="text">
     <label for="name" class="block">Name of rule</label>
 </div>
-<div class="dob-input">
-  <input id="min_year" name="min_year" type="number" pattern="[0-9]*" min="0">
-    <label for="min_year" class="block">Min Year</label>
+<div class="dob-input relative">
+    <input type="radio" class="styled-checkbox" id="family_exists_each" name="family_exists" checked>
+    <label for="family_exists_each">Award vouchers per <i>eligible family member</i> if family exists?</label>
 </div>
-<div class="dob-input">
-    <input id="min_month" name="min_month" type="number" pattern="[0-9]*" min="0">
-    <label for="min_month" class="block">Min Month</label>
-</div>
-
-<div class="dob-input">
-    <input id="max_year" name="max_year" type="number" pattern="[0-9]*" min="0">
-    <label for="max_year" class="block">Max Year (opt)</label>
-</div>
-<div class="dob-input">
-    <input id="max_month" name="max_month" type="number" pattern="[0-9]*" min="0">
-    <label for="max_month" class="block">Max Month (opt)</label>
+<div class="dob-input relative">
+    <input type="radio" class="styled-checkbox" id="family_exists_total" name="family_exists" checked>
+    <label for="family_exists_total">Award vouchers per <i>family</i> if family exists?</label>
 </div>
 <div class="dob-input">
     <input id="num_vouchers" name="num_vouchers" type="number" pattern="[0-9]*" min="0">
     <label for="num_vouchers" class="block">Number of vouchers</label>
-</div>
-<div class="dob-input">
-    <input id="except_if_rule_id" name="except_if_rule_id" type="number" pattern="[0-9]*" min="0">
-    <label for="except_if_rule_id" class="block">Exception rule ID</label>
-    <span>Ignore this rule if another family member fulfils the exception rule</span>
 </div>
 <div class="dob-input relative">
     <input type="checkbox" class="styled-checkbox" id="has_warning" name="has_warning" checked>

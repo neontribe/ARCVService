@@ -16,7 +16,8 @@ class RulesController extends Controller
       foreach ($rules as $key => $rule) {
         $desc = Rules::describe($rule);
       }
-      return view('service.rules', compact('rules'));
+      $new_rule_type = false;
+      return view('service.rules', compact('rules', 'new_rule_type'));
   }
 
   public function new(Request $request)

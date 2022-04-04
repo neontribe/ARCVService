@@ -45,7 +45,9 @@
             </form>
             <br>
             @includeWhen($new_rule_type === 'age', 'service.partials.age_rule')
-            {{-- @include('service.partials.age_rule') --}}
+            @includeWhen($new_rule_type === 'family', 'service.partials.family_rule')
+            @includeWhen($new_rule_type === 'prescription', 'service.partials.presciption_rule')
+            @includeWhen($new_rule_type === 'school', 'service.partials.school_rule')
     </div>
 <?php \Log::info($new_rule_type) ?>
     <script>
