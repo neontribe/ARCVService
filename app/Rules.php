@@ -22,6 +22,7 @@ class Rules extends Model
       'name',
       'value',
       'except_if_rule_id',
+      'type'
   ];
 
   /**

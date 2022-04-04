@@ -17,7 +17,7 @@ class CreateRuleDetailsTable extends Migration
           $table->increments('id');
           $table->integer('rule_id')->unsigned();
           $table->string('type')->nullable();
-          $table->integer('value')->nullable();
+          $table->string('value')->nullable();
           $table->timestamps();
           $table->softDeletes();
         });

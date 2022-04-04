@@ -22,8 +22,7 @@ class RulesController extends Controller
     'max_year',
     'max_month',
     'pregnancy',
-    'family_exists_each',
-    'family_exists_total',
+    'family_exists',
     'has_prescription',
     'child_at_school_primary',
     'child_at_school_secondary',
@@ -56,6 +55,7 @@ class RulesController extends Controller
           'sponsor_id' => 1,
           'name' => $request->input('name'),
           'value' => $request->input('num_vouchers'),
+          'type' => $request->input('rule_type'),
       ]);
       $rule->save();
       $rule_details_array = $this->sortRuleDetails($request, $rule->id);
@@ -75,9 +75,17 @@ class RulesController extends Controller
 
   public function sortRuleDetails(Request $request, int $rule_id)
   {
+    \Log::info($request);
     $possible_rules = $request->all();
     $rules_to_save = [];
     foreach ($possible_rules as $possible_rule => $value) {
+
+      if ($value === 'on') {
+        $value = 1;
+      }
+      if ($value === 'off') {
+        $value = 0;
+      }
       if (in_array($possible_rule, $this->rule_types)) {
           array_push($rules_to_save, [
             'type' => $possible_rule,
@@ -85,6 +93,10 @@ class RulesController extends Controller
             'rule_id' => $rule_id,
           ]);
       }
+    }
+
+    if (isset($request['has_warning'])) {
+      // Something to save the warning.
     }
     return $rules_to_save;
   }
