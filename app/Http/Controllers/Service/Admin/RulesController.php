@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Service\Admin;
 use App\Http\Controllers\Controller;
 use App\Rules;
 use App\Sponsor;
-// use Illuminate\Http\Request;
+use Illuminate\Http\Request;
 use App\Http\Requests\RuleRequest;
 
 class RulesController extends Controller
@@ -19,9 +19,19 @@ class RulesController extends Controller
       return view('service.rules', compact('rules'));
   }
 
+  public function new(Request $request)
+  {
+    $new_rule_type = $request->input('new_rule_type');
+
+    $rules = Rules::get();
+    foreach ($rules as $key => $rule) {
+      $desc = Rules::describe($rule);
+    }
+    return view('service.rules', compact('rules', 'new_rule_type'));
+  }
+
   public function create(RuleRequest $request)
   {
-      \Log::info($request);
       $rule = new Rules([
           'sponsor_id' => 1,
           'name' => $request->input('name'),

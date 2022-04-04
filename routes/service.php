@@ -39,6 +39,13 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.rules.index',
         'uses' => 'Admin\RulesController@index',
     ]);
+
+    // ...change rule type
+    Route::get('rules/create', [
+        'as' => 'admin.rules.new',
+        'uses' => 'Admin\RulesController@new',
+    ]);
+
     // ...create rule
     Route::post('rules/create', [
         'as' => 'admin.rules.create',
