@@ -14,30 +14,15 @@
                       <th>ID</th>
                       <th>Name</th>
                       <th>Description</th>
-                      {{-- <th>Entity</th>
-                      <th>Value</th>
-                      <th>Min Age<br>(y m)</th>
-                      <th>Max Age<br>(y m)</th>
-                      <th>Has prescription</th>
-                      <th>At Primary School</th>
-                      <th>At Secondary School</th>
-                      <th>Family exists</th> --}}
                   </tr>
                 </thead>
+                <tbody>
                   @foreach ($rules as $key => $rule)
-                        <tbody>
+
                             <tr>
                                 <td>{{ $rule->id }}</td>
                                 <td>{{ $rule->name }}</td>
                                 <td>{{ $rule->describe($rule) }}</td>
-                                {{-- <td>{{ $rule->entity }}</td>
-                                <td>{{ $rule->value }}</td>
-                                <td>{{ $rule->min_year }} {{ $rule->min_month }}</td>
-                                <td>{{ $rule->max_year }} {{ $rule->max_month }}</td>
-                                <td>{{ $rule->has_prescription }}</td>
-                                <td>{{ $rule->is_at_primary_school }}</td>
-                                <td>{{ $rule->is_at_secondary_school }}</td>
-                                <td>{{ $rule->family_exists }}</td> --}}
                             </tr>
                   @endforeach
                 </tbody>
@@ -46,6 +31,8 @@
             <h1>Add new rule</h1>
             <h5>Select rule type</h5>
             <i>Brief explanation of rule types somewhere</i>
+            <form action="{{ URL::route("admin.rules.create") }}" method="post">
+                {!! csrf_field() !!}
             {{-- <div style="display:flex; flex-direction:row; justify-content:space-evenly;"> --}}
                 <div class="select">
                     <select name="new_rule_type" id="new_rule_type">
@@ -59,6 +46,10 @@
             <br>
             <i>Pretend they've chosen age</i>
 
+            <div>
+              <input id="name" name="name" type="text">
+                <label for="name" class="block">Name</label>
+            </div>
             <div class="dob-input">
               <input id="min_year" name="min_year" type="number" pattern="[0-9]*" min="0">
                 <label for="min_year" class="block">Min Year</label>
@@ -94,9 +85,12 @@
                 <label for="warning_months">Number of months before expiry to show warning</label>
             </div>
             <div class="dob-input relative">
-                <input type="text" class="styled-checkbox" id="warning_message" name="warning_message" pattern="[A-Za-z]*">
+                <input type="text" class="styled-checkbox" id="warning_message" name="warning_message">
                 <label for="warning_message">Warning message</label>
             </div>
+            <button class="long-button submit" type="submit">Save</button>
+        </form>
+
 
     </div>
 

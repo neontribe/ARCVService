@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Service\Admin;
 use App\Http\Controllers\Controller;
 use App\Rules;
 use App\Sponsor;
-use Illuminate\Http\Request;
+// use Illuminate\Http\Request;
+use App\Http\Requests\RuleRequest;
 
 class RulesController extends Controller
 {
@@ -14,13 +15,30 @@ class RulesController extends Controller
       $rules = Rules::get();
       foreach ($rules as $key => $rule) {
         $desc = Rules::describe($rule);
-        \Log::info($desc);
       }
       return view('service.rules', compact('rules'));
   }
 
-  public function create()
+  public function create(RuleRequest $request)
   {
-      return view('service.rules');
+      \Log::info($request);
+      $rule = new Rules([
+          'sponsor_id' => 1,
+          'name' => $request->input('name'),
+          'value' => $request->input('num_vouchers'),
+      ]);
+      if (!$rule->save()) {
+          // Oops! Log that
+          Log::error('Bad save for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+          // Throw it back to the user
+          return redirect()
+              ->route('admin.dashboard')
+              ->withErrors('Rule creation failed - DB Error.');
+      }
+      $rules = Rules::get();
+      foreach ($rules as $key => $rule) {
+        $desc = Rules::describe($rule);
+      }
+      return view('service.rules', compact('rules'));
   }
 }

@@ -3,9 +3,37 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Rules extends Model
 {
+  use SoftDeletes;
+
+  protected $dates = ['deleted_at'];
+
+  /**
+   * The attributes that are mass assignable.
+   *
+   * @var array
+   */
+  protected $fillable = [
+      'sponsor_id',
+      'name',
+      'value',
+      'except_if_rule_id',
+  ];
+
+  /**
+   * Get the rule_details associated with this rule.
+   *
+   * @return HasMany
+   */
+  public function rule_details()
+  {
+      return $this->hasMany(RuleDetails::class);
+  }
+
   public static function describe($rule)
   {
       $type = $rule->type;

@@ -17,20 +17,13 @@ class CreateRulesTable extends Migration
             $table->increments('id');
             $table->integer('sponsor_id')->unsigned();
             $table->string('name')->default('New rule');
-            $table->string('entity')->nullable();//Needs sorting
-            $table->string('type')->nullable();//Needs sorting
+            $table->string('entity')->default('Child');//Needs sorting
+            $table->string('type')->default('age');//Needs sorting
             $table->integer('value')->default(0);
-            $table->integer('min_year')->nullable();
-            $table->integer('min_month')->nullable();
-            $table->integer('max_year')->nullable();
-            $table->integer('max_month')->nullable();
             $table->boolean('warning')->default(0);
-            $table->boolean('has_prescription')->default(0);
             $table->integer('except_if_rule_id')->nullable();
-            $table->boolean('family_exists')->default(0);
-            $table->boolean('is_at_primary_school')->default(0);
-            $table->boolean('is_at_secondary_school')->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

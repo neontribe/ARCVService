@@ -39,8 +39,8 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.rules.index',
         'uses' => 'Admin\RulesController@index',
     ]);
-    // ...create form
-    Route::get('rules/create', [
+    // ...create rule
+    Route::post('rules/create', [
         'as' => 'admin.rules.create',
         'uses' => 'Admin\RulesController@create',
     ]);
