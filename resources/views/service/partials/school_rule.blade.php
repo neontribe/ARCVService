@@ -14,32 +14,6 @@
     <input type="radio" class="styled-checkbox" id="child_at_school_secondary" name="child_at_school" checked>
     <label for="child_at_school_secondary">Exclude children at secondary school</label>
 </div>
-{{-- <h5>Select school location</h5>
-<div class="select">
-    <select name="school_location" id="school_location">
-        <option value=0 disabled selected>Please Select</option>
-        <option value="age">England</option>
-        <option value="family">Ireland</option>
-        <option value="prescription">Scotland</option>
-        <option value="school">Wales</option>
-    </select>
-</div><br> --}}
-
-{{-- <div class="dob-input">
-  <input id="month_school_start" name="month_school_start" type="number" pattern="[0-9]*" min="0" min="12" value='9'>
-    <label for="month_school_start" class="block">Month school starts</label>
-</div>
-
-<p>Minimum in years and months of child in month school start</p>
-<div class="dob-input">
-  <input id="age_year_school_start" name="age_year_school_start" type="number" pattern="[0-9]*" min="0">
-    <label for="age_year_school_start" class="block">Year</label>
-</div>
-<div class="dob-input">
-    <input id="age_month_school_start" name="age_month_school_start" type="number" pattern="[0-9]*" min="0">
-    <label for="age_month_school_start" class="block">Month</label>
-</div> --}}
-
 <div class="dob-input">
     <input id="except_if_age" name="except_if_age" type="checkbox">
     <label for="except_if_age" class="block">Exception</label>
@@ -68,5 +42,6 @@
     <input type="text" class="styled-checkbox" id="warning_message" name="warning_message">
     <label for="warning_message">Warning message</label>
 </div>
+<input type="hidden" name="rule_type" value="{{ $new_rule_type }}">
 <button class="long-button submit" type="submit">Save</button>
 </form>

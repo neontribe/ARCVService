@@ -18,18 +18,7 @@
     <input id="num_vouchers" name="num_vouchers" type="number" pattern="[0-9]*" min="0">
     <label for="num_vouchers" class="block">Number of vouchers</label><span id='who_gets_vouchers'></span>
 </div>
-<div class="dob-input relative">
-    <input type="checkbox" class="styled-checkbox" id="has_warning" name="has_warning" checked>
-    <label for="has_warning">Show warning?</label>
-</div>
-<div class="dob-input relative">
-    <input type="number" class="styled-checkbox" id="warning_months" name="warning_months" pattern="[0-9]*" min="0">
-    <label for="warning_months">Number of months before expiry to show warning</label>
-</div>
-<div class="dob-input relative">
-    <input type="text" class="styled-checkbox" id="warning_message" name="warning_message">
-    <label for="warning_message">Warning message</label>
-</div>
+<input type="hidden" name="rule_type" value="{{ $new_rule_type }}">
 <button class="long-button submit" type="submit">Save</button>
 </form>
 

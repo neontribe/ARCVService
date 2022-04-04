@@ -14,5 +14,6 @@
     <input id="num_vouchers" name="num_vouchers" type="number" pattern="[0-9]*" min="0">
     <label for="num_vouchers" class="block">Number of vouchers</label>
 </div>
+<input type="hidden" name="rule_type" value="{{ $new_rule_type }}">
 <button class="long-button submit" type="submit">Save</button>
 </form>

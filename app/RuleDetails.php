@@ -4,18 +4,20 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Http\Request;
 
 class RuleDetails extends Model
 {
-  // /**
-  //  * The attributes that are mass assignable.
-  //  *
-  //  * @var array
-  //  */
-  // protected $fillable = [
-  //     'type',
-  //     'value',
-  // ];
+  /**
+   * The attributes that are mass assignable.
+   *
+   * @var array
+   */
+  protected $fillable = [
+      'rule_id',
+      'type',
+      'value',
+  ];
 
   /**
    * Get the rule this detail is for

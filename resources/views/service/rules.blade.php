@@ -49,7 +49,7 @@
             @includeWhen($new_rule_type === 'prescription', 'service.partials.presciption_rule')
             @includeWhen($new_rule_type === 'school', 'service.partials.school_rule')
     </div>
-<?php \Log::info($new_rule_type) ?>
+
     <script>
     $('#new_rule_type').on('change', function() {
       console.log($(this).val());
