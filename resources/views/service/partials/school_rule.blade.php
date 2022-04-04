@@ -8,14 +8,24 @@
 </div>
 <div class="dob-input relative">
     <input type="radio" class="styled-checkbox" id="child_at_school_primary" name="child_at_school" checked>
-    <label for="child_at_school_primary">Child is at primary school</label>
+    <label for="child_at_school_primary">Exclude children at primary school</label>
 </div>
 <div class="dob-input relative">
     <input type="radio" class="styled-checkbox" id="child_at_school_secondary" name="child_at_school" checked>
-    <label for="child_at_school_secondary">Child is at secondary school</label>
+    <label for="child_at_school_secondary">Exclude children at secondary school</label>
 </div>
+{{-- <h5>Select school location</h5>
+<div class="select">
+    <select name="school_location" id="school_location">
+        <option value=0 disabled selected>Please Select</option>
+        <option value="age">England</option>
+        <option value="family">Ireland</option>
+        <option value="prescription">Scotland</option>
+        <option value="school">Wales</option>
+    </select>
+</div><br> --}}
 
-<div class="dob-input">
+{{-- <div class="dob-input">
   <input id="month_school_start" name="month_school_start" type="number" pattern="[0-9]*" min="0" min="12" value='9'>
     <label for="month_school_start" class="block">Month school starts</label>
 </div>
@@ -28,17 +38,24 @@
 <div class="dob-input">
     <input id="age_month_school_start" name="age_month_school_start" type="number" pattern="[0-9]*" min="0">
     <label for="age_month_school_start" class="block">Month</label>
+</div> --}}
+
+<div class="dob-input">
+    <input id="except_if_age" name="except_if_age" type="checkbox">
+    <label for="except_if_age" class="block">Exception</label>
+    <span>Ignore this rule if family has other members that fulfil any age rule</span>
+</div>
+<div class="dob-input">
+    <input id="except_if_prescription" name="except_if_prescription" type="checkbox">
+    <label for="except_if_prescription" class="block">Exception</label>
+    <span>Ignore this rule if family has other members that fulfil prescription rule</span>
 </div>
 
 <div class="dob-input">
     <input id="num_vouchers" name="num_vouchers" type="number" pattern="[0-9]*" min="0">
-    <label for="num_vouchers" class="block">Number of vouchers</label>
+    <label for="num_vouchers" class="block">Number of vouchers for school age child if exception rule applies</label>
 </div>
-<div class="dob-input">
-    <input id="except_if_rule_id" name="except_if_rule_id" type="number" pattern="[0-9]*" min="0">
-    <label for="except_if_rule_id" class="block">Exception rule ID</label>
-    <span>Ignore this rule if another family member fulfils the exception rule</span>
-</div>
+
 <div class="dob-input relative">
     <input type="checkbox" class="styled-checkbox" id="has_warning" name="has_warning" checked>
     <label for="has_warning">Show warning?</label>

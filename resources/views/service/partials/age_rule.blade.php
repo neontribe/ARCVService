@@ -6,6 +6,10 @@
   <input id="name" name="name" type="text">
     <label for="name" class="block">Name of rule</label>
 </div>
+<div class="dob-input relative">
+    <input type="checkbox" class="styled-checkbox" id="pregnancy" name="pregnancy">
+    <label for="pregnancy">Award vouchers for a pregancy?</label>
+</div>
 <div class="dob-input">
   <input id="min_year" name="min_year" type="number" pattern="[0-9]*" min="0">
     <label for="min_year" class="block">Min Year</label>
@@ -27,11 +31,11 @@
     <input id="num_vouchers" name="num_vouchers" type="number" pattern="[0-9]*" min="0">
     <label for="num_vouchers" class="block">Number of vouchers</label>
 </div>
-<div class="dob-input">
+{{-- <div class="dob-input">
     <input id="except_if_rule_id" name="except_if_rule_id" type="number" pattern="[0-9]*" min="0">
     <label for="except_if_rule_id" class="block">Exception rule ID</label>
     <span>Ignore this rule if another family member fulfils the exception rule</span>
-</div>
+</div> --}}
 <div class="dob-input relative">
     <input type="checkbox" class="styled-checkbox" id="has_warning" name="has_warning" checked>
     <label for="has_warning">Show warning?</label>
