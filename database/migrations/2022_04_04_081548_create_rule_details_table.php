@@ -15,7 +15,7 @@ class CreateRuleDetailsTable extends Migration
     {
         Schema::create('rule_details', function (Blueprint $table) {
           $table->increments('id');
-          $table->integer('rule_id')->unsigned();
+          $table->integer('rules_id')->unsigned();
           $table->string('type')->nullable();
           $table->string('value')->nullable();
           $table->timestamps();

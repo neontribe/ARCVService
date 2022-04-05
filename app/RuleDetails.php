@@ -14,7 +14,7 @@ class RuleDetails extends Model
    * @var array
    */
   protected $fillable = [
-      'rule_id',
+      'rules_id',
       'type',
       'value',
   ];

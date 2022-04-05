@@ -7,11 +7,11 @@
     <label for="name" class="block">Name of rule</label>
 </div>
 <div class="dob-input relative">
-    <input type="radio" class="styled-checkbox" id="child_at_school_primary" name="child_at_school" checked>
+    <input type="radio" class="styled-checkbox" value='primary' id="child_at_school_primary" name="child_at_school" checked>
     <label for="child_at_school_primary">Exclude children at primary school</label>
 </div>
 <div class="dob-input relative">
-    <input type="radio" class="styled-checkbox" id="child_at_school_secondary" name="child_at_school" checked>
+    <input type="radio" class="styled-checkbox" value='secondary' id="child_at_school_secondary" name="child_at_school" checked>
     <label for="child_at_school_secondary">Exclude children at secondary school</label>
 </div>
 <div class="dob-input">

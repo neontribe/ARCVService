@@ -24,16 +24,15 @@ class RulesController extends Controller
     'pregnancy',
     'family_exists',
     'has_prescription',
-    'child_at_school_primary',
-    'child_at_school_secondary',
+    'child_at_school',
   ];
 
   public function index()
   {
       $rules = Rules::get();
-      foreach ($rules as $key => $rule) {
-        $desc = Rules::describe($rule);
-      }
+      // foreach ($rules as $key => $rule) {
+      //   $desc = Rules::describe($rule);
+      // }
       $new_rule_type = false;
       return view('service.rules', compact('rules', 'new_rule_type'));
   }
@@ -43,9 +42,9 @@ class RulesController extends Controller
     $new_rule_type = $request->input('new_rule_type');
 
     $rules = Rules::get();
-    foreach ($rules as $key => $rule) {
-      $desc = Rules::describe($rule);
-    }
+    // foreach ($rules as $key => $rule) {
+    //   $desc = Rules::describe($rule);
+    // }
     return view('service.rules', compact('rules', 'new_rule_type'));
   }
 
@@ -56,6 +55,8 @@ class RulesController extends Controller
           'name' => $request->input('name'),
           'value' => $request->input('num_vouchers'),
           'type' => $request->input('rule_type'),
+          'except_if_age' => $request->input('except_if_age') === 'on' ? 1 : 0,
+          'except_if_prescription' => $request->input('except_if_prescription') === 'on' ? 1 : 0,
       ]);
       $rule->save();
       $rule_details_array = $this->sortRuleDetails($request, $rule->id);
@@ -66,20 +67,19 @@ class RulesController extends Controller
       }
 
       $rules = Rules::get();
-      foreach ($rules as $key => $rule) {
-        $desc = Rules::describe($rule);
-      }
+      // foreach ($rules as $key => $rule) {
+      //   $desc = Rules::describe($rule);
+      // }
       $new_rule_type = false;
       return view('service.rules', compact('rules', 'new_rule_type'));
   }
 
   public function sortRuleDetails(Request $request, int $rule_id)
   {
-    \Log::info($request);
+    // \Log::info($request);
     $possible_rules = $request->all();
     $rules_to_save = [];
     foreach ($possible_rules as $possible_rule => $value) {
-
       if ($value === 'on') {
         $value = 1;
       }
@@ -90,7 +90,7 @@ class RulesController extends Controller
           array_push($rules_to_save, [
             'type' => $possible_rule,
             'value' => $value,
-            'rule_id' => $rule_id,
+            'rules_id' => $rule_id,
           ]);
       }
     }

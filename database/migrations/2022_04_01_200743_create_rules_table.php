@@ -21,7 +21,8 @@ class CreateRulesTable extends Migration
             $table->string('type')->default('age');//Needs sorting
             $table->integer('value')->default(0);
             $table->boolean('warning')->default(0);
-            $table->integer('except_if_rule_id')->nullable();
+            $table->boolean('except_if_age')->default(0);
+            $table->boolean('except_if_prescription')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });
