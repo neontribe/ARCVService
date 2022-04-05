@@ -46,3 +46,20 @@
 <input type="hidden" name="rule_type" value="{{ $new_rule_type }}">
 <button class="long-button submit" type="submit">Save</button>
 </form>
+
+<script>
+$('#pregnancy').change(
+  function(){
+      if ($(this).is(':checked')) {
+        $('#min_year').attr('disabled', 'disabled');
+        $('#min_month').attr('disabled', 'disabled');
+        $('#max_year').attr('disabled', 'disabled');
+        $('#max_month').attr('disabled', 'disabled');
+      } else {
+        $('#min_year').removeAttr('disabled');
+        $('#min_month').removeAttr('disabled');
+        $('#max_year').removeAttr('disabled');
+        $('#max_month').removeAttr('disabled');
+      }
+  });
+</script>
