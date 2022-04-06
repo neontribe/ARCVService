@@ -8,7 +8,7 @@
 </div>
 <div class="dob-input relative">
     <input type="checkbox" class="styled-checkbox" id="pregnancy" name="pregnancy">
-    <label for="pregnancy">Award vouchers for a pregancy?</label>
+    <label for="pregnancy">Award vouchers for a pregnancy?</label>
 </div>
 <div class="dob-input">
   <input id="min_year" name="min_year" type="number" pattern="[0-9]*" min="0">
@@ -18,7 +18,7 @@
     <input id="min_month" name="min_month" type="number" pattern="[0-9]*" min="0">
     <label for="min_month" class="block">Min Month</label>
 </div>
-
+<br>
 <div class="dob-input">
     <input id="max_year" name="max_year" type="number" pattern="[0-9]*" min="0">
     <label for="max_year" class="block">Max Year (opt)</label>
@@ -27,6 +27,16 @@
     <input id="max_month" name="max_month" type="number" pattern="[0-9]*" min="0">
     <label for="max_month" class="block">Max Month (opt)</label>
 </div>
+<p>OR</p>
+<div class="dob-input relative">
+    <input type="checkbox" class="styled-checkbox" id="stop_at_primary" name="stop_at_primary" checked>
+    <label for="stop_at_primary">STOP AT PRIMARY</label>
+</div>
+<div class="dob-input relative">
+    <input type="checkbox" class="styled-checkbox" id="stop_at_secondary" name="stop_at_secondary" checked>
+    <label for="stop_at_secondary">STOP AT SECONDARY</label>
+</div>
+<br>
 <div class="dob-input">
     <input id="num_vouchers" name="num_vouchers" type="number" pattern="[0-9]*" min="0">
     <label for="num_vouchers" class="block">Number of vouchers</label>

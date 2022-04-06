@@ -20,9 +20,8 @@ class CreateRulesTable extends Migration
             $table->string('entity')->default('Child');//Needs sorting
             $table->string('type')->default('age');//Needs sorting
             $table->integer('value')->default(0);
-            $table->boolean('warning')->default(0);
-            $table->boolean('except_if_age')->default(0);
-            $table->boolean('except_if_prescription')->default(0);
+            $table->boolean('warning_id')->default(0);
+            $table->boolean('exception_id')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

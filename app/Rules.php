@@ -21,8 +21,8 @@ class Rules extends Model
       'sponsor_id',
       'name',
       'value',
-      'except_if_age',
-      'except_if_prescription',
+      'exception_id',
+      'warning_id',
       'type'
   ];
 

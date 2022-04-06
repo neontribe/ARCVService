@@ -29,6 +29,24 @@
             </table>
 
             <h1>Add new rule</h1>
+
+
+            <p>If family exists award 10 vouchers per family</p>
+            <p>If family exists award 5 vouchers per member of family</p>
+            <p>If person has prescription award 3 vouchers</p>
+            <p></p>
+            <p></p>
+            <p>If child is under X years award Z vouchers</p>
+            <p>If child is over X years award Z vouchers</p>
+            <p>If child is over X years and under Y years award Z vouchers</p>
+            <p>If child is over X years and not at primary school award Z vouchers</p>
+            <p>If child is at primary school do not award vouchers unless</p>
+            <p>If child is at secondary school do not award vouchers unless</p>
+
+
+
+
+
             <h5>Select rule type</h5>
 
             <i>Brief explanation of rule types somewhere</i>
