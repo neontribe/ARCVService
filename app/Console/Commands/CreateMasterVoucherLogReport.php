@@ -218,17 +218,19 @@ EOD;
                     unset($chunk[$k]);
                     continue;
                   }
-                  if (!is_null($voucher['Date Trader Recorded Voucher'])
-                        && (strtotime($voucher['Date Trader Recorded Voucher']) < strtotime('2020-01-01'))
-                      ) {
-                    unset($chunk[$k]);
-                    continue;
+                  if (!is_null($voucher['Date Trader Recorded Voucher'])) {
+                        $date = \DateTime::createFromFormat('d/m/Y', $voucher['Date Trader Recorded Voucher']);
+                        if (strtotime($date->format('Y-m-d')) < strtotime('2020-01-01')) {
+                          unset($chunk[$k]);
+                          continue;
+                        }
                   }
-                  if (!is_null($voucher['Date Issued'])
-                        && (strtotime($voucher['Date Issued']) < strtotime('2020-01-01'))
-                      ) {
-                    unset($chunk[$k]);
-                    continue;
+                  if (!is_null($voucher['Date Issued'])) {
+                        $date = \DateTime::createFromFormat('d/m/Y', $voucher['Date Issued']);
+                        if (strtotime($date->format('Y-m-d')) < strtotime('2020-01-01')) {
+                          unset($chunk[$k]);
+                          continue;
+                        }
                   }
                 }
 
