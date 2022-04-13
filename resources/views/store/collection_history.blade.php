@@ -8,7 +8,7 @@
 
     <div class="content history">
         <div>
-            <h3>{{ $pri_carer->name }}</h3>
+            <h3>{{ $pri_carer->name ?? 'Deleted Carer' }}</h3>
             <a href="{{ route("store.registration.voucher-manager", ['registration' => $registration->id ]) }}" class="link">
             <div class="link-button link-button-large">
                 <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
@@ -54,7 +54,7 @@
                                                 <td>
                                                     <i class="fa fa-home"></i>
                                                     Collected At:
-                                                    {{ $bundle->disbursingCentre->name }}
+                                                    {{ $bundle->disbursingCentre->name ?? 'Deleted Centre' }}
                                                 </td>
                                                 <td rowspan="2">
                                                     <i class="fa fa-ticket button-icon" aria-hidden="true"></i>
@@ -65,12 +65,12 @@
                                                 <td>
                                                     <i class="fa fa-user"></i>
                                                     Collected By:
-                                                    {{ $bundle->collectingCarer->name }}
+                                                    {{ $bundle->collectingCarer->name ?? 'Deleted Carer' }}
                                                 </td>
                                                 <td>
                                                     <i class="fa fa-users"></i>
                                                     Allocated By:
-                                                    {{ $bundle->disbursingUser->name }}
+                                                    {{ $bundle->disbursingUser->name ?? 'Deleted User' }}
                                                 </td>
                                             </tr>
                                         </table>
