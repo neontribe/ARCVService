@@ -269,10 +269,9 @@ EOD;
 
             Log::info("beginning file write, mem:" . memory_get_usage());
 
-            // Create and write a sheet for first half of data.
+            // Create and write a sheet for all data.
             $fileHandleAll = fopen('php://temp', 'r+');
             fputcsv($fileHandleAll, $this->headers);
-            // \Log::info($rows);
             foreach ($rows as $row) {
                 fputcsv($fileHandleAll, $row);
             }
