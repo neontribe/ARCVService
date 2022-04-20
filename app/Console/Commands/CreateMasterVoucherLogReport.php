@@ -218,17 +218,12 @@ EOD;
                     unset($chunk[$k]);
                     continue;
                   }
-                  if (!is_null($voucher['Date Trader Recorded Voucher'])
-                        && (strtotime($voucher['Date Trader Recorded Voucher']) < strtotime('2020-01-01'))
-                      ) {
-                    unset($chunk[$k]);
-                    continue;
-                  }
-                  if (!is_null($voucher['Date Issued'])
-                        && (strtotime($voucher['Date Issued']) < strtotime('2020-01-01'))
-                      ) {
-                    unset($chunk[$k]);
-                    continue;
+                  if (!is_null($voucher['Reimbursed Date'])) {
+                    $date = \DateTime::createFromFormat('d/m/Y', $voucher['Reimbursed Date']);
+                    if (strtotime($date->format('Y-m-d')) < strtotime('2021-04-01')) {
+                      unset($chunk[$k]);
+                      continue;
+                    }
                   }
                 }
 
@@ -277,25 +272,12 @@ EOD;
             // Create and write a sheet for first half of data.
             $fileHandleAll = fopen('php://temp', 'r+');
             fputcsv($fileHandleAll, $this->headers);
-            foreach ($rows as $index => $row) {
-              if ($index <= count($rows)/2) {
+            // \Log::info($rows);
+            foreach ($rows as $row) {
                 fputcsv($fileHandleAll, $row);
-              }
             }
             rewind($fileHandleAll);
-            $this->writeOutput('PART1', stream_get_contents($fileHandleAll), $za);
-            fclose($fileHandleAll);
-
-            // Create and write a sheet for second half of data.
-            $fileHandleAll = fopen('php://temp', 'r+');
-            fputcsv($fileHandleAll, $this->headers);
-            foreach ($rows as $index => $row) {
-              if ($index > count($rows)/2) {
-                fputcsv($fileHandleAll, $row);
-              }
-            }
-            rewind($fileHandleAll);
-            $this->writeOutput('PART2', stream_get_contents($fileHandleAll), $za);
+            $this->writeOutput('ALLPOSTAPR21', stream_get_contents($fileHandleAll), $za);
             fclose($fileHandleAll);
 
             // Split up the rows into separate areas.
