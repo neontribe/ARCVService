@@ -15,7 +15,7 @@
     "jquery-ui": "^1.13.1",
     "laravel-mix": "^6.0.43",
     "resolve-url-loader": "^5.0.0",
-    "sass": "^1.49.9",
-    "sass-loader": "^12.1.0"
+    "sass": "^1.52.0",
+    "sass-loader": "^13.0.0"
   }
 }
