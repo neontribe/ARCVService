@@ -1,7 +1,7 @@
 {
   "name": "neontribe/arcvservice",
   "description": "ARCV Service",
-  "version": "1.13.0-RC1",
+  "version": "1.14.0-dev",
   "keywords": [],
   "license": "proprietary",
   "type": "project",
