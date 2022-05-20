@@ -1,7 +1,7 @@
 # How to set up Laravel Homestead on MacOS and Linux
 
 ## Pre-requisites
-- Before launching your Homestead environment, make sure you've installed VirtualBox 5.2 and Vagrant
+- Before launching your Homestead environment, make sure you've installed VirtualBox and Vagrant
 - You can use VMWare, Parellels or Hyper-V instead of VirtualBox but this guide refers to VirtualBox unless otherwise specified
 - Read the steps below before you begin the setup process to get an idea of what you're getting into
 

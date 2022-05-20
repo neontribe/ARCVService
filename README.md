@@ -6,7 +6,7 @@ ARCV Service is the service portal and API for ARCV Market.
 
 1. Clone the repo
 2. Create a database and user (homestead, sqlite or mysql)
-3. If not using [Homestead](https://laravel.com/docs/5.5/homestead) or Valet - you will need to configure permissions on `storage` and `bootstrap/cache`. See [Laravel 5.5 Installation](https://laravel.com/docs/5.5#installation) for more info.
+3. If not using [Homestead](https://laravel.com/docs/6.x/homestead) or Valet - you will need to configure permissions on `storage` and `bootstrap/cache`. See [Laravel 6.x Installation](https://laravel.com/docs/6.x) for more info.
 4. Copy `.env.example` to `.env` and edit to local settings
 5. `composer install`
 6. `php artisan key:generate`
@@ -85,7 +85,7 @@ GU9 7PT
 # Licensing and use of Third Party Applications
 These are the languages and packages used to create ARCV Service and where available the licences associated with them.
 
-ARCV Service 1.13
+ARCV Service 1.14
 
 Programming Language - PHP\
 Framework - Laravel https://github.com/laravel/laravel \
@@ -95,7 +95,6 @@ Third Party Packages
 - https://github.com/barryvdh/laravel-cors MIT Licence https://github.com/barryvdh/laravel-cors/blob/master/LICENSE
 - https://github.com/barryvdh/laravel-dompdf MIT Licence https://opensource.org/licenses/MIT
 - https://github.com/doctrine/dbal MIT Licence https://github.com/doctrine/dbal/blob/master/LICENSE
-- https://github.com/Maatwebsite/Laravel-Excel LGPL https://docs.laravel-excel.com/2.1/getting-started/license.html
 - https://github.com/moontoast/math Apache Licence 2.0 https://github.com/moontoast/math/blob/master/LICENSE
 - https://github.com/esbenp/laravel-api-consumer None Stated
 - https://github.com/ramsey/uuid MIT Licence https://github.com/ramsey/uuid/blob/master/LICENSE
