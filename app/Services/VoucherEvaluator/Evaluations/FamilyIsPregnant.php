@@ -6,7 +6,7 @@ use Carbon\Carbon;
 
 class FamilyIsPregnant extends BaseFamilyEvaluation
 {
-    public $reason = 'is pregnant';
+    public $reason = 'pregnant';
 
     /**
      * FamilyIsPregnant constructor.
