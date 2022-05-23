@@ -20,21 +20,21 @@ class ScottishVoucherEvaluatorTest extends TestCase
 
     // This has a | in the reason field because we want to carry the entity with it.
     const NOTICE_TYPES = [
-        'ChildIsAlmostOne' => ['reason' => 'Child|is almost 1 year old'],
-        'ScottishChildIsAlmostPrimarySchoolAge' => ['reason' => 'Child|is almost primary school age (SCOTLAND)'],
-        'ChildIsAlmostSecondarySchoolAge' => ['reason' => 'Child|is almost secondary school age'],
-        'ChildIsPrimarySchoolAge' => ['reason' => 'Child|is primary school age (SCOTLAND)'],
-        'ChildIsSecondarySchoolAge' => ['reason' => 'Child|is secondary school age'],
+        'ChildIsAlmostOne' => ['reason' => 'Child|almost 1 year old'],
+        'ScottishChildIsAlmostPrimarySchoolAge' => ['reason' => 'Child|almost primary school age (SCOTLAND)'],
+        'ChildIsAlmostSecondarySchoolAge' => ['reason' => 'Child|almost secondary school age'],
+        'ChildIsPrimarySchoolAge' => ['reason' => 'Child|primary school age (SCOTLAND)'],
+        'ChildIsSecondarySchoolAge' => ['reason' => 'Child|secondary school age'],
         'FamilyHasUnverifiedChildren' => ['reason' => 'Family|has one or more children that you haven\'t checked ID for yet'],
         'ScottishChildCanDefer' => ['reason' => 'Child|is able to defer (SCOTLAND)'],
     ];
 
     // This has a | in the reason field because we want to carry the entity with it.
     const CREDIT_TYPES = [
-        'ChildIsUnderOne' => ['reason' => 'Child|is under 1 year old', 'value' => 6],
-        'ScottishChildIsBetweenOneAndPrimarySchoolAge' => ['reason' => 'Child|is between 1 and start of primary school age (SCOTLAND)', 'value' => 4],
-        'ChildIsPrimarySchoolAge' => ['reason' => 'Child|is primary school age', 'value' => 4],
-        'FamilyIsPregnant' => ['reason' => 'Family|is pregnant', 'value' => 4],
+        'ChildIsUnderOne' => ['reason' => 'Child|under 1 year old', 'value' => 6],
+        'ScottishChildIsBetweenOneAndPrimarySchoolAge' => ['reason' => 'Child|between 1 and start of primary school age (SCOTLAND)', 'value' => 4],
+        'ChildIsPrimarySchoolAge' => ['reason' => 'Child|primary school age', 'value' => 4],
+        'FamilyIsPregnant' => ['reason' => 'Family|pregnant', 'value' => 4],
     ];
 
     private $rulesMods = [];
