@@ -130,10 +130,12 @@ class SponsorControllerTest extends StoreTestCase
             ->see($data["voucher_prefix"])
         ;
 
-        // Find the Sponsor
+        // Find the Sponsor, and check it's attributes
         $this->seeInDatabase('sponsors', [
             'name' => $data["name"],
-            'shortcode' => $data['voucher_prefix']
+            'shortcode' => $data['voucher_prefix'],
+            // controller sets this false
+            'can_tap' => false,
         ]);
     }
 
