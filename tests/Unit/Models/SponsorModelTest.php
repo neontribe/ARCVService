@@ -17,7 +17,7 @@ class SponsorModelTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->sponsor = factory(Sponsor::class)->create();
+        $this->sponsor = factory(Sponsor::class)->create()->fresh();
     }
 
     public function testSponsorIsCreatedWithExpectedAttributes()
@@ -26,7 +26,9 @@ class SponsorModelTest extends TestCase
         // Keeping it simple to make writing test suite less onerous.
         // The default error returned by asserts will be enough.
         $this->assertInstanceOf(Sponsor::class, $s);
-        $this->assertNotNull($s->name);
+        $this->assertisString($s->name);
+        $this->assertIsString($s->shortcode);
+        $this->assertTrue($s->can_tap);
     }
 
 
