@@ -91,4 +91,14 @@ return [
     */
     'first_delivery_date' => env('ARC_FIRST_DELIVERY_DATE', '2019-09-26'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | the programme names we are running
+    | eg. "standard", "social prescribing"
+    |--------------------------------------------------------------------------
+     */
+    'programmes' => [
+        'Standard',
+        'Social Prescribing',
+    ],
 ];

@@ -88,7 +88,7 @@ $factory->defineAs(App\CentreUser::class, 'FMUser',function (Faker\Generator $fa
 /**
  * Sponsor for testing
  */
-$factory->define(App\Sponsor::class, function (Faker\Generator $faker) {
+$factory->define(App\Sponsor::class, function (Faker\Generator $faker, array $attributes = []) {
 
     $counties = [
         "Barnfordshire",
@@ -139,10 +139,12 @@ $factory->define(App\Sponsor::class, function (Faker\Generator $faker) {
 
     $index = $faker->unique()->numberBetween(0, 43);
 
-    return [
+    $data = [
         'name' => $counties[$index],
         'shortcode' => $faker->regexify('[A-Z]{4}'),
     ];
+
+    return array_merge($attributes, $data);
 });
 
 /**

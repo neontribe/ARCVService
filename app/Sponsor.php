@@ -21,6 +21,11 @@ class Sponsor extends Model
         'name',
         'shortcode',
         'can_tap',
+        'programme',
+    ];
+
+    protected $appends = [
+        'programme_name',
     ];
 
     /**
@@ -38,7 +43,18 @@ class Sponsor extends Model
      */
     protected $casts = [
         'can_tap' => 'boolean',
+        'programme' => 'integer',
     ];
+
+    /**
+     * Gets an english version of the programme name
+     *
+     * @return mixed
+     */
+    public function getProgrammeNameAttribute()
+    {
+        return config('arc.programmes')[$this->programme];
+    }
 
     /**
      * Get the vouchers associated with this Sponsor.
