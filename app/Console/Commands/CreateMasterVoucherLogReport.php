@@ -218,19 +218,12 @@ EOD;
                     unset($chunk[$k]);
                     continue;
                   }
-                  if (!is_null($voucher['Date Trader Recorded Voucher'])) {
-                        $date = \DateTime::createFromFormat('d/m/Y', $voucher['Date Trader Recorded Voucher']);
-                        if (strtotime($date->format('Y-m-d')) < strtotime('2020-01-01')) {
-                          unset($chunk[$k]);
-                          continue;
-                        }
-                  }
-                  if (!is_null($voucher['Date Issued'])) {
-                        $date = \DateTime::createFromFormat('d/m/Y', $voucher['Date Issued']);
-                        if (strtotime($date->format('Y-m-d')) < strtotime('2020-01-01')) {
-                          unset($chunk[$k]);
-                          continue;
-                        }
+                  if (!is_null($voucher['Reimbursed Date'])) {
+                    $date = \DateTime::createFromFormat('d/m/Y', $voucher['Reimbursed Date']);
+                    if (strtotime($date->format('Y-m-d')) < strtotime('2021-04-01')) {
+                      unset($chunk[$k]);
+                      continue;
+                    }
                   }
                 }
 
@@ -283,7 +276,7 @@ EOD;
                 fputcsv($fileHandleAll, $row);
             }
             rewind($fileHandleAll);
-            $this->writeOutput('ALL', stream_get_contents($fileHandleAll), $za);
+            $this->writeOutput('ALLPOSTAPR21', stream_get_contents($fileHandleAll), $za);
             fclose($fileHandleAll);
 
             // Split up the rows into separate areas.
