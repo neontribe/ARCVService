@@ -43,6 +43,7 @@ class Sponsor extends Model
      */
     protected $casts = [
         'can_tap' => 'boolean',
+        'programme' => 'integer',
     ];
 
     /**
