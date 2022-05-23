@@ -98,7 +98,7 @@ return [
     |--------------------------------------------------------------------------
      */
     'programmes' => [
-        'standard',
-        'social prescribing',
+        'Standard',
+        'Social Prescribing',
     ],
 ];
