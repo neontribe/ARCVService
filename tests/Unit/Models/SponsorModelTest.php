@@ -26,11 +26,17 @@ class SponsorModelTest extends TestCase
         // Keeping it simple to make writing test suite less onerous.
         // The default error returned by asserts will be enough.
         $this->assertInstanceOf(Sponsor::class, $s);
-        $this->assertisString($s->name);
+        $this->assertIsString($s->name);
         $this->assertIsString($s->shortcode);
         $this->assertTrue($s->can_tap);
+        $this->assertIsInt($s->programme);
     }
 
+    public function testItCanGetItsProgramName()
+    {
+        $s = $this->sponsor;
+        $this->assertEquals($s->programme_name, config('arc.programmes')[$s->programme]);
+    }
 
     public function testSoftDeleteSponsor()
     {
@@ -49,14 +55,6 @@ class SponsorModelTest extends TestCase
         ]);
         $this->assertCount(10, $this->sponsor->vouchers);
         $this->assertNotEquals($this->sponsor->vouchers, Voucher::all());
-    }
-
-    /** @test */
-    public function itHasExpectedAttributes()
-    {
-        $s = $this->sponsor;
-        $this->assertNotNull($s->name);
-        $this->assertNotNull($s->shortcode);
     }
 
     /** @test */
