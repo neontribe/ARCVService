@@ -48,7 +48,6 @@ class SponsorsController extends Controller
         $sponsor = new Sponsor([
             'name' => $request->input('name'),
             'shortcode' => $request->input('voucher_prefix'),
-            // 'is_scotland' => $request->input('is_scotland') == 'on' ? 1 : 0
         ]);
 
         // Atomic action,don't need to transact it
@@ -60,10 +59,6 @@ class SponsorsController extends Controller
                 ->route('admin.sponsors.create')
                 ->withErrors('Creation failed - DB Error.');
         }
-
-        // if ($sponsor->is_scotland) {
-        //   $sponsor->evaluations()->saveMany($this->scottishFamilyOverrides());
-        // }
 
         // Send to index with a success message
         return redirect()
