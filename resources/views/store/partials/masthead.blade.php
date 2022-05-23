@@ -18,6 +18,9 @@
         <div class="header-section">
             <ul>
                 <li>User: {{ Auth::user()->name }} </li>
+                @if ( config('app.env') !== 'production' )
+                    <li>Programme: {{ Auth::user()->centre->sponsor->programme_name }}</li>
+                @endif
                 <li>Centre:
                     @if( Auth::user()->centres->count() == 1 )
                         {{ Auth::user()->centre->name }}
