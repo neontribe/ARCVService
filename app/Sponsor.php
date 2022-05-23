@@ -24,6 +24,10 @@ class Sponsor extends Model
         'programme',
     ];
 
+    protected $appends = [
+        'programme_name',
+    ];
+
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -40,6 +44,16 @@ class Sponsor extends Model
     protected $casts = [
         'can_tap' => 'boolean',
     ];
+
+    /**
+     * Gets an english version of the programme name
+     *
+     * @return mixed
+     */
+    public function getProgrammeNameAttribute()
+    {
+        return config('arc.programmes')[$this->programme];
+    }
 
     /**
      * Get the vouchers associated with this Sponsor.
