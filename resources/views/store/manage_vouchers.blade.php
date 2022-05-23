@@ -13,6 +13,9 @@
                     <img src="{{ asset('store/assets/info-light.svg') }}">
                     <h2 id='this-family'>This Family</h2>
                 </div>
+                <div>
+                    <h3>Their RV-ID is: {{ $registration->family->rvid }}</h3>
+                </div>
                 <div class="alongside-container">
                     <div>
                         <h3>Main Carer:</h3>
