@@ -48,6 +48,8 @@ class SponsorsController extends Controller
         $sponsor = new Sponsor([
             'name' => $request->input('name'),
             'shortcode' => $request->input('voucher_prefix'),
+            // this is the simplest way to do this
+            'can_tap' => false,
         ]);
 
         // Atomic action,don't need to transact it

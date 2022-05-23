@@ -21,7 +21,6 @@ class Sponsor extends Model
         'name',
         'shortcode',
         'can_tap',
-        // 'is_scotland',
     ];
 
     /**
@@ -39,7 +38,6 @@ class Sponsor extends Model
      */
     protected $casts = [
         'can_tap' => 'boolean',
-        // 'is_scotland' => 'boolean'
     ];
 
     /**
@@ -79,6 +77,6 @@ class Sponsor extends Model
      */
     public function evaluations()
     {
-        return $this->hasMany('App\Evaluation');
+        return $this->hasMany(Evaluation::class);
     }
 }
