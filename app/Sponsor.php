@@ -21,6 +21,7 @@ class Sponsor extends Model
         'name',
         'shortcode',
         'can_tap',
+        'programme',
     ];
 
     /**
