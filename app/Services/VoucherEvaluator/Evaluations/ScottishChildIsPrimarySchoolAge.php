@@ -10,7 +10,7 @@ use Chalcedonyt\Specification\NotSpec;
 
 class ScottishChildIsPrimarySchoolAge extends BaseChildEvaluation
 {
-    public $reason = 'is primary school age (SCOTLAND)';
+    public $reason = 'primary school age (SCOTLAND)';
     private $specification;
 
     /**

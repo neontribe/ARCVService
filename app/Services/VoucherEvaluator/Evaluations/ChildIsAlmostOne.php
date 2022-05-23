@@ -9,7 +9,7 @@ use Chalcedonyt\Specification\AndSpec;
 
 class ChildIsAlmostOne extends BaseChildEvaluation
 {
-    public $reason = 'is almost 1 year old';
+    public $reason = 'almost 1 year old';
     private $specification;
 
     /**
