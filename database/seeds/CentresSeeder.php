@@ -30,5 +30,8 @@ class CentresSeeder extends Seeder
 
         // Scottish centre
         factory(App\Centre::class)->create(["sponsor_id" => 8]);
+
+        // Social prescribing centre
+        factory(App\Centre::class)->create(['name' => 'Prescribing Centre', 'sponsor_id' => 9]);
     }
 }

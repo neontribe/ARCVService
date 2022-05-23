@@ -61,7 +61,7 @@ class SponsorsSeeder extends Seeder
         $scottishRulesSponser->evaluations()->saveMany($this->scottishFamilyOverrides());
         $scottishRulesSponser->evaluations()->saveMany($this->veryfiesKids());
 
-        // make an area/sponsor in a different programme
+        // make an area/sponsor in a different programme - should be 9
         factory(App\Sponsor::class)->create([
             'name' => "Social Prescribing Area",
             'shortcode' => "SPA",

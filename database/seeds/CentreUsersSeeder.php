@@ -69,5 +69,14 @@ class CentreUsersSeeder extends Seeder
         $deletedUsers = factory(App\CentreUser::class, 2)->create([
             "deleted_at"  => date("Y-m-d H:i:s"),
         ]);
+
+        // an SP user for testing
+        $socialPrescriber = factory(App\CentreUser::class)->create([
+            'name' => 'prescribing user',
+            'email' => 'arc+spuser@neontribe.co.uk',
+            "password" => bcrypt('store_pass'),
+        ]);
+        $spcId = App\Centre::where('name', 'Prescribing Centre')->first()->id;
+        $socialPrescriber->centres()->attach($spcId, ["homeCentre" => true]);
     }
 }
