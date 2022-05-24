@@ -126,6 +126,10 @@
                             </strong>
                             per week
                         </li>
+                        @if ($programme !==0)
+                            </ul><br>
+                        @endif
+                        @if ($programme === 0)
                         <li>
                             Has
                             <strong>
@@ -162,6 +166,7 @@
                         </li>
                     </ul>
                 </div>
+                        @endif
                 <div>
                     <label for="eligibility-hsbs">
                         Are you receiving Healthy Start or Best Start?
@@ -188,7 +193,9 @@
                         @endforeach
                     </select>
                 </div>
-                @includeWhen(!empty($noticeReasons), 'store.partials.notice_box', ['noticeReasons' => $noticeReasons])
+                @if ($programme === 0)
+                    @includeWhen(!empty($noticeReasons), 'store.partials.notice_box', ['noticeReasons' => $noticeReasons])
+                @endif
                 <button class="long-button submit" type="submit" formnovalidate>Save Changes</button>
                 <button class="long-button"
                         onclick="window.open( '{{ URL::route("store.registration.print", ["registration" => $registration]) }}'); return false">
