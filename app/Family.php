@@ -3,8 +3,11 @@
 namespace App;
 
 use App\Services\VoucherEvaluator\AbstractEvaluator;
+use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\IEvaluee;
+use App\Traits\Aliasable;
 use App\Traits\Evaluable;
+use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,7 +15,18 @@ use Log;
 
 class Family extends Model implements IEvaluee
 {
+    use Aliasable;
     use Evaluable;
+
+    /**
+     * Trait overrides for names
+     * @var string[]
+     */
+    public $programmeAliases = [
+        "Family",
+        "Household",
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -38,8 +52,7 @@ class Family extends Model implements IEvaluee
      *
      * @var array
      */
-    protected $hidden = [
-    ];
+    protected $hidden = [];
 
     /**
      * Attributes to autocalculate and add when we ask.
@@ -48,7 +61,7 @@ class Family extends Model implements IEvaluee
      */
     protected $appends = [
         'expecting',
-        'rvid'
+        'rvid',
     ];
 
     /**
@@ -56,7 +69,7 @@ class Family extends Model implements IEvaluee
      *
      * @return AbstractEvaluator
      */
-    public function getEvaluator()
+    public function getEvaluator(): AbstractEvaluator
     {
         if ($this->has('registrations')) {
             return $this->registrations()->first()->getEvaluator();
@@ -69,7 +82,7 @@ class Family extends Model implements IEvaluee
     /**
      * Gets the due date or Null;
      *
-     * @return mixed
+     * @return mixed|null
      */
     public function getExpectingAttribute()
     {
@@ -88,7 +101,7 @@ class Family extends Model implements IEvaluee
      * @param Centre $centre
      * @param bool $switch Force the user to switch centre and change RVID.
      */
-    public function lockToCentre(Centre $centre, $switch = false)
+    public function lockToCentre(Centre $centre, bool $switch = false): void
     {
         // Check we don't have one.
         if (!$this->centre_sequence || $switch) {
@@ -110,11 +123,11 @@ class Family extends Model implements IEvaluee
      *
      * @return string
      */
-    public function getRvidAttribute()
+    public function getRvidAttribute(): string
     {
         $rvid = "UNKNOWN";
         if ($this->initialCentre && $this->centre_sequence) {
-            $rvid =  $this->initialCentre->prefix . str_pad((string)$this->centre_sequence, 4, "0", STR_PAD_LEFT);
+            $rvid = $this->initialCentre->prefix . str_pad((string)$this->centre_sequence, 4, "0", STR_PAD_LEFT);
         }
         return $rvid;
     }
@@ -170,7 +183,7 @@ class Family extends Model implements IEvaluee
 
     public function scopeWithPrimaryCarer($query)
     {
-        $subQuery = \DB::table('carers')
+        $subQuery = DB::table('carers')
             ->select('name')
             ->whereRaw('family_id = families.id')
             ->orderBy('id', 'asc')
