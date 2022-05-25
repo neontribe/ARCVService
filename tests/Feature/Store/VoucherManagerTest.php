@@ -89,6 +89,15 @@ class VoucherManagerTest extends StoreTestCase
     }
 
     /** @test */
+    public function testRVIDVisible()
+    {
+        // Check we can see "Their RV-ID is" on this page
+        $this->actingAs($this->fmUser, 'store')
+            ->visit(URL::route('store.registration.voucher-manager', [ 'registration' => $this->registration ]))
+            ->seeElement("#rv-id");
+    }
+
+    /** @test */
     public function itCanShowFamilyWarnings()
     {
         /**
