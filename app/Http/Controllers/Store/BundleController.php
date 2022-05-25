@@ -54,6 +54,7 @@ class BundleController extends Controller
             : null;
 
         $valuation = $registration->getValuation();
+        $programme = Auth::user()->centre->sponsor->programme;
 
         return view('store.manage_vouchers', array_merge(
             $data,
@@ -67,7 +68,8 @@ class BundleController extends Controller
                 "vouchers" => $sorted_bundle,
                 "vouchers_amount" => count($bundle),
                 "entitlement" => $valuation->getEntitlement(),
-                "noticeReasons" => $valuation->getNoticeReasons()
+                "noticeReasons" => $valuation->getNoticeReasons(),
+                "programme" => $programme
             ]
         ));
     }

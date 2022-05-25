@@ -30,7 +30,9 @@
                         </ul>
                     </div>
                 </div>
-                @includeWhen(!empty($noticeReasons), 'store.partials.notice_box', ['noticeReasons' => $noticeReasons])
+                @if ($programme === 0)
+                    @includeWhen(!empty($noticeReasons), 'store.partials.notice_box', ['noticeReasons' => $noticeReasons])
+                @endif
                 <a href="{{ route("store.registration.edit", ['registration' => $registration->id ]) }}" class="link" id='edit-family-link'>
                     <div class="link-button link-button-large">
                         <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Go to edit family

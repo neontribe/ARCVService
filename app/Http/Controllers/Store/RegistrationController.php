@@ -217,6 +217,7 @@ class RegistrationController extends Controller
 
         $evaluations["creditables"] = $registration->getEvaluator()->getPurposeFilteredEvaluations("credits");
         $evaluations["disqualifiers"] = $registration->getEvaluator()->getPurposeFilteredEvaluations("disqualifiers");
+        $programme = Auth::user()->centre->sponsor->programme;
 
         return view('store.edit_registration', array_merge(
             $data,
@@ -231,7 +232,8 @@ class RegistrationController extends Controller
                 'verifying' => $registration->getEvaluator()->isVerifyingChildren(),
                 'evaluations' => $evaluations,
                 'deferrable' => $deferrable,
-                'can_change_defer' => $can_change_defer
+                'can_change_defer' => $can_change_defer,
+                'programme' => $programme
             ]
         ));
     }
