@@ -2,24 +2,35 @@
 
 namespace App;
 
-use App\Evaluation;
 use App\Services\VoucherEvaluator\AbstractEvaluator;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\IEvaluee;
+use App\Traits\Aliasable;
 use App\Traits\Evaluable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Child extends Model implements IEvaluee
 {
+    use Aliasable;
     use Evaluable;
+
+    public const PROGRAMME_ALIASES = [
+        "Child",
+        "Participant",
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'dob','born', 'verified', 'deferred'
+        'dob',
+        'born',
+        'verified',
+        'deferred',
     ];
 
     /**
@@ -52,7 +63,7 @@ class Child extends Model implements IEvaluee
      *
      * @return AbstractEvaluator
      */
-    public function getEvaluator()
+    public function getEvaluator(): AbstractEvaluator
     {
         if ($this->has('family')) {
             return $this->family->getEvaluator();
@@ -77,7 +88,7 @@ class Child extends Model implements IEvaluee
      * @param string $format
      * @return string
      */
-    public function getAgeString($format = '%y yr, %m mo')
+    public function getAgeString(string $format = '%y yr, %m mo') : string
     {
         $currentDate = Carbon::now();
         $startOfMonth = Carbon::now()->startOfMonth();
@@ -85,14 +96,16 @@ class Child extends Model implements IEvaluee
 
         if ($this->dob->isFuture()) {
             return "P";
-        } else if ($currentDate == $startOfMonth) {
+        }
+
+        if ($currentDate == $startOfMonth) {
             // Return 2nd of month as on the first of every month
             // Carbon treats it as the previous month and returns
             // A month less than it should be.
             return $this->dob->diff($currentDatePlusOne)->format($format);
-        } else {
-            return $this->dob->diff($currentDate)->format($format);
         }
+
+        return $this->dob->diff($currentDate)->format($format);
     }
 
     /**
@@ -101,7 +114,7 @@ class Child extends Model implements IEvaluee
      * @param string $format
      * @return string
      */
-    public function getDobAsString($format = 'M Y')
+    public function getDobAsString(string $format = 'M Y'): string
     {
         return $this->dob->format($format);
     }
@@ -113,7 +126,7 @@ class Child extends Model implements IEvaluee
      * @param int|null $month A specific month for "end of year"
      * @return Carbon
      */
-    public function calcFutureMonthYear(int $years, int $month = null)
+    public function calcFutureMonthYear(int $years, int $month = null): Carbon
     {
         // Take the month we're given, or default to the config
         $month = ($month) ?? config('arc.school_month');
@@ -137,7 +150,7 @@ class Child extends Model implements IEvaluee
      *
      * @return Carbon
      */
-    public function calcSchoolStart()
+    public function calcSchoolStart(): Carbon
     {
         return $this->calcFutureMonthYear(5);
     }
@@ -145,11 +158,11 @@ class Child extends Model implements IEvaluee
     /**
      * Get this Child's Family.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
-    public function family()
+    public function family(): BelongsTo
     {
-        return $this->belongsTo('App\Family');
+        return $this->belongsTo(Family::class);
     }
 
     /**
@@ -157,22 +170,22 @@ class Child extends Model implements IEvaluee
      *
      * @return boolean
      */
-    public function getCanDeferAttribute()
+    public function getCanDeferAttribute(): bool
     {
-      $notices = $this->getEvaluator()->evaluations["App\Child"]["notices"] ?? [];
-      if (!array_key_exists('ScottishChildCanDefer', $notices)) {
-        return false;
-      }
-      $evaluation = $this->getEvaluator()->evaluate($this);
-      $notices = $evaluation['notices'];
-
-      if (count($notices) > 0) {
-        foreach ($notices as $key => $notice) {
-          if (array_key_exists('reason', $notice) && $notice['reason'] === 'Child|is able to defer (SCOTLAND)') {
-            return true;
-          }
+        $notices = $this->getEvaluator()->evaluations["App\Child"]["notices"] ?? [];
+        if (!array_key_exists('ScottishChildCanDefer', $notices)) {
+            return false;
         }
-      }
-      return false;
+        $evaluation = $this->getEvaluator()->evaluate($this);
+        $notices = $evaluation['notices'];
+
+        if (count($notices) > 0) {
+            foreach ($notices as $key => $notice) {
+                if (array_key_exists('reason', $notice) && $notice['reason'] === 'Child|is able to defer (SCOTLAND)') {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
