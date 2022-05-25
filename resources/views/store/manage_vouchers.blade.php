@@ -14,7 +14,7 @@
                     <h2 id='this-family'>This Family</h2>
                 </div>
                 <div>
-                    <h3>Their RV-ID is: {{ $registration->family->rvid }}</h3>
+                    <h3 id='rv-id'>Their RV-ID is: {{ $registration->family->rvid }}</h3>
                 </div>
                 <div class="alongside-container">
                     <div>
