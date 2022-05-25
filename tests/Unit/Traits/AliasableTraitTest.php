@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\Traits;
 
-use App\Carer;
 use App\Traits\Aliasable;
 use Config;
 use Illuminate\Database\Eloquent\Model;
