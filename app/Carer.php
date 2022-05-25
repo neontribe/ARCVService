@@ -10,12 +10,8 @@ class Carer extends Model
 {
     use Aliasable;
 
-    /**
-     * Trait overrides for names
-     * @var string[]
-     */
-    public $programmeAliases = [
-        "Carer",
+    public const PROGRAMME_ALIASES = [
+        "Child",
         "Participant",
     ];
 

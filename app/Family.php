@@ -18,13 +18,9 @@ class Family extends Model implements IEvaluee
     use Aliasable;
     use Evaluable;
 
-    /**
-     * Trait overrides for names
-     * @var string[]
-     */
-    public $programmeAliases = [
-        "Family",
-        "Household",
+    public const PROGRAMME_ALIASES = [
+        "Child",
+        "Participant",
     ];
 
     /**

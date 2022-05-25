@@ -5,9 +5,9 @@ namespace App\Traits;
 trait Aliasable
 {
     // attaches the alias attribute
-    public function getAlias(Int $programme = 0): string
+    public static function getAlias(Int $programme = 0): string
     {
         // return the chosen key, or the basename of the class the trait is attached to
-        return $this->programmeAliases[$programme] ?? class_basename(self::class);
+        return self::PROGRAMME_ALIASES[$programme] ?? class_basename(self::class);
     }
 }

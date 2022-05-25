@@ -9,48 +9,60 @@ use Tests\TestCase;
 
 class AliasableTraitTest extends TestCase
 {
-    private $TraitClassObject;
+    private $UnaliasedTraitClassObject;
+    private $AliasedTraitClassObject;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        // let's add Aliasable to a plain model class and stash it as an object
-        $this->TraitClassObject = new class extends Model {
+        $this->UnaliasedTraitClassObject = new class extends Model {
             use Aliasable;
 
             /**
              * Trait overrides for names
              * @var string[]
              */
-            public $programmeAliases = [];
+            public const PROGRAMME_ALIASES = [];
         };
+
+
+        $this->AliasedTraitClassObject = new class extends Model {
+            use Aliasable;
+
+            /**
+             * Trait overrides for names
+             * @var string[]
+             */
+            public const PROGRAMME_ALIASES = ['first', 'second'];
+        };
+
     }
 
     /** @test */
     public function itCanSupplyAnAlias()
     {
-        // get the thing
-        $entity = $this->TraitClassObject;
-
         // function exists and returns a string
+        $entity = $this->UnaliasedTraitClassObject;
         $this->assertTrue(method_exists($entity, "getAlias"));
-        $this->assertIsString($entity->getAlias());
+        $this->assertIsString($entity::getAlias());
 
-        // oops, we forgot to configure the arc.programmes or any!
+        // oops, we forgot to configure the arc.programmes!
         Config::set('arc.programmes', []);
         // fall back on the classname
-        $this->assertEquals(class_basename(get_class($entity)), $entity->getAlias());
+        $this->assertEquals(class_basename(get_class($entity)), $entity::getAlias());
 
-        // now set it up properly!
-        $entity->programmeAliases = ['First', 'Second'];
+        // now set it up som programmes
         Config::set('arc.programmes', ['programme 1', 'programme 2']);
 
+        // get the properly configured thing
+        $entity = $this->AliasedTraitClassObject;
+
         // when we don't pass a var, we get array 0;
-        $this->assertEquals($entity->programmeAliases[0], $entity->getAlias());
+        $this->assertEquals($entity::PROGRAMME_ALIASES[0], $entity::getAlias());
         // otherwise we can pass it an int and get the right alias
-        $this->assertEquals($entity->programmeAliases[1], $entity->getAlias(1));
+        $this->assertEquals($entity::PROGRAMME_ALIASES[1], $entity::getAlias(1));
         // and if we go out of bounds it gives us the classname again
-        $this->assertEquals(class_basename(get_class($entity)), $entity->getAlias(2));
+        $this->assertEquals(class_basename(get_class($entity)), $entity::getAlias(2));
     }
 }
