@@ -32,13 +32,11 @@ class StoreNewRegistrationRequest extends FormRequest
         $rules = [
             // MUST be present; MUST be in "yes, on, 1, or true"
             'consent' => 'required|accepted',
-            // MUST be present; MUST be in listed states
+            // MAY be present; MUST be in listed states
             'eligibility-hsbs' => [
-                'required',
                 Rule::in(config('arc.reg_eligibilities_hsbs')),
             ],
             'eligibility-nrpf' => [
-                'required',
                 Rule::in(config('arc.reg_eligibilities_nrpf')),
             ],
             // MUST be present; MUST be a not-null string

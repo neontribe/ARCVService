@@ -166,7 +166,6 @@
                         </li>
                     </ul>
                 </div>
-                        @endif
                 <div>
                     <label for="eligibility-hsbs">
                         Are you receiving Healthy Start or Best Start?
@@ -193,7 +192,6 @@
                         @endforeach
                     </select>
                 </div>
-                @if ($programme === 0)
                     @includeWhen(!empty($noticeReasons), 'store.partials.notice_box', ['noticeReasons' => $noticeReasons])
                 @endif
                 <button class="long-button submit" type="submit" formnovalidate>Save Changes</button>

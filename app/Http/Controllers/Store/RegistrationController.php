@@ -164,11 +164,13 @@ class RegistrationController extends Controller
         $sponsor = $user->centre->sponsor;
         $evaluator = EvaluatorFactory::make($sponsor->evaluations);
         $verifying = $evaluator->isVerifyingChildren();
+        $programme = Auth::user()->centre->sponsor->programme;
 
         $data = [
             "user_name" => $user->name,
             "centre_name" => ($user->centre) ? $user->centre->name : null,
-            "verifying" => $verifying
+            "verifying" => $verifying,
+            "programme" => $programme
         ];
         return view('store.create_registration', $data);
     }
