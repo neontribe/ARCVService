@@ -29,9 +29,8 @@ Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 // Store Dashboard route
 // Default redirect to Service Dashboard
 
-Route::get('/', function () {
+Route::get('/', static function () {
     $route = 'store.login';
-    //$route = (Auth::guard('store')->check()) ? 'store.dashboard' : 'store.login';
     return redirect()->route($route);
 })->name('store.base');
 

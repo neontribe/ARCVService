@@ -19,8 +19,8 @@ class Family extends Model implements IEvaluee
     use Evaluable;
 
     public const PROGRAMME_ALIASES = [
-        "Child",
-        "Participant",
+        "Family",
+        "Household",
     ];
 
     /**
