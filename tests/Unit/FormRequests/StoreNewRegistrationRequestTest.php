@@ -78,8 +78,9 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                     'eligibility-nrpf' => 'yes'
                 ]
             ],
-            'requestShouldFailWhenEligibilityIsMissing' => [
-                'passed' => false,
+            // this can now pass when eligibility is missing due to SP
+            'requestCanPassWhenEligibilityIsMissing' => [
+                'passed' => true,
                 'data' => [
                     'consent' => 'on',
                     'carer' => 'A String',

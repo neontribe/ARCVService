@@ -89,6 +89,7 @@
                     <img src="{{ asset('store/assets/info-light.svg') }}" alt="logo">
                     <h2>Other information</h2>
                 </div>
+                @if ($programme === 0)
                 <div>
                     <label for="eligibility-hsbs">
                         Are you receiving Healthy Start or Best Start?
@@ -124,6 +125,7 @@
                         @endforeach
                     </select>
                 </div>
+                @endif
                 <div>
                     <div class="user-control">
                         <input type="checkbox" class="styled-checkbox @if($errors->has('consent'))invalid @endif" id="privacy-statement" name="consent" @if( old('consent') ) checked @endif/>
