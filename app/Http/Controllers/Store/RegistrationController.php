@@ -45,9 +45,11 @@ class RegistrationController extends Controller
         // Masthead bit
         /** @var User $user */
         $user = Auth::user();
+        $programme = Auth::user()->centre->sponsor->programme;
         $data = [
             "user_name" => $user->name,
             "centre_name" => ($user->centre) ? $user->centre->name : null,
+            "programme" => $programme,
         ];
 
         // Slightly roundabout method of getting the permitted centres to poll
