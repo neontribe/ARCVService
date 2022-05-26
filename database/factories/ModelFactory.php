@@ -302,7 +302,7 @@ $factory->define(App\Centre::class, function (Faker\Generator $faker) {
         $sponsor = factory(App\Sponsor::class)->create();
     }
 
-    $name = $faker->streetName;
+    $name = $faker->unique()->streetName;
 
     return [
         'name' => $name,
