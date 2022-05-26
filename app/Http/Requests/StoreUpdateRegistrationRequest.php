@@ -48,11 +48,13 @@ class StoreUpdateRegistrationRequest extends FormRequest
             'children.*.dob' => 'required_if:children.*.verified,=,true|date_format:Y-m',
             // MAY be present; MUST be a boolean
             'children.*.verified' => 'boolean',
-            // MAY be present; MUST be in listed states
+            // SOMETIMES is present; MUST be in listed states
             'eligibility-hsbs' => [
+                'sometimes',
                 Rule::in(config('arc.reg_eligibilities_hsbs')),
             ],
             'eligibility-nrpf' => [
+                'sometimes',
                 Rule::in(config('arc.reg_eligibilities_nrpf')),
             ],
         ];

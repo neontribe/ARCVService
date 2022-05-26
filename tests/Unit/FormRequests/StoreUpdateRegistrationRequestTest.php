@@ -65,8 +65,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                     'eligibility-nrpf' => 'yes'
                 ],
             ],
-            'requestShouldFailWhenEligibilityIsMissing' => [
-                'passed' => false,
+            'requestCanPassWhenEligibilityIsMissing' => [
+                'passed' => true,
                 'data' => [
                     'pri_carer' => ['A String'],
                 ]
