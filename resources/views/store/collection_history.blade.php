@@ -82,7 +82,7 @@
                 </tbody>
             </table>
         @else
-            <p class="content-warning">This family has not collected.</p>
+            <p class="content-warning">This {{ $programme === 0 ? 'family' : 'household' }} has not collected.</p>
         @endif
     </div>
 

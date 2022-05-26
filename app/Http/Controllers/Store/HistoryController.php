@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Store;
 
 use App\Http\Controllers\Controller;
 use App\Registration;
+use Auth;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Illuminate\Database\Eloquent\Collection;
@@ -17,6 +18,7 @@ class HistoryController extends Controller
         $disbursedBundlesQuery = $registration->bundles()->disbursed()->orderBy('disbursed_at', 'desc');
         /** @var Collection $disbursedBundles */
         $disbursedBundles = $disbursedBundlesQuery->get();
+        $programme = Auth::user()->centre->sponsor->programme;
 
 
         if ($disbursedBundles->count() > 0) {
@@ -62,6 +64,7 @@ class HistoryController extends Controller
             'pri_carer' => array_shift($all_carers),
             'bundles' => $disbursedBundles,
             'bundles_by_week' => $datesCollection,
+            'programme' => $programme,
         ]);
     }
 }
