@@ -10,19 +10,19 @@
         <div class="col-container">
             <div class="col">
                 <div>
-                    <img src="{{ asset('store/assets/info-light.svg') }}">
-                    <h2 id='this-family'>This Family</h2>
+                    <img src="{{ $programme === 0 ? asset('store/assets/info-light.svg') : asset('store/assets/group-light.svg') }}">
+                    <h2 id='this-family'>{{ $programme === 0 ? ' This Family' : 'Voucher Collectors' }}</h2>
                 </div>
                 <div>
                     <h3 id='rv-id'>Their RV-ID is: {{ $registration->family->rvid }}</h3>
                 </div>
                 <div class="alongside-container">
                     <div>
-                        <h3>Main Carer:</h3>
+                        <h3>Main {{ $programme === 0 ? 'Carer' : 'Participant' }}</h3>
                         <p>{{ $pri_carer->name }}</p>
                     </div>
                     <div>
-                        <h3>Children:</h3>
+                        <h3>{{ $programme === 0 ? 'Children:' : 'Household' }}</h3>
                         <ul>
                           @foreach ( $children as $child )
                             <li>{{ $child->getAgeString() }}</li>
@@ -35,12 +35,12 @@
                 @endif
                 <a href="{{ route("store.registration.edit", ['registration' => $registration->id ]) }}" class="link" id='edit-family-link'>
                     <div class="link-button link-button-large">
-                        <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Go to edit family
+                        <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Go to edit {{ $programme === 0 ? 'family' : 'household' }}
                     </div>
                 </a>
                 <a href="{{ route("store.registration.index") }}" class="link" id='find-another-family-link'>
                     <div class="link-button link-button-large">
-                        <i class="fa fa-search button-icon" aria-hidden="true"></i>Find another family
+                        <i class="fa fa-search button-icon" aria-hidden="true"></i>Find another {{ $programme === 0 ? 'family' : 'household' }}
                     </div>
                 </a>
             </div>
@@ -51,7 +51,7 @@
                 </div>
                 <div>
                     <div class="emphasised-section">
-                        <p>This family should collect:</p>
+                        <p>This {{ $programme === 0 ? 'family' : 'household' }} should collect:</p>
                         <p><b>{{ $entitlement }} vouchers per week</b></p>
                     </div>
                     @if (!empty($lastCollection))
@@ -61,7 +61,7 @@
                         </div>
                     @else
                         <div class="emphasised-section">
-                            <p class="v-spaced">This family has not collected</p>
+                            <p class="v-spaced">This {{ $programme === 0 ? 'family' : 'household' }} has not collected</p>
                         </div>
                     @endif
                 </div>
@@ -154,7 +154,7 @@
                     <h2>Voucher Pick Up</h2>
                 </div>
                 <div>
-                    <p>There are {{ $vouchers_amount }} vouchers waiting for the family</p>
+                    <p>There are {{ $vouchers_amount }} vouchers waiting for this {{ $programme === 0 ? 'family' : 'household' }}</p>
                 </div>
                 <form method="post"
                       action="{{ route('store.registration.vouchers.put', [ 'registration' => $registration->id ]) }}">
