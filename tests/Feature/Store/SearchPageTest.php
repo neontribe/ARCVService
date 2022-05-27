@@ -245,39 +245,6 @@ class SearchPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function itPaginatesWhenRequired()
-    {
-        // Create a single Sponsor
-        $sponsor = factory(Sponsor::class)->create();
-
-        // Create centre
-        $centre = factory(Centre::class)->create([
-            "sponsor_id" => $sponsor->id,
-        ]);
-
-        // Create a CentreUser in Centre
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
-
-        // Make centre some registrations
-        factory(Registration::class, 20)->create([
-            "centre_id" => $centre->id,
-        ]);
-
-        // Visit search page, make sure next page link is present and works
-        // <a class="page-link" href="http://arcv-store.test/registrations?page=2" rel="next" aria-label="Next »">›</a>
-        $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.index'))
-            ->see('<a class="page-link" href="' . URL::route('store.base') . '/registrations?page=2' . '" rel="next" aria-label="Next »">›</a>')
-            ->click('›')
-            ->seePageIs(URL::route('store.base') . '/registrations?page=2');
-    }
-
-    /** @test */
     public function itShowsFamilyPrimaryCarersAlphabetically()
     {
         // Create a Centre (and, implicitly a random Sponsor)
@@ -338,36 +305,7 @@ class SearchPageTest extends StoreTestCase
 
         // Spot  and count the Registrations Family's primary carer names
         $selector = 'td.pri_carer';
-        $this->assertCount(10, $this->crawler->filter($selector));
-    }
-
-    /** @test */
-    public function itCanPaginateWithNumberedPages()
-    {
-        $centre = factory(Centre::class)->create();
-
-        // Create a CentreUser
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
-
-        // Create 11 random registrations, which should be over the 10 per-page pagination limit.
-        factory(Registration::class, 11)->create([
-            "centre_id" => $centre->id,
-        ]);
-
-        // Spot the pagination links, expecting 2 pages.
-        $selector = 'ul.pagination li';
-        $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.index'))
-            ->seeInElementAtPos($selector, "‹", 0)
-            ->seeInElementAtPos($selector, "1", 1)
-            ->seeInElementAtPos($selector, "2", 2)
-            ->seeInElementAtPos($selector, "›", 3)
-        ;
+        $this->assertCount(25, $this->crawler->filter($selector));
     }
 
     /** @test */
@@ -415,50 +353,6 @@ class SearchPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function itCanFilterUsersByCentre()
-    {
-        // Create some centres
-        $centre1 = factory(Centre::class)->create([
-            "name" => "Tatooine"
-        ]);
-        $centre2 = factory(Centre::class)->create([
-            "name" => "Dagobah"
-        ]);
-        $centre3 = factory(Centre::class)->create([
-            "name" => "Coruscant"
-        ]);
-
-        // Create a Centre User
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre1->id, ['homeCentre' => true]);
-
-        // Create some registrations in different centres
-        factory(Registration::class, 4)->create([
-            "centre_id" => $centre1->id,
-        ]);
-        factory(Registration::class, 3)->create([
-            "centre_id" => $centre2->id,
-        ]);
-        factory(Registration::class, 2)->create([
-            "centre_id" => $centre3->id,
-        ]);
-
-        // Go to the page and filter
-        $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.index'))
-            ->select($centre1->id, 'centre')
-            ->press('search');
-
-        // Check that only the 4 users added to centre are displayed
-        $this->assertCount(4, $this->crawler->filter('td.pri_carer'));
-        $this->assertCount(0, $this->crawler->filter('div.secondary_info'));
-    }
-
-    /** @test */
     public function itDoesNotShowLeftFamiliesByDefault()
     {
         $centre = factory(Centre::class)->create();
@@ -483,9 +377,8 @@ class SearchPageTest extends StoreTestCase
         $leavingFamily->save();
 
         $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.index'));
-
-        $this->assertCount(9, $this->crawler->filter('td.pri_carer'));
+            ->visit(URL::route('store.registration.index'))
+            ->dontSee($leavingFamily->carers->first());
     }
 
     /** @test */
@@ -514,8 +407,7 @@ class SearchPageTest extends StoreTestCase
 
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
-            ->check('#families_left')
-            ->press('search');
+            ->check('#families_left');
 
         $this->assertCount(1, $this->crawler->filter('tr.inactive'));
         $this->assertCount(9, $this->crawler->filter('tr.active'));
@@ -547,8 +439,7 @@ class SearchPageTest extends StoreTestCase
 
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
-            ->check('#families_left')
-            ->press('search');
+            ->check('#families_left');
 
         // Check the number of enabled and disabled buttons.
         $this->assertCount(2, $this->crawler->filter('tr.inactive td.right.no-wrap div.disabled'));
