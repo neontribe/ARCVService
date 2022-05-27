@@ -2,10 +2,11 @@
 
 namespace App\Console\Commands;
 
+use DateTime;
 use DB;
 use Exception;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Storage;
 use Log;
 use PDO;
 use ZipStream\Exception\OverflowException;
@@ -210,21 +211,21 @@ EOD;
                 }
 
                 foreach ($chunk as $k => $voucher) {
-                  if ($this->containsOnlyNull($voucher)) {
-                    unset($chunk[$k]);
-                    continue;
-                  }
-                  if (!is_null($voucher['Void Voucher Date'])) {
-                    unset($chunk[$k]);
-                    continue;
-                  }
-                  if (!is_null($voucher['Reimbursed Date'])) {
-                    $date = \DateTime::createFromFormat('d/m/Y', $voucher['Reimbursed Date']);
-                    if (strtotime($date->format('Y-m-d')) < strtotime('2021-04-01')) {
-                      unset($chunk[$k]);
-                      continue;
+                    if ($this->containsOnlyNull($voucher)) {
+                        unset($chunk[$k]);
+                        continue;
                     }
-                  }
+                    if (!is_null($voucher['Void Voucher Date'])) {
+                        unset($chunk[$k]);
+                        continue;
+                    }
+                    if (!is_null($voucher['Reimbursed Date'])) {
+                        $date = DateTime::createFromFormat('d/m/Y', $voucher['Reimbursed Date']);
+                        if (strtotime($date->format('Y-m-d')) < strtotime('2021-04-01')) {
+                            unset($chunk[$k]);
+                            continue;
+                        }
+                    }
                 }
 
                 $rows = array_merge($rows, $chunk);
@@ -273,7 +274,7 @@ EOD;
             $fileHandleAll = fopen('php://temp', 'r+');
             fputcsv($fileHandleAll, $this->headers);
             foreach ($rows as $index => $row) {
-                if ($index <= count($rows)/2) {
+                if ($index <= count($rows) / 2) {
                     fputcsv($fileHandleAll, $row);
                 }
             }
@@ -286,7 +287,7 @@ EOD;
             $fileHandleAll = fopen('php://temp', 'r+');
             fputcsv($fileHandleAll, $this->headers);
             foreach ($rows as $index => $row) {
-                if ($index > count($rows)/2) {
+                if ($index > count($rows) / 2) {
                     fputcsv($fileHandleAll, $row);
                 }
             }
@@ -365,7 +366,7 @@ EOD;
      * @param ZipStream|null $za
      * @return bool
      */
-    public function writeOutput(String $name, String $csv, ZipStream $za = null)
+    public function writeOutput(string $name, string $csv, ZipStream $za = null)
     {
         try {
             $filename = sprintf("%s.csv", preg_replace('/\s+/', '_', $name));
@@ -392,15 +393,12 @@ EOD;
         return true;
     }
 
-        // Adapted from https://stackoverflow.com/a/67977923
-        function containsOnlyNull(array $array): bool
+    // Adapted from https://stackoverflow.com/a/67977923
+    public function containsOnlyNull(array $array): bool
     {
         foreach ($array as $key => $value) {
-
-            if ($key != 'Voucher Number' && $key != 'Voucher Area' && $key != 'Date file was Downloaded') {
-              if ($value != null) {
-                  return false;
-              }
+            if ($key !== 'Voucher Number' && $key !== 'Voucher Area' && $key !== 'Date file was Downloaded' && $value !== null) {
+                return false;
             }
         }
         return true;

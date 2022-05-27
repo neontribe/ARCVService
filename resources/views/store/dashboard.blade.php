@@ -11,13 +11,13 @@
             <a href="{{ URL::route('store.registration.create') }}">
                 <li>
                     <img src="{{ asset('store/assets/add-pregnancy-light.svg') }}" id="add-family">
-                    Add a new family
+                    Add a new {{ App\Family::getAlias($programme) }}
                 </li>
             </a>
             <a href="{{ URL::route('store.registration.index') }}">
                 <li>
                     <img src="{{ asset('store/assets/search-light.svg') }}" id="search">
-                    Search for a family
+                    Search for a  {{ App\Family::getAlias($programme) }}
                 </li>
             </a>
             @if ($user->role !== 'foodmatters_user')
