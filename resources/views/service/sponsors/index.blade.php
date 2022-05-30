@@ -17,6 +17,8 @@
                 <tr>
                     <th>Name</th>
                     <th>Voucher Prefix</th>
+                    <th>Programme</th>
+                    <th></th>
                     {{-- <th>Scottish Centre</th> --}}
                 </tr>
             </thead>
@@ -25,6 +27,12 @@
                     <tr>
                         <td>{{ $sponsor->name }}</td>
                         <td>{{ $sponsor->shortcode }}</td>
+                        <td>{{ config('arc.programmes')[$sponsor->programme] }}</td>
+                        @if($sponsor->programme)
+                            <td><a href="{{ route('admin.sponsors.edit', ['id' => $sponsor->id]) }}" style="padding:5px;" class="link-button">
+                              Edit
+                            </a></td>
+                        @endif
                         {{-- <td>{{ $sponsor->is_scotland ? 'Yes' : 'No' }}</td> --}}
                     </tr>
                 @endforeach

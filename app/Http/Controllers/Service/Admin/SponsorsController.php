@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Service\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AdminNewSponsorRequest;
+use App\Http\Requests\UpdateRulesRequest;
 use App\Evaluation;
 use App\Sponsor;
 use Auth;
+use DB;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Log;
 
@@ -66,6 +68,51 @@ class SponsorsController extends Controller
         return redirect()
             ->route('admin.sponsors.index')
             ->with('message', 'Sponsor ' . $sponsor->name . ' created.');
+    }
+
+    /**
+     * Show the form for editing an SP Sponsor's rule values.
+     *
+     * @return Factory|View
+     */
+    public function edit($id)
+    {
+        $sponsor = Sponsor::find($id);
+        $householdExistsValue = $sponsor->evaluations->where('name', 'HouseholdExists')->pluck('value');
+        $householdMemberValue = $sponsor->evaluations->where('name', 'HouseholdMember')->pluck('value');
+        return view('service.sponsors.edit', compact('sponsor', 'householdExistsValue', 'householdMemberValue'));
+    }
+
+    /**
+     * Update an SP Sponsor's rule values.
+     *
+     * @return Factory|View
+     */
+    public function update(UpdateRulesRequest $request, int $id)
+    {
+      $sponsor = Sponsor::findOrFail($id);
+      try {
+          Evaluation::where('sponsor_id', $id)
+              ->where('name', 'HouseholdExists')
+              ->update(['value' => (int)$request->input('householdExistsValue')]);
+          Evaluation::where('sponsor_id', $id)
+              ->where('name', 'HouseholdMember')
+              ->update(['value' => (int)$request->input('householdMemberValue')]);
+          Evaluation::where('sponsor_id', $id)
+              ->where('name', 'DeductFromCarer')
+              ->update(['value' => (int)$request->input('householdMemberValue') * -1]);
+      } catch (Exception $e) {
+          // Oops! Log that
+          Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+          Log::error($e->getTraceAsString());
+          // Throw it back to the user
+          return redirect()
+              ->route('admin.sponsors.index')
+              ->withErrors('Update failed - DB Error.');
+      }
+      return redirect()
+          ->route('admin.sponsors.index')
+          ->with('message', 'Sponsor ' . $sponsor->name . ' rule values edited');
     }
 
     public static function scottishFamilyOverrides()
