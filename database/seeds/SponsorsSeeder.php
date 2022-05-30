@@ -62,11 +62,12 @@ class SponsorsSeeder extends Seeder
         $scottishRulesSponser->evaluations()->saveMany($this->veryfiesKids());
 
         // make an area/sponsor in a different programme - should be 9
-        factory(App\Sponsor::class)->create([
+        $socialPrescribingCentre = factory(App\Sponsor::class)->create([
             'name' => "Social Prescribing Area",
             'shortcode' => "SPA",
             'programme' => 1 // should be the SP area!
         ]);
+        $socialPrescribingCentre->evaluations()->saveMany($this->socialPrescribingOverrides());
     }
 
     public function veryfiesKids()
@@ -250,5 +251,65 @@ class SponsorsSeeder extends Seeder
                 "entity" => "App\Family",
             ]);
         return $primarySchoolers;
+    }
+
+    public function socialPrescribingOverrides()
+    {
+        return [
+            new Evaluation([
+                "name" => "FamilyIsPregnant",
+                "value" => null,
+                "purpose" => "credits",
+                "entity" => "App\Family",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsBetweenOneAndPrimarySchoolAge",
+                "value" => null,
+                "purpose" => "credits",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsUnderOne",
+                "value" => null,
+                "purpose" => "credits",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsPrimarySchoolAge",
+                "value" => null,
+                "purpose" => "disqualifiers",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "DeductFromCarer",
+                "value" => -7,
+                "purpose" => "credits",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "HouseholdMember",
+                "value" => 7,
+                "purpose" => "credits",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "HouseholdExists",
+                "value" => 10,
+                "purpose" => "credits",
+                "entity" => "App\Family",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsAlmostPrimarySchoolAge",
+                "value" => NULL,
+                "purpose" => "notices",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsAlmostOne",
+                "value" => NULL,
+                "purpose" => "notices",
+                "entity" => "App\Child",
+            ]),
+        ];
     }
 }

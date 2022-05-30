@@ -79,16 +79,16 @@ class SPVoucherEvaluatorTest extends TestCase
                 "entity" => "App\Family",
             ]),
             new Evaluation([
-                    "name" => "ChildIsAlmostPrimarySchoolAge",
-                    "value" => NULL,
-                    "purpose" => "notices",
-                    "entity" => "App\Child",
+                "name" => "ChildIsAlmostPrimarySchoolAge",
+                "value" => NULL,
+                "purpose" => "notices",
+                "entity" => "App\Child",
             ]),
             new Evaluation([
-                    "name" => "ChildIsAlmostOne",
-                    "value" => NULL,
-                    "purpose" => "notices",
-                    "entity" => "App\Child",
+                "name" => "ChildIsAlmostOne",
+                "value" => NULL,
+                "purpose" => "notices",
+                "entity" => "App\Child",
             ]),
         ];
 
