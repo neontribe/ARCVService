@@ -10,7 +10,6 @@ use App\Registration;
 use App\Sponsor;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Config;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
@@ -29,14 +28,8 @@ class SPVoucherEvaluatorTest extends TestCase
     private $rulesMods = [];
 
     private $family;
-    private $pregnancy;
-    private $isPrimarySchool;
-    private $isOverPrimarySchool;
-    private $underPrimarySchool;
     private $underOne;
-    private $isSecondarySchoolAge;
     private $isAlmostOne;
-    private $readyForSecondarySchool;
     private $readyForPrimarySchool;
 
     protected function setUp(): void
@@ -117,16 +110,10 @@ class SPVoucherEvaluatorTest extends TestCase
             'family_id' => $this->family->id,
             'born' => 1
         ]);
-        // $this->pregnancy = factory(Child::class, 'unbornChild')->make();
         $this->isPrimarySchool = factory(Child::class, 'isPrimarySchoolAge')->make();
-        // $this->isOverPrimarySchool = factory(Child::class, 'isSecondarySchoolAge')->make();
-        // $this->underPrimarySchool = factory(Child::class, 'betweenOneAndPrimarySchoolAge')->make();
         $this->underOne = factory(Child::class, 'underOne')->make();
         $this->readyForPrimarySchool = factory(Child::class, 'readyForPrimarySchool')->make();
-
-        // $this->isSecondarySchoolAge = factory(Child::class, 'isSecondarySchoolAge')->make();
         $this->isAlmostOne = factory(Child::class, 'almostOne')->make();
-        // $this->readyForSecondarySchool = factory(Child::class, 'readyForSecondarySchool')->make();
     }
 
     /** @test */
@@ -196,7 +183,7 @@ class SPVoucherEvaluatorTest extends TestCase
         $credits = $evaluation["credits"];
         $this->assertContains(self::CREDIT_TYPES['DeductFromCarer'], $credits);
         $this->assertEquals('0', $evaluation->getEntitlement());
-        
+
         $evaluator2 = EvaluatorFactory::make($rulesMods);
         $evaluation = $evaluator2->evaluate($this->family);
         $this->assertEquals('24', $evaluation->getEntitlement());
