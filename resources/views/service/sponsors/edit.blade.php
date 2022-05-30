@@ -28,14 +28,14 @@
                   <tr>
                       <td>Household exists</td>
                       <td>Amount awarded for first carer</td>
-                      <td><input type="number" name="householdExistsValue" value="{{ $householdExistsValue[0] ?? 0 }}"
+                      <td><input type="number" name="householdExistsValue" id="householdExistsValue" value="{{ $householdExistsValue[0] ?? 0 }}"
                         min="0" class="{{ $errors->has('householdExistsValue') ? 'has-error' : '' }}" required>
                       </td>
                   </tr>
                   <tr>
                       <td>Household member</td>
                       <td>Amount awarded for each additional household member</td>
-                      <td><input type="number" name="householdMemberValue" value="{{ $householdMemberValue[0] ?? 0 }}"
+                      <td><input type="number" name="householdMemberValue" id="householdMemberValue" value="{{ $householdMemberValue[0] ?? 0 }}"
                         min="0" class="{{ $errors->has('householdMemberValue') ? 'has-error' : '' }}" required>
                       </td>
                   </tr>

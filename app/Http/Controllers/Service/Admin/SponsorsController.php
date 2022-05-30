@@ -199,4 +199,64 @@ class SponsorsController extends Controller
             ]),
         ];
     }
+
+    public static function socialPrescribingOverrides()
+    {
+        return [
+            new Evaluation([
+                "name" => "FamilyIsPregnant",
+                "value" => null,
+                "purpose" => "credits",
+                "entity" => "App\Family",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsBetweenOneAndPrimarySchoolAge",
+                "value" => null,
+                "purpose" => "credits",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsUnderOne",
+                "value" => null,
+                "purpose" => "credits",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsPrimarySchoolAge",
+                "value" => null,
+                "purpose" => "disqualifiers",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "DeductFromCarer",
+                "value" => -7,
+                "purpose" => "credits",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "HouseholdMember",
+                "value" => 7,
+                "purpose" => "credits",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "HouseholdExists",
+                "value" => 10,
+                "purpose" => "credits",
+                "entity" => "App\Family",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsAlmostPrimarySchoolAge",
+                "value" => NULL,
+                "purpose" => "notices",
+                "entity" => "App\Child",
+            ]),
+            new Evaluation([
+                "name" => "ChildIsAlmostOne",
+                "value" => NULL,
+                "purpose" => "notices",
+                "entity" => "App\Child",
+            ]),
+        ];
+    }
 }

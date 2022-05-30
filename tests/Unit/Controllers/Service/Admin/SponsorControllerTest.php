@@ -3,6 +3,7 @@
 namespace Tests\Unit\Controllers\Service\Admin;
 
 use App\AdminUser;
+use App\Http\Controllers\Service\Admin\SponsorsController;
 use App\Http\Requests\AdminNewSponsorRequest;
 use App\Sponsor;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -18,6 +19,7 @@ class SponsorControllerTest extends StoreTestCase
 
     /** @var Sponsor */
     private $existingSponsor;
+    private $socialPrescribingSponsor;
 
     public function setUp(): void
     {
@@ -26,6 +28,14 @@ class SponsorControllerTest extends StoreTestCase
         $this->existingSponsor = factory(Sponsor::class)->create([
            'shortcode' => 'EXIST'
         ]);
+
+        $this->socialPrescribingSponsor = factory(Sponsor::class)->create([
+            'name' => "Social Prescribing Area",
+            'shortcode' => "SPA",
+            'programme' => 1
+        ]);
+        $socialPrescribingRules = SponsorsController::socialPrescribingOverrides();
+        $this->socialPrescribingSponsor->evaluations()->saveMany($socialPrescribingRules);
     }
 
     /**
@@ -165,5 +175,60 @@ class SponsorControllerTest extends StoreTestCase
         ]);
     }
 
+    /** @test */
+    public function testICanSeeProgrammeTypeOnSponsorListPage()
+    {
+        $adminUser = factory(AdminUser::class)->create();
+        $this->actingAs($adminUser, 'admin')
+            ->visit(route('admin.sponsors.index'))
+            ->see($this->socialPrescribingSponsor->id)
+            ->see($this->existingSponsor->id)
+            ->see('sponsors/' . $this->socialPrescribingSponsor->id . '/edit')
+            ->dontSee('sponsors/' . $this->existingSponsor->id . '/edit')
+        ;
+    }
 
+    /** @test */
+    public function testIEditRuleValuesForAnSPSponsor()
+    {
+        $adminUser = factory(AdminUser::class)->create();
+        $this->seeInDatabase('evaluations', [
+            'sponsor_id' => $this->socialPrescribingSponsor->id,
+            'name' => 'HouseholdExists',
+            'value' => 10
+        ]);
+        $this->seeInDatabase('evaluations', [
+            'sponsor_id' => $this->socialPrescribingSponsor->id,
+            'name' => 'HouseholdMember',
+            'value' => 7
+        ]);
+        $this->seeInDatabase('evaluations', [
+            'sponsor_id' => $this->socialPrescribingSponsor->id,
+            'name' => 'DeductFromCarer',
+            'value' => -7
+        ]);
+        $this->actingAs($adminUser, 'admin')
+            ->visit(route('admin.sponsors.index'))
+            ->click('Edit')
+            ->seePageIs(route('admin.sponsors.edit', ['id' => $this->socialPrescribingSponsor->id]))
+            ->type(15, 'householdExistsValue')
+            ->type(4, 'householdMemberValue')
+            ->press('Save')
+            ->seeInDatabase('evaluations', [
+                'sponsor_id' => $this->socialPrescribingSponsor->id,
+                'name' => 'HouseholdExists',
+                'value' => 15
+            ])
+            ->seeInDatabase('evaluations', [
+                'sponsor_id' => $this->socialPrescribingSponsor->id,
+                'name' => 'HouseholdMember',
+                'value' => 4
+            ])
+            ->seeInDatabase('evaluations', [
+                'sponsor_id' => $this->socialPrescribingSponsor->id,
+                'name' => 'DeductFromCarer',
+                'value' => -4
+            ])
+        ;
+    }
 }
