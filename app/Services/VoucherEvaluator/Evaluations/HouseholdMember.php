@@ -6,7 +6,7 @@ use Carbon\Carbon;
 
 class HouseholdMember extends BaseChildEvaluation
 {
-    public $reason = ' is member of household';
+    public $reason = 'is member of the household';
     private $specification;
 
     /**

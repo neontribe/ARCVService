@@ -6,7 +6,7 @@ use Carbon\Carbon;
 
 class DeductFromCarer extends BaseChildEvaluation
 {
-    public $reason = 'DEDUCT';
+    public $reason = '';
     private $specification;
 
     /**

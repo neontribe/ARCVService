@@ -6,7 +6,7 @@ use Carbon\Carbon;
 
 class HouseholdExists extends BaseFamilyEvaluation
 {
-    public $reason = ' exists';
+    public $reason = 'exists';
     private $specification;
 
     /**
