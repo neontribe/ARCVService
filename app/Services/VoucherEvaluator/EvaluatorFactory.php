@@ -15,6 +15,7 @@ use Illuminate\Support\Collection;
 
 class EvaluatorFactory
 {
+    private static $registration;
     /**
      * Factory method that makes the evaluator with the correct rules
      *
@@ -39,6 +40,7 @@ class EvaluatorFactory
     public static function makeFromRegistration(Registration $registration, $offsetDate = null)
     {
         // Look up Sponsor rules specific to our Registration
+        self::$registration = $registration;
         $evaluations = $registration->centre->sponsor->evaluations;
         return self::make($evaluations, $offsetDate);
     }
