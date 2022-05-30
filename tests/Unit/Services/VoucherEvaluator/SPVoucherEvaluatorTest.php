@@ -18,7 +18,6 @@ class SPVoucherEvaluatorTest extends TestCase
 {
     use DatabaseMigrations;
 
-    // This has a | in the reason field because we want to carry the entity with it.
     const CREDIT_TYPES = [
         'HouseholdExists' => ['reason' => 'Family|exists', 'value' => 10],
         'HouseholdMember' => ['reason' => 'Child|is member of the household', 'value' => 7],
@@ -36,7 +35,6 @@ class SPVoucherEvaluatorTest extends TestCase
     {
         parent::setUp();
 
-        // Changes for "extended age".
         $this->rulesMods["credit-sp"] = [
             new Evaluation([
                 "name" => "FamilyIsPregnant",
