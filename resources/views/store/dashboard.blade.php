@@ -46,7 +46,7 @@
                             'id' => 'export-centre-registrations',
                             'img' => 'store/assets/export-light.svg',
                             'route' => ['store.centre.registrations.summary', ['centre' => $centre_id ]],
-                            'text' => ['components.link-button.export-entity-registrations.text', ['entity.name' => $centre->name]]
+                            'text' => ['components.link-button.export-entity-registrations.text', ['entity-name' => $centre->name]]
                         ])
                     @endcan
                 @endcan

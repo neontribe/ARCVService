@@ -15,7 +15,7 @@ return [
             'text' => 'Print all :entity sheets',
         ],
         'export-entity-registrations' => [
-          'text' => 'Export :entity.name Registrations',
+          'text' => 'Export :entity-name Registrations',
         ],
     ],
 ];
