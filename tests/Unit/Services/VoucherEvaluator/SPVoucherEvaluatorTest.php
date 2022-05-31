@@ -21,7 +21,7 @@ class SPVoucherEvaluatorTest extends TestCase
     const CREDIT_TYPES = [
         'HouseholdExists' => ['reason' => 'Family|exists', 'value' => 10],
         'HouseholdMember' => ['reason' => 'Child|is member of the household', 'value' => 7],
-        'DeductFromCarer' => ['reason' => 'Child|', 'value' => -7],
+        'DeductFromCarer' => ['reason' => 'Family|', 'value' => -7],
     ];
 
     private $rulesMods = [];
@@ -64,7 +64,7 @@ class SPVoucherEvaluatorTest extends TestCase
                 "name" => "DeductFromCarer",
                 "value" => -7,
                 "purpose" => "credits",
-                "entity" => "App\Child",
+                "entity" => "App\Family",
             ]),
             new Evaluation([
                 "name" => "HouseholdMember",
