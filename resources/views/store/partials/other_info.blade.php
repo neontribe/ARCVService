@@ -1,4 +1,4 @@
-<div class="col full-height">
+<div class="col fit-height">
     <div>
         <img src="{{ asset('store/assets/info-light.svg') }}" alt="logo">
         <h2>Other information</h2>

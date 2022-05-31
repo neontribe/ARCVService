@@ -1,5 +1,5 @@
 @section('title', 'Add a new Family')
-    <div class="col full-height">
+    <div class="col fit-height">
         <div>
             <img src="{{ asset('store/assets/group-light.svg') }}" alt="logo">
             <h2>Voucher collectors</h2>

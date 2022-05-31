@@ -1,5 +1,5 @@
 
-<div class="col full-height">
+<div class="col fit-height">
     <div>
         <img src="{{ asset('store/assets/pregnancy-light.svg') }}" alt="logo">
         <h2>Household</h2>
