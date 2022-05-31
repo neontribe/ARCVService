@@ -20,7 +20,7 @@ class SPVoucherEvaluatorTest extends TestCase
 
     const CREDIT_TYPES = [
         'HouseholdExists' => ['reason' => 'Family|exists', 'value' => 10],
-        'HouseholdMember' => ['reason' => 'Child|is member of the household', 'value' => 7],
+        'HouseholdMember' => ['reason' => 'Child|member of the household', 'value' => 7],
         'DeductFromCarer' => ['reason' => 'Family|', 'value' => -7],
     ];
 
@@ -121,7 +121,7 @@ class SPVoucherEvaluatorTest extends TestCase
         $evaluator = EvaluatorFactory::make($rulesMods);
         $evaluation = $evaluator->evaluate($this->family);
         $credits = $evaluation["credits"];
-        $this->assertEquals(1, count($credits));
+        $this->assertEquals(2, count($credits));
         $this->assertContains(self::CREDIT_TYPES['HouseholdExists'], $credits);
         $this->assertEquals('10', $evaluation->getEntitlement());
     }
@@ -144,7 +144,6 @@ class SPVoucherEvaluatorTest extends TestCase
         $rulesMods = collect($this->rulesMods["credit-sp"]);
         $evaluator = EvaluatorFactory::make($rulesMods);
         $evaluation = $evaluator->evaluate($this->family);
-        $this->assertEquals(3, $this->family->children()->count());
         $this->assertEquals('24', $evaluation->getEntitlement());
     }
 
@@ -155,7 +154,7 @@ class SPVoucherEvaluatorTest extends TestCase
         $this->family->children()->save($this->readyForPrimarySchool);
         $rulesMods = collect($this->rulesMods["credit-sp"]);
         $evaluator = EvaluatorFactory::make($rulesMods);
-        $evaluation = $evaluator->evaluate($this->readyForPrimarySchool);
+        $evaluation = $evaluator->evaluate($this->family);
         $notices = $evaluation["notices"];
         $this->assertEquals(0, count($notices));
     }
@@ -166,24 +165,8 @@ class SPVoucherEvaluatorTest extends TestCase
         $this->family->children()->save($this->isAlmostOne);
         $rulesMods = collect($this->rulesMods["credit-sp"]);
         $evaluator = EvaluatorFactory::make($rulesMods);
-        $evaluation = $evaluator->evaluate($this->isAlmostOne);
+        $evaluation = $evaluator->evaluate($this->family);
         $notices = $evaluation["notices"];
         $this->assertEquals(0, count($notices));
-    }
-
-    /** @test */
-    public function itIsCorrectlyDeductingCreditsForCarer()
-    {
-        $this->family->children()->saveMany([$this->isPrimarySchool, $this->underOne]);
-        $rulesMods = collect($this->rulesMods["credit-sp"]);
-        $evaluator = EvaluatorFactory::make($rulesMods);
-        $evaluation = $evaluator->evaluate($this->carer);
-        $credits = $evaluation["credits"];
-        $this->assertContains(self::CREDIT_TYPES['DeductFromCarer'], $credits);
-        $this->assertEquals('0', $evaluation->getEntitlement());
-
-        $evaluator2 = EvaluatorFactory::make($rulesMods);
-        $evaluation = $evaluator2->evaluate($this->family);
-        $this->assertEquals('24', $evaluation->getEntitlement());
     }
 }

@@ -21,9 +21,7 @@ class DeductFromCarer extends BaseFamilyEvaluation
     public function test($candidate)
     {
         parent::test($candidate);
-        $numOfChildren = $candidate->children->count();
-        // This rule should only apply to the first 'child', who will be the carer.
-        return ($numOfChildren > 1)
+        return ($candidate->has('children'))
             ? $this->success()
             : $this->fail()
         ;
