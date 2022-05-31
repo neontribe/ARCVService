@@ -12,6 +12,7 @@ use DB;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 use Log;
 
@@ -78,6 +79,12 @@ class SponsorsController extends Controller
      */
     public function edit($id)
     {
+        $validation = Validator::make(['id' => $id],[
+            'id' => 'required|integer|exists:sponsors,id'
+        ]);
+        if ($validation->fails()) {
+            abort(404);
+        }
         $sponsor = Sponsor::find($id);
         $householdExistsValue = $sponsor->evaluations->where('name', 'HouseholdExists')->pluck('value');
         $householdMemberValue = $sponsor->evaluations->where('name', 'HouseholdMember')->pluck('value');
