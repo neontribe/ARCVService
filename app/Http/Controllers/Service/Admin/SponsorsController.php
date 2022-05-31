@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Service\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdminNewSponsorRequest;
 use App\Http\Requests\UpdateRulesRequest;
 use App\Evaluation;
 use App\Sponsor;
