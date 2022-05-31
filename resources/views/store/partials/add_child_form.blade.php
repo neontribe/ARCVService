@@ -121,12 +121,4 @@
             dateObj, $('#dob-verified').is(":checked")
         ]);
     });
-
-    /*
-    $("#child_wrapper").on('click', '.remove_date_field', function (e) {
-        e.preventDefault();
-        $(e.target).closest('tr').remove();
-        return false;
-    });
-     */
 </script>
