@@ -31,102 +31,102 @@
 @endsection
 
 <script>
-    $(document).ready(
-        function () {
-            var el = $("#child_wrapper");
-            var addDateButton = $("#add-dob");
-            var dobError = $('#dob-error');
 
-            $(addDateButton).click(function (e) {
-                e.preventDefault();
+    function resetDobInput() {
+        // reset form
+        $('#dob-error').text('');
+        $('#dob-year').val('');
+        $('#dob-month').val('');
+        $('#dob-verified').prop('checked', false);
+        $('#dob-month').focus();
+    }
+    $(document).on('childRow:updated', resetDobInput);
 
-                var monthEl = $('#dob-month');
-                var yearEl = $('#dob-year');
-                var idCheckedEl = $('#dob-verified');
+    function addDobRow(e, dateObj, verified) {
+        // setup fields
+        // It's a valid date, so manufacture a human readable string
+        var innerTextDate = dateObj.format("MMM YYYY");
+        var valueDate = dateObj.format("YYYY-MM");
 
-                // If input fields are too small, return
-                if (monthEl.val().length < 1 || yearEl.val().length <= 2) {
-                    dobError.text('Invalid Date');
-                    return false;
-                }
+        // Organise the ID verification values and display
+        var verifiedValue = verified ? 1 : 0;
+        var displayVerified = verified ? "checked" : null;
 
-                // get the dates
-                var month = monthEl.val();
-                var year = yearEl.val();
-                var dateObj = moment(year + '-' + month, "YYYY-M", true).startOf('month');
+        // give the kids a random key
+        var childKey = Math.random();
 
-                if (!dateObj.isValid()) {
-                    switch (dateObj.invalidAt()) {
-                        case (1) : // month
-                            dobError.text('Invalid Month');
-                            break;
-                        case (0) : // year
-                            dobError.text('Invalid Year');
-                            break;
-                        default :
-                    }
-                    return false;
-                }
+        // Create the table columns
+        var ageColumn = (moment().diff(valueDate, 'days') > 0)
+            ? '<td class="age-col">' +
+            moment().diff(valueDate, 'years') + ' yr, ' +
+            moment().diff(valueDate, 'months') % 12  +
+            ' mo</td>'
+            : '<td class="age-col">P</td>'
+        ;
 
-                // Check date is less than 5 years ago of 10 months away.
-                // var lowerBoundDate = moment().startOf('month').subtract(5, 'year');
-                var upperBoundDate = moment().startOf('month').add(9, 'month');
+        var dobColumn = '<td class="dob-col"><input name="children[' + childKey + '][dob]" type="hidden" value="' + valueDate + '" >' + innerTextDate + '</td>';
+        var idColumn = (verified)
+            ? '<td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][verified]" id="child' + childKey + '" ' + displayVerified + ' value="' + verifiedValue + '"><label for="child' + childKey + '"><span class="visually-hidden">Toggle ID checked</span></label>' + '</td>'
+            : '<td class="verified-col relative"></td>';
+        var removeColumn = '<td class="remove-col"><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>';
 
-                /*
-                if (dateObj.isBefore(lowerBoundDate)) {
-                    dobError.text('Invalid Date: over 5 year ago.');
-                    return false;
-                }
-                */
+        // add an input
+        $("#child_wrapper").append('<tr>' + ageColumn + dobColumn + idColumn + removeColumn + '</tr>');
 
-                if (dateObj.isAfter(upperBoundDate)) {
-                    dobError.text('Invalid Date: over 9 months away.');
-                    return false;
-                }
+        // emit event
+        $(document).trigger('childRow:updated');
+    }
+    $(document).on('childInput:submitted', addDobRow);
 
-                // It's a valid date, so manufacture a human readable string
-                var innerTextDate = dateObj.format("MMM YYYY");
-                var valueDate = dateObj.format("YYYY-MM");
+    $("#add-dob").click(function (e) {
+        e.preventDefault();
 
-                // Make some age display values based on if it's the future.
-                var ageString = (moment().diff(valueDate, 'days') > 0)
-                    ? '<td class="age-col">' +
-                        moment().diff(valueDate, 'years') + ' yr, ' +
-                        moment().diff(valueDate, 'months') % 12  +
-                        ' mo</td>'
-                    : '<td class="age-col">P</td>'
-                    ;
+        // error field for messages
+        var dobError = $('#dob-error');
 
-                // Organise the ID verification values and display
-                var verifiedValue = idCheckedEl.is(":checked") ? 1 : 0;
-                var displayVerified = idCheckedEl.is(":checked") ? "checked" : null;
-                var childKey = Math.random();
+        // get the dates
+        var month = $('#dob-month').val();
+        var year = $('#dob-year').val();
 
-                // Create the table columns
-                var ageColumn = ageString;
-                var dobColumn = '<td class="dob-col"><input name="children[' + childKey + '][dob]" type="hidden" value="' + valueDate + '" >' + innerTextDate + '</td>';
-                var idColumn = (idCheckedEl.length)
-                    ? '<td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][verified]" id="child' + childKey + '" ' + displayVerified + ' value="' + verifiedValue + '"><label for="child' + childKey + '"><span class="visually-hidden">Toggle ID checked</span></label>' + '</td>'
-                    : '<td class="verified-col relative"></td>';
-                var removeColumn = '<td class="remove-col"><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>';
-
-                // add an input
-                $(el).append('<tr>' + ageColumn + dobColumn + idColumn + removeColumn + '</tr>');
-
-                // reset form
-                dobError.text('');
-                yearEl.val('');
-                monthEl.val('');
-                idCheckedEl.prop('checked', false);
-                monthEl.focus();
-
-            });
-
-            $(el).on("click", ".remove_date_field", function (e) {
-                e.preventDefault();
-                $(this).closest('tr').remove();
-                return false;
-            });
+        // If input fields are too small, return
+        if (month.length < 1 || year.length <= 2) {
+            dobError.text('Invalid Date');
+            return false;
         }
-    );
+
+        var dateObj = moment(year + '-' + month, "YYYY-M", true).startOf('month');
+
+        if (!dateObj.isValid()) {
+            switch (dateObj.invalidAt()) {
+                case (1) : // month
+                    dobError.text('Invalid Month');
+                    break;
+                case (0) : // year
+                    dobError.text('Invalid Year');
+                    break;
+                default :
+                    dobError.text('Invalid Date');
+            }
+            return false;
+        }
+
+        if (dateObj.isAfter(
+            moment().startOf('month').add(9, 'month')
+        )) {
+            dobError.text('Invalid Date: over 9 months away.');
+            return false;
+        }
+        // broadcast that we've validated and made the
+        $(document).trigger('childInput:submitted', [
+            dateObj, $('#dob-verified').is(":checked")
+        ]);
+    });
+
+    /*
+    $("#child_wrapper").on('click', '.remove_date_field', function (e) {
+        e.preventDefault();
+        $(e.target).closest('tr').remove();
+        return false;
+    });
+     */
 </script>

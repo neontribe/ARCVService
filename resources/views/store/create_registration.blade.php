@@ -215,6 +215,12 @@
             var spanclass = $(this)[0].id + '-span';
             $('#' + spanclass).addClass('collapsed');
         });
+
+        $("#child_wrapper").on('click', '.remove_date_field', function (e) {
+            e.preventDefault();
+            $(e.target).closest('tr').remove();
+            return false;
+        });
     </script>
 
 @endsection
