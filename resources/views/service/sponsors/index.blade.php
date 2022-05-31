@@ -30,7 +30,9 @@
                         <td>{{ config('arc.programmes')[$sponsor->programme] }}</td>
                         @if($sponsor->programme)
                             <td><a href="{{ route('admin.sponsors.edit', ['id' => $sponsor->id]) }}" style="padding:5px;" class="link-button">
-                              Edit
+                                <span class="link-button link-button-small">
+                                    Edit
+                                </span>
                             </a></td>
                         @endif
                         {{-- <td>{{ $sponsor->is_scotland ? 'Yes' : 'No' }}</td> --}}
