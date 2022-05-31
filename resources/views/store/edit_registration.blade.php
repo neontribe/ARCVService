@@ -12,7 +12,7 @@
             {{ method_field('PUT') }}
             {!! csrf_field() !!}
             <input type="hidden" name="registration" value="{{ $registration->id }}">
-            @include('store.partials.edit_voucher_collectorsSP')
+            @include('store.partials.voucher_collectorsSP')
             @include('store.partials.householdSP')
             @include('store.partials.other_infoSP')
         </form>
@@ -23,9 +23,12 @@
             {{ method_field('PUT') }}
             {!! csrf_field() !!}
             <input type="hidden" name="registration" value="{{ $registration->id }}">
-            @include('store.partials.edit_voucher_collectors')
+            @include('store.partials.voucher_collectors')
             @include('store.partials.family')
             @include('store.partials.other_info')
+        </form>
+    </div>
+@endif
 
 <script src="{{ asset('js/edit_registration.js') }}"></script>
     
