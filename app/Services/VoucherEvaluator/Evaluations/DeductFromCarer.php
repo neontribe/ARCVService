@@ -4,7 +4,7 @@ namespace App\Services\VoucherEvaluator\Evaluations;
 
 use Carbon\Carbon;
 
-class DeductFromCarer extends BaseChildEvaluation
+class DeductFromCarer extends BaseFamilyEvaluation
 {
     public $reason = '';
     private $specification;
@@ -21,9 +21,7 @@ class DeductFromCarer extends BaseChildEvaluation
     public function test($candidate)
     {
         parent::test($candidate);
-        $children = $candidate->family->children;
-        // This rule should only apply to the first 'child', who will be the carer.
-        return ($candidate->id === $children[0]->id)
+        return ($candidate->has('children'))
             ? $this->success()
             : $this->fail()
         ;

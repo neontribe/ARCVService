@@ -284,7 +284,7 @@ class SponsorsSeeder extends Seeder
                 "name" => "DeductFromCarer",
                 "value" => -7,
                 "purpose" => "credits",
-                "entity" => "App\Child",
+                "entity" => "App\Family",
             ]),
             new Evaluation([
                 "name" => "HouseholdMember",
