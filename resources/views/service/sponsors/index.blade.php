@@ -34,6 +34,8 @@
                                     Edit
                                 </span>
                             </a></td>
+                        @else
+                            <td></td>
                         @endif
                         {{-- <td>{{ $sponsor->is_scotland ? 'Yes' : 'No' }}</td> --}}
                     </tr>
