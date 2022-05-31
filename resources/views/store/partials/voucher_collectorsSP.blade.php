@@ -1,5 +1,3 @@
-@section('title', 'Add a new Household')
-
     <div class="col fit-height">
         <div>
             <img src="{{ asset('store/assets/group-light.svg') }}" alt="logo">

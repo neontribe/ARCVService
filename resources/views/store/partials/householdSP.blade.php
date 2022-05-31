@@ -1,4 +1,3 @@
-
 <div class="col fit-height">
     <div>
         <img src="{{ asset('store/assets/pregnancy-light.svg') }}" alt="logo">

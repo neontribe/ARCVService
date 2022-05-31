@@ -3,8 +3,10 @@
 @section('content')
 @if ($programme !==0)
     @include('store.partials.navbar', ['headerTitle' => 'New household sign up'])
+    @section('title', 'Add a new Household')
 @else
     @include('store.partials.navbar', ['headerTitle' => 'New family sign up'])
+    @section('title', 'Add a new Family')
 @endif
 
     @if ($programme !== 0)
