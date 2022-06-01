@@ -252,7 +252,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
     public function itNoticesWhenAChildIsAlmostPrimarySchoolAge()
     {
         // Need to change the values we use for school start to next month's integer
-        Config::set('arc.scottish_school_month', Carbon::now()->addMonth()->month);
+        Config::set('arc.scottish_school_month', Carbon::now()->addMonthsNoOverflow(1)->month);
 
         $rulesMod = collect($this->rulesMods["credit-primary"]);
         $evaluator = EvaluatorFactory::make($rulesMod);
@@ -272,7 +272,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
     public function itNoticesWhenAChildCanDefer()
     {
         // Need to change the values we use for school start to next month's integer
-        Config::set('arc.scottish_school_month', Carbon::now()->addMonth()->month);
+        Config::set('arc.scottish_school_month', Carbon::now()->addMonthsNoOverflow(1)->month);
 
         $rulesMod = collect($this->rulesMods["credit-primary"]);
         $evaluator = EvaluatorFactory::make($rulesMod);
@@ -292,7 +292,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
     public function itWontDeferAChildWhoIsOverFourAtSchoolStart()
     {
         // Need to change the values we use for school start to next month's integer
-        Config::set('arc.scottish_school_month', Carbon::now()->addMonth()->month);
+        Config::set('arc.scottish_school_month', Carbon::now()->addMonthsNoOverflow(1)->month);
 
         $rulesMod = collect($this->rulesMods["credit-primary"]);
         $evaluator = EvaluatorFactory::make($rulesMod);
