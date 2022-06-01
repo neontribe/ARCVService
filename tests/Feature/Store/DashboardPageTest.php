@@ -76,6 +76,7 @@ class DashboardPageTest extends StoreTestCase
         $downloaduser = $this->downloadUser;
 
         $relevantRoute = URL::route('store.centres.registrations.summary');
+        $otherRelevantRoute = URL::route('store.centres.registrations.summary', ['programme' => 1]);
         $specificRoute = URL::route('store.centre.registrations.summary', ['centre' => $this->centre->id ]);
         $mvlRoute = URL::route('store.vouchers.mvl.export');
 
@@ -102,6 +103,7 @@ class DashboardPageTest extends StoreTestCase
         $this->actingAs($fmuser, 'store')
             ->visit(URL::route('store.dashboard'))
             ->see($relevantRoute)
+            ->see($otherRelevantRoute)
             ->see($mvlRoute)
             ->dontSee($specificRoute)
             ->dontSee("print-registrations")
