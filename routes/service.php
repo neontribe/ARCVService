@@ -138,7 +138,7 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.sponsors.store',
         'uses' => 'Admin\SponsorsController@store',
     ]);
-    Route::get('sponsors/{id}/edit', [
+    Route::get('sponsors/{id}', [
         'as' => 'admin.sponsors.edit',
         'uses' => 'Admin\SponsorsController@edit',
     ])->where('id', '^[0-9]+$');
