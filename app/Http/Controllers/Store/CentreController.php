@@ -57,6 +57,7 @@ class CentreController extends Controller
      */
     public function exportRegistrationsSummary(Centre $centre)
     {
+        $programme = isset($_GET['programme']) ? $_GET['programme'] : 0;
         // Get User
         /** @var CentreUser $user */
         $user = Auth::user();
@@ -74,12 +75,12 @@ class CentreController extends Controller
             ];
         } else {
             // Set for relevant centres
-            $centre_ids = $user->relevantCentres()->pluck('id')->all();
+            $centre_ids = $user->relevantCentres($programme)->pluck('id')->all();
             $dateFormats = [];
             $excludeColumns = [];
         }
 
-        $summary = $this->getCentreRegistrationsSummary($centre_ids, $dateFormats, $excludeColumns);
+        $summary = $this->getCentreRegistrationsSummary($centre_ids, $dateFormats, $excludeColumns, $programme);
 
         list($rows, $headers) = $summary;
 
@@ -120,7 +121,7 @@ class CentreController extends Controller
      * @param array $excludeColumns
      * @return array
      */
-    private function getCentreRegistrationsSummary(array $centre_ids, $dateFormats = [], $excludeColumns = [])
+    private function getCentreRegistrationsSummary(array $centre_ids, $dateFormats = [], $excludeColumns = [], $programme = 0)
     {
         $dateFormats = array_replace([
             'lastCollection' => 'd/m/Y',
@@ -188,7 +189,11 @@ class CentreController extends Controller
                         $due_date = $child->dob->format($dateFormats['dob']);
                     } else {
                         // Otherwise, set the header
-                        $dob_header = 'Child ' . (string)$child_index . ' DoB';
+                        if ($programme) {
+                            $dob_header = 'Household Member ' . (string)$child_index . ' DoB';
+                        } else {
+                            $dob_header = 'Child ' . (string)$child_index . ' DoB';
+                        }
                         $kids[$dob_header] = $child->dob->lastOfMonth()->format($dateFormats['dob']);
                         $child_index += 1;
                         // A child is eligible if it's family is AND it has no disqualifications of it's own.
@@ -198,8 +203,15 @@ class CentreController extends Controller
                     }
                 }
             }
-            // Add count of eligible kids
-            $row['Eligible Children'] = $eligibleKids;
+            if ($programme) {
+                // Add count of eligible household members
+                // Minus one to account for the primary carer
+                $row['Eligible Household Members'] = $eligibleKids - 1;
+            } else {
+                // Add count of eligible kids
+                $row['Eligible Children'] = $eligibleKids;
+            }
+
 
             // Add our kids back in
             $row = array_merge($row, $kids);
@@ -210,9 +222,11 @@ class CentreController extends Controller
             $row['Leaving Date'] = $reg->family->leaving_on ? $reg->family->leaving_on->format($dateFormats['leave']) : null;
             // Would be confusing if an old reason was left in - so check leaving date is there.
             $row["Leaving Reason"] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
-            $row["Family Eligibility (HSBS)"] = ($reg->eligibility_hsbs) ?? null ;
-            $row["Family Eligibility (NRPF)"] = ($reg->eligibility_nrpf) ?? null ;
-            $row["Eligible From"] = ($reg->eligible_from) ? $reg->eligible_from->format($dateFormats['eligible_from']): null ;
+            if (!$programme) {
+                $row["Family Eligibility (HSBS)"] = ($reg->eligibility_hsbs) ?? null ;
+                $row["Family Eligibility (NRPF)"] = ($reg->eligibility_nrpf) ?? null ;
+                $row["Eligible From"] = ($reg->eligible_from) ? $reg->eligible_from->format($dateFormats['eligible_from']): null;
+            }
 
             // Create the Date Downloaded column if this user can export registrations
             if (!in_array('Date file was Downloaded', $excludeColumns, true)) {

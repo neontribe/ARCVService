@@ -129,14 +129,24 @@ class CentreUser extends Authenticatable
      *
      * @return Collection
      */
-    public function relevantCentres()
+    public function relevantCentres($programme = 0)
     {
         // default to empty collection
         $centres = collect([]);
         switch ($this->role) {
             case "foodmatters_user":
-                // Just get all centres
-                $centres = collect(Centre::get()->all());
+                if ($programme) {
+                    // Get all SP centres
+                    $centres = Centre::all()->filter(function($centre){
+                        return $centre->sponsor->programme;
+                    });
+                } else {
+                    // Get all non-SP centres
+                    $centres = Centre::all()->filter(function($centre){
+                        return $centre->sponsor->programme === 0;
+                    });
+                    // $centres = collect(Centre::get()->all());
+                }
                 break;
             case "centre_user":
                 // If we have one, get our centre's neighbours
