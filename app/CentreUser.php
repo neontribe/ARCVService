@@ -145,7 +145,6 @@ class CentreUser extends Authenticatable
                     $centres = Centre::all()->filter(function($centre){
                         return $centre->sponsor->programme === 0;
                     });
-                    // $centres = collect(Centre::get()->all());
                 }
                 break;
             case "centre_user":

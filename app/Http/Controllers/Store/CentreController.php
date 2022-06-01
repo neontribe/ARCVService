@@ -11,6 +11,7 @@ use Auth;
 use Carbon\Carbon;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use PDF;
 
@@ -55,9 +56,10 @@ class CentreController extends Controller
      * @param Centre $centre
      * @return ResponseFactory|\Symfony\Component\HttpFoundation\Response
      */
-    public function exportRegistrationsSummary(Centre $centre)
+    public function exportRegistrationsSummary(Request $request, Centre $centre)
     {
-        $programme = isset($_GET['programme']) ? $_GET['programme'] : 0;
+        $programme = $request->input('programme', 0);
+
         // Get User
         /** @var CentreUser $user */
         $user = Auth::user();
