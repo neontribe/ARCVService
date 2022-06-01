@@ -219,7 +219,9 @@ class CentreController extends Controller
             $row = array_merge($row, $kids);
 
             // Set the last dates.
-            $row['Due Date'] = $due_date;
+            if (!$programme) {
+                $row['Due Date'] = $due_date;
+            }
             $row['Join Date'] = $reg->created_at ? $reg->created_at->format($dateFormats['join']) : null;
             $row['Leaving Date'] = $reg->family->leaving_on ? $reg->family->leaving_on->format($dateFormats['leave']) : null;
             // Would be confusing if an old reason was left in - so check leaving date is there.

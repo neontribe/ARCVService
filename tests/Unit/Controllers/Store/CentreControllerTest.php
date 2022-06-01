@@ -196,7 +196,6 @@ class CentreControllerTest extends StoreTestCase
             "Entitlement",
             "Last Collection",
             "Eligible Household Members",
-            "Due Date",
             "Join Date",
             "Leaving Date",
             "Leaving Reason"
@@ -207,6 +206,7 @@ class CentreControllerTest extends StoreTestCase
             "Family Eligibility (HSBS)",
             "Family Eligibility (NRPF)",
             "Eligible From",
+            "Due Date",
         ];
 
         // Check the expected headers are present.
