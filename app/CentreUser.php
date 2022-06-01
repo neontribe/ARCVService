@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use App\Notifications\StorePasswordResetNotification;
 
 class CentreUser extends Authenticatable
@@ -136,15 +137,18 @@ class CentreUser extends Authenticatable
         switch ($this->role) {
             case "foodmatters_user":
                 if ($programme) {
-                    // Get all SP centres
-                    $centres = Centre::all()->filter(function($centre){
-                        return $centre->sponsor->programme;
-                    });
+                    $centres = DB::table('centres')
+                        ->leftJoin('sponsors', 'centres.sponsor_id', 'sponsors.id')
+                        ->where('sponsors.programme', 1)
+                        ->get()
+                    ;
                 } else {
                     // Get all non-SP centres
-                    $centres = Centre::all()->filter(function($centre){
-                        return $centre->sponsor->programme === 0;
-                    });
+                    $centres = DB::table('centres')
+                        ->leftJoin('sponsors', 'centres.sponsor_id', 'sponsors.id')
+                        ->where('sponsors.programme', 0)
+                        ->get()
+                    ;
                 }
                 break;
             case "centre_user":
