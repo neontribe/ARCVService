@@ -1,8 +1,10 @@
 <div class="col fit-height">
     <div>
         <img src="{{ asset('store/assets/info-light.svg') }}" alt="logo">
+        <input type="hidden" name="registration" value="{{ $registration->id ?? ''}}">
         <h2>This family</h2>
     </div>
+    {{-- This section should only exist in add new rather than edit record --}}
     @if (isset($family))
         <div>
             Their RV-ID is: <strong>{{ $family->rvid }}</strong>
@@ -86,9 +88,11 @@
             @endforeach
         </select>
     </div>
+    {{-- This section should only exist in edit rather than add new --}}
     @if (isset($noticeReasons))
         @includeWhen(!empty($noticeReasons), 'store.partials.notice_box', ['noticeReasons' => $noticeReasons])
     @endif
+    {{-- This section should only exist in add new rather than existing records --}}
     @if (!isset($family))
         <div>
             <div class="user-control">
@@ -108,6 +112,7 @@
         @endif
         <button class="long-button submit" type="Submit">Save Family</button>
     @endif
+    {{-- This section should only exist in edit rather than add new --}}
     @if (isset($registration))
     <button class="long-button submit" type="submit" formnovalidate>Save Changes</button>
         <button class="long-button"

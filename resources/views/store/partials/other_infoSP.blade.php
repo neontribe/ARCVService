@@ -1,9 +1,10 @@
 <div class="col fit-height">
     <div>
         <img src="{{ asset('store/assets/info-light.svg') }}" alt="logo">
+        <input type="hidden" name="registration" value="{{ $registration->id ?? ''}}">
         <h2>Other information</h2>
     </div>
-    {{-- This section should only appear in add new mode rather than edit record --}}
+    {{-- This section should only exist in add new rather than edit record --}}
     @if (!isset($family))
         <div class="user-control">
             <input type="checkbox" class="styled-checkbox @if($errors->has('consent'))invalid @endif" id="privacy-statement" name="consent" @if( old('consent') ) checked @endif/>
@@ -22,7 +23,7 @@
         {{-- The save button for add new household --}}
         <button class="long-button submit" type="Submit">Save Household</button>
     @endif
-    {{-- This section should only exist in edit mode rather than new records --}}
+    {{-- This section should only exist in edit rather than add new record --}}
     @if (isset($registration))
         <div>
             Their RV-ID is: <strong>{{ $family->rvid }}</strong>

@@ -1,15 +1,18 @@
     <div class="col fit-height">
         <div>
             <img src="{{ asset('store/assets/group-light.svg') }}" alt="logo">
+            <input type="hidden" name="registration" value="{{ $registration->id ?? ''}}">
             <h2>Voucher collectors</h2>
         </div>
         <div>
             <label for="carer">Main carer's full name</label>
+            {{-- This section should only exist in edit rather than add new record --}}
             @if (isset($pri_carer))
                 <input id="carer" name="pri_carer[{{ $pri_carer->id }}]"
                            class="@if($errors->has('pri_carer'))invalid @endif" type="text"
                            value="{{ $pri_carer->name }}" autocomplete="off"
                            autocorrect="off" spellcheck="false">
+            {{-- If this is a new record do this instead --}}
             @else
                 <input id="carer" name="carer" class="@if($errors->has('carer'))invalid @endif" type="text" autocomplete="off" autocorrect="off" spellcheck="false" value="{{ old('carer') }}">
             @endif
@@ -27,6 +30,7 @@
         <div>
             <label for="carer_adder_input">Voucher collectors <span>(optional)</span></label>
             <table id="carer_wrapper">
+                {{-- This section should only exist in edit rather than add new record --}}
                 @if (isset($sec_carers))
                 @foreach ( $sec_carers as $sec_carer )
                     <tr>
