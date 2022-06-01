@@ -297,7 +297,7 @@ class VoucherEvaluatorTest extends TestCase
     public function itNoticesWhenAChildIsAlmostPrimarySchoolAge()
     {
         // Need to change the values we use for school start to next month's integer
-        Config::set('arc.school_month', Carbon::now()->addMonth()->month);
+        Config::set('arc.school_month', Carbon::now()->addMonthsNoOverflow(1)->month);
 
         // Make standard evaluator
         $evaluator = EvaluatorFactory::make();
@@ -316,7 +316,7 @@ class VoucherEvaluatorTest extends TestCase
     public function itNoticesWhenAChildIsAlmostSecondarySchoolAge()
     {
         // Need to change the values we use for school start to next month's integer
-        Config::set('arc.school_month', Carbon::now()->addMonth()->month);
+        Config::set('arc.school_month', Carbon::now()->addMonthsNoOverflow(1)->month);
 
         // Get Rules Mods
         $rulesMod = collect($this->rulesMods["credit-primary"]);
