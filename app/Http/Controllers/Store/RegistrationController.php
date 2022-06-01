@@ -51,6 +51,7 @@ class RegistrationController extends Controller
             "centre_name" => ($user->centre) ? $user->centre->name : null,
             "programme" => $programme,
         ];
+        $programme = Auth::user()->centre->sponsor->programme;
 
         // Slightly roundabout method of getting the permitted centres to poll
         $neighbour_centre_ids = $user
@@ -101,51 +102,21 @@ class RegistrationController extends Controller
             ;
         }
 
-        // Check if the request asks us to display inactive families
-        $q = $request->get('families_left') ? $q : $q->WhereActiveFamily();
-
-        // Check if the request should filter by centre
-        $q = $request->get('centre') ? $q->where('centre_id', $request->get('centre')) : $q;
-
         // This isn't ideal as it relies on getting all the families, then sorting them.
         // However, the whereIn statements above destroy any sorted order on family_ids.
         $reg_models = $q->withFullFamily()
             ->get()
             ->values();
 
-        // Get any sorting direction from the request
-        $direction = $request->get('direction') ? $request->get('direction') : 'asc';
-
-        // Sort by desc if requested to, for anything else sort by asc as usual
-        if($direction === 'desc') {
-            $reg_models = $reg_models->sortByDesc(function ($registration) {
-                return strtolower($registration->family->pri_carer);
-            });
-        } else {
-            $reg_models = $reg_models->sortBy(function ($registration) {
-                return strtolower($registration->family->pri_carer);
-            });
-        }
-
-        // throw it into a paginator.
-        $page = LengthAwarePaginator::resolveCurrentPage();
-        $perPage = 10;
-        $offset = ($page * $perPage) - $perPage;
-        $registrations = new LengthAwarePaginator(
-            $reg_models->slice($offset, $perPage),
-            $reg_models->count(),
-            $perPage,
-            $page,
-            [
-                'path' => LengthAwarePaginator::resolveCurrentPath(),
-                'query' => array_except($request->query(), 'page'),
-            ]
-        );
+        $reg_models = $reg_models->sortBy(function ($registration) {
+            return strtolower($registration->family->pri_carer);
+        });
 
         $data = array_merge(
             $data,
             [
-                'registrations' => $registrations,
+                'registrations' => $reg_models,
+                'programme' => $programme
             ]
         );
         return view('store.index_registration', $data);
