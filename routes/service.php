@@ -142,7 +142,7 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.sponsors.edit',
         'uses' => 'Admin\SponsorsController@edit',
     ])->where('id', '^[0-9]+$');
-    Route::put('sponsors/{id}/update', [
+    Route::put('sponsors/{id}', [
         'as' => 'admin.sponsors.update',
         'uses' => 'Admin\SponsorsController@update',
     ])->where('id', '^[0-9]+$');
