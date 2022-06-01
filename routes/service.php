@@ -138,6 +138,14 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.sponsors.store',
         'uses' => 'Admin\SponsorsController@store',
     ]);
+    Route::get('sponsors/{id}', [
+        'as' => 'admin.sponsors.edit',
+        'uses' => 'Admin\SponsorsController@edit',
+    ])->where('id', '^[0-9]+$');
+    Route::put('sponsors/{id}', [
+        'as' => 'admin.sponsors.update',
+        'uses' => 'Admin\SponsorsController@update',
+    ])->where('id', '^[0-9]+$');
 
     Route::post('logout', [
         'as' => 'admin.logout',
