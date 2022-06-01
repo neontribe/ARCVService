@@ -29,6 +29,6 @@
         </div>
         @endif
 
-<script src="{{ asset('js/create_registration.js') }}"></script>
+<script src="{{ asset('store/js/create_registration.js') }}"></script>
 
 @endsection

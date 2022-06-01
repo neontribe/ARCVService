@@ -11,7 +11,7 @@
         <form action="{{ URL::route("store.registration.update",['registration' => $registration]) }}" method="post" class="full-height">
             {{ method_field('PUT') }}
             {!! csrf_field() !!}
-            <input type="hidden" name="registration" value="{{ $registration->id }}">
+            
             @include('store.partials.voucher_collectorsSP')
             @include('store.partials.householdSP')
             @include('store.partials.other_infoSP')
@@ -30,6 +30,6 @@
     </div>
 @endif
 
-<script src="{{ asset('js/edit_registration.js') }}"></script>
+<script src="{{ asset('store/js/edit_registration.js') }}"></script>
     
 @endsection

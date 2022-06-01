@@ -1,4 +1,3 @@
-<script>
         $(document).ready(
             function () {
                 var maxFields = 10;
@@ -13,7 +12,7 @@
                     }
                     if (fields < maxFields) {
                         fields++;
-                        $(el).append('<tr><td><input name="carers[]" type="text" value="' + carer_el.val() + '" ></td><td><button type="button" class="remove_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
+                        $(el).append('<tr><td><input name="new_carers[]" type="text" value="' + carer_el.val() + '" ></td><td><button type="button" class="remove_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
                         carer_el.val('');
                     }
                 });
@@ -67,4 +66,26 @@
             var spanclass = $(this)[0].id + '-span';
             $('#' + spanclass).addClass('collapsed');
         });
-</script>
+
+        //remove invalid class & error span when input is selected/tabbed to
+        $('#carer').on('click focus', function () {
+            $(this).removeClass("invalid");
+            $('#carer-span').addClass('collapsed');
+        });
+
+        $('.clickable-span').click(function (e) {
+            $('#more-family-info').removeClass('collapsed');
+            e.preventDefault();
+        });
+
+        $('.remove').click(function (e) {
+            $('#expandable').removeClass('collapsed');
+            $('#leaving').addClass('expanded');
+            e.preventDefault();
+        });
+
+        $('#cancel').click(function (e) {
+            $('#expandable').addClass('collapsed');
+            $('#leaving').removeClass('expanded');
+            e.preventDefault();
+        });

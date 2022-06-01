@@ -1,4 +1,3 @@
-<script>
         $(document).ready(
             function () {
                 var maxFields = 10;
@@ -69,5 +68,3 @@
             $('#leaving').removeClass('expanded');
             e.preventDefault();
         });
-
-    </script>
