@@ -16,13 +16,14 @@ class VoucherPaymentRequestEmail extends Mailable
     public $vouchers;
     public $file;
     public $market;
+    public $programme_amounts;
     public $stateToken;
 
     /**
      * Create a new message instance.
      */
 
-    public function __construct($user, $trader, $stateToken, $vouchers, $file)
+    public function __construct($user, $trader, $stateToken, $vouchers, $file, $programme_amounts)
     {
         $this->user = $user->name;
         $this->trader = $trader->name;
@@ -30,7 +31,9 @@ class VoucherPaymentRequestEmail extends Mailable
         $this->vouchers = $vouchers;
         $this->stateToken = $stateToken;
         $this->file = $file;
+        $this->programme_amounts = $programme_amounts;
         $this->market = $trader->market ? $trader->market->name : 'no associated market';
+        \Log::info($this->programme_amounts);
     }
 
     /**
