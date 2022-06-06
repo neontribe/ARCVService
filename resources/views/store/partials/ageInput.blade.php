@@ -1,38 +1,47 @@
-<div class="age-input-container">
-    <div class="age-input">
-        <label for="age"
-               class="block"
-        >Age</label>
-        <input id="age"
-               name="age"
-               type="number"
-               pattern="[0-9]*"
-               min="0" max="120"
-        >
-    </div>
+<div class="age-input">
+    <label for="age"
+           class="block"
+    >Age</label>
+    <input id="age"
+           name="age"
+           type="number"
+           pattern="[0-9]*"
+           min="0" max="120"
+    >
 </div>
 
+@pushonce('js:ageinput')
 <script>
-    (function ($, window, document) {
-        $.ARC = $.ARC || {};
-        $.ARC.ageInput = function () {
+    (function ($, window, document, undefined) {
+        'use strict';
+        var pluginName = 'ageInput';
 
-            /**
-             * Reset and maybe focus
-             * @param focus
-             */
-            var reset = function (focus) {
-                $('#age').val('');
-                if (focus) {
-                    $('#age').focus();
-                }
-            };
-            $(document).on('childInput:submitted', reset(true));
-            // export reset
-            return {
-                reset : reset
-            }
+        // class constructor
+        function AgeInput(el) {
+            this.element = el;
+            this.init();
         }
-    }(jQuery));
-    $("age").ARC.ageInput();
+
+        // extender to add functions
+        $.extend(AgeInput.prototype, {
+            init: function () {
+                $(document).on('childInput:submitted', {element: this.element}, this.reset);
+            },
+            reset: function (e) {
+                var instance = $(e.data.element);
+                instance.find('input[type=number]').val('');
+                instance.find('input[type=number]').filter(':first').focus();
+            }
+        });
+
+        // set namespace and bind
+        $.fn[pluginName] = function () {
+            return this.each(function () {
+                if (!$.data(this, "plugin_" + pluginName)) {
+                    $.data(this, "plugin_" + pluginName, new DobInput(this));
+                }
+            });
+        };
+    })(jQuery, window, document);
 </script>
+@endpushonce
