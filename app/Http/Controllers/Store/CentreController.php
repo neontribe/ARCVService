@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Store;
 
 use App\Centre;
 use App\CentreUser;
+use App\Child;
 use App\Http\Controllers\Controller;
 use App\Registration;
 use App\Services\VoucherEvaluator\Valuation;
@@ -191,11 +192,7 @@ class CentreController extends Controller
                         $due_date = $child->dob->format($dateFormats['dob']);
                     } else {
                         // Otherwise, set the header
-                        if ($programme) {
-                            $dob_header = 'Household Member ' . (string)$child_index . ' DoB';
-                        } else {
-                            $dob_header = 'Child ' . (string)$child_index . ' DoB';
-                        }
+                        $dob_header = Child::getAlias($programme) . ' ' . (string)$child_index . ' DoB';
                         $kids[$dob_header] = $child->dob->lastOfMonth()->format($dateFormats['dob']);
                         $child_index += 1;
                         // A child is eligible if it's family is AND it has no disqualifications of it's own.
