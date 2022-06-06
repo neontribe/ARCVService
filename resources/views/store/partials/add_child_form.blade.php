@@ -1,41 +1,8 @@
 <div>
     <span>Add children or a pregnancy:</span>
 </div>
-<div class="dob-input-container">
-    <div class="dob-input">
-        <label for="dob-month"
-               class="block"
-        >Month</label>
-        <input id="dob-month"
-               name="dob-month"
-               type="number"
-               pattern="[0-9]*"
-               min="0"
-               max="12"
-        >
-    </div>
-    <div class="dob-input">
-        <label for="dob-year"
-               class="block"
-        >Year</label>
-        <input id="dob-year"
-               name="dob-year"
-               type="number"
-               pattern="[0-9]*"
-               min="0"
-               max="{{ Carbon\Carbon::now()->year }}"
-        >
-    </div>
-    @if ( $verifying )
-        <div class="dob-input relative">
-            <input type="checkbox"
-                   class="styled-checkbox"
-                   id="dob-verified"
-                   name="dob-verified"
-            >
-            <label for="dob-verified">ID Checked</label>
-        </div>
-    @endif
+<div id="addChildDobInput" class="dob-input-container">
+    @include('store.partials.dobInput')
 </div>
 <button id="add-dob" class="link-button link-button-large">
     <i class="fa fa-plus button-icon" aria-hidden="true"></i>
@@ -49,18 +16,9 @@
     <script src="{{ asset('store/js/moment-2.20.1.min.js')}}"></script>
 @endsection
 
+
 <script>
-
-    function resetDobInput() {
-        // reset form
-        $('#dob-error').text('');
-        $('#dob-year').val('');
-        $('#dob-month').val('');
-        $('#dob-verified').prop('checked', false);
-        $('#dob-month').focus();
-    }
-
-    $(document).on('childRow:updated', resetDobInput);
+    $("#addChildDobInput").dobInput();
 
     function addDobRow(e, dateObj, verified) {
         // setup fields
@@ -98,7 +56,6 @@
     }
 
     $(document).on('childInput:submitted', addDobRow);
-
     $("#add-dob").click(function (e) {
         e.preventDefault();
 

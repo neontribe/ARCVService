@@ -1,7 +1,9 @@
 <div>
     <span>Add Household Member:</span>
 </div>
-@include('store.partials.ageInput')
+<div class="age-input-container">
+    @include('store.partials.ageInput')
+</div>
 <button id="add-age" class="link-button link-button-large">
     <i class="fa fa-plus button-icon" aria-hidden="true"></i>
     Add Household Member
@@ -15,6 +17,8 @@
 @endsection
 
 <script>
+    $("#addChildDobInput").ageInput();
+
     function addAgeRow(e, dateObj, verified) {
         // setup fields
         // It's a valid date, so manufacture a human-readable string
@@ -59,15 +63,13 @@
 
         // get the dates
         var age = $('#age').val();
-
         var dateObj = moment().subtract(age, 'years').startOf('month');
-
         if (!dateObj.isValid()) {
             dobError.text('Invalid Age');
             return false;
         }
 
-        // broadcast that we've validated and made the
+        // broadcast that we've validated and include the date
         $(document).trigger('childInput:submitted', [ dateObj, false ]);
     });
 </script>
