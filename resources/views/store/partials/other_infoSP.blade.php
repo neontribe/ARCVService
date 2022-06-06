@@ -8,7 +8,7 @@
     @if (!isset($family))
         <div class="user-control">
             <input type="checkbox" class="styled-checkbox @if($errors->has('consent'))invalid @endif" id="privacy-statement" name="consent" @if( old('consent') ) checked @endif/>
-            <label for="privacy-statement">Has the registration form been completed and signed?</label>
+            <label for="privacy-statement">Has the registration form been completed and signed?</label><br></br>
         </div>
         @if ( $errors->has('consent') )
         <div class="alert-message error" id="registration-alert">
@@ -45,7 +45,7 @@
         </a>
 
         @if (!isset($registration->family->leaving_on) )
-        <button class="remove long-button" type="button">Remove this family</button>
+        <button class="remove long-button" type="button">Remove this household</button>
         <div id="expandable" class="collapsed confirm-leaving">
             <div class="reason">
                 <label for="reason-for-leaving">
