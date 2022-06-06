@@ -34,7 +34,7 @@
                     <th>RV-ID</th>
                     <th>Weekly Voucher allocation</th>
                     <th>Amount of vouchers given out</th>
-                    <th></th>
+                    <th style="width:20%;color:white;">Voucher Numbers</th>
                     <th>Date collected</th>
                     <th>Initials of person who collected</th>
                 </tr>
