@@ -94,7 +94,7 @@
             dobError.text('Invalid Date: over 9 months away.');
             return false;
         }
-        // broadcast that we've validated and made the
+        // broadcast that we've validated and made the date object
         $(document).trigger('childInput:submitted', [
             dateObj, $('#dob-verified').is(":checked")
         ]);
