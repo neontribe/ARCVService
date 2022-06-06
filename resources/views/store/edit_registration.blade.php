@@ -60,7 +60,11 @@
                     <img src="{{ asset('store/assets/pregnancy-light.svg') }}" alt="logo">
                     <h2>Children or pregnancy</h2>
                 </div>
-                @include('store.partials.add_child_form', ['verifying' => $verifying] )
+                @if($programme === 0)
+                    @include('store.partials.add_child_form', ['verifying' => $verifying] )
+                @else
+                    @include('store.partials.add_participant_form', ['verifying' => $verifying] )
+                @endif
                 <div>
                     <table>
                         <thead>

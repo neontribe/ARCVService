@@ -1,14 +1,38 @@
 <div class="age-input-container">
     <div class="age-input">
-        <label for="age-year"
+        <label for="age"
                class="block"
-        >age</label>
-        <input id="age-year"
-               name="age-year"
+        >Age</label>
+        <input id="age"
+               name="age"
                type="number"
-               pattern="[0-9]*" min="0"
-               max="{{ $max || 120 }}"
+               pattern="[0-9]*"
+               min="0" max="120"
         >
     </div>
 </div>
 
+<script>
+    (function ($, window, document) {
+        $.ARC = $.ARC || {};
+        $.ARC.ageInput = function () {
+
+            /**
+             * Reset and maybe focus
+             * @param focus
+             */
+            var reset = function (focus) {
+                $('#age').val('');
+                if (focus) {
+                    $('#age').focus();
+                }
+            };
+            $(document).on('childInput:submitted', reset(true));
+            // export reset
+            return {
+                reset : reset
+            }
+        }
+    }(jQuery));
+    $("age").ARC.ageInput();
+</script>

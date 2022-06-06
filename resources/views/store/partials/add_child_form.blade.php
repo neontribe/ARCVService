@@ -3,19 +3,38 @@
 </div>
 <div class="dob-input-container">
     <div class="dob-input">
-        <label for="dob-month" class="block">Month</label>
-        <input id="dob-month" name="dob-month" type="number" pattern="[0-9]*" min="0" max="12">
+        <label for="dob-month"
+               class="block"
+        >Month</label>
+        <input id="dob-month"
+               name="dob-month"
+               type="number"
+               pattern="[0-9]*"
+               min="0"
+               max="12"
+        >
     </div>
     <div class="dob-input">
-        <label for="dob-year" class="block">Year</label>
-        <input id="dob-year" name="dob-year" type="number" pattern="[0-9]*" min="0"
-                max="{{ Carbon\Carbon::now()->year }}">
+        <label for="dob-year"
+               class="block"
+        >Year</label>
+        <input id="dob-year"
+               name="dob-year"
+               type="number"
+               pattern="[0-9]*"
+               min="0"
+               max="{{ Carbon\Carbon::now()->year }}"
+        >
     </div>
     @if ( $verifying )
-    <div class="dob-input relative">
-        <input type="checkbox" class="styled-checkbox" id="dob-verified" name="dob-verified">
-        <label for="dob-verified">ID Checked</label>
-    </div>
+        <div class="dob-input relative">
+            <input type="checkbox"
+                   class="styled-checkbox"
+                   id="dob-verified"
+                   name="dob-verified"
+            >
+            <label for="dob-verified">ID Checked</label>
+        </div>
     @endif
 </div>
 <button id="add-dob" class="link-button link-button-large">
@@ -23,7 +42,7 @@
     Add Child or Pregnancy
 </button>
 <div>
-<p><span id="dob-error" class="invalid-error"></span></p>
+    <p><span id="dob-error" class="invalid-error"></span></p>
 </div>
 
 @section('hoist-head')
@@ -40,11 +59,12 @@
         $('#dob-verified').prop('checked', false);
         $('#dob-month').focus();
     }
+
     $(document).on('childRow:updated', resetDobInput);
 
     function addDobRow(e, dateObj, verified) {
         // setup fields
-        // It's a valid date, so manufacture a human readable string
+        // It's a valid date, so manufacture a human-readable string
         var innerTextDate = dateObj.format("MMM YYYY");
         var valueDate = dateObj.format("YYYY-MM");
 
@@ -59,7 +79,7 @@
         var ageColumn = (moment().diff(valueDate, 'days') > 0)
             ? '<td class="age-col">' +
             moment().diff(valueDate, 'years') + ' yr, ' +
-            moment().diff(valueDate, 'months') % 12  +
+            moment().diff(valueDate, 'months') % 12 +
             ' mo</td>'
             : '<td class="age-col">P</td>'
         ;
@@ -76,6 +96,7 @@
         // emit event
         $(document).trigger('childRow:updated');
     }
+
     $(document).on('childInput:submitted', addDobRow);
 
     $("#add-dob").click(function (e) {
