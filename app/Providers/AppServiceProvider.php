@@ -39,7 +39,7 @@ class AppServiceProvider extends ServiceProvider
 
 
         // adds "push once"
-        Blade::directive('pushonce', function ($expression) {
+        Blade::directive('pushonce', static function ($expression) {
             [$pushName, $pushSub] = explode(':', trim(substr($expression, 1, -1)));
 
             $key = '__pushonce_'.str_replace('-', '_', $pushName).'_'.str_replace('-', '_', $pushSub);
