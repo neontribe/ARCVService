@@ -152,7 +152,19 @@ class VoucherController extends Controller
         // Todo factor excel/csv create functions out into service.
         $traderController = new TraderController();
         $file = $traderController->createVoucherListFile($trader, $vouchers, $title, $date);
-        event(new VoucherPaymentRequested(Auth::user(), $trader, $stateToken, $vouchers, $file));
+        $programme_amounts = [
+            'standard' => 0,
+            'social_prescription' => 0,
+        ];
+        foreach ($vouchers as $key => $voucher) {
+            if($voucher->sponsor->programme === 1) {
+                $programme_amounts['social_prescription'] += 1;
+            } else {
+                $programme_amounts['standard'] += 1;
+            }
+        }
+
+        event(new VoucherPaymentRequested(Auth::user(), $trader, $stateToken, $vouchers, $file, $programme_amounts));
 
         return response()->json(['message' => trans('api.messages.voucher_payment_requested')], 202);
     }
