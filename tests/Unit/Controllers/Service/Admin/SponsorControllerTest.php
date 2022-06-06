@@ -183,8 +183,8 @@ class SponsorControllerTest extends StoreTestCase
             ->visit(route('admin.sponsors.index'))
             ->see($this->socialPrescribingSponsor->id)
             ->see($this->existingSponsor->id)
-            ->see('sponsors/' . $this->socialPrescribingSponsor->id . '/edit')
-            ->dontSee('sponsors/' . $this->existingSponsor->id . '/edit')
+            ->see('sponsors/' . $this->socialPrescribingSponsor->id)
+            ->dontSee('sponsors/' . $this->existingSponsor->id)
         ;
     }
 
