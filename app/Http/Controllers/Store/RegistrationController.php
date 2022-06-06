@@ -246,6 +246,7 @@ class RegistrationController extends Controller
         // Get the user and Centre
         $user = Auth::user();
         $centre = ($user->centre) ? $user->centre : null;
+        $programme = $user->centre->sponsor->programme;
 
         // Cope if User has no Centre.
         if (!$centre) {
@@ -274,35 +275,67 @@ class RegistrationController extends Controller
         // Make a filename
         $filename = 'Registrations_' . Carbon::now()->format('YmdHis') . '.pdf';
 
-        // Set up the common view data.
-        $data = [
-            'user_name' => $user->name,
-            'centre_name' => ($user->centre) ? $user->centre->name : null,
-            'sheet_title' => 'Printable Family Sheet',
-            'sheet_header' => 'Family Collection Sheet',
-        ];
-
-        // Stack the registration batch into the data
-        foreach ($registrations as $registration) {
-            // Get the valuation
-            $valuation = $registration->getValuation();
-
-            $data['regs'][] = [
-                'centre' => $centre,
-                'family' => $registration->family,
-                'pri_carer' => $registration->family->pri_carer,
-                'children' => $registration->family->children,
-                'noticeReasons' => $valuation->getNoticeReasons(),
-                'creditReasons' => $valuation->getCreditReasons(),
-                'entitlement' => $valuation->getEntitlement()
+        if (!$programme) {
+            // Set up the common view data.
+            $data = [
+                'user_name' => $user->name,
+                'centre_name' => ($user->centre) ? $user->centre->name : null,
+                'sheet_title' => 'Printable Family Sheet',
+                'sheet_header' => 'Family Collection Sheet',
             ];
-        }
 
-        // throw it at a PDF.
-        $pdf = PDF::loadView(
-            'store.printables.family',
-            $data
-        );
+            // Stack the registration batch into the data
+            foreach ($registrations as $registration) {
+                // Get the valuation
+                $valuation = $registration->getValuation();
+
+                $data['regs'][] = [
+                    'centre' => $centre,
+                    'family' => $registration->family,
+                    'pri_carer' => $registration->family->pri_carer,
+                    'children' => $registration->family->children,
+                    'noticeReasons' => $valuation->getNoticeReasons(),
+                    'creditReasons' => $valuation->getCreditReasons(),
+                    'entitlement' => $valuation->getEntitlement()
+                ];
+            }
+            // throw it at a PDF.
+            $pdf = PDF::loadView(
+                'store.printables.family',
+                $data
+            );
+        } else {
+            // Set up the common view data.
+            $data = [
+                'user_name' => $user->name,
+                'centre_name' => ($user->centre) ? $user->centre->name : null,
+                'sheet_title' => 'Printable Family Sheet',
+                'sheet_header' => 'Family Collection Sheet',
+            ];
+
+            // Stack the registration batch into the data
+            foreach ($registrations as $registration) {
+                // Get the valuation
+                $valuation = $registration->getValuation();
+
+                $data['regs'][] = [
+                    'centre' => $centre,
+                    'family' => $registration->family,
+                    'pri_carer' => $registration->family->pri_carer,
+                    'children' => $registration->family->children,
+                    'noticeReasons' => $valuation->getNoticeReasons(),
+                    'creditReasons' => $valuation->getCreditReasons(),
+                    'entitlement' => $valuation->getEntitlement()
+                ];
+            }
+            // \Log::info($data['regs']);
+
+            // throw it at a PDF.
+            $pdf = PDF::loadView(
+                'store.printables.household',
+                $data
+            );
+        }
         $pdf->setPaper('A4', 'landscape');
         return @$pdf->download($filename);
     }
