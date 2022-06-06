@@ -84,7 +84,4 @@
         display: inline-block;
         text-align: center;
     }
-    /* h2 {
-        padding-bottom:25px;
-    } */
 </style>
