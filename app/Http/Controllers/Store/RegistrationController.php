@@ -246,7 +246,6 @@ class RegistrationController extends Controller
         // Get the user and Centre
         $user = Auth::user();
         $centre = ($user->centre) ? $user->centre : null;
-        $programme = $user->centre->sponsor->programme;
 
         // Cope if User has no Centre.
         if (!$centre) {
@@ -279,8 +278,8 @@ class RegistrationController extends Controller
         $data = [
             'user_name' => $user->name,
             'centre_name' => ($user->centre) ? $user->centre->name : null,
-            'sheet_title' => 'Printable ' . Family::getAlias($programme) . ' Sheet',
-            'sheet_header' => Family::getAlias($programme) . ' Collection Sheet',
+            'sheet_title' => 'Printable Family Sheet',
+            'sheet_header' => 'Family Collection Sheet',
         ];
 
         // Stack the registration batch into the data
@@ -299,12 +298,11 @@ class RegistrationController extends Controller
             ];
         }
 
-        $pdf_route = $programme ? 'store.printables.household' : 'store.printables.family';
+        // throw it at a PDF.
         $pdf = PDF::loadView(
-            $pdf_route,
+            'store.printables.family',
             $data
         );
-
         $pdf->setPaper('A4', 'landscape');
         return @$pdf->download($filename);
     }
