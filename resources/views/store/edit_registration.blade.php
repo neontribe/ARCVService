@@ -238,12 +238,12 @@
     <script>
         $(document).ready(
             function () {
-                var maxFields = 10;
-                var el = $("#carer_wrapper");
-                var carer_el = $('#carer_adder_input');
-                var addButton = $("#add_collector");
-                var fields = 1;
-                $(addButton).click(function (e) {
+                $("#add_collector").click(function (e) {
+                    var maxFields = 10;
+                    var el = $("#carer_wrapper");
+                    var carer_el = $('#carer_adder_input');
+                    var fields = 1;
+
                     e.preventDefault();
                     if (carer_el.val().length <= 1) {
                         return false;
@@ -263,16 +263,11 @@
             }
         );
 
-        $(document).ready(
-            function () {
-                var el = $("#existing_wrapper");
-                $(el).on("click", ".remove_date_field", function (e) {
-                    e.preventDefault();
-                    $(this).closest('tr').remove();
-                    return false;
-                });
-            }
-        );
+        $('#existing_wrapper').on('click', '.remove_date_field', function (e) {
+            e.preventDefault();
+            $(this).closest('tr').remove();
+            return false;
+        });
 
         // If enter is pressed, keyboard is hidden on iPad and form submit is disabled
         $('#carer').on('keyup keypress', function (e) {
