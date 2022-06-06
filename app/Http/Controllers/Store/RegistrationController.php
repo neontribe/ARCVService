@@ -328,7 +328,6 @@ class RegistrationController extends Controller
                     'entitlement' => $valuation->getEntitlement()
                 ];
             }
-            // \Log::info($data['regs']);
 
             // throw it at a PDF.
             $pdf = PDF::loadView(
