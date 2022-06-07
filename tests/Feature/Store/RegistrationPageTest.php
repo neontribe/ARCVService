@@ -271,6 +271,7 @@ class RegistrationPageTest extends StoreTestCase
         ;
         $this->assertEquals(1, Registration::get()->count());
         $registration = Registration::first();
+        // SP allows this field to be null so test needed changing to accommodate this
         if ($this->assertNotNull($registration->eligible_from)) {
             $originalDate = $registration->eligible_from;
 
