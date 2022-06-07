@@ -3,11 +3,10 @@ $(document).ready(
         var maxFields = 10;
         var el = $("#carer_wrapper");
         var carer_el = $('#carer_adder_input');
-        var addButton = $("#add_collector");
         var fields = 1;
 
         /// add button click
-        $(addButton).click(function (e) {
+        $("#add_collector").click(function (e) {
             e.preventDefault();
             if (carer_el.val().length <= 1) {
                 return false;
@@ -35,13 +34,6 @@ $('#carer').on('keyup keypress', function (e) {
         $("input").blur();
         return false;
     }
-});
-//remove invalid class when input is selected/tabbed to
-$('#privacy-statement, #carer').on('click focus', function () {
-    $(this).removeClass("invalid");
-    // Remove relevent error message
-    var spanclass = $(this)[0].id + '-span';
-    $('#' + spanclass).addClass('collapsed');
 });
 
 //remove invalid class & error span when input is selected/tabbed to
@@ -71,4 +63,12 @@ $("#child_wrapper").on('click', '.remove_date_field', function (e) {
     e.preventDefault();
     $(e.target).closest('tr').remove();
     return false;
+});
+
+//remove invalid class when input is selected/tabbed to
+$('#privacy-statement, #carer').on('click focus', function () {
+    $(this).removeClass("invalid");
+    // Remove relevent error message
+    var spanclass = $(this)[0].id + '-span';
+    $('#' + spanclass).addClass('collapsed');
 });

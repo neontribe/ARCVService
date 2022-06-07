@@ -5,6 +5,7 @@ $(document).ready(
         var carer_el = $('#carer_adder_input');
         var fields = 1;
 
+        /// add button click
         $("#add_collector").click(function (e) {
             e.preventDefault();
             if (carer_el.val().length <= 1) {
@@ -24,12 +25,6 @@ $(document).ready(
         })
     }
 );
-
-$('#existing_wrapper').on('click', '.remove_date_field', function (e) {
-    e.preventDefault();
-    $(this).closest('tr').remove();
-    return false;
-});
 
 // If enter is pressed, keyboard is hidden on iPad and form submit is disabled
 $('#carer').on('keyup keypress', function (e) {
@@ -67,5 +62,12 @@ $('#cancel').click(function (e) {
 $("#child_wrapper").on('click', '.remove_date_field', function (e) {
     e.preventDefault();
     $(e.target).closest('tr').remove();
+    return false;
+});
+
+// remove existing wrapper rows
+$('#existing_wrapper').on('click', '.remove_date_field', function (e) {
+    e.preventDefault();
+    $(this).closest('tr').remove();
     return false;
 });
