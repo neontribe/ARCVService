@@ -202,6 +202,50 @@ class TraderController extends Controller
         }
         return $programme_amounts;
     }
+    /**
+     * Helper to sort standard and SP vouchers into areas.
+     *
+     * @param $vouchers
+     */
+    public function calculateProgrammeVoucherAreas($vouchers)
+    {
+        $programme_area_amounts = [];
+        $standard_areas = [];
+        $sp_areas = [];
+        foreach ($vouchers as $key => $voucher) {
+            if($voucher->sponsor->programme === 1) {
+                if (!isset($sp_areas[$voucher->sponsor->name])) {
+                    $sp_areas[$voucher->sponsor->name] = 1;
+                } else {
+                    $sp_areas[$voucher->sponsor->name] += 1;
+                }
+            } else {
+                if (!isset($standard_areas[$voucher->sponsor->name])) {
+                    $standard_areas[$voucher->sponsor->name] = 1;
+                } else {
+                    $standard_areas[$voucher->sponsor->name] += 1;
+                }
+            }
+        }
+        array_push($programme_area_amounts, $standard_areas);
+        array_push($programme_area_amounts, $sp_areas);
+        return $programme_area_amounts;
+    }
+
+    /**
+     * Get programme voucher info for email
+     * @param $vouchers
+     */
+    public function getProgrammeAmounts($vouchers)
+    {
+        $programme_amounts = [];
+        $traderController = new TraderController();
+        $programme_amounts_numbers = $traderController->calculateProgrammeVoucherAmounts($vouchers);
+        $programme_area_amounts = $traderController->calculateProgrammeVoucherAreas($vouchers);
+        $programme_amounts['numbers'] = $programme_amounts_numbers;
+        $programme_amounts['byArea'] = $programme_area_amounts;
+        return $programme_amounts;
+    }
 
     /**
      * Helper to create a list of Trader Vouchers file.
