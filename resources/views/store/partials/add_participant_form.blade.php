@@ -13,6 +13,7 @@
 </div>
 
 <script>
+    // setup the age input
     $("#addChildAgeInput").ageInput();
 
     // emit button clicked event
