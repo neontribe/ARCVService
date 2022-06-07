@@ -4,6 +4,7 @@
            class="block"
     >Month</label>
     <input id="dob-month_{{$componentID}}"
+           class="dob-month"
            name="dob-month"
            type="number"
            pattern="[0-9]*"
@@ -16,6 +17,7 @@
            class="block"
     >Year</label>
     <input id="dob-year_{{$componentID}}"
+           class="dob-year"
            name="dob-year"
            type="number"
            pattern="[0-9]*"
@@ -28,6 +30,7 @@
         <input type="checkbox"
                class="styled-checkbox"
                id="dob-verified_{{$componentID}}"
+               class="dob-verified"
                name="dob-verified"
         >
         <label for="dob-verified_{{$componentID}}">ID Checked</label>

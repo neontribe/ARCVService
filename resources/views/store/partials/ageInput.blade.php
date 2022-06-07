@@ -5,6 +5,7 @@
     >Age</label>
     <input id="age_{{ $componentID }}"
            name="age"
+           class="age"
            type="number"
            pattern="[0-9]*"
            min="0" max="120"

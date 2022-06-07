@@ -1379,7 +1379,7 @@ ADD CHILD FORM PARTIAL
     margin-bottom: 2px;
 }
 
-#dob-month {
+.dob-month {
     border: 2px solid #ffffff;
     font-size: 1.5rem;
     margin-right: 1rem;
@@ -1387,7 +1387,7 @@ ADD CHILD FORM PARTIAL
     width: 3ch;
 }
 
-#dob-year {
+.dob-year {
     border: 2px solid #ffffff;
     font-size: 1.5rem;
     margin-right: 3rem;
@@ -1395,12 +1395,20 @@ ADD CHILD FORM PARTIAL
     width: 5ch;
 }
 
-#dob-verified {
+.age {
+    border: 2px solid #ffffff;
+    font-size: 1.5rem;
+    margin-right: 3rem;
+    text-align: center;
+    width: 5ch;
+}
+
+.dob-verified {
     margin: 0;
     width: 34px;
 }
 
-#dob-verified + label {
+.dob-verified + label {
     display: inline-block;
     height: 28px;
     margin: 0;
@@ -1408,7 +1416,7 @@ ADD CHILD FORM PARTIAL
     width: auto;
 }
 
-#dob-verified + label::before {
+.dob-verified + label::before {
     bottom: 0;
     border: 0;
 }
@@ -1418,7 +1426,7 @@ ADD CHILD FORM PARTIAL
     margin-top: 1.5rem;
 }
 
-#dob-verified:checked + label::after {
+.dob-verified:checked + label::after {
     top: 3px;
 }
 
