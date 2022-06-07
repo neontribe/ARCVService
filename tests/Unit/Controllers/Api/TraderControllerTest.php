@@ -305,4 +305,28 @@ class TraderControllerTest extends TestCase
             ],
         ];
     }
+
+    /** @test */
+    public function testCalculateProgrammeVoucherAmounts()
+    {
+        $traderController = new TraderController;
+        $standardSponsor = factory(Sponsor::class)->create([
+            'programme' => 0
+        ]);
+        $spSponsor = factory(Sponsor::class)->create([
+            'programme' => 1
+        ]);
+        $standardVouchers = factory(Voucher::class, 'printed', 12)->create([
+            'sponsor_id' => $standardSponsor->id
+        ]);
+        $spVouchers = factory(Voucher::class, 'printed', 18)->create([
+            'sponsor_id' => $spSponsor->id
+        ]);
+        $vouchers = $standardVouchers->concat($spVouchers);
+        $programme_amounts = $traderController->calculateProgrammeVoucherAmounts($vouchers);
+        $this->assertEquals($programme_amounts, array (
+          'standard' => 12,
+          'social_prescription' => 18,
+        ));
+    }
 }

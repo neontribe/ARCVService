@@ -102,8 +102,8 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
         Auth::login($user);
         $controller = new TraderController();
         $file = $controller->createVoucherListFile($trader, $vouchers, $title);
-
-        $event = new VoucherPaymentRequested($user, $trader, $stateToken, $vouchers, $file);
+        $programme_amounts = $controller->calculateProgrammeVoucherAmounts($vouchers);
+        $event = new VoucherPaymentRequested($user, $trader, $stateToken, $vouchers, $file, $programme_amounts);
         $listener = new SendVoucherPaymentRequestEmail();
         $listener->handle($event);
 
@@ -119,6 +119,8 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
             ->seeEmailContains('Hi ' . config('mail.to_admin.name'))
             ->seeEmailContains(e($user->name) . ' has just successfully requested payment for')
             ->seeEmailContains($vouchers->count() . ' vouchers')
+            ->seeEmailContains('for ' .  $programme_amounts['standard'] . ' standard vouchers')
+            ->seeEmailContains('and ' .  $programme_amounts['social_prescription'] . ' social prescription vouchers')
             ->seeEmailContains(e($trader->name) . ' of')
             // Has button?
             ->seeEmailContains('<a href="' . $route . '" class="button button-pink" target="_blank">Pay Request</a>')
