@@ -215,7 +215,6 @@ return [
         // Barryvdh\DomPDF\ServiceProvider::class, //PDF Maker
         // Maatwebsite\Excel\ExcelServiceProvider::class, //Excel sheet generation
         // Sebdesign\SM\ServiceProvider::class, //FSM
-        // TomLingham\Searchy\SearchyServiceProvider::class, //"Fuzzy" search in MySQL/MariaDB/Postgres (NOT SQLite)
     ],
 
     /*
@@ -269,7 +268,6 @@ return [
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
         'PDF' => Barryvdh\DomPDF\Facade::class,
         'StateMachine' => Sebdesign\SM\Facade::class,
-        'Searchy' => TomLingham\Searchy\Facades\Searchy::class,
     ],
 
 ];

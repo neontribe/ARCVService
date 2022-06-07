@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use App\Notifications\StorePasswordResetNotification;
 
 class CentreUser extends Authenticatable
@@ -129,14 +130,17 @@ class CentreUser extends Authenticatable
      *
      * @return Collection
      */
-    public function relevantCentres()
+    public function relevantCentres($programme = 0)
     {
         // default to empty collection
         $centres = collect([]);
         switch ($this->role) {
             case "foodmatters_user":
-                // Just get all centres
-                $centres = collect(Centre::get()->all());
+                $centres = DB::table('centres')
+                    ->leftJoin('sponsors', 'centres.sponsor_id', 'sponsors.id')
+                    ->where('sponsors.programme', $programme)
+                    ->get()
+                ;
                 break;
             case "centre_user":
                 // If we have one, get our centre's neighbours

@@ -271,15 +271,17 @@ class RegistrationPageTest extends StoreTestCase
         ;
         $this->assertEquals(1, Registration::get()->count());
         $registration = Registration::first();
-        $this->assertNotNull($registration->eligible_from);
-        $originalDate = $registration->eligible_from;
+        // SP allows this field to be null so test needed changing to accommodate this
+        if ($this->assertNotNull($registration->eligible_from)) {
+            $originalDate = $registration->eligible_from;
 
-        $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'registration' => 1 ]))
-            ->press('Save Changes')
-            ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
-        ;
-        $registration = Registration::first();
-        $this->assertEquals($registration->eligible_from, $originalDate);
+            $this->actingAs($this->centreUser, 'store')
+                ->visit(URL::route('store.registration.edit', [ 'registration' => 1 ]))
+                ->press('Save Changes')
+                ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
+            ;
+            $registration = Registration::first();
+            $this->assertEquals($registration->eligible_from, $originalDate);
+        }
     }
 }
