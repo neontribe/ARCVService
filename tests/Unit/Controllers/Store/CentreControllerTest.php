@@ -43,9 +43,20 @@ class CentreControllerTest extends StoreTestCase
         ]);
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
+        // Set up a new SP sponsor and centre
+        $this->spSponsor = factory(Sponsor::class)->create([
+            'programme' => 1
+        ]);
+        $this->spCentre = factory(Centre::class)->create(['sponsor_id' => $this->spSponsor->id]);
+        $this->centreUser->centres()->attach($this->spCentre->id, ['homeCentre' => false]);
+
         // Create a bunch of registrations
         $this->registrations = factory(Registration::class, 15)->create([
             'centre_id' => $this->centre->id
+        ]);
+
+        $this->spRegistrations = factory(Registration::class, 12)->create([
+            'centre_id' => $this->spCentre->id
         ]);
 
         // Add some bundles
@@ -59,11 +70,21 @@ class CentreControllerTest extends StoreTestCase
             $bundle->save();
         });
 
+        $this->spRegistrations->each(function ($registration, $key) {
+            $bundle = $registration->currentBundle();
+            // Add some random vouchers
+            $vouchers = factory(Voucher::class, 'dispatched', rand(1, 3) * 3)->create();
+            $bundle->alterVouchers($vouchers, [], $bundle);
+            // set it to be disbursed some time in the past, with some variation.
+            $bundle->disbursed_at = Carbon::today()->startOfDay()->addHour($key);
+            $bundle->save();
+        });
+
         $this->dashboard_route = route('store.dashboard');
     }
 
     /** @test */
-    public function testItCanDownloadARegistrationsSpreadsheet()
+    public function testItCanDownloadAStandardRegistrationsSpreadsheet()
     {
         $sheet_route = route('store.centres.registrations.summary');
 
@@ -130,6 +151,104 @@ class CentreControllerTest extends StoreTestCase
             $hashes[] = $hash;
 
             $reg = $this->registrations->first(function ($model) use ($line) {
+                return $model->family->rvid = $line["RVID"];
+            });
+            // The database has an record from the output.
+            $this->assertNotFalse($reg);
+
+            // It has the correct centre name
+            $this->assertEquals($reg->centre->name, $line["Centre"]);
+
+            // It has the correct area/sponsor name
+            $this->assertEquals($reg->centre->sponsor->name, $line["Area"]);
+
+            // That thing has returned a top disbursed bundle
+            $bundle = $reg->bundles()->whereNotNull('disbursed_at')->orderBy('disbursed_at')->first();
+            $this->assertNotFalse($bundle);
+            // That is the same date as this line.
+            $this->assertEquals($bundle->disbursed_at->format('d/m/Y'), $line["Last Collection"]);
+        }
+    }
+
+    /** @test */
+    public function testItCanDownloadASocialPrescriptionsRegistrationsSpreadsheet()
+    {
+        $sheet_route = route('store.centres.registrations.summary', ['programme' => 1]);
+
+        $content = $this->actingAs($this->centreUser, 'store')
+            ->visit($this->dashboard_route)
+            ->get($sheet_route)
+            ->response
+            ->getContent()
+        ;
+
+        // Create an array of lines and filter off blank ones (default array_filter behaviour)
+        $data = array_filter(explode(PHP_EOL, $content));
+        // Shift the headers off.
+        $headers = str_getcsv(array_shift($data));
+
+        // The expected headers
+        $expected_headers = [
+            "RVID",
+            "Area",
+            "Centre",
+            "Primary Carer",
+            "Entitlement",
+            "Last Collection",
+            "Eligible Household Members",
+            "Join Date",
+            "Leaving Date",
+            "Leaving Reason"
+        ];
+        // The unexpected headers
+        $unexpected_headers = [
+            "Eligible Children",
+            "Family Eligibility (HSBS)",
+            "Family Eligibility (NRPF)",
+            "Eligible From",
+            "Due Date",
+        ];
+
+        // Check the expected headers are present.
+        foreach ($expected_headers as $expected) {
+            $this->assertContains($expected, $headers);
+        }
+        // Check the unexpected headers are not present.
+        foreach ($unexpected_headers as $unexpected) {
+            $this->assertNotContains($unexpected, $headers);
+        }
+
+        // Remap the headers onto each line as keys
+        $lines = array_map(
+            function ($line) use ($headers) {
+                return array_combine($headers, str_getcsv($line));
+            },
+            $data
+        );
+
+        // There are the right amount of lines.
+        $this->assertEquals($this->spRegistrations->count(), count($lines));
+
+        // Prep for testing hashes
+        $hashes = [];
+
+        // Test each output line
+        foreach ($lines as $line) {
+            // Make a hash, test it and add it to the end
+            $hash =
+                $line["Area"] . '#' .
+                $line["Centre"] . '#' .
+                $line["Primary Carer"];
+
+            if (!empty($hashes)) {
+                // Check that we're greater than or equal to the last hash
+                $this->assertGreaterThanOrEqual(0, strcmp($hash, last($hashes)));
+            }
+
+            // Add it on the end for next round
+            $hashes[] = $hash;
+
+            $reg = $this->spRegistrations->first(function ($model) use ($line) {
                 return $model->family->rvid = $line["RVID"];
             });
             // The database has an record from the output.

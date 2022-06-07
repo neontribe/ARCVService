@@ -42,7 +42,13 @@
                 <a href="{{ URL::route('store.centres.registrations.summary') }}" target="_blank" rel="noopener noreferrer">
                     <li>
                         <img src="{{ asset('store/assets/export-light.svg') }}" id="export-all-registrations">
-                        Export Registrations
+                        Export Standard Registrations
+                    </li>
+                </a>
+                <a href="{{ route('store.centres.registrations.summary', ['programme' => 1]) }}" target="_blank" rel="noopener noreferrer">
+                    <li>
+                        <img src="{{ asset('store/assets/export-light.svg') }}" id="export-all-sp-registrations">
+                        Export Social Prescription Registrations
                     </li>
                 </a>
                 <a href="{{ URL::route('store.vouchers.mvl.export') }}" target="_blank" rel="noopener noreferrer">
