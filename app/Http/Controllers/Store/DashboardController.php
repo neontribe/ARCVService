@@ -41,7 +41,7 @@ class DashboardController extends Controller
             "user_name" => $user->name,
             "centre_name" => $centre ? $centre->name : null,
             "centre_id" => $centre_id,
-            "print_button_text" => $pref_collection ? 'Print collection sheet' : 'Print all ' . Family::getAlias() . ' sheets',
+            "print_button_text" => $pref_collection ? 'Print collection sheet' : 'Print all ' . Family::getAlias($programme) . ' sheets',
             "print_route" => $print_route,
             "programme" => $programme,
         ];
