@@ -1,8 +1,10 @@
+@php($componentID = uniqid("", true))
 <div class="age-input">
-    <label for="age"
+    <label for="age_{{ $componentID }}"
            class="block"
     >Age</label>
-    <input name="age"
+    <input id="age_{{ $componentID }}"
+           name="age"
            type="number"
            pattern="[0-9]*"
            min="0" max="120"
