@@ -21,6 +21,28 @@
                 <td class="remove-col"></td>
             </tr>
             </thead>
+            @if(!empty($children))
+                <tbody id="existing_wrapper">
+                @foreach ( $children as $child )
+                    <tr>
+                        <td class="age-col">{{ $child->getAgeString() }}</td>
+                        <td class="dob-col">{{ $child->getDobAsString() }}</td>
+                        <td class="remove-col">
+                            <input type="hidden" name="children[{{ $child->id }}][dob]"
+                                   value="{{ Carbon\Carbon::parse($child->dob)->format('Y-m') }}"
+                            >
+                            <button class="remove_date_field">
+                                <i class="fa fa-minus" aria-hidden="true"></i>
+                            </button>
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            @endif
+        </table>
+    </div>
+    <div>
+        <table>
             <tbody id="child_wrapper">
             @if(is_array(old('children')) || (!empty(old('children'))))
                 @foreach (old('children') as $old_child )
@@ -61,5 +83,28 @@
         // emit event
         $(document).trigger('childRow:updated');
     }
+
     $(document).on('childInput:validated', addAgeRow);
+
+    // In the case of failed submission, iterate the children previously submitted
+    $(".js-old-child").each(function (index) {
+        // Grab the data out of the data attributes
+        var dob = $(this).data("dob");
+
+        // Convert to useful formats - add_child_form partial should have validated these
+        var dateObj = moment(dob, "YYYY-MM", true).format("MMM YYYY");
+        var childKey = Math.random();
+
+        var displayMonths = moment().diff(dob, 'months') % 12;
+        var displayYears = moment().diff(dob, 'years');
+
+        // Create and append new style columns
+        var ageColumn = '<td class="age-col">' + displayYears + ' yr, ' + displayMonths + ' mo</td>';
+        var dobColumn = '<td class="dob-col"><input name="children[' + childKey + '][dob]" type="hidden" value="' + dob + '" >' + dateObj + '</td>';
+        var removeColumn = '<td class="remove-col"><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>';
+
+        $(this).append(ageColumn);
+        $(this).append(dobColumn);
+        $(this).append(removeColumn);
+    });
 </script>
