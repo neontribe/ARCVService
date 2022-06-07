@@ -183,6 +183,27 @@ class TraderController extends Controller
     }
 
     /**
+     * Helper to work out numbers of standard and SP vouchers.
+     *
+     * @param $vouchers
+     */
+    public function calculateProgrammeVoucherAmounts($vouchers)
+    {
+        $programme_amounts = [
+            'standard' => 0,
+            'social_prescription' => 0,
+        ];
+        foreach ($vouchers as $key => $voucher) {
+            if($voucher->sponsor->programme === 1) {
+                $programme_amounts['social_prescription'] += 1;
+            } else {
+                $programme_amounts['standard'] += 1;
+            }
+        }
+        return $programme_amounts;
+    }
+
+    /**
      * Helper to create a list of Trader Vouchers file.
      *
      * @param Trader $trader

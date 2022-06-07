@@ -33,7 +33,6 @@ class VoucherPaymentRequestEmail extends Mailable
         $this->file = $file;
         $this->programme_amounts = $programme_amounts;
         $this->market = $trader->market ? $trader->market->name : 'no associated market';
-        \Log::info($this->programme_amounts);
     }
 
     /**
