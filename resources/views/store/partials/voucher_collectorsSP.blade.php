@@ -17,6 +17,15 @@
                 <input id="carer" name="carer" class="@if($errors->has('carer'))invalid @endif" type="text" autocomplete="off" autocorrect="off" spellcheck="false" value="{{ old('carer') }}">
             @endif
         </div>
+
+        <div id="addCarerAgeInput" class="age-input-container">
+            @include('store.partials.ageInput')
+            <button id="add-carer-age" class="link-button link-button-large">
+                <i class="fa fa-plus button-icon" aria-hidden="true"></i>
+                Add Main Participant
+            </button>
+        </div>
+
         @if ( $errors->has('carer') )
         <div class="alert-message error" id="carer-alert">
             <div class="icon-container error">
@@ -68,5 +77,13 @@
             </table>
     </div>
 </div>
+<script>
+    // setup the age input
+    $("#addCarerAgeInput").ageInput();
 
-
+    // emit button clicked event
+    $("#add-carer-age").click(function (e) {
+        e.preventDefault();
+        $("#addCarerAgeInput").trigger('childInput:submitted');
+    });
+</script>

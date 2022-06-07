@@ -3,11 +3,12 @@
 </div>
 <div id="addChildAgeInput" class="age-input-container">
     @include('store.partials.ageInput')
+    <button id="add-age" class="link-button link-button-large">
+        <i class="fa fa-plus button-icon" aria-hidden="true"></i>
+        Add Household Member
+    </button>
 </div>
-<button id="add-age" class="link-button link-button-large">
-    <i class="fa fa-plus button-icon" aria-hidden="true"></i>
-    Add Household Member
-</button>
+
 <div>
 <p><span id="age-error" class="invalid-error"></span></p>
 </div>
@@ -19,7 +20,7 @@
     // emit button clicked event
     $("#add-age").click(function (e) {
         e.preventDefault();
-        $(document).trigger('childInput:submitted');
+        $("#addChildAgeInput").trigger('childInput:submitted');
     });
 
     // Error message

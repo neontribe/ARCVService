@@ -53,7 +53,7 @@
             $.extend(DobInput.prototype, {
                 init: function () {
                     $(document).on('childRow:updated', {element: this.element}, this.reset);
-                    $(document).on('childInput:submitted', {element: this.element}, this.getDate);
+                    $(this.element).on('childInput:submitted', {element: this.element}, this.getDate);
                 },
                 getDate: function (e) {
                     // get the data

@@ -1,13 +1,15 @@
 <div>
     <span>Add children or a pregnancy:</span>
 </div>
+
 <div id="addChildDobInput" class="dob-input-container">
     @include('store.partials.dobInput')
+    <button id="add-dob" class="link-button link-button-large">
+        <i class="fa fa-plus button-icon" aria-hidden="true"></i>
+        Add Child or Pregnancy
+    </button>
 </div>
-<button id="add-dob" class="link-button link-button-large">
-    <i class="fa fa-plus button-icon" aria-hidden="true"></i>
-    Add Child or Pregnancy
-</button>
+
 <div>
     <p><span id="dob-error" class="invalid-error"></span></p>
 </div>
@@ -19,7 +21,7 @@
     $("#add-dob").click(function (e) {
         e.preventDefault();
         // broadcast that we've validated and made the date object
-        $(document).trigger('childInput:submitted');
+        $("#addChildDobInput").trigger('childInput:submitted');
     });
 
     // Error message

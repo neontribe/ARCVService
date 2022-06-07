@@ -28,7 +28,7 @@
         $.extend(AgeInput.prototype, {
             init: function () {
                 $(document).on('childRow:updated', {element: this.element}, this.reset);
-                $(document).on('childInput:submitted', {element: this.element}, this.getDate);
+                $(this.element).on('childInput:submitted', {element: this.element}, this.getDate);
             },
             getDate: function (e) {
                 var instance = $(e.data.element);
@@ -39,7 +39,7 @@
                 var dateObj = moment().subtract(age, 'years').startOf('month');
 
                 // validate it
-                if (!dateObj.isValid()) {
+                if (!dateObj.isValid() || age.toString().length === 0 ) {
                     errorMsg = 'Invalid Age';
                 }
                 if (errorMsg) {
