@@ -26,7 +26,7 @@
                 @foreach ( $children as $child )
                     <tr>
                         <td class="age-col">{{ $child->getAgeString() }}</td>
-                        <td class="dob-col">{{ $child->getDobAsString() }}</td>
+                        <td class="dob-col"></td>
                         <td class="remove-col">
                             <input type="hidden" name="children[{{ $child->id }}][dob]"
                                    value="{{ Carbon\Carbon::parse($child->dob)->format('Y-m') }}"
