@@ -31,5 +31,6 @@
     @endif
 
     <script src="{{ asset('store/js/create_registration.js') }}"></script>
+    @stack("bottom")
 @endsection
 
