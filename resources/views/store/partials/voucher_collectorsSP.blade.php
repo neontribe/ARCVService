@@ -77,13 +77,3 @@
             </table>
     </div>
 </div>
-<script>
-    // setup the age input
-    $("#addCarerAgeInput").ageInput();
-
-    // emit button clicked event
-    $("#add-carer-age").click(function (e) {
-        e.preventDefault();
-        $("#addCarerAgeInput").trigger('childInput:submitted');
-    });
-</script>
