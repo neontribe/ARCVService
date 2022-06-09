@@ -46,7 +46,7 @@
                                 </label>
                             </td>
                         @endif
-                        @if($deferring)
+                        @if ( $deferrable )
                             <td class="can-defer-col relative">
                                 @if ( $child->can_defer && $can_change_defer)
                                     <input type="checkbox"
@@ -97,8 +97,6 @@
             // It's a valid date, so manufacture a human-readable string
             var innerTextDate = dateObj.format("MMM YYYY");
             var valueDate = dateObj.format("YYYY-MM");
-
-            var deferring = ;
 
             // Organise the ID verification values and display
             var verifiedValue = verified ? 1 : 0;
@@ -154,13 +152,23 @@
 
             // Create and append new style columns
             var ageColumn = '<td class="age-col">' + displayYears + ' yr, ' + displayMonths + ' mo</td>';
+
             var dobColumn = '<td class="dob-col"><input name="children[' + childKey + '][dob]" type="hidden" value="' + dob + '" >' + dateObj + '</td>';
-            var idColumn = '<td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][verified]" id="child' + childKey + '" ' + displayVerified + ' value="' + verified + '"><label for="child' + childKey + '"><span class="visually-hidden">Toggle ID checked</span></label>' + '</td>';
+
+            var idColumn = (verified)
+                ? '<td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][verified]" id="child' + childKey + '" ' + displayVerified + ' value="' + verified + '"><label for="child' + childKey + '"><span class="visually-hidden">Toggle ID checked</span></label>' + '</td>'
+                : '';
+
+            var deferColumn = ($('#added').find('td.can-defer-col').length > 0)
+                ? '<td class="can-defer-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][deferred]" id="children[' + childKey + '][deferred]" value="0"><label for="children[' + childKey + '][deferred]"><span class="visually-hidden">Toggle canDefer checked</span></label></td>'
+                : '';
+
             var removeColumn = '<td class="remove-col"><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>';
 
             $(this).append(ageColumn);
             $(this).append(dobColumn);
             $(this).append(idColumn);
+            $(this).append(deferColumn)
             $(this).append(removeColumn);
         });
     </script>
