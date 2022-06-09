@@ -37,8 +37,8 @@ class StoreUpdateRegistrationRequest extends FormRequest
             // Element MUST be present; MUST be a not-null string
             'pri_carer.*' => 'required|string',
             // MAY be present; MUST be a not-null string
-            'carers' => 'array|min:1',
-            'carers.*' => 'string',
+            'sec_carers' => 'array|min:1',
+            'sec_carers.*' => 'string',
             // MAY be present; MUST be a not-null string
             'new_carers' => 'array|min:1',
             'new_carers.*' => 'string',

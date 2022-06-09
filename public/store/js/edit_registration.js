@@ -27,7 +27,7 @@ $(document).ready(
 );
 
 // If enter is pressed, keyboard is hidden on iPad and form submit is disabled
-$('#carer').on('keyup keypress', function (e) {
+$('#pri_carer').on('keyup keypress', function (e) {
     if (e.which === 13) {
         e.preventDefault();
         document.activeElement.blur();
@@ -37,7 +37,7 @@ $('#carer').on('keyup keypress', function (e) {
 });
 
 //remove invalid class & error span when input is selected/tabbed to
-$('#carer').on('click focus', function () {
+$('#pri_carer').on('click focus', function () {
     $(this).removeClass("invalid");
     $('#carer-span').addClass('collapsed');
 });
@@ -65,15 +65,16 @@ $("#child_wrapper").on('click', '.remove_date_field', function (e) {
     return false;
 });
 
-// remove existing wrapper rows
-$('#existing_wrapper').on('click', '.remove_date_field', function (e) {
-    e.preventDefault();
-    $(this).closest('tr').remove();
-    return false;
-});
 
 // emit button clicked event
 $("#add-carer-age").click(function (e) {
     e.preventDefault();
     $("#addCarerAgeInput").trigger('childInput:submitted');
+});
+
+// remove existing wrapper rows
+$('#existing_wrapper').on('click', '.remove_date_field', function (e) {
+    e.preventDefault();
+    $(this).closest('tr').remove();
+    return false;
 });

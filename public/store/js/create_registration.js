@@ -13,7 +13,7 @@ $(document).ready(
             }
             if (fields < maxFields) {
                 fields++;
-                $(el).append('<tr><td><input name="carers[]" type="text" value="' + carer_el.val() + '" ></td><td><button type="button" class="remove_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
+                $(el).append('<tr><td><input name="new_carers[]" type="text" value="' + carer_el.val() + '" ></td><td><button type="button" class="remove_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
                 carer_el.val('');
             }
         });
@@ -27,7 +27,7 @@ $(document).ready(
 );
 
 // If enter is pressed, keyboard is hidden on iPad and form submit is disabled
-$('#carer').on('keyup keypress', function (e) {
+$('#pri_carer').on('keyup keypress', function (e) {
     if (e.which === 13) {
         e.preventDefault();
         document.activeElement.blur();
@@ -37,7 +37,7 @@ $('#carer').on('keyup keypress', function (e) {
 });
 
 //remove invalid class & error span when input is selected/tabbed to
-$('#carer').on('click focus', function () {
+$('#pri_carer').on('click focus', function () {
     $(this).removeClass("invalid");
     $('#carer-span').addClass('collapsed');
 });
@@ -72,7 +72,7 @@ $("#add-carer-age").click(function (e) {
 });
 
 //remove invalid class when input is selected/tabbed to
-$('#privacy-statement, #carer').on('click focus', function () {
+$('#privacy-statement, #pri_carer').on('click focus', function () {
     $(this).removeClass("invalid");
     // Remove relevent error message
     var spanclass = $(this)[0].id + '-span';

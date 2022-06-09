@@ -107,8 +107,5 @@
             $(this).append(dobColumn);
             $(this).append(removeColumn);
         });
-
-        // setup the age input
-        $("#addCarerAgeInput").ageInput();
     </script>
 @endpushonce

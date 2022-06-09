@@ -16,11 +16,11 @@ use App\User;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 use Log;
 use PDF;
@@ -90,7 +90,7 @@ class RegistrationController extends Controller
             $data,
             [
                 'registrations' => $reg_models,
-                'programme' => $programme
+                'programme' => $programme,
             ]
         );
         return view('store.index_registration', $data);
@@ -117,7 +117,7 @@ class RegistrationController extends Controller
             "user_name" => $user->name,
             "centre_name" => ($user->centre) ? $user->centre->name : null,
             "verifying" => $verifying,
-            "programme" => $programme
+            "programme" => $programme,
         ];
         return view('store.create_registration', $data);
     }
@@ -147,14 +147,14 @@ class RegistrationController extends Controller
         $evaluations = $registration->centre->sponsor->evaluations;
         $deferrable = false;
         foreach ($evaluations as $key => $evaluation) {
-          if ($evaluation['name'] == 'ScottishChildCanDefer') {
-            $deferrable = true;
-          }
+            if ($evaluation['name'] === 'ScottishChildCanDefer') {
+                $deferrable = true;
+            }
         }
         $can_change_defer = true;
         $this_month = Carbon::now()->month;
         if ($this_month > config('arc.scottish_school_month')) {
-          $can_change_defer = false;
+            $can_change_defer = false;
         }
 
         // Get the valuation
@@ -182,7 +182,7 @@ class RegistrationController extends Controller
                 'evaluations' => $evaluations,
                 'deferrable' => $deferrable,
                 'can_change_defer' => $can_change_defer,
-                'programme' => $programme
+                'programme' => $programme,
             ]
         ));
     }
@@ -210,7 +210,7 @@ class RegistrationController extends Controller
         $valuation = $registration->getValuation();
 
         // Make a filename
-        $filename = 'Registration' . Carbon::now()->format('YmdHis') .'.pdf';
+        $filename = 'Registration' . Carbon::now()->format('YmdHis') . '.pdf';
 
         // Setup common data
         $data = [
@@ -227,7 +227,7 @@ class RegistrationController extends Controller
             'children' => $registration->family->children,
             'noticeReasons' => $valuation->getNoticeReasons(),
             'creditReasons' => $valuation->getCreditReasons(),
-            'entitlement' => $valuation->getEntitlement()
+            'entitlement' => $valuation->getEntitlement(),
         ];
 
         // throw at a PDF
@@ -294,7 +294,7 @@ class RegistrationController extends Controller
                 'children' => $registration->family->children,
                 'noticeReasons' => $valuation->getNoticeReasons(),
                 'creditReasons' => $valuation->getCreditReasons(),
-                'entitlement' => $valuation->getEntitlement()
+                'entitlement' => $valuation->getEntitlement(),
             ];
         }
 
@@ -311,10 +311,10 @@ class RegistrationController extends Controller
      * Stores an incoming Registration.
      *
      * @param StoreNewRegistrationRequest $request
-     * @throws Throwable $e
      * @return RedirectResponse
+     * @throws Throwable $e
      */
-    public function store(StoreNewRegistrationRequest $request)
+    public function store(StoreNewRegistrationRequest $request): RedirectResponse
     {
         // Create Carers, merge primary carer
         $carers = array_map(
@@ -322,8 +322,8 @@ class RegistrationController extends Controller
                 return new Carer(['name' => $carer]);
             },
             array_merge(
-                (array)$request->get('carer'),
-                (array)$request->get('carers')
+                (array)$request->get('pri_carer'),
+                (array)$request->get('new_carers')
             )
         );
 
@@ -335,7 +335,7 @@ class RegistrationController extends Controller
         $hsbs = $request->get('eligibility-hsbs');
         $eligible_from = null;
         if ($hsbs === 'healthy-start-receiving') {
-          $eligible_from = Carbon::now();
+            $eligible_from = Carbon::now();
         }
 
         // Create Registration
@@ -362,7 +362,7 @@ class RegistrationController extends Controller
                 $registration->centre()->associate(Auth::user()->centre);
                 $registration->save();
             });
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Oops! Log that
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getTraceAsString());
@@ -384,11 +384,9 @@ class RegistrationController extends Controller
      * @param Registration $registration
      * @return RedirectResponse
      */
-    public function update(StoreUpdateRegistrationRequest $request, Registration $registration)
+    public function update(StoreUpdateRegistrationRequest $request, Registration $registration): RedirectResponse
     {
         $amendedCarers = [];
-
-        $registration = ($registration) ?? Registration::findOrFail($request->get('registration'));
 
         // Fetch eligibility
         $eligibility_hsbs = $request->get('eligibility-hsbs');
@@ -397,10 +395,12 @@ class RegistrationController extends Controller
         $deferred = $request->get('deferred');
 
         //Prevent the date changing if you're just editing a different field
-        if ($registration->eligible_from == null && $eligibility_hsbs === 'healthy-start-receiving') {
-          $eligible_from = Carbon::now();
-        } else if ($eligibility_hsbs !== 'healthy-start-receiving') {
-          $eligible_from = null;
+        if ($registration->eligible_from === null && $eligibility_hsbs === 'healthy-start-receiving') {
+            $eligible_from = Carbon::now();
+        } else {
+            if ($eligibility_hsbs !== 'healthy-start-receiving') {
+                $eligible_from = null;
+            }
         }
 
         // NOTE: Following refactor where we needed to retain Carer ids.
@@ -408,7 +408,7 @@ class RegistrationController extends Controller
         // to simplify method below for sorting and updating carer entries.
 
         // Update primary carer.
-        $carerInput = (array) $request->get("pri_carer");
+        $carerInput = (array)$request->get("pri_carer");
         $carerKey = key($carerInput);
         $carer = Carer::find($carerKey);
         if ($carer->name !== $carerInput[$carer->id]) {
@@ -417,7 +417,7 @@ class RegistrationController extends Controller
         }
 
         // Find secondary carers id's in the DB
-        $carersInput = (array) $request->get("sec_carers");
+        $carersInput = (array)$request->get("sec_carers");
         $carersKeys = $registration->family->carers->pluck("id")->toArray();
         // remove carerKey from that;
         if (($key = array_search($carerKey, $carersKeys)) !== false) {
@@ -441,7 +441,7 @@ class RegistrationController extends Controller
 
         // Create new carers
         $newCarers = array_map(
-            function ($new_carer) {
+            static function ($new_carer) {
                 return new Carer(['name' => $new_carer]);
             },
             (array)$request->get('new_carers')
@@ -456,7 +456,17 @@ class RegistrationController extends Controller
 
         // Try to transact, so we can roll it back
         try {
-            DB::transaction(function () use ($registration, $family, $amendedCarers, $newCarers, $carersKeysToDelete, $children, $eligibility_hsbs, $eligibility_nrpf, $eligible_from) {
+            DB::transaction(function () use (
+                $registration,
+                $family,
+                $amendedCarers,
+                $newCarers,
+                $carersKeysToDelete,
+                $children,
+                $eligibility_hsbs,
+                $eligibility_nrpf,
+                $eligible_from
+            ) {
 
                 // delete the missing carers
                 Carer::whereIn('id', $carersKeysToDelete)->delete();
@@ -483,7 +493,6 @@ class RegistrationController extends Controller
                 // save changes to registration.
                 $registration->save();
             });
-
         } catch (Throwable $e) {
             // Oops! Log that
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
@@ -502,36 +511,38 @@ class RegistrationController extends Controller
     /**
      * Makes children from input data
      * @param array $children
-     * @return array
+     * @return Child[]
      */
-    private function makeChildrenFromInput(array $children = [])
+    private function makeChildrenFromInput(array $children = []): array
     {
-        return array_map(function($child) {
+        return array_map(
+            function ($child) {
             // Note: Carbon uses different time formats than laravel validation
             // For crazy reasons known only to the creators of Carbon, when no day provided,
             // createFromFormat - defaults to 31 - which bumps to next month if not a real day.
             // So we want '2013-02-01' not '2013-02-31'...
-            $month_of_birth = Carbon::createFromFormat('Y-m-d', $child['dob'] . '-01');
+                $month_of_birth = Carbon::createFromFormat('Y-m-d', $child['dob'] . '-01');
 
             // Check and set verified, or null
-            $verified = null;
-            if (array_key_exists('verified', $child)) {
-                $verified = boolval($child['verified']);
-            }
+                $verified = null;
+                if (array_key_exists('verified', $child)) {
+                    $verified = (bool)$child['verified'];
+                }
 
             // Check and set deferred, or null
-            $deferred = 0;
-            if (array_key_exists('deferred', $child)) {
-                $deferred = boolval($child['deferred']);
-            }
+                $deferred = 0;
+                if (array_key_exists('deferred', $child)) {
+                    $deferred = (bool)$child['deferred'];
+                }
 
-            return new Child([
+                return new Child([
                 'born' => $month_of_birth->isPast(),
                 'dob' => $month_of_birth->toDateTimeString(),
                 'verified' => $verified,
-                'deferred' => $deferred
-            ]);
-        },
-        $children);
+                'deferred' => $deferred,
+                ]);
+            },
+            $children
+        );
     }
 }
