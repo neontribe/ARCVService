@@ -46,22 +46,22 @@
                                 </label>
                             </td>
                         @endif
-                        @if ( $child->can_defer && $can_change_defer)
+                        @if($deferring)
                             <td class="can-defer-col relative">
-                                <input type="checkbox"
-                                       class="styled-checkbox inline-dob"
-                                       name="children[{{ $child->id }}][deferred]"
-                                       id="children[{{ $child->id }}][deferred]"
-                                       {{ $child->deferred ? "checked" : null }} value="1"
-                                >
-                                <label for="children[{{ $child->id }}][deferred]">
-                                    <span class="visually-hidden">Toggle canDefer checked</span>
-                                </label>
+                                @if ( $child->can_defer && $can_change_defer)
+                                    <input type="checkbox"
+                                           class="styled-checkbox inline-dob"
+                                           name="children[{{ $child->id }}][deferred]"
+                                           id="children[{{ $child->id }}][deferred]"
+                                           {{ $child->deferred ? "checked" : null }} value="1"
+                                    >
+                                    <label for="children[{{ $child->id }}][deferred]">
+                                        <span class="visually-hidden">Toggle canDefer checked</span>
+                                    </label>
+                                @elseif (isset($child->deferred) && !$can_change_defer)
+                                    {{ $child->deferred ? 'Y' : 'N' }}
+                                @endif
                             </td>
-                        @elseif ($child->deferred && !$can_change_defer)
-                            <td>{{ $child->deferred ? 'Y' : 'N' }}</td>
-                        @else
-                            <td></td>
                         @endif
                         <td class="remove-col">
                             <input type="hidden" name="children[{{ $child->id }}][dob]"
@@ -91,12 +91,14 @@
     </div>
 </div>
 @pushonce("bottom:family")
-<script>
-    function addDobRow(e, dateObj, verified) {
+    <script>
+        function addDobRow(e, dateObj, verified) {
             // setup fields
             // It's a valid date, so manufacture a human-readable string
             var innerTextDate = dateObj.format("MMM YYYY");
             var valueDate = dateObj.format("YYYY-MM");
+
+            var deferring = ;
 
             // Organise the ID verification values and display
             var verifiedValue = verified ? 1 : 0;
@@ -115,13 +117,21 @@
             ;
 
             var dobColumn = '<td class="dob-col"><input name="children[' + childKey + '][dob]" type="hidden" value="' + valueDate + '" >' + innerTextDate + '</td>';
+
             var idColumn = (verified !== null)
                 ? '<td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][verified]" id="child' + childKey + '" ' + displayVerified + ' value="' + verifiedValue + '"><label for="child' + childKey + '"><span class="visually-hidden">Toggle ID checked</span></label>' + '</td>'
-                : '<td class="verified-col relative"></td>';
+                : '';
+
+            // add a defer column if we need to
+            var deferColumn = ($('#added').find('td.can-defer-col').length > 0)
+                ? '<td class="can-defer-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][deferred]" id="children[' + childKey + '][deferred]" value="0"><label for="children[' + childKey + '][deferred]"><span class="visually-hidden">Toggle canDefer checked</span></label></td>'
+                : ''
+            ;
+
             var removeColumn = '<td class="remove-col"><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>';
 
             // add an input
-            $("#child_wrapper").append('<tr>' + ageColumn + dobColumn + idColumn + removeColumn + '</tr>');
+            $("#child_wrapper").append('<tr>' + ageColumn + dobColumn + idColumn + deferColumn + removeColumn + '</tr>');
 
             // emit event
             $(document).trigger('childRow:updated');
