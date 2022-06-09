@@ -316,8 +316,7 @@ class RegistrationController extends Controller
      */
     public function store(StoreNewRegistrationRequest $request)
     {
-        // Create Carers
-        // TODO: Alter request to pre-join the array?
+        // Create Carers, merge primary carer
         $carers = array_map(
             function ($carer) {
                 return new Carer(['name' => $carer]);

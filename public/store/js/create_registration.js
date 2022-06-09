@@ -13,7 +13,7 @@ $(document).ready(
             }
             if (fields < maxFields) {
                 fields++;
-                $(el).append('<tr><td><input name="new_carers[]" type="text" value="' + carer_el.val() + '" ></td><td><button type="button" class="remove_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
+                $(el).append('<tr><td><input name="carers[]" type="text" value="' + carer_el.val() + '" ></td><td><button type="button" class="remove_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
                 carer_el.val('');
             }
         });
