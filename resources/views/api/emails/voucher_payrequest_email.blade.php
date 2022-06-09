@@ -12,6 +12,33 @@
         <p> {{ $trader }} of </p>
         <p> {{ $market }}'s account.</p>
 
+        <p>They have requested payment for {{ $programme_amounts['numbers']['standard'] }} standard vouchers and {{ $programme_amounts['numbers']['social_prescription'] }} social prescription vouchers.</p>
+        @if ($programme_amounts['numbers']['standard'] > 0)
+            <h4>Standard</h4>
+            <table>
+                <tr><th>Area</th><th>Number of Vouchers</th></tr>
+                @foreach ($programme_amounts['byArea'][0] as $name => $amount)
+                    <tr>
+                        <td>{{ $name }}</td>
+                        <td style="text-align:center;">{{ $amount }}</td>
+                    </tr>
+                @endforeach
+            </table>
+        @endif
+        @if ($programme_amounts['numbers']['social_prescription'] > 0)
+            <h4>Social Prescription</h4>
+            <table>
+                <tr><th>Area</th><th>Number of Vouchers</th></tr>
+                @foreach ($programme_amounts['byArea'][1] as $name => $amount)
+                    <tr>
+                        <td>{{ $name }}</td>
+                        <td style="text-align:center;">{{ $amount }}</td>
+                    </tr>
+                @endforeach
+            </table>
+        @endif
+        <br/>
+
         <p>The details for this request are attached to this email.</p>
 
         <p>The attached file is best viewed through a spreadsheet program such as Microsoft Excel, LibreOffice Calc or Google Sheets. If you have any problems with opening or downloading it, please email <a href="mailto:{{ config('mail.to_developer.address') }}">{{ config('mail.to_developer.name') }}</a>.</p>

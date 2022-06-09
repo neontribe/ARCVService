@@ -305,4 +305,62 @@ class TraderControllerTest extends TestCase
             ],
         ];
     }
+
+    /** @test */
+    public function testCalculateProgrammeVoucherAmounts()
+    {
+        $traderController = new TraderController;
+        $standardSponsor = factory(Sponsor::class)->create([
+            'programme' => 0
+        ]);
+        $spSponsor = factory(Sponsor::class)->create([
+            'programme' => 1
+        ]);
+        $standardVouchers = factory(Voucher::class, 'printed', 12)->create([
+            'sponsor_id' => $standardSponsor->id
+        ]);
+        $spVouchers = factory(Voucher::class, 'printed', 18)->create([
+            'sponsor_id' => $spSponsor->id
+        ]);
+        $vouchers = $standardVouchers->concat($spVouchers);
+        $programme_amounts = $traderController->calculateProgrammeVoucherAmounts($vouchers);
+        $this->assertEquals($programme_amounts, array (
+          'standard' => 12,
+          'social_prescription' => 18,
+        ));
+    }
+
+    /** @test */
+    public function testCalculateProgrammeVoucherAreaAmounts()
+    {
+        $traderController = new TraderController;
+        $standardSponsors = factory(Sponsor::class, 3)->create([
+            'programme' => 0
+        ]);
+        $spSponsors = factory(Sponsor::class, 3)->create([
+            'programme' => 1
+        ]);
+        $standardVouchers = $spVouchers = collect();
+        foreach ($standardSponsors as $key => $standardSponsor) {
+            $sv = factory(Voucher::class, 'printed', 12)->create([
+                'sponsor_id' => $standardSponsor->id
+            ]);
+            $standardVouchers = $standardVouchers->concat($sv);
+        }
+        foreach ($spSponsors as $key => $spSponsor) {
+            $spv = factory(Voucher::class, 'printed', 18)->create([
+                'sponsor_id' => $spSponsor->id
+            ]);
+            $spVouchers = $spVouchers->concat($spv);
+        }
+
+        $vouchers = $standardVouchers->concat($spVouchers);
+        $programme_voucher_areas = $traderController->calculateProgrammeVoucherAreas($vouchers);
+        $this->assertArrayHasKey($standardSponsors[0]->name, $programme_voucher_areas[0]);
+        $this->assertArrayHasKey($standardSponsors[1]->name, $programme_voucher_areas[0]);
+        $this->assertArrayHasKey($standardSponsors[2]->name, $programme_voucher_areas[0]);
+        $this->assertArrayHasKey($spSponsors[0]->name, $programme_voucher_areas[1]);
+        $this->assertArrayHasKey($spSponsors[1]->name, $programme_voucher_areas[1]);
+        $this->assertArrayHasKey($spSponsors[2]->name, $programme_voucher_areas[1]);  
+    }
 }
