@@ -72,9 +72,6 @@ $('#existing_wrapper').on('click', '.remove_date_field', function (e) {
     return false;
 });
 
-// setup the age input
-$("#addCarerAgeInput").ageInput();
-
 // emit button clicked event
 $("#add-carer-age").click(function (e) {
     e.preventDefault();
