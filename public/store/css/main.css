@@ -1422,8 +1422,8 @@ ADD CHILD FORM PARTIAL
 }
 
 .dob-input.relative {
-    align-self: flex-end;
-    margin-top: 1.5rem;
+    top: 20px;
+    padding-left: 38px;
 }
 
 .dob-verified:checked + label::after {
