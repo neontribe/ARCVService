@@ -12,6 +12,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <script src="{{ asset('js/app.js') }}"></script>
         @yield('hoist-head')
+        @stack('js')
     </head>
     <body>
     @yield('cookie-warning')

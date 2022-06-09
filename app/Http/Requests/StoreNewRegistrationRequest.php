@@ -42,10 +42,10 @@ class StoreNewRegistrationRequest extends FormRequest
                 Rule::in(config('arc.reg_eligibilities_nrpf')),
             ],
             // MUST be present; MUST be a not-null string
-            'carer' => 'required|string',
+            'pri_carer' => 'required|string',
             // MAY be present; MUST be a not-null string
-            'carers' => 'array|min:1',
-            'carers.*' => 'string',
+            'new_carers' => 'array|min:1',
+            'new_carers.*' => 'string',
             // MAY be present, Min 1
             'children' => 'array|min:1',
             // MAY be present alone; MUST be present if child verified, MUST be a date format of '2017-07'
