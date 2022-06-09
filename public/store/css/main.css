@@ -1381,7 +1381,7 @@ ADD CHILD FORM PARTIAL
 
 .dob-month {
     border: 2px solid #ffffff;
-    font-size: 1.5rem;
+    font-size: 1.5rem   ;
     margin-right: 1rem;
     text-align: center;
     width: 3ch;

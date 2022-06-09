@@ -60,7 +60,11 @@
                     var instance = $(e.data.element);
                     var month = instance.find('input[name=dob-month]').val();
                     var year = instance.find('input[name=dob-year]').val();
-                    var verified = instance.find('input[name=dob-verified]').is(":checked");
+                    // true false or null, if we arn't verifying.
+                    var verified = (instance.find('input[name=dob-verified]').length > 0)
+                        ? instance.find('input[name=dob-verified]').is(":checked")
+                        : null
+                    ;
                     var errorMsg = null;
 
                     // If input fields are too small, return
