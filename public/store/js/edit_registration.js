@@ -8,9 +8,12 @@ $(document).ready(
         /// add button click
         $("#add_collector").click(function (e) {
             e.preventDefault();
-            if (carer_el.val().length <= 1) {
+            var validateName = carer_el.val().match(/^[A-Za-z.\s\'—-]+$/);
+            if (carer_el.val().length <= 1 || validateName === null) {
+                $('#carer-name-error').show();
                 return false;
             }
+            $('#carer-name-error').hide();
             if (fields < maxFields) {
                 fields++;
                 $(el).append('<tr><td><input name="new_carers[]" type="text" value="' + carer_el.val() + '" ></td><td><button type="button" class="remove_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td></tr>');
