@@ -41,7 +41,10 @@ class StoreUpdateRegistrationRequest extends FormRequest
             'sec_carers.*' => 'string',
             // MAY be present; MUST be a not-null string
             'new_carers' => 'array|min:1',
-            'new_carers.*' => 'string',
+            'new_carers.*' => [
+                'not-regex:/^.*[\p{C}].*$/u',
+                'regex:/^[A-Za-z.\s\'—-]+$/',
+            ],
             // MAY be present, Min 1
             'children' => 'array|min:1',
             // MAY be present alone; MUST be present if child verified, MUST be a date format of '2017-07'
