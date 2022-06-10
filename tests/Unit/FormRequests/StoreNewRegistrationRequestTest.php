@@ -61,7 +61,7 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'passed' => true,
                 'data' => [
                     'consent' => 'yes',
-                    'carer' => 'A String',
+                    'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes'
                 ]
@@ -73,7 +73,7 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
             'requestShouldFailWhenConsentIsMissing' => [
                 'passed' => false,
                 'data' => [
-                    'carer' => 'A String',
+                    'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes'
                 ]
@@ -83,14 +83,14 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'passed' => true,
                 'data' => [
                     'consent' => 'on',
-                    'carer' => 'A String',
+                    'pri_carer' => 'A String',
                 ]
             ],
             'requestShouldFailWhenCarerIsNotAString' => [
                 'passed' => false,
                 'data' => [
                     'consent' => true,
-                    'carer' => 1,
+                    'pri_carer' => 1,
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes'
                 ]
@@ -99,7 +99,7 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'passed' => false,
                 'data' => [
                     'consent' => 'yes',
-                    'carer' => 'A String',
+                    'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'hello',
                     'eligibility-nrpf' => 'hello'
                 ]
@@ -108,7 +108,7 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'passed' => false,
                 'data' => [
                     'consent' => 2,
-                    'carer' => 'A String',
+                    'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes'
                 ]
@@ -117,7 +117,7 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'passed' => true,
                 'data' => [
                     'consent' => 1,
-                    'carer' => 'A String',
+                    'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes',
                     'carers' => ['B String', 'C String'],
@@ -127,27 +127,27 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'passed' => false,
                 'data' => [
                     'consent' => 1,
-                    'carer' => 'A String',
+                    'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes',
-                    'carers' => [],
+                    'new_carers' => [],
                 ]
             ],
             'requestShouldFailWithNonStringSecondaryCarers' => [
                 'passed' => false,
                 'data' => [
                     'consent' => 1,
-                    'carer' => 'A String',
+                    'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes',
-                    'carers' => [1,2,3,4],
+                    'new_carers' => [1,2,3,4],
                 ]
             ],
             'requestShouldSucceedWithMinimalChildren' => [
                 'passed' => true,
                 'data' => [
                     'consent' => 1,
-                    'carer' => 'A String',
+                    'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes',
                     'children' => [
@@ -159,7 +159,7 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'passed' => false,
                 'data' => [
                     'consent' => 1,
-                    'carer' => 'A String',
+                    'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes',
                     'children' => [
@@ -171,7 +171,7 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'passed' => false,
                 'data' => [
                     'consent' => 1,
-                    'carer' => 'A String',
+                    'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes',
                     'children' => [],
@@ -181,7 +181,7 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'passed' => true,
                 'data' => [
                     'consent' => 1,
-                    'carer' => 'A String',
+                    'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes',
                     'children' => [
@@ -195,7 +195,7 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'passed' => true,
                 'data' => [
                     'consent' => 1,
-                    'carer' => 'A String',
+                    'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes',
                     'children' => [
@@ -218,7 +218,7 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 'passed' => false,
                 'data' => [
                     'consent' => 1,
-                    'carer' => 'A String',
+                    'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes',
                     'children' => [
