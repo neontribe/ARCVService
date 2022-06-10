@@ -307,4 +307,23 @@ class RegistrationPageTest extends StoreTestCase
             $this->assertEquals($registration->eligible_from, $originalDate);
         }
     }
+
+    /** @test */
+    public function asAnSPUserICanSeeTheCorrectInputs()
+    {
+        $this->actingAs($this->spCentreUser, 'store')
+            ->visit(URL::route('store.registration.create'))
+            ->seeElement('input[name="pri_carer"]')
+            ->seeElement('input[name="age"]')
+            ->seeElement('input[id="carer_adder_input"]')
+            ->seeElement('button[id="add-carer-age"]')
+            ->seeElement('button[id="add-age"]')
+            ->dontSee('verified-col')
+            ->dontSee('can-defer-col')
+            ->dontSee('eligibility-hsbs')
+            ->dontSee('eligibility-nrpf')
+            ->see('Has the registration form been completed and signed?')
+            ->see('Save Household')
+        ;
+    }
 }

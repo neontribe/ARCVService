@@ -40,6 +40,11 @@ class EditPageTest extends StoreTestCase
     private $scottishCentre;
     private $scottishCentreUser;
     private $scottishRegistration;
+    private $spRulesSponsor;
+    private $spFamily;
+    private $spCentre;
+    private $spCentreUser;
+    private $spRegistration;
 
     public function setUp(): void
     {
@@ -75,12 +80,6 @@ class EditPageTest extends StoreTestCase
         ]);
         $this->scottishCentreUser->centres()->attach($this->scottishCentre->id, ['homeCentre' => true]);
         $this->scottishFamily = factory(Family::class)->create();
-        // $this->underPrimarySchool = factory(Child::class, 'betweenOneAndPrimarySchoolAge')->make();
-        // $this->isPrimarySchool = factory(Child::class, 'isPrimarySchoolAge')->make();
-        // $this->isOverPrimarySchool = factory(Child::class, 'isSecondarySchoolAge')->make();
-        // $this->readyForScottishPrimarySchool = factory(Child::class, 'readyForScottishPrimarySchool')->make();
-        // $this->canDefer = factory(Child::class, 'canDefer')->make();
-        // $this->canNotDefer = factory(Child::class, 'canNotDefer')->make();
 
         $this->scottishRegistration = factory(Registration::class)->create([
             "centre_id" => $this->scottishCentre->id,
@@ -89,6 +88,33 @@ class EditPageTest extends StoreTestCase
         // The registration factory gives the family kids, so get rid of them
         // so we can be more specific.
         $this->scottishFamily->children()->delete();
+
+        // Social prescribing set up
+        $spRules = SponsorsController::socialPrescribingOverrides();
+        $this->spRulesSponsor = factory(Sponsor::class)->create([
+            'programme' => 1
+        ]);
+        $this->spRulesSponsor->evaluations()->saveMany($spRules);
+        $this->spCentre = factory(Centre::class)->create([
+          'sponsor_id' => $this->spRulesSponsor->id
+        ]);
+
+        // Create a CentreUser
+        $this->spCentreUser =  factory(CentreUser::class)->create([
+            "name"  => "sp test user",
+            "email" => "sptestuser@example.com",
+            "password" => bcrypt('sp_test_user_pass'),
+        ]);
+        $this->spCentreUser->centres()->attach($this->spCentre->id, ['homeCentre' => true]);
+        $this->spFamily = factory(Family::class)->create();
+
+        $this->spRegistration = factory(Registration::class)->create([
+            "centre_id" => $this->spCentre->id,
+            "family_id" => $this->spFamily->id,
+        ]);
+        // The registration factory gives the family kids, so get rid of them
+        // so we can be more specific.
+        $this->spFamily->children()->delete();
 
     }
 
@@ -527,5 +553,33 @@ class EditPageTest extends StoreTestCase
       $this->dontSee($rule->reason);
       $rule2 = new ScottishChildIsAlmostPrimarySchoolAge();
       $this->dontSee($rule2->reason);
+    }
+
+    /** @test */
+    public function itShowsAnSPRegistrationsDetailsCorrectly()
+    {
+        $new_carers = factory(Carer::class, 2)->make();
+        $this->spRegistration->family->carers()->saveMany($new_carers);
+        //
+        $new_participants = factory(Child::class, 3)->make();
+        $this->spRegistration->family->children()->saveMany($new_participants);
+        //
+        $children = $this->spRegistration->family->children;
+        $this->assertTrue($children->count() === 3);
+        // Find the edit page
+        $this->actingAs($this->spCentreUser, 'store')
+            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->spRegistration ]))
+        ;
+        // See the names in the page
+        foreach ($new_carers as $new_carer) {
+            $this->see($new_carer->name);
+        }
+        
+        foreach ($new_participants as $new_participant) {
+            $this->see('<td class="age-col">'. explode(',',$new_participant->getAgeString())[0] .'</td>');
+            $this->dontSee('ID Checked');
+            $this->dontSee('eligibility-hsbs');
+            $this->dontSee('eligibility-nrpf');
+        }
     }
 }
