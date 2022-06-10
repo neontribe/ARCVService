@@ -4,6 +4,8 @@ namespace Tests\Feature\Store;
 use App\Centre;
 use App\Registration;
 use App\CentreUser;
+use App\Sponsor;
+use App\Http\Controllers\Service\Admin\SponsorsController;
 use InvalidArgumentException;
 use Tests\StoreTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -19,6 +21,8 @@ class RegistrationPageTest extends StoreTestCase
      */
     private $centre;
     private $centreUser;
+    private $spCentre;
+    private $spCentreUser;
 
     public function setUp(): void
     {
@@ -33,6 +37,25 @@ class RegistrationPageTest extends StoreTestCase
             "password" => bcrypt('test_user_pass'),
         ]);
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+
+        // Create an SP Sponsor
+        $spSponsor = factory(Sponsor::class)->create([
+            'programme' => 1
+        ]);
+        $spRules = SponsorsController::socialPrescribingOverrides();
+        $spSponsor->evaluations()->saveMany($spRules);
+        // Create an SP Centre
+        $this->spCentre = factory(Centre::class)->create([
+            'sponsor_id' => $spSponsor->id
+        ]);
+
+        // Create an SP CentreUser
+        $this->spCentreUser =  factory(CentreUser::class)->create([
+            "name"  => "SP user",
+            "email" => "SP@example.com",
+            "password" => bcrypt('test_user_pass'),
+        ]);
+        $this->spCentreUser->centres()->attach($this->spCentre->id, ['homeCentre' => true]);
     }
 
     /** @test */
