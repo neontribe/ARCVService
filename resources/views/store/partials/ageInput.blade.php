@@ -37,9 +37,9 @@
                 // create the date from local age
                 var age = instance.find('input[name=age]').val();
                 var dateObj = moment().subtract(age, 'years').startOf('month');
-
-                // validate it
-                if (!dateObj.isValid() || age.toString().length === 0 ) {
+                var isSensibleAge = (age > 0 && age <= 120) ? true : false;
+                 // validate it
+                if (!dateObj.isValid() || age.toString().length === 0 || isSensibleAge === false) {
                     errorMsg = 'Invalid Age';
                 }
                 if (errorMsg) {
