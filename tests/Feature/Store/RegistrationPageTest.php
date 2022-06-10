@@ -40,7 +40,7 @@ class RegistrationPageTest extends StoreTestCase
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
-            ->seeElement('input[name="carer"]')
+            ->seeElement('input[name="pri_carer"]')
         ;
     }
 
@@ -140,7 +140,7 @@ class RegistrationPageTest extends StoreTestCase
 
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
-            ->type('Test Carer', 'carer')
+            ->type('Test Carer', 'pri_carer')
             ->check('consent')
             ->press('Save Family')
             ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
@@ -167,7 +167,7 @@ class RegistrationPageTest extends StoreTestCase
 
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
-            ->type('Test Carer', 'carer')
+            ->type('Test Carer', 'pri_carer')
             ->press('Save Family')
             ->seePageIs(URL::route('store.registration.create'))
             ->seeElement('#registration-alert')
@@ -203,7 +203,7 @@ class RegistrationPageTest extends StoreTestCase
         $this->assertEquals(0, Registration::get()->count());
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
-            ->type('Test Carer', 'carer')
+            ->type('Test Carer', 'pri_carer')
             ->check('consent')
             ->select('healthy-start-receiving', 'eligibility-hsbs')
             ->press('Save Family')
@@ -220,7 +220,7 @@ class RegistrationPageTest extends StoreTestCase
         $this->assertEquals(0, Registration::get()->count());
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
-            ->type('Test Carer', 'carer')
+            ->type('Test Carer', 'pri_carer')
             ->check('consent')
             ->select('healthy-start-applying', 'eligibility-hsbs')
             ->press('Save Family')
@@ -237,7 +237,7 @@ class RegistrationPageTest extends StoreTestCase
         $this->assertEquals(0, Registration::get()->count());
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
-            ->type('Test Carer', 'carer')
+            ->type('Test Carer', 'pri_carer')
             ->check('consent')
             ->select('healthy-start-receiving', 'eligibility-hsbs')
             ->press('Save Family')
@@ -263,7 +263,7 @@ class RegistrationPageTest extends StoreTestCase
         $this->assertEquals(0, Registration::get()->count());
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
-            ->type('Test Carer', 'carer')
+            ->type('Test Carer', 'pri_carer')
             ->check('consent')
             ->select('healthy-start-receiving', 'eligibility-hsbs')
             ->press('Save Family')
