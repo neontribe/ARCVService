@@ -30,7 +30,7 @@
     });
 
     // Clear error message
-    $('document').on('childInput:validated', function(e) {
+    $(document).on('childInput:validated', function(e) {
         $('#age-error').text('');
     })
 </script>
