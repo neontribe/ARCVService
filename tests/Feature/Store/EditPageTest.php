@@ -521,7 +521,7 @@ class EditPageTest extends StoreTestCase
         ->see('<td class="dob-col">'. $hasDeferred->getDobAsString() .'</td>')
         ->seeElement('input[type="hidden"][value="'. $hasDeferred->dob->format('Y-m') .'"]')
         ->dontSeeElement($selector)
-        ->see('<td>Y</td>')
+        ->seeInElement(".can-defer-col",'Y')
       ;
       $rule = new ScottishChildCanDefer();
       $this->dontSee($rule->reason);
