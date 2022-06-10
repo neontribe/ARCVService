@@ -25,7 +25,7 @@
                 <tbody id="existing_wrapper">
                 @foreach ( $children as $child )
                     <tr>
-                        <td class="age-col">{{ $child->getAgeString() }}</td>
+                        <td class="age-col">{{ explode(',', $child->getAgeString())[0] }}</td>
                         <td class="dob-col"></td>
                         <td class="remove-col">
                             <input type="hidden" name="children[{{ $child->id }}][dob]"
@@ -69,9 +69,7 @@
             // Create the table columns
             var ageColumn = (moment().diff(valueDate, 'days') > 0)
                 ? '<td class="age-col">' +
-                moment().diff(valueDate, 'years') + ' yr, ' +
-                moment().diff(valueDate, 'months') % 12 +
-                ' mo</td>'
+                moment().diff(valueDate, 'years') + ' yr</td>'
                 : '<td class="age-col">P</td>'
             ;
 
@@ -99,7 +97,7 @@
             var displayYears = moment().diff(dob, 'years');
 
             // Create and append new style columns
-            var ageColumn = '<td class="age-col">' + displayYears + ' yr, ' + displayMonths + ' mo</td>';
+            var ageColumn = '<td class="age-col">' + displayYears + ' yr</td>';
             var dobColumn = '<td class="dob-col"><input name="children[' + childKey + '][dob]" type="hidden" value="' + dob + '" >' + dateObj + '</td>';
             var removeColumn = '<td class="remove-col"><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>';
 
