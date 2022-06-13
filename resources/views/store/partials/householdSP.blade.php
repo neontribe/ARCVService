@@ -110,12 +110,10 @@
             // Create and append new style columns
             var ageColumn = '<td class="age-col">' + displayYears + ' yr</td>';
             var dobColumn = '<td class="dob-col"><input name="children[' + childKey + '][dob]" type="hidden" value="' + dob + '" >' + dateObj + '</td>';
-            // var isPriCarerColumn = '<td class="is-pri-carer-col"><input name="children[' + childKey + '][is_pri_carer]" type="hidden" value=' + isPriCarer + '></td>';
             var removeColumn = '<td class="remove-col"><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>';
 
             $(this).append(ageColumn);
             $(this).append(dobColumn);
-            // $(this).append(isPriCarerColumn);
             $(this).append(removeColumn);
         });
     </script>
