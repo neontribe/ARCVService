@@ -34,7 +34,11 @@
         @include('store.partials.ageInput')
         <button id="add-carer-age" class="link-button link-button-large">
             <i class="fa fa-plus button-icon" aria-hidden="true"></i>
-            Add Main Participant
+            @if (isset($pri_carer))
+                Update Main Participant
+            @else
+                Add Main Participant
+            @endif
         </button>
     </div>
 

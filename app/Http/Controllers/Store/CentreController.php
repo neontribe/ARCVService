@@ -180,34 +180,43 @@ class CentreController extends Controller
             // Evaluate it.
             $regValuation = $reg->valuatation;
 
+            if ($programme) {
+                $pri_carer = $reg->family->children->firstWhere('is_pri_carer', 1);
+                $dob_header = 'Main Carer DoB';
+                if ($pri_carer) {
+                    $kids[$dob_header] = $pri_carer->dob->lastOfMonth()->format($dateFormats['dob']);
+                }
+            }
+
             if ($reg->family) {
                 /** @var Valuation $familyValuation */
                 $familyValuation = $reg->family->getValuation();
                 $child_index = 1;
                 foreach ($reg->family->children as $child) {
-                    // Will run a child valuation if we don't already have one.
-                    /** @var Valuation $childValuation */
-                    $childValuation = $child->getValuation();
+                    if (!$programme || !$child->is_pri_carer) {
+                        // Will run a child valuation if we don't already have one.
+                        /** @var Valuation $childValuation */
+                        $childValuation = $child->getValuation();
 
-                    if ($child->dob->isFuture()) {
-                        // If it's a pregnancy, set due date and move on.
-                        $due_date = $child->dob->format($dateFormats['dob']);
-                    } else {
-                        // Otherwise, set the header
-                        $dob_header = Child::getAlias($programme) . ' ' . (string)$child_index . ' DoB';
-                        $kids[$dob_header] = $child->dob->lastOfMonth()->format($dateFormats['dob']);
-                        $child_index += 1;
-                        // A child is eligible if it's family is AND it has no disqualifications of it's own.
-                        if ($familyValuation->getEligibility() && $childValuation->getEligibility()) {
-                            $eligibleKids += 1;
+                        if ($child->dob->isFuture()) {
+                            // If it's a pregnancy, set due date and move on.
+                            $due_date = $child->dob->format($dateFormats['dob']);
+                        } else {
+                            // Otherwise, set the header
+                            $dob_header = Child::getAlias($programme) . ' ' . (string)$child_index . ' DoB';
+                            $kids[$dob_header] = $child->dob->lastOfMonth()->format($dateFormats['dob']);
+                            $child_index += 1;
+                            // A child is eligible if it's family is AND it has no disqualifications of it's own.
+                            if ($familyValuation->getEligibility() && $childValuation->getEligibility()) {
+                                $eligibleKids += 1;
+                            }
                         }
                     }
                 }
             }
             if ($programme) {
                 // Add count of eligible household members
-                // Minus one to account for the primary carer
-                $row['Eligible Household Members'] = $eligibleKids - 1;
+                $row['Eligible Household Members'] = $eligibleKids;
             } else {
                 // Add count of eligible kids
                 $row['Eligible Children'] = $eligibleKids;

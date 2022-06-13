@@ -33,7 +33,7 @@
             getDate: function (e) {
                 var instance = $(e.data.element);
                 var errorMsg = null;
-
+                var buttonID = instance.attr('id');
                 // create the date from local age
                 var age = instance.find('input[name=age]').val();
                 var dateObj = moment().subtract(age, 'years').startOf('month');
@@ -46,7 +46,7 @@
                     $(document).trigger('childInput:error', [ errorMsg ]);
                 } else {
                     // broadcast that we've validated and include the date
-                    $(document).trigger('childInput:validated', [ dateObj, false ]);
+                    $(document).trigger('childInput:validated', [ dateObj, false, buttonID ]);
                 }
             },
             reset: function (e) {
