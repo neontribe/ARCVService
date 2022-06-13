@@ -180,16 +180,20 @@ class CentreController extends Controller
             // Evaluate it.
             $regValuation = $reg->valuatation;
 
-            $pri_carer = $reg->family->children->firstWhere('is_pri_carer', 1);
-            $dob_header = 'Main Carer DoB';
-            $kids[$dob_header] = $pri_carer->dob->lastOfMonth()->format($dateFormats['dob']);
+            if ($programme) {
+                $pri_carer = $reg->family->children->firstWhere('is_pri_carer', 1);
+                $dob_header = 'Main Carer DoB';
+                if ($pri_carer) {
+                    $kids[$dob_header] = $pri_carer->dob->lastOfMonth()->format($dateFormats['dob']);
+                }
+            }
 
             if ($reg->family) {
                 /** @var Valuation $familyValuation */
                 $familyValuation = $reg->family->getValuation();
                 $child_index = 1;
                 foreach ($reg->family->children as $child) {
-                    if (!$child->is_pri_carer) {
+                    if (!$programme || !$child->is_pri_carer) {
                         // Will run a child valuation if we don't already have one.
                         /** @var Valuation $childValuation */
                         $childValuation = $child->getValuation();

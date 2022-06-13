@@ -59,6 +59,15 @@ class CentreControllerTest extends StoreTestCase
             'centre_id' => $this->spCentre->id
         ]);
 
+        foreach ($this->spRegistrations as $key => $reg) {
+            foreach ($reg->family->children as $key => $child) {
+                if ($key === 0) {
+                    $child->is_pri_carer = 1;
+                    $child->save();
+                }
+            }
+        }
+
         // Add some bundles
         $this->registrations->each(function ($registration, $key) {
             $bundle = $registration->currentBundle();
@@ -196,6 +205,7 @@ class CentreControllerTest extends StoreTestCase
             "Entitlement",
             "Last Collection",
             "Eligible Household Members",
+            "Main Carer DoB",
             "Join Date",
             "Leaving Date",
             "Leaving Reason"
@@ -208,7 +218,7 @@ class CentreControllerTest extends StoreTestCase
             "Eligible From",
             "Due Date",
         ];
-
+\Log::info($headers);
         // Check the expected headers are present.
         foreach ($expected_headers as $expected) {
             $this->assertContains($expected, $headers);
