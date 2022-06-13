@@ -31,6 +31,7 @@ class Child extends Model implements IEvaluee
         'born',
         'verified',
         'deferred',
+        'is_pri_carer',
     ];
 
     /**

@@ -55,6 +55,7 @@ class StoreNewRegistrationRequest extends FormRequest
             'children.*.dob' => 'required_if:children.*.verified,=,true|date_format:Y-m',
             // MAY be present; MUST be a boolean
             'children.*.verified' => 'boolean',
+            'is_pri_carer' => 'boolean'
         ];
 
         return $rules;

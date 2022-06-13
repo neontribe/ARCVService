@@ -27,6 +27,9 @@
                     <tr>
                         <td class="age-col">{{ explode(',', $child->getAgeString())[0] }}</td>
                         <td class="dob-col"></td>
+                        <td class='is-pri-carer-col'><input type="hidden" name="children[{{ $child->id }}][is_pri_carer]"
+                               value="{{ $child->is_pri_carer }}"
+                        ></td>
                         <td class="remove-col">
                             <input type="hidden" name="children[{{ $child->id }}][dob]"
                                    value="{{ Carbon\Carbon::parse($child->dob)->format('Y-m') }}"
@@ -58,7 +61,7 @@
 
 @pushonce('bottom:householdSP')
     <script>
-        function addAgeRow(e, dateObj, verified) {
+        function addAgeRow(e, dateObj, verified, buttonID = '') {
             // setup fields
             // It's a valid date, so manufacture a human-readable string
             var valueDate = dateObj.format("YYYY-MM");
@@ -73,22 +76,30 @@
                 : '<td class="age-col">P</td>'
             ;
 
+            var isPriCarer = buttonID === 'addCarerAgeInput' ? 1 : 0;
+            if (isPriCarer === 1) {
+                $('.is-pri-carer-col').find("input").each(function() {
+                    if ($(this).val() == 1) {
+                        $(this).closest('tr').remove();
+                    }
+                });
+            }
+
             var dobColumn = '<td class="dob-col"><input name="children[' + childKey + '][dob]" type="hidden" value="' + valueDate + '" ></td>';
+            var isPriCarerColumn = '<td class="is-pri-carer-col"><input name="children[' + childKey + '][is_pri_carer]" type="hidden" value=' + isPriCarer + '></td>';
             var removeColumn = '<td class="remove-col"><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>';
 
             // add an input
-            $("#child_wrapper").append('<tr>' + ageColumn + dobColumn + removeColumn + '</tr>');
+            $("#child_wrapper").append('<tr>' + ageColumn + dobColumn + isPriCarerColumn + removeColumn + '</tr>');
 
             // emit event
             $(document).trigger('childRow:updated');
         }
         $(document).on('childInput:validated', addAgeRow);
-
         // In the case of failed submission, iterate the children previously submitted
         $(".js-old-child").each(function (index) {
             // Grab the data out of the data attributes
             var dob = $(this).data("dob");
-
             // Convert to useful formats - add_child_form partial should have validated these
             var dateObj = moment(dob, "YYYY-MM", true).format("MMM YYYY");
             var childKey = Math.random();
@@ -99,10 +110,12 @@
             // Create and append new style columns
             var ageColumn = '<td class="age-col">' + displayYears + ' yr</td>';
             var dobColumn = '<td class="dob-col"><input name="children[' + childKey + '][dob]" type="hidden" value="' + dob + '" >' + dateObj + '</td>';
+            // var isPriCarerColumn = '<td class="is-pri-carer-col"><input name="children[' + childKey + '][is_pri_carer]" type="hidden" value=' + isPriCarer + '></td>';
             var removeColumn = '<td class="remove-col"><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>';
 
             $(this).append(ageColumn);
             $(this).append(dobColumn);
+            // $(this).append(isPriCarerColumn);
             $(this).append(removeColumn);
         });
     </script>

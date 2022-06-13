@@ -535,11 +535,18 @@ class RegistrationController extends Controller
                     $deferred = (bool)$child['deferred'];
                 }
 
+            // Check and set is_pri_carer, or null
+                $is_pri_carer = null;
+                if (array_key_exists('is_pri_carer', $child)) {
+                    $is_pri_carer = (bool)$child['is_pri_carer'];
+                }
+
                 return new Child([
-                'born' => $month_of_birth->isPast(),
-                'dob' => $month_of_birth->toDateTimeString(),
-                'verified' => $verified,
-                'deferred' => $deferred,
+                    'born' => $month_of_birth->isPast(),
+                    'dob' => $month_of_birth->toDateTimeString(),
+                    'verified' => $verified,
+                    'deferred' => $deferred,
+                    'is_pri_carer' => $is_pri_carer,
                 ]);
             },
             $children
