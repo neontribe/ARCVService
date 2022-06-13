@@ -218,7 +218,7 @@ class CentreControllerTest extends StoreTestCase
             "Eligible From",
             "Due Date",
         ];
-\Log::info($headers);
+
         // Check the expected headers are present.
         foreach ($expected_headers as $expected) {
             $this->assertContains($expected, $headers);
