@@ -9,7 +9,7 @@ use Chalcedonyt\Specification\AndSpec;
 
 class ScottishChildCanDefer extends BaseChildEvaluation
 {
-    public $reason = 'is able to defer (SCOTLAND)';
+    public $reason = 'able to defer (SCOTLAND)';
     private $specification;
 
     /**

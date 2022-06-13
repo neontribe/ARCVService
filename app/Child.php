@@ -182,7 +182,7 @@ class Child extends Model implements IEvaluee
 
         if (count($notices) > 0) {
             foreach ($notices as $key => $notice) {
-                if (array_key_exists('reason', $notice) && $notice['reason'] === 'Child|is able to defer (SCOTLAND)') {
+                if (array_key_exists('reason', $notice) && $notice['reason'] === 'Child|able to defer (SCOTLAND)') {
                     return true;
                 }
             }

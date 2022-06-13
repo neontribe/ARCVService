@@ -26,7 +26,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
         'ChildIsPrimarySchoolAge' => ['reason' => 'Child|primary school age (SCOTLAND)'],
         'ChildIsSecondarySchoolAge' => ['reason' => 'Child|secondary school age'],
         'FamilyHasUnverifiedChildren' => ['reason' => 'Family|has one or more children that you haven\'t checked ID for yet'],
-        'ScottishChildCanDefer' => ['reason' => 'Child|is able to defer (SCOTLAND)'],
+        'ScottishChildCanDefer' => ['reason' => 'Child|able to defer (SCOTLAND)'],
     ];
 
     // This has a | in the reason field because we want to carry the entity with it.
