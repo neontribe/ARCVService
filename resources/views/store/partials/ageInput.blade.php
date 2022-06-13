@@ -33,7 +33,7 @@
             getDate: function (e) {
                 var instance = $(e.data.element);
                 var errorMsg = null;
-                var buttonID = $(instance).attr('id');
+                var buttonID = instance.attr('id');
                 // create the date from local age
                 var age = instance.find('input[name=age]').val();
                 var dateObj = moment().subtract(age, 'years').startOf('month');
