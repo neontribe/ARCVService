@@ -280,7 +280,9 @@ class EditPageTest extends StoreTestCase
         Carbon::setTestNow(Carbon::parse('first day of January 2018')->startOfDay());
 
         // Create a Centre, CentreUser and Registration
-        $centre = factory(Centre::class)->create();
+        $centre = factory(Centre::class)->create([
+            'sponsor_id' => 1 // Not an SP sponsor
+        ]);
         $centreUser =  factory(CentreUser::class)->create([
             "name"  => "tester",
             "email" => "tester@example.com",
