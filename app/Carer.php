@@ -4,11 +4,13 @@ namespace App;
 
 use App\Traits\Aliasable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Carer extends Model
 {
     use Aliasable;
+    use SoftDeletes;
 
     public const PROGRAMME_ALIASES = [
         "Child",
@@ -39,5 +41,15 @@ class Carer extends Model
     public function family() : BelongsTo
     {
         return $this->belongsTo(Family::class);
+    }
+
+    /**
+     * Overrides the delete function to alter the name
+     */
+    public function delete()
+    {
+         $this->name = 'Deleted';
+         $this->save();
+         return parent::delete();
     }
 }

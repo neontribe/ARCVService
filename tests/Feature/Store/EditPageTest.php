@@ -576,12 +576,71 @@ class EditPageTest extends StoreTestCase
         foreach ($new_carers as $new_carer) {
             $this->see($new_carer->name);
         }
-        
+
         foreach ($new_participants as $new_participant) {
             $this->see('<td class="age-col">'. explode(',',$new_participant->getAgeString())[0] .'</td>');
             $this->dontSee('ID Checked');
             $this->dontSee('eligibility-hsbs');
             $this->dontSee('eligibility-nrpf');
         }
+    }
+
+    /** @test */
+    public function ICanDeleteASecondaryCarerWhoHasCollectedABundle()
+    {
+        $this->registration->family->carers()->delete();
+        $main_carer = factory(Carer::class)->make([
+            'name' => 'Main Carer'
+        ]);
+        $this->registration->family->carers()->save($main_carer);
+        $secondary_carer = factory(Carer::class)->make([
+            'name' => 'Secondary Carer'
+        ]);
+        $this->registration->family->carers()->save($secondary_carer);
+        $this->seeInDatabase('carers', [
+            'name' => 'Main Carer'
+        ]);
+        $this->seeInDatabase('carers', [
+            'name' => 'Secondary Carer'
+        ]);
+
+        //All this just to delete the carer after they've collcted a bundle.
+        $currentBundle = $this->registration->currentBundle(); //Required. No idea why.
+        $this->assertCount(1, $this->registration->bundles);
+        $disbursementCentre = $this->centre->id;
+        $disbursementDate = Carbon::now()->startOfWeek()->format("Y-m-d");
+        $collectingCarer = 'Secondary Carer';
+        $route = route('store.registration.voucher-manager', ['registration' => $this->registration->id]);
+        $put_route = route('store.registration.vouchers.put', ['registration' => $this->registration->id]);
+        $data = [
+            "collected_at" => $disbursementCentre,
+            "collected_on" => $disbursementDate,
+            "collected_by" => $collectingCarer
+        ];
+        $response = $this->actingAs($this->centreUser, 'store')
+            ->visit($route)
+            ->put(
+                $put_route,
+                $data
+            );
+
+        $carer_to_delete = Carer::where('id', $secondary_carer->id)->first();
+        $carer_to_delete->delete();
+        $this->seeInDatabase('carers', [
+            'id' => $secondary_carer->id,
+            'name' => 'Deleted'
+        ]);
+        $this->dontSeeInDatabase('carers', [
+            'id' => $secondary_carer->id,
+            'deleted_at' => null
+        ]);
+
+        // We can't see the actual list showing 'Deleted' because of the way phpunit works
+        // but at least check it doesn't throw an error.
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.collection-history', [ 'registration' => $this->registration ]))
+            ->assertResponseStatus(200)
+            ->see('Full Collection History')
+        ;
     }
 }
