@@ -576,7 +576,7 @@ class EditPageTest extends StoreTestCase
         foreach ($new_carers as $new_carer) {
             $this->see($new_carer->name);
         }
-        
+
         foreach ($new_participants as $new_participant) {
             $this->see('<td class="age-col">'. explode(',',$new_participant->getAgeString())[0] .'</td>');
             $this->dontSee('ID Checked');
@@ -589,14 +589,14 @@ class EditPageTest extends StoreTestCase
     public function ICanDeleteASecondaryCarerWhoHasCollectedABundle()
     {
         $this->registration->family->carers()->delete();
-        $main_carer = factory(Carer::class, 1)->make([
+        $main_carer = factory(Carer::class)->make([
             'name' => 'Main Carer'
         ]);
-        $this->registration->family->carers()->saveMany($main_carer);
-        $secondary_carer = factory(Carer::class, 1)->make([
+        $this->registration->family->carers()->save($main_carer);
+        $secondary_carer = factory(Carer::class)->make([
             'name' => 'Secondary Carer'
         ]);
-        $this->registration->family->carers()->saveMany($secondary_carer);
+        $this->registration->family->carers()->save($secondary_carer);
         $this->seeInDatabase('carers', [
             'name' => 'Main Carer'
         ]);
@@ -624,10 +624,10 @@ class EditPageTest extends StoreTestCase
                 $data
             );
 
-        $carer_to_delete = Carer::where('id', $secondary_carer[0]->id)->first();
+        $carer_to_delete = Carer::where('id', $secondary_carer->id)->first();
         $carer_to_delete->delete();
         $this->seeInDatabase('carers', [
-            'id' => $secondary_carer[0]->id,
+            'id' => $secondary_carer->id,
             'name' => 'Deleted'
         ]);
 
