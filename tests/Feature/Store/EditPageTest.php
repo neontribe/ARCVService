@@ -630,6 +630,10 @@ class EditPageTest extends StoreTestCase
             'id' => $secondary_carer->id,
             'name' => 'Deleted'
         ]);
+        $this->dontSeeInDatabase('carers', [
+            'id' => $secondary_carer->id,
+            'deleted_at' => null
+        ]);
 
         // We can't see the actual list showing 'Deleted' because of the way phpunit works
         // but at least check it doesn't throw an error.
