@@ -498,7 +498,7 @@ class RegistrationController extends Controller
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getTraceAsString());
             // Throw it back to the user
-            return redirect()->route('store.registration.edit')->withErrors('Registration update failed.');
+            return redirect()->route('store.registration.edit', ['registration' => $registration->id])->withErrors('Registration update failed.');
         }
         // Or return the success
         Log::info('Registration ' . $registration->id . ' updated by service user ' . Auth::id());
