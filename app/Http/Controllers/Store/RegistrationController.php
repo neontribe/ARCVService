@@ -469,7 +469,9 @@ class RegistrationController extends Controller
             ) {
 
                 // delete the missing carers
-                Carer::whereIn('id', $carersKeysToDelete)->delete();
+                Carer::whereIn('id', $carersKeysToDelete)->get()->each(function($carer) {
+                    $carer->delete();
+                });
 
                 // delete the children. still messy.
                 $family->children()->delete();
