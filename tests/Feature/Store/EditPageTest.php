@@ -639,6 +639,8 @@ class EditPageTest extends StoreTestCase
         // but at least check it doesn't throw an error.
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.collection-history', [ 'registration' => $this->registration ]))
+            ->assertResponseStatus(200)
+            ->see('Full Collection History')
         ;
     }
 }
