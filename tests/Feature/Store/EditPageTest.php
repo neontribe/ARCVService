@@ -584,4 +584,57 @@ class EditPageTest extends StoreTestCase
             $this->dontSee('eligibility-nrpf');
         }
     }
+
+    /** @test */
+    public function ICanDeleteASecondaryCarerWhoHasCollectedABundle()
+    {
+        $this->registration->family->carers()->delete();
+        $main_carer = factory(Carer::class, 1)->make([
+            'name' => 'Main Carer'
+        ]);
+        $this->registration->family->carers()->saveMany($main_carer);
+        $secondary_carer = factory(Carer::class, 1)->make([
+            'name' => 'Secondary Carer'
+        ]);
+        $this->registration->family->carers()->saveMany($secondary_carer);
+        $this->seeInDatabase('carers', [
+            'name' => 'Main Carer'
+        ]);
+        $this->seeInDatabase('carers', [
+            'name' => 'Secondary Carer'
+        ]);
+
+        //All this just to delete the carer after they've collcted a bundle.
+        $currentBundle = $this->registration->currentBundle(); //Required. No idea why.
+        $this->assertCount(1, $this->registration->bundles);
+        $disbursementCentre = $this->centre->id;
+        $disbursementDate = Carbon::now()->startOfWeek()->format("Y-m-d");
+        $collectingCarer = 'Secondary Carer';
+        $route = route('store.registration.voucher-manager', ['registration' => $this->registration->id]);
+        $put_route = route('store.registration.vouchers.put', ['registration' => $this->registration->id]);
+        $data = [
+            "collected_at" => $disbursementCentre,
+            "collected_on" => $disbursementDate,
+            "collected_by" => $collectingCarer
+        ];
+        $response = $this->actingAs($this->centreUser, 'store')
+            ->visit($route)
+            ->put(
+                $put_route,
+                $data
+            );
+
+        $carer_to_delete = Carer::where('id', $secondary_carer[0]->id)->first();
+        $carer_to_delete->delete();
+        $this->seeInDatabase('carers', [
+            'id' => $secondary_carer[0]->id,
+            'name' => 'Deleted'
+        ]);
+
+        // We can't see the actual list showing 'Deleted' because of the way phpunit works
+        // but at least check it doesn't throw an error.
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.collection-history', [ 'registration' => $this->registration ]))
+        ;
+    }
 }
