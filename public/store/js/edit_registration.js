@@ -4,11 +4,12 @@ $(document).ready(
         var el = $("#carer_wrapper");
         var carer_el = $('#carer_adder_input');
         var fields = 1;
+        var rxName = /^[ \w.'`—-]+$/
 
         /// add button click
         $("#add_collector").click(function (e) {
             e.preventDefault();
-            var validateName = carer_el.val().match(/^[A-Za-z.\s\'—-]+$/);
+            var validateName = carer_el.val().match(rxName);
             if (carer_el.val().length <= 1 || validateName === null) {
                 $('#carer-name-error').show();
                 return false;
