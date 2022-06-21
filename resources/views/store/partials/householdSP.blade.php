@@ -43,8 +43,6 @@
                 </tbody>
             @endif
         </table>
-    </div>
-    <div>
         <table>
             <tbody id="child_wrapper">
             @if(is_array(old('children')) || (!empty(old('children'))))
