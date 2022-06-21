@@ -38,6 +38,12 @@
                 <i class="fa fa-plus" aria-hidden="true"></i>
             </button>
         </div>
+        <span
+            style="display:none;"
+            id="carer-name-error"
+            class="invalid-error">
+            Must be: letters, numbers, spaces, hyphens, apostrophes and full stops.
+        </span>
     </div>
     <div class="added">
         <p>You have added:</p>
