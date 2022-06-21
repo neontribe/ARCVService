@@ -42,7 +42,7 @@
             style="display:none;"
             id="carer-name-error"
             class="invalid-error">
-            Allowed characters: letters, spaces, hyphens and full stops.
+            Must be: letters, numbers, spaces, hyphens, apostrophes and full stops.
         </span>
     </div>
     <div class="added">
