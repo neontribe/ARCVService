@@ -17,5 +17,10 @@
     "resolve-url-loader": "^5.0.0",
     "sass": "^1.52.0",
     "sass-loader": "^13.0.0"
-  }
+  },
+  "browserslist": [
+    ">2%",
+    "ie 11",
+    "last 3 versions"
+  ]
 }
