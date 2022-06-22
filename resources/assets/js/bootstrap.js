@@ -6,6 +6,6 @@
 
 try {
     window.$ = window.jQuery = require('jquery');
-
+    require('jquery-ui/ui/widgets/datepicker.js');
     require('bootstrap-sass');
 } catch (e) {}

@@ -9,6 +9,7 @@
         <link rel="stylesheet" href="{{ asset('store/assets/google/fonts.css') }}" >
         <link rel="stylesheet" href="{{ asset('store/assets/font-awesome-4.7.0/css/font-awesome.min.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ asset('store/css/main.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ asset('store/css/datepicker.css') }}">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <script src="{{ asset('js/app.js') }}"></script>
         @yield('hoist-head')

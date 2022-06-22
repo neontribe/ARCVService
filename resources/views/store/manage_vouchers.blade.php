@@ -269,11 +269,11 @@
                     }
                 });
 
-                // Browser backup for lack of datepicker support eg. Safari
+                // Browser backup for lack of datepicker support eg. IE11
                 // Reset back to English date format
                 var collectedOn = $('#collected-on');
                 if (collectedOn[0].type !== 'date') {
-                    collectedOn.datepicker({dateFormat: 'dd-mm-yyyy'}).val();
+                    collectedOn.datepicker({dateFormat: 'yy-mm-dd'}).val();
                 }
                 collectedOn.valueAsDate = new Date();
 
