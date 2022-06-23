@@ -59,7 +59,11 @@
 
 @pushonce('bottom:householdSP')
     <script>
-        function addAgeRow(e, dateObj, verified, buttonID = '') {
+        function addAgeRow(e, dateObj, verified, buttonID) {
+            // set a default
+            if (typeof buttonID !== 'string') {
+                buttonID = '';
+            }
             // setup fields
             // It's a valid date, so manufacture a human-readable string
             var valueDate = dateObj.format("YYYY-MM");
