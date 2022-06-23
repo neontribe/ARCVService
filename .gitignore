@@ -24,3 +24,4 @@ npm-debug.log
 /resources/fonts/*
 /_ide_helper_models.php
 /yarn-error.log
+/public/store/css/datepicker.css
