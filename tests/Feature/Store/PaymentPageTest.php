@@ -66,7 +66,7 @@ class PaymentPageTest extends StoreTestCase
             ->dontseeElement('table')
             ->dontsee('Voucher Code')
             ->dontsee('Status')
-            ->dontsee('Date')
+            ->see('This payment request is invalid, or has expired.')
         ;
     }
 
