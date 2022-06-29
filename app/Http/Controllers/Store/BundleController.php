@@ -321,9 +321,9 @@ class BundleController extends Controller
 
                         // Generate error messages where vouchers of the sort existed, using unescaped HTML where necessary.
                         $relevant && $messages[] = new HtmlString(
-                            "These vouchers are currently allocated to a different " . \App\Family::getAlias($programme) . ". Click on the voucher number to view the other " . \App\Family::getAlias($programme) . " 's record: " . join(', ', $relevant)
+                            "These vouchers are currently allocated to a different " . Family::getAlias($programme) . ". Click on the voucher number to view the other " . Family::getAlias($programme) . "'s record: " . join(', ', $relevant)
                         );
-                        $inaccessible && $messages[] = "These vouchers are allocated to a different " . \App\Family::getAlias($programme) . " in a centre you can't access: " . join(', ', $inaccessible);
+                        $inaccessible && $messages[] = "These vouchers are allocated to a different " . Family::getAlias($programme) . " in a centre you can't access: " . join(', ', $inaccessible);
 
                         break;
                     case "empty":
