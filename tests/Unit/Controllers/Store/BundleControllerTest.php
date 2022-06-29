@@ -611,17 +611,19 @@ class BundleControllerTest extends StoreTestCase
 
         // See that it's got no vouchers.
         $this->assertEquals(0, $currentBundle->vouchers()->count());
-
+        $entity = Family::getAlias($this->programme);
         // Check the expected error message is in the session
         $response->seeInSession('error_messages');
+        //dd(Session::get('error_messages'));
         $this->assertTrue($this->hasMatchingErrorMessage(
             Session::get('error_messages'),
-            '~These vouchers are allocated to a family in a centre you can\'t access: ' . $this->testCodes[1] . '~'
+            '~These vouchers are allocated to a different ' . $entity . ' in a centre you can\'t access: ' . $this->testCodes[1] . '~'
         ));
+
 
         // Check the expected error message is in the view
         $this->followRedirects()
-        ->seeInElement('div[class="alert-message error"]', 'These vouchers are allocated to a family in a centre you can\'t access: ' . $this->testCodes[1]);
+        ->seeInElement('div[class="alert-message error"]', 'These vouchers are allocated to a different ' . $entity . ' in a centre you can\'t access: ' . $this->testCodes[1]);
     }
 
     /** @test */
