@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Store;
 use App\Bundle;
 use App\Carer;
 use App\Centre;
+use App\Family;
 use App\Voucher;
 use App\Registration;
 use App\Http\Requests\StoreAppendBundleRequest;
@@ -273,6 +274,7 @@ class BundleController extends Controller
      */
     public function redirectAfterRequest($errors, $successRoute, $failRoute, $bundle = null)
     {
+        $programme = Auth::user()->centre->sponsor->programme;
         if (!empty($errors)) {
             // Assemble messages
             $messages = [];
@@ -319,9 +321,9 @@ class BundleController extends Controller
 
                         // Generate error messages where vouchers of the sort existed, using unescaped HTML where necessary.
                         $relevant && $messages[] = new HtmlString(
-                            "These vouchers are currently allocated to a different family. Click on the voucher number to view the other family's record: " . join(', ', $relevant)
+                            "These vouchers are currently allocated to a different " . Family::getAlias($programme) . ". Click on the voucher number to view the other " . Family::getAlias($programme) . "'s record: " . join(', ', $relevant)
                         );
-                        $inaccessible && $messages[] = "These vouchers are allocated to a family in a centre you can't access: " . join(', ', $inaccessible);
+                        $inaccessible && $messages[] = "These vouchers are allocated to a different " . Family::getAlias($programme) . " in a centre you can't access: " . join(', ', $inaccessible);
 
                         break;
                     case "empty":

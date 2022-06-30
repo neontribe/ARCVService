@@ -6,6 +6,7 @@ use App\Registration;
 use App\Bundle;
 use App\Centre;
 use App\CentreUser;
+use App\Family;
 use App\Sponsor;
 use App\Voucher;
 use Auth;
@@ -58,6 +59,8 @@ class BundleControllerTest extends StoreTestCase
             ]);
             $voucher->applyTransition('dispatch');
         }
+
+        $this->programme = Auth::user()->centre->sponsor->programme;
 
         Auth::logout();
     }
@@ -546,14 +549,15 @@ class BundleControllerTest extends StoreTestCase
 
         // Check the expected error message is in the session
         $response->seeInSession('error_messages');
+        $entity = Family::getAlias($this->programme);
         $this->assertTrue($this->hasMatchingErrorMessage(
             Session::get('error_messages'),
-            '~These vouchers are currently allocated to a different family. Click on the voucher number to view the other family\'s record: <a href="' . $route . '">' . $this->testCodes[0] . '</a>~'
+            '~These vouchers are currently allocated to a different ' . $entity . '. Click on the voucher number to view the other ' . $entity . '\'s record: <a href="' . $route . '">' . $this->testCodes[0] . '</a>~'
             ));
 
         // Check the expected error message is in the view
         $this->followRedirects()
-            ->seeInElement('div[class="alert-message error"]', 'Click on the voucher number to view the other family\'s record: <a href="' . $route . '">' . $this->testCodes[0] . '</a>');
+            ->seeInElement('div[class="alert-message error"]', 'Click on the voucher number to view the other ' . $entity . '\'s record: <a href="' . $route . '">' . $this->testCodes[0] . '</a>');
     }
 
     /** @test */
@@ -607,17 +611,19 @@ class BundleControllerTest extends StoreTestCase
 
         // See that it's got no vouchers.
         $this->assertEquals(0, $currentBundle->vouchers()->count());
-
+        $entity = Family::getAlias($this->programme);
         // Check the expected error message is in the session
         $response->seeInSession('error_messages');
+        //dd(Session::get('error_messages'));
         $this->assertTrue($this->hasMatchingErrorMessage(
             Session::get('error_messages'),
-            '~These vouchers are allocated to a family in a centre you can\'t access: ' . $this->testCodes[1] . '~'
+            '~These vouchers are allocated to a different ' . $entity . ' in a centre you can\'t access: ' . $this->testCodes[1] . '~'
         ));
+
 
         // Check the expected error message is in the view
         $this->followRedirects()
-        ->seeInElement('div[class="alert-message error"]', 'These vouchers are allocated to a family in a centre you can\'t access: ' . $this->testCodes[1]);
+        ->seeInElement('div[class="alert-message error"]', 'These vouchers are allocated to a different ' . $entity . ' in a centre you can\'t access: ' . $this->testCodes[1]);
     }
 
     /** @test */
