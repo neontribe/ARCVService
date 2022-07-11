@@ -138,7 +138,7 @@ class CentreUser extends Authenticatable
             case "foodmatters_user":
                 $centres = collect(Centre::get()->all());
                 $centres = $centres->filter(function($model) {
-                    return $model->sponsor->programme == 0;
+                    return $model->sponsor->programme === $programme;
                 });
                 break;
             case "centre_user":
