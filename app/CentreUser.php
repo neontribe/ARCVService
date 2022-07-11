@@ -137,7 +137,7 @@ class CentreUser extends Authenticatable
         switch ($this->role) {
             case "foodmatters_user":
                 $centres = collect(Centre::get()->all());
-                $centres = $centres->filter(function($model) {
+                $centres = $centres->filter(function($model) use ($programme) {
                     return $model->sponsor->programme === $programme;
                 });
                 break;
