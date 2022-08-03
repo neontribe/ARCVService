@@ -157,7 +157,7 @@
             var displayYears = moment().diff(dob, 'years');
 
             // Create and append new style columns
-            if (displayMonths >= 0) {
+            if (displayMonths > 0) {
                 var ageColumn = '<td class="age-col">' + displayYears + ' yr, ' + displayMonths + ' mo</td>';
             } else {
                 ageColumn = '<td class="age-col">P</td>';
