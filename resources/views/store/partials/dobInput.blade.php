@@ -25,7 +25,7 @@
            max="{{ Carbon\Carbon::now()->year }}"
     >
 </div>
-@if ( $verifying )
+@if ( $sponsorsRequiresID )
     <div class="dob-input relative">
         <input type="checkbox"
                class="styled-checkbox"
@@ -60,7 +60,7 @@
                     var instance = $(e.data.element);
                     var month = instance.find('input[name=dob-month]').val();
                     var year = instance.find('input[name=dob-year]').val();
-                    // true false or null, if we arn't verifying.
+                    // true false or null, if we aren't verifying.
                     var verified = (instance.find('input[name=dob-verified]').length > 0)
                         ? instance.find('input[name=dob-verified]').is(":checked")
                         : null

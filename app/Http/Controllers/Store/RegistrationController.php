@@ -110,13 +110,13 @@ class RegistrationController extends Controller
         // as we have no registration to refer to yet.
         $sponsor = $user->centre->sponsor;
         $evaluator = EvaluatorFactory::make($sponsor->evaluations);
-        $verifying = $evaluator->isVerifyingChildren();
+        $sponsorsRequiresID = $evaluator->isVerifyingChildren();
         $programme = Auth::user()->centre->sponsor->programme;
 
         $data = [
             "user_name" => $user->name,
             "centre_name" => ($user->centre) ? $user->centre->name : null,
-            "verifying" => $verifying,
+            "sponsorsRequiresID" => $sponsorsRequiresID,
             "programme" => $programme,
         ];
         return view('store.create_registration', $data);
@@ -178,7 +178,7 @@ class RegistrationController extends Controller
                 'children' => $registration->family->children,
                 'noticeReasons' => $valuation->getNoticeReasons(),
                 'entitlement' => $valuation->getEntitlement(),
-                'verifying' => $registration->getEvaluator()->isVerifyingChildren(),
+                'sponsorsRequiresID' => $registration->getEvaluator()->isVerifyingChildren(),
                 'evaluations' => $evaluations,
                 'deferrable' => $deferrable,
                 'can_change_defer' => $can_change_defer,

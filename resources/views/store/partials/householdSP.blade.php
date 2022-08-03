@@ -10,7 +10,7 @@
     <div>
         <p>To add a household member, complete the box below with their age.</p>
     </div>
-    @include('store.partials.add_participant_form', ['verifying' => $verifying])
+    @include('store.partials.add_participant_form', ['sponsorsRequiresID' => $sponsorsRequiresID])
     <div class="added">
         <label for="child_wrapper">You have added:</label>
         <table>
