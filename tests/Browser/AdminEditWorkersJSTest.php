@@ -10,7 +10,7 @@ use App\Centre;
 use App\CentreUser;
 use App\Sponsor;
 
-class EditWorkersJSTest extends DuskTestCase
+class AdminEditWorkersJSTest extends DuskTestCase
 {
     use DatabaseMigrations;
 
