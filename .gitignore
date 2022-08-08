@@ -13,6 +13,7 @@ Homestead.json
 Homestead.yaml
 npm-debug.log
 .env
+.env.dusk.local
 .prettierignore
 .vscode
 .DS_STORE
@@ -26,3 +27,5 @@ npm-debug.log
 /yarn-error.log
 /public/store/css/datepicker.css
 /public/images/
+tests/Browser/console/
+tests/Browser/screenshots/
