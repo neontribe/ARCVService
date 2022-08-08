@@ -64,8 +64,8 @@
 
                 // make some fields
                 var userIdInput = '<input name="users[' + key + '][id]" type="hidden" value="" >';
-                var nameInput = '<input required name="users[' + key + '][name]" type="text" value="' + newUserName + '" >';
-                var emailInput = '<input required name="users[' + key + '][email]" type="email" value="' + newUserEmail + '" >';
+                var nameInput = '<input required name="users[' + key + '][name]" type="text" dusk="trader_name" value="' + newUserName + '" >';
+                var emailInput = '<input required name="users[' + key + '][email]" type="email" dusk="trader_email" value="' + newUserEmail + '" >';
                 var userDelControl = '<button type="button" class="remove-row"><i class="glyphicon glyphicon-minus" aria-hidden="true"></i></button>';
 
                 // add the new field and controls
