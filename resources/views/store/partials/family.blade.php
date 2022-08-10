@@ -109,13 +109,13 @@
                 moment().diff(valueDate, 'years') + ' yr, ' +
                 moment().diff(valueDate, 'months') % 12 +
                 ' mo</td>'
-                : '<td class="age-col">P</td>'
+                : '<td dusk="pregnancy_col" class="age-col">P</td>'
             ;
 
             var dobColumn = '<td class="dob-col"><input name="children[' + childKey + '][dob]" type="hidden" value="' + valueDate + '" >' + innerTextDate + '</td>';
 
             var idColumn = (verified !== null)
-                ? '<td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][verified]" id="child' + childKey + '" ' + displayVerified + ' value="' + verifiedValue + '"><label for="child' + childKey + '"><span class="visually-hidden">Toggle ID checked</span></label>' + '</td>'
+                ? '<td class="verified-col relative"><input type="checkbox" dusk="create_child_dob" class="styled-checkbox inline-dob" name="children[' + childKey + '][verified]" id="child' + childKey + '" ' + displayVerified + ' value="' + verifiedValue + '"><label for="child' + childKey + '"><span class="visually-hidden">Toggle ID checked</span></label>' + '</td>'
                 : '';
 
             // add a defer column if we need to
