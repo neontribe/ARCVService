@@ -40,7 +40,7 @@ class AdminViewCentresTest extends DuskTestCase
                     ->assertSee('Dashboard')
                     ->visit('/centres')
                     ->assertSee('Children\'s Centres')
-                    ->assertSee('Search')
+                    ->assertSee('Search:')
                     ->assertSee('Next')
                     ->resize(1920, 3000)
                     ->assertSee('Showing 1 to 10 of 15 entries')

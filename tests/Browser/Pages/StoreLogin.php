@@ -7,6 +7,7 @@ use App\Centre;
 use App\CentreUser;
 use App\Evaluation;
 use App\Market;
+use App\Registration;
 use App\Sponsor;
 use Laravel\Dusk\Browser;
 use Laravel\Dusk\Page;
@@ -19,7 +20,7 @@ class StoreLogin extends Page
     public $other_sponsor;
     public $other_centres;
     public $centreUser;
-    public $pagination_centres;
+    public $registrations;
 
     public function __construct()
     {
@@ -57,8 +58,8 @@ class StoreLogin extends Page
         ]);
         $this->centreUser->centres()->attach($this->centres[0]->id, ['homeCentre' => true]);
 
-        $this->pagination_centres = factory(Centre::class, 15)->create([
-            'sponsor_id' =>  $this->sponsor->id
+        $this->registrations = factory(Registration::class, 15)->create([
+            "centre_id" => $this->centres[0]->id,
         ]);
     }
     /**
