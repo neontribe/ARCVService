@@ -432,7 +432,7 @@ $factory->defineAs(App\Child::class, 'almostBorn', function (Faker\Generator $fa
 // Child - almost 1
 $factory->defineAs(App\Child::class, 'almostOne', function (Faker\Generator $faker) {
 
-    $dob = Carbon::now()->startOfMonth()->subMonths(11);
+    $dob = Carbon::now()->startOfMonth()->subMonthsNoOverflow(11);
 
     return [
         'born' => $dob->isPast(),
@@ -496,7 +496,7 @@ $factory->defineAs(App\Child::class, 'canDefer', function (Faker\Generator $fake
     $year = $now->year;
     $dob = Carbon::now();
     $schoolStartMonth = config('arc.scottish_school_month');
-    $dob->year($year)->subMonths($schoolStartMonth - 6)->day(1);
+    $dob->year($year)->subMonthsNoOverflow($schoolStartMonth - 6)->day(1);
     return [
         'born' => $dob->isPast(),
         'dob' => $dob->toDateTimeString(),

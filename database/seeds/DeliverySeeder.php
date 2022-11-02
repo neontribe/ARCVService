@@ -20,7 +20,7 @@ class DeliverySeeder extends Seeder
         $user = User::where('name', 'demoseeder')->first();
         if (!$user) {
             $user = factory(User::class)->create(['name' => 'demoseeder']);
-        };
+        }
 
         Auth::login($user);
 
@@ -38,7 +38,7 @@ class DeliverySeeder extends Seeder
                 // check the date
                 'dispatched_at' => function () {
                     return Carbon::today()
-                        ->subMonths(rand(0, 11))
+                        ->subMonthsNoOverflow(rand(0, 11))
                         ->subDays(rand(0, 30));
                 },
             ])
@@ -61,7 +61,7 @@ class DeliverySeeder extends Seeder
                         $v->applyTransition('dispatch');
                     });
                 $delivery->vouchers()->saveMany($vs);
-                $delivery->range = $shortcode . "01" . $key ."000" . " - " . $shortcode . "01" . $key . "050";
+                $delivery->range = $shortcode . "01" . $key . "000" . " - " . $shortcode . "01" . $key . "050";
                 $delivery->save();
             });
     }

@@ -5,14 +5,14 @@ use App\Carer;
 use App\Centre;
 use App\CentreUser;
 use App\Child;
+use App\Delivery;
 use App\Family;
 use App\Registration;
 use App\Sponsor;
-use Carbon\Carbon;
-use Illuminate\Database\Seeder;
-use App\Delivery;
 use App\User;
 use App\Voucher;
+use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
 
 class RegistrationsSeeder extends Seeder
@@ -39,7 +39,7 @@ class RegistrationsSeeder extends Seeder
         // We will have a better way of incorporating this into factories - but currenly families get created by Reg seeds.
         // So for now, this ensures we have one for testing.
         $family = $inactive->family;
-        $family->leaving_on = Carbon::now()->subMonths(2);
+        $family->leaving_on = Carbon::now()->subMonthsNoOverflow(2);
         $family->leaving_reason = config('arc.leaving_reasons')[0];
         $family->save();
 
@@ -54,7 +54,7 @@ class RegistrationsSeeder extends Seeder
         $this->user = User::where('name', 'demoseeder')->first();
         if (!$this->user) {
             $this->user = factory(User::class)->create(['name' => 'demoseeder']);
-        };
+        }
 
         // set some variables.
         Auth::login($this->user);
@@ -96,7 +96,7 @@ class RegistrationsSeeder extends Seeder
             $eligibility_hsbs = $eligibilities_hsbs[mt_rand(0, count($eligibilities_hsbs) - 1)];
             $eligible_from = null;
             if ($eligibility_hsbs === 'healthy-start-receiving') {
-              $eligible_from = Carbon::now();
+                $eligible_from = Carbon::now();
             }
 
             $registrations[] = Registration::create(
@@ -106,7 +106,7 @@ class RegistrationsSeeder extends Seeder
                     'eligibility_hsbs' => $eligibility_hsbs,
                     'eligibility_nrpf' => $eligibilities_nrpf[mt_rand(0, count($eligibilities_nrpf) - 1)],
                     'consented_on' => Carbon::now(),
-                    'eligible_from' => $eligible_from
+                    'eligible_from' => $eligible_from,
                 ]
             );
         }
@@ -125,15 +125,15 @@ class RegistrationsSeeder extends Seeder
         $quantity = ($quantity) ? $quantity : 1;
         if (is_null($centre)) {
             $centre = factory(Centre::class)->create([
-              'sponsor_id' => 8
+                'sponsor_id' => 8,
             ]);
         }
         $user = CentreUser::where('name', 'ARC CC User')->first();
         if (!$user) {
             $user = factory(CentreUser::class)->create(['name' => 'ARC CC User']);
-        };
+        }
         $user->centres()->attach([
-            $centre->id => ['homeCentre' => false]
+            $centre->id => ['homeCentre' => false],
         ]);
 
         $registrations = [];
@@ -153,7 +153,7 @@ class RegistrationsSeeder extends Seeder
             $eligibility_hsbs = $eligibilities_hsbs[mt_rand(0, count($eligibilities_hsbs) - 1)];
             $eligible_from = null;
             if ($eligibility_hsbs === 'healthy-start-receiving') {
-              $eligible_from = Carbon::now();
+                $eligible_from = Carbon::now();
             }
 
             $registrations[] = Registration::create(
@@ -163,7 +163,7 @@ class RegistrationsSeeder extends Seeder
                     'eligibility_hsbs' => $eligibility_hsbs,
                     'eligibility_nrpf' => $eligibilities_nrpf[mt_rand(0, count($eligibilities_nrpf) - 1)],
                     'consented_on' => Carbon::now(),
-                    'eligible_from' => $eligible_from
+                    'eligible_from' => $eligible_from,
                 ]
             );
         }
@@ -286,7 +286,7 @@ class RegistrationsSeeder extends Seeder
                 // centre with SK rules that is not in same area as families 3, 5 and 6
                 'centre' => factory(Centre::class)->create(['sponsor_id' => Sponsor::find(2)->id]),
                 'carers' => [
-                    ['name' => '2MAY20-VC1-CH2-HI-122018']
+                    ['name' => '2MAY20-VC1-CH2-HI-122018'],
                 ],
                 'children' => [
                     ['age' => 'underOne', 'state' => 'unverified'],

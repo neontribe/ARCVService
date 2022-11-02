@@ -2,24 +2,23 @@
 
 namespace Tests\Feature\Store;
 
-use Tests\StoreTestCase;
 use App\Carer;
 use App\Centre;
-use App\Child;
 use App\CentreUser;
+use App\Child;
 use App\Evaluation;
 use App\Family;
-use App\Registration;
-use App\Sponsor;
 use App\Http\Controllers\Service\Admin\SponsorsController;
+use App\Registration;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsPrimarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\FamilyHasNoEligibleChildren;
 use App\Services\VoucherEvaluator\Evaluations\ScottishChildCanDefer;
 use App\Services\VoucherEvaluator\Evaluations\ScottishChildIsAlmostPrimarySchoolAge;
-use App\Services\VoucherEvaluator\Evaluations\ScottishChildIsPrimarySchoolAge;
+use App\Sponsor;
 use Carbon\Carbon;
 use Config;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\StoreTestCase;
 use URL;
 
 class EditPageTest extends StoreTestCase
@@ -34,7 +33,6 @@ class EditPageTest extends StoreTestCase
     private $centre;
     private $centreUser;
     private $registration;
-    private $faker;
     private $scottishRulesSponsor;
     private $scottishFamily;
     private $scottishCentre;
@@ -53,8 +51,8 @@ class EditPageTest extends StoreTestCase
         $this->centre = factory(Centre::class)->create();
 
         // Create a CentreUser
-        $this->centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
+        $this->centreUser = factory(CentreUser::class)->create([
+            "name" => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
         ]);
@@ -69,12 +67,12 @@ class EditPageTest extends StoreTestCase
         $this->scottishRulesSponsor = factory(Sponsor::class)->create();
         $this->scottishRulesSponsor->evaluations()->saveMany($scottishRules);
         $this->scottishCentre = factory(Centre::class)->create([
-          'sponsor_id' => $this->scottishRulesSponsor
+            'sponsor_id' => $this->scottishRulesSponsor,
         ]);
 
         // Create a CentreUser
-        $this->scottishCentreUser =  factory(CentreUser::class)->create([
-            "name"  => "scottish test user",
+        $this->scottishCentreUser = factory(CentreUser::class)->create([
+            "name" => "scottish test user",
             "email" => "scottishtestuser@example.com",
             "password" => bcrypt('scottish_test_user_pass'),
         ]);
@@ -92,16 +90,16 @@ class EditPageTest extends StoreTestCase
         // Social prescribing set up
         $spRules = SponsorsController::socialPrescribingOverrides();
         $this->spRulesSponsor = factory(Sponsor::class)->create([
-            'programme' => 1
+            'programme' => 1,
         ]);
         $this->spRulesSponsor->evaluations()->saveMany($spRules);
         $this->spCentre = factory(Centre::class)->create([
-          'sponsor_id' => $this->spRulesSponsor->id
+            'sponsor_id' => $this->spRulesSponsor->id,
         ]);
 
         // Create a CentreUser
-        $this->spCentreUser =  factory(CentreUser::class)->create([
-            "name"  => "sp test user",
+        $this->spCentreUser = factory(CentreUser::class)->create([
+            "name" => "sp test user",
             "email" => "sptestuser@example.com",
             "password" => bcrypt('sp_test_user_pass'),
         ]);
@@ -115,7 +113,6 @@ class EditPageTest extends StoreTestCase
         // The registration factory gives the family kids, so get rid of them
         // so we can be more specific.
         $this->spFamily->children()->delete();
-
     }
 
     /** @test */
@@ -123,19 +120,17 @@ class EditPageTest extends StoreTestCase
     {
         $pri_carer = $this->registration->family->carers->first();
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
-            ->seeElement('input[id="carer"][value="'. $pri_carer->name .'"]')
-        ;
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->registration]))
+            ->seeElement('input[id="carer"][value="' . $pri_carer->name . '"]');
     }
 
     /** @test */
     public function itShowsASecondaryCarerInput()
     {
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->registration]))
             ->seeElement('input[name="carer_adder_input"]')
-            ->seeElement('button[id="add-dob"]')
-        ;
+            ->seeElement('button[id="add-dob"]');
     }
 
     /** @test */
@@ -159,13 +154,11 @@ class EditPageTest extends StoreTestCase
 
         // Find the edit page
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
-        ;
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->registration]));
         // See the names in the page
         foreach ($carers as $sec_carer) {
-             $this->see($sec_carer->name)
-                 ->seeElement('input[type="text"][value="'. $sec_carer->name .'"]')
-                 ;
+            $this->see($sec_carer->name)
+                ->seeElement('input[type="text"][value="' . $sec_carer->name . '"]');
         }
     }
 
@@ -174,11 +167,10 @@ class EditPageTest extends StoreTestCase
     public function itShowsAChildInputComplex()
     {
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->registration]))
             ->seeElement('input[name="dob-month"]')
             ->seeElement('input[name="dob-year"]')
-            ->seeElement('button[id="add-dob"]')
-        ;
+            ->seeElement('button[id="add-dob"]');
     }
 
     /** @test */
@@ -199,14 +191,12 @@ class EditPageTest extends StoreTestCase
 
         // Find the edit page
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
-        ;
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->registration]));
         // See the names in the page
         foreach ($children as $child) {
-            $this->see('<td class="age-col">'. $child->getAgeString() .'</td>')
-                ->see('<td class="dob-col">'. $child->getDobAsString() .'</td>')
-                ->seeElement('input[type="hidden"][value="'. $child->dob->format('Y-m') .'"]')
-            ;
+            $this->see('<td class="age-col">' . $child->getAgeString() . '</td>')
+                ->see('<td class="dob-col">' . $child->getDobAsString() . '</td>')
+                ->seeElement('input[type="hidden"][value="' . $child->dob->format('Y-m') . '"]');
         }
     }
 
@@ -214,18 +204,16 @@ class EditPageTest extends StoreTestCase
     public function itShowsALogoutButton()
     {
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
-            ->seeInElement('button[type=submit]', 'Log out')
-        ;
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->registration]))
+            ->seeInElement('button[type=submit]', 'Log out');
     }
 
     /** @test */
     public function itShowsAFormSaveButton()
     {
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
-            ->seeInElement('button[type=submit]', 'Save Changes')
-        ;
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->registration]))
+            ->seeInElement('button[type=submit]', 'Save Changes');
     }
 
     /** @test */
@@ -237,27 +225,24 @@ class EditPageTest extends StoreTestCase
             ->seeElement('#eligibility-hsbs>option[value="healthy-start-receiving"]')
             ->seeElement('#eligibility-hsbs>option[value="healthy-start-receiving-not-eligible-or-rejected"]')
             ->seeElement('#eligibility-nrpf>option[value="yes"]')
-            ->seeElement('#eligibility-nrpf>option[value="no"]')
-        ;
+            ->seeElement('#eligibility-nrpf>option[value="no"]');
     }
 
     /** @test */
     public function itShowsTheLoggedInUserDetails()
     {
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration->id ]))
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->registration->id]))
             ->see($this->centreUser->name)
-            ->see($this->centreUser->centre->name)
-        ;
+            ->see($this->centreUser->centre->name);
     }
 
     /** @test */
     public function itShowsTheLeavingFormIfFamilyIsOnScheme()
     {
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration->id ]))
-            ->see('Remove this family')
-        ;
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->registration->id]))
+            ->see('Remove this family');
     }
 
     /** @test */
@@ -268,9 +253,8 @@ class EditPageTest extends StoreTestCase
         $family->leaving_reason = config('arc.leaving_reasons')[0];
         $family->save();
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration->id ]))
-            ->dontSee('Remove this family')
-        ;
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->registration->id]))
+            ->dontSee('Remove this family');
     }
 
     /** @test */
@@ -283,8 +267,8 @@ class EditPageTest extends StoreTestCase
         $centre = factory(Centre::class)->create([
             'sponsor_id' => 1 // Not an SP sponsor
         ]);
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "tester",
+        $centreUser = factory(CentreUser::class)->create([
+            "name" => "tester",
             "email" => "tester@example.com",
             "password" => bcrypt('test_user_pass'),
         ]);
@@ -303,24 +287,22 @@ class EditPageTest extends StoreTestCase
                 collect([
                     factory(Child::class, 'betweenOneAndPrimarySchoolAge', 3)->make(),
                 ])->flatten()
-            )
-        ;
+            );
 
         // Amend 3 children's DOB to be 11, 12 + 13 months old.
-        $family->children[0]->dob = Carbon::now()->subMonths(13)->startOfMonth()->startOfDay();
+        $family->children[0]->dob = Carbon::now()->subMonthsNoOverflow(13)->startOfMonth()->startOfDay();
         $family->children[0]->save();
-        $family->children[1]->dob = Carbon::now()->subMonths(12)->startOfMonth()->startOfDay();
+        $family->children[1]->dob = Carbon::now()->subMonthsNoOverflow(12)->startOfMonth()->startOfDay();
         $family->children[1]->save();
-        $family->children[2]->dob = Carbon::now()->subMonths(11)->startOfMonth()->startOfDay();
+        $family->children[2]->dob = Carbon::now()->subMonthsNoOverflow(11)->startOfMonth()->startOfDay();
         $family->children[2]->save();
 
         // Test that entering children's DOB's gives the expected age.
         $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'registration' => $family->id ]))
+            ->visit(URL::route('store.registration.edit', ['registration' => $family->id]))
             ->see('<td class="age-col">1 yr, 1 mo</td>')
             ->see('<td class="age-col">1 yr, 0 mo</td>')
-            ->see('<td class="age-col">0 yr, 11 mo</td>')
-        ;
+            ->see('<td class="age-col">0 yr, 11 mo</td>');
 
         // Set Carbon date & time back
         Carbon::setTestNow();
@@ -336,8 +318,7 @@ class EditPageTest extends StoreTestCase
                 'PUT',
                 route('store.registration.family', $this->registration->family->id),
                 ['leaving_reason' => 'Not a good one']
-            )
-        ;
+            );
         $this->assertResponseStatus(302);
         $this->assertEquals('The given data was invalid.', $response->exception->getMessage());
     }
@@ -353,8 +334,8 @@ class EditPageTest extends StoreTestCase
         $data = [
             'pri_carer' => ['A String'],
             'children' => [
-                0 => ['dob' => '2017-09']
-            ]
+                0 => ['dob' => '2017-09'],
+            ],
         ];
 
         $this->actingAs($this->centreUser, 'store')
@@ -363,8 +344,7 @@ class EditPageTest extends StoreTestCase
                 'PUT',
                 route('store.registration.update', $this->registration->id),
                 $data
-            )
-        ;
+            );
         $this->assertResponseStatus(403);
     }
 
@@ -378,8 +358,7 @@ class EditPageTest extends StoreTestCase
             // Still see header of leaving popup
             ->see('Reason for leaving')
             // Still see the button - will prove that the family is still in scheme
-            ->see('Remove this family')
-        ;
+            ->see('Remove this family');
     }
 
     /** @test */
@@ -390,8 +369,7 @@ class EditPageTest extends StoreTestCase
             ->press('Remove this family')
             ->select(config('arc.leaving_reasons')[0], 'leaving_reason')
             ->press('Yes')
-            ->seePageIs(route('store.registration.index'))
-        ;
+            ->seePageIs(route('store.registration.index'));
     }
 
     /** @test */
@@ -417,14 +395,14 @@ class EditPageTest extends StoreTestCase
                 'name' => 'ChildIsPrimarySchoolAge',
                 'purpose' => 'credits',
                 'entity' => 'App\Child',
-                'value' => 4
+                'value' => 4,
             ])
         );
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', $this->registration->id));
 
         // See it has increased by one
-        $this->assertCount($startingEvalCount+1, $this->crawler->filter('ul#creditables li'));
+        $this->assertCount($startingEvalCount + 1, $this->crawler->filter('ul#creditables li'));
         // See the reason
         $rule = new ChildIsPrimarySchoolAge();
         $this->see($rule->reason);
@@ -439,7 +417,7 @@ class EditPageTest extends StoreTestCase
                 'name' => 'FamilyHasNoEligibleChildren',
                 'purpose' => 'disqualifiers',
                 'entity' => 'App\Family',
-                'value' => 0
+                'value' => 0,
             ])
         );
 
@@ -458,103 +436,99 @@ class EditPageTest extends StoreTestCase
     /** @test */
     public function ICanSeeAScottishChildCanBeDeferred()
     {
-      Config::set('arc.scottish_school_month', Carbon::now()->month + 1);
-      $canDefer = factory(Child::class, 'canDefer')->make();
-      $this->scottishFamily->children()->save($canDefer);
-      $inputID = "children[" . $canDefer->id . "][deferred]";
-      $selector = 'input[id=\'' . $inputID . '\']';
-      $this->actingAs($this->scottishCentreUser, 'store')
-        ->visit(URL::route('store.registration.edit', $this->scottishRegistration->id))
-        ->see('<td class="age-col">'. $canDefer->getAgeString() .'</td>')
-        ->see('<td class="dob-col">'. $canDefer->getDobAsString() .'</td>')
-        ->seeElement('input[type="hidden"][value="'. $canDefer->dob->format('Y-m') .'"]')
-        ->seeElement($selector)
-      ;
-      // It should tell us they can start school AND they can defer
-      $rule = new ScottishChildCanDefer();
-      $this->see($rule->reason);
-      $rule2 = new ScottishChildIsAlmostPrimarySchoolAge();
-      $this->see($rule2->reason);
+        Config::set('arc.scottish_school_month', Carbon::now()->month + 1);
+        $canDefer = factory(Child::class, 'canDefer')->make();
+        $this->scottishFamily->children()->save($canDefer);
+        $inputID = "children[" . $canDefer->id . "][deferred]";
+        $selector = 'input[id=\'' . $inputID . '\']';
+        $this->actingAs($this->scottishCentreUser, 'store')
+            ->visit(URL::route('store.registration.edit', $this->scottishRegistration->id))
+            ->see('<td class="age-col">' . $canDefer->getAgeString() . '</td>')
+            ->see('<td class="dob-col">' . $canDefer->getDobAsString() . '</td>')
+            ->seeElement('input[type="hidden"][value="' . $canDefer->dob->format('Y-m') . '"]')
+            ->seeElement($selector);
+        // It should tell us they can start school AND they can defer
+        $rule = new ScottishChildCanDefer();
+        $this->see($rule->reason);
+        $rule2 = new ScottishChildIsAlmostPrimarySchoolAge();
+        $this->see($rule2->reason);
     }
 
     /** @test */
     public function ICanDeferAScottishChild()
     {
-      Config::set('arc.scottish_school_month', Carbon::now()->month + 1);
-      $canDefer = factory(Child::class, 'canDefer')->make();
-      $this->scottishFamily->children()->save($canDefer);
-      $this->seeInDatabase('children', [
-          'id' => $canDefer->id,
-          'deferred' => 0
-      ]);
+        Config::set('arc.scottish_school_month', Carbon::now()->month + 1);
+        $canDefer = factory(Child::class, 'canDefer')->make();
+        $this->scottishFamily->children()->save($canDefer);
+        $this->seeInDatabase('children', [
+            'id' => $canDefer->id,
+            'deferred' => 0,
+        ]);
 
-      // This is what happens when you have square brackets in ids.
-      $inputID = "children[" . $canDefer->id . "][deferred]";
-      $selector = 'input[id=\'' . $inputID . '\']';
+        // This is what happens when you have square brackets in ids.
+        $inputID = "children[" . $canDefer->id . "][deferred]";
+        $selector = 'input[id=\'' . $inputID . '\']';
 
-      $this->actingAs($this->scottishCentreUser, 'store')
-        ->visit(URL::route('store.registration.edit', $this->scottishRegistration->id))
-        ->see('<td class="age-col">'. $canDefer->getAgeString() .'</td>')
-        ->see('<td class="dob-col">'. $canDefer->getDobAsString() .'</td>')
-        ->seeElement('input[type="hidden"][value="'. $canDefer->dob->format('Y-m') .'"]')
-        ->seeElement($selector)
-        ->check($inputID)
-        ->press('Save Changes')
-        ->seePageIs(URL::route('store.registration.edit', [ 'registration' => $this->scottishRegistration->id ]))
-      ;
-      // Saving changes deletes the children and re-adds them,
-      // so we can't use the same id. Since we only made one kid,
-      // we'll need to trust that this check is fine.
-      $this->seeInDatabase('children', [
-          'deferred' => 1
-      ]);
+        $this->actingAs($this->scottishCentreUser, 'store')
+            ->visit(URL::route('store.registration.edit', $this->scottishRegistration->id))
+            ->see('<td class="age-col">' . $canDefer->getAgeString() . '</td>')
+            ->see('<td class="dob-col">' . $canDefer->getDobAsString() . '</td>')
+            ->seeElement('input[type="hidden"][value="' . $canDefer->dob->format('Y-m') . '"]')
+            ->seeElement($selector)
+            ->check($inputID)
+            ->press('Save Changes')
+            ->seePageIs(URL::route('store.registration.edit', ['registration' => $this->scottishRegistration->id]));
+        // Saving changes deletes the children and re-adds them,
+        // so we can't use the same id. Since we only made one kid,
+        // we'll need to trust that this check is fine.
+        $this->seeInDatabase('children', [
+            'deferred' => 1,
+        ]);
     }
 
     /** @test */
     public function ItWontOfferDeferForAnIneligibleScottishChild()
     {
-      Config::set('arc.scottish_school_month', Carbon::now()->month + 1);
-      $canNotDefer = factory(Child::class, 'canNotDefer')->make();
-      $this->scottishFamily->children()->save($canNotDefer);
-      $this->actingAs($this->scottishCentreUser, 'store')
-        ->visit(URL::route('store.registration.edit', $this->scottishRegistration->id))
-        ->see('<td class="age-col">'. $canNotDefer->getAgeString() .'</td>')
-        ->see('<td class="dob-col">'. $canNotDefer->getDobAsString() .'</td>')
-        ->seeElement('input[type="hidden"][value="'. $canNotDefer->dob->format('Y-m') .'"]')
-      ;
-      // It should tell us they can start school BUT they can't defer
-      $rule = new ScottishChildCanDefer();
-      $this->dontSee($rule->reason);
-      $rule2 = new ScottishChildIsAlmostPrimarySchoolAge();
-      $this->see($rule2->reason);
+        Config::set('arc.scottish_school_month', Carbon::now()->month + 1);
+        $canNotDefer = factory(Child::class, 'canNotDefer')->make();
+        $this->scottishFamily->children()->save($canNotDefer);
+        $this->actingAs($this->scottishCentreUser, 'store')
+            ->visit(URL::route('store.registration.edit', $this->scottishRegistration->id))
+            ->see('<td class="age-col">' . $canNotDefer->getAgeString() . '</td>')
+            ->see('<td class="dob-col">' . $canNotDefer->getDobAsString() . '</td>')
+            ->seeElement('input[type="hidden"][value="' . $canNotDefer->dob->format('Y-m') . '"]');
+        // It should tell us they can start school BUT they can't defer
+        $rule = new ScottishChildCanDefer();
+        $this->dontSee($rule->reason);
+        $rule2 = new ScottishChildIsAlmostPrimarySchoolAge();
+        $this->see($rule2->reason);
     }
 
     /** @test */
     public function AfterSchoolStartsICantChangeADeferral()
     {
-      Config::set('arc.scottish_school_month', Carbon::now()->month);
-      $schoolStartMonth = config('arc.scottish_school_month');
-      Carbon::setTestNow(Carbon::now()->month($schoolStartMonth + 1)->startOfDay());
-      $hasDeferred = factory(Child::class)->create([
-        'deferred' => 1,
-        'family_id' => $this->scottishFamily->id,
-        'dob' => '2017-10-01 00:00:00'
-      ]);
-      $this->scottishFamily->children()->save($hasDeferred);
-      $inputID = "children[" . $hasDeferred->id . "][deferred]";
-      $selector = 'input[id=\'' . $inputID . '\']';
-      $this->actingAs($this->scottishCentreUser, 'store')
-        ->visit(URL::route('store.registration.edit', $this->scottishRegistration->id))
-        ->see('<td class="age-col">'. $hasDeferred->getAgeString() .'</td>')
-        ->see('<td class="dob-col">'. $hasDeferred->getDobAsString() .'</td>')
-        ->seeElement('input[type="hidden"][value="'. $hasDeferred->dob->format('Y-m') .'"]')
-        ->dontSeeElement($selector)
-        ->seeInElement(".can-defer-col",'Y')
-      ;
-      $rule = new ScottishChildCanDefer();
-      $this->dontSee($rule->reason);
-      $rule2 = new ScottishChildIsAlmostPrimarySchoolAge();
-      $this->dontSee($rule2->reason);
+        Config::set('arc.scottish_school_month', Carbon::now()->month);
+        $schoolStartMonth = config('arc.scottish_school_month');
+        Carbon::setTestNow(Carbon::now()->month($schoolStartMonth + 1)->startOfDay());
+        $hasDeferred = factory(Child::class)->create([
+            'deferred' => 1,
+            'family_id' => $this->scottishFamily->id,
+            'dob' => '2017-10-01 00:00:00',
+        ]);
+        $this->scottishFamily->children()->save($hasDeferred);
+        $inputID = "children[" . $hasDeferred->id . "][deferred]";
+        $selector = 'input[id=\'' . $inputID . '\']';
+        $this->actingAs($this->scottishCentreUser, 'store')
+            ->visit(URL::route('store.registration.edit', $this->scottishRegistration->id))
+            ->see('<td class="age-col">' . $hasDeferred->getAgeString() . '</td>')
+            ->see('<td class="dob-col">' . $hasDeferred->getDobAsString() . '</td>')
+            ->seeElement('input[type="hidden"][value="' . $hasDeferred->dob->format('Y-m') . '"]')
+            ->dontSeeElement($selector)
+            ->seeInElement(".can-defer-col", 'Y');
+        $rule = new ScottishChildCanDefer();
+        $this->dontSee($rule->reason);
+        $rule2 = new ScottishChildIsAlmostPrimarySchoolAge();
+        $this->dontSee($rule2->reason);
     }
 
     /** @test */
@@ -570,15 +544,14 @@ class EditPageTest extends StoreTestCase
         $this->assertTrue($children->count() === 3);
         // Find the edit page
         $this->actingAs($this->spCentreUser, 'store')
-            ->visit(URL::route('store.registration.edit', [ 'registration' => $this->spRegistration ]))
-        ;
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->spRegistration]));
         // See the names in the page
         foreach ($new_carers as $new_carer) {
             $this->see($new_carer->name);
         }
 
         foreach ($new_participants as $new_participant) {
-            $this->see('<td class="age-col">'. explode(',',$new_participant->getAgeString())[0] .'</td>');
+            $this->see('<td class="age-col">' . explode(',', $new_participant->getAgeString())[0] . '</td>');
             $this->dontSee('ID Checked');
             $this->dontSee('eligibility-hsbs');
             $this->dontSee('eligibility-nrpf');
@@ -590,18 +563,18 @@ class EditPageTest extends StoreTestCase
     {
         $this->registration->family->carers()->delete();
         $main_carer = factory(Carer::class)->make([
-            'name' => 'Main Carer'
+            'name' => 'Main Carer',
         ]);
         $this->registration->family->carers()->save($main_carer);
         $secondary_carer = factory(Carer::class)->make([
-            'name' => 'Secondary Carer'
+            'name' => 'Secondary Carer',
         ]);
         $this->registration->family->carers()->save($secondary_carer);
         $this->seeInDatabase('carers', [
-            'name' => 'Main Carer'
+            'name' => 'Main Carer',
         ]);
         $this->seeInDatabase('carers', [
-            'name' => 'Secondary Carer'
+            'name' => 'Secondary Carer',
         ]);
 
         //All this just to delete the carer after they've collcted a bundle.
@@ -615,7 +588,7 @@ class EditPageTest extends StoreTestCase
         $data = [
             "collected_at" => $disbursementCentre,
             "collected_on" => $disbursementDate,
-            "collected_by" => $collectingCarer
+            "collected_by" => $collectingCarer,
         ];
         $response = $this->actingAs($this->centreUser, 'store')
             ->visit($route)
@@ -628,19 +601,18 @@ class EditPageTest extends StoreTestCase
         $carer_to_delete->delete();
         $this->seeInDatabase('carers', [
             'id' => $secondary_carer->id,
-            'name' => 'Deleted'
+            'name' => 'Deleted',
         ]);
         $this->dontSeeInDatabase('carers', [
             'id' => $secondary_carer->id,
-            'deleted_at' => null
+            'deleted_at' => null,
         ]);
 
         // We can't see the actual list showing 'Deleted' because of the way phpunit works
         // but at least check it doesn't throw an error.
         $this->actingAs($this->centreUser, 'store')
-            ->visit(URL::route('store.registration.collection-history', [ 'registration' => $this->registration ]))
+            ->visit(URL::route('store.registration.collection-history', ['registration' => $this->registration]))
             ->assertResponseStatus(200)
-            ->see('Full Collection History')
-        ;
+            ->see('Full Collection History');
     }
 }

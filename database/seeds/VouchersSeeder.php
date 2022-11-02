@@ -22,6 +22,7 @@ class VouchersSeeder extends Seeder
             'to' => 'payment_pending',
         ],
     ];
+
     /**
      * Run the database seeds.
      *
@@ -33,7 +34,7 @@ class VouchersSeeder extends Seeder
         $user = App\User::where('name', 'demoseeder')->first();
         if (!$user) {
             $user = factory(App\User::class)->create(['name' => 'demoseeder']);
-        };
+        }
 
         Auth::login($user);
 
@@ -43,7 +44,7 @@ class VouchersSeeder extends Seeder
         // Only 40 for now or we will get 9 digits.
         // These vouchers dispatched before we added delivery to system.
         // They can be collected even though they do not have a delivery_id.
-        $timestamp_pre_delivery = Carbon\Carbon::parse(config('arc.first_delivery_date'))->subMonth(1);
+        $timestamp_pre_delivery = Carbon\Carbon::parse(config('arc.first_delivery_date'))->subMonthsNoOverflow(1);
         $rvp_vouchers = factory(App\Voucher::class, 'printed', 40)->create([
             'created_at' => $timestamp_pre_delivery,
         ]);
@@ -53,9 +54,9 @@ class VouchersSeeder extends Seeder
 
         $size = sizeOf($rvp_vouchers);
         // Assign the codes that match the paper.
-        for ($i=60; $i<$size+60; $i++) {
-            $k = $i-60;
-            $rvp_vouchers[$k]->code = 'RVNT123455'.$i;
+        for ($i = 60; $i < $size + 60; $i++) {
+            $k = $i - 60;
+            $rvp_vouchers[$k]->code = 'RVNT123455' . $i;
             $rvp_vouchers[$k]->sponsor_id = $rvp->id;
             $rvp_vouchers[$k]->save();
 
@@ -63,7 +64,6 @@ class VouchersSeeder extends Seeder
                 //Progress these to dispatched.
                 $rvp_vouchers[$k]->applyTransition('dispatch');
             }
-
         }
 
         // Transition one voucher to recorded by trader 1.
@@ -79,7 +79,7 @@ class VouchersSeeder extends Seeder
         $pendingtoken = factory(App\StateToken::class)->create([
             'uuid' => 'auuidforpendingvouchers',
         ]);
-        for ($i=10; $i<16; $i++) {
+        for ($i = 10; $i < 16; $i++) {
             // Trader 3 chosen because 1 might be used for specific other stuff.
             $rvp_vouchers[$i]->trader_id = 3;
             $rvp_vouchers[$i]->applyTransition('collect');
@@ -90,7 +90,7 @@ class VouchersSeeder extends Seeder
                 // In fact - might be able to simplify by manually assigning token id to record.
                 $rvp_vouchers[$i]->applyTransition('payout');
             } else {
-              $rvp_vouchers[$i]->getPriorState()->stateToken()->associate($pendingtoken)->save();
+                $rvp_vouchers[$i]->getPriorState()->stateToken()->associate($pendingtoken)->save();
             }
         }
 
@@ -107,20 +107,20 @@ class VouchersSeeder extends Seeder
         $delivery = factory(App\Delivery::class)->create([
             // Our sponsor 'RVNT' is definitely linked to this centre
             'centre_id' => 1,
-            'dispatched_at' => Carbon\Carbon::now()->subMonth(1),
+            'dispatched_at' => Carbon\Carbon::now()->subMonthsNoOverflow(1),
             'range' => 'RVNT0000-RVNT0099',
         ]);
         $delivery->vouchers()->saveMany($rvnt4);
 
         $user = App\User::where('name', 'Rolf Billabong')->first();
-        $date = Carbon\Carbon::now()->subMonths(3);
+        $date = Carbon\Carbon::now()->subMonthsNoOverflow(3);
         // Create 50 vouchers that have a state of payment_pending
         // and attach to Rolf Billabong
         factory(App\Voucher::class, 'printed', 50)->create([
             'trader_id' => $user->traders[0]->id,
             'created_at' => $date,
             'updated_at' => $date,
-            'currentstate' => 'payment_pending'
+            'currentstate' => 'payment_pending',
         ])->each(function ($v) use (&$date) {
             // add a day to it
             $date->addDay();

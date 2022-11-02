@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Controllers\Api;
 
+use App\Http\Controllers\API\TraderController;
 use App\Market;
-use App\Voucher;
+use App\Sponsor;
 use App\Trader;
 use App\User;
-use App\Sponsor;
-use App\Http\Controllers\API\TraderController;
+use App\Voucher;
 use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
@@ -93,13 +93,17 @@ class TraderControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonStructure([
             [
-                "id", "name", "pic_url", "market_id", "featureOverride"
-            ]
+                "id",
+                "name",
+                "pic_url",
+                "market_id",
+                "featureOverride",
+            ],
         ]);
         /**
          * TODO: This is not as good as the assertJsonStructure but that requires phpunit 7.5
          * * And the mail assertions won't let us upgrade.  This will need to be revisited in the future.
-        */
+         */
         $response->assertJsonPath("0.id", 3);
         $response->assertJsonPath("0.market_id", 1);
         $response->assertJsonPath("0.id", 3);
@@ -135,21 +139,21 @@ class TraderControllerTest extends TestCase
 
     public function testItLimitsTheVoucherHistoryTo15()
     {
-        $date = Carbon::now()->subMonths(3);
+        $date = Carbon::now()->subMonthsNoOverflow(3);
 
         // create 49 vouchers to bring the total of payment_pending to 50
         factory(Voucher::class, 'printed', 49)->create([
             'trader_id' => $this->traders[0]->id,
             'created_at' => $date,
             'updated_at' => $date,
-            'currentstate' => 'payment_pending'
+            'currentstate' => 'payment_pending',
         ])->each(function ($v) use (&$date) {
             // add a day to it
             $date->addDay();
             foreach ($this->states as $state) {
                 $base = [
                     'voucher_id' => $v->id,
-                    'created_at' => $date->addSeconds(10)->format('Y-m-d H:i:s')
+                    'created_at' => $date->addSeconds(10)->format('Y-m-d H:i:s'),
                 ];
                 $attribs = array_merge($base, $state);
                 factory(VoucherState::class)->create($attribs);
@@ -169,21 +173,21 @@ class TraderControllerTest extends TestCase
 
     public function testItPutsPaginationInTheVoucherHistory()
     {
-        $date = Carbon::now()->subMonths(3);
+        $date = Carbon::now()->subMonthsNoOverflow(3);
 
         // create 49 vouchers to bring the total of payment_pending to 50
         factory(Voucher::class, 'printed', 49)->create([
             'trader_id' => $this->traders[0]->id,
             'created_at' => $date,
             'updated_at' => $date,
-            'currentstate' => 'payment_pending'
+            'currentstate' => 'payment_pending',
         ])->each(function ($v) use (&$date) {
             // add a day to it
             $date->addDay();
             foreach ($this->states as $state) {
                 $base = [
                     'voucher_id' => $v->id,
-                    'created_at' => $date->addSeconds(10)->format('Y-m-d H:i:s')
+                    'created_at' => $date->addSeconds(10)->format('Y-m-d H:i:s'),
                 ];
                 $attribs = array_merge($base, $state);
                 factory(VoucherState::class)->create($attribs);
@@ -234,9 +238,8 @@ class TraderControllerTest extends TestCase
             ])
             ->assertStatus(202)
             ->assertJson([
-                'message' => trans('api.messages.email_voucher_history')
-            ])
-        ;
+                'message' => trans('api.messages.email_voucher_history'),
+            ]);
     }
 
     /**
@@ -259,9 +262,8 @@ class TraderControllerTest extends TestCase
                     [
                         'date' => $date,
                     ]
-                )
-            ])
-        ;
+                ),
+            ]);
     }
 
     /**
@@ -273,8 +275,7 @@ class TraderControllerTest extends TestCase
             ->json('POST', route('api.trader.voucher-history-email', 1), [
                 'submission_date' => null,
             ])
-            ->assertStatus(403)
-        ;
+            ->assertStatus(403);
     }
 
     /**
@@ -284,8 +285,7 @@ class TraderControllerTest extends TestCase
     private function linkHeaderToArray(string $header)
     {
         $values = [];
-        foreach (explode(',', $header) as $link)
-        {
+        foreach (explode(',', $header) as $link) {
             $values = array_merge($values, $this->extractLinkData($link));
         }
         return $values;
@@ -311,22 +311,22 @@ class TraderControllerTest extends TestCase
     {
         $traderController = new TraderController;
         $standardSponsor = factory(Sponsor::class)->create([
-            'programme' => 0
+            'programme' => 0,
         ]);
         $spSponsor = factory(Sponsor::class)->create([
-            'programme' => 1
+            'programme' => 1,
         ]);
         $standardVouchers = factory(Voucher::class, 'printed', 12)->create([
-            'sponsor_id' => $standardSponsor->id
+            'sponsor_id' => $standardSponsor->id,
         ]);
         $spVouchers = factory(Voucher::class, 'printed', 18)->create([
-            'sponsor_id' => $spSponsor->id
+            'sponsor_id' => $spSponsor->id,
         ]);
         $vouchers = $standardVouchers->concat($spVouchers);
         $programme_amounts = $traderController->calculateProgrammeVoucherAmounts($vouchers);
-        $this->assertEquals($programme_amounts, array (
-          'standard' => 12,
-          'social_prescription' => 18,
+        $this->assertEquals($programme_amounts, array(
+            'standard' => 12,
+            'social_prescription' => 18,
         ));
     }
 
@@ -335,21 +335,21 @@ class TraderControllerTest extends TestCase
     {
         $traderController = new TraderController;
         $standardSponsors = factory(Sponsor::class, 3)->create([
-            'programme' => 0
+            'programme' => 0,
         ]);
         $spSponsors = factory(Sponsor::class, 3)->create([
-            'programme' => 1
+            'programme' => 1,
         ]);
         $standardVouchers = $spVouchers = collect();
-        foreach ($standardSponsors as $key => $standardSponsor) {
+        foreach ($standardSponsors as $standardSponsor) {
             $sv = factory(Voucher::class, 'printed', 12)->create([
-                'sponsor_id' => $standardSponsor->id
+                'sponsor_id' => $standardSponsor->id,
             ]);
             $standardVouchers = $standardVouchers->concat($sv);
         }
-        foreach ($spSponsors as $key => $spSponsor) {
+        foreach ($spSponsors as $spSponsor) {
             $spv = factory(Voucher::class, 'printed', 18)->create([
-                'sponsor_id' => $spSponsor->id
+                'sponsor_id' => $spSponsor->id,
             ]);
             $spVouchers = $spVouchers->concat($spv);
         }
@@ -361,6 +361,6 @@ class TraderControllerTest extends TestCase
         $this->assertArrayHasKey($standardSponsors[2]->name, $programme_voucher_areas[0]);
         $this->assertArrayHasKey($spSponsors[0]->name, $programme_voucher_areas[1]);
         $this->assertArrayHasKey($spSponsors[1]->name, $programme_voucher_areas[1]);
-        $this->assertArrayHasKey($spSponsors[2]->name, $programme_voucher_areas[1]);  
+        $this->assertArrayHasKey($spSponsors[2]->name, $programme_voucher_areas[1]);
     }
 }

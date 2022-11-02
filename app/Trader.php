@@ -3,13 +3,13 @@
 namespace App;
 
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class Trader extends Model
 {
@@ -122,7 +122,7 @@ class Trader extends Model
             }
 
             // get the cutoff for 6 calendar months of data.
-            $cutOff = Carbon::today()->subMonths(6)->startOfMonth()->format('Y-m-d H:i:s');
+            $cutOff = Carbon::today()->subMonthsNoOverflow(6)->startOfMonth()->format('Y-m-d H:i:s');
             $trader_id = $this->id;
 
             $q = DB::table(
@@ -148,8 +148,7 @@ class Trader extends Model
                 'innerQuery'
             )->select($columns)
                 // only pick those where the last state was $stateCondition.
-                ->where('innerQuery.state', $stateCondition)
-                ;
+                ->where('innerQuery.state', $stateCondition);
         } else {
             // get all the vouchers
             $q = DB::table('vouchers')
