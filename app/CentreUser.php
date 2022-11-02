@@ -136,11 +136,10 @@ class CentreUser extends Authenticatable
         $centres = collect([]);
         switch ($this->role) {
             case "foodmatters_user":
-                $centres = DB::table('centres')
-                    ->leftJoin('sponsors', 'centres.sponsor_id', 'sponsors.id')
-                    ->where('sponsors.programme', $programme)
-                    ->get()
-                ;
+                $centres = collect(Centre::get()->all());
+                $centres = $centres->filter(function($model) use ($programme) {
+                    return $model->sponsor->programme === $programme;
+                });
                 break;
             case "centre_user":
                 // If we have one, get our centre's neighbours
