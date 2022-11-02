@@ -47,28 +47,15 @@ class RegistrationController extends Controller
         $programme = Auth::user()->centre->sponsor->programme;
         $data = [
             "user_name" => $user->name,
-            "centre_name" => ($user->centre) ? $user->centre->name : null,
+            "centre_name" => $user->centre->name ?? null,
             "programme" => $programme,
         ];
-        $programme = Auth::user()->centre->sponsor->programme;
 
-        // Slightly roundabout method of getting the permitted centres to poll
+        // costs 2 requests, centres with ids
         $neighbour_centre_ids = $user
             ->relevantCentres()
             ->pluck('id')
             ->toArray();
-
-        $family_name = $request->get('family_name');
-
-        // Fetch the list of primary carers, the first carer in the family.
-        $pri_carers = Carer::select([DB::raw('MIN(id) as min_id')])
-            ->groupBy('family_id')
-            ->pluck('min_id')
-            ->toArray();
-
-        // Get the current database driver
-        $connection = config('database.default');
-        $driver = config("database.connections.{$connection}.driver");
 
         //find the registrations
         $q = Registration::query();
@@ -93,6 +80,7 @@ class RegistrationController extends Controller
                 'programme' => $programme,
             ]
         );
+
         return view('store.index_registration', $data);
     }
 

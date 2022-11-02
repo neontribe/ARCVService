@@ -147,7 +147,7 @@ class CentreUser extends Authenticatable
                 /** @var Centre $centre */
                 $centre = $this->centre;
                 if (!is_null($centre)) {
-                    $centres = collect($centre->neighbours()->get()->all());
+                    $centres = $centre->neighbours()->get();
                 }
                 break;
         }
