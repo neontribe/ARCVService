@@ -495,8 +495,8 @@ $factory->defineAs(App\Child::class, 'canDefer', function (Faker\Generator $fake
     $now = Carbon::now()->startOfMonth()->subYears(4);
     $year = $now->year;
     $dob = Carbon::now();
-    $dob->year($year)->month(1)->day(1);
-
+    $schoolStartMonth = config('arc.scottish_school_month');
+    $dob->year($year)->subMonths($schoolStartMonth - 6)->day(1);
     return [
         'born' => $dob->isPast(),
         'dob' => $dob->toDateTimeString(),
@@ -510,7 +510,8 @@ $factory->defineAs(App\Child::class, 'canNotDefer', function (Faker\Generator $f
     $now = Carbon::now()->startOfMonth()->subYears(5);
     $year = $now->year;
     $dob = Carbon::now();
-    $dob->year($year)->month(6)->day(1);
+    $schoolStartMonth = config('arc.scottish_school_month');
+    $dob->year($year)->month($schoolStartMonth - 1)->day(1);
 
     return [
         'born' => $dob->isPast(),
