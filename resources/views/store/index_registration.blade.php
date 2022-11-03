@@ -28,7 +28,7 @@
                         <tr class="{{ $registration->family->leaving_on ? 'inactive' : 'active' }}">
                             <td class="pri_carer">
                                 <div>{{ $registration->family->carers->first()->name }}</div>
-                                {!! Request::get("centre") == ($registration->centre->id) ?
+                                {!! Request::get("centre") == ($registration->centre_id) ?
                                 null : '<div class="secondary_info">' . $registration->centre->name . '</div>'
                                 !!}
                             </td>

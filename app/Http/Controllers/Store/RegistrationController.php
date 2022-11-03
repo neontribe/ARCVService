@@ -13,17 +13,18 @@ use App\Registration;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\Valuation;
 use App\User;
-use Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
-use DB;
 use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-use Log;
-use PDF;
+
 use Throwable;
 
 class RegistrationController extends Controller
@@ -41,36 +42,30 @@ class RegistrationController extends Controller
      */
     public function index(Request $request)
     {
-        // Masthead bit
-        /** @var User $user */
-        $user = Auth::user();
-        $programme = Auth::user()->centre->sponsor->programme;
+        $user = CentreUser::findOrFail(Auth::user()->id);
+        $programme = $user->centre->sponsor->programme;
         $data = [
             "user_name" => $user->name,
-            "centre_name" => ($user->centre) ? $user->centre->name : null,
+            "centre_name" => $user->centre->name ?? null,
             "programme" => $programme,
+            'registrations' => $this->getRegistrationModels($user),
         ];
-        $programme = Auth::user()->centre->sponsor->programme;
+        return view('store.index_registration', $data);
+    }
 
+    /**
+     * @param CentreUser $user
+     * @return mixed
+     */
+    public function getRegistrationModels(CentreUser $user)
+    {
         // Slightly roundabout method of getting the permitted centres to poll
         $neighbour_centre_ids = $user
             ->relevantCentres()
             ->pluck('id')
             ->toArray();
 
-        $family_name = $request->get('family_name');
-
-        // Fetch the list of primary carers, the first carer in the family.
-        $pri_carers = Carer::select([DB::raw('MIN(id) as min_id')])
-            ->groupBy('family_id')
-            ->pluck('min_id')
-            ->toArray();
-
-        // Get the current database driver
-        $connection = config('database.default');
-        $driver = config("database.connections.{$connection}.driver");
-
-        //find the registrations
+        // find the registrations
         $q = Registration::query();
         if (!empty($neighbour_centre_ids)) {
             $q = $q->whereIn('centre_id', $neighbour_centre_ids);
@@ -78,22 +73,20 @@ class RegistrationController extends Controller
 
         // This isn't ideal as it relies on getting all the families, then sorting them.
         // However, the whereIn statements above destroy any sorted order on family_ids.
-        $reg_models = $q->withFullFamily()
+        return $q->withFullFamily()
             ->get()
+            ->sortBy(function ($registration) {
+                return strtolower($registration->family->pri_carer);
+            })
             ->values();
+    }
 
-        $reg_models = $reg_models->sortBy(function ($registration) {
-            return strtolower($registration->family->pri_carer);
-        });
 
-        $data = array_merge(
-            $data,
-            [
-                'registrations' => $reg_models,
-                'programme' => $programme,
-            ]
-        );
-        return view('store.index_registration', $data);
+
+
+    public function jsonIndex(Request $request)
+    {
+        return;
     }
 
     /**
@@ -469,7 +462,7 @@ class RegistrationController extends Controller
             ) {
 
                 // delete the missing carers
-                Carer::whereIn('id', $carersKeysToDelete)->get()->each(function($carer) {
+                Carer::whereIn('id', $carersKeysToDelete)->get()->each(function ($carer) {
                     $carer->delete();
                 });
 
