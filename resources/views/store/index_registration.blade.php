@@ -16,7 +16,6 @@
             <thead>
                 <tr>
                     <td>Name</td>
-                    <td class="center">Voucher Entitlement</td>
                     <td class="center">RV-ID</td>
                     <td></td>
                 </tr>
@@ -31,7 +30,6 @@
                         null : '<div class="secondary_info">' . $registration->centre->name . '</div>'
                         !!}
                     </td>
-                    <td class="center">{{ $registration->getValuation()->getEntitlement() }}</td>
                     <td class="center">{{ $registration->family->rvid }}</td>
                     <td class="right no-wrap">
                         @if( !isset($registration->family->leaving_on) )
@@ -68,7 +66,7 @@
 <script>
   $(document).ready(function () {
     var registrationTable = $('#registrationTable').DataTable({
-        "columnDefs": [ { "orderable":false, "targets":3 } ],
+        "columnDefs": [ { "orderable":false, "targets":2 } ],
     });
     $(".inactive").hide(); // Hide families that have left by default.
     $('input.filter').on('change', function() {
