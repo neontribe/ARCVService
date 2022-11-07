@@ -219,30 +219,30 @@ class SearchPageTest extends StoreTestCase
             ->see($registration->family->rvid);
     }
 
-    /** @test */
-    public function itShowsTheVoucherEntitlement()
-    {
-        // Create a Centre
-        $centre = factory(Centre::class)->create();
-
-        // Create a CentreUser
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
-
-        // Create a random registration with our centre.
-        $registration = factory(Registration::class)->create([
-            "centre_id" => $centre->id,
-        ]);
-
-        // Spot the Registration family's RVID
-        $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.index'))
-            ->see('<td class="center">' . $registration->getValuation()->getEntitlement() . "</td>");
-    }
+    // /** @test */
+    // public function itShowsTheVoucherEntitlement()
+    // {
+    //     // Create a Centre
+    //     $centre = factory(Centre::class)->create();
+    //
+    //     // Create a CentreUser
+    //     $centreUser =  factory(CentreUser::class)->create([
+    //         "name"  => "test user",
+    //         "email" => "testuser@example.com",
+    //         "password" => bcrypt('test_user_pass'),
+    //     ]);
+    //     $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
+    //
+    //     // Create a random registration with our centre.
+    //     $registration = factory(Registration::class)->create([
+    //         "centre_id" => $centre->id,
+    //     ]);
+    //
+    //     // Spot the Registration family's RVID
+    //     $this->actingAs($centreUser, 'store')
+    //         ->visit(URL::route('store.registration.index'))
+    //         ->see('<td class="center">' . $registration->getValuation()->getEntitlement() . "</td>");
+    // }
 
     /** @test */
     public function itShowsFamilyPrimaryCarersAlphabetically()
