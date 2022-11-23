@@ -29,10 +29,10 @@ class VoucherEvaluatorTest extends TestCase
 
     // This has a | in the reason field because we want to carry the entity with it.
     const CREDIT_TYPES = [
-        'ChildIsUnderOne' => ['reason' => 'Child|under 1 year old', 'value' => 6],
-        'ChildIsBetweenOneAndPrimarySchoolAge' => ['reason' => 'Child|between 1 and start of primary school age', 'value' => 3],
-        'ChildIsPrimarySchoolAge' => ['reason' => 'Child|primary school age', 'value' => 3],
-        'FamilyIsPregnant' => ['reason' => 'Family|pregnant', 'value' => 3],
+        'ChildIsUnderOne' => ['reason' => 'Child|under 1 year old', 'value' => 8],
+        'ChildIsBetweenOneAndPrimarySchoolAge' => ['reason' => 'Child|between 1 and start of primary school age', 'value' => 4],
+        'ChildIsPrimarySchoolAge' => ['reason' => 'Child|primary school age', 'value' => 4],
+        'FamilyIsPregnant' => ['reason' => 'Family|pregnant', 'value' => 4],
     ];
 
     private $rulesMods = [];
@@ -224,10 +224,10 @@ class VoucherEvaluatorTest extends TestCase
         $this->assertTrue($evaluation->getEligibility());
         // We have :
         // - one child between 1 and primary school age (3 vouchers)
-        // - who enables one child at primary school age (3 vouchers)
+        // - who enables one child at primary school age (4 vouchers)
         // - but not one child who is overage (0 vouchers)
 
-        $this->assertEquals('6', $evaluation->getEntitlement());
+        $this->assertEquals('7', $evaluation->getEntitlement());
     }
 
     /** @test */
@@ -242,7 +242,7 @@ class VoucherEvaluatorTest extends TestCase
 
         // Check the correct credit type is applied.
         $this->assertContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits);
-        $this->assertEquals(6, $evaluation->getEntitlement());
+        $this->assertEquals(8, $evaluation->getEntitlement());
     }
 
     /** @test */
@@ -258,7 +258,7 @@ class VoucherEvaluatorTest extends TestCase
 
         // Check the correct credit type is applied.
         $this->assertContains(self::CREDIT_TYPES['ChildIsBetweenOneAndPrimarySchoolAge'], $credits);
-        $this->assertEquals(3, $evaluation->getEntitlement());
+        $this->assertEquals(4, $evaluation->getEntitlement());
     }
 
     /** @test */
@@ -346,12 +346,12 @@ class VoucherEvaluatorTest extends TestCase
 
         // make a bunch of offset dates to check credits on
         $offsets = [
-            '2001-04-01' => 6,
-            '2001-04-11' => 6,
-            '2001-04-12' => 6,
-            '2001-04-13' => 6,
-            '2001-04-30' => 6,
-            '2001-05-05' => 3
+            '2001-04-01' => 8,
+            '2001-04-11' => 8,
+            '2001-04-12' => 8,
+            '2001-04-13' => 8,
+            '2001-04-30' => 8,
+            '2001-05-05' => 4
         ];
 
         foreach ($offsets as $offset => $expected) {
@@ -388,13 +388,13 @@ class VoucherEvaluatorTest extends TestCase
         $evaluation = $evaluator->evaluate($this->family);
 
         // Test we get a default number of total vouchers
-        $this->assertEquals(12, $evaluation->getEntitlement());
+        $this->assertEquals(16, $evaluation->getEntitlement());
 
         // Change number of vouchers allocated to a pregnant family
         $this->rulesMods['pregnancy'] = [
             new Evaluation([
             'name' => 'FamilyIsPregnant',
-            'value' => 4,
+            'value' => 5,
             'purpose' => 'credits',
             'entity' => 'App\Family',
             'sponsor_id' => $registration->centre->sponsor->id,
@@ -406,7 +406,7 @@ class VoucherEvaluatorTest extends TestCase
         $credits = $newFamilyEvaluation['credits'];
         // We test we get more vouchers with the new rule
         $this->assertNotEquals(self::CREDIT_TYPES['FamilyIsPregnant']['value'], $credits[0]['value']);
-        $this->assertEquals(4, $credits[0]['value']);
-        $this->assertEquals(13, $newFamilyEvaluation->getEntitlement());
+        $this->assertEquals(5, $credits[0]['value']);
+        $this->assertEquals(17, $newFamilyEvaluation->getEntitlement());
     }
 }
