@@ -64,7 +64,7 @@ class VoucherEvaluatorTest extends TestCase
             // credit primary schoolers
             new Evaluation([
                 "name" => "ChildIsPrimarySchoolAge",
-                "value" => "3",
+                "value" => "4",
                 "purpose" => "credits",
                 "entity" => "App\Child",
             ]),
@@ -187,7 +187,7 @@ class VoucherEvaluatorTest extends TestCase
         // Check it can find eligible children (0 vouchers)
         // - because no under primary school-ers validate the primary school-ers.
         $this->assertTrue($evaluation->getEligibility());
-        $this->assertEquals('3', $evaluation->getEntitlement());
+        $this->assertEquals('4', $evaluation->getEntitlement());
     }
 
     /** @test */
@@ -223,11 +223,11 @@ class VoucherEvaluatorTest extends TestCase
         // Check it passes
         $this->assertTrue($evaluation->getEligibility());
         // We have :
-        // - one child between 1 and primary school age (3 vouchers)
+        // - one child between 1 and primary school age (4 vouchers)
         // - who enables one child at primary school age (4 vouchers)
         // - but not one child who is overage (0 vouchers)
 
-        $this->assertEquals('7', $evaluation->getEntitlement());
+        $this->assertEquals('8', $evaluation->getEntitlement());
     }
 
     /** @test */
