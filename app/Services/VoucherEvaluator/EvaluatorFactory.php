@@ -54,8 +54,9 @@ class EvaluatorFactory
     {
         $evaluations = [
             "App\Child" => [
+                // Change back to 6 as requested 30-11-2022
                 'credits' => [
-                    "ChildIsUnderOne" => new ChildIsUnderOne($offsetDate, 8),
+                    "ChildIsUnderOne" => new ChildIsUnderOne($offsetDate, 6),
                     "ChildIsBetweenOneAndPrimarySchoolAge" => new ChildIsBetweenOneAndPrimarySchoolAge($offsetDate, 4),
                 ],
                 'notices' => [
