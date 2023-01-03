@@ -268,7 +268,6 @@ class ApiVoucherControllerTest extends TestCase
             ->json('POST', $route, $data)
             ->assertStatus(200)
         ;
-
         // Try to transition to confirm again and expect the exception message from SMException. This exception
         // means it is not possible to change from payment_pending to payment_pending (which is what we want to happen).
         $data = [
