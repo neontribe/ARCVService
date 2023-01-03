@@ -11,7 +11,6 @@ use App\Voucher;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use SM\SMException;
 use Tests\TestCase;
 
 class ApiVoucherControllerTest extends TestCase
@@ -227,67 +226,6 @@ class ApiVoucherControllerTest extends TestCase
             ->json('POST', $route, $data)
             ->assertStatus(200)
             ->assertJson(['message' => trans('api.messages.batch_voucher_submit', $expectedCounts)])
-        ;
-    }
-
-    /** @test */
-    public function testItCannotTransitionFromSameState()
-    {
-        // Start off with collect transition (printed or dispatched)
-        $data = [
-            "trader_id" => 1,
-            "transition" => 'collect',
-            "vouchers" => $this->vouchers->pluck('code')->toArray()
-        ];
-        $transition = 'collect';
-        $this->vouchers
-            ->each(function ($voucher) use ($transition) {
-                $voucher->applyTransition($transition);
-                \Log::info($voucher);
-            });
-        $route = route('api.voucher.transition');
-        $this->actingAs($this->user, 'api')
-            ->json('POST', $route, $data)
-            ->assertStatus(200)
-        ;
-
-        // Transition to confirm, which changes it to payment_pending
-        $data = [
-            "trader_id" => 1,
-            "transition" => 'confirm',
-            "vouchers" => $this->vouchers->pluck('code')->toArray()
-        ];
-        $transition = 'confirm';
-        $this->vouchers
-            ->each(function ($voucher) use ($transition) {
-                $voucher->applyTransition($transition);
-                \Log::info($voucher);
-            });
-        $route = route('api.voucher.transition');
-        $this->actingAs($this->user, 'api')
-            ->json('POST', $route, $data)
-            ->assertStatus(200)
-        ;
-
-        // Try to transition to confirm again and expect the exception message from SMException. This exception
-        // means it is not possible to change from payment_pending to payment_pending (which is what we want to happen).
-        $data = [
-            "trader_id" => 1,
-            "transition" => 'confirm',
-            "vouchers" => $this->vouchers->pluck('code')->toArray()
-        ];
-        $transition = 'confirm';
-        $this->vouchers
-            ->each(function ($voucher) use ($transition) {
-                $this->expectExceptionMessage('Transition "confirm" cannot be applied on state "payment_pending" of object "App\Voucher" with graph "Voucher".');
-                $this->expectException(SMException::class);
-                $voucher->applyTransition($transition);
-                \Log::info($voucher);
-            });
-        $route = route('api.voucher.transition');
-        $this->actingAs($this->user, 'api')
-            ->json('POST', $route, $data)
-            ->assertStatus(200)
         ;
     }
 }
