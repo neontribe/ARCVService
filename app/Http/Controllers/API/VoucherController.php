@@ -11,6 +11,7 @@ use App\Voucher;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use SM\SMException;
 
 class VoucherController extends Controller
 {
@@ -111,7 +112,16 @@ class VoucherController extends Controller
             }
 
             // Transitioning also saves model changes above
-            $voucher->applyTransition($transition);
+            // Check we actually can transition first to avoid duplicates, catch SMException error if
+            // we're trying to transition from and to the same state
+            try {
+                if ($voucher->transitionAllowed($transition)) {
+                    $voucher->applyTransition($transition);
+                }
+            } catch (SMException $e) {
+                \Log::error($e->getMessage());
+                continue;
+            }
 
             // If this is a 'confirm' transition - add to a list
             // for sending to ARC admin. This is a request for payment.
