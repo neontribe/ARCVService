@@ -46,7 +46,6 @@ class StoreVoucherControllerTest extends StoreTestCase
     public function setUp(): void
     {
         parent::setUp();
-        $this->markTestSkipped('Waiting for testItCanDecryptAStoredZip fix');
 
         // Set routes
         $this->dashboard_route = URL::route('store.dashboard');
@@ -110,8 +109,8 @@ EOD;
         }
 
         // Stream a zip to a file in storage, encrypting as we write (with the secret stream wrapper).
-        $storagePath = $this->disk->getAdapter()->getPathPrefix();
-        // $storagePath = Storage::path('');
+        // $storagePath = $this->disk->getAdapter()->getPathPrefix();
+        $storagePath = Storage::path('enc');
         $options = new Archive();
         $output = fopen('ssw://' . $storagePath . '/' . $this->archiveName, 'w');
         $options->setOutputStream($output);
@@ -122,8 +121,7 @@ EOD;
         $za->finish();
         fclose($output); // Close the stream manually, now, or it will not be ready in time for the read below.
 
-        $this->assertTrue($this->disk->exists($this->archiveName));
-
+        $this->assertTrue(Storage::disk('local')->exists($this->archiveName));
         // Fetch the route; should return a zip that may be streamed.
         $response = $this->actingAs($this->centreUser, 'store')
             ->visit($this->dashboard_route)
