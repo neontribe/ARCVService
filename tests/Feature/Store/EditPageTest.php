@@ -329,7 +329,6 @@ class EditPageTest extends StoreTestCase
     /** @test */
     public function itWillNotAcceptAnInvalidLeavingReason()
     {
-        $this->markTestSkipped('Waiting for fix');
         $response = $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', $this->registration->id))
             ->press('Remove this family')
@@ -340,7 +339,7 @@ class EditPageTest extends StoreTestCase
             )
         ;
         $this->assertResponseStatus(302);
-        $this->assertEquals('The given data was invalid.', $response->exception->getMessage());
+        $this->assertEquals('The selected leaving reason is invalid.', $response->exception->getMessage());
     }
 
     /** @test */
