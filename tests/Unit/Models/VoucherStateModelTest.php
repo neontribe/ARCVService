@@ -36,7 +36,7 @@ class VoucherStateModelTest extends TestCase
         // We need an auth's user to progress the voucher states.
         Auth::login($this->marketUser);
 
-        $voucher = factory(Voucher::class, 'printed')->create();
+        $voucher = factory(Voucher::class)->state('printed')->create();
 
         $voucher->applyTransition('dispatch');
 
@@ -51,7 +51,7 @@ class VoucherStateModelTest extends TestCase
         // We need an auth's user to progress the voucher states.
         Auth::login($this->marketUser);
 
-        $voucher = factory(Voucher::class, 'printed')->create();
+        $voucher = factory(Voucher::class)->state('printed')->create();
 
         // Can we progress to the next step? printed->dispatched
         $this->assertTrue($voucher->transitionAllowed('dispatch'));
@@ -68,7 +68,7 @@ class VoucherStateModelTest extends TestCase
         // We need an auth's user to progress the voucher states.
         Auth::login($this->marketUser);
 
-        $voucher = factory(Voucher::class, 'printed')->create();
+        $voucher = factory(Voucher::class)->state('printed')->create();
         // This will throw exception $this->expectException() wasn't defined
         // But using the function annotation @expectedException works.
         $voucher->state('confirm');
@@ -78,7 +78,7 @@ class VoucherStateModelTest extends TestCase
     public function testAPrintedVoucherCanBeCollected()
     {
         Auth::login($this->marketUser);
-        $voucher = factory(Voucher::class, 'printed')->create();
+        $voucher = factory(Voucher::class)->state('printed')->create();
 
         $voucher->applyTransition('collect');
 
@@ -89,7 +89,7 @@ class VoucherStateModelTest extends TestCase
     public function testADispatchedVoucherCanBeCollected()
     {
         Auth::login($this->marketUser);
-        $voucher = factory(Voucher::class, 'printed')->create();
+        $voucher = factory(Voucher::class)->state('printed')->create();
 
         $voucher->applyTransition('dispatch');
         $voucher->applyTransition('collect');
@@ -101,7 +101,7 @@ class VoucherStateModelTest extends TestCase
     public function testOnlyADispatchedVoucherCanBeExpiredOrVoided()
     {
         Auth::login($this->marketUser);
-        $v = factory(Voucher::class, 'printed')->create();
+        $v = factory(Voucher::class)->state('printed')->create();
         $this->assertEquals($v->currentstate, 'printed');
 
         // Cant get there from printed
@@ -133,7 +133,7 @@ class VoucherStateModelTest extends TestCase
     public function testAnExpiredOrVoidedVoucherCanBeRetired()
     {
         Auth::login($this->marketUser);
-        $vouchers = factory(Voucher::class, 'printed', 2)
+        $vouchers = factory(Voucher::class, 2)->state('printed')
             ->create()
             ->each(function ($voucher) {
                 $voucher->applyTransition('dispatch');
@@ -158,7 +158,7 @@ class VoucherStateModelTest extends TestCase
     public function testARecordedVoucherCanBeRejectedBackToPrinted()
     {
         Auth::login($this->marketUser);
-        $voucher = factory(Voucher::class, 'printed')->create();
+        $voucher = factory(Voucher::class)->state('printed')->create();
 
         $voucher->applyTransition('collect');
         $voucher->applyTransition('reject-to-printed');
@@ -170,7 +170,7 @@ class VoucherStateModelTest extends TestCase
     public function testARecordedVoucherCanBeRejectedBackToDispatched()
     {
         Auth::login($this->marketUser);
-        $voucher = factory(Voucher::class, 'printed')->create();
+        $voucher = factory(Voucher::class)->state('printed')->create();
 
         $voucher->applyTransition('dispatch');
         $voucher->applyTransition('collect');
@@ -184,7 +184,7 @@ class VoucherStateModelTest extends TestCase
     {
         // Make a voucher
         Auth::login($this->marketUser);
-        $voucher = factory(Voucher::class, 'printed')->create();
+        $voucher = factory(Voucher::class)->state('printed')->create();
         $voucher->applyTransition('dispatch');
         $voucher->applyTransition('collect');
         $voucher->applyTransition('confirm');
@@ -209,7 +209,7 @@ class VoucherStateModelTest extends TestCase
     {
         // Make a 100 vouchers
         Auth::login($this->adminUser);
-        $vouchers = factory(Voucher::class, 'printed', 100)->create();
+        $vouchers = factory(Voucher::class, 100)->state('printed')->create();
 
         // Dispatch them the normal way
         foreach ($vouchers as $voucher) {

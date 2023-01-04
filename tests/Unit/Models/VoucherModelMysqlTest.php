@@ -57,7 +57,7 @@ class VoucherModelMysqlTest extends MysqlStoreTestCase
     {
         // Make vouchers from them
         foreach ($this->rangeCodes as $rangeCode) {
-            factory(Voucher::class, 'printed')->create([
+            factory(Voucher::class)->state('printed')->create([
                 'code' => $rangeCode,
                 'sponsor_id' => $this->sponsor->id,
             ]);

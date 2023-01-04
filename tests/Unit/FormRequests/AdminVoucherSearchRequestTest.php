@@ -37,7 +37,7 @@ class AdminVoucherSearchRequestTest extends StoreTestCase
      */
     public function testICanSubmitASearchWithValidCode()
     {
-        $voucherToSearch = factory(Voucher::class, 'dispatched')->create();
+        $voucherToSearch = factory(Voucher::class)->state('dispatched')->create();
         $rules = (new VoucherSearchRequest())->rules();
         $mockedRequestData = ['voucher_code' => $voucherToSearch->code];
 

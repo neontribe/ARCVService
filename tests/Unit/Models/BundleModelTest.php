@@ -3,10 +3,13 @@
 namespace Tests\Unit\Models;
 
 use App\Carer;
+use App\Centre;
+use App\CentreUser;
 use App\Family;
 use Auth;
 use App\Bundle;
 use App\Registration;
+use App\Voucher;
 use Carbon\Carbon;
 use Faker\Factory;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -23,7 +26,7 @@ class BundleModelTest extends TestCase
     {
         parent::setUp();
         // create a blank factory
-        $this->bundle = factory('App\Bundle')->create();
+        $this->bundle = factory(Bundle::class)->create();
     }
 
     public function testBundleIsCreatedWithExpectedAttributes()
@@ -43,8 +46,8 @@ class BundleModelTest extends TestCase
 
     public function testPopulatedBundleIsCreatedWithExpectedAttributes()
     {
-        $centre = factory('App\Centre')->create();
-        $user = factory('App\CentreUser')->create(['centre_id'=>$centre->id]);
+        $centre = factory(Centre::class)->create();
+        $user = factory(CentreUser::class)->create(['centre_id'=>$centre->id]);
         Auth::login($user);
 
         // family and carer needed to collect the bundle
@@ -53,7 +56,7 @@ class BundleModelTest extends TestCase
         $carer = factory(Carer::class)->create(['name'=>'Bob','family_id'=>$family->id]);
 
         //create three vouchers and transition to collected.
-        $vs = factory('App\Voucher', 'printed', 3)
+        $vs = factory(Voucher::class, 3)->state('printed')
             ->create()
             ->each(function ($v) {
                 $v->applyTransition('dispatch');
@@ -80,11 +83,11 @@ class BundleModelTest extends TestCase
 
     public function testBundleCanHaveManyVouchers()
     {
-        $user = factory('App\CentreUser')->create();
+        $user = factory(CentreUser::class)->create();
         Auth::login($user);
 
         // Create three vouchers.
-        $vs = factory('App\Voucher', 'printed', 3)
+        $vs = factory(Voucher::class, 3)->state('printed')
             ->create()
             ->each(function ($v) {
                 $v->bundle()->associate($this->bundle);
@@ -103,7 +106,7 @@ class BundleModelTest extends TestCase
         $faker = Factory::create();
 
         // Add a disbursed bundle history
-        $disbursedBundles = factory('App\Bundle', 4)->create([
+        $disbursedBundles = factory(Bundle::class, 4)->create([
             'disbursed_at' => Carbon::yesterday()
                 ->startOfDay()
                 ->addHours(
@@ -124,7 +127,7 @@ class BundleModelTest extends TestCase
     /** @test */
     public function testItCannotAlterTheBundleToIncludeADisbursedVoucher()
     {
-        $user = factory('App\CentreUser')->create();
+        $user = factory(CentreUser::class)->create();
         Auth::login($user);
 
         // Make a bundle
@@ -132,7 +135,7 @@ class BundleModelTest extends TestCase
         $disbursedBundle = factory(Bundle::class)->create();
 
         // Make some vouchers and add those to it.
-        $vs = factory('App\Voucher', 'printed', 3)
+        $vs = factory(Voucher::class, 3)->state('printed')
             ->create()
             ->each(function ($v) use ($disbursedBundle) {
                 $v->applyTransition('dispatch');

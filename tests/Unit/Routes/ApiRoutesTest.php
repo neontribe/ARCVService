@@ -28,7 +28,7 @@ class ApiRoutesTest extends TestCase
         parent::setUp();
         $this->withoutMockingConsoleOutput();
         $this->trader = factory(Trader::class)->create();
-        $this->vouchers = factory(Voucher::class, 'printed', 10)->create();
+        $this->vouchers = factory(Voucher::class, 10)->state('printed')->create();
         $this->user = factory(User::class)->create();
 
         // Set up password client

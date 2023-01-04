@@ -23,7 +23,7 @@ class VoucherModelTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->voucher = factory(Voucher::class, 'dispatched')->create();
+        $this->voucher = factory(Voucher::class)->state('dispatched')->create();
     }
 
     /** @test */
@@ -160,7 +160,7 @@ class VoucherModelTest extends TestCase
             'TST0123457'
         ];
         foreach ($goodCodes as $goodCode) {
-            $voucher = factory(Voucher::class, 'printed')->create([
+            $voucher = factory(Voucher::class)->state('printed')->create([
                 'code' => $goodCode
             ]);
             $voucher->applyTransition('dispatch');
@@ -189,12 +189,12 @@ class VoucherModelTest extends TestCase
         // A dispatched Voucher.
         $v1 = $this->voucher;
         // A reimbursed Voucher.
-        $v2 = factory(Voucher::class, 'dispatched')->create();
+        $v2 = factory(Voucher::class)->state('dispatched')->create();
         $v2->applyTransition('collect');
         $v2->applyTransition('confirm');
         $v2->applyTransition('payout');
         // A couple of Payment Pending Vouchers.
-        $v3 = factory(Voucher::class, 'dispatched', 2)->create();
+        $v3 = factory(Voucher::class, 2)->state('dispatched')->create();
         $v3[0]->applyTransition('collect');
         $v3[0]->applyTransition('confirm');
         $v3[1]->applyTransition('collect');
@@ -284,7 +284,7 @@ class VoucherModelTest extends TestCase
         );
 
         foreach ($rangeCodes as $rangeCode) {
-            $voucher = factory(Voucher::class, 'printed')->create([
+            $voucher = factory(Voucher::class)->state('printed')->create([
                 'code' => $rangeCode,
                 'sponsor_id' => $sponsor->id,
             ]);

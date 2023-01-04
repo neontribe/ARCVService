@@ -20,8 +20,8 @@ class PaymentPageTest extends StoreTestCase
         parent::setUp();
 
         // Create a voucher and a trader with some info
-        $this->voucher = factory(Voucher::class, 'printed')->create();
-        $trader = factory(Trader::class, 'withnullable')->create();
+        $this->voucher = factory(Voucher::class)->state('printed')->create();
+        $trader = factory(Trader::class)->state('withnullable')->create();
         $this->voucher->code = 'TEST12345';
         $this->voucher->trader_id = $trader->id;
         $this->voucher->save();

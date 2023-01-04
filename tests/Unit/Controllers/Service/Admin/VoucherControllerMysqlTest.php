@@ -50,7 +50,7 @@ class VoucherControllerMysqlTest extends MysqlStoreTestCase
         Auth::login($this->user);
 
         foreach ($this->rangeCodes as $rangeCode) {
-            $voucher = factory(Voucher::class, 'printed')->create([
+            $voucher = factory(Voucher::class)->state('printed')->create([
                 'code' => $rangeCode,
                 'sponsor_id' => $this->sponsor->id,
             ]);
@@ -266,7 +266,7 @@ class VoucherControllerMysqlTest extends MysqlStoreTestCase
     public function testAdminCanVoidASingleVoucher()
     {
         $this->adminUser = factory(AdminUser::class)->create();
-        $this->voucherToVoid = factory(Voucher::class, 'dispatched')->create();
+        $this->voucherToVoid = factory(Voucher::class)->state('dispatched')->create();
         $this->actingAs($this->adminUser, 'admin')
             ->visit(route('admin.vouchers.index'))
             ->seeInElement('td', $this->voucherToVoid->code)

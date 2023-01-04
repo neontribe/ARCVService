@@ -43,14 +43,14 @@ class DashboardPageTest extends StoreTestCase
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
         // Create a CentreUser
-        $this->downloadUser = factory(CentreUser::class, 'withDownloader')->create([
+        $this->downloadUser = factory(CentreUser::class)->state('withDownloader')->create([
             "name"  => "CC DL user",
             "email" => "testccdluser@example.com",
             "password" => bcrypt('test_ccdluser_pass'),
         ]);
         $this->downloadUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
-        $this->fmUser = factory(CentreUser::class, 'FMUser')->create([
+        $this->fmUser = factory(CentreUser::class)->state('FMUser')->create([
             "name"  => "FM test user",
             "email" => "testfmuser@example.com",
             "password" => bcrypt('test_fmuser_pass'),

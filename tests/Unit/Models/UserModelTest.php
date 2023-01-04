@@ -17,7 +17,7 @@ class UserModelTest extends TestCase
     {
         parent::setUp();
         $this->users = factory(User::class, 2)->create();
-        $this->traders = factory(Trader::class, 'withnullable', 5)->create();
+        $this->traders = factory(Trader::class, 5)->state('withnullable')->create();
 
         $this->users[0]->traders()->sync([1,2,3]);
         $this->users[1]->traders()->sync([4,5]);

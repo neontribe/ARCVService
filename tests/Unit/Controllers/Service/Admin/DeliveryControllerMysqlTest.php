@@ -67,7 +67,7 @@ class DeliveryControllerMysqlTest extends MysqlStoreTestCase
         Auth::login($this->user);
 
         foreach ($this->rangeCodes as $rangeCode) {
-            factory(Voucher::class, 'printed')->create([
+            factory(Voucher::class)->state('printed')->create([
                 'code' => $rangeCode,
                 'sponsor_id' => $this->sponsor->id,
             ]);

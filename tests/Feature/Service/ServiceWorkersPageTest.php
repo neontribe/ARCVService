@@ -71,7 +71,7 @@ class ServiceWorkersPageTest extends StoreTestCase
         $this->userHomeCentreTwoAlt->centres()->attach($this->altCentres->all());
 
         // Create 1 user with a homeCentre who can Download
-        $this->downloaderUser = factory(CentreUser::class, 'withDownloader')->create([
+        $this->downloaderUser = factory(CentreUser::class)->state('withDownloader')->create([
             "name" => "test downloader",
             "email" => "testdl@example.com",
         ]);

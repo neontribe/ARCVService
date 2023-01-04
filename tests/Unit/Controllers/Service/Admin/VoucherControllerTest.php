@@ -110,7 +110,7 @@ class VoucherControllerTest extends TestCase
             $this->assertStringStartsWith($shortcode, $voucher->code);
 
             // Assert that the voucher code lands between 50 and 60 (our generated range).
-            $this->assertRegExp('/,*5[0-9]/', $voucher->code);
+            $this->assertMatchesRegularExpression('/,*5[0-9]/', $voucher->code);
         }
     }
 
@@ -136,7 +136,7 @@ class VoucherControllerTest extends TestCase
             $this->assertStringStartsWith($shortcode, $voucher->code);
 
             // the voucher code must be padded to 5
-            $this->assertRegExp('/' . $shortcode . '(09999|10000|10001)$/', $voucher->code);
+            $this->assertMatchesRegularExpression('/' . $shortcode . '(09999|10000|10001)$/', $voucher->code);
         }
     }
 }
