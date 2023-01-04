@@ -415,7 +415,7 @@ class Voucher extends Model
      */
     public static function findByCodes($codes)
     {
-        return self::whereIn('code', $codes)->get();
+        return self::whereIn('code', $codes)->sharedLock()->get();
     }
 
   /**
