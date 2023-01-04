@@ -1,13 +1,14 @@
 <?php
+namespace Database\Seeders;
 
-use App\Bundle;
-use App\Carer;
 use App\Centre;
+use App\CentreUser;
 use App\Registration;
+use App\User;
 use App\Voucher;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class TestActiveUsersSeeder extends Seeder
 {
@@ -22,22 +23,22 @@ class TestActiveUsersSeeder extends Seeder
         $today = Carbon::today()->startOfDay();
 
         // Get or create the seeder user
-        $user = App\User::where('name', 'demoseeder')->first();
+        $user = User::where('name', 'demoseeder')->first();
         if (!$user) {
-            $user = factory(App\User::class)->create(['name' => 'demoseeder']);
+            $user = factory(User::class)->create(['name' => 'demoseeder']);
         };
 
         Auth::login($user);
 
         // Make a centre for them
         /** @var Centre $c */
-        $c = factory(App\Centre::class)->create([
+        $c = factory(Centre::class)->create([
             "sponsor_id" => 1,
             "name" => "Active User Test"
         ]);
 
         // ARC CCUSer who can download.
-        $user = factory(App\CentreUser::class, 'withDownloader')->create([
+        $user = factory(CentreUser::class)->state('withDownloader')->create([
             "name"  => "ARC CCDownloader",
             "email" => "arc+ccdownloader@neontribe.co.uk",
             "password" => bcrypt('store_pass'),
@@ -113,7 +114,7 @@ class TestActiveUsersSeeder extends Seeder
 
                 // Create three random vouchers and transition to dispatched, then bundle
                 /** @var Collection $vs */
-                $vs = factory(Voucher::class, 'printed', 3)
+                $vs = factory(Voucher::class, 3)->state('printed')
                     ->create()
                     ->each(function (Voucher $v) {
                         $v->applyTransition('dispatch');

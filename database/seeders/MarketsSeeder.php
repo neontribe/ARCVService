@@ -1,5 +1,7 @@
 <?php
+namespace Database\Seeders;
 
+use App\Market;
 use Illuminate\Database\Seeder;
 
 class MarketsSeeder extends Seeder
@@ -47,7 +49,7 @@ class MarketsSeeder extends Seeder
         ];
 
         foreach ($marketsData as $market) {
-            factory(App\Market::class)->create($market);
+            factory(Market::class)->create($market);
         }
     }
 }

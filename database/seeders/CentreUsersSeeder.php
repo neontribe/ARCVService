@@ -1,5 +1,8 @@
 <?php
+namespace Database\Seeders;
 
+use App\Centre;
+use App\CentreUser;
 use Illuminate\Database\Seeder;
 
 class CentreUsersSeeder extends Seeder
@@ -12,7 +15,7 @@ class CentreUsersSeeder extends Seeder
     public function run()
     {
         // 1 specific user in the first centre
-        $user1 = factory(App\CentreUser::class)->create([
+        $user1 = factory(CentreUser::class)->create([
             "name"  => "ARC CC User",
             "email" => "arc+ccuser@neontribe.co.uk",
             "password" => bcrypt('store_pass'),
@@ -27,7 +30,7 @@ class CentreUsersSeeder extends Seeder
         // Get the first centre's sponsor and make two more centres with the same sponsor
         $sponsor_id = $user1->centres()->first()->sponsor->id;
 
-        $local_centres = factory(App\Centre::class, 2)->create(['sponsor_id' => $sponsor_id]);
+        $local_centres = factory(Centre::class, 2)->create(['sponsor_id' => $sponsor_id]);
 
         // Attach the extra centres
         $user1->centres()->attach([
@@ -35,7 +38,7 @@ class CentreUsersSeeder extends Seeder
             $local_centres[1]->id  => ['homeCentre' => false],
         ]);
 
-        $user2 = factory(App\CentreUser::class, 'FMUser')->create([
+        $user2 = factory(CentreUser::class)->state('FMUser')->create([
             "name"  => "ARC FM User",
             "email" => "arc+fmuser@neontribe.co.uk",
             "password" => bcrypt('store_pass'),
@@ -43,7 +46,7 @@ class CentreUsersSeeder extends Seeder
         $user2->centres()->attach(1, ['homeCentre' => true]);
 
         // ARC admin is an fmuser in centre 2, which has individual forms on the dashboard.
-        $user3 = factory(App\CentreUser::class, 'FMUser')->create([
+        $user3 = factory(CentreUser::class)->state('FMUser')->create([
             "name"  => "ARC fmuser2",
             "email" => "arc+fmuser2@neontribe.co.uk",
             "password" => bcrypt('store_pass'),
@@ -51,32 +54,32 @@ class CentreUsersSeeder extends Seeder
         $user3->centres()->attach(2, ['homeCentre' => true]);
 
         // 4 faked users associated with random Centres
-        factory(App\CentreUser::class, 4)
+        factory(CentreUser::class, 4)
             ->create()
             ->each(function ($centreUser) {
-                $centres  = App\Centre::get();
+                $centres  = Centre::get();
                 if ($centres->count() > 0) {
                     // Pick a random Centre
                     $centre = $centres[random_int(0, $centres->count()-1)];
                 } else {
                     // There should be at least one Centre
-                    $centre = factory(App\Centre::class)->create();
+                    $centre = factory(Centre::class)->create();
                 }
                 $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
             });
 
         // 2 deleted users
-        $deletedUsers = factory(App\CentreUser::class, 2)->create([
+        $deletedUsers = factory(CentreUser::class, 2)->create([
             "deleted_at"  => date("Y-m-d H:i:s"),
         ]);
 
         // an SP user for testing
-        $socialPrescriber = factory(App\CentreUser::class)->create([
+        $socialPrescriber = factory(CentreUser::class)->create([
             'name' => 'prescribing user',
             'email' => 'arc+spuser@neontribe.co.uk',
             "password" => bcrypt('store_pass'),
         ]);
-        $spcId = App\Centre::where('name', 'Prescribing Centre')->first()->id;
+        $spcId = Centre::where('name', 'Prescribing Centre')->first()->id;
         $socialPrescriber->centres()->attach($spcId, ["homeCentre" => true]);
     }
 }

@@ -60,7 +60,7 @@ $factory->define(App\CentreUser::class, function (Faker\Generator $faker) {
 /**
  * CentreUser who can Download.
  */
-$factory->defineAs(App\CentreUser::class, 'withDownloader', function ($faker) use ($factory) {
+$factory->state(App\CentreUser::class, 'withDownloader', function ($faker) use ($factory) {
     $cu = $factory->raw(App\CentreUser::class);
 
     return array_merge($cu, [
@@ -71,7 +71,7 @@ $factory->defineAs(App\CentreUser::class, 'withDownloader', function ($faker) us
 /**
  * Specifically an Admin Centre User [foodmatters_user]
  */
-$factory->defineAs(App\CentreUser::class, 'FMUser',function (Faker\Generator $faker) use ($factory){
+$factory->state(App\CentreUser::class, 'FMUser',function (Faker\Generator $faker) use ($factory){
     static $password;
 
     return [
@@ -180,7 +180,7 @@ $factory->define(App\Trader::class, function (Faker\Generator $faker) {
 /**
  * Trader with nullables filled.
  */
-$factory->defineAs(App\Trader::class, 'withnullable', function ($faker) use ($factory) {
+$factory->state(App\Trader::class, 'withnullable', function ($faker) use ($factory) {
     $trader = $factory->raw(App\Trader::class);
 
     return array_merge($trader, [
@@ -245,7 +245,7 @@ $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
 /**
  * Voucher with currentstate printed.
  */
-$factory->defineAs(App\Voucher::class, 'printed', function ($faker) use ($factory) {
+$factory->state(App\Voucher::class, 'printed', function ($faker) use ($factory) {
 
     // As our starting state, we do not require a `voucher_state` to be generated.
     $voucher = $factory->raw(App\Voucher::class);
@@ -258,7 +258,7 @@ $factory->defineAs(App\Voucher::class, 'printed', function ($faker) use ($factor
 /**
  * Voucher with currentstate dispatched.
  */
-$factory->defineAs(App\Voucher::class, 'dispatched', function ($faker) use ($factory) {
+$factory->state(App\Voucher::class, 'dispatched', function ($faker) use ($factory) {
     $voucher = $factory->raw(App\Voucher::class);
 
     // Dispatched is the first state, so we can go with default values here.
@@ -406,7 +406,7 @@ $factory->state(App\Child::class, 'unverified', function(Faker\Generator $faker)
 
 
 // Child - unborn
-$factory->defineAs(App\Child::class, 'unbornChild', function (Faker\Generator $faker) {
+$factory->state(App\Child::class, 'unbornChild', function (Faker\Generator $faker) {
 
     $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('+2 month', '+8 months')->getTimestamp());
     $dob = $dob->startOfMonth();
@@ -418,7 +418,7 @@ $factory->defineAs(App\Child::class, 'unbornChild', function (Faker\Generator $f
 });
 
 // Child - almost born
-$factory->defineAs(App\Child::class, 'almostBorn', function (Faker\Generator $faker) {
+$factory->state(App\Child::class, 'almostBorn', function (Faker\Generator $faker) {
 
     $dob = Carbon::now()->startOfMonth()->addMonths(1);
 
@@ -430,7 +430,7 @@ $factory->defineAs(App\Child::class, 'almostBorn', function (Faker\Generator $fa
 
 
 // Child - almost 1
-$factory->defineAs(App\Child::class, 'almostOne', function (Faker\Generator $faker) {
+$factory->state(App\Child::class, 'almostOne', function (Faker\Generator $faker) {
 
     $dob = Carbon::now()->startOfMonth()->subMonths(11);
 
@@ -441,7 +441,7 @@ $factory->defineAs(App\Child::class, 'almostOne', function (Faker\Generator $fak
 });
 
 // Child - under 1
-$factory->defineAs(App\Child::class, 'underOne', function (Faker\Generator $faker) {
+$factory->state(App\Child::class, 'underOne', function (Faker\Generator $faker) {
 
     $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-10 months', '-2 months')->getTimestamp());
     $dob = $dob->startOfMonth();
@@ -453,7 +453,7 @@ $factory->defineAs(App\Child::class, 'underOne', function (Faker\Generator $fake
 });
 
 // Child - Between One and Primary School Age
-$factory->defineAs(App\Child::class, 'betweenOneAndPrimarySchoolAge', function (Faker\Generator $faker) {
+$factory->state(App\Child::class, 'betweenOneAndPrimarySchoolAge', function (Faker\Generator $faker) {
 
     $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-32 months', '-14 months')->getTimestamp());
     $dob = $dob->startOfMonth();
@@ -465,7 +465,7 @@ $factory->defineAs(App\Child::class, 'betweenOneAndPrimarySchoolAge', function (
 });
 
 // Child - ready for Primary School when the school_month rolls around
-$factory->defineAs(App\Child::class, 'readyForPrimarySchool', function (Faker\Generator $faker) {
+$factory->state(App\Child::class, 'readyForPrimarySchool', function (Faker\Generator $faker) {
 
     // Make a child who's four now, and thus due to start school soon(ish)
     $dob = Carbon::now()->startOfMonth()->subYears(4);
@@ -477,7 +477,7 @@ $factory->defineAs(App\Child::class, 'readyForPrimarySchool', function (Faker\Ge
 });
 
 // Child - ready for Primary School when the school_month rolls around ( QUESTION )
-$factory->defineAs(App\Child::class, 'readyForScottishPrimarySchool', function (Faker\Generator $faker) {
+$factory->state(App\Child::class, 'readyForScottishPrimarySchool', function (Faker\Generator $faker) {
 
     // Make a child who's four now, and thus due to start school soon(ish)
     $dob = Carbon::now()->month(1)->startOfMonth()->subYears(4);
@@ -489,7 +489,7 @@ $factory->defineAs(App\Child::class, 'readyForScottishPrimarySchool', function (
 });
 
 // Child - ready for Primary School in Scotland, but will still be four.
-$factory->defineAs(App\Child::class, 'canDefer', function (Faker\Generator $faker) {
+$factory->state(App\Child::class, 'canDefer', function (Faker\Generator $faker) {
 
     // Make a child who's four now, and thus due to start school soon(ish)
     $now = Carbon::now()->startOfMonth()->subYears(4);
@@ -504,7 +504,7 @@ $factory->defineAs(App\Child::class, 'canDefer', function (Faker\Generator $fake
 });
 
 // Child - ready for Primary School in Scotland, but won't be four.
-$factory->defineAs(App\Child::class, 'canNotDefer', function (Faker\Generator $faker) {
+$factory->state(App\Child::class, 'canNotDefer', function (Faker\Generator $faker) {
 
     // Make a child who's four now, and thus due to start school soon(ish)
     $now = Carbon::now()->startOfMonth()->subYears(5);
@@ -520,7 +520,7 @@ $factory->defineAs(App\Child::class, 'canNotDefer', function (Faker\Generator $f
 });
 
 // Child - over School Age
-$factory->defineAs(App\Child::class, 'isPrimarySchoolAge', function (Faker\Generator $faker) {
+$factory->state(App\Child::class, 'isPrimarySchoolAge', function (Faker\Generator $faker) {
 
     $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-10 years', '-6 years')->getTimestamp());
     $dob = $dob->startOfMonth();
@@ -532,7 +532,7 @@ $factory->defineAs(App\Child::class, 'isPrimarySchoolAge', function (Faker\Gener
 });
 
 // Child - ready for Secondary School when the school_month rolls around
-$factory->defineAs(App\Child::class, 'readyForSecondarySchool', function (Faker\Generator $faker) {
+$factory->state(App\Child::class, 'readyForSecondarySchool', function (Faker\Generator $faker) {
 
     // Make a child who's 11 now, and thus due to start school soon(ish)
     $dob = Carbon::now()->startOfMonth()->subYears(11);
@@ -544,7 +544,7 @@ $factory->defineAs(App\Child::class, 'readyForSecondarySchool', function (Faker\
 });
 
 // Child - over Primary School Age
-$factory->defineAs(App\Child::class, 'isSecondarySchoolAge', function (Faker\Generator $faker) {
+$factory->state(App\Child::class, 'isSecondarySchoolAge', function (Faker\Generator $faker) {
 
     $dob = Carbon::createFromTimestamp($faker->dateTimeBetween('-17 years', '-12 years')->getTimestamp());
     $dob = $dob->startOfMonth();

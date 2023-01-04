@@ -1,4 +1,5 @@
 <?php
+namespace Database\Seeders;
 
 use App\Centre;
 use App\Delivery;
@@ -6,6 +7,7 @@ use App\User;
 use App\Voucher;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Auth;
 
 class DeliverySeeder extends Seeder
 {
@@ -29,7 +31,7 @@ class DeliverySeeder extends Seeder
         shuffle($centre_ids);
 
         // Setup 5 deliveries to random centres and add 50 vouchers to each
-        factory(App\Delivery::class, 5)
+        factory(Delivery::class, 5)
             ->create([
                 // pop the last one off.
                 'centre_id' => function () use (&$centre_ids) {
@@ -51,7 +53,7 @@ class DeliverySeeder extends Seeder
                     $shortcode . "01" . $key . "050"
                 );
                 // Turn those into vouchers
-                $vs = factory(Voucher::class, 'printed', count($codes))
+                $vs = factory(Voucher::class, count($codes))->state('printed')
                     ->create([
                         'code' => function () use (&$codes) {
                             return array_pop($codes);
