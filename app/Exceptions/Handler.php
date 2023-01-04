@@ -19,6 +19,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Throwable;
 
 class Handler extends ExceptionHandler
 {
@@ -49,7 +50,7 @@ class Handler extends ExceptionHandler
      * @param Exception $e Exception
      * @return bool;
      */
-    protected function shallWeStackTrace(Exception $e)
+    protected function shallWeStackTrace(Throwable $e)
     {
         if (config('app.env') === 'production') {
             foreach ($this->dontStackTrace as $type) {
@@ -70,7 +71,7 @@ class Handler extends ExceptionHandler
      * @param  Exception  $e
      * @return mixed
      */
-    public function report(Exception $e)
+    public function report(Throwable $e)
     {
         if (!$this->shallWeStackTrace($e)) {
             try {
@@ -102,7 +103,7 @@ class Handler extends ExceptionHandler
      * @param  Exception  $exception
      * @return RedirectResponse|Redirector|Response
      */
-    public function render($request, Exception $exception)
+    public function render($request, Throwable $exception)
     {
         if ($exception instanceof TokenMismatchException) {
             // Explicitly redirect to login form if token mismatches.
