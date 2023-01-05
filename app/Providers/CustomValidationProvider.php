@@ -47,7 +47,7 @@ class CustomValidationProvider extends ServiceProvider
 
             if (!empty($secondCode)) {
                 $other = Voucher::splitShortcodeNumeric($secondCode);
-                if (is_numeric($code["number"]) && is_numeric($other["number"])) {
+                if (is_array($code) && is_array($other) && is_numeric($code["number"]) && is_numeric($other["number"])) {
                     return intval($code["number"]) > intval($other["number"]);
                 }
             }
@@ -74,7 +74,7 @@ class CustomValidationProvider extends ServiceProvider
 
             if (!empty($secondCode)) {
                 $other = Voucher::splitShortcodeNumeric($secondCode);
-                if (is_numeric($code["number"]) && is_numeric($other["number"])) {
+                if (is_array($code) && is_array($other) && is_numeric($code["number"]) && is_numeric($other["number"])) {
                     return intval($code["number"]) >= intval($other["number"]);
                 }
             }
@@ -102,7 +102,7 @@ class CustomValidationProvider extends ServiceProvider
 
             if (!empty($otherVal)) {
                 $other = Voucher::splitShortcodeNumeric($otherVal);
-                if (is_string($val["shortcode"]) && is_string($other["shortcode"])) {
+                if (is_array($val) && is_array($other) && is_string($val["shortcode"]) && is_string($other["shortcode"])) {
                     return $val['shortcode'] === $other['shortcode'];
                 }
             }

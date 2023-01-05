@@ -68,7 +68,6 @@ class BundleControllerTest extends StoreTestCase
     /** @test */
     public function testICannotSubmitInvalidValuesToAppendVouchers()
     {
-        $this->markTestSkipped('Waiting for fix');
         $dataSets = [
             // no data
             [
