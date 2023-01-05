@@ -29,7 +29,6 @@ class SendVoucherHistoryEmailTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // $this->markTestSkipped('Waiting for Mail fix');
         $this->traders = factory(Trader::class, 2)->create();
         $this->vouchers = factory(Voucher::class, 10)->state('printed')->create();
         $this->user = factory(User::class)->create();
