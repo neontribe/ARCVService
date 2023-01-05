@@ -5,6 +5,7 @@ namespace Tests\Unit\Listeners;
 use App\Events\VoucherHistoryEmailRequested;
 use App\Http\Controllers\API\TraderController;
 use App\Listeners\SendVoucherHistoryEmail;
+use App\Mail\VoucherHistoryEmail;
 use App\Market;
 use App\Sponsor;
 use App\Trader;
@@ -14,6 +15,7 @@ use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class SendVoucherHistoryEmailTest extends TestCase
@@ -27,7 +29,7 @@ class SendVoucherHistoryEmailTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->markTestSkipped('Waiting for Mail fix');
+        // $this->markTestSkipped('Waiting for Mail fix');
         $this->traders = factory(Trader::class, 2)->create();
         $this->vouchers = factory(Voucher::class, 10)->state('printed')->create();
         $this->user = factory(User::class)->create();
@@ -68,6 +70,8 @@ class SendVoucherHistoryEmailTest extends TestCase
 
     public function testRequestVoucherHistoryEmail()
     {
+        Mail::fake();
+        
         // Todo this test could be split up and improved.
         $user = $this->user;
         $trader = $this->traders[0];
@@ -83,14 +87,26 @@ class SendVoucherHistoryEmailTest extends TestCase
         $listener = new SendVoucherHistoryEmail();
         $listener->handle($event);
 
-        // We can improve this - but test basic data is correct.
-        // uses laravel helper function e() to prevent errors from names with apostrophes
-        $this->seeEmailWasSent()
-            ->seeEmailTo($user->email)
-            ->seeEmailSubject('Rose Voucher Payment Records')
-            ->seeEmailContains('Hi ' . e($user->name))
-            ->seeEmailContains('requested a copy of ' . e($trader->name))
-            ->seeEmailContains("The file includes payment records from $min_date to $max_date")
-        ;
+        $viewData = [
+            'user' => $user,
+            'max_date' => $max_date,
+            'vouchers' => $vouchers,
+            'trader' => $trader,
+            'date' => Carbon::now(), // The view needs a date, but it doesn't seem to matter what it is for our purposes
+        ];
+
+        Mail::assertSent(VoucherHistoryEmail::class, 1);
+        Mail::assertSent(VoucherHistoryEmail::class, function (VoucherHistoryEmail $mail) use ($viewData) {
+            $email = $mail->build();
+            $this->assertEquals($mail->to[0]['address'], $viewData['user']->email);
+            $body = view($email->view, $viewData)->render();
+            $user_name = $viewData['user']->name;
+            $this->assertStringContainsString('Rose Voucher Payment Records', $mail->subject);
+            $this->assertStringContainsString(e($user_name), $body);
+            $this->assertStringContainsString('requested a copy of ', $body);
+            $this->assertStringContainsString('The file includes payment records from', $body);
+            $this->assertStringContainsString($viewData['max_date'], $body);
+            return true;
+        });
     }
 }
