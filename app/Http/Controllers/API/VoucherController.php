@@ -33,7 +33,7 @@ class VoucherController extends Controller
         );
 
         // Do we want to validate codes by regex rule before we try to find them or meh?
-        $vouchers = Voucher::findByCodes($uniqueVouchers);
+        $vouchers = Voucher::whereIn('code', $uniqueVouchers)->sharedLock()->get();
 
         // We'll be collating the codes by category.
         $responses = [
