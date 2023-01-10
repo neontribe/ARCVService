@@ -109,7 +109,6 @@ EOD;
         }
 
         // Stream a zip to a file in storage, encrypting as we write (with the secret stream wrapper).
-        // $storagePath = $this->disk->getAdapter()->getPathPrefix();
         $storagePath = Storage::path('enc');
         $options = new Archive();
         $output = fopen('ssw://' . $storagePath . '/' . $this->archiveName, 'w');
