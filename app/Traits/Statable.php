@@ -10,6 +10,7 @@ namespace App\Traits;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use SM\Factory\FactoryInterface;
+use SM\SMException;
 use SM\StateMachine\StateMachine;
 use SM\StateMachine\StateMachineInterface;
 
@@ -63,12 +64,26 @@ trait Statable
     }
 
     /**
-     * @param string $transition
+     * @param $transition
      * @return bool
+     * @throws SMException
      */
     public function applyTransition($transition)
     {
-        return $this->getStateMachine()->apply($transition);
+        $sm = $this->getStateMachine();
+        // get the current state and set it to "from"
+        $from = $sm->getState();
+        // try to transition - might throw an SMException and abort
+        $transitioned = $sm->apply($transition);
+
+        if ($transitioned) {
+            // if it worked save all the stuff
+            $to = $sm->getState();
+            $this->postTransition($from, $to, $transition);
+        }
+
+        // return
+        return $transition;
     }
 
     /**
@@ -112,5 +127,30 @@ trait Statable
             return (object) $transitionDef;
         }
         return null;
+    }
+
+
+    /**
+     * @return void
+     */
+    public function postTransition($from, $to, $transition)
+    {
+        $sm = $this->getStateMachine();
+        $model = $sm->getObject();
+
+        // We need to collect the user_type (basically the classname)
+        // as we now have several with conflicting ids.
+        // Will permit accurate tidying up late.
+        $user_type = class_basename(auth()->user());
+        $this->history()->create([
+            "transition" => $transition,
+            "from" => $from, // what the state was before.
+            "to" => $to, // what it is now
+            "user_id" => auth()->id(), // the user ID
+            "user_type" => $user_type, // the type of user (we now have many)
+            "source" => "",
+        ]);
+        // actually saves the model
+        $model->save();
     }
 }
