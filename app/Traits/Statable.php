@@ -8,6 +8,7 @@
 
 namespace App\Traits;
 
+use Exception;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use SM\Factory\FactoryInterface;
 use SM\SMException;
@@ -131,12 +132,25 @@ trait Statable
 
 
     /**
+     * @param string $from
+     * @param string $to
+     * @param string $transition
      * @return void
+     * @throws Exception
      */
     public function postTransition($from, $to, $transition)
     {
         $sm = $this->getStateMachine();
         $model = $sm->getObject();
+
+        // actually saves the model
+        if ($transition === "confirm") {
+            if (!$model->update(['currentstate' => $to])) {
+                throw new Exception("failed to update a voucher");
+            }
+        } else {
+            $model->save();
+        }
 
         // We need to collect the user_type (basically the classname)
         // as we now have several with conflicting ids.
@@ -150,7 +164,6 @@ trait Statable
             "user_type" => $user_type, // the type of user (we now have many)
             "source" => "",
         ]);
-        // actually saves the model
-        $model->save();
+
     }
 }
