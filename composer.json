@@ -31,8 +31,9 @@
     "neontribe/laravel-specification": "dev-master",
     "ramsey/uuid": "^3.9.6",
     "sebdesign/laravel-state-machine": "^2.1.1",
-    "symfony/event-dispatcher": "^4.4.37",
     "symfony/console": "4.4.36",
+    "symfony/event-dispatcher": "^4.4.37",
+    "symfony/lock": "^5.4",
     "usmanhalalit/laracsv": "^2.1.0"
   },
   "require-dev": {
