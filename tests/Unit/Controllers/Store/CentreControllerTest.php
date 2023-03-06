@@ -36,7 +36,7 @@ class CentreControllerTest extends StoreTestCase
         $this->centre = factory(Centre::class)->create();
 
         // Create an FM User
-        $this->centreUser = factory(CentreUser::class, 'FMUser')->create([
+        $this->centreUser = factory(CentreUser::class)->state('FMUser')->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -72,7 +72,7 @@ class CentreControllerTest extends StoreTestCase
         $this->registrations->each(function ($registration, $key) {
             $bundle = $registration->currentBundle();
             // Add some random vouchers
-            $vouchers = factory(Voucher::class, 'dispatched', rand(1, 3) * 3)->create();
+            $vouchers = factory(Voucher::class, rand(1, 3) * 3)->state('dispatched')->create();
             $bundle->alterVouchers($vouchers, [], $bundle);
             // set it to be disbursed some time in the past, with some variation.
             $bundle->disbursed_at = Carbon::today()->startOfDay()->addHour($key);
@@ -82,7 +82,7 @@ class CentreControllerTest extends StoreTestCase
         $this->spRegistrations->each(function ($registration, $key) {
             $bundle = $registration->currentBundle();
             // Add some random vouchers
-            $vouchers = factory(Voucher::class, 'dispatched', rand(1, 3) * 3)->create();
+            $vouchers = factory(Voucher::class, rand(1, 3) * 3)->state('dispatched')->create();
             $bundle->alterVouchers($vouchers, [], $bundle);
             // set it to be disbursed some time in the past, with some variation.
             $bundle->disbursed_at = Carbon::today()->startOfDay()->addHour($key);
@@ -284,7 +284,7 @@ class CentreControllerTest extends StoreTestCase
         $centre = factory(Centre::class)->create(['sponsor_id' => $sponsor->id]);
         $this->assertEquals(1, $sponsor->centres->count());
 
-        $centreUser = factory(CentreUser::class, 'withDownloader')->create([
+        $centreUser = factory(CentreUser::class)->state('withDownloader')->create([
             "name"  => "test downloader",
             "email" => "testdl@example.com",
             "password" => bcrypt('test_user_pass'),

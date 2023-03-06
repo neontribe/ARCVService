@@ -1,5 +1,7 @@
 <?php
+namespace Database\Seeders;
 
+use App\AdminUser;
 use Illuminate\Database\Seeder;
 
 class AdminUsersSeeder extends Seeder
@@ -23,7 +25,7 @@ class AdminUsersSeeder extends Seeder
         ];
 
         foreach ($usersData as $user) {
-            factory(App\AdminUser::class)->create($user);
+            factory(AdminUser::class)->create($user);
         }
     }
 }

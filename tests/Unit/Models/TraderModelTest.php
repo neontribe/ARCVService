@@ -20,7 +20,7 @@ class TraderModelTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->trader = factory(Trader::class, 'withnullable')->create();
+        $this->trader = factory(Trader::class)->state('withnullable')->create();
     }
 
     public function testTraderIsCreatedWithExpectedAttributes()
@@ -73,7 +73,7 @@ class TraderModelTest extends TestCase
 
     public function testTraderHasConfirmedVouchers()
     {
-        $vouchers = factory(Voucher::class, 'printed', 3)->create([
+        $vouchers = factory(Voucher::class, 3)->state('printed')->create([
             'trader_id' => $this->trader->id,
         ]);
 
@@ -104,7 +104,7 @@ class TraderModelTest extends TestCase
 
     public function testTraderHasVouchersWithStatus()
     {
-        $vouchers = factory(Voucher::class, 'printed', 6)->create([
+        $vouchers = factory(Voucher::class, 6)->state('printed')->create([
             'trader_id' => $this->trader->id,
         ]);
 

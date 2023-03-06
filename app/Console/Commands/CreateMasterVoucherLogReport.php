@@ -249,7 +249,7 @@ EOD;
             // Make a zip archive, or not.
             if (!$this->option('no-zip')) {
                 // Setup an archive
-                $storagePath = Storage::disk($this->disk)->getAdapter()->getPathPrefix();
+                $storagePath = Storage::path($this->disk);
                 // Open the file for writing at the correct location
                 $path = $storagePath . '/' . $this->archiveName;
 

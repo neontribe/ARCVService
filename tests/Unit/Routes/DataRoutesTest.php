@@ -41,6 +41,9 @@ class DataRoutesTest extends TestCase
     // Admin Users can see the data.
     public function testVouchersIndexRouteAuthdAdmin()
     {
+        // Check we don't have timezone info in the dates
+        $this->assertStringNotContainsString('T', $this->vouchers[0]->created_at);
+        $this->assertStringNotContainsString('Z', $this->vouchers[0]->created_at);
         $this->actingAs($this->admin, 'admin')
             ->get(route('data.vouchers.index'))
             ->assertStatus(200)
@@ -70,6 +73,9 @@ class DataRoutesTest extends TestCase
 
     public function testUsersIndexRoute()
     {
+        // Check we don't have timezone info in the dates
+        $this->assertStringNotContainsString('T', $this->users[0]->created_at);
+        $this->assertStringNotContainsString('Z', $this->users[0]->created_at);
         $this->actingAs($this->admin, 'admin')
             ->get(route('data.users.index'))
             ->assertStatus(200)
@@ -80,6 +86,9 @@ class DataRoutesTest extends TestCase
 
     public function testMarketsIndexRoute()
     {
+        // Check we don't have timezone info in the dates
+        $this->assertStringNotContainsString('T', $this->markets[0]->created_at);
+        $this->assertStringNotContainsString('Z', $this->markets[0]->created_at);
         $this->actingAs($this->admin, 'admin')
             ->get(route('data.markets.index'))
             ->assertStatus(200)
@@ -90,6 +99,9 @@ class DataRoutesTest extends TestCase
 
     public function testTradersIndexRoute()
     {
+        // Check we don't have timezone info in the dates
+        $this->assertStringNotContainsString('T', $this->traders[0]->created_at);
+        $this->assertStringNotContainsString('Z', $this->traders[0]->created_at);
         $this->actingAs($this->admin, 'admin')
             ->get(route('data.traders.index'))
             ->assertStatus(200)

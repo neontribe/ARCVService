@@ -50,7 +50,7 @@ class CentreUserModelTest extends TestCase
         $cu->fresh();
         $this->assertTrue($cu->downloader);
 
-        $cu = factory(CentreUser::class, 'withDownloader')->create()->fresh();
+        $cu = factory(CentreUser::class)->state('withDownloader')->create()->fresh();
         $this->assertTrue($cu->downloader);
     }
 

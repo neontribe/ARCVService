@@ -57,7 +57,7 @@ class StoreRoutesTest extends StoreTestCase
         ]);
 
         // Create a few Users
-        $this->fmUser = factory(CentreUser::class, 'FMUser')->create([
+        $this->fmUser = factory(CentreUser::class)->state('FMUser')->create([
             'name' => 'FM test user',
             'email' => 'testfmuser@example.com',
             'password' => bcrypt('test_fmuser_pass'),
@@ -71,7 +71,7 @@ class StoreRoutesTest extends StoreTestCase
         ]);
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
-        $this->downloaderUser = factory(CentreUser::class, 'withDownloader')->create([
+        $this->downloaderUser = factory(CentreUser::class)->state('withDownloader')->create([
             'name' => 'test downloader',
             'email' => 'testdl@example.com',
             'password' => bcrypt('test_user_pass'),

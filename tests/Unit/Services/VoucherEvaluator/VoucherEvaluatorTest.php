@@ -110,15 +110,15 @@ class VoucherEvaluatorTest extends TestCase
         ];
 
         $this->family = factory(Family::class)->create();
-        $this->pregnancy = factory(Child::class, 'unbornChild')->make();
-        $this->isPrimarySchool = factory(Child::class, 'isPrimarySchoolAge')->make();
-        $this->isOverPrimarySchool = factory(Child::class, 'isSecondarySchoolAge')->make();
-        $this->underPrimarySchool = factory(Child::class, 'betweenOneAndPrimarySchoolAge')->make();
-        $this->underOne = factory(Child::class, 'underOne')->make();
-        $this->isSecondarySchoolAge = factory(Child::class, 'isSecondarySchoolAge')->make();
-        $this->isAlmostOne = factory(Child::class, 'almostOne')->make();
-        $this->readyForPrimarySchool = factory(Child::class, 'readyForPrimarySchool')->make();
-        $this->readyForSecondarySchool = factory(Child::class, 'readyForSecondarySchool')->make();
+        $this->pregnancy = factory(Child::class)->state('unbornChild')->make();
+        $this->isPrimarySchool = factory(Child::class)->state('isPrimarySchoolAge')->make();
+        $this->isOverPrimarySchool = factory(Child::class)->state('isSecondarySchoolAge')->make();
+        $this->underPrimarySchool = factory(Child::class)->state('betweenOneAndPrimarySchoolAge')->make();
+        $this->underOne = factory(Child::class)->state('underOne')->make();
+        $this->isSecondarySchoolAge = factory(Child::class)->state('isSecondarySchoolAge')->make();
+        $this->isAlmostOne = factory(Child::class)->state('almostOne')->make();
+        $this->readyForPrimarySchool = factory(Child::class)->state('readyForPrimarySchool')->make();
+        $this->readyForSecondarySchool = factory(Child::class)->state('readyForSecondarySchool')->make();
     }
 
     /** @test */

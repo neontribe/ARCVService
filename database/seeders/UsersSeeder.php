@@ -1,5 +1,8 @@
 <?php
+namespace Database\Seeders;
 
+use App\User;
+use App\Trader;
 use Illuminate\Database\Seeder;
 
 class UsersSeeder extends Seeder
@@ -35,10 +38,10 @@ class UsersSeeder extends Seeder
         ];
 
         foreach ($usersData as $user) {
-            $users[] = factory(App\User::class)->create($user);
+            $users[] = factory(User::class)->create($user);
         }
 
-        $traders = App\Trader::pluck('id')->toArray();
+        $traders = Trader::pluck('id')->toArray();
         foreach ($users as $user) {
             // Sync to a random subset of 1 2 or 3 traders.
             // Unique subset of traders.

@@ -4,8 +4,8 @@ namespace Tests\Unit\Listeners;
 
 use App\Events\VoucherPaymentRequested;
 use App\Http\Controllers\API\TraderController;
-use App\Http\Controllers\API\VoucherController;
 use App\Listeners\SendVoucherPaymentRequestEmail;
+use App\Mail\VoucherPaymentRequestEmail;
 use App\Market;
 use App\Sponsor;
 use App\StateToken;
@@ -14,15 +14,13 @@ use App\User;
 use App\Voucher;
 use Auth;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Spinen\MailAssertions\MailTracking;
-use Swift_Message;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 use URL;
 
 class SendVoucherPaymentRequestEmailTest extends TestCase
 {
     use DatabaseMigrations;
-    use MailTracking;
 
     protected $traders;
     protected $vouchers;
@@ -33,7 +31,7 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
     {
         parent::setUp();
         $this->traders = factory(Trader::class, 2)->create();
-        $this->vouchers = factory(Voucher::class, 'printed', 10)->create();
+        $this->vouchers = factory(Voucher::class, 10)->state('printed')->create();
         $this->user = factory(User::class)->create();
 
         // Add market to trader[1];
@@ -57,34 +55,11 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
         }
     }
 
-    /**
-     * Custom function to assert that the email wasn't addresses to a recipient
-     * @param $recipient
-     * @param Swift_Message|null $message
-     * @return $this
-     */
-    protected function seeEmailNotToCcBcc($recipient, Swift_Message $message = null)
-    {
-        $fail_message = "The last email sent was sent to $recipient.";
-
-        // Not in the To
-        $this->assertArrayNotHasKey($recipient, (array)$this->getEmail($message)
-            ->getTo(), $fail_message);
-
-        // Not in the Cc
-        $this->assertArrayNotHasKey($recipient, (array)$this->getEmail($message)
-            ->getCc(), $fail_message);
-
-        // Not in the Bcc
-        $this->assertArrayNotHasKey($recipient, (array)$this->getEmail($message)
-            ->getBcc(), $fail_message);
-
-        return $this;
-    }
-
     /** @test */
     public function testRequestVoucherPayment()
     {
+        Mail::fake();
+
         $user = $this->user;
         $trader = $this->traders[0];
         $vouchers = $trader->vouchers;
@@ -111,22 +86,35 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
         // Make the route to check
         $route = URL::route('store.payment-request.show', $stateToken->uuid);
 
-        // We can improve this - but test basic data is correct.
-        // uses laravel helper function e() to prevent errors from names with apostrophes
-        $this->seeEmailWasSent()
-            ->seeEmailTo(config('mail.to_admin.address'))
-            ->seeEmailNotToCcBcc($user->email)
-            ->seeEmailSubject('Rose Voucher Payment Request')
-            ->seeEmailContains('Hi ' . config('mail.to_admin.name'))
-            ->seeEmailContains(e($user->name) . ' has just successfully requested payment for')
-            ->seeEmailContains($vouchers->count() . ' vouchers')
-            ->seeEmailContains('for ' .  $programme_amounts['numbers']['standard'] . ' standard vouchers')
-            ->seeEmailContains('and ' .  $programme_amounts['numbers']['social_prescription'] . ' social prescription vouchers')
-            ->seeEmailContains(e($trader->name) . ' of')
-            // Has button?
-            ->seeEmailContains('<a href="' . $route . '" class="button button-pink" target="_blank">Pay Request</a>')
-            // Has link?
-            ->seeEmailContains('<br>' . $route)
-        ;
+        $viewData = [
+            'user' => $user,
+            'vouchers' => $vouchers,
+            'trader' => $trader,
+            'market' => $trader->market,
+            'programme_amounts' => $programme_amounts,
+            'actionUrl' => URL::route('store.payment-request.show', $this->stateToken->uuid),
+            'actionText' => 'Pay Request'
+        ];
+
+        Mail::assertSent(VoucherPaymentRequestEmail::class, 1);
+        Mail::assertSent(VoucherPaymentRequestEmail::class, function (VoucherPaymentRequestEmail $mail) use ($viewData, $route) {
+            $email = $mail->build();
+            $this->assertEquals(config('mail.to_admin.address'), $mail->to[0]['address']);
+            $this->assertEquals([], $mail->cc);
+            $this->assertEquals([], $mail->bcc);
+            $body = view($email->view, $viewData)->render();
+            $user_name = $viewData['user']->name;
+            $this->assertStringContainsString('Rose Voucher Payment Request', $mail->subject);
+            $this->assertStringContainsString('Hi ' . config('mail.to_admin.name'), $body);
+            $this->assertStringContainsString(e($user_name), $body);
+            $this->assertStringContainsString(' has just successfully requested payment for', $body);
+            $this->assertStringContainsString($viewData['vouchers']->count() . ' vouchers', $body);
+            $this->assertStringContainsString('for ' .  $viewData['programme_amounts']['numbers']['standard'] . ' standard vouchers', $body);
+            $this->assertStringContainsString('and ' .  $viewData['programme_amounts']['numbers']['social_prescription'] . ' social prescription vouchers', $body);
+            $this->assertStringContainsString(e($viewData['trader']->name), $body);
+            $this->assertStringContainsString('<a href="' . $route . '" class="button button-pink" target="_blank">Pay Request</a>', $body);
+            $this->assertStringContainsString('<br>' . $route, $body);
+            return true;
+        });
     }
 }

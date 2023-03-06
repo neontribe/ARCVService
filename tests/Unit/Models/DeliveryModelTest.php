@@ -2,7 +2,9 @@
 
 namespace Tests\Unit\Models;
 
+use App\Centre;
 use App\Delivery;
+use App\Voucher;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
@@ -36,10 +38,10 @@ class DeliveryModelTest extends TestCase
     /** @test */
     public function testPopulatedDeliveryIsCreatedWithExpectedAttributes()
     {
-        $centre = factory('App\Centre')->create();
+        $centre = factory(Centre::class)->create();
 
         // create three vouchers and transition to collected.
-        $vs = factory('App\Voucher', 'printed', 3)
+        $vs = factory(Voucher::class, 3)->state('printed')
             ->create()
             ->each(function ($v) {
                 $v->applyTransition('dispatch');
@@ -64,7 +66,7 @@ class DeliveryModelTest extends TestCase
     public function testDeliveryCanHaveManyVouchers()
     {
         // Create three vouchers and transition to dipatched.
-        $vs = factory('App\Voucher', 'printed', 3)
+        $vs = factory(Voucher::class, 3)->state('printed')
             ->create()
             ->each(function ($v) {
                 $v->applyTransition('dispatch');
@@ -84,17 +86,17 @@ class DeliveryModelTest extends TestCase
     public function testOrderDeliveriesByField()
     {
         factory(Delivery::class)->create([
-            'centre_id' => factory('App\Centre')->create(['name' => 'Adriatic Centre'])->id,
+            'centre_id' => factory(Centre::class)->create(['name' => 'Adriatic Centre'])->id,
             'dispatched_at' => Carbon::yesterday(),
             'range' => 'ABC101-ABC200',
         ]);
         factory(Delivery::class)->create([
-            'centre_id' => factory('App\Centre')->create(['name' => 'Zanzibar Centre'])->id,
+            'centre_id' => factory(Centre::class)->create(['name' => 'Zanzibar Centre'])->id,
             'dispatched_at' => Carbon::tomorrow(),
             'range' => 'XYZ101-XYZ200',
         ]);
         factory(Delivery::class)->create([
-            'centre_id' => factory('App\Centre')->create(['name' => 'Medditeranean Centre'])->id,
+            'centre_id' => factory(Centre::class)->create(['name' => 'Medditeranean Centre'])->id,
             'dispatched_at' => Carbon::now(),
             'range' => 'ABC201-ABC300',
         ]);

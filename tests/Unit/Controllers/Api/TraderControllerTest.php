@@ -44,7 +44,7 @@ class TraderControllerTest extends TestCase
     {
         parent::setUp();
         $this->traders = factory(Trader::class, 2)->create();
-        $this->vouchers = factory(Voucher::class, 'printed', 10)->create();
+        $this->vouchers = factory(Voucher::class, 10)->state('printed')->create();
         $this->user = factory(User::class)->create();
 
         // Set up voucher states.
@@ -138,7 +138,7 @@ class TraderControllerTest extends TestCase
         $date = Carbon::now()->subMonths(3);
 
         // create 49 vouchers to bring the total of payment_pending to 50
-        factory(Voucher::class, 'printed', 49)->create([
+        factory(Voucher::class, 49)->state('printed')->create([
             'trader_id' => $this->traders[0]->id,
             'created_at' => $date,
             'updated_at' => $date,
@@ -172,7 +172,7 @@ class TraderControllerTest extends TestCase
         $date = Carbon::now()->subMonths(3);
 
         // create 49 vouchers to bring the total of payment_pending to 50
-        factory(Voucher::class, 'printed', 49)->create([
+        factory(Voucher::class, 49)->state('printed')->create([
             'trader_id' => $this->traders[0]->id,
             'created_at' => $date,
             'updated_at' => $date,
@@ -316,10 +316,10 @@ class TraderControllerTest extends TestCase
         $spSponsor = factory(Sponsor::class)->create([
             'programme' => 1
         ]);
-        $standardVouchers = factory(Voucher::class, 'printed', 12)->create([
+        $standardVouchers = factory(Voucher::class, 12)->state('printed')->create([
             'sponsor_id' => $standardSponsor->id
         ]);
-        $spVouchers = factory(Voucher::class, 'printed', 18)->create([
+        $spVouchers = factory(Voucher::class, 18)->state('printed')->create([
             'sponsor_id' => $spSponsor->id
         ]);
         $vouchers = $standardVouchers->concat($spVouchers);
@@ -342,13 +342,13 @@ class TraderControllerTest extends TestCase
         ]);
         $standardVouchers = $spVouchers = collect();
         foreach ($standardSponsors as $key => $standardSponsor) {
-            $sv = factory(Voucher::class, 'printed', 12)->create([
+            $sv = factory(Voucher::class, 12)->state('printed')->create([
                 'sponsor_id' => $standardSponsor->id
             ]);
             $standardVouchers = $standardVouchers->concat($sv);
         }
         foreach ($spSponsors as $key => $spSponsor) {
-            $spv = factory(Voucher::class, 'printed', 18)->create([
+            $spv = factory(Voucher::class, 18)->state('printed')->create([
                 'sponsor_id' => $spSponsor->id
             ]);
             $spVouchers = $spVouchers->concat($spv);

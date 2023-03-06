@@ -34,7 +34,7 @@ class StateHistoryManagerTest extends TestCase
         Auth::login($this->adminUser);
 
         // create a voucher as printed
-        $v = factory(Voucher::class, 'printed')->create();
+        $v = factory(Voucher::class)->state('printed')->create();
 
         Auth::login($this->centreUser);
         $v->applyTransition('dispatch');

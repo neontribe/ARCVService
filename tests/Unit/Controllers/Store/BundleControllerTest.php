@@ -54,7 +54,7 @@ class BundleControllerTest extends StoreTestCase
         Auth::login($this->centreUser);
 
         foreach ($this->testCodes as $testCode) {
-            $voucher = factory(Voucher::class, 'printed')->create([
+            $voucher = factory(Voucher::class)->state('printed')->create([
                 'code' => $testCode
             ]);
             $voucher->applyTransition('dispatch');
@@ -253,7 +253,7 @@ class BundleControllerTest extends StoreTestCase
         // Create the vouchers for the range;
         Auth::login($this->centreUser);
         foreach ($bigRange as $testCode) {
-            $voucher = factory(Voucher::class, 'printed')->create([
+            $voucher = factory(Voucher::class)->state('printed')->create([
                 'code' => $testCode
             ]);
             $voucher->applyTransition('dispatch');
@@ -330,7 +330,7 @@ class BundleControllerTest extends StoreTestCase
             'TST0123457'
         ];
         foreach ($testCodes as $testCode) {
-            $voucher = factory(Voucher::class, 'printed')->create([
+            $voucher = factory(Voucher::class)->state('printed')->create([
                 'code' => $testCode
             ]);
             $voucher->applyTransition('dispatch');
@@ -382,7 +382,7 @@ class BundleControllerTest extends StoreTestCase
             'TST0123457'
         ];
         foreach ($testCodes as $testCode) {
-            $voucher = factory(Voucher::class, 'printed')->create([
+            $voucher = factory(Voucher::class)->state('printed')->create([
                 'code' => $testCode
             ]);
             $voucher->applyTransition('dispatch');

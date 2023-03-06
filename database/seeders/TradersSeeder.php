@@ -1,5 +1,7 @@
 <?php
+namespace Database\Seeders;
 
+use App\Trader;
 use Illuminate\Database\Seeder;
 
 class TradersSeeder extends Seeder
@@ -43,7 +45,7 @@ class TradersSeeder extends Seeder
         ];
 
         foreach ($tradersData as $trader) {
-            factory(App\Trader::class)->create($trader);
+            factory(Trader::class)->create($trader);
         }
     }
 }

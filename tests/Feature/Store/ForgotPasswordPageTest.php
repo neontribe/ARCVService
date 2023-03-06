@@ -3,14 +3,14 @@ namespace Tests\Feature\Store;
 
 use App\Centre;
 use App\CentreUser;
+use App\Notifications\StorePasswordResetNotification;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Spinen\MailAssertions\MailTracking;
+use Illuminate\Support\Facades\Notification;
 use Tests\StoreTestCase;
 
 class ForgotPasswordPageTest extends StoreTestCase
 {
     use DatabaseMigrations;
-    use MailTracking;
 
 
     /**
@@ -23,7 +23,6 @@ class ForgotPasswordPageTest extends StoreTestCase
     public function setUp(): void
     {
         parent::setUp();
-
         $this->centre = factory(Centre::class)->create();
 
         // Create a CentreUser
@@ -55,13 +54,23 @@ class ForgotPasswordPageTest extends StoreTestCase
     /** @test */
     public function itResetsPasswordForUserByEmailResetLink()
     {
+        Notification::fake();
+
         $this->visit(route('store.password.request'))
             ->type('testuser@example.com', 'email')
             ->press('Send Password Reset Link');
-        $this->seeEmailWasSent()
-            ->seeEmailSubjectEquals('Password Reset Request Notification')
-            ->seeEmailContains('password/reset')
-            ->seeEmailTo('testuser@example.com');
+
+        $user = $this->centreUser;
+        Notification::assertSentTo(
+            $user,
+            StorePasswordResetNotification::class,
+            function ($notification, $channels) use ($user) {
+                $mailData = $notification->toMail($user);
+                $this->assertStringContainsString('Password Reset Request Notification', $mailData->subject);
+                $this->assertStringContainsString('password/reset', $mailData->actionUrl);
+                return true;
+            }
+        );
     }
 
     /** @test */

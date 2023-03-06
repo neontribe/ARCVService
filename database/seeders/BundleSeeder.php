@@ -1,16 +1,19 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Bundle;
 use App\Carer;
 use App\Centre;
 use App\Child;
+use App\Delivery;
 use App\Family;
+use App\Registration;
 use App\User;
 use App\Voucher;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Collection;
-
+use Illuminate\Support\Facades\Auth;
 
 class BundleSeeder extends Seeder
 {
@@ -61,14 +64,14 @@ class BundleSeeder extends Seeder
 
         // Create three random vouchers and transition to dispatched, then deliver and bundle.
         /** @var Collection $vs */
-        $vs1 = factory(Voucher::class, 'printed', 3)
+        $vs1 = factory(Voucher::class, 3)->state('printed')
             ->create()
             ->each(function (Voucher $v) {
                 $v->applyTransition('dispatch');
             });
 
         // Generate a corresponding delivery
-        $delivery = factory(App\Delivery::class)->create([
+        $delivery = factory(Delivery::class)->create([
             // Using the reg centre id but it won't match with voucher sponsor since they are random
             'centre_id' => $registration->centre->id,
             'dispatched_at' => Carbon::now(),
@@ -110,14 +113,14 @@ class BundleSeeder extends Seeder
 
         // Create three random vouchers and transition to dispatched, then deliver then bundle
         /** @var Collection $vs */
-        $vs1 = factory(Voucher::class, 'printed', 3)
+        $vs1 = factory(Voucher::class, 3)->state('printed')
             ->create()
             ->each(function (Voucher $v) {
                 $v->applyTransition('dispatch');
             });
 
         // Generate a corresponding delivery
-        $delivery = factory(App\Delivery::class)->create([
+        $delivery = factory(Delivery::class)->create([
             // Using the reg centre id but it won't match with voucher sponsor since they are random
             'centre_id' => $registration->centre->id,
             'dispatched_at' => Carbon::now(),
@@ -164,9 +167,9 @@ class BundleSeeder extends Seeder
             $family->lockToCentre($centre);
             $family->save();
             $family->carers()->saveMany(factory(Carer::class, $numCarers)->make());
-            $family->children()->save(factory(Child::class, 'betweenOneAndPrimarySchoolAge')->make());
+            $family->children()->save(factory(Child::class)->state('betweenOneAndPrimarySchoolAge')->make());
 
-            $registrations[] = App\Registration::create(
+            $registrations[] = Registration::create(
                 [
                     'centre_id' => $centre->id,
                     'family_id' => $family->id,

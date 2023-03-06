@@ -64,7 +64,7 @@ class StoreVoucherControllerTest extends StoreTestCase
         $this->centre = factory(Centre::class)->create();
 
         // Create an FM User
-        $this->centreUser = factory(CentreUser::class, 'FMUser')->create([
+        $this->centreUser = factory(CentreUser::class)->state('FMUser')->create([
             "name"  => "test user",
             "email" => "testuser@example.com",
             "password" => bcrypt('test_user_pass'),
@@ -109,7 +109,7 @@ EOD;
         }
 
         // Stream a zip to a file in storage, encrypting as we write (with the secret stream wrapper).
-        $storagePath = $this->disk->getAdapter()->getPathPrefix();
+        $storagePath = Storage::path('enc');
         $options = new Archive();
         $output = fopen('ssw://' . $storagePath . '/' . $this->archiveName, 'w');
         $options->setOutputStream($output);
@@ -120,8 +120,7 @@ EOD;
         $za->finish();
         fclose($output); // Close the stream manually, now, or it will not be ready in time for the read below.
 
-        $this->assertTrue($this->disk->exists($this->archiveName));
-
+        $this->assertTrue(Storage::disk('enc')->exists($this->archiveName));
         // Fetch the route; should return a zip that may be streamed.
         $response = $this->actingAs($this->centreUser, 'store')
             ->visit($this->dashboard_route)

@@ -1,7 +1,15 @@
 <?php
+namespace Database\Seeders;
 
+use App\Delivery;
+use App\Sponsor;
+use App\StateToken;
+use App\User;
+use App\Voucher;
 use App\VoucherState;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Auth;
 
 class VouchersSeeder extends Seeder
 {
@@ -30,26 +38,26 @@ class VouchersSeeder extends Seeder
     public function run()
     {
         // get or create the seeder user
-        $user = App\User::where('name', 'demoseeder')->first();
+        $user = User::where('name', 'demoseeder')->first();
         if (!$user) {
-            $user = factory(App\User::class)->create(['name' => 'demoseeder']);
+            $user = factory(User::class)->create(['name' => 'demoseeder']);
         };
 
         Auth::login($user);
 
         // Create RVNT one as id 1 our trader will be affiliated with this.
-        $rvp = App\Sponsor::where('shortcode', 'RVNT')->first();
+        $rvp = Sponsor::where('shortcode', 'RVNT')->first();
 
         // Only 40 for now or we will get 9 digits.
         // These vouchers dispatched before we added delivery to system.
         // They can be collected even though they do not have a delivery_id.
-        $timestamp_pre_delivery = Carbon\Carbon::parse(config('arc.first_delivery_date'))->subMonth(1);
-        $rvp_vouchers = factory(App\Voucher::class, 'printed', 40)->create([
+        $timestamp_pre_delivery = Carbon::parse(config('arc.first_delivery_date'))->subMonth(1);
+        $rvp_vouchers = factory(Voucher::class, 40)->state('printed')->create([
             'created_at' => $timestamp_pre_delivery,
         ]);
 
         // Make some random vouchers.
-        factory(App\Voucher::class, 'printed', 50)->create();
+        factory(Voucher::class, 50)->state('printed')->create();
 
         $size = sizeOf($rvp_vouchers);
         // Assign the codes that match the paper.
@@ -73,10 +81,10 @@ class VouchersSeeder extends Seeder
         // Progress a few vouchers to reimbursed and create test payment link.
         // Should be 6 vouchers RVNT12345570-75.
         // Generate a state token - for payout of a few of them.
-        $paidtoken = factory(App\StateToken::class)->create([
+        $paidtoken = factory(StateToken::class)->create([
             'uuid' => 'auuidforpaidvouchers',
         ]);
-        $pendingtoken = factory(App\StateToken::class)->create([
+        $pendingtoken = factory(StateToken::class)->create([
             'uuid' => 'auuidforpendingvouchers',
         ]);
         for ($i=10; $i<16; $i++) {
@@ -95,7 +103,7 @@ class VouchersSeeder extends Seeder
         }
 
         // 4 digit printed vouchers for trial.
-        $rvnt4 = factory(App\Voucher::class, 'printed', 100)->create();
+        $rvnt4 = factory(Voucher::class, 100)->state('printed')->create();
         foreach ($rvnt4 as $k => $v) {
             $v->code = 'RVNT' . str_pad($k, 4, '0', STR_PAD_LEFT);
             $v->sponsor_id = $rvp->id;
@@ -104,19 +112,19 @@ class VouchersSeeder extends Seeder
         }
 
         // Generate a corresponding delivery
-        $delivery = factory(App\Delivery::class)->create([
+        $delivery = factory(Delivery::class)->create([
             // Our sponsor 'RVNT' is definitely linked to this centre
             'centre_id' => 1,
-            'dispatched_at' => Carbon\Carbon::now()->subMonth(1),
+            'dispatched_at' => Carbon::now()->subMonth(1),
             'range' => 'RVNT0000-RVNT0099',
         ]);
         $delivery->vouchers()->saveMany($rvnt4);
 
-        $user = App\User::where('name', 'Rolf Billabong')->first();
-        $date = Carbon\Carbon::now()->subMonths(3);
+        $user = User::where('name', 'Rolf Billabong')->first();
+        $date = Carbon::now()->subMonths(3);
         // Create 50 vouchers that have a state of payment_pending
         // and attach to Rolf Billabong
-        factory(App\Voucher::class, 'printed', 50)->create([
+        factory(Voucher::class, 50)->state('printed')->create([
             'trader_id' => $user->traders[0]->id,
             'created_at' => $date,
             'updated_at' => $date,

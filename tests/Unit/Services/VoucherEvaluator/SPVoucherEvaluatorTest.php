@@ -108,10 +108,10 @@ class SPVoucherEvaluatorTest extends TestCase
             'family_id' => $this->family->id,
             'born' => 1
         ]);
-        $this->isPrimarySchool = factory(Child::class, 'isPrimarySchoolAge')->make();
-        $this->underOne = factory(Child::class, 'underOne')->make();
-        $this->readyForPrimarySchool = factory(Child::class, 'readyForPrimarySchool')->make();
-        $this->isAlmostOne = factory(Child::class, 'almostOne')->make();
+        $this->isPrimarySchool = factory(Child::class)->state('isPrimarySchoolAge')->make();
+        $this->underOne = factory(Child::class)->state('underOne')->make();
+        $this->readyForPrimarySchool = factory(Child::class)->state('readyForPrimarySchool')->make();
+        $this->isAlmostOne = factory(Child::class)->state('almostOne')->make();
     }
 
     /** @test */

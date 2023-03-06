@@ -31,8 +31,8 @@ class ServiceLiveVouchersPageTest extends StoreTestCase
     public function testAdminCanSearchASingleLiveVoucher()
     {
         $this->adminUser = factory(AdminUser::class)->create();
-        $this->voucherToSearch = factory(Voucher::class, 'dispatched')->create();
-        $this->otherVoucher = factory(Voucher::class, 'dispatched')->create();
+        $this->voucherToSearch = factory(Voucher::class)->state('dispatched')->create();
+        $this->otherVoucher = factory(Voucher::class)->state('dispatched')->create();
         $this->actingAs($this->adminUser, 'admin')
             ->visit(route('admin.vouchers.index'))
             ->seeInElement('td', $this->voucherToSearch->code)
@@ -48,7 +48,7 @@ class ServiceLiveVouchersPageTest extends StoreTestCase
     {
         $this->adminUser = factory(AdminUser::class)->create();
         $badSearch = "<script type='javascript'>alert();</script>";
-        $this->voucher = factory(Voucher::class, 'dispatched')->create();
+        $this->voucher = factory(Voucher::class)->state('dispatched')->create();
         $this->actingAs($this->adminUser, 'admin')
             ->visit(route('admin.vouchers.index'))
             ->seeInElement('td', $this->voucher->code)
@@ -61,7 +61,7 @@ class ServiceLiveVouchersPageTest extends StoreTestCase
     public function testAdminCanViewHistoryOfSingleVoucher()
     {
         $this->adminUser = factory(AdminUser::class)->create();
-        $this->voucherToSearch = factory(Voucher::class, 'dispatched')->create();
+        $this->voucherToSearch = factory(Voucher::class)->state('dispatched')->create();
         $this->actingAs($this->adminUser, 'admin')
             ->visit(route('admin.vouchers.index'))
             ->seeInElement('td', $this->voucherToSearch->code)
@@ -76,8 +76,8 @@ class ServiceLiveVouchersPageTest extends StoreTestCase
     public function testAdminCanResetSearch()
     {
         $this->adminUser = factory(AdminUser::class)->create();
-        $this->voucherToSearch = factory(Voucher::class, 'dispatched')->create();
-        $this->otherVoucher = factory(Voucher::class, 'dispatched')->create();
+        $this->voucherToSearch = factory(Voucher::class)->state('dispatched')->create();
+        $this->otherVoucher = factory(Voucher::class)->state('dispatched')->create();
         $this->actingAs($this->adminUser, 'admin')
             ->visit(route('admin.vouchers.index'))
             ->seeInElement('td', $this->voucherToSearch->code)

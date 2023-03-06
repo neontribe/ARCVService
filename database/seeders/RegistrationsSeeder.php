@@ -1,19 +1,21 @@
 <?php
+namespace Database\Seeders;
 
 use App\Bundle;
 use App\Carer;
 use App\Centre;
 use App\CentreUser;
 use App\Child;
+use App\Delivery;
 use App\Family;
 use App\Registration;
 use App\Sponsor;
-use Carbon\Carbon;
-use Illuminate\Database\Seeder;
-use App\Delivery;
 use App\User;
 use App\Voucher;
+use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class RegistrationsSeeder extends Seeder
 {
@@ -147,9 +149,9 @@ class RegistrationsSeeder extends Seeder
             $family->lockToCentre($centre);
             $family->save();
             $family->carers()->saveMany(factory(Carer::class, random_int(1, 3))->make());
-            $family->children()->save(factory(Child::class, 'readyForPrimarySchool')->make());
-            $family->children()->save(factory(Child::class, 'canDefer')->make());
-            $family->children()->save(factory(Child::class, 'canNotDefer')->make());
+            $family->children()->save(factory(Child::class)->state('readyForPrimarySchool')->make());
+            $family->children()->save(factory(Child::class)->state('canDefer')->make());
+            $family->children()->save(factory(Child::class)->state('canNotDefer')->make());
             $eligibility_hsbs = $eligibilities_hsbs[mt_rand(0, count($eligibilities_hsbs) - 1)];
             $eligible_from = null;
             if ($eligibility_hsbs === 'healthy-start-receiving') {
@@ -225,7 +227,7 @@ class RegistrationsSeeder extends Seeder
             $bundle = $registration->currentBundle();
             // Create three random vouchers and transition to dispatched, then deliver the bundle
             /** @var Collection $vs */
-            $vs1 = factory(Voucher::class, 'printed', 3)
+            $vs1 = factory(Voucher::class, 3)->state('printed')
                 ->create()
                 ->each(function (Voucher $v) {
                     $v->applyTransition('dispatch');
