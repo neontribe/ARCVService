@@ -238,8 +238,8 @@ class CentreController extends Controller
             // Would be confusing if an old reason was left in - so check leaving date is there.
             $row["Leaving Reason"] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
             if (!$programme) {
-                $row["Family Eligibility (HSBS)"] = ($reg->eligibility_hsbs) ?? null ;
-                $row["Family Eligibility (NRPF)"] = ($reg->eligibility_nrpf) ?? null ;
+                $row["Family Eligibility (HSBS)"] = ($reg->eligibility_hsbs) ?? null;
+                $row["Family Eligibility (NRPF)"] = (ucfirst($reg->eligibility_nrpf)) ?? null;
                 $row["Eligible From"] = ($reg->eligible_from) ? $reg->eligible_from->format($dateFormats['eligible_from']): null;
             }
 

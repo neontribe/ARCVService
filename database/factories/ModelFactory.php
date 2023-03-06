@@ -511,7 +511,7 @@ $factory->state(App\Child::class, 'canNotDefer', function (Faker\Generator $fake
     $year = $now->year;
     $dob = Carbon::now();
     $schoolStartMonth = config('arc.scottish_school_month');
-    $dob->year($year)->month($schoolStartMonth - 1)->day(1);
+    $dob->year($year)->day(1);
 
     return [
         'born' => $dob->isPast(),
