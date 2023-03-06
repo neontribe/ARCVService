@@ -1032,6 +1032,7 @@ HISTORY PAGE
 .history {
 	display: inline-flex;
 	width: 100%;
+	height: max-content;
 }
 
 .history > div {
