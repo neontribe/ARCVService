@@ -12,14 +12,15 @@
             numbers, e.g. '06 2017' for June 2017.
         </p>
     </div>
-    @include('store.partials.add_child_form', ['verifying' => $verifying])
+    @include('store.partials.add_child_form', ['sponsorsRequiresID' => $sponsorsRequiresID])
+
     <div class="added">
         <table>
             <thead>
             <tr>
                 <td class="age-col">Age</td>
                 <td class="dob-col">Month / Year</td>
-                @if ( $verifying )
+                @if ( $sponsorsRequiresID )
                     <td class="verified-col">ID</td>
                 @endif
                 @if (!empty($deferrable))
@@ -34,7 +35,7 @@
                     <tr>
                         <td class="age-col">{{ $child->getAgeString() }}</td>
                         <td class="dob-col">{{ $child->getDobAsString() }}</td>
-                        @if ( $verifying )
+                        @if ( $sponsorsRequiresID )
                             <td class="verified-col relative">
                                 <input type="checkbox" class="styled-checkbox inline-dob"
                                        name="children[{{ $child->id }}][verified]"
@@ -80,8 +81,11 @@
             <tbody id="child_wrapper">
             @if(is_array(old('children')) || (!empty(old('children'))))
                 @foreach (old('children') as $old_child )
+                    {{-- Whether or not the child was verified is not being sent back properly --}}
+                    {{-- however, the key only turns up in the array when you checked the box --}}
+                    {{-- so we'll go ahead and use that --}}
                     <tr class="js-old-child"
-                        data-dob={{ $old_child['dob'] }} data-verified={{ $old_child['verified'] ?? 0 }}></tr>
+                        data-dob={{ $old_child['dob'] }} data-verified={{ isset($old_child['verified']) ? 1 : 0 }}></tr>
                 @endforeach
             @endif
             </tbody>
@@ -139,22 +143,30 @@
         $(".js-old-child").each(function (index) {
             // Grab the data out of the data attributes
             var dob = $(this).data("dob");
+            // Have they ticked the ID box?
             var verified = $(this).data("verified");
+            // Intval is the only way to stop the JS throwing an error
+            // when the value is zero.
+            var displayVerified = {{intval($sponsorsRequiresID)}};
 
             // Convert to useful formats - add_child_form partial should have validated these
             var dateObj = moment(dob, "YYYY-MM", true).format("MMM YYYY");
             var childKey = Math.random();
-            var displayVerified = verified === 1 ? "checked" : null;
+            var childTickedIDBox = verified ? "checked" : "";
             var displayMonths = moment().diff(dob, 'months') % 12;
             var displayYears = moment().diff(dob, 'years');
 
             // Create and append new style columns
-            var ageColumn = '<td class="age-col">' + displayYears + ' yr, ' + displayMonths + ' mo</td>';
+            if (displayMonths > 0) {
+                var ageColumn = '<td class="age-col">' + displayYears + ' yr, ' + displayMonths + ' mo</td>';
+            } else {
+                ageColumn = '<td class="age-col">P</td>';
+            }
 
             var dobColumn = '<td class="dob-col"><input name="children[' + childKey + '][dob]" type="hidden" value="' + dob + '" >' + dateObj + '</td>';
 
-            var idColumn = (verified)
-                ? '<td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][verified]" id="child' + childKey + '" ' + displayVerified + ' value="' + verified + '"><label for="child' + childKey + '"><span class="visually-hidden">Toggle ID checked</span></label>' + '</td>'
+            var idColumn = (displayVerified === 1)
+                ? '<td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][verified]" id="child' + childKey + '" ' + childTickedIDBox + ' value="' + verified + '"><label for="child' + childKey + '"><span class="visually-hidden">Toggle ID checked</span></label>' + '</td>'
                 : '';
 
             var deferColumn = ($('#added').find('td.can-defer-col').length > 0)
