@@ -120,7 +120,7 @@ EOD;
         $za->finish();
         fclose($output); // Close the stream manually, now, or it will not be ready in time for the read below.
 
-        $this->assertTrue(Storage::disk('local')->exists($this->archiveName));
+        $this->assertTrue(Storage::disk('enc')->exists($this->archiveName));
         // Fetch the route; should return a zip that may be streamed.
         $response = $this->actingAs($this->centreUser, 'store')
             ->visit($this->dashboard_route)
