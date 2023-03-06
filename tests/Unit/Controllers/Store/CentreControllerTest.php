@@ -201,11 +201,11 @@ class CentreControllerTest extends StoreTestCase
             "RVID",
             "Area",
             "Centre",
-            "Primary Carer",
+            "Main Participant",
             "Entitlement",
             "Last Collection",
             "Eligible Household Members",
-            "Main Carer DoB",
+            "Main Participant DoB",
             "Join Date",
             "Leaving Date",
             "Leaving Reason"
@@ -248,7 +248,7 @@ class CentreControllerTest extends StoreTestCase
             $hash =
                 $line["Area"] . '#' .
                 $line["Centre"] . '#' .
-                $line["Primary Carer"];
+                $line["Main Participant"];
 
             if (!empty($hashes)) {
                 // Check that we're greater than or equal to the last hash
