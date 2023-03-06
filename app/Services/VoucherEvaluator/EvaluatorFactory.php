@@ -54,9 +54,10 @@ class EvaluatorFactory
     {
         $evaluations = [
             "App\Child" => [
+                // Change back to 6 as requested 30-11-2022
                 'credits' => [
                     "ChildIsUnderOne" => new ChildIsUnderOne($offsetDate, 6),
-                    "ChildIsBetweenOneAndPrimarySchoolAge" => new ChildIsBetweenOneAndPrimarySchoolAge($offsetDate, 3),
+                    "ChildIsBetweenOneAndPrimarySchoolAge" => new ChildIsBetweenOneAndPrimarySchoolAge($offsetDate, 4),
                 ],
                 'notices' => [
                     "ChildIsAlmostOne" => new ChildIsAlmostOne($offsetDate, 0),
@@ -69,7 +70,7 @@ class EvaluatorFactory
             ],
             "App\Family" => [
                 'credits' => [
-                    "FamilyIsPregnant" => new FamilyIsPregnant($offsetDate, 3)
+                    "FamilyIsPregnant" => new FamilyIsPregnant($offsetDate, 4)
                 ],
                 'notices' => [
                 ],
