@@ -42,6 +42,8 @@ class StoreRoutesTest extends StoreTestCase
 
     private $dashboardRoute;
 
+    private $searchRegistrationsRoute;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -93,6 +95,8 @@ class StoreRoutesTest extends StoreTestCase
         $this->unrelatedUser->centres()->attach($this->unrelatedCentre->id, ['homeCentre' => true]);
 
         $this->dashboardRoute = URL::route('store.dashboard');
+
+        $this->searchRegistrationsRoute = URL::route('store.registration.index');
     }
 
     /**
@@ -422,7 +426,7 @@ class StoreRoutesTest extends StoreTestCase
 
         // return to prior route
         $this->followRedirects()
-            ->seePageIs($this->dashboardRoute)
+            ->seePageIs($this->searchRegistrationsRoute)
             ->assertResponseStatus(200);
     }
 
