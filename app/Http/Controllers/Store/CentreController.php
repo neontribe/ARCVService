@@ -61,7 +61,7 @@ class CentreController extends Controller
      */
     public function exportRegistrationsSummary(Request $request, Centre $centre)
     {
-        $programme = (int)$request->input('programme', 0);
+        $programme = $request->input('programme', 0);
 
         // Get User
         /** @var CentreUser $user */
