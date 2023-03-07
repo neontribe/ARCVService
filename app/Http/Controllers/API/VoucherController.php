@@ -31,7 +31,6 @@ class VoucherController extends Controller
         $lock = $factory->createLock('transition');
 
         if ($lock->acquire()) {
-            \Log::info('I have a lock');
             $trader = Trader::findOrFail($request->input('trader_id'));
 
             //create unique, cleaned vouchers
