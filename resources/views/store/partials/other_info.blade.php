@@ -80,7 +80,7 @@
             @foreach (config('arc.reg_eligibilities_nrpf') as $index => $reg_eligibility)
                 <option value="{{ $reg_eligibility }}"
                     @if(
-                        (!isset($registration) && $index === 1) ||
+                        (!isset($registration) && $index === 0) ||
                         (isset($registration) && $registration->eligibility_nrpf === $reg_eligibility)
                         ) selected="selected"
                     @endif
