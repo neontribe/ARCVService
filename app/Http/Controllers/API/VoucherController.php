@@ -11,6 +11,8 @@ use App\Voucher;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\Store\SemaphoreStore;
 
 class VoucherController extends Controller
 {
@@ -24,15 +26,20 @@ class VoucherController extends Controller
      */
     public function transition(ApiTransitionVoucherRequest $request): JsonResponse
     {
-        $trader = Trader::findOrFail($request->input('trader_id'));
+        $store = new SemaphoreStore();
+        $factory = new LockFactory($store);
+        $lock = $factory->createLock('transition');
 
-        //create unique, cleaned vouchers
-        $uniqueVouchers = array_unique(
-            Voucher::cleanCodes($request->input('vouchers'))
-        );
+        if ($lock->acquire()) {
+            $trader = Trader::findOrFail($request->input('trader_id'));
 
-        // Do we want to validate codes by regex rule before we try to find them or meh?
-        $vouchers = Voucher::findByCodes($uniqueVouchers);
+            //create unique, cleaned vouchers
+            $uniqueVouchers = array_unique(
+                Voucher::cleanCodes($request->input('vouchers'))
+            );
+
+            // Do we want to validate codes by regex rule before we try to find them or meh?
+            $vouchers = Voucher::findByCodes($uniqueVouchers);
 
         // We'll be collating the codes by category.
         $responses = [
@@ -126,14 +133,22 @@ class VoucherController extends Controller
             }
         }
 
-        // If there are any confirmed ones... trigger the email.
-        if (!empty($vouchers_for_payment)) {
-            $this->emailVoucherPaymentRequest($trader, $stateToken, $vouchers_for_payment);
+            // If there are any confirmed ones... trigger the email.
+            if (!empty($vouchers_for_payment)) {
+                \Log::info('SENDING MAIL ' . count($vouchers_for_payment));
+                $this->emailVoucherPaymentRequest($trader, $stateToken, $vouchers_for_payment);
+            }
+            $lock->release();
+            return response()->json(
+                $this->constructResponseMessage($responses)
+            );
+        } else {
+            \Log::info('No lock for me!');
+            $responses['own_duplicate'][] = '000000';
+            return response()->json(
+                $this->constructResponseMessage($responses)
+            );
         }
-
-        return response()->json(
-            $this->constructResponseMessage($responses)
-        );
     }
 
     /**
