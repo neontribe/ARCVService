@@ -20,15 +20,7 @@ use Symfony\Component\Lock\Store\SemaphoreStore;
 class VoucherController extends Controller
 {
     // We'll be collating the codes by category.
-    private array $responses = [
-        'success_add' => [],
-        'success_reject' => [],
-        'own_duplicate' => [],
-        'other_duplicate' => [],
-        'invalid' => [],
-        'failed_reject' => [],
-        'undelivered' => [],
-    ];
+    private array $responses = [];
 
     private array $vouchers_for_payment = [];
 
@@ -48,17 +40,29 @@ class VoucherController extends Controller
      */
     public function transition(ApiTransitionVoucherRequest $request): JsonResponse
     {
-        $store = new SemaphoreStore();
-        $factory = new LockFactory($store);
-        $lock = $factory->createLock('transition');
+        $this->responses = [
+            'success_add' => [],
+            'success_reject' => [],
+            'own_duplicate' => [],
+            'other_duplicate' => [],
+            'invalid' => [],
+            'failed_reject' => [],
+            'undelivered' => [],
+        ];
 
+        // get our trader
         $this->trader = Trader::findOrFail($request->input('trader_id'));
 
         //create unique, cleaned vouchers
         $uniqueVouchers = array_unique(Voucher::cleanCodes($request->input('vouchers')));
 
+        // set a lock, to prevent double submits
+        $store = new SemaphoreStore();
+        $factory = new LockFactory($store);
+        $lock = $factory->createLock('transition');
+
         if ($lock->acquire()) {
-            // Do we want to validate codes by regex rule before we try to find them or meh?
+            // get the vouchers
             $this->vouchers = Voucher::findByCodes($uniqueVouchers);
 
             // For now - get the ones not in that list - they are bad codes.
@@ -93,8 +97,8 @@ class VoucherController extends Controller
         }
 
         if (!empty($this->vouchers_for_payment)) {
-            // If there are any confirmed ones... trigger the email.
-            return response()->json(['message' => trans('api.messages.voucher_payment_requested')], 202);
+            // If there are any confirmed ones respond appropriately.
+            return response()->json(['message' => trans('api.messages.voucher_payment_requested')]);
         }
         return response()->json(self::constructResponseMessage($this->responses));
     }
@@ -120,33 +124,10 @@ class VoucherController extends Controller
                 continue;
             }
 
-            $this->doTransition($voucher, $transition);
+            if ($this->doTransition($voucher, $transition)) {
+                $this->responses['success_add'][] = $voucher->code;
+            };
         }
-    }
-
-    /**
-     * @param Voucher $voucher
-     * @param string $transition
-     * @return bool
-     */
-    private function doTransition(Voucher $voucher, string $transition): bool
-    {
-        // Can we do a transition already?
-        try {
-            $voucher->applyTransition($transition);
-        } catch (Exception $e) {
-            Log::warning($e->getMessage());
-            if ($voucher->trader_id === $this->trader->id) {
-                // Trader has already submitted this voucher
-                $this->responses['own_duplicate'][] = $voucher->code;
-            } else {
-                // Another trader has mistakenly submitted this voucher,
-                // Or the transition isn't valid (i.e. expired state)
-                $this->responses['other_duplicate'][] = $voucher->code;
-            }
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -164,8 +145,6 @@ class VoucherController extends Controller
 
             // Can we do a transition already?
             if ($this->doTransition($voucher, $transition)) {
-                $this->responses['success_add'][] = $voucher->code;
-
                 // add to a list for sending to ARC admin. This is a request for payment.
                 $this->vouchers_for_payment[] = $voucher;
 
@@ -175,28 +154,9 @@ class VoucherController extends Controller
         }
         // If there are any confirmed ones... trigger the email.
         if (!empty($this->vouchers_for_payment)) {
-            Log::info('SENDING MAIL ' . count($this->responses['vouchers_for_payment']));
+            Log::info('SENDING MAIL ' . count($this->vouchers_for_payment));
             self::emailVoucherPaymentRequest($this->trader, $stateToken, $this->vouchers_for_payment);
         }
-    }
-
-    /**
-     * Email a Trader's Voucher Payment Request.
-     * @param Trader $trader
-     * @param StateToken $stateToken
-     * @param $vouchers
-     */
-    public static function emailVoucherPaymentRequest(Trader $trader, StateToken $stateToken, $vouchers): JsonResponse
-    {
-        $title = "A report containing voucher payment request for $trader->name.";
-        // Request date string as dd-mm-yyyy
-        $date = Carbon::now()->format('d-m-Y');
-        // Todo factor excel/csv create functions out into service.
-        $traderController = new TraderController();
-        $file = $traderController->createVoucherListFile($trader, $vouchers, $title, $date);
-        $programme_amounts = $traderController->getProgrammeAmounts($vouchers);
-
-        event(new VoucherPaymentRequested(Auth::user(), $trader, $stateToken, $vouchers, $file, $programme_amounts));
     }
 
     /**
@@ -235,6 +195,31 @@ class VoucherController extends Controller
             // Can we do a transition already?
             $this->doTransition($voucher, $transition);
         }
+    }
+
+    /**
+     * @param Voucher $voucher
+     * @param string $transition
+     * @return bool
+     */
+    private function doTransition(Voucher $voucher, string $transition): bool
+    {
+        // Can we do a transition already?
+        try {
+            $voucher->applyTransition($transition);
+        } catch (Exception $e) {
+            Log::warning($e->getMessage());
+            if ($voucher->trader_id === $this->trader->id) {
+                // Trader has already submitted this voucher
+                $this->responses['own_duplicate'][] = $voucher->code;
+            } else {
+                // Another trader has mistakenly submitted this voucher,
+                // Or the transition isn't valid (i.e. expired state)
+                $this->responses['other_duplicate'][] = $voucher->code;
+            }
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -302,6 +287,26 @@ class VoucherController extends Controller
     }
 
     /**
+     * Email a Trader's Voucher Payment Request.
+     * @param Trader $trader
+     * @param StateToken $stateToken
+     * @param $vouchers
+     * @return void
+     */
+    public static function emailVoucherPaymentRequest(Trader $trader, StateToken $stateToken, $vouchers): void
+    {
+        $title = "A report containing voucher payment request for $trader->name.";
+        // Request date string as dd-mm-yyyy
+        $date = Carbon::now()->format('d-m-Y');
+        // Todo factor excel/csv create functions out into service.
+        $traderController = new TraderController();
+        $file = $traderController->createVoucherListFile($trader, $vouchers, $title, $date);
+        $programme_amounts = $traderController->getProgrammeAmounts($vouchers);
+
+        event(new VoucherPaymentRequested(Auth::user(), $trader, $stateToken, $vouchers, $file, $programme_amounts));
+    }
+
+    /**
      * Display the specified resource.
      *
      * @param string $code
@@ -311,5 +316,4 @@ class VoucherController extends Controller
     {
         return response()->json(Voucher::findByCode($code));
     }
-
 }
