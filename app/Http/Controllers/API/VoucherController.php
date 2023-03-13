@@ -4,10 +4,10 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ApiTransitionVoucherRequest;
+use App\Services\TransitionProcessor;
 use App\Trader;
 use App\Voucher;
 use Illuminate\Http\JsonResponse;
-use Tests\Unit\Controllers\Api\TransitionProcessor;
 
 class VoucherController extends Controller
 {

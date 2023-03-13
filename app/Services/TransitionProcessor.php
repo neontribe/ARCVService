@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Controllers\Api;
+namespace App\Services;
 
 use App\Events\VoucherPaymentRequested;
 use App\Http\Controllers\API\TraderController;
@@ -11,7 +11,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Log;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\SemaphoreStore;
 
