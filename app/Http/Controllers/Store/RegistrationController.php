@@ -17,10 +17,12 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Exception;
+use HighSolutions\LaravelSearchy\Facades\Searchy;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 use Log;
 use PDF;
@@ -70,26 +72,83 @@ class RegistrationController extends Controller
         $connection = config('database.default');
         $driver = config("database.connections.{$connection}.driver");
 
+        if ($driver == 'mysql') {
+            // We can use Searchy for mysql; defaults to "fuzzy" search;
+            // results are a collection of basic objects, but we can still "pluck()"
+            $filtered_family_ids = Searchy::search('carers')
+                ->fields('name')
+                ->query($family_name)
+                ->getQuery()
+                //->whereIn('id', $pri_carers)
+                ->pluck('family_id')
+                ->toArray();
+        } else {
+            // We may not be able to use Searchy, so we default to unfuzzy.
+            $filtered_family_ids = Carer::whereIn('id', $pri_carers)
+                ->where('name', 'like', '%' . $family_name . '%')
+                ->pluck('family_id')
+                ->toArray();
+        }
+
         //find the registrations
         $q = Registration::query();
         if (!empty($neighbour_centre_ids)) {
             $q = $q->whereIn('centre_id', $neighbour_centre_ids);
         }
 
+        if (!empty($filtered_family_ids)) {
+            $q = $q->whereIn('family_id', $filtered_family_ids)
+                //  Somehow, whereIn re-orders the filtered array into numeric order.
+                //  this would be the "cheap" solution, IF sqlite supported FIELD so we could test that.
+                //  ->orderByRaw(DB::raw("FIELD(family_id, " .implode(',', $filtered_family_ids). ")"));
+            ;
+        }
+
+        // Check if the request asks us to display inactive families
+        $q = $request->get('families_left') ? $q : $q->WhereActiveFamily();
+
+        // Check if the request should filter by centre
+        $q = $request->get('centre') ? $q->where('centre_id', $request->get('centre')) : $q;
+
         // This isn't ideal as it relies on getting all the families, then sorting them.
         // However, the whereIn statements above destroy any sorted order on family_ids.
-        $reg_models = $q->withFullFamily()
+        $reg_models = $q->WithFullFamily()
             ->get()
             ->values();
 
-        $reg_models = $reg_models->sortBy(function ($registration) {
-            return strtolower($registration->family->pri_carer);
-        });
+        // Get any sorting direction from the request
+        $direction = $request->get('direction') ? $request->get('direction') : 'asc';
+
+        // Sort by desc if requested to, for anything else sort by asc as usual
+        if($direction === 'desc') {
+            $reg_models = $reg_models->sortByDesc(function ($registration) {
+                return strtolower($registration->family->pri_carer);
+            });
+        } else {
+            $reg_models = $reg_models->sortBy(function ($registration) {
+                return strtolower($registration->family->pri_carer);
+            });
+        }
+
+        // throw it into a paginator.
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 10;
+        $offset = ($page * $perPage) - $perPage;
+        $registrations = new LengthAwarePaginator(
+            $reg_models->slice($offset, $perPage),
+            $reg_models->count(),
+            $perPage,
+            $page,
+            [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'query' => array_except($request->query(), 'page'),
+            ]
+        );
 
         $data = array_merge(
             $data,
             [
-                'registrations' => $reg_models,
+                'registrations' => $registrations,
                 'programme' => $programme,
             ]
         );

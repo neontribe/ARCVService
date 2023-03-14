@@ -4,19 +4,50 @@
 
 @section('content')
 
-    @include('store.partials.navbar', ['headerTitle' => 'Search for a ' . ($programme ? 'household' : 'family')])
+    @include('store.partials.navbar', ['headerTitle' => 'Search for a family'])
     @includeWhen(Session::has('message'), 'store.partials.success')
     <div class="content search">
         <div class="control-container">
+            <form action="{{ URL::route('store.registration.index') }}" method="GET" id="searchform">
+                {!! csrf_field() !!}
+                {{-- Name search --}}
+                <div class="search-control">
+                    <label for="family_name">Search by name</label>
+                    <div class="search-actions">
+                        <input type="text" name="family_name" id="family_name" autocomplete="off" autocorrect="off"
+                               spellcheck="false" placeholder="Enter {{ $programme ? 'household' : 'family'}} name" aria-label="{{ $programme ? 'Household' : 'Family'}} Name">
+                    </div>
+                </div>
+                {{-- Centre filter --}}
+                <div class="filter-control">
+                    <label for="centre">Filter by centre</label>
+                    <select name="centre" id="centre">
+                        <option value="">All</option>
+                        @foreach (Auth::user()->centres as $centre)
+                            <option value="{{ $centre->id }}" {{ Request::get("centre")==($centre->id) ? 'selected' : '' }}>
+                                {{ $centre->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                {{-- Families left checkbox --}}
+                <div class="checkbox-control">
+                    <input type="checkbox" class="styled-checkbox no-margin" id="families_left" name="families_left" {{
+                    Request::get("families_left") ? 'checked' : '' }} />
+                    <label for="families_left">Show {{ $programme ? 'households' : 'families'}} who have left</label>
+                </div>
+                <button name="search" aria-label="Search" class="search-button">
+                    <img src="{{ asset('store/assets/search-light.svg') }}" alt="search">
+                </button>
+            </form>
         </div>
         <div>
-            <label><input type="checkbox" id="families_left" class="filter"
-                          value="showLeft"/>Show {{ $programme ? 'households' : 'families'}} who have left</label>
-
-            <table id="registrationTable">
+            <table>
                 <thead>
                 <tr>
-                    <td>Name</td>
+                    <td>Name<span class="sort-link-container">@include('store.partials.sortableChevron', ['route' =>
+                            'store.registration.index', 'orderBy' => 'name', 'direction' => request('direction')
+                            ])</span></td>
                     <td class="center">Voucher Entitlement</td>
                     <td class="center">RV-ID</td>
                     <td></td>
@@ -42,8 +73,7 @@
                                             <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Vouchers
                                         </div>
                                     </a>
-                                    <a href="{{ route('store.registration.edit', ['registration'=> $registration->id ]) }}"
-                                       class="link
+                                    <a href="{{ route('store.registration.edit', ['registration'=> $registration->id ]) }}" class="link
                             inline-link-button">
                                         <div class="link-button">
                                             <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Edit
@@ -64,35 +94,8 @@
                 </tbody>
             </table>
         </div>
+        <div>
+            {{ $registrations->links() }}
+        </div>
     </div>
-    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
-    <script>
-
-
-        $(document).ready(function () {
-
-            var registrationTable = $('#registrationTable').DataTable({
-                "columnDefs": [{"orderable": false, "targets": 3}]
-            });
-
-            registrationTable.on('draw.dt', function () {
-                console.log(applyInputFilter());
-            });
-
-            $(".inactive").hide(); // Hide families that have left by default.
-
-            function applyInputFilter() {
-                if ($('input.filter').is(":checked") === true) {
-                    $(".inactive").show();
-                } else {
-                    $(".inactive").hide();
-                }
-            }
-
-            $('input.filter').on('change', function() {
-                applyInputFilter();
-            });
-        });
-    </script>
 @endsection
