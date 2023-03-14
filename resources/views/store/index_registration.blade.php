@@ -10,39 +10,36 @@
         <div class="control-container">
             <form action="{{ URL::route('store.registration.index') }}" method="GET" id="searchform">
                 {!! csrf_field() !!}
-                {{-- Name search --}}
-                <div class="search-control">
-                    <label for="family_name">Search by name</label>
-                    <div class="search-actions">
-                        <input type="text" name="family_name" id="family_name" autocomplete="off" autocorrect="off"
-                               spellcheck="false" placeholder="Enter {{ $programme ? 'household' : 'family'}} name" aria-label="{{ $programme ? 'Household' : 'Family'}} Name">
-                    </div>
-                </div>
-                {{-- Centre filter --}}
-                <div class="filter-control">
-                    <label for="centre">Filter by centre</label>
-                    <select name="centre" id="centre">
-                        <option value="">All</option>
-                        @foreach (Auth::user()->centres as $centre)
-                            <option value="{{ $centre->id }}" {{ Request::get("centre")==($centre->id) ? 'selected' : '' }}>
-                                {{ $centre->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
                 {{-- Families left checkbox --}}
                 <div class="checkbox-control">
                     <input type="checkbox" class="styled-checkbox no-margin" id="families_left" name="families_left" {{
                     Request::get("families_left") ? 'checked' : '' }} />
                     <label for="families_left">Show {{ $programme ? 'households' : 'families'}} who have left</label>
                 </div>
-                <button name="search" aria-label="Search" class="search-button">
-                    <img src="{{ asset('store/assets/search-light.svg') }}" alt="search">
-                </button>
+{{--                --}}{{-- Centre filter --}}
+{{--                <div class="filter-control">--}}
+{{--                    <label for="centre">Filter by centre</label>--}}
+{{--                    <select name="centre" id="centre">--}}
+{{--                        <option value="">All</option>--}}
+{{--                        @foreach (Auth::user()->centres as $centre)--}}
+{{--                            <option value="{{ $centre->id }}" {{ Request::get("centre")==($centre->id) ? 'selected' : '' }}>--}}
+{{--                                {{ $centre->name }}--}}
+{{--                            </option>--}}
+{{--                        @endforeach--}}
+{{--                    </select>--}}
+{{--                </div>--}}
+                {{-- Name search --}}
+                <div class="search-control">
+                    <label for="family_name">Search by name</label>
+                    <div class="search-actions">
+                        <input type="text" name="family_name" id="family_name" autocomplete="off" autocorrect="off"
+                               spellcheck="false" onkeyup="searchForm()" placeholder="Enter {{ $programme ? 'household' : 'family'}} name" aria-label="{{ $programme ? 'Household' : 'Family'}} Name">
+                    </div>
+                </div>
             </form>
         </div>
         <div>
-            <table>
+            <table id="registrations">
                 <thead>
                 <tr>
                     <td>Name<span class="sort-link-container">@include('store.partials.sortableChevron', ['route' =>
@@ -96,4 +93,29 @@
             {{ $registrations->links() }}
         </div>
     </div>
+
+    <script>
+        function searchForm() {
+            // Declare variables
+            var input, filter, table, tr, td, i, txtValue, checkbox;
+            input = document.getElementById("family_name");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("registrations");
+            tr = table.getElementsByTagName("tr");
+            checkbox = document.getElementById("families_left");
+
+            // Loop through all table rows, and hide those who don't match the search query
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[0];
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
 @endsection
