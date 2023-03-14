@@ -10,25 +10,38 @@ use App\Trader;
 use App\Voucher;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
+use Imtigger\LaravelJobStatus\JobStatus;
+use Illuminate\Http\Request;
 
 class VoucherController extends Controller
 {
     use DispatchesJobs;
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function runJob (Request $request): JsonResponse
+    {
+        // check for a job query
+        $jobStatus = JobStatus::find((int) $request->input('jobStatus'));
+        if ($jobStatus) {
+            // check we have some cache
+            $key = $jobStatus->output['key'] ?? null ;
+            if ($key && $data = Cache::get($key)) {
+                return response()->json($data);
+            };
+        }
 
-    public function runJob () {
+        // Otherwise, start a new job
         $job = new ProcessTransitionJob([]);
-        //$this->dispatch($job);
-        $jobStatusId = $job->getJobStatusId();
+        $this->dispatch($job);
+        $jobStatus = JobStatus::find($job->getJobStatusId());
 
-        $data = $jobStatusId->toArray();
-
-        return response($data, 202, [
-            'location' => route('api.queued-task',['id' => $jobStatusId]),
-            'retry-after' => 2
-        ]);
+        // and send them wherever that should go
+        return $job::queued($jobStatus);
     }
-
 
     /**
      * Collect vouchers - this might change to a more all-purpose update vouchers.

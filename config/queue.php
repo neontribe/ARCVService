@@ -39,8 +39,11 @@ return [
             'table' => 'jobs',
             'queue' => 'default',
             'retry_after' => 90,
+            // waits for transactions before running jobs
+            'after_commit' => true,
         ],
 
+        /*
         'beanstalkd' => [
             'driver' => 'beanstalkd',
             'host' => 'localhost',
@@ -63,6 +66,7 @@ return [
             'queue' => 'default',
             'retry_after' => 90,
         ],
+        */
 
     ],
 
