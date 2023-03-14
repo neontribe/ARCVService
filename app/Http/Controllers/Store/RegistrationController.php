@@ -79,7 +79,7 @@ class RegistrationController extends Controller
                 ->fields('name')
                 ->query($family_name)
                 ->getQuery()
-                //->whereIn('id', $pri_carers)
+                ->whereIn('id', $pri_carers)
                 ->pluck('family_id')
                 ->toArray();
         } else {
