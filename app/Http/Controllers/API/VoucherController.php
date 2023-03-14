@@ -28,19 +28,20 @@ class VoucherController extends Controller
         $jobStatus = JobStatus::find((int) $request->input('jobStatus'));
         if ($jobStatus) {
             // check we have some cache
-            $key = $jobStatus->output['key'] ?? null ;
+            $key = $jobStatus->output['key'] ?? null;
             if ($key && $data = Cache::get($key)) {
                 return response()->json($data);
             };
         }
 
-        // Otherwise, start a new job
+        // Otherwise, start a new job to fetch data
         $job = new ProcessTransitionJob([]);
         $this->dispatch($job);
+
         $jobStatus = JobStatus::find($job->getJobStatusId());
 
         // and send them wherever that should go
-        return $job::queued($jobStatus);
+        return $job::monitor($jobStatus);
     }
 
     /**

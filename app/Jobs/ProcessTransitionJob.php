@@ -33,7 +33,7 @@ class ProcessTransitionJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         $max = 60;
         $this->setProgressMax($max);
@@ -43,9 +43,6 @@ class ProcessTransitionJob implements ShouldQueue
             $this->setProgressNow($i);
         }
 
-
-
-        $tags = [session()->getId()];
         $key = Str::uuid();
         $data = [
             'person' => [
@@ -53,9 +50,28 @@ class ProcessTransitionJob implements ShouldQueue
                 'age' => 'quite old'
             ]
         ];
-
-        Cache::tags($tags)->put($key, $data);
+        Cache::put($key, $data);
         $this->setOutput(['key' => $key]);
+    }
+
+
+    /**
+     * @param JobStatus $jobStatus
+     * @return JsonResponse
+     */
+    public static function monitor(JobStatus $jobStatus): JsonResponse
+    {
+        $data = $jobStatus->only([
+            'id',
+            'status',
+            'progress_now',
+            'progress_max',
+        ]);
+        // tell them to try again in a bit.
+        return response()->json($data, 202, [
+            'Location' => route('api.queued-task',['jobStatus' => $jobStatus->id]),
+            //'Retry-After' => 20
+        ]);
     }
 
     /**
@@ -101,7 +117,7 @@ class ProcessTransitionJob implements ShouldQueue
         ]);
         // tell the user where it is
         return response()->json($data, 303, [
-            'Location' => route('api.vouchers', ['jobStatus' => $jobStatus->id]),
+            'Location' => route('api.async-resource', ['jobStatus' => $jobStatus->id]),
         ]);
     }
 
