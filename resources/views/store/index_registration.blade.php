@@ -48,7 +48,6 @@
                     <td>Name<span class="sort-link-container">@include('store.partials.sortableChevron', ['route' =>
                             'store.registration.index', 'orderBy' => 'name', 'direction' => request('direction')
                             ])</span></td>
-                    <td class="center">Voucher Entitlement</td>
                     <td class="center">RV-ID</td>
                     <td></td>
                 </tr>
@@ -63,7 +62,6 @@
                                 null : '<div class="secondary_info">' . $registration->centre->name . '</div>'
                                 !!}
                             </td>
-                            <td class="center">{{ $registration->getValuation()->getEntitlement() }}</td>
                             <td class="center">{{ $registration->family->rvid }}</td>
                             <td class="right no-wrap">
                                 @if( !isset($registration->family->leaving_on) )
