@@ -4,13 +4,32 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ApiTransitionVoucherRequest;
+use App\Jobs\ProcessTransitionJob;
 use App\Services\TransitionProcessor;
 use App\Trader;
 use App\Voucher;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\JsonResponse;
 
 class VoucherController extends Controller
 {
+    use DispatchesJobs;
+
+
+    public function runJob () {
+        $job = new ProcessTransitionJob([]);
+        //$this->dispatch($job);
+        $jobStatusId = $job->getJobStatusId();
+
+        $data = $jobStatusId->toArray();
+
+        return response($data, 202, [
+            'location' => route('api.queued-task',['id' => $jobStatusId]),
+            'retry-after' => 2
+        ]);
+    }
+
+
     /**
      * Collect vouchers - this might change to a more all-purpose update vouchers.
      *

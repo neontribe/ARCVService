@@ -26,6 +26,19 @@ Route::post('user/lost_password/reset', [
     'uses' => 'Auth\ResetPasswordController@reset'
 ]);
 
+
+Route::get('async-resource', [
+    'as' => 'api.async-resource',
+    'uses' => 'VoucherController@runJob'
+]);
+
+Route::get('queue/{jobStatus}', [
+    'as' => 'api.queued-task',
+    'uses' => 'QueueController@show'
+]);
+
+
+
 /** Authentication required --------------------------------------------- */
 
 Route::group(['middleware' => 'auth:api'], function () {
