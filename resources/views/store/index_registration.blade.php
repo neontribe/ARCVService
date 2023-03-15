@@ -79,6 +79,7 @@
         </div>
         <div>
             {{ $registrations->links() }}
+            Showing {{($registrations->currentPage()-1)* $registrations->perPage()+($registrations->total() ? 1:0)}} to {{($registrations->currentPage()-1)*$registrations->perPage()+count($registrations)}}  of  {{$registrations->total()}}  Results
         </div>
     </div>
 
