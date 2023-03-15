@@ -2,11 +2,15 @@
 
 namespace App\Jobs;
 
+use App\Services\TransitionProcessor;
+use App\Trader;
+use App\Voucher;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
@@ -16,16 +20,19 @@ use Imtigger\LaravelJobStatus\Trackable;
 
 class ProcessTransitionJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    use Trackable;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Trackable;
+
+    public Request $request;
+
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(Request $request)
     {
         $this->prepareStatus();
+        $this->request = $request;
     }
 
     /**
@@ -35,42 +42,39 @@ class ProcessTransitionJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $max = 60;
-        $this->setProgressMax($max);
+        // get our trader
+        $trader = Trader::findOrFail($this->request->input('trader_id'));
 
-        for ($i = 0; $i <= $max; $i += 1) {
-            sleep(1); // Some Long Operations
-            $this->setProgressNow($i);
-        }
+        //create unique, cleaned vouchers
+        $voucherCodes = array_unique(Voucher::cleanCodes($this->request->input('vouchers')));
+
+        $processor = new TransitionProcessor($trader, $this->request->input('transition'));
+
+        $processor->handle($voucherCodes);
+
+        $responseData = $processor->constructResponseMessage();
 
         $key = Str::uuid();
-        $data = [
-            'person' => [
-                'name' => 'fred blogs',
-                'age' => 'quite old'
-            ]
-        ];
-        Cache::put($key, $data);
+        Cache::put($key, $responseData);
         $this->setOutput(['key' => $key]);
     }
 
-
     /**
+     * Sends the user to an url where they can monitor the job
      * @param JobStatus $jobStatus
      * @return JsonResponse
      */
     public static function monitor(JobStatus $jobStatus): JsonResponse
     {
+        // this is the body data; needs to tell the client what to do
         $data = $jobStatus->only([
             'id',
             'status',
-            'progress_now',
-            'progress_max',
         ]);
         // tell them to try again in a bit.
         return response()->json($data, 202, [
             'Location' => route('api.queued-task',['jobStatus' => $jobStatus->id]),
-            //'Retry-After' => 20
+            'Retry-After' => 2
         ]);
     }
 
@@ -112,12 +116,10 @@ class ProcessTransitionJob implements ShouldQueue
         $data = $jobStatus->only([
             'id',
             'status',
-            'progress_now',
-            'progress_max',
         ]);
         // tell the user where it is
         return response()->json($data, 303, [
-            'Location' => route('api.async-resource', ['jobStatus' => $jobStatus->id]),
+            'Location' => route('api.voucher.transition', ['jobStatus' => $jobStatus->id]),
         ]);
     }
 
@@ -127,6 +129,7 @@ class ProcessTransitionJob implements ShouldQueue
      */
     public static function failed(JobStatus $jobStatus): JsonResponse
     {
+        // TODO think of a better failed handler
         return self::pollingResponse($jobStatus);
     }
 
@@ -136,16 +139,15 @@ class ProcessTransitionJob implements ShouldQueue
      */
     private static function pollingResponse(JobStatus $jobStatus): JsonResponse
     {
+        // tell the client where to look.
         $data = $jobStatus->only([
             'id',
             'status',
-            'progress_now',
-            'progress_max',
         ]);
         // tell them to try again in a bit.
         return response()->json($data, 200, [
-            //'Location' => route('api.queued-task',['jobStatus' => $jobStatus->id]),
-            //'Retry-After' => 20
+            'Location' => route('api.queued-task',['jobStatus' => $jobStatus->id]),
+            'Retry-After' => 20
         ]);
     }
 }
