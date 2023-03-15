@@ -16,18 +16,7 @@
                     Request::get("families_left") ? 'checked' : '' }} />
                     <label for="families_left">Show {{ $programme ? 'households' : 'families'}} who have left</label>
                 </div>
-{{--                --}}{{-- Centre filter --}}
-{{--                <div class="filter-control">--}}
-{{--                    <label for="centre">Filter by centre</label>--}}
-{{--                    <select name="centre" id="centre">--}}
-{{--                        <option value="">All</option>--}}
-{{--                        @foreach (Auth::user()->centres as $centre)--}}
-{{--                            <option value="{{ $centre->id }}" {{ Request::get("centre")==($centre->id) ? 'selected' : '' }}>--}}
-{{--                                {{ $centre->name }}--}}
-{{--                            </option>--}}
-{{--                        @endforeach--}}
-{{--                    </select>--}}
-{{--                </div>--}}
+{{--               
                 {{-- Name search --}}
                 <div class="search-control">
                     <label for="family_name">Search by name</label>
