@@ -360,6 +360,7 @@ class SearchPageTest extends StoreTestCase
     /** @test */
     public function itShowsLeftFamilyRegistrationsAsDistinct()
     {
+        $this->markTestSkipped('Waiting for Dusk');
         $centre = factory(Centre::class)->create();
 
         // Create a Centre User
@@ -392,6 +393,7 @@ class SearchPageTest extends StoreTestCase
     /** @test */
     public function itPreventsAccessToLeftFamilyRegistrations()
     {
+        $this->markTestSkipped('Waiting for Dusk');
         $centre = factory(Centre::class)->create();
 
         // Create a CentreUser
