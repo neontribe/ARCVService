@@ -12,7 +12,7 @@
                 {!! csrf_field() !!}
                 {{-- Families left checkbox --}}
                 <div class="checkbox-control">
-                    <input type="checkbox" class="styled-checkbox no-margin" id="families_left" name="families_left" {{
+                    <input type="checkbox" class="styled-checkbox no-margin" onChange="this.form.submit()" id="families_left" name="families_left" {{
                     Request::get("families_left") ? 'checked' : '' }} />
                     <label for="families_left">Show {{ $programme ? 'households' : 'families'}} who have left</label>
                 </div>
