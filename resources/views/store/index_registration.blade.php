@@ -16,7 +16,6 @@
                     Request::get("families_left") ? 'checked' : '' }} />
                     <label for="families_left">Show {{ $programme ? 'households' : 'families'}} who have left</label>
                 </div>
-{{--               
                 {{-- Name search --}}
                 <div class="search-control">
                     <label for="family_name">Search by name</label>
