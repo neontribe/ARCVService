@@ -31,7 +31,7 @@ Route::post('user/lost_password/reset', [
 Route::group(['middleware' => 'auth:api'], function () {
 
     Route::get('queue/{jobStatus}', [
-        'as' => 'api.queued-task',
+        'as' => 'api.queued-task.show',
         'uses' => 'QueueController@show'
     ]);
 
@@ -68,8 +68,24 @@ Route::group(['middleware' => 'auth:api'], function () {
         ])->where('trader', '^[0-9]+$');
     });
 
+    /**
+     * Legacy transition for old clients
+     */
     Route::post('vouchers', [
         'as' => 'api.voucher.transition',
-        'uses' => 'VoucherController@transition',
+        'uses' => 'VoucherController@legacyTransition',
+    ])->middleware('can:collect,App\Voucher');
+
+    /**
+     * new voucher transition routes
+     */
+    Route::post('vouchers/transitions', [
+        'as' => 'api.vouchers.transition-response.store',
+        'uses' => 'TransitionController@store',
+    ])->middleware('can:collect,App\Voucher');
+
+    Route::get('vouchers/transitions/{jobStatus}', [
+        'as' => 'api.vouchers.transition-response.show',
+        'uses' => 'TransitionController@show',
     ])->middleware('can:collect,App\Voucher');
 });

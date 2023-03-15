@@ -4,48 +4,33 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ApiTransitionVoucherRequest;
-use App\Jobs\ProcessTransitionJob;
+use App\Services\TransitionProcessor;
+use App\Trader;
 use App\Voucher;
-use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Cache;
-use Imtigger\LaravelJobStatus\JobStatus;
 
 class VoucherController extends Controller
 {
-    use DispatchesJobs;
-
     /**
-     * Collect vouchers - this might change to a more all-purpose update vouchers.
-     *
+     * Legacy transition route for older clients
      * route POST api/vouchers
      *
      * @param ApiTransitionVoucherRequest $request
      * @return JsonResponse
      */
-    public function transition(ApiTransitionVoucherRequest $request): JsonResponse
+    public function legacyTransition(ApiTransitionVoucherRequest $request): JsonResponse
     {
-        // check for a job query string
-        $jobStatus = JobStatus::find((int) $request->input('jobStatus'));
-        if ($jobStatus) {
-            // check we have cached answer
-            $key = $jobStatus->output['key'] ?? null;
-            if ($key && $data = Cache::get($key)) {
-                // give it back.
-                return response()->json($data);
-            };
-        }
+        // get our trader
+        $trader = Trader::findOrFail($request->input('trader_id'));
 
-        // Otherwise...
-        // ... start a new job to fetch data
-        $job = new ProcessTransitionJob($request);
-        $this->dispatch($job);
+        //create unique, cleaned vouchers
+        $voucherCodes = array_unique(Voucher::cleanCodes($request->input('vouchers')));
 
-        // find the job status to monitor
-        $jobStatus = JobStatus::find($job->getJobStatusId());
+        $processor = new TransitionProcessor($trader, $request->input('transition'));
 
-        // send the client wherever they need to go
-        return $job::monitor($jobStatus);
+        $processor->handle($voucherCodes);
+
+        return response()->json($processor->constructResponseMessage());
     }
 
     /**

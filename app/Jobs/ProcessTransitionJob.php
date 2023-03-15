@@ -73,7 +73,7 @@ class ProcessTransitionJob implements ShouldQueue
         ]);
         // tell them to try again in a bit.
         return response()->json($data, 202, [
-            'Location' => route('api.queued-task',['jobStatus' => $jobStatus->id]),
+            'Location' => route('api.queued-task.show',['jobStatus' => $jobStatus->id]),
             'Retry-After' => 2
         ]);
     }
@@ -119,7 +119,7 @@ class ProcessTransitionJob implements ShouldQueue
         ]);
         // tell the user where it is
         return response()->json($data, 303, [
-            'Location' => route('api.voucher.transition', ['jobStatus' => $jobStatus->id]),
+            'Location' => route('api.voucher.transition-response.show', ['jobStatus' => $jobStatus->id]),
         ]);
     }
 
@@ -146,7 +146,7 @@ class ProcessTransitionJob implements ShouldQueue
         ]);
         // tell them to try again in a bit.
         return response()->json($data, 200, [
-            'Location' => route('api.queued-task',['jobStatus' => $jobStatus->id]),
+            'Location' => route('api.queued-task.show',['jobStatus' => $jobStatus->id]),
             'Retry-After' => 20
         ]);
     }
