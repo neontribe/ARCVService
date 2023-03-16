@@ -4,7 +4,7 @@
 
 @section('content')
 
-    @include('store.partials.navbar', ['headerTitle' => 'Search for a family'])
+    @include('store.partials.navbar', ['headerTitle' => 'Search for a ' . ($programme ? 'household' : 'family')])
     @includeWhen(Session::has('message'), 'store.partials.success')
     <div class="content search">
         <div class="control-container">
