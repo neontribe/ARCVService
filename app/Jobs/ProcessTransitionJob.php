@@ -4,59 +4,37 @@ namespace App\Jobs;
 
 use App\Services\TransitionProcessor;
 use App\Trader;
-use App\Voucher;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Imtigger\LaravelJobStatus\JobStatus;
 use Imtigger\LaravelJobStatus\Trackable;
+use Log;
 
 class ProcessTransitionJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Trackable;
 
-    public Request $request;
+    private Trader $trader;
+    private array $voucherCodes;
+    private string $transition;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(Request $request)
+    public function __construct(Trader $trader, array $voucherCodes, string $transition)
     {
         $this->prepareStatus();
-        $this->request = $request;
-    }
-
-    /**
-     * Execute the job.
-     *
-     * @return void
-     */
-    public function handle(): void
-    {
-        // get our trader
-        $trader = Trader::findOrFail($this->request->input('trader_id'));
-
-        //create unique, cleaned vouchers
-        $voucherCodes = array_unique(Voucher::cleanCodes($this->request->input('vouchers')));
-
-        $processor = new TransitionProcessor($trader, $this->request->input('transition'));
-
-        $processor->handle($voucherCodes);
-
-        $responseData = $processor->constructResponseMessage();
-
-        $key = Str::uuid();
-        Cache::put($key, $responseData);
-        $this->setOutput(['key' => $key]);
+        $this->trader = $trader;
+        $this->voucherCodes = $voucherCodes;
+        $this->transition = $transition;
     }
 
     /**
@@ -71,11 +49,17 @@ class ProcessTransitionJob implements ShouldQueue
             'id',
             'status',
         ]);
+
+        array_merge($data,
+            [
+                'Location' => route('api.queued-task.show', ['jobStatus' => $jobStatus->id]),
+                'Retry-After' => 2,
+            ]
+        );
+        Log::info("hello");
+
         // tell them to try again in a bit.
-        return response()->json($data, 202, [
-            'Location' => route('api.queued-task.show',['jobStatus' => $jobStatus->id]),
-            'Retry-After' => 2
-        ]);
+        return response()->json($data, 202);
     }
 
     /**
@@ -85,6 +69,24 @@ class ProcessTransitionJob implements ShouldQueue
     public static function queued(JobStatus $jobStatus): JsonResponse
     {
         return self::pollingResponse($jobStatus);
+    }
+
+    /**
+     * @param JobStatus $jobStatus
+     * @return JsonResponse
+     */
+    private static function pollingResponse(JobStatus $jobStatus): JsonResponse
+    {
+        // tell the client where to look.
+        $data = $jobStatus->only([
+            'id',
+            'status',
+        ]);
+        // tell them to try again in a bit.
+        return response()->json($data, 200, [
+            'Location' => route('api.queued-task.show', ['jobStatus' => $jobStatus->id]),
+            'Retry-After' => 20,
+        ]);
     }
 
     /**
@@ -134,20 +136,20 @@ class ProcessTransitionJob implements ShouldQueue
     }
 
     /**
-     * @param JobStatus $jobStatus
-     * @return JsonResponse
+     * Execute the job.
+     *
+     * @return void
      */
-    private static function pollingResponse(JobStatus $jobStatus): JsonResponse
+    public function handle(): void
     {
-        // tell the client where to look.
-        $data = $jobStatus->only([
-            'id',
-            'status',
-        ]);
-        // tell them to try again in a bit.
-        return response()->json($data, 200, [
-            'Location' => route('api.queued-task.show',['jobStatus' => $jobStatus->id]),
-            'Retry-After' => 20
-        ]);
+        $processor = new TransitionProcessor($this->trader, $this->transition);
+
+        $processor->handle($this->voucherCodes);
+
+        $responseData = $processor->constructResponseMessage();
+
+        $key = Str::uuid();
+        Cache::put($key, $responseData);
+        $this->setOutput(['key' => $key]);
     }
 }

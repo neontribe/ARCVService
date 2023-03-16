@@ -5,6 +5,8 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ApiTransitionVoucherRequest;
 use App\Jobs\ProcessTransitionJob;
+use App\Trader;
+use App\Voucher;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
@@ -39,8 +41,17 @@ class TransitionController extends Controller
      */
     public function store(ApiTransitionVoucherRequest $request): JsonResponse
     {
+        // get our trader
+        $trader = Trader::findOrFail($request->input('trader_id'));
+
+        //create unique, cleaned vouchers
+        $voucherCodes = array_unique(Voucher::cleanCodes($request->input('vouchers')));
+
+        // fetch the transition
+        $transition = $request->input('transition');
+
         // ... start a new job to fetch data
-        $job = new ProcessTransitionJob($request);
+        $job = new ProcessTransitionJob($trader, $voucherCodes, $transition);
         $this->dispatch($job);
 
         // find the job status to monitor

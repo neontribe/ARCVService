@@ -80,7 +80,7 @@ Route::group(['middleware' => 'auth:api'], function () {
      * new voucher transition routes
      */
     Route::post('vouchers/transitions', [
-        'as' => 'api.vouchers.transition-response.store',
+        'as' => 'api.vouchers.transition-responses.store',
         'uses' => 'TransitionController@store',
     ])->middleware('can:collect,App\Voucher');
 
