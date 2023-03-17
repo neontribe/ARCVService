@@ -882,6 +882,11 @@ SEARCH PAGE
 	flex: 1 0 40%;
 }
 
+.search-control label {
+	display:block;
+	text-align:right;
+}
+
 .search-control input {
 	margin: 5px 0 0 0;
 }
@@ -914,8 +919,8 @@ SEARCH PAGE
 
 .checkbox-control {
 	display: flex;
-	flex: 0 1 20%;
-	margin-top: 24px;
+	flex: 0 1 10%;
+	margin-top: 28px;
 	padding-left: 55px;
 	position: relative;
 }
@@ -956,12 +961,13 @@ SEARCH PAGE
 }
 
 .search-actions {
-	width: 100%;
+	float: right;
+	width: 40%;
 	display: flex;
 }
 
 .search-actions input {
-	padding: 1rem;
+	padding: 5px;
 	border: 2px solid #757475;
 	border-radius: 3px;
 }
