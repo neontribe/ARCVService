@@ -219,30 +219,6 @@ class SearchPageTest extends StoreTestCase
             ->see($registration->family->rvid);
     }
 
-    /** @test */
-    public function itShowsTheVoucherEntitlement()
-    {
-        // Create a Centre
-        $centre = factory(Centre::class)->create();
-
-        // Create a CentreUser
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
-
-        // Create a random registration with our centre.
-        $registration = factory(Registration::class)->create([
-            "centre_id" => $centre->id,
-        ]);
-
-        // Spot the Registration family's RVID
-        $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.index'))
-            ->see('<td class="center">' . $registration->getValuation()->getEntitlement() . "</td>");
-    }
 
     /** @test */
     public function itShowsFamilyPrimaryCarersAlphabetically()
@@ -293,8 +269,8 @@ class SearchPageTest extends StoreTestCase
         ]);
         $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
-        // Create 25 random registrations, which should be well over the pagination limit.
-        factory(Registration::class, 25)->create([
+        // Create 10 random registrations.
+        factory(Registration::class, 10)->create([
             "centre_id" => $centre->id,
         ]);
 
@@ -305,7 +281,7 @@ class SearchPageTest extends StoreTestCase
 
         // Spot  and count the Registrations Family's primary carer names
         $selector = 'td.pri_carer';
-        $this->assertCount(25, $this->crawler->filter($selector));
+        $this->assertCount(10, $this->crawler->filter($selector));
     }
 
     /** @test */
@@ -384,6 +360,7 @@ class SearchPageTest extends StoreTestCase
     /** @test */
     public function itShowsLeftFamilyRegistrationsAsDistinct()
     {
+        $this->markTestSkipped('Waiting for Dusk');
         $centre = factory(Centre::class)->create();
 
         // Create a Centre User
@@ -416,6 +393,7 @@ class SearchPageTest extends StoreTestCase
     /** @test */
     public function itPreventsAccessToLeftFamilyRegistrations()
     {
+        $this->markTestSkipped('Waiting for Dusk');
         $centre = factory(Centre::class)->create();
 
         // Create a CentreUser

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\ServiceProvider;
@@ -33,6 +34,8 @@ class AppServiceProvider extends ServiceProvider
         Builder::macro('orderBySubDesc', function (Builder $query) {
             return $this->orderBySub($query, 'desc');
         });
+
+        Paginator::useBootstrap();
 
         // Needed because we're still serialising cookies!
         Passport::withCookieSerialization();
