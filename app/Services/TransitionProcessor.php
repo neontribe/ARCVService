@@ -77,7 +77,7 @@ class TransitionProcessor
 
             $lock->release();
         } else {
-            Log::info('No lock for me!');
+            Log::info("Unable to achieve lock in transition processor for { $this->trader->id } doing $this->transition");
             $this->responses['own_duplicate'][] = '000000';
         }
         return $this->responses;
@@ -92,7 +92,6 @@ class TransitionProcessor
         $collect_delivery_date = Carbon::parse(config('arc.first_delivery_date'));
         $transition = $this->transition;
 
-        sleep(10);
         foreach ($this->vouchers as $voucher) {
             // Don't transition newer, undelivered vouchers
             if (// delivery_id is null

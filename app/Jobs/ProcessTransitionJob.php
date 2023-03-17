@@ -52,7 +52,6 @@ class ProcessTransitionJob implements ShouldQueue
             ],
             $jobStatus->only(['id', 'status'])
         );
-        Log::info("hello");
 
         // tell them to try again in a bit.
         return response()->json($data, 202);
