@@ -87,5 +87,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('vouchers/transitions/{jobStatus}', [
         'as' => 'api.vouchers.transition-response.show',
         'uses' => 'TransitionController@show',
-    ])->middleware('can:collect,App\Voucher');
+    ])->where('jobStatus', '^[0-9]+$')
+        //->middleware('can:collect,App\Voucher');
+        ;
+
 });

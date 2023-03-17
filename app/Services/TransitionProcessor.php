@@ -92,6 +92,7 @@ class TransitionProcessor
         $collect_delivery_date = Carbon::parse(config('arc.first_delivery_date'));
         $transition = $this->transition;
 
+        sleep(10);
         foreach ($this->vouchers as $voucher) {
             // Don't transition newer, undelivered vouchers
             if (// delivery_id is null

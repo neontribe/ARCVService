@@ -45,16 +45,12 @@ class ProcessTransitionJob implements ShouldQueue
     public static function monitor(JobStatus $jobStatus): JsonResponse
     {
         // this is the body data; needs to tell the client what to do
-        $data = $jobStatus->only([
-            'id',
-            'status',
-        ]);
-
-        array_merge($data,
+        $data = array_merge(
             [
-                'Location' => route('api.queued-task.show', ['jobStatus' => $jobStatus->id]),
-                'Retry-After' => 2,
-            ]
+                'location' => route('api.queued-task.show', ['jobStatus' => $jobStatus->id]),
+                'retry-after' => 2,
+            ],
+            $jobStatus->only(['id', 'status'])
         );
         Log::info("hello");
 
@@ -66,27 +62,27 @@ class ProcessTransitionJob implements ShouldQueue
      * @param JobStatus $jobStatus
      * @return JsonResponse
      */
-    public static function queued(JobStatus $jobStatus): JsonResponse
+    private static function pollingResponse(JobStatus $jobStatus): JsonResponse
     {
-        return self::pollingResponse($jobStatus);
+        // tell the client where to look.
+        $data = array_merge(
+            [
+                'location' => route('api.queued-task.show', ['jobStatus' => $jobStatus->id]),
+                'retry-after' => 2,
+            ],
+            $jobStatus->only(['id', 'status'])
+        );
+        // tell them to try again in a bit.
+        return response()->json($data);
     }
 
     /**
      * @param JobStatus $jobStatus
      * @return JsonResponse
      */
-    private static function pollingResponse(JobStatus $jobStatus): JsonResponse
+    public static function queued(JobStatus $jobStatus): JsonResponse
     {
-        // tell the client where to look.
-        $data = $jobStatus->only([
-            'id',
-            'status',
-        ]);
-        // tell them to try again in a bit.
-        return response()->json($data, 200, [
-            'Location' => route('api.queued-task.show', ['jobStatus' => $jobStatus->id]),
-            'Retry-After' => 20,
-        ]);
+        return self::pollingResponse($jobStatus);
     }
 
     /**
@@ -115,13 +111,11 @@ class ProcessTransitionJob implements ShouldQueue
     {
         // we're done! `303 Other` the user to somewhere they can pick up their data.
         // get the output off the job
-        $data = $jobStatus->only([
-            'id',
-            'status',
-        ]);
+        $route = route('api.vouchers.transition-response.show', ['jobStatus' => $jobStatus->id]);
+        $data = array_merge(['location' => $route], $jobStatus->only(['id', 'status']));
         // tell the user where it is
         return response()->json($data, 303, [
-            'Location' => route('api.voucher.transition-response.show', ['jobStatus' => $jobStatus->id]),
+            'Location' => $route,
         ]);
     }
 
