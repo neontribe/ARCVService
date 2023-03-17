@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "45f9f1f0c2d1c69d82aeb3fad9815dbe",
+    "content-hash": "beae174a06877a3a6825322c98bd8ed5",
     "packages": [
         {
             "name": "barryvdh/laravel-debugbar",
@@ -1191,86 +1191,6 @@
                 "source": "https://github.com/firebase/php-jwt/tree/v6.4.0"
             },
             "time": "2023-02-09T21:01:23+00:00"
-        },
-        {
-            "name": "fruitcake/laravel-cors",
-            "version": "v3.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/fruitcake/laravel-cors.git",
-                "reference": "7c036ec08972d8d5d9db637e772af6887828faf5"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/fruitcake/laravel-cors/zipball/7c036ec08972d8d5d9db637e772af6887828faf5",
-                "reference": "7c036ec08972d8d5d9db637e772af6887828faf5",
-                "shasum": ""
-            },
-            "require": {
-                "fruitcake/php-cors": "^1.2",
-                "illuminate/contracts": "^6|^7|^8|^9",
-                "illuminate/support": "^6|^7|^8|^9",
-                "php": "^7.4|^8.0"
-            },
-            "require-dev": {
-                "laravel/framework": "^6|^7.24|^8",
-                "orchestra/testbench-dusk": "^4|^5|^6|^7",
-                "phpunit/phpunit": "^9",
-                "squizlabs/php_codesniffer": "^3.5"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "3.0-dev"
-                },
-                "laravel": {
-                    "providers": [
-                        "Fruitcake\\Cors\\CorsServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Fruitcake\\Cors\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Fruitcake",
-                    "homepage": "https://fruitcake.nl"
-                },
-                {
-                    "name": "Barry vd. Heuvel",
-                    "email": "barryvdh@gmail.com"
-                }
-            ],
-            "description": "Adds CORS (Cross-Origin Resource Sharing) headers support in your Laravel application",
-            "keywords": [
-                "api",
-                "cors",
-                "crossdomain",
-                "laravel"
-            ],
-            "support": {
-                "issues": "https://github.com/fruitcake/laravel-cors/issues",
-                "source": "https://github.com/fruitcake/laravel-cors/tree/v3.0.0"
-            },
-            "funding": [
-                {
-                    "url": "https://fruitcake.nl",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/barryvdh",
-                    "type": "github"
-                }
-            ],
-            "abandoned": true,
-            "time": "2022-02-23T14:53:22+00:00"
         },
         {
             "name": "fruitcake/php-cors",
@@ -8310,6 +8230,61 @@
             "time": "2022-06-03T18:03:27+00:00"
         },
         {
+            "name": "werk365/etagconditionals",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/365Werk/etagconditionals.git",
+                "reference": "cc6579720fe4f789b38d6b3fe5c6718c78967457"
+            },
+            "require": {
+                "illuminate/support": "~7|~8|~9"
+            },
+            "require-dev": {
+                "orchestra/testbench": "~5|~6|~7",
+                "phpunit/phpunit": "~8.0|~9.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Werk365\\EtagConditionals\\EtagConditionalsServiceProvider"
+                    ],
+                    "aliases": {
+                        "EtagConditionals": "Werk365\\EtagConditionals\\Facades\\EtagConditionals"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Werk365\\EtagConditionals\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Werk365\\EtagConditionals\\Tests\\": "tests"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Hergen Dillema",
+                    "email": "h.dillema@365werk.nl",
+                    "homepage": "https://365werk.nl"
+                }
+            ],
+            "description": "Laravel package to enable support for ETags and handling If-Match and If-None-Match conditional requests",
+            "homepage": "https://github.com/werk365/etagconditionals",
+            "keywords": [
+                "EtagConditionals",
+                "Laravel"
+            ],
+            "time": "2022-05-27T11:22:35+00:00"
+        },
+        {
             "name": "winzou/state-machine",
             "version": "0.4.3",
             "source": {
@@ -11550,6 +11525,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "werk365/etagconditionals": 20,
         "neontribe/laravel-specification": 20
     },
     "prefer-stable": false,
