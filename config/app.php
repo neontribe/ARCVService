@@ -207,7 +207,8 @@ return [
          * Extra packages
          */
         // Optimus\ApiConsumer\Provider\LaravelServiceProvider::class, //Passport assistance
-        Chalcedonyt\Specification\Providers\SpecificationServiceProvider::class
+        Chalcedonyt\Specification\Providers\SpecificationServiceProvider::class,
+         Imtigger\LaravelJobStatus\LaravelJobStatusBusServiceProvider::class,
 
         // Auto-discovery on
         // Barryvdh\Debugbar\ServiceProvider::class, //DebugBar

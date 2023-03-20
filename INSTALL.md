@@ -69,3 +69,57 @@ Do the steps below:
 
 ## Resources
 1. [Laravel Homestead official documentation](https://laravel.com/docs/6.x/homestead)
+
+## QUEUES and Supervisor
+
+This application relies on a queue to run a number of tasks.
+The queue workers are kep alive by supervisor
+
+Remember to set `QUEUE_DRIVER=database` in th `.env` file.
+
+You should probably have something like this in 
+
+`supervisor.conf` (probably `/etc/supervisor/supervisor.conf`)
+
+```
+[unix_http_server]
+file=/var/run/supervisor/supervisor.sock   ; (the path to the socket file)
+
+[supervisord]
+logfile=/var/log/supervisor/supervisord.log  ; (main log file;default $CWD/supervisord.log)
+logfile_maxbytes=50MB       ; (max main logfile bytes b4 rotation;default 50MB)
+logfile_backups=10          ; (num of main logfile rotation backups;default 10)
+loglevel=info               ; (log level;default info; others: debug,warn,trace)
+pidfile=/var/run/supervisord.pid ; (supervisord pidfile;default supervisord.pid)
+nodaemon=false              ; (start in foreground if true;default false)
+minfds=1024                 ; (min. avail startup file descriptors;default 1024)
+minprocs=200                ; (min. avail process descriptors;default 200)
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+[supervisorctl]
+serverurl=unix:///var/run/supervisor/supervisor.sock ; use a unix:// URL  for a unix socket
+
+[include]
+files =conf.d/*.conf
+
+```
+
+and something like this in the `/etc/supervisor/conf.d/laravel-worker.conf` for the worker:
+
+```
+[program:laravel-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php /home/vagrant/Code/ARCVService/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=vagrant
+numprocs=4
+redirect_stderr=true
+stdout_logfile=/home/vagrant/Code/ARCVService/storage/logs/worker.log
+stopwaitsecs=3600
+
+```
