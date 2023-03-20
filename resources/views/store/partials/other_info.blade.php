@@ -70,6 +70,9 @@
                 </option>
             @endforeach
         </select>
+        @if (isset($registration) && $registration->eligibility_hsbs === 'healthy-start-applying')
+            <br><mark>Please check if status has changed to receiving.</mark></br>
+        @endif
     </div>
     <div>
         <label for="eligibility-nrpf">

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0033b36a2de6b20ac6bdae52028f4a9c",
+    "content-hash": "f185adefa4550d42859fa06644353141",
     "packages": [
         {
             "name": "barryvdh/laravel-debugbar",
@@ -1488,6 +1488,72 @@
                 }
             ],
             "time": "2021-10-07T12:57:01+00:00"
+        },
+        {
+            "name": "highsolutions/laravel-searchy",
+            "version": "9.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/highsolutions/laravel-searchy.git",
+                "reference": "e2dd320ecb44d2fd27e8a5017da41baba49b7b61"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/highsolutions/laravel-searchy/zipball/e2dd320ecb44d2fd27e8a5017da41baba49b7b61",
+                "reference": "e2dd320ecb44d2fd27e8a5017da41baba49b7b61",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "5.*|^6.0|^7.0|^8.0|^9.0",
+                "php": "^5.5.9 || ^7.0 || ^8.0"
+            },
+            "require-dev": {
+                "orchestra/testbench": "3.*|4.*|5.*|6.*|7.*",
+                "phpunit/phpunit": "6.*|7.*|8.*|9.*"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.0-dev"
+                },
+                "laravel": {
+                    "providers": [
+                        "HighSolutions\\LaravelSearchy\\LaravelSearchyServiceProvider"
+                    ],
+                    "aliases": {
+                        "Searchy": "HighSolutions\\LaravelSearchy\\Facades\\Searchy"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "HighSolutions\\LaravelSearchy\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tom Lingham",
+                    "email": "tjlingham@gmail.com"
+                },
+                {
+                    "name": "HighSolutions",
+                    "email": "adam@highsolutions.pl"
+                }
+            ],
+            "description": "Laravel Searchy makes user driven searching easy with fuzzy search, basic string matching, Levenshtein Distance and more.",
+            "keywords": [
+                "fuzzy",
+                "laravel",
+                "search"
+            ],
+            "support": {
+                "source": "https://github.com/highsolutions/laravel-searchy/tree/9.0"
+            },
+            "time": "2022-03-29T12:20:21+00:00"
         },
         {
             "name": "laravel/framework",
@@ -6104,71 +6170,6 @@
             "time": "2023-02-24T10:42:00+00:00"
         },
         {
-            "name": "symfony/mailchimp-mailer",
-            "version": "v6.2.7",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/mailchimp-mailer.git",
-                "reference": "1e80f24fbb61ae7899afaebd7f9693f05b6fd52a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/mailchimp-mailer/zipball/1e80f24fbb61ae7899afaebd7f9693f05b6fd52a",
-                "reference": "1e80f24fbb61ae7899afaebd7f9693f05b6fd52a",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=8.1",
-                "symfony/mailer": "^5.4.21|^6.2.7"
-            },
-            "require-dev": {
-                "symfony/http-client": "^5.4|^6.0"
-            },
-            "type": "symfony-mailer-bridge",
-            "autoload": {
-                "psr-4": {
-                    "Symfony\\Component\\Mailer\\Bridge\\Mailchimp\\": ""
-                },
-                "exclude-from-classmap": [
-                    "/Tests/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Symfony Mailchimp Mailer Bridge",
-            "homepage": "https://symfony.com",
-            "support": {
-                "source": "https://github.com/symfony/mailchimp-mailer/tree/v6.2.7"
-            },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2023-02-21T10:35:38+00:00"
-        },
-        {
             "name": "symfony/mailer",
             "version": "v6.2.7",
             "source": {
@@ -9188,16 +9189,16 @@
         },
         {
             "name": "myclabs/deep-copy",
-            "version": "1.11.0",
+            "version": "1.11.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/myclabs/DeepCopy.git",
-                "reference": "14daed4296fae74d9e3201d2c4925d1acb7aa614"
+                "reference": "7284c22080590fb39f2ffa3e9057f10a4ddd0e0c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/14daed4296fae74d9e3201d2c4925d1acb7aa614",
-                "reference": "14daed4296fae74d9e3201d2c4925d1acb7aa614",
+                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/7284c22080590fb39f2ffa3e9057f10a4ddd0e0c",
+                "reference": "7284c22080590fb39f2ffa3e9057f10a4ddd0e0c",
                 "shasum": ""
             },
             "require": {
@@ -9235,7 +9236,7 @@
             ],
             "support": {
                 "issues": "https://github.com/myclabs/DeepCopy/issues",
-                "source": "https://github.com/myclabs/DeepCopy/tree/1.11.0"
+                "source": "https://github.com/myclabs/DeepCopy/tree/1.11.1"
             },
             "funding": [
                 {
@@ -9243,7 +9244,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-03-03T13:19:32+00:00"
+            "time": "2023-03-08T13:26:56+00:00"
         },
         {
             "name": "nunomaduro/collision",
@@ -11565,5 +11566,5 @@
     "platform-overrides": {
         "php": "8.1"
     },
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "2.3.0"
 }
