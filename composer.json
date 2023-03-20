@@ -21,6 +21,7 @@
     "barryvdh/laravel-dompdf": "2.0.1",
     "doctrine/dbal": "3.6.1",
     "fakerphp/faker": "^1.19.0",
+    "highsolutions/laravel-searchy" : "^9.0",
     "fruitcake/laravel-cors": "3.0.0",
     "imtigger/laravel-job-status": "^1.2",
     "laravel/framework": "^9.0",

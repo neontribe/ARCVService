@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "45f9f1f0c2d1c69d82aeb3fad9815dbe",
+    "content-hash": "f185adefa4550d42859fa06644353141",
     "packages": [
         {
             "name": "barryvdh/laravel-debugbar",
@@ -1490,45 +1490,44 @@
             "time": "2021-10-07T12:57:01+00:00"
         },
         {
-            "name": "imtigger/laravel-job-status",
-            "version": "1.2.0",
+            "name": "highsolutions/laravel-searchy",
+            "version": "9.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/imTigger/laravel-job-status.git",
-                "reference": "8e2660721c2448f6c74082bfeea6e82cd10aa3de"
+                "url": "https://github.com/highsolutions/laravel-searchy.git",
+                "reference": "e2dd320ecb44d2fd27e8a5017da41baba49b7b61"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/imTigger/laravel-job-status/zipball/8e2660721c2448f6c74082bfeea6e82cd10aa3de",
-                "reference": "8e2660721c2448f6c74082bfeea6e82cd10aa3de",
+                "url": "https://api.github.com/repos/highsolutions/laravel-searchy/zipball/e2dd320ecb44d2fd27e8a5017da41baba49b7b61",
+                "reference": "e2dd320ecb44d2fd27e8a5017da41baba49b7b61",
                 "shasum": ""
             },
             "require": {
-                "ext-json": "*",
-                "illuminate/contracts": ">=5.5",
-                "illuminate/database": ">=5.5",
-                "illuminate/queue": ">=5.5",
-                "illuminate/support": ">=5.5",
-                "nesbot/carbon": ">=1.21",
-                "php": ">=7.1"
+                "illuminate/support": "5.*|^6.0|^7.0|^8.0|^9.0",
+                "php": "^5.5.9 || ^7.0 || ^8.0"
             },
             "require-dev": {
-                "friendsofphp/php-cs-fixer": "^2.11",
-                "orchestra/database": ">=3.5",
-                "orchestra/testbench": ">=3.5",
-                "phpunit/phpunit": ">=5.7"
+                "orchestra/testbench": "3.*|4.*|5.*|6.*|7.*",
+                "phpunit/phpunit": "6.*|7.*|8.*|9.*"
             },
             "type": "library",
             "extra": {
+                "branch-alias": {
+                    "dev-master": "3.0-dev"
+                },
                 "laravel": {
                     "providers": [
-                        "Imtigger\\LaravelJobStatus\\LaravelJobStatusServiceProvider"
-                    ]
+                        "HighSolutions\\LaravelSearchy\\LaravelSearchyServiceProvider"
+                    ],
+                    "aliases": {
+                        "Searchy": "HighSolutions\\LaravelSearchy\\Facades\\Searchy"
+                    }
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "Imtigger\\LaravelJobStatus\\": "src"
+                    "HighSolutions\\LaravelSearchy\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1537,22 +1536,24 @@
             ],
             "authors": [
                 {
-                    "name": "Tiger Fok",
-                    "email": "tiger@tiger-workshop.com"
+                    "name": "Tom Lingham",
+                    "email": "tjlingham@gmail.com"
+                },
+                {
+                    "name": "HighSolutions",
+                    "email": "adam@highsolutions.pl"
                 }
             ],
-            "description": "Laravel Job Status",
+            "description": "Laravel Searchy makes user driven searching easy with fuzzy search, basic string matching, Levenshtein Distance and more.",
             "keywords": [
-                "job",
+                "fuzzy",
                 "laravel",
-                "lumen",
-                "queue"
+                "search"
             ],
             "support": {
-                "issues": "https://github.com/imTigger/laravel-job-status/issues",
-                "source": "https://github.com/imTigger/laravel-job-status/tree/1.2.0"
+                "source": "https://github.com/highsolutions/laravel-searchy/tree/9.0"
             },
-            "time": "2020-09-19T16:43:44+00:00"
+            "time": "2022-03-29T12:20:21+00:00"
         },
         {
             "name": "laravel/framework",
