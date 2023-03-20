@@ -35,12 +35,21 @@ class TransitionProcessor
 
     private string $transition;
 
+    /**
+     * @param Trader $trader
+     * @param string $transition
+     */
     public function __construct(trader $trader, string $transition)
     {
         $this->transition = $transition;
         $this->trader = $trader;
     }
 
+    /**
+     * Preps and picks a strategy for transitioning vouchers
+     * @param array $voucherCodes
+     * @return array|array[]
+     */
     public function handle(array $voucherCodes): array
     {
         // set a lock, to prevent double submits
@@ -84,6 +93,7 @@ class TransitionProcessor
     }
 
     /**
+     * handles collection vouchers
      * @return void
      */
     public function handleCollect(): void
@@ -103,6 +113,8 @@ class TransitionProcessor
                 $this->responses['undelivered'][] = $voucher->code;
                 continue;
             }
+            // mark the voucher against the trader.
+            $voucher->trader_id = $this->trader->id;
 
             if ($this->doTransition($voucher, $transition)) {
                 $this->responses['success_add'][] = $voucher->code;
@@ -111,6 +123,7 @@ class TransitionProcessor
     }
 
     /**
+     * Actually does the transition - will save a voucher on the way through
      * @param Voucher $voucher
      * @param string $transition
      * @return bool
@@ -136,6 +149,7 @@ class TransitionProcessor
     }
 
     /**
+     * confirms a voucher set for payment
      * @return void
      */
     public function handleConfirm(): void
@@ -145,8 +159,6 @@ class TransitionProcessor
         $transition = $this->transition;
 
         foreach ($this->vouchers as $voucher) {
-
-            $voucher->trader_id = $this->trader->id;
 
             // Can we do a transition already?
             if ($this->doTransition($voucher, $transition)) {
@@ -185,6 +197,7 @@ class TransitionProcessor
     }
 
     /**
+     * This handles rejections back to the free voucher pool
      * @return void
      */
     public function handleReject(): void
@@ -200,7 +213,7 @@ class TransitionProcessor
             // alter the transition
             $transition = "reject-to-" . $last_state->from;
 
-            // will be saved if transition success
+            // return voucher to free pool
             $voucher->trader_id = null;
 
             // Can we do a transition already?
@@ -211,6 +224,7 @@ class TransitionProcessor
     }
 
     /**
+     * This is for undefined transitions, as a catchall.
      * @return void
      */
     public function handleDefault(): void
