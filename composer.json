@@ -37,6 +37,7 @@
     "symfony/console": "6.2.7",
     "symfony/event-dispatcher": "6.2.7",
     "symfony/lock": "^6.2",
+    "symfony/mailchimp-mailer": "^6.2",
     "usmanhalalit/laracsv": "^2.1.0"
   },
   "require-dev": {
