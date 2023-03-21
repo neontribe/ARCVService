@@ -33,8 +33,8 @@ class PaymentsController extends Controller
      */
     public function index()
     {
-        $payments = $this->getPaymentsPast7Days();
-        return view('service.payments.index', compact('payments'));
+        $paymentData = $this->getPaymentsPast7Days();
+        return view('service.payments.index', compact('paymentData'));
     }
 
     private function getPaymentsPast7Days()
@@ -89,20 +89,45 @@ where stid is not null;
         $lists = collect($pending);
 
         $payments = $lists->sortBy(function ($list){
-            return $list->tname . '#' .
+            return
+                $list->stuuid . '#' .
+                $list->tname . '#' .
                 $list->mname . "#" .
                 $list->msponname . "#" .
                 $list->uname . "#" .
                 $list->vsponname . "#" .
                 $list->total . "#" .
-                $list->byarea . "#" .
-                $list->vid;
+                $list->byarea;
 
         });
 
-        return $payments;
+        $paymentData = [];
+
+        foreach ($payments as $payment) {
+
+            // grab any existing id in the array
+            $currentUuid = $paymentData[$payment->stuuid] ?? [];
+
+            // overwrite with things it probably already has...
+            if (empty($currentUuid)) {
+                $currentUuid["traderName"] = $payment->tname;
+                $currentUuid["marketName"] = $payment->mname;
+                $currentUuid["area"] = $payment->msponname;
+                $currentUuid["requestedBy"] = $payment->uname;
+                $currentUuid["vouchersTotal"] = $payment->total;
+                $currentUuid["voucherAreas"] = [];
+            }
+
+            $currentUuid["voucherAreas"][$payment->vsponname] = $payment->byarea;
+
+            // update paymentData;
+            $paymentData[$payment->stuuid] = $currentUuid;
+        }
+
+        return $paymentData;
 
     }
+
     /** Get a specific payment request by link
      * @param $paymentUuid
      * @return mixed

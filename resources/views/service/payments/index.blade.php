@@ -14,7 +14,7 @@
             @endif
             <table class="table table-striped">
                 <thead>
-                <tr>
+                <tr><th></th>
                     <th>Name</th>
                     <th>Market</th>
                     <th>Area</th>
@@ -25,41 +25,33 @@
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($payments as $payment)
-                    <tr data-toggle="collapse" data-target="#varea{{$payment->vid}}" class="accordion-toggle">
-                        <td><span class="glyphicon glyphicon-th-list"></span>   {{ $payment->tname }}</td>
-                        <td>{{ $payment->mname }}</td>
-                        <td>{{ $payment->msponname }}</td>
-                        <td>{{ $payment->uname }}</td>
-                        <td>{{ $payment->vsponname }}</td>
+                    @foreach ($paymentData as $key => $paymentDatum)
+                    <tr data-toggle="collapse" data-target=".varea{{$key}}" class="accordion-toggle">
+                        <td><span class="glyphicon glyphicon-th-list"></span></td>
+                        <td>{{ $paymentDatum["traderName"]}}</td>
+                        <td>{{ $paymentDatum["marketName"]}}</td>
+                        <td>{{ $paymentDatum["area"]}}</td>
+                        <td>{{ $paymentDatum["requestedBy"]}}</td>
+                        <td>All</td>
+                        <td>{{ $paymentDatum["vouchersTotal"]}}</td>
                         <td>
-                            <a href="{{ route('admin.payment-request.show', ['id' => $payment->vid ]) }}" class="link">
+                            <a href="{{ route('admin.payment-request.show', ['paymentUuid' => $key]) }}" class="link">
                                 <div class="link-button link-button-small">
                                     <i class="fa fa-money button-icon" aria-hidden="true"></i>Pay Request
                                 </div>
                             </a>
                         </td>
                     </tr>
-                    <tr>
-                        <td>
-                            <div class="accordian-body collapse" id=varea{{$payment->vid}}>
-                                <table class="table table-striped">
-                                    <tbody>
-                                        <tr>
-                                            <td>{{ $payment->total }}</td>
-                                            <td>{{ $payment->byarea }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </td>
+                    @foreach($paymentDatum["voucherAreas"] as $area=>$value)
+                    <tr class="accordian-body collapse varea{{$key}}"><td colspan="5"></td>
+                        <td>{{ $area }}</td>
+                        <td>{{ $value }}</td>
+                        <td></td>
                     </tr>
+                        @endforeach
                     @endforeach
                 </tbody>
             </table>
-
         </div>
-
     </div>
-
 @endsection
