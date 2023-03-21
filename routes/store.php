@@ -35,18 +35,6 @@ Route::get('/', static function () {
 })->name('store.base');
 
 
-// Store payment request link handling; does not require any auth
-Route::get('/payment-request/{paymentUuid}', [
-        'as' => 'store.payment-request.show',
-        'uses' => 'PaymentController@show'
-    ]);
-
-Route::put('/payment-request/{paymentUuid}', [
-        'as' => 'store.payment-request.update',
-        'uses' => 'PaymentController@update'
-    ]);
-
-
 // Route groups for authorised routes
 Route::group(['middleware' => 'auth:store'], function () {
     Route::get(

@@ -69,6 +69,23 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'uses' => 'Admin\VouchersController@search',
     ]);
 
+    //Payment Management
+    Route::get('payments',[
+        'as' =>'admin.payments.index',
+        'uses' =>'Admin\PaymentsController@index',
+    ]);
+
+    // Copied Store payment request link handling; does not require any auth need to add auth
+    Route::get('/payment-request/ad630614-5ced-46c0-83fb-96b0bb81f0d1', [
+        'as' => 'admin.payment-request.show',
+        'uses' => 'Admin\PaymentsController@show'
+    ]);
+
+    Route::put('/payment-request/{paymentUuid}', [
+        'as' => 'admin.payment-request.update',
+        'uses' => 'Admin\PaymentsController@update'
+    ]);
+
     // Worker Management
     Route::get('workers', [
         'as' => 'admin.centreusers.index',
