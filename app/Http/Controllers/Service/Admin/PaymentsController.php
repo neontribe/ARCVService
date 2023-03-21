@@ -3,26 +3,12 @@
 namespace App\Http\Controllers\Service\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Voucher;
-use App\VoucherState;
-use App\Market;
-use App\Sponsor;
 use App\StateToken;
 use App\Trader;
-use App\User;
-use Carbon\Carbon;
-use Debugbar;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-use Laracsv\Export;
-use Ramsey\Uuid\Uuid;
-use Throwable;
 
 class PaymentsController extends Controller
 {
@@ -85,7 +71,7 @@ on allp.vsstid = sts.stid
 where stid is not null;
 ")
         );
-
+        //TODO suspect this needs some error handling
         $lists = collect($pending);
 
         $payments = $lists->sortBy(function ($list){
