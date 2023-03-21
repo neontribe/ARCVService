@@ -181,8 +181,6 @@ where stid is not null;
     {
         // Initialise
         $vouchers = [];
-        $trader = "trader";
-        $number_to_pay = 0;
 
         // Find the StateToken of a given uuid
         $state_token = StateToken::where('uuid', $paymentUuid)->first();
@@ -208,25 +206,9 @@ where stid is not null;
                     $v->applyTransition('payout');
                 }
             }
-
-            // Count the payable vouchers
-            $number_to_pay = collect($vouchers)
-                ->where('currentstate', 'payment_pending')
-                ->count();
-
-            // Get the trader's name
-            if(!empty($vouchers)) {
-                $trader = Trader::find($vouchers[0]->trader_id)->name;
-            }
-
         }
 
-        // voucher transition to paid
-        return view('service.payments.payment-request.update', [
-            'state_token' => $state_token,
-            'vouchers' => $vouchers,
-            'trader' => $trader,
-            'number_to_pay' => $number_to_pay,
-        ]);
+        return redirect()->route('admin.payments.index')->with('notification','Vouchers Paid!');
+
     }
 }

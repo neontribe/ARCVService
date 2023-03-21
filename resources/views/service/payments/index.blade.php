@@ -26,8 +26,8 @@
                 </thead>
                 <tbody>
                     @foreach ($paymentData as $key => $paymentDatum)
-                    <tr data-toggle="collapse" data-target=".varea{{$key}}" class="accordion-toggle">
-                        <td><span class="glyphicon glyphicon-th-list"></span></td>
+                    <tr  class="accordion-toggle">
+                        <td><span class="glyphicon glyphicon-th-list" data-toggle="collapse" data-target=".varea{{$key}}"></span></td>
                         <td>{{ $paymentDatum["traderName"]}}</td>
                         <td>{{ $paymentDatum["marketName"]}}</td>
                         <td>{{ $paymentDatum["area"]}}</td>
@@ -35,7 +35,7 @@
                         <td>All</td>
                         <td>{{ $paymentDatum["vouchersTotal"]}}</td>
                         <td>
-                            <a href="{{ route('service.payments.payment-request.show', ['paymentUuid' => $key]) }}" class="link">
+                            <a href="{{ route('service.payment-request.show', ['paymentUuid' => $key]) }}" class="link">
                                 <div class="link-button link-button-small">
                                     <i class="fa fa-money button-icon" aria-hidden="true"></i>Pay Request
                                 </div>
