@@ -75,14 +75,13 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'uses' =>'Admin\PaymentsController@index',
     ]);
 
-    // Copied Store payment request link handling; does not require any auth need to add auth
-    Route::get('/payment-request/{paymentUuid}', [
-        'as' => 'admin.payment-request.show',
+    Route::get('payments/payment-request/{paymentUuid}', [
+        'as' => 'service.payment-request.show',
         'uses' => 'Admin\PaymentsController@show'
     ]);
 
-    Route::put('/payment-request/{paymentUuid}', [
-        'as' => 'admin.payment-request.update',
+    Route::put('payments/payment-request/{paymentUuid}', [
+        'as' => 'service.payment-request.update',
         'uses' => 'Admin\PaymentsController@update'
     ]);
 

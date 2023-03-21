@@ -90,7 +90,6 @@ where stid is not null;
 
         $payments = $lists->sortBy(function ($list){
             return
-                $list->stuuid . '#' .
                 $list->tname . '#' .
                 $list->mname . "#" .
                 $list->msponname . "#" .
@@ -166,7 +165,7 @@ where stid is not null;
             }
         }
 
-        return view('service.payment_request', [
+        return view('service.payments.payment_request', [
             'state_token' => $state_token,
             'vouchers' => $vouchers,
             'trader' => $trader,
@@ -223,7 +222,7 @@ where stid is not null;
         }
 
         // voucher transition to paid
-        return view('service.payment_request', [
+        return view('service.payments.payment-request.update', [
             'state_token' => $state_token,
             'vouchers' => $vouchers,
             'trader' => $trader,

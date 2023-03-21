@@ -35,7 +35,7 @@
                         <td>All</td>
                         <td>{{ $paymentDatum["vouchersTotal"]}}</td>
                         <td>
-                            <a href="{{ route('admin.payment-request.show', ['paymentUuid' => $key]) }}" class="link">
+                            <a href="{{ route('service.payments.payment-request.show', ['paymentUuid' => $key]) }}" class="link">
                                 <div class="link-button link-button-small">
                                     <i class="fa fa-money button-icon" aria-hidden="true"></i>Pay Request
                                 </div>
