@@ -179,6 +179,8 @@ class CentreController extends Controller
             $kids = [];
             $due_date = null;
             $eligibleKids = 0;
+            // Total includes pregnancies
+            $totalKids = 0;
 
             // Evaluate it.
             $regValuation = $reg->valuatation;
@@ -204,6 +206,7 @@ class CentreController extends Controller
                         if ($child->dob->isFuture()) {
                             // If it's a pregnancy, set due date and move on.
                             $due_date = $child->dob->format($dateFormats['dob']);
+                            $totalKids += 1;
                         } else {
                             // Otherwise, set the header
                             $dob_header = Child::getAlias($programme) . ' ' . (string)$child_index . ' DoB';
@@ -221,6 +224,8 @@ class CentreController extends Controller
                 // Add count of eligible household members
                 $row['Eligible Household Members'] = $eligibleKids;
             } else {
+                // Add total including pregnancies
+                $row['Total Children'] = $totalKids + $eligibleKids;
                 // Add count of eligible kids
                 $row['Eligible Children'] = $eligibleKids;
             }
@@ -237,6 +242,8 @@ class CentreController extends Controller
             $row['Leaving Date'] = $reg->family->leaving_on ? $reg->family->leaving_on->format($dateFormats['leave']) : null;
             // Would be confusing if an old reason was left in - so check leaving date is there.
             $row["Leaving Reason"] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
+            $row['Rejoin Date'] = $reg->family->rejoin_on ?? null;
+            $row['Leave Count'] = $reg->family->leave_amount ?? null;
             if (!$programme) {
                 $row["Family Eligibility (HSBS)"] = ($reg->eligibility_hsbs) ?? null;
                 $row["Family Eligibility (NRPF)"] = (ucfirst($reg->eligibility_nrpf)) ?? null;
