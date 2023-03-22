@@ -76,13 +76,18 @@ Route::group(['middleware' => 'auth:admin'], function () {
     ]);
 
     Route::get('payments/payment-request/{paymentUuid}', [
-        'as' => 'service.payment-request.show',
+        'as' => 'admin.payment-request.show',
         'uses' => 'Admin\PaymentsController@show'
     ]);
 
     Route::put('payments/payment-request/{paymentUuid}', [
-        'as' => 'service.payment-request.update',
+        'as' => 'admin.payment-request.update',
         'uses' => 'Admin\PaymentsController@update'
+    ]);
+
+    Route::get('payments/trader-payment-history/{id}', [
+        'as' => 'admin.trader-payment-history.show',
+        'uses' => 'Admin\TradersController@show'
     ]);
 
     // Worker Management
