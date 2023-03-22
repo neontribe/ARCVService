@@ -85,9 +85,9 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'uses' => 'Admin\PaymentsController@update'
     ]);
 
-    Route::get('payments/trader-payment-history/{id}', [
+        Route::get('payments/trader-payment-history/{trader}', [
         'as' => 'admin.trader-payment-history.show',
-        'uses' => 'Admin\TradersController@show'
+        'uses' => 'Admin\TradersController@traderHistory'
     ]);
 
     // Worker Management

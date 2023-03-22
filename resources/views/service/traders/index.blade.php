@@ -39,7 +39,7 @@
                             @endif
                         </td>
                         <td>
-                            <a href="{{ route('admin.trader-payment-history.show', ['id' => $trader->id ]) }}" class="link">
+                            <a href="{{ route('admin.trader-payment-history.show', ['trader' => $trader ]) }}" class="link">
                                 <div class="link-button link-button-small">
                                     <i class="fa fa-pencil button-icon" aria-hidden="true"></i>View
                                 </div>

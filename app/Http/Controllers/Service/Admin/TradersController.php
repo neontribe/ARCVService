@@ -14,6 +14,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -125,6 +126,34 @@ class TradersController extends Controller
 
         $marketsBySponsor = Sponsor::with(['markets:sponsor_id,id,name'])->get(['id', 'name']);
         return view('service.traders.create', compact('marketsBySponsor', 'preselected'));
+    }
+
+    /**
+     * Display the Trader's voucher / payment history as Admin
+     *
+     * @param Trader $trader
+     * @return Paginator
+     *
+     **/
+    public function traderHistory (Trader $trader)
+    {
+        // get days we pended on
+        $history = DB::table(static function ($query) use ($trader) {
+            $query->selectRaw("SUBSTR(`voucher_states`.`created_at`, 1, 10) as pendedOn")
+                ->from('vouchers')
+                // use inner join
+                ->join('voucher_states', 'vouchers.id', 'voucher_states.voucher_id')
+                ->where('voucher_states.to', 'payment_pending')
+                ->where('vouchers.trader_id', $trader->id)
+                // cut down the recorded
+                ->where('vouchers.currentstate', '!=', 'recorded')
+                ->groupBy('pendedOn')
+                ->orderByDesc('pendedOn');
+        }, 'daysFromQuery')
+            ->select('pendedOn')
+            ->paginate();
+        return view('service.payments.paymentHistory', compact('history')); //don't think I need compact as not array?
+
     }
 
     /**
@@ -253,6 +282,7 @@ class TradersController extends Controller
             ->route('admin.traders.index')
             ->with('message', 'Trader ' . $trader->name . ' updated');
     }
+
 
     public function download()
     {
