@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('families', function (Blueprint $table) {
-            $table->date('rejoin_on')->nullable();
+            $table->timestamp('rejoin_on')->nullable();
             $table->integer('leave_amount')->default(0);
         });
 
