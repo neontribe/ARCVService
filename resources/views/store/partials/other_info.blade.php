@@ -128,8 +128,8 @@
                 <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
             </div>
         </a>
-
-        @if (!isset($registration->family->leaving_on) )
+        @php(\App\Http\Controllers\Store\FamilyController::status($registration))
+        @if ($registration->family->status === true )
         <button class="remove long-button" type="button">Remove this family</button>
         <div id="expandable" class="collapsed confirm-leaving">
             <div class="reason">
