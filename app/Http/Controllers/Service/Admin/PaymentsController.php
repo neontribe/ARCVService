@@ -151,7 +151,7 @@ where stid is not null;
             }
         }
 
-        return view('service.payments.payment_request', [
+        return view('service.payments.paymentRequest', [
             'state_token' => $state_token,
             'vouchers' => $vouchers,
             'trader' => $trader,

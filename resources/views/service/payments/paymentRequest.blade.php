@@ -57,7 +57,7 @@
                     @endforeach
                 </table>
                 @if ( $number_to_pay > 0 )
-                    <form action="{{ route('service.payment-request.update', ['paymentUuid' => $state_token->uuid ]) }}" method="POST">
+                    <form action="{{ route('admin.payment-request.update', ['paymentUuid' => $state_token->uuid ]) }}" method="POST">
                         {{ method_field('PUT') }}
                         {!! csrf_field() !!}
                         <button class="link-button link-button-small" type="submit">
