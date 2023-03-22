@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Service\Admin;
 
+use App\Http\Controllers\API\TraderController;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminNewUpdateTraderRequest;
 use App\Market;
@@ -15,6 +16,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -138,7 +140,7 @@ class TradersController extends Controller
     public function traderHistory (Trader $trader)
     {
         // get days we pended on
-        $history = DB::table(static function ($query) use ($trader) {
+        $historyCount = DB::table(static function ($query) use ($trader) {
             $query->selectRaw("SUBSTR(`voucher_states`.`created_at`, 1, 10) as pendedOn")
                 ->from('vouchers')
                 // use inner join
@@ -151,8 +153,26 @@ class TradersController extends Controller
                 ->orderByDesc('pendedOn');
         }, 'daysFromQuery')
             ->select('pendedOn')
-            ->paginate();
-        return view('service.payments.paymentHistory', compact('history')); //don't think I need compact as not array?
+            ->paginate()
+            ->toArray();
+
+        // if there are any, make a query
+        if ($historyCount["total"] === 0) {
+            $history = [];
+        } else {
+            // get the first and last dates from that.
+            $toDate = Arr::first($historyCount["data"])->pendedOn . ' 23:59:59';
+            $fromDate = Arr::last($historyCount["data"])->pendedOn . ' 00:00:00';
+
+            // get histories between those dates.
+            $histories = TraderController::paymentHistoryBetweenDateTimes($trader, $fromDate, $toDate)->all();
+
+            // process the data into an array
+            $history = TraderController::historyGroupByDate($histories);
+        }
+
+
+        return view('service.payments.paymentHistory', compact( 'history')); //don't think I need compact as not array?
 
     }
 
