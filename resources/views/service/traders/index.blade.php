@@ -19,7 +19,8 @@
                     <th>Market</th>
                     <th>Area</th>
                     <th>Users</th>
-                    <th></th>
+                    <th>Payments</th>
+                    <th>Info</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -36,6 +37,13 @@
                                     @endforeach
                                 </ul>
                             @endif
+                        </td>
+                        <td>
+                            <a href="{{ route('admin.trader-payment-history.show', ['id' => $trader->id ]) }}" class="link">
+                                <div class="link-button link-button-small">
+                                    <i class="fa fa-pencil button-icon" aria-hidden="true"></i>View
+                                </div>
+                            </a>
                         </td>
                         <td>
                             <a href="{{ route('admin.traders.edit', ['id' => $trader->id ]) }}" class="link">
