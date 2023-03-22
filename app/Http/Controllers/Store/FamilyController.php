@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers\Store;
 
+use App\Http\Requests\StoreRejoinRegistrationFamilyRequest;
 use App\Http\Requests\StoreUpdateRegistrationFamilyRequest;
+use Auth;
 use Carbon\Carbon;
 use App\Registration;
 use App\Family;
 use App\Http\Controllers\Controller;
+use Log;
 
 class FamilyController extends Controller
 {
     /**
      * For now - the only update we can do is deactivate.
-     * We can also rejoin the family if they previously left.
      * The rest of family related info is updated through a related Registration.
      *
      * @param StoreUpdateRegistrationFamilyRequest $request
@@ -26,35 +28,49 @@ class FamilyController extends Controller
         /** @var  $family Family */
         $family = $registration->family;
 
-        // Family has left before and is rejoining now
-        if ($family->leaving_on) {
-            // Add/update rejoin date
-            $family->rejoin_on = Carbon::now();
-            // Wipe previous leaving_on to make them 'current' again - keep original leaving_reason for
-            // reports and to identify them as a previous leaver
-            $family->leaving_on = null;
-            $action = 'rejoining';
-        // Family is now leaving again
-        } elseif ($family->rejoin_on) {
-            $family->rejoin_on = null;
-            $family->leaving_on = Carbon::now();
-            // Increase leave_amount by 1
-            $family->increment('leave_amount');
-            $action = 'leaving';
-        // Family is leaving for the first time
-        } else {
-            // Set leaving date
-            $family->leaving_on = Carbon::now();
-            // Increase leave_amount by 1
-            $family->increment('leave_amount');
-            // validate by the FormRequest
-            $family->leaving_reason = $request->leaving_reason;
-            $action = 'leaving';
-        }
+        // Set leaving date
+        $family->leaving_on = Carbon::now();
+
+        // validate by the FormRequest
+        $family->leaving_reason = $request->leaving_reason;
+
+        // Increase leave_amount by 1
+        $family->increment('leave_amount');
+
+
         $family->save();
-        // Successful leave or rejoin. Go back to registration/ family search listing
+        // Successful deactivation . Go back to registration/ family search listing
         return redirect()
             ->route('store.registration.index')
-            ->with('message', 'You have just marked ' . $family->carers->first()->name . ' as ' . $action . ' the project');
+            ->with('message', 'You have just marked ' . $family->carers->first()->name . ' as leaving the project');
+    }
+
+    /**
+     * If the family is rejoining having previously left
+     *
+     * @param StoreRejoinRegistrationFamilyRequest $request
+     *
+     * @param Registration $registration (because permission to update comes through Registration)
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function rejoin(StoreRejoinRegistrationFamilyRequest $request, Registration $registration): \Illuminate\Http\RedirectResponse
+    {
+        // get Family
+        /** @var  $family Family */
+        $family = $registration->family;
+
+        // Set rejoin date
+        $family->rejoin_on = Carbon::now()->format('Y-m-d');
+
+        // Wipe previous leaving_on to make them 'current' again - keep original leaving_reason for
+        // reports and to identify them as a previous leaver
+        $family->leaving_on = null;
+
+        $family->save();
+        // Log that this family has rejoined
+        Log::info('Registration ' . $registration->id . ' marked as rejoined by service user ' . Auth::id());
+        // Successful reactivation. Go back to edit this registration so details can be updated
+        return redirect()
+            ->route('store.registration.edit', ['registration'=> $registration->id ]);
     }
 }

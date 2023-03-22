@@ -66,9 +66,12 @@
                                     <div class="link-button link-button-small disabled">
                                         <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Vouchers
                                     </div>
-                                    <div class="link-button link-button-small disabled">
-                                        <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Edit
-                                    </div>
+                                    <a href="{{ route('store.registration.view', ['registration'=> $registration->id ]) }}" class="link
+                            inline-link-button">
+                                        <div class="link-button view">
+                                            View
+                                        </div>
+                                    </a>
                                 @endif
                             </td>
                         </tr>

@@ -420,6 +420,10 @@ input[type="text"].invalid,
 	background-color: #757575;
 }
 
+.view {
+	background-color: #757575;
+}
+
 .disabled:hover {
 	cursor: not-allowed;
 	text-decoration: none;
@@ -839,6 +843,11 @@ EDIT PAGE
 
 .remove {
 	background-color: #d2232a;
+	margin: 0.5rem 1rem;
+}
+
+.rejoin {
+	background-color: #a74e94;
 	margin: 0.5rem 1rem;
 }
 

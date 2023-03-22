@@ -177,6 +177,7 @@ class RegistrationController extends Controller
             "centre_name" => ($user->centre) ? $user->centre->name : null,
             "sponsorsRequiresID" => $sponsorsRequiresID,
             "programme" => $programme,
+            'leaver' => false,
         ];
         return view('store.create_registration', $data);
     }
@@ -242,6 +243,67 @@ class RegistrationController extends Controller
                 'deferrable' => $deferrable,
                 'can_change_defer' => $can_change_defer,
                 'programme' => $programme,
+                'leaver' => false,
+            ]
+        ));
+    }
+
+    /**
+     * Show the Registration / Family edit form for a leaver
+     *
+     * @param Registration $registration
+     * @return Factory|View
+     */
+    public function view(Registration $registration)
+    {
+        // Get User and Centre;
+        /** @var CentreUser $user */
+        $user = Auth::user();
+        $data = [
+            'user_name' => $user->name,
+            'centre_name' => ($user->centre) ? $user->centre->name : null,
+        ];
+
+        // Get the registration, with deep eager-loaded Family (with Children and Carers)
+        if ($registration) {
+            $registration = Registration::withFullFamily()->find($registration->id);
+        } else {
+            abort(404, 'Registration not found.');
+        }
+        $evaluations = $registration->centre->sponsor->evaluations;
+        $deferrable = false;
+        foreach ($evaluations as $key => $evaluation) {
+            if ($evaluation['name'] === 'ScottishChildCanDefer') {
+                $deferrable = true;
+            }
+        }
+        $can_change_defer = true;
+        $this_month = Carbon::now()->month;
+        if ($this_month > config('arc.scottish_school_month')) {
+            $can_change_defer = false;
+        }
+
+        // Get the valuation
+        /** @var Valuation $valuation */
+        $valuation = $registration->getValuation();
+
+        // Grab carers copy for shift)ing without altering family->carers
+        $carers = $registration->family->carers->all();
+
+        $evaluations["creditables"] = $registration->getEvaluator()->getPurposeFilteredEvaluations("credits");
+        $evaluations["disqualifiers"] = $registration->getEvaluator()->getPurposeFilteredEvaluations("disqualifiers");
+        $programme = Auth::user()->centre->sponsor->programme;
+
+        return view('store.view_registration', array_merge(
+            $data,
+            [
+                'registration' => $registration,
+                'family' => $registration->family,
+                'pri_carer' => array_shift($carers),
+                'children' => $registration->family->children,
+                'entitlement' => $valuation->getEntitlement(),
+                'programme' => $programme,
+                'leaver' => true,
             ]
         ));
     }
