@@ -249,7 +249,7 @@ class RegistrationController extends Controller
     }
 
     /**
-     * Show the Registration / Family edit form for a leaver
+     * Show the Registration / Family view form for a leaver
      *
      * @param Registration $registration
      * @return Factory|View
@@ -271,17 +271,6 @@ class RegistrationController extends Controller
             abort(404, 'Registration not found.');
         }
         $evaluations = $registration->centre->sponsor->evaluations;
-        $deferrable = false;
-        foreach ($evaluations as $key => $evaluation) {
-            if ($evaluation['name'] === 'ScottishChildCanDefer') {
-                $deferrable = true;
-            }
-        }
-        $can_change_defer = true;
-        $this_month = Carbon::now()->month;
-        if ($this_month > config('arc.scottish_school_month')) {
-            $can_change_defer = false;
-        }
 
         // Get the valuation
         /** @var Valuation $valuation */
