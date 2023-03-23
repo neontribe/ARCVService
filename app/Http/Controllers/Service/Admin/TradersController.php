@@ -16,12 +16,14 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Laracsv\Export;
+use function League\Flysystem\withPath;
 use Ramsey\Uuid\Uuid;
 use Throwable;
 
@@ -163,17 +165,29 @@ class TradersController extends Controller
             // get the first and last dates from that.
             $toDate = Arr::first($historyCount["data"])->pendedOn . ' 23:59:59';
             $fromDate = Arr::last($historyCount["data"])->pendedOn . ' 00:00:00';
+//            $toDate = $historyCount->items()->first()->pendedOn . ' 23:59:59';
+//            $fromDate = $historyCount->lastItem()->pendedOn . ' 00:00:00';
 
             // get histories between those dates.
             $histories = TraderController::paymentHistoryBetweenDateTimes($trader, $fromDate, $toDate)->all();
 
             // process the data into an array
             $history = TraderController::historyGroupByDate($histories);
+            
         }
 
+        $paginate = function($items, $perPage = 25, $page = null){
+            $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
+            $total = count($items);
+            $currentpage = $page;
+            $offset = ($currentpage * $perPage) - $perPage ;
+            $itemstoshow = array_slice($items , $offset , $perPage);
+            return new LengthAwarePaginator($itemstoshow ,$total ,$perPage);
+        };
 
-        return view('service.payments.paymentHistory', compact( 'history')); //don't think I need compact as not array?
+        $history = $paginate($history,25,null,$trader)->withPath(route('admin.trader-payment-history.show', ['trader' => $trader->id ]) );
 
+        return view('service.payments.paymentHistory', compact( 'history'));
     }
 
     /**
