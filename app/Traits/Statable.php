@@ -75,11 +75,11 @@ trait Statable
     /**
      * Checks if a transition is "allowed" by the FSM graph
      *
-     * @param $transition
+     * @param string $transition
      * @return bool
      * @throws SMException
      */
-    public function transitionAllowed($transition)
+    public function transitionAllowed(string $transition) : bool
     {
         return $this->getStateMachine()->can($transition);
     }
