@@ -2,11 +2,14 @@
 
 namespace App\Providers;
 
+use App\Http\Controllers\Service\Admin\PaymentsController;
+use Carbon\Carbon;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
 use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
@@ -52,6 +55,12 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('endpushonce', static function ($expression) {
             return '<?php $__env->stopPush(); endif; ?>';
         });
+
+        // to enable conditional sidebar link
+        $checkPayments = PaymentsController::getPaymentsPast7Days('payment_pending',Carbon::now()->subDays(7));
+        $countPayments = count($checkPayments);
+
+        View::share('hasPayments', $countPayments);
     }
 
     /**
