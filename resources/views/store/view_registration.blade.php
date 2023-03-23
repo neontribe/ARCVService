@@ -36,9 +36,8 @@
                     </div>
                 </div>
             @endif
-            <div class="confirmation-buttons">
-                <button type="submit" class="submit" formaction="{{ URL::route('store.registration.rejoin',['registration' => $registration]) }}">Rejoin</button>
-                <button id="cancel">Cancel</button>
+            <div>
+                <button class="long-button submit" formaction="{{ URL::route('store.registration.rejoin',['registration' => $registration]) }}">Rejoin</button>
             </div>
         </div>
     </form>
