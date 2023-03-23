@@ -8,8 +8,9 @@
         <li><a href="{{ url('/deliveries') }}"><span class="glyphicon glyphicon-th-list"></span>View sent vouchers</a></li>
         <li><a href="{{ url('/deliveries/create') }}"><span class="glyphicon glyphicon-send"></span>Send vouchers</a></li>
         <li><a href="{{ url('/vouchers/void') }}"><span class="glyphicon glyphicon-fire"></span>Void voucher codes</a></li>
-        <li><a href="{{ url('/payments') }}"><span class="glyphicon glyphicon-gbp"></span>Payment Requests</a></li>
-        {{--Need to add colour change if outstanding requests--}}
+        <li><a href="{{ url('/payments') }}"
+               @if($hasPayments > 0) class ="payments" @endif><span class="glyphicon glyphicon-gbp"></span>Payment Requests</a></li>
+        {{--Adds colour change if outstanding payment requests--}}
         <li><a href="{{ url('/workers') }}"><span class="glyphicon glyphicon-th-list"></span>View workers</a></li>
         <li><a href="{{ url('/workers/create') }}"><span class="glyphicon glyphicon-plus"></span>Add workers</a></li>
         <li><a href="{{ url('/centres') }}"><span class="glyphicon glyphicon-th-list"></span>View children's centres</a></li>
