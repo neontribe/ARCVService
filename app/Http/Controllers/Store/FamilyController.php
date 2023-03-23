@@ -62,10 +62,6 @@ class FamilyController extends Controller
         // Set rejoin date
         $family->rejoin_on = Carbon::now();
 
-        // Wipe previous leaving_on to make them 'current' again - keep original leaving_reason for
-        // reports and to identify them as a previous leaver
-       // $family->leaving_on = null;
-
         $family->save();
         // Log that this family has rejoined
         Log::info('Registration ' . $registration->id . ' marked as rejoined by service user ' . Auth::id());
