@@ -9,7 +9,7 @@
 <div class="content flex">
     <form action="{{ URL::route("store.registration.rejoin",['registration' => $registration]) }}" method="post" class="full-height">
         {{ method_field('PUT') }}
-        {!! csrf_field() !!}
+        @csrf
         <input type="hidden" name="registration" value="{{ $registration->id }}">
         <div class="col fit-height">
             <div>

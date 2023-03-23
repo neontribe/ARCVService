@@ -32,6 +32,7 @@ class Family extends Model implements IEvaluee
         'leaving_on',
         'leaving_reason',
         'centre_sequence',
+        'rejoin_on',
     ];
 
     /**
