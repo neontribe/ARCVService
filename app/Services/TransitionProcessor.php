@@ -9,7 +9,6 @@ use App\Trader;
 use App\Voucher;
 use Carbon\Carbon;
 use Exception;
-use http\Exception\RuntimeException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
