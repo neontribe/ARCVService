@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Service\Admin;
 use App\Http\Controllers\Controller;
 use App\StateToken;
 use App\Trader;
+use Carbon\Carbon;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Facades\DB;
@@ -19,24 +20,25 @@ class PaymentsController extends Controller
      */
     public function index()
     {
-        $paymentData = $this->getPaymentsPast7Days();
-        return view('service.payments.index', compact('paymentData'));
+        $pendingPaymentData = $this->getPaymentsPast7Days('payment_pending',Carbon::now()->subDays(7));
+        $reimbursedPaymentData = $this->getPaymentsPast7Days('reimbursed',Carbon::now()->subDays(7));
+        return view('service.payments.index',['pending'=>$pendingPaymentData, 'reimbursed'=>$reimbursedPaymentData]);
     }
 
-    private function getPaymentsPast7Days()
+    private function getPaymentsPast7Days($currentState,$fromDate)
     { //TODO first just pending then add past 7 days when working okay?
 
         $pending = DB::select(DB::raw("select *,
 (select count(*) -- this gets a count of all the vouchers in the payment request 
 				from voucher_states as vs
                 left join vouchers v on vs.voucher_id = v.id
-                where v.currentstate = \"payment_pending\" and vsstid = vs.state_token_id
+                where v.currentstate = ? and vsstid = vs.state_token_id
                 and vs.state_token_id is not null) as total
 ,
 (select count(*) -- this splits the count off all vouchers into the vouchers per voucher area (voucher sponsor as opposed to market sponsor)
 				from voucher_states as vs
                 left join vouchers v on vs.voucher_id = v.id
-                where v.currentstate = \"payment_pending\" and vsstid = vs.state_token_id and v.sponsor_id = vsponsid
+                where v.currentstate = ? and vsstid = vs.state_token_id and v.sponsor_id = vsponsid
                 and vs.state_token_id is not null) as byarea
  from -- adding state token
     (select * from	-- adding voucher states
@@ -44,7 +46,8 @@ class PaymentsController extends Controller
 			(select v.id as vid, v.trader_id as tid, t.name as tname, t.market_id as tmid, v.currentstate as vstate, v.sponsor_id as vsponsid, s.name as vsponname from vouchers v
 			left join traders t on v.trader_id = t.id
 			left join sponsors s on v.sponsor_id = s.id
-			where v.currentstate = 'payment_pending'
+			where v.currentstate = ?
+			and v.updated_at >= ?
             -- gets all the vouchers with payment-pending, plus the area the voucher is from via sponsor and then trader who has scanned the voucher
 			) as pending
 		left join
@@ -69,7 +72,8 @@ class PaymentsController extends Controller
 	) as sts
 on allp.vsstid = sts.stid
 where stid is not null;
-")
+"), array($currentState,$currentState,$currentState,$fromDate)
+
         );
         //TODO suspect this needs some error handling
         $lists = collect($pending);

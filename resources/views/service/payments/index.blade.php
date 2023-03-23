@@ -25,7 +25,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($paymentData as $key => $paymentDatum)
+                    @foreach ($pending as $key => $paymentDatum)
                     <tr  class="accordion-toggle">
                         <td><span class="glyphicon glyphicon-th-list" data-toggle="collapse" data-target=".varea{{$key}}"></span></td>
                         <td>{{ $paymentDatum["traderName"]}}</td>
@@ -40,6 +40,28 @@
                                     <i class="fa fa-money button-icon" aria-hidden="true"></i>Pay Request
                                 </div>
                             </a>
+                        </td>
+                    </tr>
+                        @foreach($paymentDatum["voucherAreas"] as $area=>$value)
+                        <tr class="accordian-body collapse varea{{$key}}"><td colspan="5"></td>
+                            <td>{{ $area }}</td>
+                            <td>{{ $value }}</td>
+                            <td></td>
+                        </tr>
+                        @endforeach
+                    @endforeach
+                    @foreach ($reimbursed as $key => $paymentDatum)
+                    <tr  class="accordion-toggle">
+                        <td><span class="glyphicon glyphicon-th-list" data-toggle="collapse" data-target=".varea{{$key}}"></span></td>
+                        <td>{{ $paymentDatum["traderName"]}}</td>
+                        <td>{{ $paymentDatum["marketName"]}}</td>
+                        <td>{{ $paymentDatum["area"]}}</td>
+                        <td>{{ $paymentDatum["requestedBy"]}}</td>
+                        <td>All</td>
+                        <td>{{ $paymentDatum["vouchersTotal"]}}</td>
+                        <td><div class="badge badge-success">
+                                <i class="fa fa-money button-icon" aria-hidden="true"></i>Paid
+                            </div>
                         </td>
                     </tr>
                     @foreach($paymentDatum["voucherAreas"] as $area=>$value)
