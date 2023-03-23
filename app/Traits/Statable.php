@@ -10,6 +10,7 @@ namespace App\Traits;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use SM\Factory\FactoryInterface;
+use SM\SMException;
 use SM\StateMachine\StateMachine;
 use SM\StateMachine\StateMachineInterface;
 
@@ -74,8 +75,9 @@ trait Statable
     /**
      * Checks if a transition is "allowed" by the FSM graph
      *
-     * @param string $transition
+     * @param $transition
      * @return bool
+     * @throws SMException
      */
     public function transitionAllowed($transition)
     {

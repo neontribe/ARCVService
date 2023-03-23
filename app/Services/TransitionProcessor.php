@@ -9,6 +9,7 @@ use App\Trader;
 use App\Voucher;
 use Carbon\Carbon;
 use Exception;
+use http\Exception\RuntimeException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -113,10 +114,8 @@ class TransitionProcessor
                 $this->responses['undelivered'][] = $voucher->code;
                 continue;
             }
-            // mark the voucher against the trader.
-            $voucher->trader_id = $this->trader->id;
 
-            if ($this->doTransition($voucher, $transition)) {
+            if ($this->doTransition($voucher, $transition, $this->trader->id)) {
                 $this->responses['success_add'][] = $voucher->code;
             }
         }
@@ -126,23 +125,30 @@ class TransitionProcessor
      * Actually does the transition - will save a voucher on the way through
      * @param Voucher $voucher
      * @param string $transition
+     * @param int|null $againstTraderId
      * @return bool
      */
-    private function doTransition(Voucher $voucher, string $transition): bool
+    private function doTransition(Voucher $voucher, string $transition, ?int $againstTraderId = null): bool
     {
-        // Can we do a transition already?
         try {
-            $voucher->applyTransition($transition);
-        } catch (Exception $e) {
-            Log::warning($e->getMessage());
-            if ($voucher->trader_id === $this->trader->id) {
-                // Trader has already submitted this voucher
-                $this->responses['own_duplicate'][] = $voucher->code;
+            if ($voucher->transitionAllowed($transition)) {
+                $voucher->trader_id = $againstTraderId;
+                $voucher->applyTransition($transition);
             } else {
-                // Another trader has mistakenly submitted this voucher,
-                // Or the transition isn't valid (i.e. expired state)
-                $this->responses['other_duplicate'][] = $voucher->code;
+                // No? drop vouchers into a relevant bin
+                if ($voucher->trader_id === $againstTraderId) {
+                    // Trader has already submitted this voucher
+                    $this->responses['own_duplicate'][] = $voucher->code;
+                } else {
+                    // Another trader has mistakenly submitted this voucher,
+                    // Or the transition isn't valid (i.e expired state)
+                    $this->responses['other_duplicate'][] = $voucher->code;
+                }
+                return false;
             }
+        } catch (Exception $e) {
+            // Something went really wrong - impossible transition string?
+            Log::warning($e->getMessage());
             return false;
         }
         return true;
@@ -161,7 +167,7 @@ class TransitionProcessor
         foreach ($this->vouchers as $voucher) {
 
             // Can we do a transition already?
-            if ($this->doTransition($voucher, $transition)) {
+            if ($this->doTransition($voucher, $transition, $this->trader->id)) {
                 // add to a list for sending to ARC admin. This is a request for payment.
                 $this->vouchers_for_payment[] = $voucher;
 
@@ -213,11 +219,8 @@ class TransitionProcessor
             // alter the transition
             $transition = "reject-to-" . $last_state->from;
 
-            // return voucher to free pool
-            $voucher->trader_id = null;
-
             // Can we do a transition already?
-            if ($this->doTransition($voucher, $transition)) {
+            if ($this->doTransition($voucher, $transition, null)) {
                 $this->responses['success_reject'][] = $voucher->code;
             }
         }
@@ -232,7 +235,7 @@ class TransitionProcessor
         $transition = $this->transition;
         foreach ($this->vouchers as $voucher) {
             // Can we do a transition already?
-            $this->doTransition($voucher, $transition);
+            $this->doTransition($voucher, $transition, $this->trader->id);
         }
     }
 
