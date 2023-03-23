@@ -32,7 +32,7 @@
                             </td>
                             @if ( $voucher->currentstate === "payment_pending" )
                                 <td>
-                                    <span class="status requested">Requested</span>
+                                    <span class="link-button link-button-small requested">Requested</span>
                                 </td>
                                 <td>
                                     {{ \Carbon\Carbon::parse($voucher->paymentPendedOn()->first()->created_at)->format('d/m/Y') }}
@@ -60,8 +60,8 @@
                     <form action="{{ route('admin.payment-request.update', ['paymentUuid' => $state_token->uuid ]) }}" method="POST">
                         {{ method_field('PUT') }}
                         {!! csrf_field() !!}
-                        <button class="link-button link-button-small" type="submit">
-                        <i class="fa fa-money button-icon" aria-hidden="true"></i>Pay <b>{{ $number_to_pay }}</b> Vouchers
+                        <button class="btn link-button">
+                        Pay <b>{{ $number_to_pay }}</b> Vouchers
                         </button>
                     </form>
                 @endif

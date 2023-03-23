@@ -36,8 +36,8 @@
                         <td>{{ $paymentDatum["vouchersTotal"]}}</td>
                         <td>
                             <a href="{{ route('admin.payment-request.show', ['paymentUuid' => $key]) }}" class="link">
-                                <div class="link-button link-button-small">
-                                    <i class="fa fa-money button-icon" aria-hidden="true"></i>Pay Request
+                                <div class="link-button">
+                                    Pay Request
                                 </div>
                             </a>
                         </td>
@@ -59,7 +59,7 @@
                         <td>{{ $paymentDatum["requestedBy"]}}</td>
                         <td>All</td>
                         <td>{{ $paymentDatum["vouchersTotal"]}}</td>
-                        <td><div class="badge badge-success">
+                        <td><div class="link-button link-button-small paid">
                                 <i class="fa fa-money button-icon" aria-hidden="true"></i>Paid
                             </div>
                         </td>
