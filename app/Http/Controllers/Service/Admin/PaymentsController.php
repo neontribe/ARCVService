@@ -20,12 +20,12 @@ class PaymentsController extends Controller
      */
     public function index()
     {
-        $pendingPaymentData = $this->getPaymentsPast7Days('payment_pending',Carbon::now()->subDays(7));
-        $reimbursedPaymentData = $this->getPaymentsPast7Days('reimbursed',Carbon::now()->subDays(7));
+        $pendingPaymentData = $this::getPaymentsPast7Days('payment_pending',Carbon::now()->subDays(7));
+        $reimbursedPaymentData = $this::getPaymentsPast7Days('reimbursed',Carbon::now()->subDays(7));
         return view('service.payments.index',['pending'=>$pendingPaymentData, 'reimbursed'=>$reimbursedPaymentData]);
     }
 
-    private function getPaymentsPast7Days($currentState,$fromDate)
+    public static function getPaymentsPast7Days($currentState,$fromDate)
     { //TODO first just pending then add past 7 days when working okay?
 
         $pending = DB::select(DB::raw("select *,
