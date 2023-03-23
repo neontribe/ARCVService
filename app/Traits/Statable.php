@@ -10,6 +10,7 @@ namespace App\Traits;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use SM\Factory\FactoryInterface;
+use SM\SMException;
 use SM\StateMachine\StateMachine;
 use SM\StateMachine\StateMachineInterface;
 
@@ -76,8 +77,9 @@ trait Statable
      *
      * @param string $transition
      * @return bool
+     * @throws SMException
      */
-    public function transitionAllowed($transition)
+    public function transitionAllowed(string $transition) : bool
     {
         return $this->getStateMachine()->can($transition);
     }
