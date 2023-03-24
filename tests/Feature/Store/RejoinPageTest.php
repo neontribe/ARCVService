@@ -115,6 +115,8 @@ class RejoinPageTest extends StoreTestCase
     /** @test */
     public function itWillAllowFamilyToRejoin()
     {
+        $knownDate = Carbon::create(2023, 1, 13, 12);
+        Carbon::setTestNow($knownDate);
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.view', $this->registration->id))
             ->press('Rejoin')
@@ -122,7 +124,9 @@ class RejoinPageTest extends StoreTestCase
 
         $this->seeInDatabase('families', [
             'id' => $this->family->id,
-            'rejoin_on' => Carbon::now()
+            'rejoin_on' => $knownDate
             ]);
+
+        Carbon::setTestNow();
     }
 }
