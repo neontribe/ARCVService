@@ -26,11 +26,6 @@ class StoreRejoinRegistrationFamilyRequest extends FormRequest
     public function rules()
     {
         // A reason key might be present.
-        return [
-            'leaving_reason' => [
-                'sometimes',
-                Rule::in(config('arc.leaving_reasons')),
-            ],
-        ];
+        return [];
     }
 }
