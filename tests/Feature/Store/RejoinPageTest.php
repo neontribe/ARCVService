@@ -77,9 +77,9 @@ class RejoinPageTest extends StoreTestCase
         ;
         // Don't see the names of children in the page
         foreach ($this->children as $child) {
-            $this->dontsee('<td class="age-col">'. $child->getAgeString() .'</td>')
-                ->dontsee('<td class="dob-col">'. $child->getDobAsString() .'</td>')
-                ->dontseeElement('input[type="hidden"][value="'. $child->dob->format('Y-m') .'"]')
+            $this->dontSee('<td class="age-col">'. $child->getAgeString() .'</td>')
+                ->dontSee('<td class="dob-col">'. $child->getDobAsString() .'</td>')
+                ->dontSeeInElement('input[type="hidden"]', $child->dob->format('Y-m'))
             ;
         }
     }
@@ -98,7 +98,7 @@ class RejoinPageTest extends StoreTestCase
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.view', [ 'registration' => $this->registration ]))
-            ->dontsee('Remove this family')
+            ->dontSee('Remove this family')
         ;
     }
 
