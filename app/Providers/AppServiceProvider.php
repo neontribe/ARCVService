@@ -2,8 +2,7 @@
 
 namespace App\Providers;
 
-use App\Http\Controllers\Service\Admin\PaymentsController;
-use Carbon\Carbon;
+use App\Views\Composers\PaymentsComposer;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Database\Eloquent\Builder;
@@ -56,11 +55,8 @@ class AppServiceProvider extends ServiceProvider
             return '<?php $__env->stopPush(); endif; ?>';
         });
 
-        // to enable conditional sidebar link
-        $checkPayments = PaymentsController::getPaymentsPast7Days('payment_pending',Carbon::now()->subDays(7));
-        $countPayments = count($checkPayments);
+        View::composer('*', PaymentsComposer::class);
 
-        View::share('hasPayments', $countPayments);
     }
 
     /**

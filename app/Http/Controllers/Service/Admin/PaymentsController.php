@@ -8,6 +8,7 @@ use App\Trader;
 use Carbon\Carbon;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -16,7 +17,7 @@ class PaymentsController extends Controller
     /**
      * List Payments
      *
-     * @return Application|Factory|View
+     * @return LengthAwarePaginator
      */
     public function index()
     {
@@ -26,7 +27,7 @@ class PaymentsController extends Controller
     }
 
     public static function getPaymentsPast7Days($currentState,$fromDate)
-    { //TODO first just pending then add past 7 days when working okay?
+    {
 
         $pending = DB::select(DB::raw("select *,
 (select count(*) -- this gets a count of all the vouchers in the payment request 
