@@ -40,7 +40,12 @@
                 <tbody>
                 @foreach ($registrations as $registration)
                     @if ($registration->family)
-                        <tr class="{{ $registration->family->leaving_on ? 'inactive' : 'active' }}">
+                        @php(\App\Http\Controllers\Store\FamilyController::status($registration))
+                        @if( $registration->family->status === true)
+                            <tr class='active'>
+                        @else
+                            <tr class='inactive'>
+                        @endif
                             <td class="pri_carer">
                                 <div>{{ $registration->family->carers->first()->name }}</div>
                                 {!! Request::get("centre") == ($registration->centre->id) ?
@@ -49,7 +54,7 @@
                             </td>
                             <td class="center">{{ $registration->family->rvid }}</td>
                             <td class="right no-wrap">
-                                @if( !isset($registration->family->leaving_on) )
+                                @if( $registration->family->status === true)
                                     <a href="{{ route('store.registration.voucher-manager', ['registration'=> $registration->id ]) }}"
                                        class="link inline-link-button">
                                         <div class="link-button">
@@ -66,9 +71,12 @@
                                     <div class="link-button link-button-small disabled">
                                         <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Vouchers
                                     </div>
-                                    <div class="link-button link-button-small disabled">
-                                        <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Edit
-                                    </div>
+                                    <a href="{{ route('store.registration.view', ['registration'=> $registration->id ]) }}" class="link
+                            inline-link-button">
+                                        <div class="link-button view">
+                                            View
+                                        </div>
+                                    </a>
                                 @endif
                             </td>
                         </tr>

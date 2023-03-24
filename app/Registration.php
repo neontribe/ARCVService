@@ -174,6 +174,7 @@ class Registration extends Model implements IEvaluee
     {
         return $query->whereHas('family', function ($q) {
             $q->whereNull('leaving_on');
+            $q->orWhere('rejoin_on', '>', 'leaving_on');
         });
     }
 }

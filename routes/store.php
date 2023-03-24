@@ -98,10 +98,22 @@ Route::group(['middleware' => 'auth:store'], function () {
                 'uses' => 'RegistrationController@update',
             ])->where('registration', '^[0-9]+$');
 
+            // View a specific registration
+            Route::get('/registrations/{registration}/view', [
+                'as' => 'store.registration.view',
+                'uses' => 'RegistrationController@view',
+            ])->where('registration', '^[0-9]+$');
+
             // Update (deactivate) a specific Registration's Family
             Route::put('/registrations/{registration}/family', [
                 'as' => 'store.registration.family',
                 'uses' => 'FamilyController@update',
+            ])->where('registration', '^[0-9]+$');
+
+            // Rejoin a specific Registration's Family
+            Route::put('/registrations/{registration}/rejoin', [
+                'as' => 'store.registration.rejoin',
+                'uses' => 'FamilyController@rejoin',
             ])->where('registration', '^[0-9]+$');
 
             // Print a specific registration
