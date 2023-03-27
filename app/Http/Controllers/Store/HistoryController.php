@@ -7,6 +7,7 @@ use App\Registration;
 use Auth;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
+use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Collection;
 
 class HistoryController extends Controller
@@ -23,7 +24,7 @@ class HistoryController extends Controller
 
         if ($disbursedBundles->count() > 0) {
             // Creates a weekly date array from first assigned voucher to today.
-            $periodObject = new \DatePeriod(
+            $periodObject = new CarbonPeriod(
                 $disbursedBundles->last()->disbursed_at->startOfWeek(),
                 CarbonInterval::week(),
                 Carbon::now()->endOfWeek()
@@ -49,7 +50,7 @@ class HistoryController extends Controller
 
                 foreach ($weeklyCollections as $bundle) {
                     $weeklyCollections->amount += $bundle->vouchers->count();
-                };
+                }
 
                 // Attach collection of bundles to date
                 $datesCollection[$dateTime->startOfWeek()->format('d-m-y')] = $weeklyCollections;
