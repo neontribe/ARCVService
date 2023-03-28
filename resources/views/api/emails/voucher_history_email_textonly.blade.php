@@ -22,8 +22,8 @@ Rose Vouchers
 
 Alexandra Rose Charity
 
-For more information please go to <a href="http://www.alexandrarose.org.uk/">www.alexandrarose.org.uk</a>.
+For more information please go to <a href="http://www.alexandrarose.org.uk/" target="_blank" rel="noopener noreferrer">www.alexandrarose.org.uk</a>.
 
-<a href="https://www.alexandrarose.org.uk/Handlers/Download.ashx?IDMF=0a18fbf9-ed33-4c1d-a8a3-766542c961c8" role="link">
+<a href="https://www.alexandrarose.org.uk/Handlers/Download.ashx?IDMF=0a18fbf9-ed33-4c1d-a8a3-766542c961c8" target="_blank" rel="noopener noreferrer" role="link">
     Privacy Policy
 </a>

@@ -9,7 +9,7 @@
 
 @section('cookie-warning')
     <div class="cookie-notice">
-        <p>We use cookies to authenticate you so we can ensure that we give you the best experience on our website. For more information please read our <a href="{{ config('arc.links.privacy_policy') }}">Privacy Policy</a>.</p>
+        <p>We use cookies to authenticate you so we can ensure that we give you the best experience on our website. For more information please read our <a href="{{ config('arc.links.privacy_policy') }}" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.</p>
         <button class="cookie-agree">Dismiss</button>
     </div>
 @endsection
@@ -52,7 +52,7 @@
                 <button type="submit" class="submit">Log In</button>
                 <div class="links">
                     <a href="{{ route('store.password.request') }}">Forgot Your Password?</a>
-                    <a href="{{ config('arc.links.privacy_policy') }}">Privacy Policy</a>
+                    <a href="{{ config('arc.links.privacy_policy') }}" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
                 </div>
             </form>
         </div>
