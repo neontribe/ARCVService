@@ -61,7 +61,7 @@ class LargeVouchersSeeder extends Seeder
         // Make a transition definition
         $collectTransitionDef = Voucher::createTransitionDef("printed", "collect");
 
-        VoucherState::batchInsert($recordedVouchers, $date,1, 'User', $collectTransitionDef);
+        VoucherState::batchInsert($recordedVouchers, $date, 1, 'User', $collectTransitionDef);
 
         // Create 5000 vouchers that have a state of payment_pending
         $pendingVouchers = factory(Voucher::class, 5000)->state('printed')->create([
@@ -74,6 +74,6 @@ class LargeVouchersSeeder extends Seeder
         // Make a transition definition
         $existingTransitionDef = Voucher::createTransitionDef("recorded", "confirm");
 
-        VoucherState::batchInsert($pendingVouchers, $date,1, 'User', $existingTransitionDef);
+        VoucherState::batchInsert($pendingVouchers, $date, 1, 'User', $existingTransitionDef);
     }
 }
