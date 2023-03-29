@@ -43,6 +43,7 @@ class Family extends Model implements IEvaluee
      */
     protected $dates = [
         'leaving_on',
+        'rejoin_on',
     ];
 
     /**
