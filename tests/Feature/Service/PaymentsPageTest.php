@@ -1,16 +1,19 @@
 <?php
 
-namespace Tests\Feature\Store;
+namespace Tests\Feature\Service;
 
+use App\User;
 use Tests\StoreTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use App\AdminUser;
 use App\Voucher;
 use App\StateToken;
 use App\Trader;
 use URL;
 
-class PaymentPageTest extends StoreTestCase
+class PaymentsPageTest extends StoreTestCase
 {
+    //All these are copied and adapted from old store payment page tests that were at Feature\Store and now defunct.
     use DatabaseMigrations;
 
     protected $voucher;
@@ -18,10 +21,14 @@ class PaymentPageTest extends StoreTestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // Create Admin as this is all in auth now
+        $this->admin_user = factory(AdminUser::class)->create();
 
         // Create a voucher and a trader with some info
+        // And a user otherwise transition rightly breaks integrity constraints
         $this->voucher = factory(Voucher::class)->state('printed')->create();
         $trader = factory(Trader::class)->state('withnullable')->create();
+        $user = factory(User::class)->create();
         $this->voucher->code = 'TEST12345';
         $this->voucher->trader_id = $trader->id;
         $this->voucher->save();
@@ -37,14 +44,16 @@ class PaymentPageTest extends StoreTestCase
 
         $vs = $this->voucher->history->last();
         $vs->stateToken()->associate($stateToken);
+        $vs->user_id = $user->id;
         $vs->save();
     }
 
     /** @test */
     public function itShowsAnErrorWhenPaymentLinkBad()
     {
+        $this->actingAs($this->admin_user, 'admin')
         // A poorly formed uuid should show the page, but with an error message in place of the voucher table
-        $this->visit(URL::route('store.payment-request.show', [ 'paymentUuid' => 'a-made-up-uuid' ]))
+            ->visit(URL::route('admin.payment-request.show', [ 'paymentUuid' => 'a-made-up-uuid' ]))
             ->seeInElement('p[class="content-warning center"]', 'This payment request is invalid, or has expired.')
             ->dontSeeElement('table')
         ;
@@ -54,18 +63,21 @@ class PaymentPageTest extends StoreTestCase
     public function itShowsPaymentRequestDetailsOnlyForValidPaymentUUIDs()
     {
         // A real uuid will display the data table
-        $this->visit(URL::route('store.payment-request.show', [ 'paymentUuid' => 'a-real-uuid' ]))
+        $this->actingAs($this->admin_user, 'admin')
+            ->visit(URL::route('admin.payment-request.show', [ 'paymentUuid' => 'a-real-uuid' ]))
             ->seeElement('table')
-            ->see('Voucher Code')
-            ->see('Status')
-            ->see('Date')
+            ->seeInElement('th', 'Voucher Code')
+            ->seeInElement('th', 'Status')
+            ->seeInElement('th', 'Date')
         ;
 
-        // A made up uuid uuid will not display the data table
-        $this->visit(URL::route('store.payment-request.show', [ 'paymentUuid' => 'a-made-up-uuid' ]))
+        // A made up uuid will not display the data table
+        $this->actingAs($this->admin_user, 'admin')
+            ->visit(URL::route('admin.payment-request.show', [ 'paymentUuid' => 'a-made-up-uuid' ]))
             ->dontseeElement('table')
-            ->dontsee('Voucher Code')
-            ->dontsee('Status')
+            ->dontseeInElement('th', 'Voucher Code')
+            ->dontseeInElement('th', 'Status')
+            ->dontseeInElement('th', 'Date')
             ->see('This payment request is invalid, or has expired.')
         ;
     }
@@ -74,16 +86,18 @@ class PaymentPageTest extends StoreTestCase
     public function itShowsPayButtonWhenOnlyPaymentIsUnpaid()
     {
         // A real unpaid uuid will display the pay button
-        $this->visit(URL::route('store.payment-request.show', [ 'paymentUuid' => 'a-real-uuid' ]))
-            ->seeInElement('button[type="submit"]', 'Pay')
+        $this->actingAs($this->admin_user, 'admin')
+            ->visit(URL::route('admin.payment-request.show', [ 'paymentUuid' => 'a-real-uuid' ]))
+            ->seeInElement('button[class="btn link-button"]', 'Pay <b>1</b> Vouchers')
         ;
 
         // Transition the voucher to paid
         $this->voucher->applyTransition('payout');
 
         // A real paid uuid will not display the pay button
-        $this->visit(URL::route('store.payment-request.show', [ 'paymentUuid' => 'a-real-uuid' ]))
-            ->dontSeeInElement('button[type="submit"]', 'Pay')
+        $this->actingAs($this->admin_user, 'admin')
+            ->visit(URL::route('admin.payment-request.show', [ 'paymentUuid' => 'a-real-uuid' ]))
+            ->dontSeeInElement('button[class="btn link-button"]', 'Pay <b>1</b> Vouchers')
         ;
     }
 
@@ -91,23 +105,27 @@ class PaymentPageTest extends StoreTestCase
     public function itShowsTheCorrectVoucherStatus()
     {
         // A made up uuid will display no statuses
-        $this->visit(URL::route('store.payment-request.show', [ 'paymentUuid' => 'a-made-up-uuid' ]))
+        $this->actingAs($this->admin_user, 'admin')
+            ->visit(URL::route('admin.payment-request.show', [ 'paymentUuid' => 'a-made-up-uuid' ]))
             ->dontSeeInElement('span[class="status requested"]', 'Requested')
             ->dontSeeInElement('span[class="status paid"]', 'Paid')
         ;
 
         // A real unpaid uuid will display requested status
-        $this->visit(URL::route('store.payment-request.show', [ 'paymentUuid' => 'a-real-uuid' ]))
-            ->seeInElement('span[class="status requested"]', 'Requested')
+        $this->actingAs($this->admin_user, 'admin')
+            ->visit(URL::route('admin.payment-request.show', [ 'paymentUuid' => 'a-real-uuid' ]))
+            ->seeInElement('span[class="link-button link-button-small requested"]', 'Requested')
         ;
 
         // Transition the voucher to paid
         $this->voucher->applyTransition('payout');
 
         // A real paid uuid will display paid status
-        $this->visit(URL::route('store.payment-request.show', [ 'paymentUuid' => 'a-real-uuid' ]))
+        $this->actingAs($this->admin_user, 'admin')
+            ->visit(URL::route('admin.payment-request.show', [ 'paymentUuid' => 'a-real-uuid' ]))
             ->seeInElement('span[class="status paid"]', 'Paid')
         ;
     }
 
 }
+
