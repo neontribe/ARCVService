@@ -136,7 +136,7 @@ class TradersController extends Controller
      * Display the Trader's voucher / payment history as Admin
      *
      * @param Trader $trader
-     * @return Paginator
+     * @return view
      *
      **/
     public function traderHistory (Trader $trader)
