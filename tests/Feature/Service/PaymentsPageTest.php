@@ -24,6 +24,8 @@ class PaymentsPageTest extends StoreTestCase
         // Create Admin as this is all in auth now
         $this->admin_user = factory(AdminUser::class)->create();
 
+        $this->paymentsRoute = route('admin.payments.index');
+
         // Create a voucher and a trader with some info
         // And a user otherwise transition rightly breaks integrity constraints
         $this->voucher = factory(Voucher::class)->state('printed')->create();
@@ -46,6 +48,21 @@ class PaymentsPageTest extends StoreTestCase
         $vs->stateToken()->associate($stateToken);
         $vs->user_id = $user->id;
         $vs->save();
+    }
+    /** @test */
+    public function itShowsATableWithHeaders()
+    {
+        $this->actingAs($this->admin_user, 'admin')
+            ->visit($this->paymentsRoute)
+            ->assertResponseOk()
+            ->seeInElement('h1', 'Payment Requests')
+            ->seeInElement('th', 'Name')
+            ->seeInElement('th', 'Market')
+            ->seeInElement('th', 'Area')
+            ->seeInElement('th', 'Requested By')
+            ->seeInElement('th', 'Voucher Area')
+            ->seeInElement('th', 'Total')
+        ;
     }
 
     /** @test */
