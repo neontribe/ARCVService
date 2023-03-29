@@ -14,10 +14,10 @@ use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Auth;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Tests\TestCase;
+use Tests\StoreTestCase;
 
 
-class PaymentControllerTest extends TestCase
+class PaymentControllerTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
@@ -52,30 +52,31 @@ class PaymentControllerTest extends TestCase
         foreach ($this->vouchers as $k => $voucher) {
             $voucher->code = 'RVNT' . str_pad($k, 4, '0', STR_PAD_LEFT);
             $voucher->sponsor_id = $s->id;
+            $voucher->trader_id = $this->trader->id;
             // Progress to dispatched.
             $voucher->applyTransition('dispatch');
             $voucher->applyTransition('collect');
             $voucher->applyTransition('confirm');
 
-            $voucherState = VoucherState::where('voucher_id', $voucher->id);
-
-  //          dd($voucherState);
-            $stateToken = StateToken::where('id', $voucherState->state_token_id);
-
-            $stateToken->uuid = $token->uuid;
-
-//            $voucher->state_token_id = $token->id;
+            $voucherState = $voucher->paymentPendedOn()->first();
+            $voucherState->state_token_id = $token->id;
+            $voucherState->voucher_id = $voucher->id;
+            $voucherState->save();
             $voucher->save();
         }
-
-        $data = $token(['uuid']);
+        $data = $token->uuid;
 
         //pass the UUID to the route
-        $route = route('service.payments.paymentRequest');
+        $route = route('admin.payment-request.show',['paymentUuid'=>$data]);
 
         $this->actingAs($this->admin_user, 'admin')
-            ->post($route, $data)
-            ->assertStatus(200);
+            ->get($route)
+            ->assertResponseStatus(200);
+
+        foreach($this->vouchers as $voucher){
+            $this->see($voucher->code);
+        }
+        //TODO also test that I cannot see a different UUID in here
     }
 //    /** @test */
 //    public function testItUpdatesASpecificPaymentRequest()
