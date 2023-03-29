@@ -21,7 +21,7 @@
     "barryvdh/laravel-dompdf": "2.0.1",
     "doctrine/dbal": "3.6.1",
     "fakerphp/faker": "^1.19.0",
-    "highsolutions/laravel-searchy" : "^9.0",
+    "highsolutions/laravel-searchy": "^9.0",
     "imtigger/laravel-job-status": "^1.2",
     "laravel/framework": "^9.0",
     "laravel/helpers": "^1.5.0",
@@ -37,7 +37,8 @@
     "symfony/event-dispatcher": "6.2.7",
     "symfony/lock": "^6.2",
     "symfony/mailchimp-mailer": "^6.2",
-    "usmanhalalit/laracsv": "^2.1.0"
+    "usmanhalalit/laracsv": "^2.1.0",
+    "werk365/etagconditionals": "^1.4"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^2.8.2",

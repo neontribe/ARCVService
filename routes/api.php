@@ -49,18 +49,21 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::get('traders/{trader}', [
             'as' => 'api.trader',
             'uses' => 'TraderController@show',
-            // $user and App\Trader sent implicitly to policy.
         ])->where('trader', '^[0-9]+$');
 
         Route::get('traders/{trader}/vouchers', [
             'as' => 'api.trader.vouchers',
             'uses' => 'TraderController@showVouchers',
-        ])->where('trader', '^[0-9]+$');
+        ])->where('trader', '^[0-9]+$')
+            // Big response, 304 if the request provides a matching etag
+        ->middleware(['setEtag','ifNoneMatch']);
 
         Route::get('traders/{trader}/voucher-history', [
             'as' => 'api.trader.voucher-history',
             'uses' => 'TraderController@showVoucherHistory',
-        ])->where('trader', '^[0-9]+$');
+        ])->where('trader', '^[0-9]+$')
+            // Big response, 304 if the request provides a matching etag
+        ->middleware(['setEtag', 'ifNoneMatch']);
 
         Route::post('traders/{trader}/voucher-history-email', [
             'as' => 'api.trader.voucher-history-email',
@@ -68,27 +71,26 @@ Route::group(['middleware' => 'auth:api'], function () {
         ])->where('trader', '^[0-9]+$');
     });
 
-    /**
-     * Legacy transition for old clients
-     */
-    Route::post('vouchers', [
-        'as' => 'api.voucher.transition',
-        'uses' => 'VoucherController@legacyTransition',
-    ])->middleware('can:collect,App\Voucher');
+    Route::group(['middleware' => 'can:collect,App\Voucher'], function () {
+        /**
+         * Legacy transition route; backwards compat.
+         */
+        Route::post('vouchers', [
+            'as' => 'api.voucher.transition',
+            'uses' => 'VoucherController@legacyTransition',
+        ]);
 
-    /**
-     * new voucher transition routes
-     */
-    Route::post('vouchers/transitions', [
-        'as' => 'api.vouchers.transition-responses.store',
-        'uses' => 'TransitionController@store',
-    ])->middleware('can:collect,App\Voucher');
+        /**
+         * new voucher transition routes
+         */
+        Route::post('vouchers/transitions', [
+            'as' => 'api.vouchers.transition-responses.store',
+            'uses' => 'TransitionController@store',
+        ]);
 
-    Route::get('vouchers/transitions/{jobStatus}', [
-        'as' => 'api.vouchers.transition-response.show',
-        'uses' => 'TransitionController@show',
-    ])->where('jobStatus', '^[0-9]+$')
-        //->middleware('can:collect,App\Voucher');
-        ;
-
+        Route::get('vouchers/transitions/{jobStatus}', [
+            'as' => 'api.vouchers.transition-response.show',
+            'uses' => 'TransitionController@show',
+        ])->where('jobStatus', '^[0-9]+$');
+    });
 });
