@@ -66,6 +66,17 @@ class PaymentsPageTest extends StoreTestCase
     }
 
     /** @test */
+    public function itShowsOutstandingPaymentsInSidebar()
+    {
+        $this->actingAs($this->admin_user, 'admin')
+            ->visit($this->paymentsRoute)
+            ->assertResponseOk()
+            ->seeInElement('a.payments','Payment Requests')
+        ;
+
+    }
+
+    /** @test */
     public function itShowsAnErrorWhenPaymentLinkBad()
     {
         $this->actingAs($this->admin_user, 'admin')
