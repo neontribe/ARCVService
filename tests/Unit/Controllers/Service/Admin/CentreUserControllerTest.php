@@ -147,7 +147,7 @@ class CentreUserControllerTest extends StoreTestCase
                 'deleted_at' => null
             ])
             ->dontSeeInDatabase('centre_centre_user', [
-                'centre_user)id' => $cu->id,
+                'centre_user_id' => $cu->id,
                 'centre_id' => $this->altCentres->last()->id,
             ])
         ;
