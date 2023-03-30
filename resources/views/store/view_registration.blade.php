@@ -27,7 +27,7 @@
         <div class="col fit-height">
             <div>
                 <img src="{{ asset('store/assets/info-light.svg') }}" alt="logo">
-                <h2>This family</h2>
+                <h2>This {{ $programme ? 'household' : 'family' }}</h2>
             </div>
             @if (isset($family))
                 <div>
