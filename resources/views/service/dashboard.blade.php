@@ -14,10 +14,12 @@
             <p>Use the links in the sidebar to:</p>
             
             <ul>
-                <li>View vouchers, or to add a new batch of vouchers</li>
+                <li>View vouchers, add a new batch of vouchers, send vouchers and void vouchers</li>
+                <li>View and pay voucher payment requests</li>
                 <li>View, add and edit workers (using the 'View workers' link)</li>
                 <li>View and add centres</li>
                 <li>View and add areas</li>
+                <li>View and add traders</li>
             </ul>
         </div>
 

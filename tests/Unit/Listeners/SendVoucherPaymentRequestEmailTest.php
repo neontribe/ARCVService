@@ -8,7 +8,6 @@ use App\Listeners\SendVoucherPaymentRequestEmail;
 use App\Mail\VoucherPaymentRequestEmail;
 use App\Market;
 use App\Sponsor;
-use App\StateToken;
 use App\Trader;
 use App\User;
 use App\Voucher;
@@ -24,7 +23,6 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
 
     protected $traders;
     protected $vouchers;
-    protected $stateToken;
     protected $user;
 
     protected function setUp(): void
@@ -45,8 +43,6 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
         // Set up voucher states.
         Auth::login($this->user);
 
-        // Make a stateToken
-        $this->stateToken = factory(StateToken::class)->create();
 
         foreach ($this->vouchers as $v) {
             $v->applyTransition('dispatch');
@@ -63,14 +59,11 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
         $user = $this->user;
         $trader = $this->traders[0];
         $vouchers = $trader->vouchers;
-        $stateToken = $this->stateToken;
 
         // confirm the vouchers.
-        $vouchers->each(function ($v) use ($stateToken) {
+        $vouchers->each(function ($v) {
             $v->applyTransition('confirm');
             $v->getPriorState()
-            ->stateToken()
-            ->associate($stateToken)
             ->save();
         });
 
@@ -79,12 +72,10 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
         $controller = new TraderController();
         $file = $controller->createVoucherListFile($trader, $vouchers, $title);
         $programme_amounts = $controller->getProgrammeAmounts($vouchers);
-        $event = new VoucherPaymentRequested($user, $trader, $stateToken, $vouchers, $file, $programme_amounts);
+        $event = new VoucherPaymentRequested($user, $trader, $vouchers, $file, $programme_amounts);
         $listener = new SendVoucherPaymentRequestEmail();
         $listener->handle($event);
 
-        // Make the route to check
-        $route = URL::route('store.payment-request.show', $stateToken->uuid);
 
         $viewData = [
             'user' => $user,
@@ -92,12 +83,10 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
             'trader' => $trader,
             'market' => $trader->market,
             'programme_amounts' => $programme_amounts,
-            'actionUrl' => URL::route('store.payment-request.show', $this->stateToken->uuid),
-            'actionText' => 'Pay Request'
         ];
 
         Mail::assertSent(VoucherPaymentRequestEmail::class, 1);
-        Mail::assertSent(VoucherPaymentRequestEmail::class, function (VoucherPaymentRequestEmail $mail) use ($viewData, $route) {
+        Mail::assertSent(VoucherPaymentRequestEmail::class, function (VoucherPaymentRequestEmail $mail) use ($viewData) {
             $email = $mail->build();
             $this->assertEquals(config('mail.to_admin.address'), $mail->to[0]['address']);
             $this->assertEquals([], $mail->cc);
@@ -112,8 +101,6 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
             $this->assertStringContainsString('for ' .  $viewData['programme_amounts']['numbers']['standard'] . ' standard vouchers', $body);
             $this->assertStringContainsString('and ' .  $viewData['programme_amounts']['numbers']['social_prescription'] . ' social prescription vouchers', $body);
             $this->assertStringContainsString(e($viewData['trader']->name), $body);
-            $this->assertStringContainsString('<a href="' . $route . '" class="button button-pink" target="_blank">Pay Request</a>', $body);
-            $this->assertStringContainsString('<br>' . $route, $body);
             return true;
         });
     }

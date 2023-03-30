@@ -17,7 +17,6 @@ class VoucherPaymentRequested
 
     public $user;
     public $trader;
-    public $stateToken;
     public $vouchers;
     public $file;
     public $programme_amounts;
@@ -30,11 +29,10 @@ class VoucherPaymentRequested
      * @param $vouchers
      * @param $file
      */
-    public function __construct(User $user, Trader $trader, StateToken $stateToken, $vouchers, $file, $programme_amounts)
+    public function __construct(User $user, Trader $trader, $vouchers, $file, $programme_amounts)
     {
         $this->user = $user;
         $this->trader = $trader;
-        $this->stateToken = $stateToken;
         $this->file = $file;
         $this->vouchers = $vouchers;
         $this->programme_amounts = $programme_amounts;

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Service\Admin;
 
+use App\Http\Controllers\API\TraderController;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminNewUpdateTraderRequest;
 use App\Market;
@@ -14,11 +15,15 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Laracsv\Export;
+use function League\Flysystem\withPath;
 use Ramsey\Uuid\Uuid;
 use Throwable;
 
@@ -125,6 +130,64 @@ class TradersController extends Controller
 
         $marketsBySponsor = Sponsor::with(['markets:sponsor_id,id,name'])->get(['id', 'name']);
         return view('service.traders.create', compact('marketsBySponsor', 'preselected'));
+    }
+
+    /**
+     * Display the Trader's voucher / payment history as Admin
+     *
+     * @param Trader $trader
+     * @return view
+     *
+     **/
+    public function traderHistory (Trader $trader)
+    {
+        // get days we pended on
+        $historyCount = DB::table(static function ($query) use ($trader) {
+            $query->selectRaw("SUBSTR(`voucher_states`.`created_at`, 1, 10) as pendedOn")
+                ->from('vouchers')
+                // use inner join
+                ->join('voucher_states', 'vouchers.id', 'voucher_states.voucher_id')
+                ->where('voucher_states.to', 'payment_pending')
+                ->where('vouchers.trader_id', $trader->id)
+                // cut down the recorded
+                ->where('vouchers.currentstate', '!=', 'recorded')
+                ->groupBy('pendedOn')
+                ->orderByDesc('pendedOn');
+        }, 'daysFromQuery')
+            ->select('pendedOn')
+            ->paginate()
+            ->toArray();
+
+        // if there are any, make a query
+        if ($historyCount["total"] === 0) {
+            $history = [];
+        } else {
+            // get the first and last dates from that.
+            $toDate = Arr::first($historyCount["data"])->pendedOn . ' 23:59:59';
+            $fromDate = Arr::last($historyCount["data"])->pendedOn . ' 00:00:00';
+//            $toDate = $historyCount->items()->first()->pendedOn . ' 23:59:59';
+//            $fromDate = $historyCount->lastItem()->pendedOn . ' 00:00:00';
+
+            // get histories between those dates.
+            $histories = TraderController::paymentHistoryBetweenDateTimes($trader, $fromDate, $toDate)->all();
+
+            // process the data into an array
+            $history = TraderController::historyGroupByDate($histories);
+            
+        }
+
+        $paginate = function($items, $perPage = 25, $page = null){
+            $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
+            $total = count($items);
+            $currentpage = $page;
+            $offset = ($currentpage * $perPage) - $perPage ;
+            $itemstoshow = array_slice($items , $offset , $perPage);
+            return new LengthAwarePaginator($itemstoshow ,$total ,$perPage);
+        };
+
+        $history = $paginate($history,25,null,$trader)->withPath(route('admin.trader-payment-history.show', ['trader' => $trader->id ]) );
+
+        return view('service.payments.paymentHistory', compact( 'history'));
     }
 
     /**
@@ -253,6 +316,7 @@ class TradersController extends Controller
             ->route('admin.traders.index')
             ->with('message', 'Trader ' . $trader->name . ' updated');
     }
+
 
     public function download()
     {

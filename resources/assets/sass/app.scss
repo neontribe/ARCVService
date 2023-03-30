@@ -19,6 +19,9 @@ a {
     color: $arc_rose;
     text-decoration: none;
   }
+  &.payments {
+    color: #a71d2a;
+  }
 }
 
 h1,
@@ -285,7 +288,21 @@ span.user-array {
   min-height: 2.5rem;
   text-align: center;
   vertical-align: top;
+
+  &.paid {
+    background-color: #dff2ce;
+    box-shadow: none;
+    color: #000;
+  }
+  &.requested {
+    display: inline-block;
+    padding: 0.2em 0.8em;
+    background-color: #f8c28b;
+    box-shadow: none;
+    color: #000;
+  }
 }
+
 
 .download-list {
   display: inline-block;

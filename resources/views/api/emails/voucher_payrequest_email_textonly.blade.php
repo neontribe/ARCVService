@@ -15,10 +15,7 @@ The attached file is best viewed through a spreadsheet program such as Microsoft
 Sheets. If you have any problems with opening or downloading it, please email <a
     href="mailto:{{ config('mail.to_developer.address') }}">{{ config('mail.to_developer.name') }}</a>.
 
-To register this request as paid, copy and paste the URL below
-into your web browser and follow the directions there :
-
-{{ $actionUrl }}
+To pay this request, please go to the Rose Voucher Admin Portal.
 
 Thanks,
 Rose Vouchers
