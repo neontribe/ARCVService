@@ -32,7 +32,7 @@
             @if (isset($family))
                 <div>
                     <div>
-                        <p>This {{ $programme ? 'household' : 'family' }} has {{ count($family->children) . " " . str_plural('child', count($family->children)) }} and left the project on {{$family->leaving_on->format('d-m-Y')}}</p>
+                        <p>This {{ $programme ? 'household' : 'family' }} has {{ count($family->children) . " " . str_plural($programme ? 'participant' : 'child', count($family->children)) }} and left the project on {{$family->leaving_on->format('d-m-Y')}}</p>
                     </div>
                 </div>
             @endif
