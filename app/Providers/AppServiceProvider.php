@@ -2,10 +2,13 @@
 
 namespace App\Providers;
 
+use App\Views\Composers\PaymentsComposer;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
 use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
@@ -34,6 +37,8 @@ class AppServiceProvider extends ServiceProvider
             return $this->orderBySub($query, 'desc');
         });
 
+        Paginator::useBootstrap();
+
         // Needed because we're still serialising cookies!
         Passport::withCookieSerialization();
 
@@ -49,6 +54,9 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('endpushonce', static function ($expression) {
             return '<?php $__env->stopPush(); endif; ?>';
         });
+
+        View::composer('*', PaymentsComposer::class);
+
     }
 
     /**

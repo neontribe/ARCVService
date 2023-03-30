@@ -32,6 +32,8 @@ class Family extends Model implements IEvaluee
         'leaving_on',
         'leaving_reason',
         'centre_sequence',
+        'rejoin_on',
+        'leave_amount',
     ];
 
     /**
@@ -41,6 +43,7 @@ class Family extends Model implements IEvaluee
      */
     protected $dates = [
         'leaving_on',
+        'rejoin_on',
     ];
 
     /**

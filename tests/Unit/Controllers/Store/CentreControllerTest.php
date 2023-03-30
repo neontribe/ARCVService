@@ -117,11 +117,15 @@ class CentreControllerTest extends StoreTestCase
             "Primary Carer",
             "Entitlement",
             "Last Collection",
+            "Total Children",
             "Eligible Children",
             "Due Date",
             "Join Date",
             "Leaving Date",
-            "Leaving Reason"
+            "Leaving Reason",
+            "Rejoin Date",
+            "Leave Count",
+            "Days on programme"
         ];
 
         // Check the expected headers are present.
@@ -208,10 +212,14 @@ class CentreControllerTest extends StoreTestCase
             "Main Participant DoB",
             "Join Date",
             "Leaving Date",
-            "Leaving Reason"
+            "Leaving Reason",
+            "Rejoin Date",
+            "Leave Count",
+            "Days on programme"
         ];
         // The unexpected headers
         $unexpected_headers = [
+            "Total Children",
             "Eligible Children",
             "Family Eligibility (HSBS)",
             "Family Eligibility (NRPF)",

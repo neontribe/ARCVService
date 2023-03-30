@@ -8,16 +8,31 @@
     @includeWhen(Session::has('message'), 'store.partials.success')
     <div class="content search">
         <div class="control-container">
+            <form action="{{ URL::route('store.registration.index') }}" method="GET" id="searchform">
+                {!! csrf_field() !!}
+                {{-- Families left checkbox --}}
+                <div class="checkbox-control">
+                    <input type="checkbox" class="styled-checkbox no-margin" onChange="this.form.submit()" id="families_left" name="families_left" {{
+                    Request::get("families_left") ? 'checked' : '' }} />
+                    <label for="families_left">Show {{ $programme ? 'households' : 'families'}} who have left</label>
+                </div>
+                {{-- Name search --}}
+                <div class="search-control">
+                    <label for="family_name">Search by name</label>
+                    <div class="search-actions">
+                        <input type="text" name="family_name" id="family_name" autocomplete="off" autocorrect="off"
+                               spellcheck="false" onkeyup="searchForm()" placeholder="Enter {{ $programme ? 'household' : 'family'}} name" aria-label="{{ $programme ? 'Household' : 'Family'}} Name">
+                    </div>
+                </div>
+            </form>
         </div>
         <div>
-            <label><input type="checkbox" id="families_left" class="filter"
-                          value="showLeft"/>Show {{ $programme ? 'households' : 'families'}} who have left</label>
-
-            <table id="registrationTable">
+            <table id="registrations">
                 <thead>
                 <tr>
-                    <td>Name</td>
-                    <td class="center">Voucher Entitlement</td>
+                    <td>Name<span class="sort-link-container">@include('store.partials.sortableChevron', ['route' =>
+                            'store.registration.index', 'orderBy' => 'name', 'direction' => request('direction')
+                            ])</span></td>
                     <td class="center">RV-ID</td>
                     <td></td>
                 </tr>
@@ -25,25 +40,28 @@
                 <tbody>
                 @foreach ($registrations as $registration)
                     @if ($registration->family)
-                        <tr class="{{ $registration->family->leaving_on ? 'inactive' : 'active' }}">
+                        @php(\App\Http\Controllers\Store\FamilyController::status($registration))
+                        @if( $registration->family->status === true)
+                            <tr class='active'>
+                        @else
+                            <tr class='inactive'>
+                        @endif
                             <td class="pri_carer">
                                 <div>{{ $registration->family->carers->first()->name }}</div>
                                 {!! Request::get("centre") == ($registration->centre->id) ?
                                 null : '<div class="secondary_info">' . $registration->centre->name . '</div>'
                                 !!}
                             </td>
-                            <td class="center">{{ $registration->getValuation()->getEntitlement() }}</td>
                             <td class="center">{{ $registration->family->rvid }}</td>
                             <td class="right no-wrap">
-                                @if( !isset($registration->family->leaving_on) )
+                                @if( $registration->family->status === true)
                                     <a href="{{ route('store.registration.voucher-manager', ['registration'=> $registration->id ]) }}"
                                        class="link inline-link-button">
                                         <div class="link-button">
                                             <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Vouchers
                                         </div>
                                     </a>
-                                    <a href="{{ route('store.registration.edit', ['registration'=> $registration->id ]) }}"
-                                       class="link
+                                    <a href="{{ route('store.registration.edit', ['registration'=> $registration->id ]) }}" class="link
                             inline-link-button">
                                         <div class="link-button">
                                             <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Edit
@@ -53,9 +71,12 @@
                                     <div class="link-button link-button-small disabled">
                                         <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Vouchers
                                     </div>
-                                    <div class="link-button link-button-small disabled">
-                                        <i class="fa fa-pencil button-icon" aria-hidden="true"></i>Edit
-                                    </div>
+                                    <a href="{{ route('store.registration.view', ['registration'=> $registration->id ]) }}" class="link
+                            inline-link-button">
+                                        <div class="link-button view">
+                                            View
+                                        </div>
+                                    </a>
                                 @endif
                             </td>
                         </tr>
@@ -64,35 +85,34 @@
                 </tbody>
             </table>
         </div>
+        <div>
+            {{ $registrations->links() }}
+            Showing {{($registrations->currentPage()-1)* $registrations->perPage()+($registrations->total() ? 1:0)}} to {{($registrations->currentPage()-1)*$registrations->perPage()+count($registrations)}}  of  {{$registrations->total()}}  Results
+        </div>
     </div>
-    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+
     <script>
+        function searchForm() {
+            // Declare variables
+            var input, filter, table, tr, td, i, txtValue, checkbox;
+            input = document.getElementById("family_name");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("registrations");
+            tr = table.getElementsByTagName("tr");
+            checkbox = document.getElementById("families_left");
 
-
-        $(document).ready(function () {
-
-            var registrationTable = $('#registrationTable').DataTable({
-                "columnDefs": [{"orderable": false, "targets": 3}]
-            });
-
-            registrationTable.on('draw.dt', function () {
-                console.log(applyInputFilter());
-            });
-
-            $(".inactive").hide(); // Hide families that have left by default.
-
-            function applyInputFilter() {
-                if ($('input.filter').is(":checked") === true) {
-                    $(".inactive").show();
-                } else {
-                    $(".inactive").hide();
+            // Loop through all table rows, and hide those who don't match the search query
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[0];
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
                 }
             }
-
-            $('input.filter').on('change', function() {
-                applyInputFilter();
-            });
-        });
+        }
     </script>
 @endsection

@@ -395,6 +395,30 @@ class EditPageTest extends StoreTestCase
     }
 
     /** @test */
+    public function leaveAmountIncreases()
+    {
+        // Create a family
+        $family = factory(Family::class)->create();
+        // Make a registration for the family
+        $registration = factory(Registration::class)->create([
+            "centre_id" => $this->centre->id,
+            "family_id" => $family->id,
+        ]);
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.edit', $registration->id))
+            ->press('Remove this family')
+            ->select(config('arc.leaving_reasons')[0], 'leaving_reason')
+            ->press('Yes')
+            ->seePageIs(route('store.registration.index'))
+        ;
+
+        $this->seeInDatabase('families', [
+            'id' => $family->id,
+            'leave_amount' => 1
+        ]);
+    }
+
+    /** @test */
     public function itShowsTheCorrectEvaluatingRules()
     {
         $evals = $this->registration

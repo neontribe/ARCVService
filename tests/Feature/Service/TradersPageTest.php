@@ -39,6 +39,7 @@ class TradersPageTest extends StoreTestCase
             ->seeInElement('th', 'Market')
             ->seeInElement('th', 'Area')
             ->seeInElement('th', 'Users')
+            ->seeInElement('th', 'Payments')
         ;
     }
 

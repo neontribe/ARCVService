@@ -42,6 +42,9 @@ class ServiceRoutesTest extends StoreTestCase
             'admin.traders.index' => [],
             'admin.traders.create' => [],
             'admin.traders.edit' => ['id' => 1],
+            'admin.payments.index' => [],
+            'admin.payment-request.show' => ['paymentUuid' => 1 ],
+            'admin.trader-payment-history.show' => ['trader' => 1],
         ],
         'POST' => [
             'admin.vouchers.storebatch' => [],
@@ -55,6 +58,7 @@ class ServiceRoutesTest extends StoreTestCase
             'admin.centreusers.update' => ['id' => 1],
             'admin.markets.update' => ['id' => 1],
             'admin.traders.update' => ['id' => 1],
+            'admin.payment-request.update' => ['paymentUuid' => 1],
         ],
     ];
 

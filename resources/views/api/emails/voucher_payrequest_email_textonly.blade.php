@@ -15,10 +15,7 @@ The attached file is best viewed through a spreadsheet program such as Microsoft
 Sheets. If you have any problems with opening or downloading it, please email <a
     href="mailto:{{ config('mail.to_developer.address') }}">{{ config('mail.to_developer.name') }}</a>.
 
-To register this request as paid, copy and paste the URL below
-into your web browser and follow the directions there :
-
-{{ $actionUrl }}
+To pay this request, please go to the Rose Voucher Admin Portal.
 
 Thanks,
 Rose Vouchers
@@ -27,8 +24,8 @@ Rose Vouchers
 
 Alexandra Rose Charity
 
-For more information please go to <a href="http://www.alexandrarose.org.uk/">www.alexandrarose.org.uk</a>.
+For more information please go to <a href="http://www.alexandrarose.org.uk/" target="_blank" rel="noopener noreferrer">www.alexandrarose.org.uk</a>.
 
-<a href="https://www.alexandrarose.org.uk/Handlers/Download.ashx?IDMF=0a18fbf9-ed33-4c1d-a8a3-766542c961c8">
+<a href="https://www.alexandrarose.org.uk/Handlers/Download.ashx?IDMF=0a18fbf9-ed33-4c1d-a8a3-766542c961c8" target="_blank" rel="noopener noreferrer">
     Privacy Policy
 </a>

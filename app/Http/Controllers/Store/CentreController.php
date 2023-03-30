@@ -137,7 +137,8 @@ class CentreController extends Controller
             'dob' => 'd/m/Y',
             'join' => 'd/m/Y',
             'leave' => 'd/m/Y',
-            'eligible_from' => 'd/m/Y'
+            'eligible_from' => 'd/m/Y',
+            'rejoin' => 'd/m/Y',
         ], $dateFormats);
 
         // Get registrations decorated - may no longer be terribly efficient.
@@ -179,6 +180,8 @@ class CentreController extends Controller
             $kids = [];
             $due_date = null;
             $eligibleKids = 0;
+            // Total includes pregnancies
+            $totalKids = 0;
 
             // Evaluate it.
             $regValuation = $reg->valuatation;
@@ -204,6 +207,7 @@ class CentreController extends Controller
                         if ($child->dob->isFuture()) {
                             // If it's a pregnancy, set due date and move on.
                             $due_date = $child->dob->format($dateFormats['dob']);
+                            $totalKids += 1;
                         } else {
                             // Otherwise, set the header
                             $dob_header = Child::getAlias($programme) . ' ' . (string)$child_index . ' DoB';
@@ -221,6 +225,8 @@ class CentreController extends Controller
                 // Add count of eligible household members
                 $row['Eligible Household Members'] = $eligibleKids;
             } else {
+                // Add total including pregnancies
+                $row['Total Children'] = $totalKids + $eligibleKids;
                 // Add count of eligible kids
                 $row['Eligible Children'] = $eligibleKids;
             }
@@ -228,6 +234,23 @@ class CentreController extends Controller
 
             // Add our kids back in
             $row = array_merge($row, $kids);
+
+            // Calculate number of days on programme
+            if ($reg->family->leaving_on && !$reg->family->rejoin_on) {
+                $startDate = Carbon::parse($reg->created_at);
+                $leaveDate = Carbon::parse($reg->family->leaving_on);
+                $diff = $startDate->diffInDays($leaveDate);
+            } elseif ($reg->family->rejoin_on) {
+                $startDate = Carbon::parse($reg->created_at);
+                $leaveDate = Carbon::parse($reg->family->leaving_on);
+                $rejoinDate = Carbon::parse($reg->family->rejoin_on);
+                $now = Carbon::now();
+                $firstCount = $startDate->diffInDays($leaveDate);
+                $secondCount = $rejoinDate->diffInDays($now);
+                $diff = $firstCount + $secondCount;
+            } else {
+                $diff = false;
+            }
 
             // Set the last dates.
             if (!$programme) {
@@ -237,6 +260,9 @@ class CentreController extends Controller
             $row['Leaving Date'] = $reg->family->leaving_on ? $reg->family->leaving_on->format($dateFormats['leave']) : null;
             // Would be confusing if an old reason was left in - so check leaving date is there.
             $row["Leaving Reason"] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
+            $row['Rejoin Date'] = $reg->family->rejoin_on ? $reg->family->rejoin_on->format($dateFormats['rejoin']) : null;
+            $row['Days on programme'] = $diff ?? null;
+            $row['Leave Count'] = $reg->family->leave_amount ?? null;
             if (!$programme) {
                 $row["Family Eligibility (HSBS)"] = ($reg->eligibility_hsbs) ?? null;
                 $row["Family Eligibility (NRPF)"] = (ucfirst($reg->eligibility_nrpf)) ?? null;
@@ -318,7 +344,8 @@ class CentreController extends Controller
             'dob' => 'd/m/Y',
             'join' => 'd/m/Y',
             'leave' => 'd/m/Y',
-            'eligible_from' => 'd/m/Y'
+            'eligible_from' => 'd/m/Y',
+            'rejoin' => 'd/m/Y',
         ], $dateFormats);
 
         // Get registrations decorated - may no longer be terribly efficient.
@@ -347,7 +374,7 @@ class CentreController extends Controller
 
             // Null coalesce `??` does not trigger `Trying to get property of non-object` explosions
             $row = [
-                'RVID' => ($reg->family->rvid) ?? 'Family not found',
+                'RVID' => ($reg->family->rvid) ?? 'Household not found',
                 'Area' => ($reg->centre->sponsor->name) ?? 'Area not found',
                 'Centre' => ($reg->centre->name) ?? 'Centre not found',
                 'Main Participant' => ($reg->family->pri_carer) ?? 'Main Participant not Found',
@@ -410,6 +437,23 @@ class CentreController extends Controller
             // Add our kids back in
             $row = array_merge($row, $kids);
 
+            // Calculate number of days on programme
+            if ($reg->family->leaving_on && !$reg->family->rejoin_on) {
+                $startDate = Carbon::parse($reg->created_at);
+                $leaveDate = Carbon::parse($reg->family->leaving_on);
+                $diff = $startDate->diffInDays($leaveDate);
+            } elseif ($reg->family->rejoin_on) {
+                $startDate = Carbon::parse($reg->created_at);
+                $leaveDate = Carbon::parse($reg->family->leaving_on);
+                $rejoinDate = Carbon::parse($reg->family->rejoin_on);
+                $now = Carbon::now();
+                $firstCount = $startDate->diffInDays($leaveDate);
+                $secondCount = $rejoinDate->diffInDays($now);
+                $diff = $firstCount + $secondCount;
+            } else {
+                $diff = false;
+            }
+
             // Set the last dates.
             if (!$programme) {
                 $row['Due Date'] = $due_date;
@@ -418,6 +462,9 @@ class CentreController extends Controller
             $row['Leaving Date'] = $reg->family->leaving_on ? $reg->family->leaving_on->format($dateFormats['leave']) : null;
             // Would be confusing if an old reason was left in - so check leaving date is there.
             $row["Leaving Reason"] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
+            $row['Rejoin Date'] = $reg->family->rejoin_on ? $reg->family->rejoin_on->format($dateFormats['rejoin']) : null;
+            $row['Days on programme'] = $diff ?? null;
+            $row['Leave Count'] = $reg->family->leave_amount ?? null;
             if (!$programme) {
                 $row["Family Eligibility (HSBS)"] = ($reg->eligibility_hsbs) ?? null ;
                 $row["Family Eligibility (NRPF)"] = ($reg->eligibility_nrpf) ?? null ;

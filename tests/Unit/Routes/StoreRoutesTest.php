@@ -490,45 +490,6 @@ class StoreRoutesTest extends StoreTestCase
     }
 
     /** @test */
-    public function testShowPaymentRequestRoute()
-    {
-        // Don't need to be logged in.
-        Auth::logout();
-
-        $stateToken = factory(StateToken::class)->create([
-            'uuid' => '12345678-1234-1234-1234-1234567890ab'
-        ]);
-
-        // Make a route url with the uuid.
-        $route = URL::route('store.payment-request.show', ['paymentUuid' => $stateToken->uuid]);
-
-        // GET the page with a correct Uuid
-        $this->get($route)
-            ->seePageIs($route)
-            ->assertResponseStatus(200);
-    }
-
-    /** @test */
-    public function testPayPaymentRequestRoute()
-    {
-        // Don't need to be logged in.
-        Auth::logout();
-
-        $stateToken = factory(StateToken::class)->create([
-            'uuid' => '12345678-1234-1234-1234-1234567890ab'
-        ]);
-
-        // Make route urls with the uuid. Technically, they're the same route ut the controller should bounce to 302.
-        $route_update = URL::route('store.payment-request.update', ['paymentUuid' => $stateToken->uuid]);
-        $route_show = URL::route('store.payment-request.show', ['paymentUuid' => $stateToken->uuid]);
-
-        // PUT the page with a correct Uuid - other than that it doesn't "need" any request params or body.
-        $this->put($route_update)
-            ->seePageIs($route_show)
-            ->assertResponseStatus(200);
-    }
-
-    /** @test */
     public function testMVLRouteGuard()
     {
         // Make some registrations

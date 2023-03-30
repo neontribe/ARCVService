@@ -35,12 +35,21 @@ class TransitionProcessor
 
     private string $transition;
 
+    /**
+     * @param Trader $trader
+     * @param string $transition
+     */
     public function __construct(trader $trader, string $transition)
     {
         $this->transition = $transition;
         $this->trader = $trader;
     }
 
+    /**
+     * Preps and picks a strategy for transitioning vouchers
+     * @param array $voucherCodes
+     * @return array|array[]
+     */
     public function handle(array $voucherCodes): array
     {
         // set a lock, to prevent double submits
@@ -84,6 +93,7 @@ class TransitionProcessor
     }
 
     /**
+     * handles collection vouchers
      * @return void
      */
     public function handleCollect(): void
@@ -104,38 +114,47 @@ class TransitionProcessor
                 continue;
             }
 
-            if ($this->doTransition($voucher, $transition)) {
+            if ($this->doTransition($voucher, $transition, $this->trader->id)) {
                 $this->responses['success_add'][] = $voucher->code;
             }
         }
     }
 
     /**
+     * Actually does the transition - will save a voucher on the way through
      * @param Voucher $voucher
      * @param string $transition
+     * @param int|null $againstTraderId
      * @return bool
      */
-    private function doTransition(Voucher $voucher, string $transition): bool
+    private function doTransition(Voucher $voucher, string $transition, ?int $againstTraderId = null): bool
     {
-        // Can we do a transition already?
         try {
-            $voucher->applyTransition($transition);
-        } catch (Exception $e) {
-            Log::warning($e->getMessage());
-            if ($voucher->trader_id === $this->trader->id) {
-                // Trader has already submitted this voucher
-                $this->responses['own_duplicate'][] = $voucher->code;
+            if ($voucher->transitionAllowed($transition)) {
+                $voucher->trader_id = $againstTraderId;
+                $voucher->applyTransition($transition);
             } else {
-                // Another trader has mistakenly submitted this voucher,
-                // Or the transition isn't valid (i.e. expired state)
-                $this->responses['other_duplicate'][] = $voucher->code;
+                // No? drop vouchers into a relevant bin
+                if ($voucher->trader_id === $againstTraderId) {
+                    // Trader has already submitted this voucher
+                    $this->responses['own_duplicate'][] = $voucher->code;
+                } else {
+                    // Another trader has mistakenly submitted this voucher,
+                    // Or the transition isn't valid (i.e expired state)
+                    $this->responses['other_duplicate'][] = $voucher->code;
+                }
+                return false;
             }
+        } catch (Exception $e) {
+            // Something went really wrong - impossible transition string?
+            Log::warning($e->getMessage());
             return false;
         }
         return true;
     }
 
     /**
+     * confirms a voucher set for payment
      * @return void
      */
     public function handleConfirm(): void
@@ -146,10 +165,8 @@ class TransitionProcessor
 
         foreach ($this->vouchers as $voucher) {
 
-            $voucher->trader_id = $this->trader->id;
-
             // Can we do a transition already?
-            if ($this->doTransition($voucher, $transition)) {
+            if ($this->doTransition($voucher, $transition, $this->trader->id)) {
                 // add to a list for sending to ARC admin. This is a request for payment.
                 $this->vouchers_for_payment[] = $voucher;
 
@@ -185,6 +202,7 @@ class TransitionProcessor
     }
 
     /**
+     * This handles rejections back to the free voucher pool
      * @return void
      */
     public function handleReject(): void
@@ -200,17 +218,15 @@ class TransitionProcessor
             // alter the transition
             $transition = "reject-to-" . $last_state->from;
 
-            // will be saved if transition success
-            $voucher->trader_id = null;
-
             // Can we do a transition already?
-            if ($this->doTransition($voucher, $transition)) {
+            if ($this->doTransition($voucher, $transition, null)) {
                 $this->responses['success_reject'][] = $voucher->code;
             }
         }
     }
 
     /**
+     * This is for undefined transitions, as a catchall.
      * @return void
      */
     public function handleDefault(): void
@@ -218,7 +234,7 @@ class TransitionProcessor
         $transition = $this->transition;
         foreach ($this->vouchers as $voucher) {
             // Can we do a transition already?
-            $this->doTransition($voucher, $transition);
+            $this->doTransition($voucher, $transition, $this->trader->id);
         }
     }
 

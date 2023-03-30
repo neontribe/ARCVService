@@ -35,6 +35,11 @@ class UsersSeeder extends Seeder
                 'email' => 'arc+greta@neontribe.co.uk',
                 'password' => bcrypt('market_pass'),
             ],
+            [
+                'name' => 'Brian Bloom',
+                'email' => 'arc+brian@neontribe.co.uk',
+                'password' => bcrypt('market_pass'),
+            ],
         ];
 
         foreach ($usersData as $user) {
@@ -59,7 +64,12 @@ class UsersSeeder extends Seeder
         }
 
         // So we reliably have one user with a single trader.
+        // Rolf Billabong - standard user with single trader
         $users[0]->traders()->sync([1]);
+
+        // Brian Bloom - user with a large amount of vouchers that
+        // is sometimes used
+        $users[4]->traders()->sync([2]);
 
         // So we reliably have one user who can act on behalf of all traders.
         $users[3]->traders()->sync($traders);
