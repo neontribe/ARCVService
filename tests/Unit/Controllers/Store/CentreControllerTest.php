@@ -124,7 +124,8 @@ class CentreControllerTest extends StoreTestCase
             "Leaving Date",
             "Leaving Reason",
             "Rejoin Date",
-            "Leave Count"
+            "Leave Count",
+            "Days on programme"
         ];
 
         // Check the expected headers are present.
@@ -213,7 +214,8 @@ class CentreControllerTest extends StoreTestCase
             "Leaving Date",
             "Leaving Reason",
             "Rejoin Date",
-            "Leave Count"
+            "Leave Count",
+            "Days on programme"
         ];
         // The unexpected headers
         $unexpected_headers = [
