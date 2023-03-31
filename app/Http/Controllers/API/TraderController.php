@@ -185,10 +185,10 @@ class TraderController extends Controller
 
     /**
      * Helper to work out numbers of standard and SP vouchers.
-     * @param $vouchers
+     * @param ArrayAccess|array $vouchers
      * @return int[]
      */
-    public static function calculateProgrammeVoucherAmounts($vouchers): array
+    public static function calculateProgrammeVoucherAmounts(ArrayAccess|array $vouchers): array
     {
         $programme_amounts = [
             'standard' => 0,
@@ -205,31 +205,20 @@ class TraderController extends Controller
     }
     /**
      * Helper to sort standard and SP vouchers into area.
-     * @param $vouchers
+     * @param ArrayAccess|array $vouchers
      * @return array
      */
-    public static function calculateProgrammeVoucherAreas($vouchers): array
+    public static function calculateProgrammeVoucherAreas(ArrayAccess|array $vouchers): array
     {
         $programme_area_amounts = [];
-        $standard_areas = [];
-        $sp_areas = [];
         foreach ($vouchers as $voucher) {
-            if ($voucher->sponsor->programme === 1) {
-                if (!isset($sp_areas[$voucher->sponsor->name])) {
-                    $sp_areas[$voucher->sponsor->name] = 1;
-                } else {
-                    $sp_areas[$voucher->sponsor->name] += 1;
-                }
-            } else {
-                if (!isset($standard_areas[$voucher->sponsor->name])) {
-                    $standard_areas[$voucher->sponsor->name] = 1;
-                } else {
-                    $standard_areas[$voucher->sponsor->name] += 1;
-                }
-            }
+            $sponsorName = $voucher->sponsor->name;
+            $index = $voucher->sponsor->programme;
+            $programme_area_amounts[$index][$sponsorName] = isset($programme_area_amounts[$index][$sponsorName])
+                ? $programme_area_amounts[$index][$sponsorName] +1
+                : 1
+                ;
         }
-        $programme_area_amounts[] = $standard_areas;
-        $programme_area_amounts[] = $sp_areas;
         return $programme_area_amounts;
     }
 
