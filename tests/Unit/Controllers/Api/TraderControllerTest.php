@@ -309,7 +309,6 @@ class TraderControllerTest extends TestCase
     /** @test */
     public function testCalculateProgrammeVoucherAmounts()
     {
-        $traderController = new TraderController;
         $standardSponsor = factory(Sponsor::class)->create([
             'programme' => 0
         ]);
@@ -323,7 +322,7 @@ class TraderControllerTest extends TestCase
             'sponsor_id' => $spSponsor->id
         ]);
         $vouchers = $standardVouchers->concat($spVouchers);
-        $programme_amounts = $traderController->calculateProgrammeVoucherAmounts($vouchers);
+        $programme_amounts = TraderController::calculateProgrammeVoucherAmounts($vouchers);
         $this->assertEquals($programme_amounts, array (
           'standard' => 12,
           'social_prescription' => 18,
@@ -333,7 +332,6 @@ class TraderControllerTest extends TestCase
     /** @test */
     public function testCalculateProgrammeVoucherAreaAmounts()
     {
-        $traderController = new TraderController;
         $standardSponsors = factory(Sponsor::class, 3)->create([
             'programme' => 0
         ]);
@@ -355,12 +353,12 @@ class TraderControllerTest extends TestCase
         }
 
         $vouchers = $standardVouchers->concat($spVouchers);
-        $programme_voucher_areas = $traderController->calculateProgrammeVoucherAreas($vouchers);
+        $programme_voucher_areas = TraderController::calculateProgrammeVoucherAreas($vouchers);
         $this->assertArrayHasKey($standardSponsors[0]->name, $programme_voucher_areas[0]);
         $this->assertArrayHasKey($standardSponsors[1]->name, $programme_voucher_areas[0]);
         $this->assertArrayHasKey($standardSponsors[2]->name, $programme_voucher_areas[0]);
         $this->assertArrayHasKey($spSponsors[0]->name, $programme_voucher_areas[1]);
         $this->assertArrayHasKey($spSponsors[1]->name, $programme_voucher_areas[1]);
-        $this->assertArrayHasKey($spSponsors[2]->name, $programme_voucher_areas[1]);  
+        $this->assertArrayHasKey($spSponsors[2]->name, $programme_voucher_areas[1]);
     }
 }

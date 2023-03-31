@@ -157,7 +157,7 @@ class TraderController extends Controller
         $title = 'A report containing voucher history.';
         // Request date string as dd-mm-yyyy
         $date = $request->submission_date ?: null;
-        $file = $this->createVoucherListFile($trader, $vouchers, $title, $date);
+        $file = self::createVoucherListFile($trader, $vouchers, $title, $date);
 
         // If all vouchers are requested attempt to get the minimum and maximum dates for the report.
         if (is_null($date)) {
@@ -184,17 +184,17 @@ class TraderController extends Controller
 
     /**
      * Helper to work out numbers of standard and SP vouchers.
-     *
      * @param $vouchers
+     * @return int[]
      */
-    public function calculateProgrammeVoucherAmounts($vouchers)
+    public static function calculateProgrammeVoucherAmounts($vouchers): array
     {
         $programme_amounts = [
             'standard' => 0,
             'social_prescription' => 0,
         ];
-        foreach ($vouchers as $key => $voucher) {
-            if($voucher->sponsor->programme === 1) {
+        foreach ($vouchers as $voucher) {
+            if ($voucher->sponsor->programme === 1) {
                 $programme_amounts['social_prescription'] += 1;
             } else {
                 $programme_amounts['standard'] += 1;
@@ -203,17 +203,17 @@ class TraderController extends Controller
         return $programme_amounts;
     }
     /**
-     * Helper to sort standard and SP vouchers into areas.
-     *
+     * Helper to sort standard and SP vouchers into area.
      * @param $vouchers
+     * @return array
      */
-    public function calculateProgrammeVoucherAreas($vouchers)
+    public static function calculateProgrammeVoucherAreas($vouchers): array
     {
         $programme_area_amounts = [];
         $standard_areas = [];
         $sp_areas = [];
-        foreach ($vouchers as $key => $voucher) {
-            if($voucher->sponsor->programme === 1) {
+        foreach ($vouchers as $voucher) {
+            if ($voucher->sponsor->programme === 1) {
                 if (!isset($sp_areas[$voucher->sponsor->name])) {
                     $sp_areas[$voucher->sponsor->name] = 1;
                 } else {
@@ -227,21 +227,21 @@ class TraderController extends Controller
                 }
             }
         }
-        array_push($programme_area_amounts, $standard_areas);
-        array_push($programme_area_amounts, $sp_areas);
+        $programme_area_amounts[] = $standard_areas;
+        $programme_area_amounts[] = $sp_areas;
         return $programme_area_amounts;
     }
 
     /**
      * Get programme voucher info for email
-     * @param $vouchers
+     * @param array $vouchers
+     * @return array
      */
-    public function getProgrammeAmounts($vouchers)
+    public static function getProgrammeAmounts(array $vouchers): array
     {
         $programme_amounts = [];
-        $traderController = new TraderController();
-        $programme_amounts_numbers = $traderController->calculateProgrammeVoucherAmounts($vouchers);
-        $programme_area_amounts = $traderController->calculateProgrammeVoucherAreas($vouchers);
+        $programme_amounts_numbers =self::calculateProgrammeVoucherAmounts($vouchers);
+        $programme_area_amounts = self::calculateProgrammeVoucherAreas($vouchers);
         $programme_amounts['numbers'] = $programme_amounts_numbers;
         $programme_amounts['byArea'] = $programme_area_amounts;
         return $programme_amounts;
@@ -249,14 +249,18 @@ class TraderController extends Controller
 
     /**
      * Helper to create a list of Trader Vouchers file.
-     *
      * @param Trader $trader
-     * @param $vouchers
-     * @param $title
-     * @param null $date
-     * @return false|string
+     * @param array $vouchers
+     * @param string $title
+     * @param string|null $date
+     * @return string
      */
-    public function createVoucherListFile(Trader $trader, $vouchers, $title, $date = null)
+    public static function createVoucherListFile(
+        Trader $trader,
+        array $vouchers,
+        string $title,
+        string $date = null
+    ): string
     {
         $data = [
             'report_title' => $title,
@@ -300,7 +304,7 @@ class TraderController extends Controller
         $csv = stream_get_contents($tmp);
         fclose($tmp);
 
-        return $csv;
+        return !empty($csv) ? $csv : '';
     }
 
     /**
