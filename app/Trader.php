@@ -104,58 +104,25 @@ class Trader extends Model
      * Vouchers submitted by this trader that have a given status.
      * @param $status
      * @param array $columns
-     * @return array|Collection
+     * @return Collection
      */
-    public function vouchersWithStatus($status = null, array $columns = ['*'])
+    public function vouchersWithStatus($status = null, array $columns = ['*']): Collection
     {
+        // get all the vouchers
+        $q = DB::table('vouchers')->select($columns)->where('trader_id', $this->id);
+
         if (!empty($status)) {
-            // Get the vouchers with given status, mapped to these states.
-            switch ($status) {
-                case "unpaid":
-                    $stateCondition = "payment_pending";
-                    break;
-                case "unconfirmed":
-                    $stateCondition = "recorded";
-                    break;
-                default:
-                    $stateCondition = null;
-                    break;
-            }
+            // Get the vouchers with given status
+            $stateCondition = match ($status) {
+                "unpaid" => "payment_pending",
+                "unconfirmed" => "recorded",
+                default => null,
+            };
 
             // get the cutoff for 6 calendar months of data.
             $cutOff = Carbon::today()->subMonths(6)->startOfMonth()->format('Y-m-d H:i:s');
-            $trader_id = $this->id;
 
-            $q = DB::table(
-                static function ($query) use ($cutOff, $trader_id) {
-                    // get the voucher's details
-                    $query->select([
-                        'vouchers.id',
-                        'vouchers.code',
-                        'vouchers.updated_at',
-                        'vouchers.currentstate',
-                    ])->addSelect([
-                        // including the last state activity newer than $cutoff
-                        // because we don't want to fetch vouchers with last activity older than 6 months
-                        'state' => VoucherState::select('to')
-                            ->whereColumn('voucher_states.voucher_id', 'vouchers.id')
-                            ->where('voucher_states.created_at', '>=', $cutOff)
-                            ->orderByDesc('voucher_states.updated_at')
-                            ->orderByDesc('id')
-                            ->limit(1),
-                    ])->from('vouchers')
-                        ->where('vouchers.trader_id', $trader_id);
-                },
-                'innerQuery'
-            )->select($columns)
-                // only pick those where the last state was $stateCondition.
-                ->where('innerQuery.state', $stateCondition)
-                ;
-        } else {
-            // get all the vouchers
-            $q = DB::table('vouchers')
-                ->select($columns)
-                ->where('trader_id', $this->id);
+            $q->where('currentstate', $stateCondition)->where('updated_at', '>=', $cutOff);
         }
         return $q->orderByDesc('updated_at')->get();
     }
@@ -163,10 +130,10 @@ class Trader extends Model
     /**
      * Prepare a date for array / JSON serialization.
      *
-     * @param  \DateTimeInterface  $date
+     * @param DateTimeInterface $date
      * @return string
      */
-    protected function serializeDate(DateTimeInterface $date)
+    protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format('Y-m-d H:i:s');
     }

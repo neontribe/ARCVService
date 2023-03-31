@@ -18,7 +18,7 @@ return new class extends Migration
             $indexesFound = $sm->listTableIndexes('vouchers');
 
             if (!array_key_exists("vouchers_code_index", $indexesFound)) {
-                $table->index([DB::raw('code(10)')], 'vouchers_code_index');
+                $table->index('code', 'vouchers_code_index');
             }
 
             if (!array_key_exists("vouchers_currentstate_index", $indexesFound)) {
