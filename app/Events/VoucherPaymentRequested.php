@@ -4,6 +4,7 @@ namespace App\Events;
 
 use App\User;
 use App\Trader;
+use ArrayAccess;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -16,7 +17,7 @@ class VoucherPaymentRequested
 
     public User $user;
     public Trader $trader;
-    public array $vouchers;
+    public array|ArrayAccess $vouchers;
     public string $file;
     public array $programme_amounts;
 
@@ -24,12 +25,17 @@ class VoucherPaymentRequested
      * VoucherPaymentRequested constructor.
      * @param User $user
      * @param Trader $trader
-     * @param array $vouchers
+     * @param array|ArrayAccess $vouchers
      * @param string $file
      * @param array $programme_amounts
      */
-    public function __construct(User $user, Trader $trader, array $vouchers, string $file, array $programme_amounts)
-    {
+    public function __construct(
+        User $user,
+        Trader $trader,
+        array|ArrayAccess $vouchers,
+        string $file,
+        array $programme_amounts
+    ) {
         $this->user = $user;
         $this->trader = $trader;
         $this->file = $file;

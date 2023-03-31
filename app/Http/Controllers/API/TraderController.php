@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Trader;
 use App\Voucher;
 use App\VoucherState;
+use ArrayAccess;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -234,10 +235,10 @@ class TraderController extends Controller
 
     /**
      * Get programme voucher info for email
-     * @param array $vouchers
+     * @param ArrayAccess|array $vouchers
      * @return array
      */
-    public static function getProgrammeAmounts(array $vouchers): array
+    public static function getProgrammeAmounts(ArrayAccess|array $vouchers): array
     {
         $programme_amounts = [];
         $programme_amounts_numbers =self::calculateProgrammeVoucherAmounts($vouchers);
@@ -250,14 +251,14 @@ class TraderController extends Controller
     /**
      * Helper to create a list of Trader Vouchers file.
      * @param Trader $trader
-     * @param array $vouchers
+     * @param ArrayAccess|array $vouchers
      * @param string $title
      * @param string|null $date
      * @return string
      */
     public static function createVoucherListFile(
         Trader $trader,
-        array $vouchers,
+        ArrayAccess|array $vouchers,
         string $title,
         string $date = null
     ): string
