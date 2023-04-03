@@ -1,4 +1,4 @@
-<div class="alert-message error">
+<div @isset($id) id="{{ $id }}" @endisset class="alert-message error">
     <div class="icon-container error">
         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
     </div>
