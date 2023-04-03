@@ -177,28 +177,26 @@ class TransitionProcessor
         // If there are any confirmed ones... trigger the email.
         if (!empty($this->vouchers_for_payment)) {
             Log::info('SENDING MAIL ' . count($this->vouchers_for_payment));
-            self::emailVoucherPaymentRequest($this->trader, $stateToken, $this->vouchers_for_payment);
+            self::emailVoucherPaymentRequest($this->trader, $this->vouchers_for_payment);
         }
     }
 
     /**
      * Email a Trader's Voucher Payment Request.
      * @param Trader $trader
-     * @param StateToken $stateToken
-     * @param $vouchers
+     * @param array $vouchers
      * @return void
      */
-    public static function emailVoucherPaymentRequest(Trader $trader, StateToken $stateToken, $vouchers): void
+    public static function emailVoucherPaymentRequest(Trader $trader, array $vouchers): void
     {
         $title = "A report containing voucher payment request for $trader->name.";
         // Request date string as dd-mm-yyyy
         $date = Carbon::now()->format('d-m-Y');
         // Todo factor excel/csv create functions out into service.
-        $traderController = new TraderController();
-        $file = $traderController->createVoucherListFile($trader, $vouchers, $title, $date);
-        $programme_amounts = $traderController->getProgrammeAmounts($vouchers);
+        $file = TraderController::createVoucherListFile($trader, $vouchers, $title, $date);
+        $programme_amounts = TraderController::getProgrammeAmounts($vouchers);
 
-        event(new VoucherPaymentRequested(Auth::user(), $trader, $stateToken, $vouchers, $file, $programme_amounts));
+        event(new VoucherPaymentRequested(Auth::user(), $trader, $vouchers, $file, $programme_amounts));
     }
 
     /**

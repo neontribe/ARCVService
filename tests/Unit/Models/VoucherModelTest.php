@@ -200,8 +200,8 @@ class VoucherModelTest extends TestCase
         $v3[1]->applyTransition('collect');
         $v3[1]->applyTransition('confirm');
 
-        $this->assertCount(3, Voucher::confirmed()->get());
-        $this->assertEquals([2,3,4], Voucher::confirmed()->pluck('id')->toArray());
+        $ids = Voucher::confirmed()->orderBy('id')->get()->pluck('id')->toArray();
+        $this->assertEquals([2,3,4], $ids);
     }
 
     /**

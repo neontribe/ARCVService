@@ -70,7 +70,7 @@ class SendVoucherHistoryEmailTest extends TestCase
     public function testRequestVoucherHistoryEmail()
     {
         Mail::fake();
-        
+
         // Todo this test could be split up and improved.
         $user = $this->user;
         $trader = $this->traders[0];
@@ -78,8 +78,8 @@ class SendVoucherHistoryEmailTest extends TestCase
         $title = 'Test Rose Voucher Payment Records';
 
         Auth::login($user);
-        $controller = new TraderController();
-        $file = $controller->createVoucherListFile($trader, $vouchers, $title);
+
+        $file = TraderController::createVoucherListFile($trader, $vouchers, $title);
 
         list($min_date, $max_date) = Voucher::getMinMaxVoucherDates($vouchers);
         $event = new VoucherHistoryEmailRequested($user, $trader, $file, $min_date, $max_date);

@@ -36,27 +36,27 @@
                 <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
             </div>
         </a>
-
-        @if (!isset($registration->family->leaving_on) )
-        <button class="remove long-button" type="button">Remove this household</button>
-        <div id="expandable" class="collapsed confirm-leaving">
-            <div class="reason">
-                <label for="reason-for-leaving">
-                    Reason for leaving
-                </label>
-                <select id="reason-for-leaving" name="leaving_reason" required>
-                    <option value="" disabled selected>Select a reason...</option>
-                    @foreach(Config::get('arc.leaving_reasons') as $reason)
-                        <option value="{{ $reason }}"> {{ $reason }}</option>
-                    @endforeach
-                </select>
+        @php(\App\Http\Controllers\Store\FamilyController::status($registration))
+        @if ($registration->family->status === true )
+            <button class="remove long-button" type="button">Remove this family</button>
+            <div id="expandable" class="collapsed confirm-leaving">
+                <div class="reason">
+                    <label for="reason-for-leaving">
+                        Reason for leaving
+                    </label>
+                    <select id="reason-for-leaving" name="leaving_reason" required>
+                        <option value="" disabled selected>Select a reason...</option>
+                        @foreach(Config::get('arc.leaving_reasons') as $reason)
+                            <option value="{{ $reason }}"> {{ $reason }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <p>Are you sure?</p>
+                <div class="confirmation-buttons">
+                    <button type="submit" class="submit" formaction="{{ URL::route('store.registration.family',['registration' => $registration]) }}">Yes</button>
+                    <button id="cancel">Cancel</button>
+                </div>
             </div>
-            <p>Are you sure?</p>
-            <div class="confirmation-buttons">
-                <button type="submit" class="submit" formaction="{{ URL::route('store.registration.family',['registration' => $registration]) }}">Yes</button>
-                <button id="cancel">Cancel</button>
-            </div>
-        </div>
         @endif
     @endif
 </div>
