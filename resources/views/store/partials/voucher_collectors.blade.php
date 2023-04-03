@@ -10,7 +10,7 @@
             {{-- This section should only exist in edit rather than add new record --}}
             <input id="carer"
                    name="pri_carer[{{ $pri_carer->id }}]"
-                   class="@if($errors->has('pri_carer'))invalid @endif"
+                   class="@if($errors->has('pri_carer')) invalid @endif"
                    type="text"
                    value="{{ $pri_carer->name }}"
                    autocomplete="off"
@@ -26,12 +26,14 @@
                    autocomplete="off"
                    autocorrect="off"
                    spellcheck="false"
-                   value="{{ old('pri_carer') }}">
+                   value="{{ old('pri_carer') }}"
+            >
         @endif
     </div>
-    @includeWhen($errors->has('pri_carer'),
+    @includeWhen(
+        $errors->has('pri_carer'),
         'store.partials.errors',
-        $error_array = ['This field is required']
+        ['error_array' => ['This field is required'], 'id' => 'carer-alert']
     )
     <div>
         <label for="carer_adder_input">Voucher collectors (optional)</label>
@@ -91,9 +93,10 @@
             @endif
         </table>
 
-        @includeWhen($errors->has("new_carers.*"),
+        @includeWhen(
+                $errors->has('new_carers.*'),
                 'store.partials.errors',
-                $error_array = ['Please check you have valid carer names']
+                ['error_array' => ['Please check you have valid carer names']]
                 )
     </div>
 </div>

@@ -1,4 +1,3 @@
-
 <div class="col fit-height">
     <div>
         <img src="{{ asset('store/assets/group-light.svg') }}" alt="logo">
@@ -34,7 +33,7 @@
 
     @includeWhen($errors->has("pri_carer"),
         'store.partials.errors',
-        $error_array = ['This field is required']
+        ['error_array' => ['This field is required']]
         )
 
     <div id="addCarerAgeInput" class="age-input-container">
@@ -112,9 +111,9 @@
             @endif
         </table>
 
-        @includeWhen($errors->has("new_carers.*"),
+        @includeWhen($errors->has('new_carers.*'),
                 'store.partials.errors',
-                $error_array = ['Please check you have valid collector names']
+                ['error_array' => ['Please check you have valid collector names']]
                 )
     </div>
 </div>

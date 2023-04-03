@@ -7,12 +7,17 @@
     {{-- This section should only exist in add new rather than edit record --}}
     @if (!isset($family))
         <div class="user-control">
-            <input type="checkbox" class="styled-checkbox @if($errors->has('consent'))invalid @endif" id="privacy-statement" name="consent" @if( old('consent') ) checked @endif/>
+            <input type="checkbox"
+                   class="styled-checkbox @if($errors->has('consent')) invalid @endif"
+                   id="privacy-statement"
+                   name="consent"
+                   @checked(old('consent'))
+            >
             <label for="privacy-statement">Has the registration form been completed and signed?</label><br></br>
         </div>
         @includeWhen($errors->has('consent'),
             'store.partials.errors',
-            $error_array = ["Registration form must be signed in order to complete registration"])
+            ['error_array' => ['Registration form must be signed in order to complete registration']])
         {{-- The save button for add new household --}}
         <button class="long-button submit" type="Submit">Save Household</button>
     @endif
@@ -53,7 +58,10 @@
                 </div>
                 <p>Are you sure?</p>
                 <div class="confirmation-buttons">
-                    <button type="submit" class="submit" formaction="{{ URL::route('store.registration.family',['registration' => $registration]) }}">Yes</button>
+                    <button type="submit"
+                            class="submit"
+                            formaction="{{ URL::route('store.registration.family',['registration' => $registration]) }}"
+                    >Yes</button>
                     <button id="cancel">Cancel</button>
                 </div>
             </div>

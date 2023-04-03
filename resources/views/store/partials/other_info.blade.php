@@ -61,16 +61,15 @@
             <option value=0>Please select</option>
             @foreach (config('arc.reg_eligibilities_hsbs') as $index => $reg_eligibility)
                 <option value="{{ $reg_eligibility }}"
-                    @if(
+                    @selected(
                         (!isset($registration) && $index === 0) ||
                         (isset($registration) && $registration->eligibility_hsbs === $reg_eligibility)
-                        ) selected="selected"
-                @endif
+                        )
                 >@lang('arc.reg_eligibilities_hsbs.' . $reg_eligibility)
                 </option>
             @endforeach
         </select>
-        @if (isset($registration) && $registration->eligibility_hsbs === 'healthy-start-applying')
+        @if(isset($registration) && $registration->eligibility_hsbs === 'healthy-start-applying')
             <br><mark>Please check if status has changed to receiving.</mark></br>
         @endif
     </div>
@@ -82,11 +81,10 @@
             <option value=0>Please select</option>
             @foreach (config('arc.reg_eligibilities_nrpf') as $index => $reg_eligibility)
                 <option value="{{ $reg_eligibility }}"
-                    @if(
+                    @selected(
                         (!isset($registration) && $index === 1) ||
                         (isset($registration) && $registration->eligibility_nrpf === $reg_eligibility)
-                        ) selected="selected"
-                    @endif
+                        )
                 >@lang('arc.reg_eligibilities_nrpf.' . $reg_eligibility)
                 </option>
             @endforeach
@@ -101,17 +99,17 @@
         <div>
             <div class="user-control">
                 <input type="checkbox"
-                       class="styled-checkbox@if($errors->has('consent'))invalid @endif"
+                       class="styled-checkbox @if($errors->has('consent')) invalid @endif"
                        id="privacy-statement"
                        name="consent"
-                       @if( old('consent') ) checked @endif
+                       @checked( old('consent') )
                 />
                 <label for="privacy-statement">Has the registration form been completed and signed?</label>
             </div>
         </div>
-        @includeWhen($errors->has('consent'),
-            'store.partials.errors',
-            $error_array = ['Registration form must be signed in order to complete registration'])
+        @includeWhen($errors->has('consent'), 'store.partials.errors',
+            ['error_array' => ['Registration form must be signed in order to complete registration'],
+            'id' => 'registration-alert'])
         <button class="long-button submit" type="Submit">Save Family</button>
     @endif
     {{-- This section should only exist in edit rather than add new --}}
