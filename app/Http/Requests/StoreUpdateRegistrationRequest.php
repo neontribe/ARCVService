@@ -17,7 +17,8 @@ class StoreUpdateRegistrationRequest extends FormRequest
         $registration = $this->route('registration');
         // Refuse updates to "left" families;
         // This is an extra, specific permission requirement for the update route.
-        return (!isset($registration->family->leaving_on));
+        // Amended to allow new rejoin functionality
+        return (!isset($registration->family->leaving_on) || $registration->family->rejoin_on > $registration->family->leaving_on);
     }
 
     /**

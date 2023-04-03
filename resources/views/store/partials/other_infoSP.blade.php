@@ -45,7 +45,7 @@
         </a>
         @php(\App\Http\Controllers\Store\FamilyController::status($registration))
         @if ($registration->family->status === true )
-            <button class="remove long-button" type="button">Remove this family</button>
+            <button class="remove long-button" type="button">Remove this household</button>
             <div id="expandable" class="collapsed confirm-leaving">
                 <div class="reason">
                     <label for="reason-for-leaving">
