@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e062ee453b33190fcd23af2493075a3a",
+    "content-hash": "67ee82e4e7ddef6de0ba57fea7e5c834",
     "packages": [
         {
             "name": "barryvdh/laravel-debugbar",
@@ -1542,16 +1542,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v9.52.4",
+            "version": "v9.52.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "9239128cfb4d22afefb64060dfecf53e82987267"
+                "reference": "e14d28c0f9403630d13f308bb43f3d3cb73d6d67"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/9239128cfb4d22afefb64060dfecf53e82987267",
-                "reference": "9239128cfb4d22afefb64060dfecf53e82987267",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/e14d28c0f9403630d13f308bb43f3d3cb73d6d67",
+                "reference": "e14d28c0f9403630d13f308bb43f3d3cb73d6d67",
                 "shasum": ""
             },
             "require": {
@@ -1736,7 +1736,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2023-02-22T14:38:06+00:00"
+            "time": "2023-03-28T18:03:54+00:00"
         },
         {
             "name": "laravel/helpers",
@@ -4749,16 +4749,16 @@
         },
         {
             "name": "psy/psysh",
-            "version": "v0.11.13",
+            "version": "v0.11.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bobthecow/psysh.git",
-                "reference": "722317c9f5627e588788e340f29b923e58f92f54"
+                "reference": "8c2e264def7a8263a68ef6f0b55ce90b77d41e17"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/722317c9f5627e588788e340f29b923e58f92f54",
-                "reference": "722317c9f5627e588788e340f29b923e58f92f54",
+                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/8c2e264def7a8263a68ef6f0b55ce90b77d41e17",
+                "reference": "8c2e264def7a8263a68ef6f0b55ce90b77d41e17",
                 "shasum": ""
             },
             "require": {
@@ -4819,9 +4819,9 @@
             ],
             "support": {
                 "issues": "https://github.com/bobthecow/psysh/issues",
-                "source": "https://github.com/bobthecow/psysh/tree/v0.11.13"
+                "source": "https://github.com/bobthecow/psysh/tree/v0.11.14"
             },
-            "time": "2023-03-21T14:22:44+00:00"
+            "time": "2023-03-28T03:41:01+00:00"
         },
         {
             "name": "ramsey/collection",
@@ -8361,6 +8361,66 @@
             "time": "2022-06-03T18:03:27+00:00"
         },
         {
+            "name": "werk365/etagconditionals",
+            "version": "1.4.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/365Werk/etagconditionals.git",
+                "reference": "2ce75f2efda1f58560c44252f8b281834b132237"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/365Werk/etagconditionals/zipball/2ce75f2efda1f58560c44252f8b281834b132237",
+                "reference": "2ce75f2efda1f58560c44252f8b281834b132237",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "~7|~8|~9|~10"
+            },
+            "require-dev": {
+                "orchestra/testbench": "~5|~6|~7|~8",
+                "phpunit/phpunit": "~8.0|~9.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Werk365\\EtagConditionals\\EtagConditionalsServiceProvider"
+                    ],
+                    "aliases": {
+                        "EtagConditionals": "Werk365\\EtagConditionals\\Facades\\EtagConditionals"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Werk365\\EtagConditionals\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Hergen Dillema",
+                    "email": "h.dillema@365werk.nl",
+                    "homepage": "https://365werk.nl"
+                }
+            ],
+            "description": "Laravel package to enable support for ETags and handling If-Match and If-None-Match conditional requests",
+            "homepage": "https://github.com/werk365/etagconditionals",
+            "keywords": [
+                "EtagConditionals",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/365Werk/etagconditionals/issues",
+                "source": "https://github.com/365Werk/etagconditionals/tree/1.4.2"
+            },
+            "time": "2023-03-22T10:32:46+00:00"
+        },
+        {
             "name": "winzou/state-machine",
             "version": "0.4.3",
             "source": {
@@ -9769,16 +9829,16 @@
         },
         {
             "name": "phpdocumentor/type-resolver",
-            "version": "1.7.0",
+            "version": "1.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpDocumentor/TypeResolver.git",
-                "reference": "1534aea9bde19a5c85c5d1e1f834ab63f4c5dcf5"
+                "reference": "dfc078e8af9c99210337325ff5aa152872c98714"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/1534aea9bde19a5c85c5d1e1f834ab63f4c5dcf5",
-                "reference": "1534aea9bde19a5c85c5d1e1f834ab63f4c5dcf5",
+                "url": "https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/dfc078e8af9c99210337325ff5aa152872c98714",
+                "reference": "dfc078e8af9c99210337325ff5aa152872c98714",
                 "shasum": ""
             },
             "require": {
@@ -9821,9 +9881,9 @@
             "description": "A PSR-5 based resolver of Class names, Types and Structural Element Names",
             "support": {
                 "issues": "https://github.com/phpDocumentor/TypeResolver/issues",
-                "source": "https://github.com/phpDocumentor/TypeResolver/tree/1.7.0"
+                "source": "https://github.com/phpDocumentor/TypeResolver/tree/1.7.1"
             },
-            "time": "2023-03-12T10:13:29+00:00"
+            "time": "2023-03-27T19:02:04+00:00"
         },
         {
             "name": "phpmd/phpmd",
@@ -10042,16 +10102,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.10.8",
+            "version": "1.10.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "0166aef76e066f0dd2adc2799bdadfa1635711e9"
+                "reference": "9b13dafe3d66693d20fe5729c3dde1d31bb64703"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/0166aef76e066f0dd2adc2799bdadfa1635711e9",
-                "reference": "0166aef76e066f0dd2adc2799bdadfa1635711e9",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9b13dafe3d66693d20fe5729c3dde1d31bb64703",
+                "reference": "9b13dafe3d66693d20fe5729c3dde1d31bb64703",
                 "shasum": ""
             },
             "require": {
@@ -10100,7 +10160,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-03-24T10:28:16+00:00"
+            "time": "2023-03-30T08:58:01+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",

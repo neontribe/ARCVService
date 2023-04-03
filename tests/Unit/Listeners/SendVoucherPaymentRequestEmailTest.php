@@ -69,9 +69,8 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
 
         $title = 'Test Rose Voucher Payment Request';
         Auth::login($user);
-        $controller = new TraderController();
-        $file = $controller->createVoucherListFile($trader, $vouchers, $title);
-        $programme_amounts = $controller->getProgrammeAmounts($vouchers);
+        $file = TraderController::createVoucherListFile($trader, $vouchers, $title);
+        $programme_amounts = TraderController::getProgrammeAmounts($vouchers);
         $event = new VoucherPaymentRequested($user, $trader, $vouchers, $file, $programme_amounts);
         $listener = new SendVoucherPaymentRequestEmail();
         $listener->handle($event);
