@@ -232,7 +232,7 @@ class TraderControllerTest extends TestCase
             ->json('POST', route('api.trader.voucher-history-email', 1), [
                 'submission_date' => null,
             ])
-            ->assertStatus(202)
+            ->assertStatus(200)
             ->assertJson([
                 'message' => trans('api.messages.email_voucher_history')
             ])
@@ -252,7 +252,7 @@ class TraderControllerTest extends TestCase
             ->json('POST', route('api.trader.voucher-history-email', 1), [
                 'submission_date' => $date,
             ])
-            ->assertStatus(202)
+            ->assertStatus(200)
             ->assertJson([
                 'message' => trans(
                     'api.messages.email_voucher_history_date',
