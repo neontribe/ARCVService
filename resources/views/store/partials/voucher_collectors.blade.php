@@ -19,16 +19,10 @@
                    autocomplete="off" autocorrect="off" spellcheck="false" value="{{ old('pri_carer') }}">
         @endif
     </div>
-    @if ( $errors->has('pri_carer') )
-        <div class="alert-message error" id="carer-alert">
-            <div class="icon-container error">
-                <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-            </div>
-            <div>
-                <p>This field is required</p>
-            </div>
-        </div>
-    @endif
+    @includeWhen($errors->has('pri_carer'),
+        'store.partials.errors',
+        $error_array = ['This field is required']
+    )
     <div>
         <label for="carer_adder_input">Voucher collectors (optional)</label>
         <div id="carer_adder" class="small-button-container">
@@ -66,9 +60,13 @@
             @endif
             <!-- create and edit pages, bad submit reload -->
             @if(is_array(old('new_carers')) || (!empty(old('new_carers'))))
-                @foreach (old('new_carers') as $old_new_carer )
+                @foreach (old('new_carers') as $index => $old_new_carer )
                     <tr>
-                        <td><input name="new_carers[]" type="text" value="{{ $old_new_carer }}"></td>
+                        <td><input name="new_carers[]"
+                                   type="text"
+                                   value="{{ $old_new_carer }}"
+                                   class="{{ $errors->has("new_carers.$index") ? 'invalid' : '' }}">
+                        </td>
                         <td>
                             <button type="button" class="remove_field"><i class="fa fa-minus" aria-hidden="true"></i>
                             </button>
@@ -77,5 +75,10 @@
                 @endforeach
             @endif
         </table>
+
+        @includeWhen($errors->has("new_carers.*"),
+                'store.partials.errors',
+                $error_array = ['Please check you have valid carer names']
+                )
     </div>
 </div>

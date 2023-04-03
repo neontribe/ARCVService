@@ -100,20 +100,18 @@
     @if (!isset($family))
         <div>
             <div class="user-control">
-                <input type="checkbox" class="styled-checkbox @if($errors->has('consent'))invalid @endif" id="privacy-statement" name="consent" @if( old('consent') ) checked @endif/>
+                <input type="checkbox"
+                       class="styled-checkbox@if($errors->has('consent'))invalid @endif"
+                       id="privacy-statement"
+                       name="consent"
+                       @if( old('consent') ) checked @endif
+                />
                 <label for="privacy-statement">Has the registration form been completed and signed?</label>
             </div>
         </div>
-        @if ( $errors->has('consent') )
-            <div class="alert-message error" id="registration-alert">
-                <div class="icon-container error">
-                    <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                </div>
-                <div>
-                    <p>Registration form must be signed in order to complete registration</p>
-                </div>
-            </div>
-        @endif
+        @includeWhen($errors->has('consent'),
+            'store.partials.errors',
+            $error_array = ['Registration form must be signed in order to complete registration'])
         <button class="long-button submit" type="Submit">Save Family</button>
     @endif
     {{-- This section should only exist in edit rather than add new --}}
