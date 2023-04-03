@@ -180,7 +180,7 @@ class TraderController extends Controller
             );
         }
 
-        return response()->json(['message' => $response_text], 202);
+        return response()->json(['message' => $response_text]);
     }
 
     /**
