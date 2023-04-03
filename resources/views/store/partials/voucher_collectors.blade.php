@@ -8,15 +8,25 @@
         <label for="pri_carer">Main carer's full name</label>
         @if (isset($pri_carer))
             {{-- This section should only exist in edit rather than add new record --}}
-            <input id="carer" name="pri_carer[{{ $pri_carer->id }}]"
-                   class="@if($errors->has('pri_carer'))invalid @endif" type="text"
-                   value="{{ $pri_carer->name }}" autocomplete="off"
-                   autocorrect="off" spellcheck="false">
-
+            <input id="carer"
+                   name="pri_carer[{{ $pri_carer->id }}]"
+                   class="@if($errors->has('pri_carer'))invalid @endif"
+                   type="text"
+                   value="{{ $pri_carer->name }}"
+                   autocomplete="off"
+                   autocorrect="off"
+                   spellcheck="false"
+            >
         @else
             {{-- If this is a new record do this instead --}}
-            <input id="carer" name="pri_carer" class="@if($errors->has('pri_carer'))invalid @endif" type="text"
-                   autocomplete="off" autocorrect="off" spellcheck="false" value="{{ old('pri_carer') }}">
+            <input id="carer"
+                   name="pri_carer"
+                   class="@if($errors->has('pri_carer')) invalid @endif"
+                   type="text"
+                   autocomplete="off"
+                   autocorrect="off"
+                   spellcheck="false"
+                   value="{{ old('pri_carer') }}">
         @endif
     </div>
     @includeWhen($errors->has('pri_carer'),
@@ -26,8 +36,13 @@
     <div>
         <label for="carer_adder_input">Voucher collectors (optional)</label>
         <div id="carer_adder" class="small-button-container">
-            <input id="carer_adder_input" name="carer_adder_input" type="text" autocomplete="off" autocorrect="off"
-                   spellcheck="false">
+            <input id="carer_adder_input"
+                   name="carer_adder_input"
+                   type="text"
+                   autocomplete="off"
+                   autocorrect="off"
+                   spellcheck="false"
+            >
             <button id="add_collector" class="add-button">
                 <i class="fa fa-plus" aria-hidden="true"></i>
             </button>

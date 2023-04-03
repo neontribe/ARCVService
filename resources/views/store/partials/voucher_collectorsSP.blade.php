@@ -114,7 +114,7 @@
 
         @includeWhen($errors->has("new_carers.*"),
                 'store.partials.errors',
-                $error_array = ['Please check you have valid carer names']
+                $error_array = ['Please check you have valid collector names']
                 )
     </div>
 </div>
