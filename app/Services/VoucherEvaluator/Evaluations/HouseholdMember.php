@@ -22,7 +22,7 @@ class HouseholdMember extends BaseChildEvaluation
     {
         parent::test($candidate);
 
-        return ($candidate->family->leaving_on === null)
+        return ($candidate->leaving_on === null || $candidate->rejoin_on > $candidate->leaving_on)
             ? $this->success()
             : $this->fail()
         ;
