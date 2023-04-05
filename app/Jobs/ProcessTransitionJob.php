@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Services\TransitionProcessor;
 use App\Trader;
+use App\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Imtigger\LaravelJobStatus\JobStatus;
 use Imtigger\LaravelJobStatus\Trackable;
-use Log;
+use Illuminate\Support\Facades\Auth;
 
 class ProcessTransitionJob implements ShouldQueue
 {
@@ -23,18 +24,20 @@ class ProcessTransitionJob implements ShouldQueue
     private Trader $trader;
     private array $voucherCodes;
     private string $transition;
+    private int $runAsId;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(Trader $trader, array $voucherCodes, string $transition)
+    public function __construct(Trader $trader, array $voucherCodes, string $transition, int $runAsId)
     {
         $this->prepareStatus();
         $this->trader = $trader;
         $this->voucherCodes = $voucherCodes;
         $this->transition = $transition;
+        $this->runAsId = $runAsId;
     }
 
     /**
@@ -79,7 +82,7 @@ class ProcessTransitionJob implements ShouldQueue
      * @param JobStatus $jobStatus
      * @return JsonResponse
      */
-    public static function queued(JobStatus $jobStatus): JsonResponse
+    public static function queuedHandler(JobStatus $jobStatus): JsonResponse
     {
         return self::pollingResponse($jobStatus);
     }
@@ -88,7 +91,7 @@ class ProcessTransitionJob implements ShouldQueue
      * @param JobStatus $jobStatus
      * @return JsonResponse
      */
-    public static function executing(JobStatus $jobStatus): JsonResponse
+    public static function executingHandler(JobStatus $jobStatus): JsonResponse
     {
         return self::pollingResponse($jobStatus);
     }
@@ -97,7 +100,7 @@ class ProcessTransitionJob implements ShouldQueue
      * @param JobStatus $jobStatus
      * @return JsonResponse
      */
-    public static function retrying(JobStatus $jobStatus): JsonResponse
+    public static function retryingHandler(JobStatus $jobStatus): JsonResponse
     {
         return self::pollingResponse($jobStatus);
     }
@@ -106,7 +109,7 @@ class ProcessTransitionJob implements ShouldQueue
      * @param JobStatus $jobStatus
      * @return JsonResponse
      */
-    public static function finished(JobStatus $jobStatus): JsonResponse
+    public static function finishedHandler(JobStatus $jobStatus): JsonResponse
     {
         // we're done! `303 Other` the user to somewhere they can pick up their data.
         // get the output off the job
@@ -122,7 +125,7 @@ class ProcessTransitionJob implements ShouldQueue
      * @param JobStatus $jobStatus
      * @return JsonResponse
      */
-    public static function failed(JobStatus $jobStatus): JsonResponse
+    public static function failedHandler(JobStatus $jobStatus): JsonResponse
     {
         // TODO think of a better failed handler
         return self::pollingResponse($jobStatus);
@@ -135,14 +138,25 @@ class ProcessTransitionJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $processor = new TransitionProcessor($this->trader, $this->transition);
+        // Login if we're not
+        if (!Auth::check()) {
+            Auth::login(User::find($this->runAsId));
+        }
 
-        $processor->handle($this->voucherCodes);
+        if (Auth::user()->id === $this->runAsId) {
 
-        $responseData = $processor->constructResponseMessage();
+            $processor = new TransitionProcessor($this->trader, $this->transition);
 
-        $key = Str::uuid();
-        Cache::put($key, $responseData);
-        $this->setOutput(['key' => $key]);
+            $processor->handle($this->voucherCodes);
+
+            $responseData = $processor->constructResponseMessage();
+
+            $key = Str::uuid();
+            Cache::put($key, $responseData);
+            $this->setOutput(['key' => $key]);
+            Auth::logout();
+        } else {
+            \Log::error('Incorrect user for transition job');
+        }
     }
 }

@@ -158,7 +158,7 @@ class TraderController extends Controller
         $title = 'A report containing voucher history.';
         // Request date string as dd-mm-yyyy
         $date = $request->submission_date ?: null;
-        $file = self::createVoucherListFile($trader, $vouchers, $title, $date);
+        $file = self::createVoucherListFile($trader, $vouchers, $title, $date, Auth::user()->name);
 
         // If all vouchers are requested attempt to get the minimum and maximum dates for the report.
         if (is_null($date)) {
@@ -243,18 +243,20 @@ class TraderController extends Controller
      * @param ArrayAccess|array $vouchers
      * @param string $title
      * @param string|null $date
+     * @param string $userName
      * @return string
      */
     public static function createVoucherListFile(
         Trader $trader,
         ArrayAccess|array $vouchers,
         string $title,
-        string $date = null
+        string $date = null,
+        string $userName = '',
     ): string
     {
         $data = [
             'report_title' => $title,
-            'user' => Auth::user()->name,
+            'user' => $userName,
             'trader' => $trader->name,
             // This is currently a nullable relation.
             'market' => $trader->market

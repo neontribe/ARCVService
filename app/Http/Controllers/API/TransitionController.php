@@ -9,6 +9,7 @@ use App\Trader;
 use App\Voucher;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Imtigger\LaravelJobStatus\JobStatus;
 
@@ -51,7 +52,7 @@ class TransitionController extends Controller
         $transition = $request->input('transition');
 
         // ... start a new job to fetch data
-        $job = new ProcessTransitionJob($trader, $voucherCodes, $transition);
+        $job = new ProcessTransitionJob($trader, $voucherCodes, $transition, Auth::user()->id);
         $this->dispatch($job);
 
         // find the job status to monitor

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;;
+use App\Http\Controllers\Controller;
 use Imtigger\LaravelJobStatus\JobStatus;
 use RuntimeException;
 
@@ -16,10 +16,10 @@ class QueueController extends Controller
     {
         // get the job type
         $jobType = $jobStatus->type;
-        $state = $jobStatus->status;
-        if (method_exists($jobType, $state)) {
-            return call_user_func("$jobType::$state", $jobStatus);
+        $stateHandler = $jobStatus->status . "Handler";
+        if (method_exists($jobType, $stateHandler)) {
+            return call_user_func("$jobType::$stateHandler", $jobStatus);
         }
-        throw new RuntimeException("$jobType does not have a method for $state");
+        throw new RuntimeException("$jobType does not have a method for $stateHandler");
     }
 }
