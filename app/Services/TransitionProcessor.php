@@ -193,7 +193,7 @@ class TransitionProcessor
         // Request date string as dd-mm-yyyy
         $date = Carbon::now()->format('d-m-Y');
         // Todo factor excel/csv create functions out into service.
-        $file = TraderController::createVoucherListFile($trader, $vouchers, $title, $date);
+        $file = TraderController::createVoucherListFile($trader, $vouchers, $title, $date, Auth::user()->name);
         $programme_amounts = TraderController::getProgrammeAmounts($vouchers);
 
         event(new VoucherPaymentRequested(Auth::user(), $trader, $vouchers, $file, $programme_amounts));
