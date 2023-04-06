@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 use Imtigger\LaravelJobStatus\JobStatus;
 use Imtigger\LaravelJobStatus\Trackable;
 use Illuminate\Support\Facades\Auth;
+use Log;
 
 class ProcessTransitionJob implements ShouldQueue
 {
@@ -25,6 +26,12 @@ class ProcessTransitionJob implements ShouldQueue
     private array $voucherCodes;
     private string $transition;
     private int $runAsId;
+
+    // die to failed_jobs after single failure
+    public int $tries = 1;
+
+    // jobs really should not take 600 seconds
+    public int $timeout = 600;
 
     /**
      * Create a new job instance.
@@ -102,6 +109,7 @@ class ProcessTransitionJob implements ShouldQueue
      */
     public static function retryingHandler(JobStatus $jobStatus): JsonResponse
     {
+        // this probably won't happen, but for safety's sake we'll catch it.
         return self::pollingResponse($jobStatus);
     }
 
@@ -156,7 +164,7 @@ class ProcessTransitionJob implements ShouldQueue
             $this->setOutput(['key' => $key]);
             Auth::logout();
         } else {
-            \Log::error('Incorrect user for transition job');
+            Log::error('Incorrect user for transition job');
         }
     }
 }
