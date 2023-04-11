@@ -55,17 +55,20 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::get('traders/{trader}/vouchers', [
             'as' => 'api.trader.vouchers',
             'uses' => 'TraderController@showVouchers',
-        ])->where('trader', '^[0-9]+$');
+        ])->middleware(['setEtag', 'ifNoneMatch'])
+            ->where('trader', '^[0-9]+$');
 
         Route::get('traders/{trader}/voucher-history', [
             'as' => 'api.trader.voucher-history',
             'uses' => 'TraderController@showVoucherHistory',
-        ])->where('trader', '^[0-9]+$');
+        ])->middleware(['setEtag', 'ifNoneMatch'])
+            ->where('trader', '^[0-9]+$');
 
         Route::post('traders/{trader}/voucher-history-email', [
             'as' => 'api.trader.voucher-history-email',
             'uses' => 'TraderController@emailVoucherHistory',
-        ])->where('trader', '^[0-9]+$');
+        ])->middleware(['setEtag', 'ifNoneMatch'])
+            ->where('trader', '^[0-9]+$');
     });
 
     /**
