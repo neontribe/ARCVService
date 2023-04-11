@@ -115,10 +115,10 @@ class ApiRoutesTest extends TestCase
             'username' => 'nottheusersname@example.com',
             'password' => 'secret',
         ])->assertStatus(401)
-        ->assertJson([
-            'error' => 'invalid_credentials',
-            'message' => 'The user credentials were incorrect.',
-        ]);
+            ->assertJson([
+                'error' => 'invalid_credentials',
+                'message' => 'The user credentials were incorrect.',
+            ]);
     }
 
     public function testDontGetAccessTokenWithBadUserPassword()
@@ -157,6 +157,31 @@ class ApiRoutesTest extends TestCase
             ->assertHeader('Content-Type', 'application/json')
             ->assertJsonStructure([0 => ['code', 'updated_at']])
         ;
+    }
+    public function testVouchersRouteHasEtags()
+    {
+        $trader = factory(Trader::class)->create();
+        $this->user->traders()->sync([$trader->id]);
+        $this->actingAs($this->user, 'api')
+            ->json('GET', route('api.trader.vouchers', $trader))
+            ->assertHeader('etag')
+        ;
+    }
+
+    public function testVouchersRoute304sWithKnownEtag()
+    {
+        $trader = factory(Trader::class)->create();
+        $this->user->traders()->sync([$trader->id]);
+
+        // grab an etag route
+        $etag = $this->actingAs($this->user, 'api')
+            ->json('GET', route('api.trader.vouchers', $trader))
+            ->headers->get('etag');
+
+        // regrab it with the etag in If-None-Match
+        $this->actingAs($this->user, 'api')
+            ->json('GET', route('api.trader.vouchers', $trader), [], ['If-None-Match' => $etag])
+            ->assertStatus(304);
     }
 
     public function testUnauthenticatedDontShowTraderVouchersRoute()
@@ -353,8 +378,8 @@ class ApiRoutesTest extends TestCase
         $this->actingAs($this->user, 'api')
             ->json('POST', route('api.voucher.transition'), $payload)
             ->assertStatus(403)
-        // Policy/ Gate still an issue throwing
-        // Illuminate\Auth\Access\AuthorizationException rather than json.
+            // Policy/ Gate still an issue throwing
+            // Illuminate\Auth\Access\AuthorizationException rather than json.
         ;
     }
 
@@ -426,7 +451,33 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testUserCannotSeeNotOwnTraderVoucherHistory()
+    public function testVoucherHistoryHasEtags()
+    {
+        $trader = factory(Trader::class)->create();
+        $this->user->traders()->sync([$trader->id]);
+        $this->actingAs($this->user, 'api')
+            ->json('GET', route('api.trader.voucher-history', $trader))
+            ->assertHeader('etag')
+        ;
+    }
+
+    public function testVoucherHistory304sWithKnownEtag()
+    {
+        $trader = factory(Trader::class)->create();
+        $this->user->traders()->sync([$trader->id]);
+
+        // grab an etag route
+        $etag = $this->actingAs($this->user, 'api')
+            ->json('GET', route('api.trader.voucher-history', $trader))
+            ->headers->get('etag');
+
+        // regrab it with the etag in If-None-Match
+        $this->actingAs($this->user, 'api')
+            ->json('GET', route('api.trader.voucher-history', $trader), [], ['If-None-Match' => $etag])
+            ->assertStatus(304);
+    }
+
+    public function testUserCannotSeeAnotherTradersVoucherHistory()
     {
         $trader = factory(Trader::class)->create();
         // Don't sync this trader to our user.
