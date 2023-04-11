@@ -83,6 +83,7 @@ class VouchersSeeder extends Seeder
         // Generate a state token - for payout of a few of them.
         $paidtoken = factory(StateToken::class)->create([
             'uuid' => 'auuidforpaidvouchers',
+            'admin_user_id' => '1',
         ]);
         $pendingtoken = factory(StateToken::class)->create([
             'uuid' => 'auuidforpendingvouchers',
