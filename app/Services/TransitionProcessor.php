@@ -159,8 +159,9 @@ class TransitionProcessor
      */
     public function handleConfirm(): void
     {
-        // If 'confirm', we'll need a StateToken for Later
+        // If 'confirm', we'll need a StateToken for Later, with an ID for Admin Payment flagging
         $stateToken = factory(StateToken::class)->create();
+        $stateToken->user_id=Auth::user()->id;
         $transition = $this->transition;
 
         foreach ($this->vouchers as $voucher) {

@@ -4,6 +4,7 @@ namespace App;
 
 use DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Ramsey\Uuid\Uuid;
 use Log;
 
@@ -15,7 +16,9 @@ class StateToken extends Model
      * @var array
      */
     protected $fillable = [
-        'uuid'
+        'uuid',
+        'user_id',
+        'admin_user_id',
     ];
 
     /**
@@ -70,5 +73,25 @@ class StateToken extends Model
     public function voucherStates()
     {
         return $this->hasMany(VoucherState::class);
+    }
+
+    /**
+     * The user that created this StateToken
+     *
+     * @return HasOne
+     */
+    public function users(): HasOne
+    {
+        return $this->hasOne(User::class);
+    }
+
+    /**
+     * The admin user that updated this StateToken
+     *
+     * @return HasOne
+     */
+    public function adminUsers(): HasOne
+    {
+        return $this->hasOne(AdminUser::class);
     }
 }

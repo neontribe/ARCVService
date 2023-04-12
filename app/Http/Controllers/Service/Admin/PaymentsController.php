@@ -6,11 +6,10 @@ use App\Http\Controllers\Controller;
 use App\StateToken;
 use App\Trader;
 use Carbon\Carbon;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\View\View;
+use Log;
 
 class PaymentsController extends Controller
 {
@@ -118,6 +117,26 @@ where stid is not null;
 
     }
 
+    /** Lightweight check for outstanding payments to highlight in dashboard
+     * @param $idkyet
+     * @return bool
+     */
+    public static function checkIfOutstandingPayments(): bool
+    {
+        $date = Carbon::now()->subDays(7)->startOfDay();
+
+        $payments = DB::table('state_tokens')
+            ->where('created_at','>',$date)
+            ->whereNull('admin_user_id')
+            ->count();
+        if($payments > 0){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     /** Get a specific payment request by link
      * @param $paymentUuid
      * @return mixed
@@ -192,14 +211,23 @@ where stid is not null;
             }
 
             // Transition the vouchers
+            $success = true;
             foreach ($vouchers as $v) {
                 if ($v->transitionAllowed('payout')) {
                     $v->applyTransition('payout');
                 }
+
+                else {
+                    Log::info('Failure Processing Payout Transition');
+                    $success = false;
+                    break;
+                }
+            }
+            if ($success){
+                $state_token->admin_user_id = Auth::user()->id;
+                $state_token->save();
             }
         }
-
         return redirect()->route('admin.payments.index')->with('notification','Vouchers Paid!');
-
     }
 }

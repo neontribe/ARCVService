@@ -3,7 +3,6 @@
 namespace App\Views\Composers;
 
 use App\Http\Controllers\Service\Admin\PaymentsController;
-use Carbon\Carbon;
 use Illuminate\View\View;
 
 class PaymentsComposer
@@ -17,10 +16,10 @@ class PaymentsComposer
     public function compose(View $view)
     {
 
-        $checkPayments = PaymentsController::getPaymentsPast7Days('payment_pending',Carbon::now()->subDays(7));
+        $checkPayments = PaymentsController::checkIfOutstandingPayments();
 
-        $countPayments = count($checkPayments);
+//        $countPayments = count($checkPayments);
 
-        $view->with('hasPayments', $countPayments);
+        $view->with('hasPayments', $checkPayments);
     }
 }
