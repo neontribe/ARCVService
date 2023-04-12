@@ -123,14 +123,13 @@ where stid is not null;
      */
     public static function checkIfOutstandingPayments(): bool
     {
-        $date = Carbon::now()->subDays(7);
+        $date = Carbon::now()->subDays(7)->startOfDay();
 
         $payments = DB::table('state_tokens')
             ->where('created_at','>',$date)
             ->whereNull('admin_user_id')
             ->count();
-
-            if($payments > 0){
+        if($payments > 0){
             return true;
         }
         else {
