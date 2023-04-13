@@ -100,6 +100,9 @@ class BundleController extends Controller
             $errors = ['append' => $numVouchers];
         }
 
+        //Check the voucher isn't already recorded, payment_pending, paid or retired
+
+
         // Return to manager in all cases
         $successRoute = $failRoute = route(
             'store.registration.voucher-manager',
@@ -293,6 +296,9 @@ class BundleController extends Controller
                         break;
                     case "disbursed":
                         $messages[] = "These vouchers have been given out: " . join(', ', $values);
+                        break;
+                    case "used":
+                        $messages[] = "These vouchers have already been used: " . join(', ', $values);
                         break;
                     case "bundled":
                         // Some vouchers were allocated to a family already. Partition these based on whether the user

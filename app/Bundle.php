@@ -133,7 +133,12 @@ class Bundle extends Model
                 } else if ($voucher->bundle && $bundle !== null) {
                     // Vouchers should not jump from another bundle without being manually removed first.
                     $errors["bundled"][] = $voucher;
-                } else {
+                }
+                else if (!$voucher->transitionAllowed('collect')){
+                    // Vouchers cannot be bundled if they are expired, void, recorded, payment_pending or paid
+                    $errors["used"][] = $voucher->code;
+                }
+                else {
                     // Change its bundle
                     $voucher->bundle()->associate($bundle)->save();
                 }
