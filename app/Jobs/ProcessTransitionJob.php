@@ -119,12 +119,14 @@ class ProcessTransitionJob implements ShouldQueue
      */
     public static function finishedHandler(JobStatus $jobStatus): JsonResponse
     {
-        // we're done! `303 Other` the user to somewhere they can pick up their data.
-        // get the output off the job
+        // we're done! should be `303 Other` the user to somewhere they can pick up their data.
+        // get the output off the job.
+        // iOS is rubbish though - it doesn't treat auth headers right with 303s, so we're relying
+        // on the client to manually read the "finished" status :-(
         $route = route('api.vouchers.transition-response.show', ['jobStatus' => $jobStatus->id]);
         $data = array_merge(['location' => $route], $jobStatus->only(['id', 'status']));
         // tell the user where it is
-        return response()->json($data, 303, [
+        return response()->json($data, 202, [
             'Location' => $route,
         ]);
     }
