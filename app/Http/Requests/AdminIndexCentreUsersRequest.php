@@ -25,7 +25,7 @@ class AdminIndexCentreUsersRequest extends FormRequest
     public function rules()
     {
         return [
-            'orderBy' => 'string|in:name,homeCentreArea,homeCentre',
+            'orderBy' => 'in:name,homeCentreArea,homeCentre',
             'direction' => 'in:asc,desc',
         ];
     }

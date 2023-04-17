@@ -12,22 +12,26 @@ use App\Sponsor;
 use DB;
 use Debugbar;
 use Exception;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Laracsv\Export;
+use League\Csv\CannotInsertRecord;
 use Log;
 use Ramsey\Uuid\Uuid;
-use Laracsv\Export;
+use Throwable;
 
 class CentreUsersController extends Controller
 {
     /**
      * Display a listing of Workers.
-     *
      * @param AdminIndexCentreUsersRequest $request
-     * @return Factory|View
+     * @return Application|Factory|View
      */
-    public function index(AdminIndexCentreUsersRequest $request)
+    public function index(AdminIndexCentreUsersRequest $request): View|Factory|Application
     {
         // fetch query params from request
         $field = $request->input('orderBy');
@@ -48,23 +52,21 @@ class CentreUsersController extends Controller
     }
 
     /**
-    * Show the form for creating new CentreUsers
-    *
-    * @return Factory|View
-    */
-    public function create()
+     * Show the form for creating new CentreUsers
+     * @return Factory|View|Application
+     */
+    public function create(): Factory|View|Application
     {
         $centres = Centre::get(['name', 'id']);
         return view('service.centreusers.create', compact('centres'));
     }
 
     /**
-     * Show the form for editing a CentreUser
-     *
+     * Show the form for editing a CentreUser.
      * @param $id
-     * @return Factory|View
+     * @return Application|Factory|View
      */
-    public function edit($id)
+    public function edit($id): View|Factory|Application
     {
         // Find the worker or throw a 500
         $worker = CentreUser::findOrFail($id);
@@ -75,16 +77,11 @@ class CentreUsersController extends Controller
         // Work out current worker-centre selections
         $workerCentres = [
             "home" => $homeCentreId,
-            "alternates" => $worker
-                ->centres()
-                ->whereKeyNot($homeCentreId)
-                ->pluck('id')
-                ->all()
+            "alternates" => $worker->centres()->whereKeyNot($homeCentreId)->pluck('id')->all(),
         ];
 
         // Saucy eager loading to get sponsors and their centres
-        $centresBySponsor = Sponsor::with(['centres:sponsor_id,id,name'])
-            ->get(['id', 'name'])
+        $centresBySponsor = Sponsor::with(['centres:sponsor_id,id,name'])->get(['id', 'name'])
             // Set some flags on those.
             ->each(function ($sponsor) use ($workerCentres) {
                 $sponsor->centres->each(function ($centre) use ($workerCentres) {
@@ -106,7 +103,7 @@ class CentreUsersController extends Controller
      * @param AdminUpdateCentreUserRequest $request
      * @param $id
      * @return RedirectResponse
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function update(AdminUpdateCentreUserRequest $request, $id)
     {
@@ -133,58 +130,20 @@ class CentreUsersController extends Controller
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getTraceAsString());
             // Throw it back to the user
-            return redirect()
-                ->route('admin.centreusers.edit', ['id' => $id])
+            return redirect()->route('admin.centreusers.edit', ['id' => $id])
                 ->withErrors('Update failed - DB Error.');
         }
-        return redirect()
-            ->route('admin.centreusers.index')
+        return redirect()->route('admin.centreusers.index')
             ->with('message', 'Worker ' . $centreUser->name . ' updated');
     }
 
     /**
-     * Create a CentreUser from a form
-     * @param AdminNewCentreUserRequest $request
-     * @return RedirectResponse
-     * @throws \Throwable
-     */
-    public function store(AdminNewCentreUserRequest $request)
-    {
-        try {
-            $centreUser = DB::transaction(function () use ($request) {
-                // Create a CentreUser;
-                $cu = new CentreUser([
-                    'name' => $request->input('name'),
-                    'email' => $request->input('email'),
-                    // Set random password
-                    'password' => bcrypt(Uuid::uuid4()->toString())
-                ]);
-                $cu->save();
-
-                // Sync those;
-                $this->syncCentres($request, $cu);
-
-                return $cu;
-            });
-        } catch (Exception $e) {
-            // Oops! Log that
-            Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
-            Log::error($e->getTraceAsString());
-            // Throw it back to the user
-            return redirect()->route('admin.centreusers.create')->withErrors('Creation failed - DB Error.');
-        }
-        return redirect()
-            ->route('admin.centreusers.index')
-            ->with('message', 'Worker ' . $centreUser->name . ' created');
-    }
-
-    /**
      * Code deduplication;
-     * @param $request
+     * @param Request $request
      * @param CentreUser $cu
      * @return array
      */
-    private function syncCentres($request, CentreUser $cu)
+    private function syncCentres(Request $request, CentreUser $cu): array
     {
         // Set Home Centre
         $homeCentre_id = $request->input('worker_centre');
@@ -205,7 +164,46 @@ class CentreUsersController extends Controller
         return $cu->centres()->sync($centre_ids);
     }
 
-    public function download()
+    /**
+     * Create a CentreUser from a form
+     * @param AdminNewCentreUserRequest $request
+     * @return RedirectResponse
+     * @throws Throwable
+     */
+    public function store(AdminNewCentreUserRequest $request): RedirectResponse
+    {
+        try {
+            $centreUser = DB::transaction(function () use ($request) {
+                // Create a CentreUser;
+                $cu = new CentreUser([
+                    'name' => $request->input('name'),
+                    'email' => $request->input('email'),
+                    // Set random password
+                    'password' => bcrypt(Uuid::uuid4()->toString()),
+                ]);
+                $cu->save();
+
+                // Sync those;
+                $this->syncCentres($request, $cu);
+
+                return $cu;
+            });
+        } catch (Exception $e) {
+            // Oops! Log that
+            Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+            Log::error($e->getTraceAsString());
+            // Throw it back to the user
+            return redirect()->route('admin.centreusers.create')->withErrors('Creation failed - DB Error.');
+        }
+        return redirect()->route('admin.centreusers.index')->with('message',
+            'Worker ' . $centreUser->name . ' created');
+    }
+
+    /**
+     * @return void
+     * @throws CannotInsertRecord
+     */
+    public function download(): void
     {
         $workers = CentreUser::get()->sortBy(function ($item) {
             $homeCentre = $item->homeCentre;
@@ -218,7 +216,7 @@ class CentreUsersController extends Controller
          * * modify downloader values to print user friendly text
          * * currently, the y/n in the model reverts to 0/1 because of Laravel casting
          * * so we are creating a temporary property
-        */
+         */
         $csvExporter->beforeEach(function ($worker) {
             $worker->downloaderRole = $worker->downloader ? 'Yes' : 'No';
             foreach ($worker->centres as $centre) {
@@ -235,7 +233,7 @@ class CentreUsersController extends Controller
             'homeCentre.sponsor.name' => 'Home Centre Area',
             'homeCentre.name' => 'Home Centre',
             'alternative_centres' => 'Alternative Centre',
-            'downloaderRole' => 'Downloader'
+            'downloaderRole' => 'Downloader',
         ];
 
         $fileName = 'active_workers.csv';
@@ -253,18 +251,16 @@ class CentreUsersController extends Controller
     }
 
     /**
-     * Handle deleting a centre user.
-     *
-     * @param CentreUser $organisation
+     * Handle deleting a centre user
+     * @param int $id
      * @return RedirectResponse
      */
-    public function delete($id): RedirectResponse
+    public function delete(int $id): RedirectResponse
     {
-      $centreUser = CentreUser::findOrFail($id);
-      $centreUser->centre->centreUsers()->detach($id);
-      $centreUser->delete();
-      return redirect()
-          ->route('admin.centreusers.index')
-          ->with('message', 'Worker ' . $centreUser->name . ' deleted');
+        $centreUser = CentreUser::findOrFail($id);
+        $centreUser->centre->centreUsers()->detach($id);
+        $centreUser->delete();
+        return redirect()->route('admin.centreusers.index')
+            ->with('message', 'Worker ' . $centreUser->name . ' deleted');
     }
 }

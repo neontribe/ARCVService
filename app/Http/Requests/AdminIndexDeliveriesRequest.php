@@ -25,7 +25,7 @@ class AdminIndexDeliveriesRequest extends FormRequest
     public function rules()
     {
         return [
-            'orderBy' => 'string|in:name,homeCentreArea,homeCentre',
+            'orderBy' => 'in:centre,range,dispatchDate',
             'direction' => 'in:asc,desc',
         ];
     }
