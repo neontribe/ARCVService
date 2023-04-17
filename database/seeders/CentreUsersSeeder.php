@@ -81,5 +81,21 @@ class CentreUsersSeeder extends Seeder
         ]);
         $spcId = Centre::where('name', 'Prescribing Centre')->first()->id;
         $socialPrescriber->centres()->attach($spcId, ["homeCentre" => true]);
+
+        // Scottish user for testing
+        $scottishUser = factory(CentreUser::class)->create([
+            'name' => 'Scottish user',
+            'email' => 'arc+scuser@neontribe.co.uk',
+            'password' => bcrypt('store_pass'),
+        ]);
+        $scottishUser->centres()->attach(8, ['homeCentre' => true]);
+
+        // Southwark user for testing
+        $southwarkUser = factory(CentreUser::class)->create([
+            'name' => 'Southwark user',
+            'email' => 'arc+swuser@neontribe.co.uk',
+            'password' => bcrypt('store_pass'),
+        ]);
+        $southwarkUser->centres()->attach(6, ['homeCentre' => true]);
     }
 }
