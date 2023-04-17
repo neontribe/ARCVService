@@ -26,7 +26,7 @@ class AdminNewVoucherRequest extends FormRequest
     {
         return  [
             // MUST be present, and exist in table
-            'sponsor_id' => 'required|exists:sponsors,id',
+            'sponsor_id' => 'required|integer|exists:sponsors,id',
             // MUST be present, and an optionally zero padded number string
             'start' =>' required|string|regex:/^[0-9]+$/',
             'end' => 'required|string|regex:/^[0-9]+$/',

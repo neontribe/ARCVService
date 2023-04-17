@@ -38,7 +38,7 @@ class ApiTransitionVoucherRequest extends FormRequest
         */
 
         return [
-            'trader_id' => 'required|exists:traders,id',
+            'trader_id' => 'required|numeric|exists:traders,id',
             'transition' => 'required|string',
             'vouchers' => 'required|array|min:1',
             'vouchers.*' => 'required|string',
