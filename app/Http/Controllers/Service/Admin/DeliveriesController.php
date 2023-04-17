@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Service\Admin;
 use App\Centre;
 use App\Delivery;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdminIndexDeliveriesRequest;
 use App\Http\Requests\AdminNewDeliveryRequest;
 use App\Sponsor;
 use App\Voucher;
@@ -14,7 +15,6 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Log;
 use Throwable;
@@ -24,10 +24,10 @@ class DeliveriesController extends Controller
     /**
      * Display a listing of Sponsors.
      *
-     * @param Request $request
+     * @param AdminIndexDeliveriesRequest $request
      * @return Factory|View
      */
-    public function index(Request $request)
+    public function index(AdminIndexDeliveriesRequest $request)
     {
         // load the deliveries.
         $deliveries = Delivery::with('centre')

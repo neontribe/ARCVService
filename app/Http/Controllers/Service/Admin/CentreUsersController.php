@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Service\Admin;
 use App\Centre;
 use App\CentreUser;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdminIndexCentreUsersRequest;
 use App\Http\Requests\AdminNewCentreUserRequest;
 use App\Http\Requests\AdminUpdateCentreUserRequest;
 use App\Sponsor;
@@ -13,11 +14,9 @@ use Debugbar;
 use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Log;
 use Ramsey\Uuid\Uuid;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Laracsv\Export;
 
 class CentreUsersController extends Controller
@@ -25,37 +24,26 @@ class CentreUsersController extends Controller
     /**
      * Display a listing of Workers.
      *
-     * @param Request $request
+     * @param AdminIndexCentreUsersRequest $request
      * @return Factory|View
      */
-    public function index(Request $request)
+    public function index(AdminIndexCentreUsersRequest $request)
     {
         // fetch query params from request
-        $field = $request->input('orderBy', null);
-        $direction = $request->input('direction', null);
+        $field = $request->input('orderBy');
+        $direction = $request->input('direction');
 
-        switch (true) {
-            case ($field === 'name'):
-                $workers = CentreUser::orderByField([
-                    'orderBy' => $field,
-                    'direction' => $direction
-                ])->get();
-                break;
-            case ($field === 'homeCentreArea' and $direction === 'desc'):
-                $workers = CentreUser::get()->sortByDesc('homeCentre.sponsor.name');
-                break;
-            case ($field === 'homeCentreArea' and $direction === 'asc'):
-                $workers = CentreUser::get()->sortBy('homeCentre.sponsor.name');
-                break;
-            case ($field === 'homeCentre' and $direction === 'desc'):
-                $workers = CentreUser::get()->sortByDesc('homeCentre.name');
-                break;
-            default:
-                $workers = CentreUser::get()->sortBy(function ($item) {
-                    $homeCentre = $item->homeCentre;
-                    return $homeCentre->sponsor->name . '#' . $homeCentre->name . '#' . $item->name;
-                });
-        }
+        $sorter = match ($field) {
+            'name' => 'name',
+            'homeCentreArea' => 'homeCentre.sponsor.name',
+            'homeCentre' => 'homeCentre.name',
+            default => function ($item) {
+                $homeCentre = $item->homeCentre;
+                return $homeCentre->sponsor->name . '#' . $homeCentre->name . '#' . $item->name;
+            },
+        };
+        $workers = CentreUser::get()->sortBy($sorter, SORT_REGULAR, ($direction === 'desc'));
+
         return view('service.centreusers.index', compact('workers'));
     }
 
