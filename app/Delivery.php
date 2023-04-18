@@ -87,21 +87,24 @@ class Delivery extends Model
      * @param array $sort
      * @return Builder
      */
-    public function scopeOrderByField(Builder $query, $sort)
+    public function scopeOrderByField(Builder $query, array $sort)
     {
         switch ($sort['orderBy']) {
             case 'centre':
-                return $query->orderByCentre($sort['direction']);
+                $query->orderByCentre($sort['direction']);
                 break;
             case 'range':
-                return $query->orderByRange($sort['direction']);
+                $query->orderByRange($sort['direction']);
                 break;
             case 'dispatchDate':
-                return $query->orderByDispatchDate($sort['direction']);
+                $query->orderByDispatchDate($sort['direction']);
                 break;
             default:
                 // default to date order ascending, so new things are on the BOTTOM.
-                return $query->orderByDispatchDate('asc');
+                $query->orderByDispatchDate('asc');
+                break;
+
         }
+        return $query;
     }
 }

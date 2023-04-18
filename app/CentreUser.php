@@ -2,14 +2,12 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\belongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use App\Notifications\StorePasswordResetNotification;
 
 class CentreUser extends Authenticatable
@@ -173,30 +171,5 @@ class CentreUser extends Authenticatable
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new StorePasswordResetNotification($token, $this->name));
-    }
-
-    /**
-     * Scope order by name
-     *
-     * @param Builder $query
-     * @param string $direction
-     */
-    public function scopeOrderByName(Builder $query, $direction = 'asc')
-    {
-        $query->orderBy('name', $direction);
-    }
-
-    /**
-     * Strategy to sort columns
-     *
-     * @param Builder $query
-     * @param array $sort
-     * @return Builder
-     */
-    public function scopeOrderByField(Builder $query, $sort)
-    {
-        if ($sort['orderBy'] === 'name') {
-            return $query->orderByName($sort['direction']);
-        }
     }
 }
