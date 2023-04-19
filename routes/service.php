@@ -29,7 +29,7 @@ Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail'
 ;
 Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')
     ->name('admin.password.reset')
-    ->where('token', '[0-9a-f]{80}');
+    ->where('token', '[0-9a-f]{64}');
 ;
 Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 
