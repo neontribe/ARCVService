@@ -161,7 +161,8 @@ class TransitionProcessor
     {
         // If 'confirm', we'll need a StateToken for Later, with an ID for Admin Payment flagging
         $stateToken = factory(StateToken::class)->create();
-        $stateToken->user_id=Auth::user()->id;
+        $stateToken->user_id = Auth::user()->id;
+        $stateToken->save();
         $transition = $this->transition;
 
         foreach ($this->vouchers as $voucher) {
