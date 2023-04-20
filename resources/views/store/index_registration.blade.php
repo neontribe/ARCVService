@@ -21,7 +21,9 @@
                     <label for="family_name">Search by name</label>
                     <div class="search-actions">
                         <input type="text" name="family_name" id="family_name" autocomplete="off" autocorrect="off"
-                               spellcheck="false" onkeyup="searchForm()" placeholder="Enter {{ $programme ? 'household' : 'family'}} name" aria-label="{{ $programme ? 'Household' : 'Family'}} Name">
+                               spellcheck="false" onkeyup="searchForm()"
+                               placeholder="Enter {{ $programme ? 'household' : 'family'}} name" aria-label="{{ $programme ? 'Household' : 'Family'}} Name"
+                               value="{{ Request::get("family_name") ?? '' }}" />
                     </div>
                 </div>
             </form>
@@ -93,25 +95,19 @@
 
     <script>
         function searchForm() {
-            // Declare variables
-            var input, filter, table, tr, td, i, txtValue, checkbox;
-            input = document.getElementById("family_name");
-            filter = input.value.toUpperCase();
-            table = document.getElementById("registrations");
-            tr = table.getElementsByTagName("tr");
-            checkbox = document.getElementById("families_left");
-
-            // Loop through all table rows, and hide those who don't match the search query
-            for (i = 0; i < tr.length; i++) {
-                td = tr[i].getElementsByTagName("td")[0];
-                if (td) {
-                    txtValue = td.textContent || td.innerText;
-                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                        tr[i].style.display = "";
-                    } else {
-                        tr[i].style.display = "none";
-                    }
+            // setup before functions
+            var typingTimer;                //timer identifier
+            var doneTypingInterval = 500;   //time in ms (half a second)
+            // on keyup, start the countdown
+            $("#family_name").keyup(function(){
+                clearTimeout(typingTimer);
+                if ($("#family_name").val()) {
+                    typingTimer = setTimeout(doneTyping, doneTypingInterval);
                 }
+            });
+            // user is "finished typing" do something
+            function doneTyping () {
+                $("#searchform").submit();
             }
         }
     </script>
