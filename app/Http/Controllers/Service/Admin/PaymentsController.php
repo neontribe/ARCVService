@@ -13,110 +13,86 @@ use Log;
 
 class PaymentsController extends Controller
 {
+    public function index()
+    {
+        $pendingPaymentData = $this::getPaymentsPast7Days();
+//       $reimbursedPaymentData = $this::getPaymentsPast7Days('reimbursed',Carbon::now()->subDays(7));
+        return view('service.payments.index', ['pending' => $pendingPaymentData]);
+//        return view('service.payments.index',['pending'=>$pendingPaymentData, 'reimbursed'=>$reimbursedPaymentData]);
+    }
+
     /**
      * List Payments
      *
      * @return LengthAwarePaginator
      */
-    public function index()
+    public static function getPaymentsPast7Days()
     {
-        $pendingPaymentData = $this::getPaymentsPast7Days('payment_pending',Carbon::now()->subDays(7));
-        $reimbursedPaymentData = $this::getPaymentsPast7Days('reimbursed',Carbon::now()->subDays(7));
-        return view('service.payments.index',['pending'=>$pendingPaymentData, 'reimbursed'=>$reimbursedPaymentData]);
-    }
+        //set the period we want scoped
+        $sevenDaysAgo = Carbon::now()->subDays(7)->startOfDay();
+        //get all the StateTokens for unpaid (pending) payment requests in the past 7 days
+        // (in theory nothing is ever unpaid for that long anyway)
+        $pending = StateToken::whereNotNull('user_id')->whereNull('admin_user_id')->where('created_at', '>', $sevenDaysAgo)->get();
+        //get all the StateTokens for payments recorded as PAID in the last seven days
+//        $paid = StateToken::whereNotNull('user_id')->whereNotNull('admin_user_id')->where('created_at',>, $sevenDaysAgo)->get();
 
-    public static function getPaymentsPast7Days($currentState,$fromDate)
-    {
+        foreach ($pending as $stateToken) {
+            //Get ALL of the VoucherStates that are related to this StateToken
+            //As need to count them (proxy for total vouchers) and also use them to get to other attributes on related models
+            $voucherStates = $stateToken->voucherStates()->get();
+//            var_dump($voucherStates);
+            //total //distinct voucher ids on voucher_state
+            //              $voucher = $lastState->voucher;
 
-        $pending = DB::select(DB::raw("select *,
-(select count(*) -- this gets a count of all the vouchers in the payment request 
-				from voucher_states as vs
-                left join vouchers v on vs.voucher_id = v.id
-                where v.currentstate = ? and vsstid = vs.state_token_id
-                and vs.state_token_id is not null) as total
-,
-(select count(*) -- this splits the count off all vouchers into the vouchers per voucher area (voucher sponsor as opposed to market sponsor)
-				from voucher_states as vs
-                left join vouchers v on vs.voucher_id = v.id
-                where v.currentstate = ? and vsstid = vs.state_token_id and v.sponsor_id = vsponsid
-                and vs.state_token_id is not null) as byarea
- from -- adding state token
-    (select * from	-- adding voucher states
-		(select * from -- adding market area
-			(select v.id as vid, v.trader_id as tid, t.name as tname, t.market_id as tmid, v.currentstate as vstate, v.sponsor_id as vsponsid, s.name as vsponname from vouchers v
-			left join traders t on v.trader_id = t.id
-			left join sponsors s on v.sponsor_id = s.id
-			where v.currentstate = ?
-			and v.updated_at >= ?
-            -- gets all the vouchers with payment-pending, plus the area the voucher is from via sponsor and then trader who has scanned the voucher
-			) as pending
-		left join
-			(select vs.voucher_id as vsvid, vs.id as vsid, vs.state_token_id as vsstid, vs.user_id, u.name as uname 
-				from voucher_states as vs
-				left join users u on vs.user_id = u.id
-                -- gets the vouchers states for the voucher, as we need this to get both the user that requested payment and the state token to enable pyament
-			) as pwithusers
-		on pending.vid = pwithusers.vsvid
-        ) as pusers
-        left join 
-		(select m.id as mid, m.sponsor_id as msid, m.name as mname, mspon.name as msponname
-		from markets m
-        left join sponsors mspon on m.sponsor_id = mspon.id
-        -- gets the area for the market, as we need this separately to the area that the voucher was issued, to be able to distinguish SP (special program) vouchers
-		) as mspons
-        on mspons.mid = pusers.tmid
-	) as allp     
-		left join
-	(select st.id as stid, st.uuid as stuuid from state_tokens st
-    -- gets the state token information as we need the uuid to enable payment
-	) as sts
-on allp.vsstid = sts.stid
-where stid is not null;
-"), array($currentState,$currentState,$currentState,$fromDate)
+            //Get all the attributes we need via each voucherState
+            foreach ($voucherStates as $voucherState) {
+//              $voucherState = $paymentData[$voucherState->stuuid] ?? [];
+                //add the uuid to each voucherState for use later
+                $voucherState['stuuid'] = $stateToken->uuid;
+                //These are the main headers
+                $voucherState['tname'] = $voucherState->voucher->trader->name;
+                $voucherState['mname'] = $voucherState->voucher->trader->market->name;
+                $voucherState['mspon'] = $voucherState->voucher->trader->market->sponsor->name;
+                $voucherState['uname'] = $voucherState->user->name;
+                $voucherState['total'] = count($voucherStates);
+                $voucherState['splitByArea'] = [];
+                    foreach($voucherState['splitByArea'] as $perArea){
+                        //this should split the above into voucher areas (unique()?) & sizeof?
+                        $perArea['vArea'] = 'Jam';
+                        //need this to be  count of all the vouchers with this voucher area
+                        $perArea['countArea'] = 4;
+                    }
+                //update pending with the filled in voucherStates
+                $pending = $voucherStates;
 
-        );
-        //TODO suspect this needs some error handling
-        $lists = collect($pending);
+                //initialise an array to use for passing the data to the index & view
+                $pendingData = [];
 
-        $payments = $lists->sortBy(function ($list){
-            return
-                $list->tname . '#' .
-                $list->mname . "#" .
-                $list->msponname . "#" .
-                $list->uname . "#" .
-                $list->vsponname . "#" .
-                $list->total . "#" .
-                $list->byarea;
+                foreach ($pending as $pendingRow) {
+                    // ngl not sure why this is here as the array will be empty...
+                    // grab any existing id in the array because safety dance?
+                    $currentRow = $pendingData[$pendingRow->stuuid] ?? [];
+                    // map the rows from pending to the new array
+                    // overwrite with things it probably already has...
+                    if (empty($currentRow)) {
+                        $currentRow["traderName"] = $pendingRow->tname;
+                        $currentRow["marketName"] = $pendingRow->mname;
+                        $currentRow["area"] = $pendingRow->mspon;
+                        $currentRow["requestedBy"] = $pendingRow->uname;
+                        $currentRow["vouchersTotal"] = $pendingRow->total;
+                        $currentRow["voucherAreas"] = [];
+                    }
+                    //I think this is to allow it to work for the dropdown
+                    $currentRow["voucherAreas"][$pendingRow->vArea] = $pendingRow->byVArea;
+                    $currentRow["voucherAreas"][$pendingRow->countArea] = $pendingRow->countVArea;
+                    // update pendingData;
+                    $pendingData[$pendingRow->stuuid] = $currentRow;
 
-        });
-
-        $paymentData = [];
-
-        foreach ($payments as $payment) {
-
-            // grab any existing id in the array
-            $currentUuid = $paymentData[$payment->stuuid] ?? [];
-
-            // overwrite with things it probably already has...
-            if (empty($currentUuid)) {
-                $currentUuid["traderName"] = $payment->tname;
-                $currentUuid["marketName"] = $payment->mname;
-                $currentUuid["area"] = $payment->msponname;
-                $currentUuid["requestedBy"] = $payment->uname;
-                $currentUuid["vouchersTotal"] = $payment->total;
-                $currentUuid["voucherAreas"] = [];
+                }
+                return $pendingData;
             }
-
-            $currentUuid["voucherAreas"][$payment->vsponname] = $payment->byarea;
-
-            // update paymentData;
-            $paymentData[$payment->stuuid] = $currentUuid;
         }
-
-        return $paymentData;
-
     }
-
     /** Lightweight check for outstanding payments to highlight in dashboard
      * @param $idkyet
      * @return bool
