@@ -35,64 +35,77 @@ class PaymentsController extends Controller
         $pending = StateToken::whereNotNull('user_id')->whereNull('admin_user_id')->where('created_at', '>', $sevenDaysAgo)->get();
         //get all the StateTokens for payments recorded as PAID in the last seven days
 //        $paid = StateToken::whereNotNull('user_id')->whereNotNull('admin_user_id')->where('created_at',>, $sevenDaysAgo)->get();
+//        print("<pre>".print_r($pending,true)."</pre>");
 
         foreach ($pending as $stateToken) {
             //Get ALL of the VoucherStates that are related to this StateToken
             //As need to count them (proxy for total vouchers) and also use them to get to other attributes on related models
             $voucherStates = $stateToken->voucherStates()->get();
-//            var_dump($voucherStates);
             //total //distinct voucher ids on voucher_state
             //              $voucher = $lastState->voucher;
-
+            $voucherStatesOutput = [];
             //Get all the attributes we need via each voucherState
             foreach ($voucherStates as $voucherState) {
 //              $voucherState = $paymentData[$voucherState->stuuid] ?? [];
                 //add the uuid to each voucherState for use later
-                $voucherState['stuuid'] = $stateToken->uuid;
+//                $voucherStatesOutput[$stateToken->uuid] = [];
+                $voucherStatesOutput[$stateToken->uuid] = [];
                 //These are the main headers
-                $voucherState['tname'] = $voucherState->voucher->trader->name;
-                $voucherState['mname'] = $voucherState->voucher->trader->market->name;
-                $voucherState['mspon'] = $voucherState->voucher->trader->market->sponsor->name;
-                $voucherState['uname'] = $voucherState->user->name;
-                $voucherState['total'] = count($voucherStates);
-                $voucherState['splitByArea'] = [];
-                    foreach($voucherState['splitByArea'] as $perArea){
-                        //this should split the above into voucher areas (unique()?) & sizeof?
-                        $perArea['vArea'] = 'Jam';
-                        //need this to be  count of all the vouchers with this voucher area
-                        $perArea['countArea'] = 4;
-                    }
-                //update pending with the filled in voucherStates
-                $pending = $voucherStates;
+                $voucherStatesOutput[$stateToken->uuid]['tname'] = $voucherState->voucher->trader->name;
+                $voucherStatesOutput[$stateToken->uuid]['mname'] = $voucherState->voucher->trader->market->name;
+                $voucherStatesOutput[$stateToken->uuid]['mspon'] = $voucherState->voucher->trader->market->sponsor->name;
+                $voucherStatesOutput[$stateToken->uuid]['uname'] = $voucherState->user->name;
+                $voucherStatesOutput[$stateToken->uuid]['total'] = count($voucherStates);
+                $voucherStatesOutput[$stateToken->uuid]['varea'] = $voucherState->voucher->sponsor->name;
+                $voucherStatesOutput[$stateToken->uuid]['countarea'] = 4;
 
-                //initialise an array to use for passing the data to the index & view
-                $pendingData = [];
+//                $voucherStatesOutput[$stateToken->uuid]['splitByArea'] = [];
+//                    foreach($voucherState['splitByArea'] as $perArea){
+//                        //this should split the above into voucher areas (unique()?) & sizeof?
+//                        $perArea['vArea'] = 'Jam';
+//                        //need this to be  count of all the vouchers with this voucher area
+//                        $perArea['countArea'] = 4;
+//                    }
+            }
+            $output = $voucherStatesOutput;
 
-                foreach ($pending as $pendingRow) {
-                    // ngl not sure why this is here as the array will be empty...
-                    // grab any existing id in the array because safety dance?
-                    $currentRow = $pendingData[$pendingRow->stuuid] ?? [];
-                    // map the rows from pending to the new array
-                    // overwrite with things it probably already has...
-                    if (empty($currentRow)) {
-                        $currentRow["traderName"] = $pendingRow->tname;
-                        $currentRow["marketName"] = $pendingRow->mname;
-                        $currentRow["area"] = $pendingRow->mspon;
-                        $currentRow["requestedBy"] = $pendingRow->uname;
-                        $currentRow["vouchersTotal"] = $pendingRow->total;
-                        $currentRow["voucherAreas"] = [];
-                    }
-                    //I think this is to allow it to work for the dropdown
-                    $currentRow["voucherAreas"][$pendingRow->vArea] = $pendingRow->byVArea;
-                    $currentRow["voucherAreas"][$pendingRow->countArea] = $pendingRow->countVArea;
-                    // update pendingData;
-                    $pendingData[$pendingRow->stuuid] = $currentRow;
+            //use group by area to create nested values?
+            //update pending with the filled in voucherStates
+//                $pending = $voucherStates;
+            print("<pre>" . print_r($output, true) . "</pre>");
+        }
 
+
+        {
+
+//                //initialise an array to use for passing the data to the index & view
+//                $formattedData = [];
+//
+//                foreach ($output as $outputRow) {
+//                    // ngl not sure why this is here as the array will be empty...
+//                    // grab any existing id in the array because safety dance?
+////                        $formattedData[$output->uuid] = [];
+////                    $currentRow = $pendingData[$outputRow->uuid] ?? [];
+//                    // map the rows from pending to the new array
+//                    // overwrite with things it probably already has...
+////                    if (empty($currentRow)) {
+//                    $formattedData["traderName"] = $outputRow->tname;
+//                    $formattedData["marketName"] = $outputRow->mname;
+//                    $formattedData["area"] = $outputRow->mspon;
+//                    $formattedData["requestedBy"] = $outputRow->uname;
+//                    $formattedData["vouchersTotal"] = $outputRow->total;
+////                        $currentRow[$output->uuid]["voucherAreas"] = [];
+//                    }
+//                    //I think this is to allow it to work for the dropdown
+////                    $currentRow["voucherAreas"][$outputRow->vArea] = $outputRow->byVArea;
+////                    $currentRow["voucherAreas"][$outputRow->countArea] = $outputRow->countVArea;
+////                    // update pendingData;
+////                    $pendingData[$outputRow->uuid] = $currentRow;
+//                $pendingData = $formattedData;
                 }
                 return $pendingData;
             }
-        }
-    }
+
     /** Lightweight check for outstanding payments to highlight in dashboard
      * @param $idkyet
      * @return bool
