@@ -51,7 +51,8 @@ class PaymentsController extends Controller
         $sevenDaysAgo = Carbon::now()->subDays(7)->startOfDay();
         //get all the StateTokens for unpaid (pending) payment requests in the past 7 days
         // (in theory nothing is ever unpaid for that long anyway)
-        $pendingTokens = StateToken::whereNotNull('user_id')
+        $pendingTokens = StateToken::with('user','voucherStates','voucherStates.voucher','voucherStates.voucher.trader',
+            'voucherStates.voucher.trader.market.sponsor','voucherStates.voucher.sponsor')->whereNotNull('user_id')
             ->whereNull('admin_user_id')
             ->where('created_at', '>', $sevenDaysAgo)
             ->get();
@@ -59,9 +60,9 @@ class PaymentsController extends Controller
         $pendingResults = [];
         foreach ($pendingTokens as $stateToken) {
 
-            $voucherStates = $stateToken->voucherStates()->get();
+            $voucherStates = $stateToken->voucherStates->all();
             $pendingResults[$stateToken->uuid] = [];
-            $pendingResults[$stateToken->uuid]['requestedBy'] = $stateToken->user()->name ?? 'unknown';
+            $pendingResults[$stateToken->uuid]['requestedBy'] = $stateToken->user->name ?? 'unknown';
             $pendingResults[$stateToken->uuid]['vouchersTotal'] = count($voucherStates);
 
             //Get all the attributes we need via each voucherState
