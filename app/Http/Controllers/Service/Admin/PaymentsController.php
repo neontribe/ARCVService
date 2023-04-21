@@ -73,7 +73,10 @@ class PaymentsController extends Controller
                 $pendingResults[$stateToken->uuid]['mspon'] = $pendingResults[$stateToken->uuid]['mspon'] ?? $trader->market->sponsor->name;
 
                 $areaList = $pendingResults[$stateToken->uuid]['voucherareas'] ?? [];
-                $areaList[$voucherState->voucher->sponsor->name] += 1;
+                $areaList[$voucherState->voucher->sponsor->name] = isset($areaList[$voucherState->voucher->sponsor->name])
+                    ? $areaList[$voucherState->voucher->sponsor->name] +=1
+                    : 1;
+
                 $pendingResults[$stateToken->uuid]['voucherareas'] = $areaList;
             }
         }
