@@ -69,7 +69,7 @@ class PaymentsController extends Controller
             ->where('created_at', '>', $fromDate)
             ->whereNotNull('user_id')
             // if $paid = true will make this a NotNull, thereby getting paid things
-            ->whereNull('admin_user_id', null, $paid)
+            ->whereNull('admin_user_id', 'and', $paid)
             ->get();
 
         return self::makePaymentDataStructure($tokens);
