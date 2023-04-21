@@ -61,23 +61,23 @@ class PaymentsController extends Controller
 
             $voucherStates = $stateToken->voucherStates()->get();
             $pendingResults[$stateToken->uuid] = [];
-            $pendingResults[$stateToken->uuid]['uname'] = $stateToken->user()->name ?? 'unknown';
-            $pendingResults[$stateToken->uuid]['total'] = count($voucherStates);
+            $pendingResults[$stateToken->uuid]['requestedBy'] = $stateToken->user()->name ?? 'unknown';
+            $pendingResults[$stateToken->uuid]['vouchersTotal'] = count($voucherStates);
 
             //Get all the attributes we need via each voucherState
             foreach ($voucherStates as $voucherState) {
                 $trader = $voucherState->voucher->trader;
                 //These are the main headers; check once and then take that going forward
-                $pendingResults[$stateToken->uuid]['tname'] = $pendingResults[$stateToken->uuid]['tname'] ?? $trader->name;
-                $pendingResults[$stateToken->uuid]['mname'] = $pendingResults[$stateToken->uuid]['mname'] ?? $trader->market->name;
-                $pendingResults[$stateToken->uuid]['mspon'] = $pendingResults[$stateToken->uuid]['mspon'] ?? $trader->market->sponsor->name;
+                $pendingResults[$stateToken->uuid]['traderName'] = $pendingResults[$stateToken->uuid]['traderName'] ?? $trader->name;
+                $pendingResults[$stateToken->uuid]['marketName'] = $pendingResults[$stateToken->uuid]['marketName'] ?? $trader->market->name;
+                $pendingResults[$stateToken->uuid]['area'] = $pendingResults[$stateToken->uuid]['area'] ?? $trader->market->sponsor->name;
 
-                $areaList = $pendingResults[$stateToken->uuid]['voucherareas'] ?? [];
+                $areaList = $pendingResults[$stateToken->uuid]['voucherAreas'] ?? [];
                 $areaList[$voucherState->voucher->sponsor->name] = isset($areaList[$voucherState->voucher->sponsor->name])
                     ? $areaList[$voucherState->voucher->sponsor->name] +=1
                     : 1;
 
-                $pendingResults[$stateToken->uuid]['voucherareas'] = $areaList;
+                $pendingResults[$stateToken->uuid]['voucherAreas'] = $areaList;
             }
         }
         return $pendingResults;
