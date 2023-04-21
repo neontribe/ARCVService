@@ -69,10 +69,11 @@ class PaymentsController extends Controller
 
             //Get all the attributes we need via each voucherState
             foreach ($voucherStates as $voucherState) {
+                $trader = $voucherState->voucher->trader;
                 //These are the main headers; check once and then take that going forward
-                $pendingResults[$stateToken->uuid]['tname'] = $pendingResults[$stateToken->uuid]['tname'] ?? $voucherState->voucher->trader->name;
-                $pendingResults[$stateToken->uuid]['tname'] = $pendingResults[$stateToken->uuid]['mname'] ?? $voucherState->voucher->trader->market->name;
-                $pendingResults[$stateToken->uuid]['tname'] = $pendingResults[$stateToken->uuid]['mspon'] ?? $voucherState->voucher->trader->market->sponsor->name;
+                $pendingResults[$stateToken->uuid]['tname'] = $pendingResults[$stateToken->uuid]['tname'] ?? $trader->name;
+                $pendingResults[$stateToken->uuid]['tname'] = $pendingResults[$stateToken->uuid]['mname'] ?? $trader->market->name;
+                $pendingResults[$stateToken->uuid]['tname'] = $pendingResults[$stateToken->uuid]['mspon'] ?? $trader->market->sponsor->name;
 
                 $areaList = $pendingResults[$stateToken->uuid]['voucherareas'] ?? [];
                 $areaList[$voucherState->voucher->sponsor->name] += 1;

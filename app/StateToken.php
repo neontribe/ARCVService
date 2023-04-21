@@ -80,7 +80,7 @@ class StateToken extends Model
      *
      * @return HasOne
      */
-    public function users(): HasOne
+    public function user(): HasOne
     {
         return $this->hasOne(User::class);
     }
@@ -90,7 +90,7 @@ class StateToken extends Model
      *
      * @return HasOne
      */
-    public function adminUsers(): HasOne
+    public function adminUser(): HasOne
     {
         return $this->hasOne(AdminUser::class);
     }
