@@ -13,6 +13,25 @@ use Log;
 
 class PaymentsController extends Controller
 {
+    /** Lightweight check for outstanding payments to highlight in dashboard
+     * @param $idkyet
+     * @return bool
+     */
+    public static function checkIfOutstandingPayments(): bool
+    {
+        $date = Carbon::now()->subDays(7)->startOfDay();
+
+        $payments = DB::table('state_tokens')
+            ->where('created_at', '>', $date)
+            ->whereNull('admin_user_id')
+            ->count();
+        if ($payments > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public function index()
     {
         $pendingPaymentData = $this::getPaymentsPast7Days();
@@ -24,7 +43,7 @@ class PaymentsController extends Controller
     /**
      * List Payments
      *
-     * @return LengthAwarePaginator
+     * @return array
      */
     public static function getPaymentsPast7Days()
     {
@@ -32,98 +51,35 @@ class PaymentsController extends Controller
         $sevenDaysAgo = Carbon::now()->subDays(7)->startOfDay();
         //get all the StateTokens for unpaid (pending) payment requests in the past 7 days
         // (in theory nothing is ever unpaid for that long anyway)
-        $pending = StateToken::whereNotNull('user_id')->whereNull('admin_user_id')->where('created_at', '>', $sevenDaysAgo)->get();
-        //get all the StateTokens for payments recorded as PAID in the last seven days
-//        $paid = StateToken::whereNotNull('user_id')->whereNotNull('admin_user_id')->where('created_at',>, $sevenDaysAgo)->get();
-//        print("<pre>".print_r($pending,true)."</pre>");
+        $pendingTokens = StateToken::whereNotNull('user_id')
+            ->whereNull('admin_user_id')
+            ->where('created_at', '>', $sevenDaysAgo)
+            ->get();
 
-        foreach ($pending as $stateToken) {
+        $pendingResults = [];
+        foreach ($pendingTokens as $stateToken) {
+
+            $voucherStates = $stateToken->voucherStates()->get();
+            $pendingResults[$stateToken->uuid] = [];
+            $pendingResults[$stateToken->uuid]['uname'] = $stateToken->user->name;
+            $pendingResults[$stateToken->uuid]['total'] = count($voucherStates);
+
             //Get ALL of the VoucherStates that are related to this StateToken
             //As need to count them (proxy for total vouchers) and also use them to get to other attributes on related models
-            $voucherStates = $stateToken->voucherStates()->get();
-            //total //distinct voucher ids on voucher_state
-            //              $voucher = $lastState->voucher;
-            $voucherStatesOutput = [];
+
             //Get all the attributes we need via each voucherState
             foreach ($voucherStates as $voucherState) {
-//              $voucherState = $paymentData[$voucherState->stuuid] ?? [];
-                //add the uuid to each voucherState for use later
-//                $voucherStatesOutput[$stateToken->uuid] = [];
-                $voucherStatesOutput[$stateToken->uuid] = [];
-                //These are the main headers
-                $voucherStatesOutput[$stateToken->uuid]['tname'] = $voucherState->voucher->trader->name;
-                $voucherStatesOutput[$stateToken->uuid]['mname'] = $voucherState->voucher->trader->market->name;
-                $voucherStatesOutput[$stateToken->uuid]['mspon'] = $voucherState->voucher->trader->market->sponsor->name;
-                $voucherStatesOutput[$stateToken->uuid]['uname'] = $voucherState->user->name;
-                $voucherStatesOutput[$stateToken->uuid]['total'] = count($voucherStates);
-                $voucherStatesOutput[$stateToken->uuid]['varea'] = $voucherState->voucher->sponsor->name;
-                $voucherStatesOutput[$stateToken->uuid]['countarea'] = 4;
+                //These are the main headers; check once and then take that going forward
+                    $pendingResults[$stateToken->uuid]['tname'] ?? $voucherState->voucher->trader->name;
+                    $pendingResults[$stateToken->uuid]['mname'] ?? $voucherState->voucher->trader->market->name;
+                    $pendingResults[$stateToken->uuid]['mspon'] ?? $voucherState->voucher->trader->market->sponsor->name;
 
-//                $voucherStatesOutput[$stateToken->uuid]['splitByArea'] = [];
-//                    foreach($voucherState['splitByArea'] as $perArea){
-//                        //this should split the above into voucher areas (unique()?) & sizeof?
-//                        $perArea['vArea'] = 'Jam';
-//                        //need this to be  count of all the vouchers with this voucher area
-//                        $perArea['countArea'] = 4;
-//                    }
+                $areaList = $pendingResults[$stateToken->uuid]['voucherareas'] ?? [];
+                $areaList[$voucherState->voucher->sponsor->name] += 1;
+                $pendingResults[$stateToken->uuid]['voucherareas'] = $areaList;
             }
-            $output = $voucherStatesOutput;
-
-            //use group by area to create nested values?
-            //update pending with the filled in voucherStates
-//                $pending = $voucherStates;
-            print("<pre>" . print_r($output, true) . "</pre>");
         }
-
-
-        {
-
-//                //initialise an array to use for passing the data to the index & view
-//                $formattedData = [];
-//
-//                foreach ($output as $outputRow) {
-//                    // ngl not sure why this is here as the array will be empty...
-//                    // grab any existing id in the array because safety dance?
-////                        $formattedData[$output->uuid] = [];
-////                    $currentRow = $pendingData[$outputRow->uuid] ?? [];
-//                    // map the rows from pending to the new array
-//                    // overwrite with things it probably already has...
-////                    if (empty($currentRow)) {
-//                    $formattedData["traderName"] = $outputRow->tname;
-//                    $formattedData["marketName"] = $outputRow->mname;
-//                    $formattedData["area"] = $outputRow->mspon;
-//                    $formattedData["requestedBy"] = $outputRow->uname;
-//                    $formattedData["vouchersTotal"] = $outputRow->total;
-////                        $currentRow[$output->uuid]["voucherAreas"] = [];
-//                    }
-//                    //I think this is to allow it to work for the dropdown
-////                    $currentRow["voucherAreas"][$outputRow->vArea] = $outputRow->byVArea;
-////                    $currentRow["voucherAreas"][$outputRow->countArea] = $outputRow->countVArea;
-////                    // update pendingData;
-////                    $pendingData[$outputRow->uuid] = $currentRow;
-//                $pendingData = $formattedData;
-                }
-                return $pendingData;
-            }
-
-    /** Lightweight check for outstanding payments to highlight in dashboard
-     * @param $idkyet
-     * @return bool
-     */
-    public static function checkIfOutstandingPayments(): bool
-    {
-        $date = Carbon::now()->subDays(7)->startOfDay();
-
-        $payments = DB::table('state_tokens')
-            ->where('created_at','>',$date)
-            ->whereNull('admin_user_id')
-            ->count();
-        if($payments > 0){
-            return true;
-        }
-        else {
-            return false;
-        }
+        return $pendingResults;
     }
 
     /** Get a specific payment request by link
@@ -159,7 +115,7 @@ class PaymentsController extends Controller
                 ->count();
 
             // Get the trader's name
-            if(!empty($vouchers)) {
+            if (!empty($vouchers)) {
                 $trader = Trader::find($vouchers[0]->trader_id)->name;
             }
         }
@@ -204,19 +160,17 @@ class PaymentsController extends Controller
             foreach ($vouchers as $v) {
                 if ($v->transitionAllowed('payout')) {
                     $v->applyTransition('payout');
-                }
-
-                else {
+                } else {
                     Log::info('Failure Processing Payout Transition');
                     $success = false;
                     break;
                 }
             }
-            if ($success){
+            if ($success) {
                 $state_token->admin_user_id = Auth::user()->id;
                 $state_token->save();
             }
         }
-        return redirect()->route('admin.payments.index')->with('notification','Vouchers Paid!');
+        return redirect()->route('admin.payments.index')->with('notification', 'Vouchers Paid!');
     }
 }
