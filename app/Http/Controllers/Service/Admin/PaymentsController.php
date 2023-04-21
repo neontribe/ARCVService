@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\StateToken;
 use App\Trader;
 use Carbon\Carbon;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Log;
@@ -14,7 +17,6 @@ use Log;
 class PaymentsController extends Controller
 {
     /** Lightweight check for outstanding payments to highlight in dashboard
-     * @param $idkyet
      * @return bool
      */
     public static function checkIfOutstandingPayments(): bool
@@ -25,63 +27,91 @@ class PaymentsController extends Controller
             ->where('created_at', '>', $date)
             ->whereNull('admin_user_id')
             ->count();
-        if ($payments > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
-    public function index()
-    {
-        $pendingPaymentData = $this::getPaymentsPast7Days();
-//       $reimbursedPaymentData = $this::getPaymentsPast7Days('reimbursed',Carbon::now()->subDays(7));
-        return view('service.payments.index', ['pending' => $pendingPaymentData]);
-//        return view('service.payments.index',['pending'=>$pendingPaymentData, 'reimbursed'=>$reimbursedPaymentData]);
+        return $payments > 0;
     }
 
     /**
-     * List Payments
-     *
+     * Lists the payments paid and pending
+     * @return Factory|View|Application
+     */
+    public function index(): Factory|View|Application
+    {
+        $pendingPaymentData = self::getStateTokensFromDate();
+        $reimbursedPaymentData = self::getStateTokensFromDate(true);
+        return view('service.payments.index', [
+                'pending'=>$pendingPaymentData,
+                'reimbursed'=>$reimbursedPaymentData
+            ]);
+    }
+
+    /**
+     * Constructs the Payment structure for our blade
+     * @param Collection $tokens
      * @return array
      */
-    public static function getPaymentsPast7Days()
+    public static function makePaymentDataStructure(Collection $tokens): array
     {
-        //set the period we want scoped
-        $sevenDaysAgo = Carbon::now()->subDays(7)->startOfDay();
-        //get all the StateTokens for unpaid (pending) payment requests in the past 7 days
-        // (in theory nothing is ever unpaid for that long anyway)
-        $pendingTokens = StateToken::with('user','voucherStates','voucherStates.voucher','voucherStates.voucher.trader',
-            'voucherStates.voucher.trader.market.sponsor','voucherStates.voucher.sponsor')->whereNotNull('user_id')
-            ->whereNull('admin_user_id')
-            ->where('created_at', '>', $sevenDaysAgo)
-            ->get();
-
         $pendingResults = [];
-        foreach ($pendingTokens as $stateToken) {
+        foreach ($tokens as $stateToken) {
+            // start tracking this set of results
+            $currentTokenResults = [];
+            $currentTokenResults['requestedBy'] = $stateToken->user->name ?? 'unknown';
 
+            // get the states for this token
             $voucherStates = $stateToken->voucherStates->all();
-            $pendingResults[$stateToken->uuid] = [];
-            $pendingResults[$stateToken->uuid]['requestedBy'] = $stateToken->user->name ?? 'unknown';
-            $pendingResults[$stateToken->uuid]['vouchersTotal'] = count($voucherStates);
+            // count 'em while we're here
+            $currentTokenResults['vouchersTotal'] = count($voucherStates);
 
             //Get all the attributes we need via each voucherState
             foreach ($voucherStates as $voucherState) {
                 $trader = $voucherState->voucher->trader;
                 //These are the main headers; check once and then take that going forward
-                $pendingResults[$stateToken->uuid]['traderName'] = $pendingResults[$stateToken->uuid]['traderName'] ?? $trader->name;
-                $pendingResults[$stateToken->uuid]['marketName'] = $pendingResults[$stateToken->uuid]['marketName'] ?? $trader->market->name;
-                $pendingResults[$stateToken->uuid]['area'] = $pendingResults[$stateToken->uuid]['area'] ?? $trader->market->sponsor->name;
+                $currentTokenResults['traderName'] ??= $trader->name;
+                $currentTokenResults['marketName'] ??= $trader->market->name;
+                $currentTokenResults['area'] ??= $trader->market->sponsor->name;
 
-                $areaList = $pendingResults[$stateToken->uuid]['voucherAreas'] ?? [];
-                $areaList[$voucherState->voucher->sponsor->name] = isset($areaList[$voucherState->voucher->sponsor->name])
-                    ? $areaList[$voucherState->voucher->sponsor->name] +=1
+                $areaList = $currentTokenResults['voucherAreas'] ?? [];
+                $areaName = $voucherState->voucher->sponsor->name;
+                $areaList[$areaName] = isset($areaList[$areaName])
+                    ? $areaList[$areaName]++
                     : 1;
-
-                $pendingResults[$stateToken->uuid]['voucherAreas'] = $areaList;
+                $currentTokenResults['voucherAreas'] = $areaList;
             }
+            // chuck that in the results array.
+            $pendingResults[$stateToken->uuid] = $currentTokenResults;
         }
         return $pendingResults;
+    }
+
+    /**
+     * List Payments
+     * @param bool $paid
+     * @param Carbon|null $date
+     * @return array
+     */
+    public static function getStateTokensFromDate(bool $paid = false, Carbon $date = null): array
+    {
+
+        //set the period we want scoped
+        $fromDate = isset($date) ?? Carbon::now()->subDays(7)->startOfDay();
+        //get all the StateTokens for unpaid (pending) payment requests in the past 7 days
+        // (in theory nothing is ever unpaid for that long anyway)
+        $tokens = StateToken::with([
+            'user',
+            'voucherStates',
+            'voucherStates.voucher',
+            'voucherStates.voucher.trader',
+            'voucherStates.voucher.trader.market.sponsor',
+            'voucherStates.voucher.sponsor',
+        ])
+            ->where('created_at', '>', $fromDate)
+            ->whereNotNull('user_id')
+            // if $paid = true will make this a NotNull, thereby getting paid things
+            ->whereNull('admin_user_id', null, $paid)
+            ->get();
+
+        return self::makePaymentDataStructure($tokens);
     }
 
     /** Get a specific payment request by link
