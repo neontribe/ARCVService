@@ -40,9 +40,39 @@ class PaymentsController extends Controller
         $pendingPaymentData = self::getStateTokensFromDate();
         $reimbursedPaymentData = self::getStateTokensFromDate(true);
         return view('service.payments.index', [
-                'pending'=>$pendingPaymentData,
-                'reimbursed'=>$reimbursedPaymentData
-            ]);
+            'pending' => $pendingPaymentData,
+            'reimbursed' => $reimbursedPaymentData,
+        ]);
+    }
+
+    /**
+     * List Payments
+     * @param bool $paid
+     * @param Carbon|null $date
+     * @return array
+     */
+    public static function getStateTokensFromDate(bool $paid = false, Carbon $date = null): array
+    {
+
+        //set the period we want scoped
+        $fromDate = isset($date) ?? Carbon::now()->subDays(7)->startOfDay();
+        //get all the StateTokens for unpaid (pending) payment requests in the past 7 days
+        // (in theory nothing is ever unpaid for that long anyway)
+        $tokens = StateToken::with([
+            'user',
+            'voucherStates',
+            'voucherStates.voucher',
+            'voucherStates.voucher.trader',
+            'voucherStates.voucher.trader.market.sponsor',
+            'voucherStates.voucher.sponsor',
+        ])
+            ->where('created_at', '>', $fromDate)
+            ->whereNotNull('user_id')
+            // if $paid = true will make this a NotNull, thereby getting paid things
+            ->whereNull('admin_user_id', null, $paid)
+            ->get();
+
+        return self::makePaymentDataStructure($tokens);
     }
 
     /**
@@ -82,36 +112,6 @@ class PaymentsController extends Controller
             $pendingResults[$stateToken->uuid] = $currentTokenResults;
         }
         return $pendingResults;
-    }
-
-    /**
-     * List Payments
-     * @param bool $paid
-     * @param Carbon|null $date
-     * @return array
-     */
-    public static function getStateTokensFromDate(bool $paid = false, Carbon $date = null): array
-    {
-
-        //set the period we want scoped
-        $fromDate = isset($date) ?? Carbon::now()->subDays(7)->startOfDay();
-        //get all the StateTokens for unpaid (pending) payment requests in the past 7 days
-        // (in theory nothing is ever unpaid for that long anyway)
-        $tokens = StateToken::with([
-            'user',
-            'voucherStates',
-            'voucherStates.voucher',
-            'voucherStates.voucher.trader',
-            'voucherStates.voucher.trader.market.sponsor',
-            'voucherStates.voucher.sponsor',
-        ])
-            ->where('created_at', '>', $fromDate)
-            ->whereNotNull('user_id')
-            // if $paid = true will make this a NotNull, thereby getting paid things
-            ->whereNull('admin_user_id', null, $paid)
-            ->get();
-
-        return self::makePaymentDataStructure($tokens);
     }
 
     /** Get a specific payment request by link
