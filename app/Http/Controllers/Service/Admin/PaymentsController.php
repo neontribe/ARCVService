@@ -61,7 +61,7 @@ class PaymentsController extends Controller
 
             $voucherStates = $stateToken->voucherStates()->get();
             $pendingResults[$stateToken->uuid] = [];
-            $pendingResults[$stateToken->uuid]['uname'] = $stateToken->user->name;
+            $pendingResults[$stateToken->uuid]['uname'] = $stateToken->user()->name ?? 'unknown';
             $pendingResults[$stateToken->uuid]['total'] = count($voucherStates);
 
             //Get ALL of the VoucherStates that are related to this StateToken
@@ -70,9 +70,9 @@ class PaymentsController extends Controller
             //Get all the attributes we need via each voucherState
             foreach ($voucherStates as $voucherState) {
                 //These are the main headers; check once and then take that going forward
-                    $pendingResults[$stateToken->uuid]['tname'] ?? $voucherState->voucher->trader->name;
-                    $pendingResults[$stateToken->uuid]['mname'] ?? $voucherState->voucher->trader->market->name;
-                    $pendingResults[$stateToken->uuid]['mspon'] ?? $voucherState->voucher->trader->market->sponsor->name;
+                $pendingResults[$stateToken->uuid]['tname'] = $pendingResults[$stateToken->uuid]['tname'] ?? $voucherState->voucher->trader->name;
+                $pendingResults[$stateToken->uuid]['tname'] = $pendingResults[$stateToken->uuid]['mname'] ?? $voucherState->voucher->trader->market->name;
+                $pendingResults[$stateToken->uuid]['tname'] = $pendingResults[$stateToken->uuid]['mspon'] ?? $voucherState->voucher->trader->market->sponsor->name;
 
                 $areaList = $pendingResults[$stateToken->uuid]['voucherareas'] ?? [];
                 $areaList[$voucherState->voucher->sponsor->name] += 1;
