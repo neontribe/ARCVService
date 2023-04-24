@@ -105,7 +105,7 @@ class PaymentsController extends Controller
                 $areaList = $currentTokenResults['voucherAreas'] ?? [];
                 $areaName = $voucherState->voucher->sponsor->name;
                 $areaList[$areaName] = isset($areaList[$areaName])
-                    ? $areaList[$areaName]++
+                    ? $areaList[$areaName] +=1
                     : 1;
                 $currentTokenResults['voucherAreas'] = $areaList;
             }
