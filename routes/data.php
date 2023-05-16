@@ -34,9 +34,9 @@ Route::name('data.')
         // Temp route for demo only.
         Route::name('reset')
             ->get('reset', function () {
-                $process = new Process('php ../artisan migrate:refresh --seed --force');
+                $process = new Process(['php', '../artisan', 'migrate:refresh', '--seed', '--force']);
                 $process->run();
-                $process = new Process('php ../artisan passport:install');
+                $process = new Process(['php', '../artisan', 'passport:install']);
                 $process->run();
 
                 $new_secret = DB::table('oauth_clients')->where('id', 2)->pluck('secret')[0];
