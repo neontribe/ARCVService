@@ -21,8 +21,15 @@ services:
     arc:
         build:
             context: .
-            dockerfile: .docker/Dockerfile
+        image: neontribe/arc:dev
         user: ${CURRENT_UID}
+        environment:
+            DB_USERNAME: lamp
+            DB_PASSWORD: lamp
+            DB_DATABASE: lamp
+            DB_HOST: db
+            DB_CONNECTION: mysql
+            DB_PORT: 3306
         ports:
             - "8000:8000"
         extra_hosts:
@@ -37,6 +44,10 @@ services:
         #volumes:
         #- .:/var/www/html
         depends_on: [ db ]
+#         tty: true
+#         stdin_open: true
+#         entrypoint: bash
+        entrypoint: /opt/app/.docker/docker-entrypoint.sh
         links:
             - db
         restart: always

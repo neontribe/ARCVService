@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 ESC_SEQ="\x1b["
 COL_RESET=$ESC_SEQ"39;49;00m"
@@ -34,13 +34,6 @@ BROADCAST_DRIVER=${BROADCAST_DRIVER}
 
 CACHE_DRIVER=${CACHE_DRIVER}
 
-DB_CONNECTION=mysql
-DB_DATABASE=lamp
-DB_HOST=db
-DB_PASSWORD=lamp
-DB_PORT=3306
-DB_USERNAME=lamp
-
 MAIL_DRIVER=${MAIL_DRIVER}
 MAIL_ENCRYPTION=${MAIL_ENCRYPTION}
 MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
@@ -68,7 +61,7 @@ composer install
 
 while [ "$MYSQL_IS_RUNNING" != 0 ]; do
   echo "Testing for mysql running..."
-  mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -h ${DB_HOST} ${DB_DATABASE} # 2>&1 > /dev/null
+  mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -h ${DB_HOST} ${DB_DATABASE} -e "show tables;"# 2>&1 > /dev/null
   MYSQL_IS_RUNNING="$?"
   echo "MYSQL_IS_RUNNING = $MYSQL_IS_RUNNING"
 done
