@@ -27,7 +27,7 @@ You will need to fix your local DNS to point arcv-service.test and arcv-store.te
 
 ## Quick start
 
-    CURRENT_UID=$(id -u):$(id -g) docker-compose up --build # add -d to fork into the background
+    docker-compose up --build # add -d to fork into the background
 
 If you forked it into the background then you can see the logs with:
 
@@ -43,14 +43,7 @@ You can reset the system by stopping the containers and deleting the mysql volum
     docker-compose rm
     docker volume rm arcvservice_mysql
     rm .env
-    CURRENT_UID=$(id -u):$(id -g) docker-compose up --build
-
-## Environment variables.
-
-At run time you can override environment variables. At run time by exporting the required environment variable.
-
-    export APP_SEEDS=dev
-    CURRENT_UID=$(id -u):$(id -g) docker-compose up --build
+    docker-compose up --build
 
 ## Accessing the environment
 

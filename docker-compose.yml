@@ -13,8 +13,7 @@ services:
             #- mysql:/var/lib/mysql
         restart: always
         healthcheck:
-            test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-            # test: ["CMD", "mysql" ,"-u", "lamp", "-plamp", "-h", "localhost", "lamp", "-e", "'desc user;'"]
+            test: ["CMD", "mysql" ,"-u", "lamp", "-plamp", "-h", "localhost", "lamp", "-e", "'desc user;'"]
             interval: 20s
             retries: 10
 
@@ -22,7 +21,6 @@ services:
         build:
             context: .
         image: neontribe/arc:dev
-        user: ${CURRENT_UID}
         environment:
             DB_USERNAME: lamp
             DB_PASSWORD: lamp
@@ -33,6 +31,7 @@ services:
         ports:
             - "8000:8000"
         extra_hosts:
+            - host.docker.internal:host-gateway
             - arc.test:127.0.1.1
             - arcv-service.test:127.0.1.1
             - arcv-store.test:127.0.1.1
@@ -40,14 +39,12 @@ services:
             # If you look in the docker file you can see what envs could be overridden
             # ARC_SERVICE_DOMAIN: arcv-service.test
             # ARC_STORE_DOMAIN: arcv-store.test
-        # If you un-comment this section you can work on local files that run in the dockers.
-        #volumes:
-        #- .:/var/www/html
+        volumes:
+            - .:/opt/project
         depends_on: [ db ]
 #         tty: true
 #         stdin_open: true
 #         entrypoint: bash
-        entrypoint: /opt/app/.docker/docker-entrypoint.sh
         links:
             - db
         restart: always

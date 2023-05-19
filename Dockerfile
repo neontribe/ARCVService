@@ -1,16 +1,14 @@
-FROM tobybatch/php:8.1-apache as builder
+FROM tobybatch/php:8.1-apache-dev as builder
 LABEL maintainer="tobias@neontribe.co.uk"
 
-ADD . /opt/app
+ADD . /opt/project
 
 RUN touch .env
 ENV COMPOSER_HOME=/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV DATABASE_URL="sqlite://tmp/db.sqlite3"
-RUN mkdir -p /opt/app/.git/hooks/ && \
+RUN mkdir -p /opt/project/.git/hooks/ && \
     apt update && apt install -y default-mysql-client vim htop && \
-    composer --no-ansi install --working-dir=/opt/app --no-dev --optimize-autoloader && \
-    composer --no-ansi clearcache && \
     cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini && \
     sed -i "s/expose_php = On/expose_php = Off/g" /usr/local/etc/php/php.ini && \
     sed -i "s/;opcache.enable=1/opcache.enable=1/g" /usr/local/etc/php/php.ini && \
@@ -19,9 +17,12 @@ RUN mkdir -p /opt/app/.git/hooks/ && \
     sed -i "s/;opcache.max_accelerated_files=10000/opcache.max_accelerated_files=100000/g" /usr/local/etc/php/php.ini && \
     sed -i "s/opcache.validate_timestamps=1/opcache.validate_timestamps=0/g" /usr/local/etc/php/php.ini && \
     sed -i "s/session.gc_maxlifetime = 1440/session.gc_maxlifetime = 604800/g" /usr/local/etc/php/php.ini && \
-    mkdir -p /opt/app/var/logs && chmod 777 /opt/app/var/logs && \
-    sed "s/128M/-1/g" /usr/local/etc/php/php.ini-development > /opt/app/php-cli.ini && \
-    chown -R www-data:www-data /opt/app/var /usr/local/etc/php/php.ini
+    mkdir -p /opt/project/var/logs && chmod 777 /opt/project/var/logs && \
+    sed "s/128M/-1/g" /usr/local/etc/php/php.ini-development > /opt/project/php-cli.ini && \
+    chown -R www-data:www-data /opt/project/var /usr/local/etc/php/php.ini
+RUN echo xdebug.mode=develop,debug >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN echo xdebug.client_host=host.docker.internal >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN echo xdebug.start_with_request=yes >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 FROM builder as final
 
@@ -64,4 +65,6 @@ ENV QUEUE_DRIVER sync
 ENV SESSION_DRIVER file
 ENV SESSION_SECURE_COOKIE false
 
-ENTRYPOINT /opt/app/.docker/docker-entrypoint.sh
+WORKDIR /opt/project
+
+ENTRYPOINT /opt/project/.docker/docker-entrypoint.sh

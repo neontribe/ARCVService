@@ -69,6 +69,10 @@ done
 COUNT=$(mysql -u arcservice -parcservice arcservice -sN -e "select count(*) from information_schema.TABLES where TABLE_SCHEMA = '${DB_DATABASE}'" 2>/dev/null)
 # The 20 below is arbitry. It's a test to see if we need to install
 echo $COUNT
+
+composer --no-ansi install --working-dir=/opt/app --dev --optimize-autoloader
+composer --no-ansi clearcache
+
 if [ -z "$COUNT" ] || [ "$COUNT" -lt 20 ]; then
   php ./artisan key:generate
   php ./artisan migrate --seed
