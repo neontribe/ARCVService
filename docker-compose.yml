@@ -27,9 +27,12 @@ services:
             DB_USERNAME: lamp
             DB_PASSWORD: lamp
             DB_DATABASE: lamp
-            DB_HOST: db
+            DB_HOST: arcdb
             DB_CONNECTION: mysql
             DB_PORT: 3306
+            # If you look in the docker file you can see what envs could be overridden
+            # ARC_SERVICE_DOMAIN: arcv-service.test
+            # ARC_STORE_DOMAIN: arcv-store.test
         ports:
             - "8000:8000"
         extra_hosts:
@@ -37,11 +40,6 @@ services:
             - arc.test:127.0.1.1
             - arcv-service.test:127.0.1.1
             - arcv-store.test:127.0.1.1
-        environment:
-            DB_HOST: arcdb
-            # If you look in the docker file you can see what envs could be overridden
-            # ARC_SERVICE_DOMAIN: arcv-service.test
-            # ARC_STORE_DOMAIN: arcv-store.test
         volumes:
             - .:/opt/project
         depends_on: [ arcdb ]
