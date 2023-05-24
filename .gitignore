@@ -31,3 +31,4 @@ tests/Browser/screenshots/
 /public/images/
 .docker-installed
 passport.install
+coverage
