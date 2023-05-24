@@ -1,7 +1,7 @@
 # See Docker.md for more info...
 version: '2.1'
 services:
-    db:
+    sqldb:
         image: mysql:5.7
         environment:
             MYSQL_USER: lamp
@@ -9,37 +9,48 @@ services:
             MYSQL_DATABASE: lamp
             MYSQL_RANDOM_ROOT_PASSWORD: "yes"
         # Uncomment this line to persist data between restarts
-        #volumes:
-            #- mysql:/var/lib/mysql
+        volumes:
+            - mysql:/var/lib/mysql
         restart: always
+        ports:
+          - "3336:3306"
         healthcheck:
-            test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-            # test: ["CMD", "mysql" ,"-u", "lamp", "-plamp", "-h", "localhost", "lamp", "-e", "'desc user;'"]
+            test: ["CMD", "mysql" ,"-u", "lamp", "-plamp", "-h", "localhost", "lamp", "-e", "'desc user;'"]
             interval: 20s
             retries: 10
 
     arc:
         build:
             context: .
-            dockerfile: .docker/Dockerfile
-        user: ${CURRENT_UID}
-        ports:
-            - "8000:8000"
-        extra_hosts:
-            - arc.test:127.0.1.1
-            - arcv-service.test:127.0.1.1
-            - arcv-store.test:127.0.1.1
-        # environment:
+        image: neontribe/arc:dev
+        environment:
+            CURRENT_UID: ${CURRENT_UID:-33}
+            DB_USERNAME: lamp
+            DB_PASSWORD: lamp
+            DB_DATABASE: lamp
+            DB_HOST: sqldb
+            DB_CONNECTION: mysql
+            DB_PORT: 3306
             # If you look in the docker file you can see what envs could be overridden
             # ARC_SERVICE_DOMAIN: arcv-service.test
             # ARC_STORE_DOMAIN: arcv-store.test
-        # If you un-comment this section you can work on local files that run in the dockers.
-        #volumes:
-        #- .:/var/www/html
-        depends_on: [ db ]
+        ports:
+            - "8000:8000"
+        extra_hosts:
+            - host.docker.internal:host-gateway
+            - arc.test:127.0.1.1
+            - arcv-service.test:127.0.1.1
+            - arcv-store.test:127.0.1.1
+        volumes:
+            - .:/opt/project
+        depends_on: [ sqldb ]
+        # tty: true
+        # stdin_open: true
+        # entrypoint: bash
         links:
-            - db
+            - sqldb
         restart: always
 
 volumes:
     mysql:
+

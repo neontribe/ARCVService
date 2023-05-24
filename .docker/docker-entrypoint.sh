@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 ESC_SEQ="\x1b["
 COL_RESET=$ESC_SEQ"39;49;00m"
@@ -34,13 +34,6 @@ BROADCAST_DRIVER=${BROADCAST_DRIVER}
 
 CACHE_DRIVER=${CACHE_DRIVER}
 
-DB_CONNECTION=mysql
-DB_DATABASE=lamp
-DB_HOST=db
-DB_PASSWORD=lamp
-DB_PORT=3306
-DB_USERNAME=lamp
-
 MAIL_DRIVER=${MAIL_DRIVER}
 MAIL_ENCRYPTION=${MAIL_ENCRYPTION}
 MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
@@ -68,7 +61,7 @@ composer install
 
 while [ "$MYSQL_IS_RUNNING" != 0 ]; do
   echo "Testing for mysql running..."
-  mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -h ${DB_HOST} ${DB_DATABASE} # 2>&1 > /dev/null
+  mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -h ${DB_HOST} ${DB_DATABASE} -e "show tables;"# 2>&1 > /dev/null
   MYSQL_IS_RUNNING="$?"
   echo "MYSQL_IS_RUNNING = $MYSQL_IS_RUNNING"
 done
@@ -76,6 +69,10 @@ done
 COUNT=$(mysql -u arcservice -parcservice arcservice -sN -e "select count(*) from information_schema.TABLES where TABLE_SCHEMA = '${DB_DATABASE}'" 2>/dev/null)
 # The 20 below is arbitry. It's a test to see if we need to install
 echo $COUNT
+
+composer --no-ansi install --working-dir=/opt/app --dev --optimize-autoloader
+composer --no-ansi clearcache
+
 if [ -z "$COUNT" ] || [ "$COUNT" -lt 20 ]; then
   php ./artisan key:generate
   php ./artisan migrate --seed
@@ -86,4 +83,11 @@ if [ -z "$COUNT" ] || [ "$COUNT" -lt 20 ]; then
   touch .docker-installed
 fi
 
-php ./artisan serve --host=0.0.0.0
+if [ ! -z "$CURRENT_UID" and "$CURRENT_UID" != "33" ]; then
+    chown -R "$CURRENT_UID" /opt/project
+    echo arcuser:x:"$CURRENT_UID":"$CURRENT_UID"::/var/www:/usr/sbin/nologin >> /etc/passwd
+    pwconv
+fi
+
+setfacl -R -m u:${CURRENT_UID}:rwX storage
+su -c "php ./artisan serve --host=0.0.0.0" -s /bin/bash $(id -nu $CURRENT_UID)
