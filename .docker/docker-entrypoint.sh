@@ -83,4 +83,11 @@ if [ -z "$COUNT" ] || [ "$COUNT" -lt 20 ]; then
   touch .docker-installed
 fi
 
-php ./artisan serve --host=0.0.0.0
+if [ ! -z "$CURRENT_UID" and "$CURRENT_UID" != "33" ]; then
+    chown -R "$CURRENT_UID" /opt/project
+    echo arcuser:x:"$CURRENT_UID":"$CURRENT_UID"::/var/www:/usr/sbin/nologin >> /etc/passwd
+    pwconv
+fi
+
+setfacl -R -m u:${CURRENT_UID}:rwX storage
+su -c "php ./artisan serve --host=0.0.0.0" -s /bin/bash $(id -nu $CURRENT_UID)

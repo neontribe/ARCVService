@@ -10,10 +10,12 @@ ENV DATABASE_URL="sqlite://tmp/db.sqlite3"
 RUN echo xdebug.mode=develop,debug >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo xdebug.client_host=host.docker.internal >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo xdebug.start_with_request=yes >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN apt update && apt install -y default-mysql-client
+RUN apt update && apt install -y default-mysql-client acl
 RUN composer install --dev
 
 FROM builder as final
+
+ENV CURRENT_UID 33
 
 ENV APP_DEBUG true
 ENV APP_ENV local

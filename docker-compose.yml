@@ -1,7 +1,7 @@
 # See Docker.md for more info...
 version: '2.1'
 services:
-    arcdb:
+    sqldb:
         image: mysql:5.7
         environment:
             MYSQL_USER: lamp
@@ -13,7 +13,7 @@ services:
             - mysql:/var/lib/mysql
         restart: always
         ports:
-          - "3306:3306"
+          - "3336:3306"
         healthcheck:
             test: ["CMD", "mysql" ,"-u", "lamp", "-plamp", "-h", "localhost", "lamp", "-e", "'desc user;'"]
             interval: 20s
@@ -24,10 +24,11 @@ services:
             context: .
         image: neontribe/arc:dev
         environment:
+            CURRENT_UID: ${CURRENT_UID:-33}
             DB_USERNAME: lamp
             DB_PASSWORD: lamp
             DB_DATABASE: lamp
-            DB_HOST: arcdb
+            DB_HOST: sqldb
             DB_CONNECTION: mysql
             DB_PORT: 3306
             # If you look in the docker file you can see what envs could be overridden
@@ -42,12 +43,12 @@ services:
             - arcv-store.test:127.0.1.1
         volumes:
             - .:/opt/project
-        depends_on: [ arcdb ]
-#         tty: true
-#         stdin_open: true
-#         entrypoint: bash
+        depends_on: [ sqldb ]
+        # tty: true
+        # stdin_open: true
+        # entrypoint: bash
         links:
-            - arcdb
+            - sqldb
         restart: always
 
 volumes:
