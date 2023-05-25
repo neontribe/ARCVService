@@ -2,15 +2,15 @@
 
 ## Requirements
 
-  * docker-composer:
+  * [docker-composer](https://docs.docker.com/compose/install/)
 
-You need to add the testing domains to you hosts file:
+You need to add the testing domains to your hosts file:
 
     echo "127.0.0.1   arcv-service.test arcv-store.test db" | sudo tee -a /etc/hosts
 
-## Quick start the local DB for native deving
+## Quick start the local DB for native development
 
-Start a local DB in a container with a persistent databse. Exposed on port 3336 (to avoid clashes with other mysql).
+Start a local DB in a container with a persistent database. Exposed on port 3336 (to avoid clashes with other mysql).
 
     docker-compose up -d arcdb
 
@@ -38,7 +38,7 @@ And to run against that DB you need set these values in your `.env`:
 
 ## Full application in a docker
 
-**Move or remove your .env file**. The docker will set it's env varibale at run time. Edit `docker-compose.yml` to set them, and then run `docker-compose up --force-recreate`
+**Move or remove your .env file**. The docker will set its env variable at run time. Edit `docker-compose.yml` to set them, and then run `docker-compose up --force-recreate`
 
     CURRENT_UI=$(id -u) docker-compose up --build # add -d to fork into the background
 
@@ -52,7 +52,7 @@ If you forked it into the background then you can see the logs with:
 
 ## Resetting
 
-You can reset the system by stopping the containers and deleting the mysql volume and the .env file.  Assuming you are in the the directory as this file those commands will look something like this:
+You can reset the system by stopping the containers and deleting the mysql volume and the .env file.  Assuming you are in the directory as this file those commands will look something like this:
 
     docker-compose stop or ctrl-c if it's in the foreground
     docker-compose rm

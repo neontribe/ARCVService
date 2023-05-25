@@ -10,6 +10,8 @@ COL_MAGENTA=$ESC_SEQ"35;01m"
 COL_CYAN=$ESC_SEQ"36;01m"
 
 composer install
+yarn
+yarn build
 
 while [ "$MYSQL_IS_RUNNING" != 0 ]; do
   echo "Testing for mysql running..."

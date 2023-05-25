@@ -10,8 +10,14 @@ ENV DATABASE_URL="sqlite://tmp/db.sqlite3"
 RUN echo xdebug.mode=develop,debug >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo xdebug.client_host=host.docker.internal >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo xdebug.start_with_request=yes >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN apt update && apt install -y default-mysql-client acl
+RUN apt update && apt install -y default-mysql-client acl gnupg2
 RUN composer install --dev
+
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+#COPY --from=node:18 /usr/local/bin/node /usr/local/bin/node
+#COPY --from=node:18 /opt/yarn-v1.22.19/bin/yarn
+
+RUN /opt/project/.docker/yarn-install.sh
 
 FROM builder as final
 
