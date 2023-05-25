@@ -83,7 +83,7 @@ if [ -z "$COUNT" ] || [ "$COUNT" -lt 20 ]; then
   touch .docker-installed
 fi
 
-if [ ! -z "$CURRENT_UID" and "$CURRENT_UID" != "33" ]; then
+if [ ! -z "$CURRENT_UID" ] && [ "$CURRENT_UID" != "33" ]; then
     chown -R "$CURRENT_UID" /opt/project
     echo arcuser:x:"$CURRENT_UID":"$CURRENT_UID"::/var/www:/usr/sbin/nologin >> /etc/passwd
     pwconv
