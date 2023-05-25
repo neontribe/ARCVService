@@ -2,30 +2,13 @@
 
 ## Requirements
 
-To use this install docker-composer:
+  * docker-composer:
 
-    apt intall docker.io docker-compose
+You need to add the testing domains to you hosts file:
 
-If you are getting an error to do with the docker composer version, you may need to try another way
+    echo "127.0.0.1   arcv-service.test arcv-store.test db" | sudo tee -a /etc/hosts
 
-If you dont already have Docker, get it from the docker repo:
-
-    https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-using-the-repository
-
-If you are on elementaryOS you need to replace ```$(lsb_release -cs) \``` in step 4 with ```xenial \```
-
-(https://elementaryos.stackexchange.com/questions/11844/installing-docker-on-elementary-os-loki)
-
-Then to install docker-composer you need to use the instructions in the docker-compose repo
-
-    https://github.com/docker/compose/releases
-
-If you find that when you do docker-compose --version it says ```bash: /usr/bin/docker-compose: No such file or directory```
-    but usr/bin is in your path you may just need to restart your session for it to refresh.
-
-You will need to fix your local DNS to point arcv-service.test and arcv-store.test to point to localhost and then run:
-
-## Quick start the local DB
+## Quick start the local DB for native deving
 
 Start a local DB in a container with a persistent databse. Exposed on port 3336 (to avoid clashes with other mysql).
 
@@ -55,7 +38,7 @@ And to run against that DB you need set these values in your `.env`:
 
 ## Full application in a docker
 
-**This will overwrite your .env file** Back it up now.
+**Move or remove your .env file**. The docker will set it's env varibale at run time. Edit `docker-compose.yml` to set them, and then run `docker-compose up --force-recreate`
 
     CURRENT_UI=$(id -u) docker-compose up --build # add -d to fork into the background
 
