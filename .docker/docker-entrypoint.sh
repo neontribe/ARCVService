@@ -1,6 +1,8 @@
 #!/bin/bash -x
 
-composer install
+source $HOME/.bashrc
+
+composer --no-ansi install --working-dir=/opt/project --dev --optimize-autoloader
 yarn
 yarn prod
 
@@ -11,8 +13,6 @@ while [ "$MYSQL_IS_RUNNING" != 0 ]; do
   echo "MYSQL_IS_RUNNING = $MYSQL_IS_RUNNING"
 done
 
-composer --no-ansi install --working-dir=/opt/app --dev --optimize-autoloader
-composer --no-ansi clearcache
 
 COUNT=$(mysql -u arcservice -parcservice arcservice -sN -e "select count(*) from information_schema.TABLES where TABLE_SCHEMA = '${DB_DATABASE}'" 2>/dev/null)
 # The 20 below is arbitrary. It's a test to see if we need to install
@@ -32,6 +32,8 @@ if [ ! -z "$CURRENT_UID" ] && [ "$CURRENT_UID" != "33" ]; then
     echo arcuser:x:"$CURRENT_UID":"$CURRENT_UID"::/var/www:/usr/sbin/nologin >> /etc/passwd
     pwconv
 fi
+
+composer --no-ansi clearcache
 
 # shellcheck disable=SC2086
 setfacl -R -m u:${CURRENT_UID}:rwX storage
