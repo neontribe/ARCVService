@@ -5,8 +5,8 @@ If you know what you are doing then jump straight to [components](#components) o
 1. [Install docker desktop](#install-docker-desktop)
 2. [Fixing domain names](#fixing-domain-names)
 3. [Start the container](#start-the-container)
-5. [Building assets](#accessing-the-container)
-4. [Accessing the container](#accessing-the-container)
+4. [Building assets](#accessing-the-container)
+5. [Accessing the container](#accessing-the-container)
 6. [Native development](#native-development)
 7. [Development using the container](#development-using-the-container)
 8. [Resetting the database](#resetting-the-database)
@@ -27,7 +27,7 @@ The ARC project uses virtual host switching to deviler it's service. To support 
 On Mac or Linux you can run this command:
 
 ```bash
-grep arcv-service.test /etc/hosts || sudo tee -a /etc/hosts docker compose up
+grep arcv-service.test /etc/hosts || echo "127.0.0.1   arcv-service.test arcv-store.test sqldb" | sudo tee -a /etc/hosts | sudo tee -a /etc/hosts
 ```
 
 Full instruction for Windows, Mac and Linux are [here](https://www.howtogeek.com/27350/beginner-geek-how-to-edit-your-hosts-file/)

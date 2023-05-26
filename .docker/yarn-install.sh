@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 cd /opt/project
 source /root/.nvm/nvm.sh

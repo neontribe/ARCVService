@@ -13,8 +13,7 @@ while [ "$MYSQL_IS_RUNNING" != 0 ]; do
   echo "MYSQL_IS_RUNNING = $MYSQL_IS_RUNNING"
 done
 
-
-COUNT=$(mysql -u arcservice -parcservice arcservice -sN -e "select count(*) from information_schema.TABLES where TABLE_SCHEMA = '${DB_DATABASE}'" 2>/dev/null)
+COUNT=$(mysql -u "${DB_USERNAME}" -p"${DB_PASSWORD}" -h "${DB_HOST}" "${DB_DATABASE}" -sN -e "select count(*) from information_schema.TABLES where TABLE_SCHEMA = '${DB_DATABASE}'" 2>/dev/null)
 # The 20 below is arbitrary. It's a test to see if we need to install
 
 if [ -z "$COUNT" ] || [ "$COUNT" -lt 20 ]; then
@@ -27,14 +26,30 @@ if [ -z "$COUNT" ] || [ "$COUNT" -lt 20 ]; then
   touch .docker-installed
 fi
 
-if [ ! -z "$CURRENT_UID" ] && [ "$CURRENT_UID" != "33" ]; then
-    echo arcuser:x:"$CURRENT_UID":"$CURRENT_UID"::/var/www:/usr/sbin/nologin >> /etc/passwd
-    pwconv
-fi
-
 composer --no-ansi clearcache
 
+# Do I have a GID in the container
+# shellcheck disable=SC2153
+GROUP_NAME=$(id -gn "$CURRENT_UID")
+# shellcheck disable=SC2181
+if [ "$?" != 0 ]; then
+  CURRENT_GID=33
+  GROUP_NAME=www-data
+else
+  CURRENT_GID=$(id -g "$CURRENT_UID")
+fi
+
+# Do I have a UID in the container
+USER_NAME=$(id -un "${CURRENT_UID}")
+if [ -z "$USER_NAME" ]; then
+  echo arcuser:x:"$CURRENT_UID":"$CURRENT_GID"::/var/www:/usr/sbin/nologin >> /etc/passwd
+  pwconv
+fi
+
+echo "Setting permission to $CURRENT_UID:$CURRENT_GID"
+
+# Chown back any files created as root
+find . -user root -exec chown "${USER_NAME}:${GROUP_NAME}" {} \;
+chown -R "${USER_NAME}:${GROUP_NAME}" /opt/project/storage /opt/project/bootstrap/cache
 # shellcheck disable=SC2086
-chown -R "${CURRENT_UID}" /opt/project/storage
-find . -user root -exec chown "${CURRENT_UID}" {} +
-su -c "php ./artisan serve --host=0.0.0.0" -s /bin/bash "$(id -nu $CURRENT_UID)"
+su -c "php ./artisan serve --host=0.0.0.0" -s /bin/bash "$USER_NAME"
