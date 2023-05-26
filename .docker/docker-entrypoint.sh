@@ -36,5 +36,5 @@ composer --no-ansi clearcache
 
 # shellcheck disable=SC2086
 chown -R "${CURRENT_UID}" /opt/project/storage
-find . -user root -exec chown "${CURRENT_UID}" {} \;
+find . -user root -exec chown "${CURRENT_UID}" {} +
 su -c "php ./artisan serve --host=0.0.0.0" -s /bin/bash "$(id -nu $CURRENT_UID)"
