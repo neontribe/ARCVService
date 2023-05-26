@@ -1,19 +1,19 @@
 # See Docker.md for more info...
 version: '2.1'
 services:
+
     sqldb:
         image: mysql:5.7
         environment:
             MYSQL_USER: lamp
             MYSQL_PASSWORD: lamp
             MYSQL_DATABASE: lamp
-            MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-        # Uncomment this line to persist data between restarts
+            MYSQL_ROOT_PASSWORD: notSecureChangeMe
         volumes:
             - mysql:/var/lib/mysql
         restart: always
         ports:
-          - "3336:3306"
+          - "${SQLDB_PORT:-3336}:3306"
         healthcheck:
             test: ["CMD", "mysql" ,"-u", "lamp", "-plamp", "-h", "localhost", "lamp", "-e", "'desc user;'"]
             interval: 20s
@@ -30,14 +30,14 @@ services:
             DB_DATABASE: lamp
             DB_HOST: sqldb
             DB_CONNECTION: mysql
-            DB_PORT: 3306
+            DB_PORT: ${SQLDB_PORT:-3306}
             MAIL_HOST: mailer
-            MAIL_PORT: 1025
+            MAIL_PORT: ${MAILER_SMTP_PORT:-1025}
             # If you look in the docker file you can see what envs could be overridden
             # ARC_SERVICE_DOMAIN: arcv-service.test
             # ARC_STORE_DOMAIN: arcv-store.test
         ports:
-            - "8000:8000"
+            - "${ARC_PORT:-8000}:8000"
         extra_hosts:
             - host.docker.internal:host-gateway
             - arc.test:127.0.1.1
@@ -57,8 +57,18 @@ services:
     mailer:
         image: schickling/mailcatcher
         ports:
-            - 1025:1025
-            - 1080:1080
+            - "${MAILER_SMTP_PORT:-1025}:1025"
+            - "${MAILER_ADMIN_PORT:-1080}:1080"
+
+    phpmyadmin:
+        image: phpmyadmin
+        restart: always
+        ports:
+            - "${PHPMYADMIN_PORT:-8800}:80"
+        environment:
+            PMA_HOST: sqldb
+            PMA_USER: lamp
+            PMA_PASSWORD: lamp
 
 volumes:
     mysql:
