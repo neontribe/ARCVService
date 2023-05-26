@@ -28,7 +28,6 @@ if [ -z "$COUNT" ] || [ "$COUNT" -lt 20 ]; then
 fi
 
 if [ ! -z "$CURRENT_UID" ] && [ "$CURRENT_UID" != "33" ]; then
-    chown -R "$CURRENT_UID" /opt/project
     echo arcuser:x:"$CURRENT_UID":"$CURRENT_UID"::/var/www:/usr/sbin/nologin >> /etc/passwd
     pwconv
 fi
@@ -36,6 +35,6 @@ fi
 composer --no-ansi clearcache
 
 # shellcheck disable=SC2086
-setfacl -R -m u:${CURRENT_UID}:rwX storage
+chown -R "${CURRENT_UID}" /opt/project/storage
 find . -user root -exec chown "${CURRENT_UID}" {} \;
 su -c "php ./artisan serve --host=0.0.0.0" -s /bin/bash "$(id -nu $CURRENT_UID)"
