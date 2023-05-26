@@ -144,7 +144,9 @@ MAIL_PORT=1025
 
 The repository folder is mounted in the container (at `/opt/project`). You can just [start the container](#start-the-container) and point your IDE at this folder.
 
-**TODO** Added phpstorm debugger setup
+### PHPStorm
+
+If you are using PHP Storm then [here](.docker/DEBUGGING.md) is a detailed guide of how to attach the PHP Storm debugger to the thread in the running container.
 
 ## Components
 
