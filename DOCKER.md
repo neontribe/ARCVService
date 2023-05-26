@@ -57,31 +57,31 @@ docker compose up
 The container will be ready to use when you see output something like this:
 
 ```
-arcvservice-arc-1         | 
-arcvservice-arc-1         |    INFO  Server running on [http://0.0.0.0:8000].  
-arcvservice-arc-1         | 
+arcvservice-arc-1         |
+arcvservice-arc-1         |    INFO  Server running on [http://0.0.0.0:8000].
+arcvservice-arc-1         |
 arcvservice-arc-1         |   Press Ctrl+C to stop the server
-arcvservice-arc-1         | 
-arcvservice-arc-1         |    WARN  Xdebug: [Step Debug.  
-arcvservice-arc-1         | 
-arcvservice-arc-1         |    WARN  Xdebug: [Step Debug.  
-arcvservice-arc-1         | 
-arcvservice-arc-1         |    WARN  Xdebug: [Step Debug.  
-arcvservice-arc-1         | 
+arcvservice-arc-1         |
+arcvservice-arc-1         |    WARN  Xdebug: [Step Debug.
+arcvservice-arc-1         |
+arcvservice-arc-1         |    WARN  Xdebug: [Step Debug.
+arcvservice-arc-1         |
+arcvservice-arc-1         |    WARN  Xdebug: [Step Debug.
+arcvservice-arc-1         |
 arcvservice-arc-1         |   2023-05-26 11:01:49 ................................................... ~ 0s
 ```
 
 If you are using Mac, Linux or WSL you can set the server to run as your user, this means that the file written by Laravel will be owned by you.
 
 ```bash
-CURRENT_UI=$(id -u) docker compose up
+CURRENT_UID=$(id -u) docker compose up
 ```
 
 Logs will appear in the terminal standard out.
 
 ## Building assets
 
-This project uses `yarn` to build and deploy the static assets. The assets are (re)built when the `arc` container is restarted. If you need to rebuild the assets without restarting the container you can run `yarn` either natively or in the container. 
+This project uses `yarn` to build and deploy the static assets. The assets are (re)built when the `arc` container is restarted. If you need to rebuild the assets without restarting the container you can run `yarn` either natively or in the container.
 
 ### Watching assets
 
@@ -152,7 +152,7 @@ If you are using PHP Storm then [here](.docker/DEBUGGING.md) is a detailed guide
 
 ### arc
 
-The `arc` container is built at run time. It creates a docker image called `neontribe/arc:dev` and exposes itself at http://localhost:8000 using `artisan serve`. 
+The `arc` container is built at run time. It creates a docker image called `neontribe/arc:dev` and exposes itself at http://localhost:8000 using `artisan serve`.
 
 ### sqldb
 
@@ -170,9 +170,9 @@ The `phpmyadmin` container is the official build of PHPMyAdmin which automatical
 
 The arc container ships with default settings that will run the service "out of the box".
 
-When the service is started the default settings from the [Dockerfile](Dockerfile) are read. Then any settings specified in the environment section of the arc container in the [docker-compose.yml](docker-compose.yml) will override those in the Docker file. And finally any settings in the `.env` file will override those in the `docker-compose.yml` file. 
+When the service is started the default settings from the [Dockerfile](Dockerfile) are read. Then any settings specified in the environment section of the arc container in the [docker-compose.yml](docker-compose.yml) will override those in the Docker file. And finally any settings in the `.env` file will override those in the `docker-compose.yml` file.
 
-e.g. Lets look at the `APP_LOG_LEVEL`. 
+e.g. Lets look at the `APP_LOG_LEVEL`.
 
 1. It defaults to `debug` in the Dockerfile
 2. If we add it to the environment section of the docker-compose.yml file we can set that to `info`
