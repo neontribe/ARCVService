@@ -1,4 +1,5 @@
 # ARCV Service
+
 ## About ARC Voucher Service/API
 ARCV Service is the service portal and API for ARCV Market.
 
@@ -18,6 +19,26 @@ ARCV Service is the service portal and API for ARCV Market.
 12. Run `yarn watch` in the background during development to automatically compile assets when modifying code or changing commit
 
 We suggest that you use the TLD `.test` as others, like `.app` may now be in the public domain and you will experience difficulty with respect to browser behavior over HTTP/HTTPS.
+
+## Docker
+
+There is a self building docker file in the root of the repo. Full docker instruction are [here](DOCKER.md). Environment variables that can be ovverriden can be found in the [Dockerfile](Dockerfile). 
+
+### Quick start
+
+To start a dev instance on port 8000 run:
+
+    echo "127.0.0.1   arcv-service.test arcv-store.test sqldb" | sudo tee -a /etc/hosts
+    docker compose up
+
+If that fails it is because the docker guys changed the invocation method, try:
+
+    docker-compose up
+
+ * Arc service is now available at http://arcv-service.test:8000/login
+ * Mysql is available at ``mysql -ulamp -plamp -h127.0.0.1 -P3336 lamp`
+ * Phpmyadmin is available at [http://arcv-service.test:8880/login](http://arcv-service.test:8800/index.php?route=/database/structure&db=lamp)
+ * Mail catcher is available at http://arcv-service.test:1080/
 
 ## Setting up reporting
 

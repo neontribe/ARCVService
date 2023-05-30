@@ -1,77 +1,20 @@
 #!/bin/bash -x
 
-ESC_SEQ="\x1b["
-COL_RESET=$ESC_SEQ"39;49;00m"
-COL_RED=$ESC_SEQ"31;01m"
-COL_GREEN=$ESC_SEQ"32;01m"
-COL_YELLOW=$ESC_SEQ"33;01m"
-COL_BLUE=$ESC_SEQ"34;01m"
-COL_MAGENTA=$ESC_SEQ"35;01m"
-COL_CYAN=$ESC_SEQ"36;01m"
+source $HOME/.bashrc
 
-cat <<EOF > .env
-# Set this to true for production envs
-APP_DEBUG=${APP_DEBUG}
-APP_ENV=${APP_ENV}
-APP_KEY=base64:5/euYB2rELcumOH7lKf8aOd4aOb5GAO6J/I1ykDDIPk=
-APP_LOG_LEVEL=${APP_LOG_LEVEL}
-APP_NAME=${APP_NAME}
-APP_SEEDS=${APP_SEEDS}
-APP_TIMEZONE=${APP_TIMEZONE}
-APP_URL=${APP_URL}
-APP_VER=${APP_VER}
-
-ARC_MARKET_URL=${ARC_MARKET_URL}
-ARC_SCHOOL_MONTH=${ARC_SCHOOL_MONTH}
-ARC_SERVICE_DOMAIN=${ARC_SERVICE_DOMAIN}
-ARC_STORE_DOMAIN=${ARC_STORE_DOMAIN}
-ARC_MVL_FILENAME=MVLReport.zip
-ARC_MVL_DISK=enc
-ARC_SCHOOL_MONTH=9
-ARC_STORE_BUNDLE_MAX_VOUCHER_APPEND=20
-
-BROADCAST_DRIVER=${BROADCAST_DRIVER}
-
-CACHE_DRIVER=${CACHE_DRIVER}
-
-MAIL_DRIVER=${MAIL_DRIVER}
-MAIL_ENCRYPTION=${MAIL_ENCRYPTION}
-MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
-MAIL_FROM_NAME='${MAIL_FROM_NAME}'
-MAIL_HOST=${MAIL_HOST}
-MAIL_PASSWORD=${MAIL_PASSWORD}
-MAIL_PORT=${MAIL_PORT}
-MAIL_TO_ADMIN_ADDRESS=${MAIL_TO_ADMIN_ADDRESS}
-MAIL_TO_ADMIN_NAME='${MAIL_TO_ADMIN_NAME}'
-MAIL_TO_DEVELOPER_NAME='${MAIL_TO_DEVELOPER_NAME}'
-MAIL_TO_DEVELOPER_TEAM=${MAIL_TO_DEVELOPER_TEAM}
-MAIL_USERNAME=${MAIL_USERNAME}
-
-PASSWORD_CLIENT=${PASSWORD_CLIENT}
-PASSWORD_CLIENT_SECRET=${PASSWORD_CLIENT_SECRET}
-
-QUEUE_DRIVER=${QUEUE_DRIVER}
-
-SESSION_DRIVER=${SESSION_DRIVER}
-SESSION_SECURE_COOKIE=${SESSION_SECURE_COOKIE}
-EOF
-cat .env
-
-composer install
+composer --no-ansi install --working-dir=/opt/project --dev --optimize-autoloader
+yarn
+yarn prod
 
 while [ "$MYSQL_IS_RUNNING" != 0 ]; do
   echo "Testing for mysql running..."
-  mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -h ${DB_HOST} ${DB_DATABASE} -e "show tables;"# 2>&1 > /dev/null
+  mysql -u "${DB_USERNAME}" -p"${DB_PASSWORD}" -h "${DB_HOST}" "${DB_DATABASE}" -e "show tables;"# 2>&1 > /dev/null
   MYSQL_IS_RUNNING="$?"
   echo "MYSQL_IS_RUNNING = $MYSQL_IS_RUNNING"
 done
 
-COUNT=$(mysql -u arcservice -parcservice arcservice -sN -e "select count(*) from information_schema.TABLES where TABLE_SCHEMA = '${DB_DATABASE}'" 2>/dev/null)
-# The 20 below is arbitry. It's a test to see if we need to install
-echo $COUNT
-
-composer --no-ansi install --working-dir=/opt/app --dev --optimize-autoloader
-composer --no-ansi clearcache
+COUNT=$(mysql -u "${DB_USERNAME}" -p"${DB_PASSWORD}" -h "${DB_HOST}" "${DB_DATABASE}" -sN -e "select count(*) from information_schema.TABLES where TABLE_SCHEMA = '${DB_DATABASE}'" 2>/dev/null)
+# The 20 below is arbitrary. It's a test to see if we need to install
 
 if [ -z "$COUNT" ] || [ "$COUNT" -lt 20 ]; then
   php ./artisan key:generate
@@ -83,11 +26,30 @@ if [ -z "$COUNT" ] || [ "$COUNT" -lt 20 ]; then
   touch .docker-installed
 fi
 
-if [ ! -z "$CURRENT_UID" and "$CURRENT_UID" != "33" ]; then
-    chown -R "$CURRENT_UID" /opt/project
-    echo arcuser:x:"$CURRENT_UID":"$CURRENT_UID"::/var/www:/usr/sbin/nologin >> /etc/passwd
-    pwconv
+composer --no-ansi clearcache
+
+# Do I have a GID in the container
+# shellcheck disable=SC2153
+GROUP_NAME=$(id -gn "$CURRENT_UID")
+# shellcheck disable=SC2181
+if [ "$?" != 0 ]; then
+  CURRENT_GID=33
+  GROUP_NAME=www-data
+else
+  CURRENT_GID=$(id -g "$CURRENT_UID")
 fi
 
-setfacl -R -m u:${CURRENT_UID}:rwX storage
-su -c "php ./artisan serve --host=0.0.0.0" -s /bin/bash $(id -nu $CURRENT_UID)
+# Do I have a UID in the container
+USER_NAME=$(id -un "${CURRENT_UID}")
+if [ -z "$USER_NAME" ]; then
+  echo arcuser:x:"$CURRENT_UID":"$CURRENT_GID"::/var/www:/usr/sbin/nologin >> /etc/passwd
+  pwconv
+fi
+
+echo "Setting permission to $CURRENT_UID:$CURRENT_GID"
+
+# Chown back any files created as root
+find . -user root -exec chown "${USER_NAME}:${GROUP_NAME}" {} \;
+chown -R "${USER_NAME}:${GROUP_NAME}" /opt/project/storage /opt/project/bootstrap/cache
+# shellcheck disable=SC2086
+su -c "php ./artisan serve --host=0.0.0.0" -s /bin/bash "$USER_NAME"
