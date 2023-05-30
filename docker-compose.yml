@@ -1,0 +1,74 @@
+# See Docker.md for more info...
+version: '2.1'
+services:
+
+    sqldb:
+        image: mysql:5.7
+        environment:
+            MYSQL_USER: lamp
+            MYSQL_PASSWORD: lamp
+            MYSQL_DATABASE: lamp
+            MYSQL_ROOT_PASSWORD: notSecureChangeMe
+        volumes:
+            - mysql:/var/lib/mysql
+        restart: always
+        ports:
+          - "${SQLDB_PORT:-3336}:3306"
+        healthcheck:
+            test: ["CMD", "mysql" ,"-u", "lamp", "-plamp", "-h", "localhost", "lamp", "-e", "'desc user;'"]
+            interval: 20s
+            retries: 10
+
+    arc:
+        build:
+            context: .
+        image: neontribe/arc:dev
+        environment:
+            CURRENT_UID: ${CURRENT_UID:-33}
+            DB_USERNAME: lamp
+            DB_PASSWORD: lamp
+            DB_DATABASE: lamp
+            DB_HOST: sqldb
+            DB_CONNECTION: mysql
+            DB_PORT: ${SQLDB_PORT:-3306}
+            MAIL_HOST: mailer
+            MAIL_PORT: ${MAILER_SMTP_PORT:-1025}
+            # If you look in the docker file you can see what envs could be overridden
+            # ARC_SERVICE_DOMAIN: arcv-service.test
+            # ARC_STORE_DOMAIN: arcv-store.test
+        ports:
+            - "${ARC_PORT:-8000}:8000"
+        extra_hosts:
+            - host.docker.internal:host-gateway
+            - arc.test:127.0.1.1
+            - arcv-service.test:127.0.1.1
+            - arcv-store.test:127.0.1.1
+        volumes:
+            - .:/opt/project
+        depends_on: [ sqldb ]
+        # tty: true
+        # stdin_open: true
+        # entrypoint: bash
+        links:
+            - sqldb
+        restart: always
+
+
+    mailer:
+        image: schickling/mailcatcher
+        ports:
+            - "${MAILER_SMTP_PORT:-1025}:1025"
+            - "${MAILER_ADMIN_PORT:-1080}:1080"
+
+    phpmyadmin:
+        image: phpmyadmin
+        restart: always
+        ports:
+            - "${PHPMYADMIN_PORT:-8800}:80"
+        environment:
+            PMA_HOST: sqldb
+            PMA_USER: lamp
+            PMA_PASSWORD: lamp
+
+volumes:
+    mysql:
