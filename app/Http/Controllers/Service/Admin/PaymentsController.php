@@ -6,119 +6,17 @@ use App\Http\Controllers\Controller;
 use App\StateToken;
 use App\Trader;
 use Carbon\Carbon;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Log;
 
 class PaymentsController extends Controller
 {
-    /**
-     * List Payments
-     *
-     * @return LengthAwarePaginator
-     */
-    public function index()
-    {
-        $pendingPaymentData = $this::getPaymentsPast7Days('payment_pending',Carbon::now()->subDays(7));
-        $reimbursedPaymentData = $this::getPaymentsPast7Days('reimbursed',Carbon::now()->subDays(7));
-        return view('service.payments.index',['pending'=>$pendingPaymentData, 'reimbursed'=>$reimbursedPaymentData]);
-    }
-
-    public static function getPaymentsPast7Days($currentState,$fromDate)
-    {
-
-        $pending = DB::select(DB::raw("select *,
-(select count(*) -- this gets a count of all the vouchers in the payment request 
-				from voucher_states as vs
-                left join vouchers v on vs.voucher_id = v.id
-                where v.currentstate = ? and vsstid = vs.state_token_id
-                and vs.state_token_id is not null) as total
-,
-(select count(*) -- this splits the count off all vouchers into the vouchers per voucher area (voucher sponsor as opposed to market sponsor)
-				from voucher_states as vs
-                left join vouchers v on vs.voucher_id = v.id
-                where v.currentstate = ? and vsstid = vs.state_token_id and v.sponsor_id = vsponsid
-                and vs.state_token_id is not null) as byarea
- from -- adding state token
-    (select * from	-- adding voucher states
-		(select * from -- adding market area
-			(select v.id as vid, v.trader_id as tid, t.name as tname, t.market_id as tmid, v.currentstate as vstate, v.sponsor_id as vsponsid, s.name as vsponname from vouchers v
-			left join traders t on v.trader_id = t.id
-			left join sponsors s on v.sponsor_id = s.id
-			where v.currentstate = ?
-			and v.updated_at >= ?
-            -- gets all the vouchers with payment-pending, plus the area the voucher is from via sponsor and then trader who has scanned the voucher
-			) as pending
-		left join
-			(select vs.voucher_id as vsvid, vs.id as vsid, vs.state_token_id as vsstid, vs.user_id, u.name as uname 
-				from voucher_states as vs
-				left join users u on vs.user_id = u.id
-                -- gets the vouchers states for the voucher, as we need this to get both the user that requested payment and the state token to enable pyament
-			) as pwithusers
-		on pending.vid = pwithusers.vsvid
-        ) as pusers
-        left join 
-		(select m.id as mid, m.sponsor_id as msid, m.name as mname, mspon.name as msponname
-		from markets m
-        left join sponsors mspon on m.sponsor_id = mspon.id
-        -- gets the area for the market, as we need this separately to the area that the voucher was issued, to be able to distinguish SP (special program) vouchers
-		) as mspons
-        on mspons.mid = pusers.tmid
-	) as allp     
-		left join
-	(select st.id as stid, st.uuid as stuuid from state_tokens st
-    -- gets the state token information as we need the uuid to enable payment
-	) as sts
-on allp.vsstid = sts.stid
-where stid is not null;
-"), array($currentState,$currentState,$currentState,$fromDate)
-
-        );
-        //TODO suspect this needs some error handling
-        $lists = collect($pending);
-
-        $payments = $lists->sortBy(function ($list){
-            return
-                $list->tname . '#' .
-                $list->mname . "#" .
-                $list->msponname . "#" .
-                $list->uname . "#" .
-                $list->vsponname . "#" .
-                $list->total . "#" .
-                $list->byarea;
-
-        });
-
-        $paymentData = [];
-
-        foreach ($payments as $payment) {
-
-            // grab any existing id in the array
-            $currentUuid = $paymentData[$payment->stuuid] ?? [];
-
-            // overwrite with things it probably already has...
-            if (empty($currentUuid)) {
-                $currentUuid["traderName"] = $payment->tname;
-                $currentUuid["marketName"] = $payment->mname;
-                $currentUuid["area"] = $payment->msponname;
-                $currentUuid["requestedBy"] = $payment->uname;
-                $currentUuid["vouchersTotal"] = $payment->total;
-                $currentUuid["voucherAreas"] = [];
-            }
-
-            $currentUuid["voucherAreas"][$payment->vsponname] = $payment->byarea;
-
-            // update paymentData;
-            $paymentData[$payment->stuuid] = $currentUuid;
-        }
-
-        return $paymentData;
-
-    }
-
     /** Lightweight check for outstanding payments to highlight in dashboard
-     * @param $idkyet
      * @return bool
      */
     public static function checkIfOutstandingPayments(): bool
@@ -126,15 +24,95 @@ where stid is not null;
         $date = Carbon::now()->subDays(7)->startOfDay();
 
         $payments = DB::table('state_tokens')
-            ->where('created_at','>',$date)
+            ->where('created_at', '>', $date)
             ->whereNull('admin_user_id')
             ->count();
-        if($payments > 0){
-            return true;
+
+        return $payments > 0;
+    }
+
+    /**
+     * Lists the payments paid and pending
+     * @return Factory|View|Application
+     */
+    public function index(): Factory|View|Application
+    {
+        $pendingPaymentData = self::getStateTokensFromDate();
+        $reimbursedPaymentData = self::getStateTokensFromDate(true);
+        return view('service.payments.index', [
+            'pending' => $pendingPaymentData,
+            'reimbursed' => $reimbursedPaymentData,
+        ]);
+    }
+
+    /**
+     * List Payments
+     * @param bool $paid
+     * @param Carbon|null $date
+     * @return array
+     */
+    public static function getStateTokensFromDate(bool $paid = false, Carbon $date = null): array
+    {
+
+        //set the period we want scoped
+        $fromDate = $date ?? Carbon::now()->subDays(7)->startOfDay();
+        //get all the StateTokens for unpaid (pending) payment requests in the past 7 days
+        // (in theory nothing is ever unpaid for that long anyway)
+        $tokens = StateToken::with([
+            'user',
+            'voucherStates',
+            'voucherStates.voucher',
+            'voucherStates.voucher.trader',
+            'voucherStates.voucher.trader.market.sponsor',
+            'voucherStates.voucher.sponsor',
+        ])
+            ->where('created_at', '>', $fromDate->format('Y-m-d'))
+            ->whereNotNull('user_id')
+            // if $paid = true will make this a NotNull, thereby getting paid things
+            ->whereNull('admin_user_id', 'and', $paid)
+            ->orderBy('created_at','desc')
+            ->get();
+
+        return self::makePaymentDataStructure($tokens);
+    }
+
+    /**
+     * Constructs the Payment structure for our blade
+     * @param Collection $tokens
+     * @return array
+     */
+    public static function makePaymentDataStructure(Collection $tokens): array
+    {
+        $pendingResults = [];
+        foreach ($tokens as $stateToken) {
+            // start tracking this set of results
+            $currentTokenResults = [];
+            $currentTokenResults['requestedBy'] = $stateToken->user->name ?? 'unknown';
+
+            // get the states for this token
+            $voucherStates = $stateToken->voucherStates->all();
+            // count 'em while we're here
+            $currentTokenResults['vouchersTotal'] = count($voucherStates);
+
+            //Get all the attributes we need via each voucherState
+            foreach ($voucherStates as $voucherState) {
+                $trader = $voucherState->voucher->trader;
+                //These are the main headers; check once and then take that going forward
+                $currentTokenResults['traderName'] ??= $trader->name;
+                $currentTokenResults['marketName'] ??= $trader->market->name;
+                $currentTokenResults['area'] ??= $trader->market->sponsor->name;
+
+                $areaList = $currentTokenResults['voucherAreas'] ?? [];
+                $areaName = $voucherState->voucher->sponsor->name;
+                $areaList[$areaName] = isset($areaList[$areaName])
+                    ? $areaList[$areaName] +=1
+                    : 1;
+                $currentTokenResults['voucherAreas'] = $areaList;
+            }
+            // chuck that in the results array.
+            $pendingResults[$stateToken->uuid] = $currentTokenResults;
         }
-        else {
-            return false;
-        }
+        return $pendingResults;
     }
 
     /** Get a specific payment request by link
@@ -170,7 +148,7 @@ where stid is not null;
                 ->count();
 
             // Get the trader's name
-            if(!empty($vouchers)) {
+            if (!empty($vouchers)) {
                 $trader = Trader::find($vouchers[0]->trader_id)->name;
             }
         }
@@ -215,19 +193,17 @@ where stid is not null;
             foreach ($vouchers as $v) {
                 if ($v->transitionAllowed('payout')) {
                     $v->applyTransition('payout');
-                }
-
-                else {
+                } else {
                     Log::info('Failure Processing Payout Transition');
                     $success = false;
                     break;
                 }
             }
-            if ($success){
+            if ($success) {
                 $state_token->admin_user_id = Auth::user()->id;
                 $state_token->save();
             }
         }
-        return redirect()->route('admin.payments.index')->with('notification','Vouchers Paid!');
+        return redirect()->route('admin.payments.index')->with('notification', 'Vouchers Paid!');
     }
 }

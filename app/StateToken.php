@@ -4,6 +4,7 @@ namespace App;
 
 use DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Ramsey\Uuid\Uuid;
 use Log;
@@ -78,20 +79,20 @@ class StateToken extends Model
     /**
      * The user that created this StateToken
      *
-     * @return HasOne
+     * @return BelongsTo
      */
-    public function users(): HasOne
+    public function user(): BelongsTo
     {
-        return $this->hasOne(User::class);
+        return $this->belongsTo(User::class);
     }
 
     /**
      * The admin user that updated this StateToken
      *
-     * @return HasOne
+     * @return BelongsTo
      */
-    public function adminUsers(): HasOne
+    public function adminUser(): BelongsTo
     {
-        return $this->hasOne(AdminUser::class);
+        return $this->belongsTo(AdminUser::class);
     }
 }
