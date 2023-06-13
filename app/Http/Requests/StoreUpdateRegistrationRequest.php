@@ -61,10 +61,6 @@ class StoreUpdateRegistrationRequest extends FormRequest
                 'sometimes',
                 Rule::in(config('arc.reg_eligibilities_nrpf')),
             ],
-			'pri_carer_ethnicity' => [
-				'sometimes',
-				Rule::in(config('arc.ethnicity')),
-			],
         ];
 
         return $rules;

@@ -16,20 +16,31 @@
                    autocomplete="off"
                    autocorrect="off"
                    spellcheck="false"
-            >
-            <label for="pri_carer_ethnicity">Main carer's ethnic background</label><br>
+            ><br></br>
+            <label for="pri_carer_ethnicity">Main carer's ethnic background (optional)</label><br>
             <select name="pri_carer_ethnicity[{{ $pri_carer->id }}]" id="pri_carer_ethnicity">
                 <option value=0>Please select</option>
                 @foreach (config('arc.ethnicity') as $ethnicity)
                     <option value="{{ $ethnicity }}"
-                            @selected(
-	                            (!isset($pri_carer->ethnicity)) ||
+                        @selected(
                                 ($pri_carer->ethnicity === $ethnicity)
                             )
                     >@lang('arc.ethnicity_short.' . $ethnicity)
                     </option>
                 @endforeach
-            </select>
+            </select><br></br>
+            <label for="pri_carer_language">Main carer's preferred language (optional)</label><br>
+            <select name="pri_carer_language[{{ $pri_carer->id }}]" id="pri_carer_language">
+                <option value=0>Please select</option>
+                @foreach (config('arc.language') as $language)
+                    <option value="{{ $language }}"
+                            @selected(
+                                ($pri_carer->language === $language)
+                            )
+                    >@lang('arc.language.' . $language)
+                    </option>
+                @endforeach
+            </select><br></br>
         @else
             {{-- If this is a new record do this instead --}}
             <input id="carer"

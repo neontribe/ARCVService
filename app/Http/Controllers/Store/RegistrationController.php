@@ -525,12 +525,22 @@ class RegistrationController extends Controller
 
         // Update primary carer.
         $carerInput = (array)$request->get("pri_carer");
+		$carerEthnicity = $request->get("pri_carer_ethnicity");
+		$carerLanguage= $request->get('pri_carer_language');
         $carerKey = key($carerInput);
         $carer = Carer::find($carerKey);
         if ($carer->name !== $carerInput[$carer->id]) {
             $carer->name = $carerInput[$carer->id];
             $amendedCarers[] = $carer;
         }
+		if ($carer->ethnicity !== $carerEthnicity[$carer->id]) {
+			$carer->ethnicity = $carerEthnicity[$carer->id];
+			$amendedCarers[] = $carer;
+		}
+		if ($carer->language !== $carerLanguage[$carer->id]) {
+			$carer->language = $carerLanguage[$carer->id];
+			$amendedCarers[] = $carer;
+		}
 
         // Find secondary carers id's in the DB
         $carersInput = (array)$request->get("sec_carers");
