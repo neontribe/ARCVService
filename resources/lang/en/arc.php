@@ -26,8 +26,4 @@ return [
 		'other' => 'Other ethnic group: Arabic / Turkish / Iranian / Syrian / Any other ethnic group',
 		'not' => 'Not answered',
 	],
-	'language' => [
-		'eng' => 'English',
-		'other' => 'Other',
-	]
 ];

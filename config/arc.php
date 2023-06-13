@@ -116,8 +116,4 @@ return [
 		'other',
 		'not',
 	],
-	'language' => [
-		'eng',
-		'other',
-	],
 ];
