@@ -101,4 +101,23 @@ return [
         'Standard',
         'Social Prescribing',
     ],
+
+	/*
+    |--------------------------------------------------------------------------
+    | Demographic fields for primary carer - ethnic background and main language
+    |
+    |--------------------------------------------------------------------------
+     */
+	'ethnicity' => [
+		'white',
+		'mixed',
+		'asian',
+		'black',
+		'other',
+		'not',
+	],
+	'language' => [
+		'eng',
+		'other',
+	],
 ];

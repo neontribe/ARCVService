@@ -223,17 +223,23 @@ class RegistrationController extends Controller
 
         // Grab carers copy for shift)ing without altering family->carers
         $carers = $registration->family->carers->all();
+		$pri_carer = array_shift($carers);
+		$pri_carer_ethnicity = $pri_carer->ethnicity;
+		$pri_carer_language = $pri_carer->language;
 
         $evaluations["creditables"] = $registration->getEvaluator()->getPurposeFilteredEvaluations("credits");
         $evaluations["disqualifiers"] = $registration->getEvaluator()->getPurposeFilteredEvaluations("disqualifiers");
         $programme = Auth::user()->centre->sponsor->programme;
+
 
         return view('store.edit_registration', array_merge(
             $data,
             [
                 'registration' => $registration,
                 'family' => $registration->family,
-                'pri_carer' => array_shift($carers),
+                'pri_carer' => $pri_carer,
+				'pri_carer_ethnicity' => $pri_carer_ethnicity,
+				'pri_carer_language' => $pri_carer_language,
                 'sec_carers' => $carers,
                 'children' => $registration->family->children,
                 'noticeReasons' => $valuation->getNoticeReasons(),
