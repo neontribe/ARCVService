@@ -11,6 +11,7 @@ use App\Voucher;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class ApiVoucherControllerTest extends TestCase
@@ -66,6 +67,8 @@ class ApiVoucherControllerTest extends TestCase
     /** @test */
     public function testItNeverTidiesOldTokensOnConfirmTransitions()
     {
+        Mail::fake();
+
         // Create a Centre
         $centre = factory(Centre::class)->create();
 
@@ -145,6 +148,8 @@ class ApiVoucherControllerTest extends TestCase
     /** @test */
     public function testItAttachesTokensToPaymentPendingStates()
     {
+        Mail::fake();
+
         // Create a Centre
         $centre = factory(Centre::class)->create();
 
