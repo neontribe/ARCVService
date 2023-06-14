@@ -434,8 +434,12 @@ class RegistrationController extends Controller
     {
         // Create Carers, merge primary carer
         $carers = array_map(
-            function ($carer) {
-                return new Carer(['name' => $carer]);
+            function ($carer) use ($request) {
+                return new Carer([
+					'name' => $carer,
+					'ethnicity' => $request->get("pri_carer_ethnicity"),
+					'language' => $request->get("pri_carer_language")
+				]);
             },
             array_merge(
                 (array)$request->get('pri_carer'),
