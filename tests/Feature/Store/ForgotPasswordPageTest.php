@@ -5,6 +5,7 @@ use App\Centre;
 use App\CentreUser;
 use App\Notifications\StorePasswordResetNotification;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Tests\StoreTestCase;
 
@@ -76,6 +77,8 @@ class ForgotPasswordPageTest extends StoreTestCase
     /** @test */
     public function itCannotEffectRedirectWithAManipulatedRefererHeader()
     {
+        Mail::fake();
+
         $this->visit(route('store.password.request'))
             ->see('Reset Password');
 

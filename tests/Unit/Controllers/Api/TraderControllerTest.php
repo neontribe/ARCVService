@@ -2,6 +2,9 @@
 
 namespace Tests\Unit\Controllers\Api;
 
+use App\Events\VoucherHistoryEmailRequested;
+use App\Listeners\SendVoucherHistoryEmail;
+use App\Mail\VoucherHistoryEmail;
 use App\Market;
 use App\Voucher;
 use App\Trader;
@@ -12,6 +15,9 @@ use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Mail\PendingMail;
+use Illuminate\Support\Facades\Mail;
+use Mockery;
 use Tests\TestCase;
 
 class TraderControllerTest extends TestCase
@@ -226,6 +232,8 @@ class TraderControllerTest extends TestCase
      */
     public function testEmailVoucherHistoryAllDates()
     {
+        Mail::fake();
+
         // Sync the user with trader 1.
         $this->user->traders()->sync([1]);
         $this->actingAs($this->user, 'api')
@@ -237,6 +245,8 @@ class TraderControllerTest extends TestCase
                 'message' => trans('api.messages.email_voucher_history')
             ])
         ;
+
+        Mail::assertSent(VoucherHistoryEmail::class);
     }
 
     /**
@@ -244,6 +254,8 @@ class TraderControllerTest extends TestCase
      */
     public function testEmailVoucherHistorySpecificDate()
     {
+        Mail::fake();
+
         // Sync the user with trader 1.
         $this->user->traders()->sync([1]);
         // There should be some vouchers pended today.
@@ -262,6 +274,8 @@ class TraderControllerTest extends TestCase
                 )
             ])
         ;
+
+        Mail::assertSent(VoucherHistoryEmail::class);
     }
 
     /**
