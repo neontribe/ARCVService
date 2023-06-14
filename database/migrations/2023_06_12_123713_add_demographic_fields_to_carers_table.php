@@ -27,8 +27,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('carers', function (Blueprint $table) {
-			$table->dropColumn('ethnicity');
-			$table->dropColumn('language');
+			$table->dropColumn(['ethnicity' , 'language']);
         });
     }
 };
