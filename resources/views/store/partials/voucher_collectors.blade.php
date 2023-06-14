@@ -17,29 +17,31 @@
                    autocorrect="off"
                    spellcheck="false"
             ><br></br>
-            <label for="pri_carer_ethnicity">Main carer's ethnic background (optional)</label><br>
-            <select name="pri_carer_ethnicity[{{ $pri_carer->id }}]" id="pri_carer_ethnicity">
-                <option value=0>Please select</option>
-                @foreach (config('arc.ethnicity') as $ethnicity)
-                    <option value="{{ $ethnicity }}"
-                        @selected(
-                                ($pri_carer->ethnicity === $ethnicity)
-                            )
-                    >@lang('arc.ethnicity_short.' . $ethnicity)
-                    </option>
-                @endforeach
-            </select><br></br>
-            <label for="pri_carer_language">Main carer's preferred language (optional)</label><br>
-            <input id="pri_carer_language"
-                   name="pri_carer_language[{{ $pri_carer->id }}]"
-                   class="@if($errors->has('pri_carer_language')) invalid @endif"
-                   type="text"
-                   onkeyup="this.value = this.value.replace(/[^a-z]/, '')"
-                   value="{{ $pri_carer->language }}"
-                   autocomplete="off"
-                   autocorrect="off"
-                   spellcheck="false"
-            ><br></br>
+            @if(App::environment(['local', 'staging']))
+                <label for="pri_carer_ethnicity">Main carer's ethnic background (optional)</label><br>
+                <select name="pri_carer_ethnicity[{{ $pri_carer->id }}]" id="pri_carer_ethnicity">
+                    <option value=0>Please select</option>
+                    @foreach (config('arc.ethnicity') as $ethnicity)
+                        <option value="{{ $ethnicity }}"
+                            @selected(
+                                    ($pri_carer->ethnicity === $ethnicity)
+                                )
+                        >@lang('arc.ethnicity_short.' . $ethnicity)
+                        </option>
+                    @endforeach
+                </select><br></br>
+                <label for="pri_carer_language">Main carer's preferred language (optional)</label><br>
+                <input id="pri_carer_language"
+                       name="pri_carer_language[{{ $pri_carer->id }}]"
+                       class="@if($errors->has('pri_carer_language')) invalid @endif"
+                       type="text"
+                       onkeyup="this.value = this.value.replace(/[^a-z]/, '')"
+                       value="{{ $pri_carer->language }}"
+                       autocomplete="off"
+                       autocorrect="off"
+                       spellcheck="false"
+                ><br></br>
+            @endif
         @else
             {{-- If this is a new record do this instead --}}
             <input id="carer"
@@ -51,25 +53,27 @@
                    spellcheck="false"
                    value="{{ old('pri_carer') }}"
             ><br></br>
-            <label for="pri_carer_ethnicity">Main carer's ethnic background (optional)</label><br>
-            <select name="pri_carer_ethnicity" id="pri_carer_ethnicity">
-                <option value=0>Please select</option>
-                @foreach (config('arc.ethnicity') as $ethnicity)
-                    <option value="{{ $ethnicity }}">@lang('arc.ethnicity_short.' . $ethnicity)
-                    </option>
-                @endforeach
-            </select><br></br>
-            <label for="pri_carer_language">Main carer's preferred language (optional)</label><br>
-            <input id="pri_carer_language"
-                   name="pri_carer_language"
-                   class="@if($errors->has('pri_carer_language')) invalid @endif"
-                   type="text"
-                   onkeyup="this.value = this.value.replace(/[^a-z]/, '')"
-                   autocomplete="off"
-                   autocorrect="off"
-                   spellcheck="false"
-                   value="{{ old('pri_carer_language') }}"
-            ><br></br>
+            @if(App::environment(['local', 'staging']))
+                <label for="pri_carer_ethnicity">Main carer's ethnic background (optional)</label><br>
+                <select name="pri_carer_ethnicity" id="pri_carer_ethnicity">
+                    <option value=0>Please select</option>
+                    @foreach (config('arc.ethnicity') as $ethnicity)
+                        <option value="{{ $ethnicity }}">@lang('arc.ethnicity_short.' . $ethnicity)
+                        </option>
+                    @endforeach
+                </select><br></br>
+                <label for="pri_carer_language">Main carer's preferred language (optional)</label><br>
+                <input id="pri_carer_language"
+                       name="pri_carer_language"
+                       class="@if($errors->has('pri_carer_language')) invalid @endif"
+                       type="text"
+                       onkeyup="this.value = this.value.replace(/[^a-z]/, '')"
+                       autocomplete="off"
+                       autocorrect="off"
+                       spellcheck="false"
+                       value="{{ old('pri_carer_language') }}"
+                ><br></br>
+            @endif
         @endif
     </div>
     @includeWhen(
