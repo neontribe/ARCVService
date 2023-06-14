@@ -11,7 +11,7 @@
       <table class="info centre">
         <tr>
           <td>
-            <h2>Children's Centre: {{ $centre->name }}</h2>
+            <h2>Distribution Centre: {{ $centre->name }}</h2>
           </td>
           <td class="week-commencing">
             <p>Week commencing</p>
