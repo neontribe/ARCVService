@@ -29,7 +29,17 @@
                         >@lang('arc.ethnicity_short.' . $ethnicity)
                         </option>
                     @endforeach
-                </select><br></br>
+                </select>
+                <span class="clickable-span">(longer descriptions)</span>
+                <li class="collapsed" id="more-ethnicity-info">
+                    <ul id="ethnicities">
+                        <br></br>
+                        @foreach(config('arc.ethnicity_long') as $ethnicity)
+                            <li>{{$ethnicity}}</li>
+                        @endforeach
+                    </ul>
+                </li>
+                    <br></br>
                 <label for="pri_carer_language">Main carer's preferred language (optional)</label><br>
                 <input id="pri_carer_language"
                        name="pri_carer_language[{{ $pri_carer->id }}]"

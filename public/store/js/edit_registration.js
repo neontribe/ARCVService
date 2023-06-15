@@ -51,6 +51,11 @@ $('.clickable-span').click(function (e) {
     e.preventDefault();
 });
 
+$('.clickable-span').click(function (e) {
+    $('#more-ethnicity-info').removeClass('collapsed');
+    e.preventDefault();
+});
+
 $('.remove').click(function (e) {
     $('#expandable').removeClass('collapsed');
     $('#leaving').addClass('expanded');
