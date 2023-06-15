@@ -31,8 +31,17 @@ class RegistrationsSeeder extends Seeder
         $this->createRegistrationForCentre(2, CentreUser::find(2)->centre);
         $this->createRegistrationForCentre(2, CentreUser::find(3)->centre);
 
-        // Create 10 regs randomly
-        factory(Registration::class, 10)->create();
+
+        // Create some regs not randomly as we want to avoid the SP centres for now
+		factory(Registration::class)->create(["centre_id" => 1]);
+		factory(Registration::class)->create(["centre_id" => 2]);
+		factory(Registration::class)->create(["centre_id" => 3]);
+		factory(Registration::class)->create(["centre_id" => 4]);
+		factory(Registration::class)->create(["centre_id" => 5]);
+		factory(Registration::class)->create(["centre_id" => 6]);
+		factory(Registration::class)->create(["centre_id" => 7]);
+		factory(Registration::class)->create(["centre_id" => 8]);
+
 
         // One registration with our CC with an incative family.
         $inactive = factory(Registration::class)
@@ -49,9 +58,13 @@ class RegistrationsSeeder extends Seeder
         $this->createRegistrationForCentre(3);
         $this->createRegistrationForScottishCentre(1);
 
+		// create some SP regs
+		$this->createRegistrationForSPCentre(2,  Centre::find(10));
+		$this->createRegistrationForSPCentre(2,  Centre::find(11));
+
         // create a registration with a bundle
         $bundle = factory(Bundle::class)->create();
-        factory(Registration::class)->create()->bundles()->save($bundle);
+        factory(Registration::class)->create(["centre_id" => 13])->bundles()->save($bundle);
 
         $this->user = User::where('name', 'demoseeder')->first();
         if (!$this->user) {
@@ -88,29 +101,33 @@ class RegistrationsSeeder extends Seeder
         $eligibilities_hsbs = config('arc.reg_eligibilities_hsbs');
         $eligibilities_nrpf = config('arc.reg_eligibilities_nrpf');
 
+		$spCentreIDs = ['9', '10', '11'];
         foreach (range(1, $quantity) as $q) {
-            // create a family and set it up.
-            $family = factory(Family::class)->make();
-            $family->lockToCentre($centre);
-            $family->save();
-            $family->carers()->saveMany(factory(Carer::class, random_int(1, 3))->make());
-            $family->children()->saveMany(factory(Child::class, random_int(0, 4))->make());
-            $eligibility_hsbs = $eligibilities_hsbs[mt_rand(0, count($eligibilities_hsbs) - 1)];
-            $eligible_from = null;
-            if ($eligibility_hsbs === 'healthy-start-receiving') {
-              $eligible_from = Carbon::now();
-            }
+			// We want to make sure regs are not assigned to the specific SP centres at random
+			if (!array_key_exists($centre->id, $spCentreIDs)) {
+				// create a family and set it up.
+				$family = factory(Family::class)->make();
+				$family->lockToCentre($centre);
+				$family->save();
+				$family->carers()->saveMany(factory(Carer::class, random_int(1, 3))->make());
+				$family->children()->saveMany(factory(Child::class, random_int(0, 4))->make());
+				$eligibility_hsbs = $eligibilities_hsbs[mt_rand(0, count($eligibilities_hsbs) - 1)];
+				$eligible_from = null;
+				if ($eligibility_hsbs === 'healthy-start-receiving') {
+					$eligible_from = Carbon::now();
+				}
 
-            $registrations[] = Registration::create(
-                [
-                    'centre_id' => $centre->id,
-                    'family_id' => $family->id,
-                    'eligibility_hsbs' => $eligibility_hsbs,
-                    'eligibility_nrpf' => $eligibilities_nrpf[mt_rand(0, count($eligibilities_nrpf) - 1)],
-                    'consented_on' => Carbon::now(),
-                    'eligible_from' => $eligible_from
-                ]
-            );
+				$registrations[] = Registration::create(
+					[
+						'centre_id' => $centre->id,
+						'family_id' => $family->id,
+						'eligibility_hsbs' => $eligibility_hsbs,
+						'eligibility_nrpf' => $eligibilities_nrpf[mt_rand(0, count($eligibilities_nrpf) - 1)],
+						'consented_on' => Carbon::now(),
+						'eligible_from' => $eligible_from
+					]
+				);
+			}
         }
         // Return the collection in case anyone needs it.
         return collect($registrations);
@@ -173,7 +190,52 @@ class RegistrationsSeeder extends Seeder
         return collect($registrations);
     }
 
-    /**
+	/**
+	 * @param $quantity
+	 * @param Centre $centre
+	 * @return Collection
+	 */
+	public function createRegistrationForSPCentre($quantity, Centre $centre = null)
+	{
+		// set the loop and centre
+		$quantity = ($quantity) ? $quantity : 1;
+
+		$registrations = [];
+
+		foreach (range(1, $quantity) as $q) {
+			// create a family and set it up.
+			$family = factory(Family::class)->make();
+			$family->lockToCentre($centre);
+			$family->save();
+			$family->carers()->saveMany(factory(Carer::class, random_int(1, 3))->make());
+			// Make the first carer a "child" as is the SP way
+			$family->carers()->save(factory(Child::class)->create([
+				'dob' => '1983-01-01',
+				'family_id' => $family->id,
+				'born' => 1
+			]));
+			$family->children()->save(factory(Child::class)->state('readyForPrimarySchool')->make());
+			$family->children()->save(factory(Child::class)->state('canDefer')->make());
+			$family->children()->save(factory(Child::class)->state('canNotDefer')->make());
+
+
+			$registrations[] = Registration::create(
+				[
+					'centre_id' => $centre->id,
+					'family_id' => $family->id,
+					'eligibility_hsbs' => null,
+					'eligibility_nrpf' => null,
+					'consented_on' => Carbon::now(),
+					'eligible_from' => Carbon::now()
+				]
+			);
+		}
+		// Return the collection in case anyone needs it.
+		return collect($registrations);
+	}
+
+
+	/**
      * @param array $familyData
      * @param Centre $centre
      * @return void
@@ -188,10 +250,12 @@ class RegistrationsSeeder extends Seeder
         if (is_null($centre)) {
             $centre = factory(Centre::class)->create();
         }
-
-        $family = factory(Family::class)->make();
-        $family->lockToCentre($centre);
-        $family->save();
+		$spCentreIDs = ['9', '10', '11'];
+		if (!array_key_exists($centre->id, $spCentreIDs)) {
+			$family = factory(Family::class)->make();
+			$family->lockToCentre($centre);
+			$family->save();
+		}
 
         foreach ($familyData['carers'] as $carer) {
             $carers[] = factory(Carer::class)->make(['name' => $carer['name']]);
