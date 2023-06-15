@@ -24,6 +24,8 @@ class Carer extends Model
      */
     protected $fillable = [
         'name',
+		'ethnicity',
+		'language',
     ];
 
     /**

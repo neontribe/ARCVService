@@ -101,4 +101,27 @@ return [
         'Standard',
         'Social Prescribing',
     ],
+
+	/*
+    |--------------------------------------------------------------------------
+    | Demographic fields for primary carer - ethnic background and main language
+    |
+    |--------------------------------------------------------------------------
+     */
+	'ethnicity' => [
+		'white',
+		'mixed',
+		'asian',
+		'black',
+		'other',
+		'not',
+	],
+	'ethnicity_long' => [
+		'white' => 'White: Scottish/ British / Irish / Traveller / Any other White background',
+		'mixed' => 'Mixed/Multiple ethnic groups: White and Black Caribbean / White and Black African / White and Asian / Latin American / Any other Mixed/Multiple ethnic background',
+		'asian' => 'Asian/Asian British: Indian / Pakistani / Bangladeshi / Chinese / Afghani / Any other Asian background',
+		'black' => 'Black/Black British: African / Caribbean / Moroccan / Somalian / Any other Black/British background',
+		'other' => 'Other ethnic group: Arabic / Turkish / Iranian / Syrian / Any other ethnic group',
+		'not' => 'Not answered',
+	],
 ];

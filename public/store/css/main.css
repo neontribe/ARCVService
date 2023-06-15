@@ -841,6 +841,16 @@ EDIT PAGE
 	padding-left: 1.5rem;
 }
 
+#more-ethnicity-info {
+	list-style-type: none;
+}
+
+#more-ethnicity-info > ul {
+	list-style-type: none;
+	font-size: 0.8rem;
+	padding-left: 1.5rem;
+}
+
 .remove {
 	background-color: #d2232a;
 	margin: 0.5rem 1rem;
