@@ -28,16 +28,6 @@ class Carer extends Model
 		'language',
     ];
 
-	/**
-	 * The attributes to append to the model's array form.
-	 *
-	 * @var array
-	 */
-	protected $appends = [
-		'ethnicity',
-		'language',
-	];
-
     /**
      * The attributes that should be hidden for arrays.
      *

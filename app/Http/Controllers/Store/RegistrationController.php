@@ -582,11 +582,11 @@ class RegistrationController extends Controller
 			$carer->name = $carerInput[$carer->id];
 			$amendedCarers[] = $carer;
 		}
-		if ($carerEthnicity !== $carerEthnicity[$carer->id]) {
+		if ($carerEthnicity !== null && $carerEthnicity !== $carerEthnicity[$carer->id]) {
 			$carer->ethnicity = $carerEthnicity[$carer->id];
 			$amendedCarers[] = $carer;
 		}
-		if ($carerLanguage !== $carerLanguage[$carer->id]) {
+		if ($carerLanguage !== null && $carerLanguage !== $carerLanguage[$carer->id]) {
 			$carer->language = $carerLanguage[$carer->id];
 			$amendedCarers[] = $carer;
 		}
