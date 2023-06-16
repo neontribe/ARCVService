@@ -40,12 +40,12 @@
                     </ul>
                 </li>
                     <br></br>
-                <label for="pri_carer_language">Main carer's preferred language (optional)</label><br>
+                <label for="pri_carer_language">Carer's main language (optional)</label><br>
                 <input id="pri_carer_language"
                        name="pri_carer_language[{{ $pri_carer->id }}]"
                        class="@if($errors->has('pri_carer_language')) invalid @endif"
                        type="text"
-                       onkeyup="this.value = this.value.replace(/[^a-z]/, '')"
+                       onkeyup="this.value = this.value.replace(/[^a-z ]/,'')"
                        value="{{ $pri_carer->language }}"
                        autocomplete="off"
                        autocorrect="off"
@@ -72,12 +72,12 @@
                         </option>
                     @endforeach
                 </select><br></br>
-                <label for="pri_carer_language">Main carer's preferred language (optional)</label><br>
+                <label for="pri_carer_language">Carer's main language (optional)</label><br>
                 <input id="pri_carer_language"
                        name="pri_carer_language"
                        class="@if($errors->has('pri_carer_language')) invalid @endif"
                        type="text"
-                       onkeyup="this.value = this.value.replace(/[^a-z]/, '')"
+                       onkeyup="this.value = this.value.replace(/[^a-z ]/,'')"
                        autocomplete="off"
                        autocorrect="off"
                        spellcheck="false"
