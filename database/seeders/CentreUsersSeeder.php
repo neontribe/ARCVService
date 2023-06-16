@@ -97,5 +97,21 @@ class CentreUsersSeeder extends Seeder
             'password' => bcrypt('store_pass'),
         ]);
         $southwarkUser->centres()->attach(6, ['homeCentre' => true]);
+
+		// Tower Hamlet SP user for testing
+		$towerHamletUser = factory(CentreUser::class)->create([
+			'name' => 'Tower Hamlet SP user',
+			'email' => 'arc+thuser@neontribe.co.uk',
+			'password' => bcrypt('store_pass'),
+		]);
+		$towerHamletUser->centres()->attach(10, ['homeCentre' => true]);
+
+		// Lambeth SP user for testing
+		$lambethUser = factory(CentreUser::class)->create([
+			'name' => 'Lambeth SP user',
+			'email' => 'arc+lambethuser@neontribe.co.uk',
+			'password' => bcrypt('store_pass'),
+		]);
+		$lambethUser->centres()->attach(11, ['homeCentre' => true]);
     }
 }

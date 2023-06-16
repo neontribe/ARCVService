@@ -35,5 +35,11 @@ class CentresSeeder extends Seeder
 
         // Social prescribing centre
         factory(Centre::class)->create(['name' => 'Prescribing Centre', 'sponsor_id' => 9]);
+
+		// Tower Hamlet SP centre
+		factory(Centre::class)->create(['name' => 'Tower Hamlet SP', 'sponsor_id' => 10]);
+
+		// Lambeth SP centre
+		factory(Centre::class)->create(['name' => 'Lambeth SP', 'sponsor_id' => 11]);
     }
 }

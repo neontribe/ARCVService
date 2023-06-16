@@ -70,6 +70,22 @@ class SponsorsSeeder extends Seeder
             'programme' => 1 // should be the SP area!
         ]);
         $socialPrescribingCentre->evaluations()->saveMany($this->socialPrescribingOverrides());
+
+		// make Tower Hamlet SP area/sponsor in SP programme - should be 10
+		$towerHamletSPcentre = factory(Sponsor::class)->create([
+			'name' => "Tower Hamlet Social Prescribing",
+			'shortcode' => "THA",
+			'programme' => 1 // should be the SP area!
+		]);
+		$towerHamletSPcentre->evaluations()->saveMany($this->towerHamletSocialPrescribingOverrides());
+
+		// make Lambeth SP area/sponsor in SP programme - should be 11
+		$lambethSPcentre = factory(Sponsor::class)->create([
+			'name' => "Lambeth Social Prescribing",
+			'shortcode' => "LSP",
+			'programme' => 1 // should be the SP area!
+		]);
+		$lambethSPcentre->evaluations()->saveMany($this->lambethSocialPrescribingOverrides());
     }
 
     public function veryfiesKids()
@@ -314,4 +330,124 @@ class SponsorsSeeder extends Seeder
             ]),
         ];
     }
+
+	public function lambethSocialPrescribingOverrides()
+	{
+		return [
+			new Evaluation([
+				"name" => "FamilyIsPregnant",
+				"value" => null,
+				"purpose" => "credits",
+				"entity" => "App\Family",
+			]),
+			new Evaluation([
+				"name" => "ChildIsBetweenOneAndPrimarySchoolAge",
+				"value" => null,
+				"purpose" => "credits",
+				"entity" => "App\Child",
+			]),
+			new Evaluation([
+				"name" => "ChildIsUnderOne",
+				"value" => null,
+				"purpose" => "credits",
+				"entity" => "App\Child",
+			]),
+			new Evaluation([
+				"name" => "ChildIsPrimarySchoolAge",
+				"value" => null,
+				"purpose" => "disqualifiers",
+				"entity" => "App\Child",
+			]),
+			new Evaluation([
+				"name" => "DeductFromCarer",
+				"value" => -2,
+				"purpose" => "credits",
+				"entity" => "App\Family",
+			]),
+			new Evaluation([
+				"name" => "HouseholdMember",
+				"value" => 2,
+				"purpose" => "credits",
+				"entity" => "App\Child",
+			]),
+			new Evaluation([
+				"name" => "HouseholdExists",
+				"value" => 8,
+				"purpose" => "credits",
+				"entity" => "App\Family",
+			]),
+			new Evaluation([
+				"name" => "ChildIsAlmostPrimarySchoolAge",
+				"value" => NULL,
+				"purpose" => "notices",
+				"entity" => "App\Child",
+			]),
+			new Evaluation([
+				"name" => "ChildIsAlmostOne",
+				"value" => NULL,
+				"purpose" => "notices",
+				"entity" => "App\Child",
+			]),
+		];
+	}
+
+	public function towerHamletSocialPrescribingOverrides()
+	{
+		return [
+			new Evaluation([
+				"name" => "FamilyIsPregnant",
+				"value" => null,
+				"purpose" => "credits",
+				"entity" => "App\Family",
+			]),
+			new Evaluation([
+				"name" => "ChildIsBetweenOneAndPrimarySchoolAge",
+				"value" => null,
+				"purpose" => "credits",
+				"entity" => "App\Child",
+			]),
+			new Evaluation([
+				"name" => "ChildIsUnderOne",
+				"value" => null,
+				"purpose" => "credits",
+				"entity" => "App\Child",
+			]),
+			new Evaluation([
+				"name" => "ChildIsPrimarySchoolAge",
+				"value" => null,
+				"purpose" => "disqualifiers",
+				"entity" => "App\Child",
+			]),
+			new Evaluation([
+				"name" => "DeductFromCarer",
+				"value" => -2,
+				"purpose" => "credits",
+				"entity" => "App\Family",
+			]),
+			new Evaluation([
+				"name" => "HouseholdMember",
+				"value" => 2,
+				"purpose" => "credits",
+				"entity" => "App\Child",
+			]),
+			new Evaluation([
+				"name" => "HouseholdExists",
+				"value" => 6,
+				"purpose" => "credits",
+				"entity" => "App\Family",
+			]),
+			new Evaluation([
+				"name" => "ChildIsAlmostPrimarySchoolAge",
+				"value" => NULL,
+				"purpose" => "notices",
+				"entity" => "App\Child",
+			]),
+			new Evaluation([
+				"name" => "ChildIsAlmostOne",
+				"value" => NULL,
+				"purpose" => "notices",
+				"entity" => "App\Child",
+			]),
+		];
+	}
 }
