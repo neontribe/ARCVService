@@ -96,6 +96,15 @@ class RegistrationController extends Controller
 			$q = $q->whereIn('centre_id', $neighbour_centre_ids);
 		}
 
+		// only for cc users with access to more than 1 centre
+		if (Auth::user()->centres->count() > 1) {
+			// get the centre_id from the masthead dropdown which is set by session (so we can filter reg selection)
+			$filtered_centre_id = session('CentreUserCurrentCentreId');
+		if ($filtered_centre_id) {
+			$q = $q->where('centre_id', '=', $filtered_centre_id);
+		}
+	}
+
 		if (!empty($filtered_family_ids)) {
 			$q = $q->whereIn('family_id', $filtered_family_ids)
 				//  Somehow, whereIn re-orders the filtered array into numeric order.
