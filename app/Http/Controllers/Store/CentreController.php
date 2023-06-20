@@ -198,6 +198,7 @@ class CentreController extends Controller
                 /** @var Valuation $familyValuation */
                 $familyValuation = $reg->family->getValuation();
                 $child_index = 1;
+				$totalKids = count($reg->family->children);
                 foreach ($reg->family->children as $child) {
                     if (!$programme || !$child->is_pri_carer) {
                         // Will run a child valuation if we don't already have one.
@@ -207,7 +208,6 @@ class CentreController extends Controller
                         if ($child->dob->isFuture()) {
                             // If it's a pregnancy, set due date and move on.
                             $due_date = $child->dob->format($dateFormats['dob']);
-                            $totalKids += 1;
                         } else {
                             // Otherwise, set the header
                             $dob_header = Child::getAlias($programme) . ' ' . (string)$child_index . ' DoB';
@@ -226,7 +226,7 @@ class CentreController extends Controller
                 $row['Eligible Household Members'] = $eligibleKids;
             } else {
                 // Add total including pregnancies
-                $row['Total Children'] = $totalKids + $eligibleKids;
+                $row['Total Children'] = $totalKids;
                 // Add count of eligible kids
                 $row['Eligible Children'] = $eligibleKids;
             }
