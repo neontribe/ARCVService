@@ -4,6 +4,7 @@
 
 <div id="addChildDobInput" class="dob-input-container">
     @include('store.partials.dobInput')
+    <br /><br /><br />
     <button id="add-dob" class="link-button link-button-large">
         <i class="fa fa-plus button-icon" aria-hidden="true"></i>
         Add Child or Pregnancy
