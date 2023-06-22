@@ -194,7 +194,7 @@ class CentreController extends Controller
                 'Main Language' => $main_language,
                 'Other Language' => $other_language,
                 'Entitlement' => $reg->getValuation()->getEntitlement(),
-                ''Last Collection' => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format($dateFormats['lastCollection']) : null,                
+                'Last Collection' => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format($dateFormats['lastCollection']) : null,
                 'Active' => ($reg->isActive()) ? 'true' : 'false'
             ];
 
