@@ -55,7 +55,7 @@ class RegistrationsSeeder extends Seeder
         $family->save();
 
         // create 3 regs for a *new* centre (with no users)
-        $this->createRegistrationForCentre(3);
+        $this->createRegistrationForCentre(3000);
         $this->createRegistrationForScottishCentre(1);
 
 		// create some SP regs
