@@ -24,6 +24,17 @@
                                spellcheck="false" onkeyup="searchForm()"
                                placeholder="Enter {{ $programme ? 'household' : 'family'}} name" aria-label="{{ $programme ? 'Household' : 'Family'}} Name"
                                value="{{ Request::get("family_name") ?? '' }}" />
+
+                        <input type="hidden" name="fuzzy" value="0">
+                        <div class="fuzzy-search">
+                            <button class="btn" onClick="toggleFuzzySearch(); return false;">
+                                <i id="fuzzy-search-icon" class="fa fa-dot-circle-o" aria-hidden="true"></i>
+                            </button>
+                            <div class="fuzzy-search-content" id="fuzzy-search-content">
+                                <a href="#" onClick="setExactSearch()">Exact</a>
+                                <a href="#" onClick="setFuzzySearch()">Fuzzy</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -109,6 +120,26 @@
             function doneTyping () {
                 $("#searchform").submit();
             }
+        }
+
+        function toggleFuzzySearch() {
+            if ($("input[name='fuzzy']").val() === "0") {
+                setFuzzySearch();
+            } else {
+                setExactSearch();
+            }
+        }
+
+        function setExactSearch() {
+            console.log("setExactSearch");
+            $("input[name='fuzzy']").val(0);
+            document.getElementById("fuzzy-search-icon").classList.remove("fuzzy-on");
+        }
+
+        function setFuzzySearch() {
+            console.log("setFuzzySearch");
+            $("input[name='fuzzy']").val(1);
+            document.getElementById("fuzzy-search-icon").classList.add("fuzzy-on");
         }
     </script>
 @endsection
