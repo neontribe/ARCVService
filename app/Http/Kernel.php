@@ -22,6 +22,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\XssHeader::class,
         \App\Http\Middleware\ContentTypeOptionsHeader::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        \App\Http\Middleware\Empty304::class,
     ];
 
     /**
