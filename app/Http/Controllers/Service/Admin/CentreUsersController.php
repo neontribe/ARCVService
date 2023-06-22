@@ -9,6 +9,7 @@ use App\Http\Requests\AdminIndexCentreUsersRequest;
 use App\Http\Requests\AdminNewCentreUserRequest;
 use App\Http\Requests\AdminUpdateCentreUserRequest;
 use App\Sponsor;
+use Carbon\Carbon;
 use DB;
 use Debugbar;
 use Exception;
@@ -251,15 +252,18 @@ class CentreUsersController extends Controller
     }
 
     /**
-     * Handle deleting a centre user
+     * Handle deleting a centre user - change email and name to allow them to be re-added
+	 * later if needed
      * @param int $id
      * @return RedirectResponse
      */
     public function delete(int $id): RedirectResponse
     {
         $centreUser = CentreUser::findOrFail($id);
-        $centreUser->centre->centreUsers()->detach($id);
-        $centreUser->delete();
+        $centreUser->name = 'DELETED' . $centreUser->name;
+        $centreUser->email = 'DELETED' . $centreUser->email;
+        $centreUser->deleted_at = Carbon::now()->format('Ymd-His');
+        $centreUser->save();
         return redirect()->route('admin.centreusers.index')
             ->with('message', 'Worker ' . $centreUser->name . ' deleted');
     }
