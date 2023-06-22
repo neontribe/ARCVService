@@ -198,7 +198,7 @@ class CentreController extends Controller
                 /** @var Valuation $familyValuation */
                 $familyValuation = $reg->family->getValuation();
                 $child_index = 1;
-				$totalKids = count($reg->family->children);
+                $totalKids = count($reg->family->children);
                 foreach ($reg->family->children as $child) {
                     if (!$programme || !$child->is_pri_carer) {
                         // Will run a child valuation if we don't already have one.
