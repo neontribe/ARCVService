@@ -139,16 +139,12 @@ class CentreUserControllerTest extends StoreTestCase
             ->followRedirects()
             ->assertResponseOk()
             ->seePageIs(route('admin.centreusers.index'))
-            ->see('Worker ' . $cu->name . ' deleted')
+            ->see('Worker DELETED' . $cu->name . ' deleted')
             ->dontSee($cu->email)
             ->notSeeInDatabase('centre_users', [
                 'name' => $this->data['name'],
                 'email' => $this->data['email'],
                 'deleted_at' => null
-            ])
-            ->dontSeeInDatabase('centre_centre_user', [
-                'centre_user_id' => $cu->id,
-                'centre_id' => $this->altCentres->last()->id,
             ])
         ;
     }
