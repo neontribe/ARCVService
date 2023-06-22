@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Store;
 
+use App\Carer;
 use App\Centre;
 use App\CentreUser;
 use App\Child;
@@ -165,16 +166,38 @@ class CentreController extends Controller
                 ? $lastCollection->disbursed_at
                 : null;
 
+			// Get full carer details as we need ethnicity and language
+			$pri_carer_full = Carer::where('name', $reg->family->pri_carer)->first(['name', 'ethnicity', 'language']);
+			$pri_carer_ethnicity = config('arc.ethnicity_long.' . $pri_carer_full->ethnicity);
+
+			if ($pri_carer_full->language === null) {
+				// then they haven't answered
+				$main_language = 'not answered';
+				$other_language = '';
+			} elseif ($pri_carer_full->language !== 'english') {
+				// record main language as 'other' then add extra column for actual language
+				$main_language = 'other';
+				$other_language = strtolower($pri_carer_full->language);
+			} else {
+				// english and blank 'other language'
+				$main_language = strtolower($pri_carer_full->language);
+				$other_language = '';
+			}
+
             // Null coalesce `??` does not trigger `Trying to get property of non-object` explosions
             $row = [
                 'RVID' => ($reg->family->rvid) ?? 'Family not found',
                 'Area' => ($reg->centre->sponsor->name) ?? 'Area not found',
                 'Centre' => ($reg->centre->name) ?? 'Centre not found',
                 'Primary Carer' => ($reg->family->pri_carer) ?? 'Primary Carer not Found',
+                'Ethnicity' => ($pri_carer_ethnicity) ?? 'not answered',
+                'Main Language' => $main_language,
+                'Other Language' => $other_language,
                 'Entitlement' => $reg->getValuation()->getEntitlement(),
-                'Last Collection' => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format($dateFormats['lastCollection']) : null,
+                ''Last Collection' => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format($dateFormats['lastCollection']) : null,                
                 'Active' => ($reg->isActive()) ? 'true' : 'false'
             ];
+
 
             // Per child dependent things
             $kids = [];
