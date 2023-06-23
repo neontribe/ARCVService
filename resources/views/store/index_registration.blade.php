@@ -12,7 +12,7 @@
                 {!! csrf_field() !!}
                 {{-- Families left checkbox --}}
                 <div class="checkbox-control">
-                    <input type="checkbox" class="styled-checkbox no-margin" onChange="this.form.submit()" id="families_left" name="families_left" {{
+                    <input type="checkbox" class="styled-checkbox no-margin" onChange="submitSearchForm()" id="families_left" name="families_left" {{
                     Request::get("families_left") ? 'checked' : '' }} />
                     <label for="families_left">Show {{ $programme ? 'households' : 'families'}} who have left</label>
                 </div>
@@ -25,14 +25,30 @@
                                placeholder="Enter {{ $programme ? 'household' : 'family'}} name" aria-label="{{ $programme ? 'Household' : 'Family'}} Name"
                                value="{{ Request::get("family_name") ?? '' }}" />
 
-                        <input type="hidden" name="fuzzy" value="0">
+                        <input type="hidden" name="fuzzy" value="{{ $fuzzy }}">
                         <div class="fuzzy-search">
                             <button class="btn" onClick="toggleFuzzySearch(); return false;">
-                                <i id="fuzzy-search-icon" class="fa fa-dot-circle-o" aria-hidden="true"></i>
+                                <i id="fuzzy-search-icon"
+                                   @if ($fuzzy)
+                                        class="fa fa-dot-circle-o fuzzy-on"
+                                   @else
+                                        class="fa fa-dot-circle-o"
+                                   @endif
+                                   aria-hidden="true"></i>
                             </button>
                             <div class="fuzzy-search-content" id="fuzzy-search-content">
-                                <a href="#" id="fuzzy-search-exact" class="fuzzy-text-on" onClick="setExactSearch()">Exact</a>
-                                <a href="#" id="fuzzy-search-fuzzy" onClick="setFuzzySearch()">Fuzzy</a>
+                                <a href="#"
+                                   id="fuzzy-search-exact"
+                                   @if (! $fuzzy)
+                                        class="fuzzy-text-on"
+                                   @endif
+                                   onClick="setExactSearch()">Exact</a>
+                                <a href="#"
+                                   id="fuzzy-search-fuzzy"
+                                   @if ($fuzzy)
+                                        class="fuzzy-text-on"
+                                   @endif
+                                   onClick="setFuzzySearch()">Fuzzy</a>
                             </div>
                         </div>
                     </div>
@@ -108,7 +124,7 @@
         function searchForm() {
             // setup before functions
             var typingTimer;                //timer identifier
-            var doneTypingInterval = 500;   //time in ms (half a second)
+            var doneTypingInterval = 750;   //time in ms (half a second)
             // on keyup, start the countdown
             $("#family_name").keyup(function(){
                 clearTimeout(typingTimer);
@@ -131,7 +147,6 @@
         }
 
         function setExactSearch() {
-            console.log("setExactSearch");
             $("input[name='fuzzy']").val(0);
             document.getElementById("fuzzy-search-exact").classList.add("fuzzy-text-on");
             document.getElementById("fuzzy-search-fuzzy").classList.remove("fuzzy-text-on");
@@ -139,11 +154,16 @@
         }
 
         function setFuzzySearch() {
-            console.log("setFuzzySearch");
             $("input[name='fuzzy']").val(1);
             document.getElementById("fuzzy-search-exact").classList.remove("fuzzy-text-on");
             document.getElementById("fuzzy-search-fuzzy").classList.add("fuzzy-text-on");
             document.getElementById("fuzzy-search-icon").classList.add("fuzzy-on");
+        }
+
+        function submitSearchForm() {
+            if (document.getElementById("family_name").val().length >= 3) {
+                document.getElementById("searchform").submit();
+            }
         }
     </script>
 @endsection
