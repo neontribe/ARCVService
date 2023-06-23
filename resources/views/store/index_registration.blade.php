@@ -31,8 +31,8 @@
                                 <i id="fuzzy-search-icon" class="fa fa-dot-circle-o" aria-hidden="true"></i>
                             </button>
                             <div class="fuzzy-search-content" id="fuzzy-search-content">
-                                <a href="#" onClick="setExactSearch()">Exact</a>
-                                <a href="#" onClick="setFuzzySearch()">Fuzzy</a>
+                                <a href="#" id="fuzzy-search-exact" class="fuzzy-text-on" onClick="setExactSearch()">Exact</a>
+                                <a href="#" id="fuzzy-search-fuzzy" onClick="setFuzzySearch()">Fuzzy</a>
                             </div>
                         </div>
                     </div>
@@ -133,12 +133,16 @@
         function setExactSearch() {
             console.log("setExactSearch");
             $("input[name='fuzzy']").val(0);
+            document.getElementById("fuzzy-search-exact").classList.add("fuzzy-text-on");
+            document.getElementById("fuzzy-search-fuzzy").classList.remove("fuzzy-text-on");
             document.getElementById("fuzzy-search-icon").classList.remove("fuzzy-on");
         }
 
         function setFuzzySearch() {
             console.log("setFuzzySearch");
             $("input[name='fuzzy']").val(1);
+            document.getElementById("fuzzy-search-exact").classList.remove("fuzzy-text-on");
+            document.getElementById("fuzzy-search-fuzzy").classList.add("fuzzy-text-on");
             document.getElementById("fuzzy-search-icon").classList.add("fuzzy-on");
         }
     </script>

@@ -1525,3 +1525,7 @@ ADD CHILD FORM PARTIAL
 .fuzzy-search:hover .fuzzy-search-content {
   display: block;
 }
+
+.fuzzy-text-on {
+    font-weight: bold;
+}
