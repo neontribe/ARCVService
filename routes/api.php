@@ -94,4 +94,9 @@ Route::group(['middleware' => 'auth:api'], function () {
         //->middleware('can:collect,App\Voucher');
         ;
 
+
+    Route::put('log', [
+        'as' => 'api.log',
+        'uses' => 'LoggingController@log',
+    ]);
 });
