@@ -20,6 +20,46 @@ ARCV Service is the service portal and API for ARCV Market.
 
 We suggest that you use the TLD `.test` as others, like `.app` may now be in the public domain and you will experience difficulty with respect to browser behavior over HTTP/HTTPS.
 
+## Versioning, branching and tags
+
+Use [semver](https://semver.org/) for versioning. Each sprint is considered a minor release until the customer asks for a major, non backwardly compatible re-write.
+
+### Sprint development
+
+ * Find the trello card and grab the URL, e.g. `https://trello.com/c/P5aKkOWJ/2056-market-roll-up-repo`
+ * Create a branch off develop that uses the ticket number and title, e.g. `dev/2056-market-roll-up-repo`
+ * Work on the ticket
+ * Raise a PR into develop
+ * Merge and delete branch
+
+### Create a Release candidate
+
+ * Tag develop with the incremented release number, e.g. `git checkout develop && git tag v1.16.0-rc.1`
+ * Push the tag, `git push --tags`
+ * Release to staging
+
+### Creating a Release
+
+ * Merge `develop` into `main`
+ * Tag main with a release, e.g. `git checkout main && git tag v1.16.0`
+ * Push the tag, `git push --tags`
+ * Release to live
+
+### Hotfix
+
+ * Find the trello card and grab the URL, e.g. `https://trello.com/c/P5aKkOWJ/2099-HOTFIX-something-is-broken`
+ * Create a branch off main that uses the ticket number and title, e.g. `hotfix/2099-HOTFIX-something-is-broken`
+ * Work on the ticket
+ * Raise a PR into develop
+ * Merge and delete branch
+ * Once testing is passed create a release with an incremented patch number e.g. `git checkout develop && git tag v1.16.1`
+ * Release to staging
+ * Test on staging
+ * Merge `develop` into `main`, the tag points at a commit so the tag is now pointing to `HEAD` on main
+ * Release to live
+
+
+
 ## Docker
 
 There is a self building docker file in the root of the repo. Full docker instruction are [here](DOCKER.md). Environment variables that can be ovverriden can be found in the [Dockerfile](Dockerfile). 
@@ -76,11 +116,12 @@ It also requires PHP's `zip` extension installed and enabled.
 
 ## Deployment
 
-1. `./makedeploy.sh ARCVService_v<x.y.z>(-[beta|RC]X)`
-2. copy the tgz file up to the server
-3. login and move to the correct folder
-4. `./deploy-service ARCVService_v<x.y.z>(-[beta|RC]X).tgz service_v<x.y.z>(-[beta|RC]X)`
-5. update the `.env` file
+1. checkout the release tag, `git checkout v<x.y.z>`
+2. `./makedeploy.sh ARCVService_v<x.y.z>(-[beta|RC]X)`
+3. copy the tgz file up to the server
+4. login and move to the correct folder
+5. `./deploy-service ARCVService_v<x.y.z>(-[beta|RC]X).tgz service_v<x.y.z>(-[beta|RC]X)`
+6. update the `.env` file
 
 # Copyright
 This project was developed by :
