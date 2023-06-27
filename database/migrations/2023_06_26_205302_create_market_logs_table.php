@@ -21,8 +21,7 @@ return new class extends Migration
             $table->string('created');
             $table->longtext('data');
             $table->string('hash');
-            $table->integer('trader')->unsigned()->index();
-            $table->foreign('trader')->references('id')->on('traders')->onDelete('cascade');
+            $table->integer('trader_id');
         });
     }
 

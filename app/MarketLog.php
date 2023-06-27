@@ -25,6 +25,7 @@ class MarketLog extends Model
         "created",
         "data",
         "hash",
+        "trader_id",
     ];
 
     /**
@@ -52,14 +53,4 @@ class MarketLog extends Model
     public static $rules = [
         'status' => ['numeric'],
     ];
-
-    /**
-     * Get the traders this market has.
-     *
-     * @return HasOne
-     */
-    public function trader()
-    {
-        return $this->hasOne(Trader::class);
-    }
 }
