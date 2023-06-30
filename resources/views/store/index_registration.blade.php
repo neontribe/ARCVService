@@ -151,6 +151,7 @@
             document.getElementById("fuzzy-search-exact").classList.add("fuzzy-text-on");
             document.getElementById("fuzzy-search-fuzzy").classList.remove("fuzzy-text-on");
             document.getElementById("fuzzy-search-icon").classList.remove("fuzzy-on");
+            submitSearchForm();
         }
 
         function setFuzzySearch() {
@@ -158,6 +159,7 @@
             document.getElementById("fuzzy-search-exact").classList.remove("fuzzy-text-on");
             document.getElementById("fuzzy-search-fuzzy").classList.add("fuzzy-text-on");
             document.getElementById("fuzzy-search-icon").classList.add("fuzzy-on");
+            submitSearchForm();
         }
 
         function submitSearchForm() {
