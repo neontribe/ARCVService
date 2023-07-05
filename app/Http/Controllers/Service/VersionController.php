@@ -12,7 +12,7 @@ class VersionController extends Controller
     {
         $version = "unknown";
         if (file_exists(base_path("version.txt"))) {
-            $version = file_get_contents("version.txt");
+            $version = trim(file_get_contents(base_path("version.txt")));
         } else {
             /** @noinspection PhpComposerExtensionStubsInspection */
             $pkg = json_decode(file_get_contents(base_path('composer.json')), false);
