@@ -25,6 +25,16 @@ class StoreUpdateSessionRequest extends FormRequest
     public function rules()
     {
         /*
+         * A bit hacky but when we send 'all' to the SessionController we want to blank
+         * the session value for CentreUserCurrentCentreId and the role below was blocking
+         * this as it only permits existing centre ids
+         */
+        $input = $this->all(['centre']);
+        if ($input["centre"]) {
+            return [];
+        }
+
+        /*
          * These rules validate that the form data is well-formed.
          * It is NOT responsible for the context validation of that data.
          */
