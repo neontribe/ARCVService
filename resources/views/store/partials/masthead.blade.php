@@ -29,6 +29,7 @@
                             {!! method_field('put') !!}
                             {!! csrf_field() !!}
                             <select name="centre" onchange="document.centreUserForm.submit()">
+                                <option value="all">All centres</option>
                                 @foreach (Auth::user()->centres as $centre)
                                     <option
                                             value="{{ $centre->id }}"

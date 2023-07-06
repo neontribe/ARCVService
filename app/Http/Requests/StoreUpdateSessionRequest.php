@@ -11,7 +11,7 @@ class StoreUpdateSessionRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         // Route group ath:store should be sufficient guard.
         return true;
@@ -22,16 +22,24 @@ class StoreUpdateSessionRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
+        /*
+         * A bit hacky but when we send 'all' to the SessionController we want to blank
+         * the session value for CentreUserCurrentCentreId and the role below was blocking
+         * this as it only permits existing centre ids
+         */
+        $input = $this->all(['centre']);
+        if ($input["centre"] === "all") {
+            return [];
+        }
+
         /*
          * These rules validate that the form data is well-formed.
          * It is NOT responsible for the context validation of that data.
          */
-        $rules = [
+        return [
             'centre' => 'integer|exists:centres,id'
         ];
-
-        return $rules;
     }
 }
