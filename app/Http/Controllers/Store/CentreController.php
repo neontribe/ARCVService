@@ -321,13 +321,18 @@ class CentreController extends Controller
             $bActiveDate = ($b['Last Collection'])
                 ? Carbon::createFromFormat($dateFormats['lastCollection'], $b['Last Collection'])
                 : Carbon::parse('1970-01-01');
-
+            if (!isset($a['Centre'])) {
+                $a['Centre'] = '';
+            }
             $hashA = strtolower(
                 $a['Area'] . '#' .
                 $a['Centre'] . '#' .
                 $aActiveDate->toDateString() . '#' .
                 $a['Primary Carer']
             );
+            if (!isset($b['Centre'])) {
+                $b['Centre'] = '';
+            }
             $hashB = strtolower(
                 $b['Area'] . '#' .
                 $b['Centre'] . '#' .
