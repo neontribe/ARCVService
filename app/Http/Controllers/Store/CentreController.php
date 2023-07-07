@@ -321,21 +321,21 @@ class CentreController extends Controller
             $bActiveDate = ($b['Last Collection'])
                 ? Carbon::createFromFormat($dateFormats['lastCollection'], $b['Last Collection'])
                 : Carbon::parse('1970-01-01');
-            if (!isset($a['Centre'])) {
-                $a['Centre'] = '';
+            if (!isset($a['Distribution Centre'])) {
+                $a['Distribution Centre'] = '';
             }
             $hashA = strtolower(
                 $a['Area'] . '#' .
-                $a['Centre'] . '#' .
+                $a['Distribution Centre'] . '#' .
                 $aActiveDate->toDateString() . '#' .
                 $a['Primary Carer']
             );
-            if (!isset($b['Centre'])) {
-                $b['Centre'] = '';
+            if (!isset($b['Distribution Centre'])) {
+                $b['Distribution Centre'] = '';
             }
             $hashB = strtolower(
                 $b['Area'] . '#' .
-                $b['Centre'] . '#' .
+                $b['Distribution Centre'] . '#' .
                 $bActiveDate->toDateString() . '#' .
                 $b['Primary Carer']
             );
@@ -529,15 +529,21 @@ class CentreController extends Controller
                 ? Carbon::createFromFormat($dateFormats['lastCollection'], $b['Last Collection'])
                 : Carbon::parse('1970-01-01');
 
+            if (!isset($a['Distribution Centre'])) {
+                $a['Distribution Centre'] = '';
+            }
             $hashA = strtolower(
                 $a['Area'] . '#' .
-                $a['Centre'] . '#' .
+                $a['Distribution Centre'] . '#' .
                 $aActiveDate->toDateString() . '#' .
                 $a['Main Participant']
             );
+            if (!isset($b['Distribution Centre'])) {
+                $b['Distribution Centre'] = '';
+            }
             $hashB = strtolower(
                 $b['Area'] . '#' .
-                $b['Centre'] . '#' .
+                $b['Distribution Centre'] . '#' .
                 $bActiveDate->toDateString() . '#' .
                 $b['Main Participant']
             );
