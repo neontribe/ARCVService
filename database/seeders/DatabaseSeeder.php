@@ -44,6 +44,7 @@ class DatabaseSeeder extends Seeder
         $this->call(BundleSeeder::class);
         $this->call(DeliverySeeder::class);
         $this->call(TestActiveUsersSeeder::class);
+        // $this->call(LargeVouchersSeeder::class);
     }
 
     /**
