@@ -110,11 +110,6 @@ return [
      */
 
     'ethnicity_desc' => [
-        'MLAM' => 'Mixed - Latin American',
-        'MWAS' => 'Mixed - White and Asian',
-        'MWBA' => 'Mixed - White and Black African',
-        'MWBC' => 'Mixed - White and Black Caribbean',
-        'MOTH' => 'Mixed - Any other Mixed/Multiple background',
         'AAFG' => 'Asian/Asian British - Afghani',
         'ABAN' => 'Asian/Asian British - Bangladeshi',
         'ACHN' => 'Asian/Asian British - Chinese',
@@ -126,6 +121,11 @@ return [
         'BMOR' => 'Black/Black British - Moroccan',
         'BSOM' => 'Black/Black British - Somalian',
         'BOTH' => 'Black/Black British - Any other Black/British background',
+        'MLAM' => 'Mixed - Latin American',
+        'MWAS' => 'Mixed - White and Asian',
+        'MWBA' => 'Mixed - White and Black African',
+        'MWBC' => 'Mixed - White and Black Caribbean',
+        'MOTH' => 'Mixed - Any other Mixed/Multiple background',
         'OARA' => 'Other ethnic group - Arab',
         'OSYR' => 'Other ethnic group - Syrian',
         'OTUR' => 'Other ethnic group - Turkish',
