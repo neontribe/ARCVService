@@ -71,10 +71,8 @@ class RegistrationController extends Controller
         $fuzzy = $request->get('fuzzy');
         \Log::info("F/E " . $fuzzy);
         if ($fuzzy) {
-            \Log::info("FUZZY");
             $filtered_family_ids = $this->fuzzySearch($family_name, $pri_carers);
         } else {
-            \Log::info("EXACT");
             $filtered_family_ids = $this->exactSearch($family_name, $pri_carers);
         }
 
