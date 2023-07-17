@@ -30,6 +30,8 @@ Use [semver](https://semver.org/) for versioning. Each sprint is considered a mi
  * Create a branch off develop that uses the ticket number and title, e.g. `dev/2056-market-roll-up-repo`
  * Work on the ticket
  * Raise a PR into develop
+ * Add a link to the PR into the Trello card
+ * Wait for at least one approval on the PR
  * Merge and delete branch
 
 ### Create a Release candidate
@@ -51,6 +53,8 @@ Use [semver](https://semver.org/) for versioning. Each sprint is considered a mi
  * Create a branch off main that uses the ticket number and title, e.g. `hotfix/2099-HOTFIX-something-is-broken`
  * Work on the ticket
  * Raise a PR into develop
+ * Add a link to the PR into the Trello card
+ * Wait for at least one approval on the PR
  * Merge and delete branch
  * Once testing is passed create a release with an incremented patch number e.g. `git checkout develop && git tag v1.16.1`
  * Release to staging
@@ -62,7 +66,7 @@ Use [semver](https://semver.org/) for versioning. Each sprint is considered a mi
 
 ## Docker
 
-There is a self building docker file in the root of the repo. Full docker instruction are [here](DOCKER.md). Environment variables that can be ovverriden can be found in the [Dockerfile](Dockerfile). 
+There is a self building docker file in the root of the repo. Full docker instruction are [here](DOCKER.md). Environment variables that can be ovverriden can be found in the [Dockerfile](Dockerfile).
 
 ### Quick start
 
