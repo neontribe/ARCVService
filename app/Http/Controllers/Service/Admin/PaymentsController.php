@@ -99,6 +99,10 @@ class PaymentsController extends Controller
                 $trader = $voucherState->voucher->trader;
                 //These are the main headers; check once and then take that going forward
                 $currentTokenResults['traderName'] ??= $trader->name;
+                if (empty($currentTokenResults['traderName'])) {
+                    \Log::warning("Bad voucher trader name: ", json_encode($voucherStates));
+                    continue;
+                }
                 $currentTokenResults['marketName'] ??= $trader->market->name;
                 $currentTokenResults['area'] ??= $trader->market->sponsor->name;
 
@@ -109,6 +113,20 @@ class PaymentsController extends Controller
                     : 1;
                 $currentTokenResults['voucherAreas'] = $areaList;
             }
+            foreach ($pendingResults as $index => $result) {
+                if (
+                    empty($result['requestedBy']) ||
+                    empty($result['vouchersTotal']) ||
+                    empty($result['traderName']) ||
+                    empty($result['marketName']) ||
+                    empty($result['area']) ||
+                    empty($result['voucherAreas'])
+                ) {
+                    \Log::error("Bad pending results at index " . $index . " - " . json_encode($result));
+                    unset($pendingResults[$index]);
+                }
+            }
+
             // chuck that in the results array.
             $pendingResults[$stateToken->uuid] = $currentTokenResults;
         }
