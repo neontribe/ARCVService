@@ -122,6 +122,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Mandrill Transport Definition
+    |--------------------------------------------------------------------------
+    |
+    | When using the Mandrill API to send e-mails using the Symfony Transport, we
+    | need to tell the Mandrill Mail Provider to utilize this transport
+    |
+    */
+
+    'mandrill' => [
+        'transport' => 'mandrill',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Markdown Mail Settings
     |--------------------------------------------------------------------------
     |
