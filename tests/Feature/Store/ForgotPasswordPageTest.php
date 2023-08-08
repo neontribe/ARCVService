@@ -90,10 +90,7 @@ class ForgotPasswordPageTest extends StoreTestCase
         $headers = ['Referer' => 'www.google.com'];
 
         // Post, emulate clicking form button.
-        $this->post(route('store.password.email'), $post_data, $headers);
-
-        // Expecting to *not* be at google.
-        $this->dontSee('www.google.com')
-            ->see('/password/reset');
+        $this->post(route('store.password.email'), $post_data, $headers)->followRedirects();
+        $this->seeRouteIs('store.password.request');
     }
 }
