@@ -17,12 +17,11 @@
     "ext-pdo": "*",
     "ext-sodium": "*",
     "ext-zip": "*",
-    "werk365/etagconditionals": "1.4.2",
     "barryvdh/laravel-debugbar": "^v3.8.1",
     "barryvdh/laravel-dompdf": "2.0.1",
     "doctrine/dbal": "3.6.3",
     "fakerphp/faker": "^1.21.0",
-    "highsolutions/laravel-searchy" : "^9.0",
+    "highsolutions/laravel-searchy": "^9.0",
     "imtigger/laravel-job-status": "^1.2",
     "laravel/framework": "^9.52.5",
     "laravel/helpers": "^1.6.0",
@@ -36,9 +35,11 @@
     "sebdesign/laravel-state-machine": "3.4.1",
     "symfony/console": "6.3.0",
     "symfony/event-dispatcher": "6.3.0",
+    "symfony/http-client": "^6.3",
     "symfony/lock": "^6.2.8",
     "symfony/mailchimp-mailer": "^6.2.7",
-    "usmanhalalit/laracsv": "^2.1.0"
+    "usmanhalalit/laracsv": "^2.1.0",
+    "werk365/etagconditionals": "1.4.2"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^2.13.0",

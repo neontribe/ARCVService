@@ -14,7 +14,7 @@ class MandrillMailProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register() : void
     {
         //
     }
@@ -24,15 +24,16 @@ class MandrillMailProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot() : void
     {
-        Mail::extend('mandrill', function () {
-        return (new MandrillTransportFactory)->create(
-            new Dsn(
-                'mandrill+api',
-                'default',
-                config('services.mandrill.key')
-            ));
+        Mail::extend('mandrill', static function () {
+            return (new MandrillTransportFactory)->create(
+                new Dsn(
+                    'mandrill+api', // give me the mandrill api transport
+                    'default',
+                    config('services.mandrill.key') // "user"
+                )
+            );
         });
     }
 }
