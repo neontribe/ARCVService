@@ -6,6 +6,7 @@ use DateTime;
 use DB;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Log;
 use PDO;
@@ -78,7 +79,7 @@ class CreateMasterVoucherLogReport extends Command
      * The date that we care about for last year's data.
      * @var string $cutOffDate
      */
-    private string $cutOffDate = '2021-04-01';
+    private string $cutOffDate;
 
     /**
      * @var ZipStream $za;
@@ -204,6 +205,10 @@ EOD;
      */
     public function initSettings() : void
     {
+        $thisYearsApril = Carbon::parse('april')->startOfMonth();
+        $years = ($thisYearsApril->isPast()) ? 2 : 1;
+        $this->cutOffDate = $thisYearsApril->subYearsNoOverflow($years)->format('Y-m-d');
+
         // Set the disk
         $this->disk = ($this->option('plain'))
             ? 'local'
