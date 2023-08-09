@@ -423,30 +423,37 @@ EOD;
      */
     public function writeMultiPartMVL($rows) : void
     {
-        // Create and write a sheet for first half of data.
-        $fileHandleAll = fopen('php://temp', 'r+');
-        fputcsv($fileHandleAll, $this->headers);
+        // set some loop controls
+        $nextFile = true;
+        $fileNum = 1;
+
+        // go over each row
         foreach ($rows as $index => $row) {
-            if ($index <= count($rows) / 2) {
-                fputcsv($fileHandleAll, $row);
+            // do we need to open a new file?
+            if ($nextFile || !isset($fileHandleAll)) {
+                // start a new file and make some headers
+                $fileHandleAll = fopen('php://temp', 'r+');
+                fputcsv($fileHandleAll, $this->headers);
+            }
+
+            // add lines to the file
+            fputcsv($fileHandleAll, $row);
+
+            // calculate the file number
+            $calcFileNum =  1 + intdiv($index, self::ROW_LIMIT);
+
+            // has it increased?
+            $nextFile = ($calcFileNum > $fileNum);
+
+            if ($nextFile) {
+                // stash and close this file
+                rewind($fileHandleAll);
+                $this->writeOutput('PART'. $fileNum, stream_get_contents($fileHandleAll));
+                fclose($fileHandleAll);
+                // update the fileNum
+                $fileNum = $calcFileNum;
             }
         }
-
-        rewind($fileHandleAll);
-        $this->writeOutput('PART1', stream_get_contents($fileHandleAll));
-        fclose($fileHandleAll);
-
-        // Create and write a sheet for second half of data.
-        $fileHandleAll = fopen('php://temp', 'r+');
-        fputcsv($fileHandleAll, $this->headers);
-        foreach ($rows as $index => $row) {
-            if ($index > count($rows) / 2) {
-                fputcsv($fileHandleAll, $row);
-            }
-        }
-        rewind($fileHandleAll);
-        $this->writeOutput('PART2', stream_get_contents($fileHandleAll));
-        fclose($fileHandleAll);
     }
 
     /**
@@ -479,5 +486,3 @@ EOD;
         }
     }
 }
-
-
