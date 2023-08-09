@@ -431,6 +431,7 @@ EOD;
         // set some loop controls
         $nextFile = true;
         $fileNum = 1;
+        $last_key = array_key_last($rows);
 
         // go over each row
         foreach ($rows as $index => $row) {
@@ -450,7 +451,7 @@ EOD;
             // has it increased?
             $nextFile = ($calcFileNum > $fileNum);
 
-            if ($nextFile) {
+            if ($nextFile || $last_key === $index) {
                 // stash and close this file
                 rewind($fileHandleAll);
                 $this->writeOutput('PART'. $fileNum, stream_get_contents($fileHandleAll));
