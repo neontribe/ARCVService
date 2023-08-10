@@ -16,13 +16,13 @@ class SponsorsSeeder extends Seeder
     {
         // create RVNT sponsor for tests
         // also used by 3MAY20-VC1-CH6-HAS-112019
-        $sponsor = factory(Sponsor::class)->create(['name' => "Real Virtual Project", "shortcode" =>"RVNT"]);
+        $sponsor = factory(Sponsor::class)->create(['name' => "Real Virtual Project", "shortcode" =>"RVNT", 'can_tap' => true]);
 
         $sponsor->evaluations()->saveMany($this->qualifyPrimarySchoolers());
         $sponsor->evaluations()->saveMany($this->veryfiesKids());
 
-        // And 5 default factory models to be able to mirror live data
-        factory(Sponsor::class, 5)->create();
+        // And 5 default factory models but change can_tap for testing purposes
+        factory(Sponsor::class, 5)->create(['can_tap' => true]);
 
         // Gets the SK rules (OLD SK SPONSOR RULES)
         // used by 2MAY20-VC1-CH2-HI-122018
@@ -59,7 +59,7 @@ class SponsorsSeeder extends Seeder
 
         // Create a Sponser that will have the Scottish evaluations applied
         // $scottishRulesSponser = factory(Sponsor::class)->create(['name' => "Scottish Rules Project", 'is_scotland' => 1]);
-        $scottishRulesSponser = factory(Sponsor::class)->create(['name' => "Scottish Rules Project"]);
+        $scottishRulesSponser = factory(Sponsor::class)->create(['name' => "Scottish Rules Project", 'can_tap' => true]);
         $scottishRulesSponser->evaluations()->saveMany($this->scottishFamilyOverrides());
         $scottishRulesSponser->evaluations()->saveMany($this->veryfiesKids());
 
@@ -67,7 +67,8 @@ class SponsorsSeeder extends Seeder
         $socialPrescribingCentre = factory(Sponsor::class)->create([
             'name' => "Social Prescribing Area",
             'shortcode' => "SPA",
-            'programme' => 1 // should be the SP area!
+            'programme' => 1, // should be the SP area!
+            'can_tap' => true
         ]);
         $socialPrescribingCentre->evaluations()->saveMany($this->socialPrescribingOverrides());
 
@@ -75,7 +76,8 @@ class SponsorsSeeder extends Seeder
 		$towerHamletSPcentre = factory(Sponsor::class)->create([
 			'name' => "Tower Hamlet Social Prescribing",
 			'shortcode' => "THA",
-			'programme' => 1 // should be the SP area!
+			'programme' => 1, // should be the SP area!
+            'can_tap' => true
 		]);
 		$towerHamletSPcentre->evaluations()->saveMany($this->towerHamletSocialPrescribingOverrides());
 
@@ -83,7 +85,8 @@ class SponsorsSeeder extends Seeder
 		$lambethSPcentre = factory(Sponsor::class)->create([
 			'name' => "Lambeth Social Prescribing",
 			'shortcode' => "LSP",
-			'programme' => 1 // should be the SP area!
+			'programme' => 1, // should be the SP area!
+            'can_tap' => true
 		]);
 		$lambethSPcentre->evaluations()->saveMany($this->lambethSocialPrescribingOverrides());
     }
