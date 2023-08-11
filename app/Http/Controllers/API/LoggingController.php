@@ -20,7 +20,7 @@ class LoggingController extends Controller
         try {
             $json = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            Log::error("Unable to process content as JSON:" . $e->getMessage());
+            Log::error('Unable to process content as JSON:' . $e->getMessage());
             return response()->json([]);
         }
 
@@ -30,9 +30,9 @@ class LoggingController extends Controller
                 // write to DB
                 $marketLog = new MarketLog();
                 $marketLog->hash = $hash;
-                $marketLog->url = $item["config"]["url"] ?? '';
-                $marketLog->status = $item["status"] ?? '';
-                $marketLog->created = $item['created'] ?? '';
+                $marketLog->url = $item['config']['url'] ?? '';
+                $marketLog->status = $item["status"] ?? -1;
+                $marketLog->created = $item['created'] ?? '' ;
                 $marketLog->data = json_encode($item);
                 $marketLog->trader_id = $item['trader'] ?? -1;
                 $marketLog->save();
