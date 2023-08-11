@@ -31,7 +31,7 @@ class LoggingController extends Controller
                 $marketLog = new MarketLog();
                 $marketLog->hash = $hash;
                 $marketLog->url = $item['config']['url'] ?? '';
-                $marketLog->status = $item["status"] ?? -1;
+                $marketLog->status = $item['status'] ?? -1;
                 $marketLog->created = $item['created'] ?? '' ;
                 $marketLog->data = json_encode($item);
                 $marketLog->trader_id = $item['trader'] ?? -1;
