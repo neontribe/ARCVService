@@ -28,7 +28,7 @@ class SponsorModelTest extends TestCase
         $this->assertInstanceOf(Sponsor::class, $s);
         $this->assertIsString($s->name);
         $this->assertIsString($s->shortcode);
-        $this->assertTrue($s->can_tap);
+        $this->assertFalse($s->can_tap);
         $this->assertIsInt($s->programme);
     }
 
