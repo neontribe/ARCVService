@@ -103,11 +103,13 @@ class TraderController extends Controller
     {
         // get days we pended on as a LengthAwarePaginator data array.
         $pgSubDates = DB::table(static function ($query) use ($trader) {
-                $query->selectRaw("SUBSTR(`voucher_states`.`created_at`, 1, 10) as pendedOn")
+            $threeMonthsAgo = Carbon::now()->subDays(90);
+            $query->selectRaw("SUBSTR(`voucher_states`.`created_at`, 1, 10) as pendedOn")
                     ->from('vouchers')
                     // use inner join
                     ->join('voucher_states', 'vouchers.id', 'voucher_states.voucher_id')
                     ->where('voucher_states.to', 'payment_pending')
+                    ->where('voucher_states.created_at', '>=',$threeMonthsAgo->format('Y-m-d'))
                     ->where('vouchers.trader_id', $trader->id)
                     // cut down the recorded
                     ->where('vouchers.currentstate', '!=', 'recorded')

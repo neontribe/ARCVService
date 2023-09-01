@@ -62,10 +62,7 @@ class StorePasswordResetNotification extends Notification
             ->line('You are receiving this email because we received a password reset request for your account on the Rosie Children\'s Centre service.')
             ->action(
                 'Reset Password',
-                ('http://'
-                    . config('arc.store_domain')
-                    . route('store.password.reset', $this->token, false)
-                )
+                route('store.password.reset', $this->token, true)
             )
             ->line('If you did not request a password reset, no further action is required.');
     }

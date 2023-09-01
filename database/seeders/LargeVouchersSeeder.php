@@ -49,7 +49,8 @@ class LargeVouchersSeeder extends Seeder
 
         // Get Brian Bloom, our designated user for a lot of vouchers
         $largeUser = User::where('name', 'Brian Bloom')->first();
-        $date = Carbon::now()->subMonths(3);
+        // 2 submonths a 3 could push it outside the 90 day history filter
+        $date = Carbon::now()->subMonths(2);
         // Create 1000 vouchers so Brian Bloom can request payment for them all at once
         $recordedVouchers = factory(Voucher::class, 1000)->state('printed')->create([
             'trader_id' => $largeUser->traders[0]->id,

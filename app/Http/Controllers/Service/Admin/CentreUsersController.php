@@ -252,7 +252,7 @@ class CentreUsersController extends Controller
     }
 
     /**
-     * Handle deleting a centre user - change email and name to allow them to be re-added
+     * Handle deleting a centre user
 	 * later if needed
      * @param int $id
      * @return RedirectResponse
@@ -260,10 +260,8 @@ class CentreUsersController extends Controller
     public function delete(int $id): RedirectResponse
     {
         $centreUser = CentreUser::findOrFail($id);
-        $centreUser->name = 'DELETED' . $centreUser->name;
-        $centreUser->email = 'DELETED' . $centreUser->email;
-        $centreUser->deleted_at = Carbon::now()->format('Ymd-His');
-        $centreUser->save();
+        $centreUser->centre->centreUsers()->detach($id);
+        $centreUser->delete();
         return redirect()->route('admin.centreusers.index')
             ->with('message', 'Worker ' . $centreUser->name . ' deleted');
     }

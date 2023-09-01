@@ -66,7 +66,7 @@ Use [semver](https://semver.org/) for versioning. Each sprint is considered a mi
 
 ## Docker
 
-There is a self building docker file in the root of the repo. Full docker instruction are [here](DOCKER.md). Environment variables that can be ovverriden can be found in the [Dockerfile](Dockerfile).
+There is a self building docker file in the root of the repo. Full docker instruction are [here](DOCKER.md). Environment variables that can be ovverriden can be found in the [Dockerfile](Dockerfile). 
 
 ### Quick start
 
