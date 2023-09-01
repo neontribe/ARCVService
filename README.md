@@ -63,27 +63,6 @@ Use [semver](https://semver.org/) for versioning. Each sprint is considered a mi
  * Release to live
 
 
-
-## Docker
-
-There is a self building docker file in the root of the repo. Full docker instruction are [here](DOCKER.md). Environment variables that can be ovverriden can be found in the [Dockerfile](Dockerfile). 
-
-### Quick start
-
-To start a dev instance on port 8000 run:
-
-    echo "127.0.0.1   arcv-service.test arcv-store.test sqldb" | sudo tee -a /etc/hosts
-    docker compose up
-
-If that fails it is because the docker guys changed the invocation method, try:
-
-    docker-compose up
-
- * Arc service is now available at http://arcv-service.test:8000/login
- * Mysql is available at ``mysql -ulamp -plamp -h127.0.0.1 -P3336 lamp`
- * Phpmyadmin is available at [http://arcv-service.test:8880/login](http://arcv-service.test:8800/index.php?route=/database/structure&db=lamp)
- * Mail catcher is available at http://arcv-service.test:1080/
-
 ## Setting up reporting
 
 This project can run reports at set times using the Artisan scheduler. This requires some means of periodic triggering. Add to crontab the following:
@@ -100,7 +79,7 @@ where
 
 It also requires PHP's `zip` extension installed and enabled.
 
-### To use the Reset data buttton on the dashboard:
+### To use the Reset data button on the dashboard:
  - chown `env` to the console user and web user group e.g. `chown neontribe:www-data .env`
  - And `chmod 775 .env`
 
@@ -114,7 +93,9 @@ It also requires PHP's `zip` extension installed and enabled.
 - Service styling is in `resources/assets/sass/app.scss`
 - When amending the styles in development, switching to a new branch or pulling code, run `yarn watch` to watch for changes
 - Service is compiled from Sass with `yarn prod`
+- 
 #### Store
+
 - Store styling is in `public/store/css/main.css`
 - Run `yarn dev` to make sure packages Store shares with Service have been included.
 
