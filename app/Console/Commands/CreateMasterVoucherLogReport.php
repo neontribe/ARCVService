@@ -24,6 +24,8 @@ class CreateMasterVoucherLogReport extends Command
                             {--force : Execute without confirmation, eg for automation}
                             {--no-zip : Don\'t wrap files in a single archive}
                             {--plain : Don\'t encrypt contents of files}
+                            {--date-from=all : The start date for this report, default=all records}
+                            {--date-to=now : The end date for this report, default=today}
                             ';
 
     /**
@@ -191,6 +193,41 @@ EOD;
      */
     public function handle()
     {
+        $dateFrom = $this->option('date-from');
+        $dateTo = $this->option('date-to');
+
+        if ($dateFrom != "all") {
+            $dateFrom = date('Y-m-d', strtotime($dateFrom));
+        } else {
+            $dateFrom = "1970-01-01";
+        }
+
+        if ($dateTo == "now") {
+            $dateTo = date('Y-m-d');
+        } else {
+            $dateTo = date('Y-m-d', strtotime($dateTo));
+        }
+
+        if ($dateTo == "1970-01-01") {
+            $this->error('Unable to parse to date: ' . $this->option('date-to'));
+            return 1;
+        } elseif ($dateFrom == "1970-01-01") {
+            $this->error('Unable to parse to date: ' . $this->option('date-from'));
+            return 2;
+        }
+
+        if ($dateFrom > $dateTo) {
+            $this->info('Looks like the from/to dates are reversed, swapping them.');
+            $d = $dateTo;
+            $dateTo = $dateFrom;
+            $dateFrom = $d;
+        }
+
+        $timeTo = strtotime($dateTo);
+        $timeFrom = strtotime($dateFrom);
+
+        $this->info(sprintf("Searching for records from %s to %s", $dateFrom, $dateTo));
+
         // Assess permission to continue
         if ($this->option('force') || $this->warnUser()) {
             // We could run it once per sponsor; consider that if it becomes super-unwieldy.
@@ -202,6 +239,9 @@ EOD;
 
             $mem = memory_get_usage();
             Log::info("starting query, mem :" . $mem);
+
+            $included = 0;
+            $skipped = 0;
 
             while ($continue) {
                 $chunk = $this->execQuery($chunkSize, $chunkSize * $lookups);
@@ -220,13 +260,21 @@ EOD;
                         continue;
                     }
                     if (!is_null($voucher['Reimbursed Date'])) {
-                        $date = DateTime::createFromFormat('d/m/Y', $voucher['Reimbursed Date']);
-                        if (strtotime($date->format('Y-m-d')) < strtotime('2021-04-01')) {
+                        $date = strtotime(DateTime::createFromFormat('d/m/Y', $voucher['Reimbursed Date'])->format('Y-m-d'));
+                        $toOld = $date < $timeFrom;
+                        $toNew =  $date > $timeTo;
+//                        $this->info(sprintf("from %s, to %s, date %s", $dateFrom, $dateTo, $date->format('Y-m-d')));
+                        if ($toOld || $toNew) {
                             unset($chunk[$k]);
-                            continue;
+                            $skipped++;
+                        }
+                        else {
+                            $included++;
                         }
                     }
                 }
+
+                $this->info(sprintf("skipped %s, included %s", $skipped, $included));
 
                 $rows = array_merge($rows, $chunk);
                 $lookups++;
