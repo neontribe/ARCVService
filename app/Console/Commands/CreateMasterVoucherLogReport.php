@@ -217,10 +217,8 @@ EOD;
         }
 
         if ($dateFrom > $dateTo) {
-            $this->info('Looks like the from/to dates are reversed, swapping them.');
-            $d = $dateTo;
-            $dateTo = $dateFrom;
-            $dateFrom = $d;
+            $this->info('Looks like the from/to dates are reversed.');
+            return 3;
         }
 
         $timeTo = strtotime($dateTo);
