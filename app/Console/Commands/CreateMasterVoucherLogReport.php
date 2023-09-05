@@ -16,38 +16,38 @@ use ZipStream\ZipStream;
 
 class CreateMasterVoucherLogReport extends Command
 {
+    const ROW_LIMIT = 1000000;
     /**
      * The name and signature of the console command.
      *
      * @var string $signature
      */
     protected $signature = 'arc:createMVLReport
+                            {--progress : show progress}
                             {--force : Execute without confirmation, eg for automation}
                             {--no-zip : Don\'t wrap files in a single archive}
                             {--plain : Don\'t encrypt contents of files}
+                            {--date-from=all : The start date for this report, default=all records}
+                            {--date-to=now : The end date for this report, default=today}
                             ';
-
     /**
      * The console command description.
      *
      * @var string $description
      */
     protected $description = 'Creates, encrypts and stores the MVL report under in /storage';
-
     /**
      * The default disk we want.
      *
      * @var string $disk
      */
     private $disk;
-
     /**
      * The default archive name.
      *
      * @var string $archiveName
      */
     private $archiveName;
-
     /**
      * The sheet headers.
      *
@@ -74,23 +74,13 @@ class CreateMasterVoucherLogReport extends Command
         'Void Reason',
         'Date file was Downloaded',
     ];
-
     /**
-     * The date that we care about for last year's data.
-     * @var string $cutOffDate
-     */
-    private string $cutOffDate;
-
-    /**
-     * @var ZipStream $za;
+     * @var ZipStream $za ;
      */
     private ZipStream $za;
 
-    private $zaOutput;
-
     // Excel can't deal with large CSVs
-    const ROW_LIMIT = 1000000;
-
+    private $zaOutput;
     /**
      * The report's query template
      *
@@ -98,7 +88,7 @@ class CreateMasterVoucherLogReport extends Command
      *      This will eventually help with the fact we'll need to chunk data too.
      * @var string $report
      */
-    private $report = <<<EOD
+    private string $report = <<<EOD
 SELECT
   vouchers.code AS 'Voucher Number',
   voucher_sponsor.name AS 'Voucher Area',
@@ -142,7 +132,7 @@ FROM vouchers
     LEFT JOIN sponsors on markets.sponsor_id = sponsors.id
   ) AS markets_query
     ON markets_query.id = vouchers.trader_id
-  # Get fields relevant to voucher's delivery (Date, target centre and centre's area)
+  # Get fields relevant to voucher's delivery (Date, target centre and centres area)
   LEFT JOIN deliveries ON vouchers.delivery_id = deliveries.id
   LEFT JOIN
     centres AS delivery_centres
@@ -201,43 +191,46 @@ EOD;
     }
 
     /**
-     * @return void
-     */
-    public function initSettings() : void
-    {
-        $thisYearsApril = Carbon::parse('april')->startOfMonth();
-        $years = ($thisYearsApril->isPast()) ? 2 : 1;
-        $this->cutOffDate = $thisYearsApril->subYearsNoOverflow($years)->format('Y-m-d');
-
-        // Set the disk
-        $this->disk = ($this->option('plain'))
-            ? 'local'
-            : 'enc';
-
-        if (!$this->option('no-zip')) {
-            // Open the file for writing at the correct location
-            $path = Storage::path($this->disk) . '/' . $this->archiveName;
-
-            // Encrypt the output stream if the user hasn't asked for it to be plain.
-            if (!$this->option('plain')) {
-                $path = 'ssw://' . $path;
-            }
-
-            // Stream directly to what is either a file or a file wrapped in a secret stream.
-            $options = new Archive();
-            $this->zaOutput = fopen($path, 'w');
-            $options->setOutputStream($this->zaOutput);
-            $this->za = new ZipStream(null, $options);
-        }
-    }
-
-    /**
      * Execute the console command.
      *
      * @return mixed
      */
     public function handle()
     {
+        // Validate dates
+        $dateFrom = $this->option('date-from');
+        $dateTo = $this->option('date-to');
+        $progress = $this->option('progress');
+
+        if ($dateFrom != "all") {
+            if (!$this->validateDate($dateFrom)) {
+                $this->error('Unable to parse from date: ' . $this->option('date-from'));
+            }
+            $dateFrom = date('Y-m-d', strtotime($dateFrom));
+        } else {
+            $dateFrom = "1970-01-01";
+        }
+
+        if ($dateTo != "now") {
+            if (!$this->validateDate($dateTo)) {
+                $this->error('Unable to parse to date: ' . $this->option('date-to'));
+            }
+            $dateTo = date('Y-m-d', strtotime($dateTo));
+        } else {
+            $dateTo = date('Y-m-d');
+        }
+
+        if ($dateFrom > $dateTo) {
+            $this->info('Looks like the from/to dates are reversed.');
+            return 3;
+        }
+
+        $timeTo = strtotime($dateTo);
+        $timeFrom = strtotime($dateFrom);
+
+        $this->info(sprintf("Searching for records from %s to %s", $dateFrom, $dateTo));
+
+        // Set up export
         $this->initSettings();
 
         // Assess permission to continue
@@ -263,7 +256,7 @@ EOD;
                 // clean the vouchers in this chunk
                 // should be done is SQL
                 foreach ($chunk as $k => $voucher) {
-                    if ($this->rejectThisVoucher($voucher)) {
+                    if ($this->rejectThisVoucher($voucher, $timeFrom, $timeTo)) {
                         unset($chunk[$k]);
                     }
                 }
@@ -273,6 +266,9 @@ EOD;
                 /*  $rows = array_merge($rows, $chunk); */
 
                 $lookups++;
+                if ($progress) {
+                    $this->output->write('.', $lookups%80 === 0);
+                }
 
                 // clean memory
                 $chunk = null;
@@ -310,17 +306,54 @@ EOD;
         exit(0);
     }
 
+    function validateDate($date, $format = 'Y-m-d'): bool
+    {
+        $d = DateTime::createFromFormat($format, $date);
+        // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
+        return $d && $d->format($format) === $date;
+    }
+
+    /**
+     * @return void
+     */
+    public function initSettings(): void
+    {
+        $thisYearsApril = Carbon::parse('april')->startOfMonth();
+        $years = ($thisYearsApril->isPast()) ? 2 : 1;
+        $this->cutOffDate = $thisYearsApril->subYearsNoOverflow($years)->format('Y-m-d');
+
+        // Set the disk
+        $this->disk = ($this->option('plain'))
+            ? 'local'
+            : 'enc';
+
+        if (!$this->option('no-zip')) {
+            // Open the file for writing at the correct location
+            $path = Storage::path($this->disk) . '/' . $this->archiveName;
+
+            // Encrypt the output stream if the user hasn't asked for it to be plain.
+            if (!$this->option('plain')) {
+                $path = 'ssw://' . $path;
+            }
+
+            // Stream directly to what is either a file or a file wrapped in a secret stream.
+            $options = new Archive();
+            $this->zaOutput = fopen($path, 'w');
+            $options->setOutputStream($this->zaOutput);
+            $this->za = new ZipStream(null, $options);
+        }
+    }
+
     /**
      * Warn the user before they execute.
      *
      * @return bool
      */
-    public function warnUser() : bool
+    public function warnUser(): bool
     {
         $this->info('WARNING: This command will run a long, blocking query that will interrupt normal service use.');
         return $this->confirm('Do you wish to continue?');
     }
-
 
     /**
      * returns a query chunk
@@ -338,34 +371,31 @@ EOD;
     }
 
     /**
-     * Encrypts and stashes files.
-     *
-     * @param String $name
-     * @param String $csv
+     * This should be part of the query
+     * @param $voucher
      * @return bool
      */
-    public function writeOutput(string $name, string $csv) : bool
+    public function rejectThisVoucher($voucher, $timeFrom, $timeTo): bool
     {
-        try {
-            $filename = sprintf("%s.csv", preg_replace('/\s+/', '_', $name));
-
-            if (isset($this->za)) {
-                // Encryption, if enabled, is handled at the creation of our ZipStream. The stream is directed through
-                // an encrypted wrapper before it writes to the disk.
-                $this->za->addFile($filename, $csv);
-            } elseif ($this->option('plain')) {
-                Storage::disk($this->disk)->put($filename, $csv);
-            } else {
-                // TODO : Consider redesigning the CLI such that this is not even possible to express.
-                Log::error('Encrypted output is not supported with --no-zip, consider adding --plain if you\'re SURE you want to write this data to the disk unencrypted.');
-            }
-        } catch (Exception $e) {
-            // Could be Storage or LaravelExcelWriterException related
-            Log::error($e->getMessage());
-            Log::error(class_basename($this) . ": Failed to write file for '" . $csv->getTitle() . "'");
-            exit(1);
+        // exit early if we don't have a Reimbursed Date
+        if (is_null($voucher['Reimbursed Date'])) {
+            return false;
         }
-        return true;
+        $reimbursedDate = strtotime(
+            DateTime::createFromFormat(
+                'd/m/Y',
+                $voucher['Reimbursed Date']
+            )->format('Y-m-d')
+        );
+
+        // return true, if any of these are true
+        return
+            // are all the fields we care about null?
+            $this->containsOnlyNull($voucher) ||
+            // is this date filled?
+            !is_null($voucher['Void Voucher Date']) ||
+            // is this date dilled *and* less than the cut-off date
+            $reimbursedDate < $timeFrom || $reimbursedDate > $timeTo;
     }
 
     /**
@@ -394,39 +424,15 @@ EOD;
                 return false;
             }
         }
-        // if we get to the end and it's all nulls
+        // if we get to the end, and it's all nulls
         return true;
-    }
-
-    /**
-     * This should be part of the query
-     * @param $voucher
-     * @return bool
-     */
-    public function rejectThisVoucher($voucher) : bool
-    {
-        // return true, if any of these are true
-        return
-            // are all the fields we care about null?
-            $this->containsOnlyNull($voucher) ||
-            // is this date filled?
-            !is_null($voucher['Void Voucher Date']) ||
-            // is this date dilled *and* less than the cut-off date
-            (!is_null($voucher['Reimbursed Date']) &&
-                strtotime(
-                    DateTime::createFromFormat(
-                        'd/m/Y',
-                        $voucher['Reimbursed Date']
-                    )->format('Y-m-d')
-                ) < strtotime($this->cutOffDate)
-            );
     }
 
     /**
      * @param $rows
      * @return void
      */
-    public function writeMultiPartMVL($rows) : void
+    public function writeMultiPartMVL($rows): void
     {
         // set some loop controls
         $nextFile = true;
@@ -446,7 +452,7 @@ EOD;
             fputcsv($fileHandleAll, $row);
 
             // calculate the file number
-            $calcFileNum =  1 + intdiv($index, self::ROW_LIMIT);
+            $calcFileNum = 1 + intdiv($index, self::ROW_LIMIT);
 
             // has it increased?
             $nextFile = ($calcFileNum > $fileNum);
@@ -454,7 +460,7 @@ EOD;
             if ($nextFile || $last_key === $index) {
                 // stash and close this file
                 rewind($fileHandleAll);
-                $this->writeOutput('PART'. $fileNum, stream_get_contents($fileHandleAll));
+                $this->writeOutput('PART' . $fileNum, stream_get_contents($fileHandleAll));
                 fclose($fileHandleAll);
                 // update the fileNum
                 $fileNum = $calcFileNum;
@@ -463,10 +469,41 @@ EOD;
     }
 
     /**
+     * Encrypts and stashes files.
+     *
+     * @param String $name
+     * @param String $csv
+     * @return bool
+     */
+    public function writeOutput(string $name, string $csv): bool
+    {
+        try {
+            $filename = sprintf("%s.csv", preg_replace('/\s+/', '_', $name));
+
+            if (isset($this->za)) {
+                // Encryption, if enabled, is handled at the creation of our ZipStream. The stream is directed through
+                // an encrypted wrapper before it writes to the disk.
+                $this->za->addFile($filename, $csv);
+            } elseif ($this->option('plain')) {
+                Storage::disk($this->disk)->put($filename, $csv);
+            } else {
+                // TODO : Consider redesigning the CLI such that this is not even possible to express.
+                Log::error('Encrypted output is not supported with --no-zip, consider adding --plain if you\'re SURE you want to write this data to the disk unencrypted.');
+            }
+        } catch (Exception $e) {
+            // Could be Storage or LaravelExcelWriterException related
+            Log::error($e->getMessage());
+            Log::error(class_basename($this) . ": Failed to write file for '" . $csv->getTitle() . "'");
+            exit(1);
+        }
+        return true;
+    }
+
+    /**
      * @param $rows
      * @return void
      */
-    public function writeAreaFiles($rows) : void
+    public function writeAreaFiles($rows): void
     {
         $areas = [];
         // We're going to use "&" references to avoid memory issues - Hang on to your hat.
