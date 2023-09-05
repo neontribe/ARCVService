@@ -202,6 +202,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\CustomValidationProvider::class,
+        App\Providers\MandrillMailProvider::class,
 
         /*
          * Extra packages
