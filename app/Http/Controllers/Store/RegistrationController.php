@@ -69,7 +69,6 @@ class RegistrationController extends Controller
 			->toArray();
 
         $fuzzy = $request->get('fuzzy');
-        \Log::info("F/E " . $fuzzy);
         if ($fuzzy) {
             $filtered_family_ids = $this->fuzzySearch($family_name, $pri_carers);
         } else {
