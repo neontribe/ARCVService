@@ -2,14 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\Services\TextFormatter;
 use DateTime;
 use DB;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
-use League\Csv\Reader;
 use Log;
 use PDO;
 use ZipStream\Exception\OverflowException;
@@ -18,6 +16,7 @@ use ZipStream\ZipStream;
 
 class CreateMasterVoucherLogReport extends Command
 {
+    const ROW_LIMIT = 1000000;
     /**
      * The name and signature of the console command.
      *
@@ -32,6 +31,7 @@ class CreateMasterVoucherLogReport extends Command
                             {--date-to=now : The end date for this report, default=today}
                             {--row-limit=999990 : The end date for this report, default=today}
                             ';
+
     /**
      * The console command description.
      *
@@ -81,13 +81,14 @@ class CreateMasterVoucherLogReport extends Command
         'Void Reason',
         'Date file was Downloaded',
     ];
+
     /**
      * @var ZipStream $za ;
      */
     private ZipStream $za;
 
-    // Excel can't deal with large CSVs
     private $zaOutput;
+
     /**
      * The report's query template
      *
@@ -139,7 +140,7 @@ FROM vouchers
     LEFT JOIN sponsors on markets.sponsor_id = sponsors.id
   ) AS markets_query
     ON markets_query.id = vouchers.trader_id
-  # Get fields relevant to voucher's delivery (Date, target centre and centres area)
+  # Get fields relevant to voucher's delivery (Date, target centre and centre's area)
   LEFT JOIN deliveries ON vouchers.delivery_id = deliveries.id
   LEFT JOIN
     centres AS delivery_centres
@@ -232,6 +233,7 @@ EOD;
         if (($this->option('force') || $this->warnUser()) && count($rows) === 0) {
             // We could run it once per sponsor; consider that if it becomes super-unwieldy.
 
+            $rows = [];
             $continue = true;
             $lookups = 0;
             $chunkSize = 50000;
@@ -415,6 +417,7 @@ EOD;
         return $this->confirm('Do you wish to continue?');
     }
 
+
     /**
      * returns a query chunk
      * @param int $limit
@@ -486,6 +489,30 @@ EOD;
         }
         // if we get to the end, and it's all nulls
         return true;
+    }
+
+    /**
+     * This should be part of the query
+     * @param $voucher
+     * @return bool
+     */
+    public function rejectThisVoucher($voucher) : bool
+    {
+        // return true, if any of these are true
+        return
+            // are all the fields we care about null?
+            $this->containsOnlyNull($voucher) ||
+            // is this date filled?
+            !is_null($voucher['Void Voucher Date']) ||
+            // is this date dilled *and* less than the cut-off date
+            (!is_null($voucher['Reimbursed Date']) &&
+                strtotime(
+                    DateTime::createFromFormat(
+                        'd/m/Y',
+                        $voucher['Reimbursed Date']
+                    )->format('Y-m-d')
+                ) < strtotime($this->cutOffDate)
+            );
     }
 
     /**
