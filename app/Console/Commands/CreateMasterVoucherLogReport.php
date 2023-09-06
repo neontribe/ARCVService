@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\TextFormatter;
 use DateTime;
 use DB;
 use Exception;
@@ -489,30 +490,6 @@ EOD;
         }
         // if we get to the end, and it's all nulls
         return true;
-    }
-
-    /**
-     * This should be part of the query
-     * @param $voucher
-     * @return bool
-     */
-    public function rejectThisVoucher($voucher) : bool
-    {
-        // return true, if any of these are true
-        return
-            // are all the fields we care about null?
-            $this->containsOnlyNull($voucher) ||
-            // is this date filled?
-            !is_null($voucher['Void Voucher Date']) ||
-            // is this date dilled *and* less than the cut-off date
-            (!is_null($voucher['Reimbursed Date']) &&
-                strtotime(
-                    DateTime::createFromFormat(
-                        'd/m/Y',
-                        $voucher['Reimbursed Date']
-                    )->format('Y-m-d')
-                ) < strtotime($this->cutOffDate)
-            );
     }
 
     /**
