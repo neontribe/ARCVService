@@ -2,12 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Services\TextFormatter;
 use DateTime;
 use DB;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use League\Csv\Reader;
 use Log;
 use PDO;
 use ZipStream\Exception\OverflowException;
@@ -16,7 +18,6 @@ use ZipStream\ZipStream;
 
 class CreateMasterVoucherLogReport extends Command
 {
-    const ROW_LIMIT = 1000000;
     /**
      * The name and signature of the console command.
      *
@@ -27,8 +28,9 @@ class CreateMasterVoucherLogReport extends Command
                             {--force : Execute without confirmation, eg for automation}
                             {--no-zip : Don\'t wrap files in a single archive}
                             {--plain : Don\'t encrypt contents of files}
-                            {--date-from=all : The start date for this report, default=all records}
+                            {--date-from=year-start : The start date for this report, default=year-start}
                             {--date-to=now : The end date for this report, default=today}
+                            {--row-limit=999990 : The end date for this report, default=today}
                             ';
     /**
      * The console command description.
@@ -36,24 +38,29 @@ class CreateMasterVoucherLogReport extends Command
      * @var string $description
      */
     protected $description = 'Creates, encrypts and stores the MVL report under in /storage';
+
+    /**
+     * @var int Row limit per file. excel (and libreoffice) tops out at 10^6
+     */
+    private int $rowLimit = 999990;
     /**
      * The default disk we want.
      *
      * @var string $disk
      */
-    private $disk;
+    private string $disk;
     /**
      * The default archive name.
      *
      * @var string $archiveName
      */
-    private $archiveName;
+    private string $archiveName;
     /**
      * The sheet headers.
      *
      * @var array $headers
      */
-    private $headers = [
+    private array $headers = [
         'Voucher Number',
         'Voucher Area',
         'Date Distributed',
@@ -174,6 +181,19 @@ OFFSET ?
 EOD;
 
     /**
+     * @var int The end time to truncate voucher export at.
+     */
+    private int $timeTo;
+    /**
+     * @var int The start time to truncate voucher export from.
+     */
+    private int $timeFrom;
+    /**
+     * @var bool If true the CLI recieves updates on the export process
+     */
+    private bool $progress;
+
+    /**
      * CreateMasterVoucherLogReport constructor.
      * Sets some defaults
      */
@@ -193,57 +213,31 @@ EOD;
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return int
+     * @throws Exception
      */
-    public function handle()
+    public function handle(): int
     {
-        // Validate dates
-        $dateFrom = $this->option('date-from');
-        $dateTo = $this->option('date-to');
-        $progress = $this->option('progress');
-
-        if ($dateFrom != "all") {
-            if (!$this->validateDate($dateFrom)) {
-                $this->error('Unable to parse from date: ' . $this->option('date-from'));
-            }
-            $dateFrom = date('Y-m-d', strtotime($dateFrom));
-        } else {
-            $dateFrom = "1970-01-01";
-        }
-
-        if ($dateTo != "now") {
-            if (!$this->validateDate($dateTo)) {
-                $this->error('Unable to parse to date: ' . $this->option('date-to'));
-            }
-            $dateTo = date('Y-m-d', strtotime($dateTo));
-        } else {
-            $dateTo = date('Y-m-d');
-        }
-
-        if ($dateFrom > $dateTo) {
-            $this->info('Looks like the from/to dates are reversed.');
-            return 3;
-        }
-
-        $timeTo = strtotime($dateTo);
-        $timeFrom = strtotime($dateFrom);
-
-        $this->info(sprintf("Searching for records from %s to %s", $dateFrom, $dateTo));
-
         // Set up export
         $this->initSettings();
 
+        $startTime = strtotime('now');
+        $rows = [];
+
+        // DEV Code while I was testing file writes, the full command took ~20 mins to run
+        // if (file_exists(sys_get_temp_dir() . "/MLVCache.ser") && config('app.env') === 'local')
+        //    $rows = unserialize(file_get_contents(sys_get_temp_dir() . "/MLVCache.ser"));
+
         // Assess permission to continue
-        if ($this->option('force') || $this->warnUser()) {
+        if (($this->option('force') || $this->warnUser()) && count($rows) === 0) {
             // We could run it once per sponsor; consider that if it becomes super-unwieldy.
 
-            $rows = [];
             $continue = true;
             $lookups = 0;
             $chunkSize = 50000;
 
             $mem = memory_get_usage();
-            Log::info("starting query, mem :" . $mem);
+            $this->log("starting query, mem :" . $mem);
 
             while ($continue) {
                 $chunk = $this->execQuery($chunkSize, $chunkSize * $lookups);
@@ -256,7 +250,7 @@ EOD;
                 // clean the vouchers in this chunk
                 // should be done is SQL
                 foreach ($chunk as $k => $voucher) {
-                    if ($this->rejectThisVoucher($voucher, $timeFrom, $timeTo)) {
+                    if ($this->rejectThisVoucher($voucher)) {
                         unset($chunk[$k]);
                     }
                 }
@@ -266,66 +260,125 @@ EOD;
                 /*  $rows = array_merge($rows, $chunk); */
 
                 $lookups++;
-                if ($progress) {
-                    $this->output->write('.', $lookups%80 === 0);
-                }
 
                 // clean memory
                 $chunk = null;
                 unset($chunk);
                 $mem = memory_get_usage();
 
-                Log::info($lookups . 'x' . $chunkSize . ', skip ' . $chunkSize * $lookups . ",mem :" . $mem);
+                $this->log(sprintf(
+                    "MVL exporting chunk %d of %d records. Memory usage: %s",
+                    $lookups, $chunkSize, TextFormatter::formatBytes($mem)
+                ));
             }
 
-            Log::info("finished query, meme:" . $mem);
-            Log::info("using " . $this->disk);
-            Log::info("beginning file write, mem:" . memory_get_usage());
+            $this->log("finished query, meme:" . TextFormatter::formatBytes($mem));
+            $this->log("using " . $this->disk);
+            $this->log("beginning file write, mem:" . memory_get_usage());
+        }
 
-            $this->writeMultiPartMVL($rows);
+        // DEV Code while I was testing file writes, the full command took ~20 mins to run
+        // if (!file_exists(sys_get_temp_dir() . "/MLVCache.ser") && config('app.env') === 'local')
+        //    file_put_contents(sys_get_temp_dir() . "/MLVCache.ser", serialize($rows));
 
-            // Split up the rows into separate areas.
-            $this->writeAreaFiles($rows);
+        $this->writeMultiPartMVL($rows);
 
-            if (isset($this->za, $this->zaOutput)) {
-                // End the zip stream with something meaningful.
-                try {
-                    $this->za->finish();
-                } catch (OverflowException $e) {
-                    Log::error($e->getMessage());
-                    Log::error("Overflow when attempting to finish a significantly large Zip file");
-                    exit(1);
-                }
+        // Split up the rows into separate areas.
+        $this->writeAreaFiles($rows);
 
-                // Manually close our stream. This is especially important when the stream is encrypted, as a little
-                // extra data is spat out.
-                fclose($this->zaOutput);
+        if (isset($this->za, $this->zaOutput)) {
+            // End the zip stream with something meaningful.
+            try {
+                $this->za->finish();
+            } catch (OverflowException $e) {
+                Log::error($e->getMessage());
+                Log::error("Overflow when attempting to finish a significantly large Zip file");
+                exit(1);
             }
+
+            // Manually close our stream. This is especially important when the stream is encrypted, as a little
+            // extra data is spat out.
+            fclose($this->zaOutput);
+        }
+        if ($this->progress) {
+            $this->output->write('', true);
+            $this->log(sprintf("Execution time: %d seconds", strtotime('now') - $startTime));
         }
         // Set 0, above for expected outcomes
         exit(0);
     }
 
-    function validateDate($date, $format = 'Y-m-d'): bool
-    {
-        $d = DateTime::createFromFormat($format, $date);
-        // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
-        return $d && $d->format($format) === $date;
+    private function log($message, $level = "info") {
+        switch ($level) {
+            case "debug":
+                Log::debug($message);
+                if ($this->progress) $this->info($message);
+                break;
+            default:
+            case "info":
+                Log::info($message);
+                if ($this->progress) $this->info($message);
+                break;
+            case "warn":
+                Log::warning($message);
+                if ($this->progress) $this->warn($message);
+                break;
+            case "error":
+                Log::error($message);
+                if ($this->progress) $this->error($message);
+                break;
+            case "critical":
+                Log::critical($message);
+                if ($this->progress) $this->error($message);
+                break;
+        }
     }
 
     /**
      * @return void
+     * @throws Exception
      */
     public function initSettings(): void
     {
-        $thisYearsApril = Carbon::parse('april')->startOfMonth();
-        $years = ($thisYearsApril->isPast()) ? 2 : 1;
-        $this->cutOffDate = $thisYearsApril->subYearsNoOverflow($years)->format('Y-m-d');
-
         // Set the disk
         $this->disk = ($this->option('plain'))
             ? 'local'
             : 'enc';
+
+        $this->progress = $this->option('progress');
+        $this->rowLimit = $this->option('row-limit');
+
+        // Validate dates
+        $dateFrom = $this->option('date-from');
+        $dateTo = $this->option('date-to');
+
+        if ($dateFrom != "year-start") {
+            if (!$this->validateDate($dateFrom)) {
+                $this->error('Unable to parse from date: ' . $this->option('date-from'));
+            }
+            $dateFrom = date('Y-m-d', strtotime($dateFrom));
+        } else {
+            $thisYearsApril = Carbon::parse('april')->startOfMonth();
+            $years = ($thisYearsApril->isPast()) ? 2 : 1;
+            $this->$dateFrom = $thisYearsApril->subYearsNoOverflow($years)->format('Y-m-d');
+        }
+
+        if ($dateTo != "now") {
+            if (!$this->validateDate($dateTo)) {
+                $this->error('Unable to parse to date: ' . $this->option('date-to'));
+            }
+            $dateTo = date('Y-m-d', strtotime($dateTo));
+        } else {
+            $dateTo = date('Y-m-d');
+        }
+
+        if ($dateFrom > $dateTo) {
+            throw new Exception(sprintf("Looks like the from/to dates are reversed, %s > %s.", $dateFrom, $dateTo));
+        }
+
+        $this->timeTo = strtotime($dateTo);
+        $this->timeFrom = strtotime($dateFrom);
+        $this->log(sprintf("Searching for records from %s to %s", $dateFrom, $dateTo));
 
         if (!$this->option('no-zip')) {
             // Open the file for writing at the correct location
@@ -344,6 +397,13 @@ EOD;
         }
     }
 
+    function validateDate($date, $format = 'Y-m-d'): bool
+    {
+        $d = DateTime::createFromFormat($format, $date);
+        // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
+        return $d && $d->format($format) === $date;
+    }
+
     /**
      * Warn the user before they execute.
      *
@@ -351,7 +411,7 @@ EOD;
      */
     public function warnUser(): bool
     {
-        $this->info('WARNING: This command will run a long, blocking query that will interrupt normal service use.');
+        $this->log('WARNING: This command will run a long, blocking query that will interrupt normal service use.', "warn");
         return $this->confirm('Do you wish to continue?');
     }
 
@@ -375,7 +435,7 @@ EOD;
      * @param $voucher
      * @return bool
      */
-    public function rejectThisVoucher($voucher, $timeFrom, $timeTo): bool
+    public function rejectThisVoucher($voucher): bool
     {
         // exit early if we don't have a Reimbursed Date
         if (is_null($voucher['Reimbursed Date'])) {
@@ -395,7 +455,7 @@ EOD;
             // is this date filled?
             !is_null($voucher['Void Voucher Date']) ||
             // is this date dilled *and* less than the cut-off date
-            $reimbursedDate < $timeFrom || $reimbursedDate > $timeTo;
+            $reimbursedDate < $this->timeFrom || $reimbursedDate > $this->timeTo;
     }
 
     /**
@@ -440,6 +500,7 @@ EOD;
         $last_key = array_key_last($rows);
 
         // go over each row
+        $rowCounter = 0;
         foreach ($rows as $index => $row) {
             // do we need to open a new file?
             if ($nextFile || !isset($fileHandleAll)) {
@@ -450,18 +511,19 @@ EOD;
 
             // add lines to the file
             fputcsv($fileHandleAll, $row);
-
+            $rowCounter++;
             // calculate the file number
-            $calcFileNum = 1 + intdiv($index, self::ROW_LIMIT);
-
+            $calcFileNum = 1 + intdiv($index, $this->rowLimit);
             // has it increased?
             $nextFile = ($calcFileNum > $fileNum);
 
             if ($nextFile || $last_key === $index) {
                 // stash and close this file
                 rewind($fileHandleAll);
+                $this->log(sprintf("Writing %d records to %s", $rowCounter, 'PART' . $fileNum));
                 $this->writeOutput('PART' . $fileNum, stream_get_contents($fileHandleAll));
                 fclose($fileHandleAll);
+                $rowCounter = 0;
                 // update the fileNum
                 $fileNum = $calcFileNum;
             }
@@ -493,7 +555,7 @@ EOD;
         } catch (Exception $e) {
             // Could be Storage or LaravelExcelWriterException related
             Log::error($e->getMessage());
-            Log::error(class_basename($this) . ": Failed to write file for '" . $csv->getTitle() . "'");
+            Log::error(class_basename($this) . ": Failed to write file for '" . $csv . "'");
             exit(1);
         }
         return true;
@@ -507,7 +569,7 @@ EOD;
     {
         $areas = [];
         // We're going to use "&" references to avoid memory issues - Hang on to your hat.
-        foreach ($rows as $rowindex => &$rowFields) {
+        foreach ($rows as &$rowFields) {
             $area = $rowFields['Voucher Area'];
             if (!isset($areas[$area])) {
                 // Not met this Area before? Add it to our list!
