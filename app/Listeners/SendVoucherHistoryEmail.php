@@ -37,8 +37,8 @@ class SendVoucherHistoryEmail
                 $event->file
             ))
         ;
-        Log::info($event->file . ' emailed.');
+        // Log::info(sprintf("Voucher history email sent to %s <%s>", $event->user, $event->trader));
         File::delete($event->file);
-        Log::info($event->file . ' deleted.');
+        // Log::info(sprintf("Voucher history file deleted for to %s <%s>", $event->user, $event->trader));
     }
 }
