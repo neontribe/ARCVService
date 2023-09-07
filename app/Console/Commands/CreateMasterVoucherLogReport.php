@@ -362,8 +362,11 @@ EOD;
             $dateFrom = date('Y-m-d', strtotime($dateFrom));
         } else {
             $thisYearsApril = Carbon::parse('april')->startOfMonth();
-            $years = ($thisYearsApril->isPast()) ? 2 : 1;
-            $this->$dateFrom = $thisYearsApril->subYearsNoOverflow($years)->format('Y-m-d');
+            if ($thisYearsApril->isFuture()) {
+                $dateFrom = $thisYearsApril->subYearsNoOverflow(1)->format('Y-m-d');
+            } else {
+                $dateFrom = $thisYearsApril->format('Y-m-d');
+            }
         }
 
         if ($dateTo != "now") {
