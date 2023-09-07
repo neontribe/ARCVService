@@ -37,11 +37,16 @@ class Handler extends ExceptionHandler
         ValidationException::class,
     ];
 
-    // These produce a single line log
-    protected $dontStackTrace = [
+    /**
+     * These produce a single line log
+     *
+     * @var array
+     */
+    protected array $dontStackTrace = [
         HttpResponseException::class,
         MethodNotAllowedHttpException::class,
         OAuthServerException::class,
+        \Laravel\Passport\Exceptions\OAuthServerException::class, // The refresh token is invalid.
     ];
 
     /**
@@ -50,7 +55,7 @@ class Handler extends ExceptionHandler
      * @param Exception $e Exception
      * @return bool;
      */
-    protected function shallWeStackTrace(Throwable $e)
+    protected function shallWeStackTrace(Throwable $e): bool
     {
         if (config('app.env') === 'production') {
             foreach ($this->dontStackTrace as $type) {
@@ -67,11 +72,10 @@ class Handler extends ExceptionHandler
      *
      * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
      *
-     * @throws Exception
-     * @param  Exception  $e
-     * @return mixed
+     * @param Exception $e
+     * @throws Throwable
      */
-    public function report(Throwable $e)
+    public function report(Throwable $e): void
     {
         if (!$this->shallWeStackTrace($e)) {
             try {
@@ -92,7 +96,7 @@ class Handler extends ExceptionHandler
                 .$e->getTrace()[0]['file']
             );
         } else {
-            return parent::report($e);
+            parent::report($e);
         }
     }
 
