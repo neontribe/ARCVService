@@ -4,6 +4,15 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+
+/**
+ * @property string $name
+ * @property Sponsor $sponsor
+ * @property Registration[] $registrations
+ * @property CentreUser[] $centreUsers
+ * @property Centre[] $neighbours
+ * @property Family[] $families
+ */
 class Centre extends Model
 {
     /**

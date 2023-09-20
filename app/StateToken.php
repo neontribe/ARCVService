@@ -8,7 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Ramsey\Uuid\Uuid;
 use Log;
-
+/**
+ * @property VoucherState $voucherStates
+ * @property User $user
+ * @property AdminUser $adminUser
+ */
 class StateToken extends Model
 {
     /**
