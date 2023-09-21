@@ -2,8 +2,16 @@
 
 namespace App;
 
+use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin Eloquent
+ * @property string $name
+ * @property string $value
+ * @property string $purpose
+ * @property Sponsor $sponsor
+ */
 class Evaluation extends Model
 {
     // An evaluation is currently for a sponsor

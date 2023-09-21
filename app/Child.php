@@ -11,6 +11,14 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property string $dob
+ * @property bool $born
+ * @property bool $verified
+ * @property bool $defer
+ * @property bool $is_pri_carer
+ * @property Family $family
+ */
 class Child extends Model implements IEvaluee
 {
     use Aliasable;

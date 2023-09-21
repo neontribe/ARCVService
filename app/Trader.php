@@ -12,6 +12,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 
+/**
+ * @property string $name
+ * @property Market $market
+ * @property User[] $users
+ * @property Voucher[] $vouchers
+ */
 class Trader extends Model
 {
     use SoftDeletes;

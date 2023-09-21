@@ -6,6 +6,7 @@ use App\Traits\Statable;
 use Auth;
 use DB;
 use DateTimeInterface;
+use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,17 @@ use Illuminate\Support\Collection;
 use Log;
 use Throwable;
 
+/**
+ * @mixin Eloquent
+ * @property string $code
+ * @property Sponsor $sponsor
+ * @property Trader $trader
+ * @property Bundle $bundle
+ * @property Delivery $delivery
+ * @property VoucherState $paymentPendedOn
+ * @property VoucherState $recordedOn
+ * @property VoucherState $reimbursedOn
+ */
 class Voucher extends Model
 {
     use Statable; // import the state transition stuff.
@@ -73,7 +85,7 @@ class Voucher extends Model
 
 
     /**
-     * Voucher can clean it's codes.
+     * Voucher can clean its codes.
      * @param array $codes
      * @return array
      */
@@ -314,7 +326,7 @@ class Voucher extends Model
      *
      * @return BelongsTo
      */
-    public function sponsor()
+    public function sponsor(): BelongsTo
     {
         return $this->belongsTo(Sponsor::class);
     }
@@ -324,7 +336,7 @@ class Voucher extends Model
      *
      * @return BelongsTo
      */
-    public function trader()
+    public function trader(): BelongsTo
     {
         return $this->belongsTo(Trader::class);
     }
@@ -334,7 +346,7 @@ class Voucher extends Model
      *
      * @return BelongsTo
      */
-    public function bundle()
+    public function bundle(): BelongsTo
     {
         return $this->belongsTo(Bundle::class);
     }
@@ -344,7 +356,7 @@ class Voucher extends Model
      *
      * @return BelongsTo
      */
-    public function delivery()
+    public function delivery(): BelongsTo
     {
         return $this->belongsTo(Delivery::class);
     }
@@ -376,7 +388,7 @@ class Voucher extends Model
     }
 
     /**
-     * Get the most recent voucher_state change to reimbursed.
+     * Get the most recent voucher_state change to 'reimbursed'.
      * There should only ever be one per voucher - but most recent safer.
      *
      * @return HasOne

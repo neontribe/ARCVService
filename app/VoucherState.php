@@ -2,10 +2,22 @@
 
 namespace App;
 
+use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 
 // hard deletes on these; if only because we'll data-warehouse them at some point.
 
+/**
+ * @mixin Eloquent
+ * @property string $transition;
+ * @property string $from;
+ * @property string $to;
+ * @property Voucher $voucher;
+ * @property User $user;
+ * @property StateToken $stateToken;
+ *
+ * Notre sure what these are?  'user_type', 'source',
+ */
 class VoucherState extends Model
 {
     /**
