@@ -7,10 +7,25 @@ use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\IEvaluee;
 use App\Traits\Evaluable;
 use Carbon\Carbon;
+use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @mixin Eloquent
+ * @property string $eligibility_hsbs
+ * @property string $eligibility_nrpf
+ * @property string $consented_on
+ * @property string $eligible_from
+ * @property string $created_at
+ * @property string $updated_at
+ * @property bool $isActive
+ * @property Family $family
+ * @property Centre $centre
+ * @property Bundle $currentBundle
+ * @property Bundle[] $bundles
+ */
 class Registration extends Model implements IEvaluee
 {
     use Evaluable;

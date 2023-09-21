@@ -3,12 +3,21 @@
 namespace App;
 
 use DateTimeInterface;
+use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * @mixin Eloquent
  * @property string $name
+ * @property string $shortcode
+ * @property bool $can_tap
+ * @property int $programme
+ * @property Voucher[] $vouchers
+ * @property Centre[] $centres
+ * @property Market[] $markets
+ * @property Evaluation[] $evaluations
  */
 class Sponsor extends Model
 {

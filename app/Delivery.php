@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property string $dispatched_at
  * @property Centre $centre
+ * @property Voucher[] $vouchers
  */
 class Delivery extends Model
 {

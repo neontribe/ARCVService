@@ -10,7 +10,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property string $name
+ * @property string $location
+ * @property string $payment_message
  * @property Sponsor $sponsor
+ * @property Trader[] $traders
  */
 class Market extends Model
 {

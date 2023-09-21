@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property string $name
+ * @property string $prefix
+ * @property string $print_pref
  * @property Sponsor $sponsor
  * @property Registration[] $registrations
  * @property CentreUser[] $centreUsers
