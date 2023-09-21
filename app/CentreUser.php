@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Eloquent;
 use Illuminate\Database\Eloquent\Relations\belongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,6 +11,17 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Collection;
 use App\Notifications\StorePasswordResetNotification;
 
+/**
+ * @mixin Eloquent
+ * @property string $name
+ * @property string $email
+ * @property string $password
+ * @property string $role
+ * @property bool $downloader
+ * @property Note[] $notes
+ * @property Centre[] $centres
+ * @property Centre[] $homeCentres
+ */
 class CentreUser extends Authenticatable
 {
     use Notifiable;

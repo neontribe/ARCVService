@@ -13,6 +13,14 @@ use Illuminate\Database\Eloquent\Model;
 use Log;
 use Throwable;
 
+/**
+ * @property int $entitlement
+ * @property Registration $registration
+ * @property Carer $collectingCarer
+ * @property Centre $disbursingCentre
+ * @property User $disbursingUser
+ * @property string $disbursed_at
+ */
 class Bundle extends Model
 {
     /**

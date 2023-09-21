@@ -2,11 +2,18 @@
 
 namespace App;
 
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Notifications\AdminPasswordResetNotification;
+use Eloquent;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
+/**
+ * @mixin Eloquent
+ * @property string $name
+ * @property string $email
+ * @property string $password
+ */
 class AdminUser extends Authenticatable
 {
     use Notifiable, SoftDeletes;
