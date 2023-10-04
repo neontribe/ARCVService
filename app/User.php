@@ -4,6 +4,7 @@ namespace App;
 
 use App\Notifications\ApiPasswordResetNotification;
 use DateTimeInterface;
+use Eloquent;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
