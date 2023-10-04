@@ -89,7 +89,7 @@ class CreateMasterVoucherLogReport extends Command
     private $zaOutput;
 
     // Excel can't deal with large CSVs
-    public const ROW_LIMIT = 900000;
+    const ROW_LIMIT = 900000;
 
     /**
      * The report's query template
@@ -203,17 +203,11 @@ EOD;
     /**
      * @return void
      */
-    public function initSettings(): void
+    public function initSettings() : void
     {
         $thisYearsApril = Carbon::parse('april')->startOfMonth();
-        //        $years = ($thisYearsApril->isPast()) ? 2 : 1;
-        //        $this->cutOffDate = $thisYearsApril->subYearsNoOverflow($years)->format('Y-m-d');
-        if ($thisYearsApril->isFuture()) {
-            $this->cutOffDate = $thisYearsApril->subYearsNoOverflow(1)->format('Y-m-d');
-        } else {
-            $this->cutOffDate = $thisYearsApril->format('Y-m-d');
-        }
-
+        $years = ($thisYearsApril->isPast()) ? 2 : 1;
+        $this->cutOffDate = $thisYearsApril->subYearsNoOverflow($years)->format('Y-m-d');
 
         // Set the disk
         $this->disk = ($this->option('plain'))
@@ -321,7 +315,7 @@ EOD;
      *
      * @return bool
      */
-    public function warnUser(): bool
+    public function warnUser() : bool
     {
         $this->info('WARNING: This command will run a long, blocking query that will interrupt normal service use.');
         return $this->confirm('Do you wish to continue?');
@@ -350,7 +344,7 @@ EOD;
      * @param String $csv
      * @return bool
      */
-    public function writeOutput(string $name, string $csv): bool
+    public function writeOutput(string $name, string $csv) : bool
     {
         try {
             $filename = sprintf("%s.csv", preg_replace('/\s+/', '_', $name));
@@ -409,31 +403,31 @@ EOD;
      * @param $voucher
      * @return bool
      */
-    public function rejectThisVoucher($voucher): bool
+    public function rejectThisVoucher($voucher) : bool
     {
         // return true, if any of these are true
         return
             // are all the fields we care about null?
             $this->containsOnlyNull($voucher) ||
             // is this date filled?
-            !is_null($voucher['Void Voucher Date']) ||
-            // is this date dilled *and* less than the cut-off date
-            (
-                !is_null($voucher['Reimbursed Date']) &&
-                strtotime(
-                    DateTime::createFromFormat(
-                        'd/m/Y',
-                        $voucher['Reimbursed Date']
-                    )->format('Y-m-d')
-                ) < strtotime($this->cutOffDate)
-            );
+            !is_null($voucher['Void Voucher Date']);
+//            ||
+//            // is this date dilled *and* less than the cut-off date
+//            (!is_null($voucher['Reimbursed Date']) &&
+//                strtotime(
+//                    DateTime::createFromFormat(
+//                        'd/m/Y',
+//                        $voucher['Reimbursed Date']
+//                    )->format('Y-m-d')
+//                ) < strtotime($this->cutOffDate)
+//            );
     }
 
     /**
      * @param $rows
      * @return void
      */
-    public function writeMultiPartMVL($rows): void
+    public function writeMultiPartMVL($rows) : void
     {
         // set some loop controls
         $nextFile = true;
@@ -473,7 +467,7 @@ EOD;
      * @param $rows
      * @return void
      */
-    public function writeAreaFiles($rows): void
+    public function writeAreaFiles($rows) : void
     {
         $areas = [];
         // We're going to use "&" references to avoid memory issues - Hang on to your hat.

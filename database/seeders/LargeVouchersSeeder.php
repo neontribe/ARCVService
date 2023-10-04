@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 
 class LargeVouchersSeeder extends Seeder
 {
-    protected $states = [
+    protected array $states = [
         [
             'transition' => 'dispatch',
             'from' => 'printed',
@@ -37,7 +37,7 @@ class LargeVouchersSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         // get or create the seeder user
         $user = User::where('name', 'demoseeder')->first();
@@ -49,7 +49,7 @@ class LargeVouchersSeeder extends Seeder
 
         // Get Brian Bloom, our designated user for a lot of vouchers
         $largeUser = User::where('name', 'Brian Bloom')->first();
-        // 2 submonths a 3 could push it outside the 90 day history filter
+        // 2 sub-months a 3 could push it outside the 90 day history filter
         $date = Carbon::now()->subMonths(2);
         // Create 1000 vouchers so Brian Bloom can request payment for them all at once
         $recordedVouchers = factory(Voucher::class, 1000)->state('printed')->create([
@@ -76,5 +76,16 @@ class LargeVouchersSeeder extends Seeder
         $existingTransitionDef = Voucher::createTransitionDef("recorded", "confirm");
 
         VoucherState::batchInsert($pendingVouchers, $date, 1, 'User', $existingTransitionDef);
+
+        // Create 5000 vouchers that have a state of reimbursed
+        $reimbursedVouchers = factory(Voucher::class, 5000)->state('printed')->create([
+            'trader_id' => $largeUser->traders[0]->id,
+            'created_at' => $date,
+            'updated_at' => $date,
+            'currentstate' => 'payment_pending'
+        ]);
+        // Make a transition definition
+        $reimbursedTransitionDef = Voucher::createTransitionDef("payment_pending", "payout");
+        VoucherState::batchInsert($reimbursedVouchers, $date, 1, 'User', $reimbursedTransitionDef);
     }
 }
