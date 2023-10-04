@@ -259,7 +259,7 @@ EOD;
                 unset($chunk);
                 $mem = memory_get_usage();
 
-                $this->info(sprintf("Chunk %d, Mem: %s", $lookups,TextFormatter::formatBytes($mem) ));
+                $this->info(sprintf("Chunk %d, Mem: %s", $lookups, TextFormatter::formatBytes($mem)));
             }
 
             $this->info("Finished query, meme:" . TextFormatter::formatBytes($mem));
