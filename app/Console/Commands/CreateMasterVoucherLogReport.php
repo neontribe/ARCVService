@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Services\TextFormatter;
+use Carbon\Exceptions\InvalidFormatException;
 use DateTime;
 use DB;
 use Exception;
@@ -17,6 +18,14 @@ use ZipStream\ZipStream;
 class CreateMasterVoucherLogReport extends Command
 {
     const ROW_LIMIT = 900000;
+
+    const REJECT_REASON_NULL_REIMBURSED_DATE = 0;
+    const REJECT_REASON_CONTAINS_ONLY_NULL = 1;
+    const REJECT_REASON_VOIDED_VOUCHER = 2;
+    const REJECT_REASON_DATE_OUT_OF_RANGE = 3;
+
+    protected array $rejectReasons = [0,0,0,0];
+
     /**
      * The name and signature of the console command.
      *
@@ -26,9 +35,10 @@ class CreateMasterVoucherLogReport extends Command
                             {--force : Execute without confirmation, eg for automation}
                             {--no-zip : Don\'t wrap files in a single archive}
                             {--plain : Don\'t encrypt contents of files}
-                            {--from= : start date, will default to the start of this financial year}
-                            {--to= : end date, will default to "now"}
+                            {--from= : start date, will default to all vouchers}
+                            {--to= : end date, will default to September 2023}
                             {--chunk-size= : how many records to process each chunk}
+                            {--include-live : include live/active vouchers}
                             ';
     /**
      * The console command description.
@@ -188,6 +198,10 @@ order by vouchers.id desc
 LIMIT ?
 OFFSET ?
 EOD;
+    /**
+     * @var bool $includeLive Include live vouchers in the download set.
+     */
+    private bool $includeLive = false;
 
     /**
      * CreateMasterVoucherLogReport constructor.
@@ -253,13 +267,24 @@ EOD;
                 /*  $rows = array_merge($rows, $chunk); */
 
                 $lookups++;
+                $chunkCount = count($chunk);
 
                 // clean memory
                 $chunk = null;
                 unset($chunk);
                 $mem = memory_get_usage();
 
-                $this->info(sprintf("Chunk %d, Mem: %s", $lookups, TextFormatter::formatBytes($mem)));
+                $this->info(
+                    sprintf(
+                        "Chunk %d, added %d, rejected %d (%s), Mem: %s",
+                        $lookups,
+                        $chunkCount,
+                        array_sum($this->rejectReasons),
+                        join("/", $this->rejectReasons),
+                        TextFormatter::formatBytes($mem)
+                    )
+                );
+                $this->rejectReasons = [0,0,0,0];
             }
 
             $this->info("Finished query, meme:" . TextFormatter::formatBytes($mem));
@@ -295,30 +320,38 @@ EOD;
      */
     public function initSettings(): void
     {
+        if ($this->option('include-live')) {
+            $this->includeLive = true;
+        }
+        
         $from = $this->option('from');
         if ($from) {
-            $carbonDate = Carbon::parse($from);
-            if ($carbonDate) {
-                $this->startDate = $carbonDate->toDateString();
-            } else {
+            try {
+                $this->startDate = Carbon::createFromFormat('d/m/Y', $from, 'UTC');
+            } catch (InvalidFormatException $exception) {
                 // Not a date
                 $this->error("From date was not a valid date: " . $from);
+                exit(1);
             }
         } else {
-            $this->startDate = $this->getStartOfThisFinancialYear()->toDateString();
+            // We were going to start this financial year
+            // $this->startDate = $this->getStartOfThisFinancialYear()->format('d/m/Y');
+            $this->startDate = Carbon::createFromFormat('d/m/Y', "01/01/1970", 'UTC');
         }
 
         $to = $this->option('to');
         if ($to) {
-            $carbonDate = Carbon::parse($to);
-            if ($carbonDate) {
-                $this->endDate = $carbonDate->toDateString();
-            } else {
+            try {
+                $this->endDate = Carbon::createFromFormat('d/m/Y', $to, 'UTC');
+            } catch (InvalidFormatException $exception) {
                 // Not a date
                 $this->error("To date was not a valid date: " . $to);
+                exit(1);
             }
         } else {
-            $this->endDate = Carbon::now()->toDateString();
+            // We were going to use till now
+            // $this->endDate = Carbon::now()->format('d/m/Y');
+            $this->endDate = Carbon::createFromFormat('d/m/Y', "31/08/2023", 'UTC');
         }
 
         $chunkSize = $this->option("chunk-size");
@@ -398,18 +431,35 @@ EOD;
     {
         if (is_null($voucher['Reimbursed Date'])) {
             // exit early
-            return false;
+            $this->rejectReasons[self::REJECT_REASON_NULL_REIMBURSED_DATE]++;
+            return true;
         }
-        $reimbursedTime = strtotime(DateTime::createFromFormat('d/m/Y', $voucher['Reimbursed Date'])->format('Y-m-d'));
+        // The output format of the MVL date is d/m/Y which is not sortable/comparable, so we reformat it
+        $reimbursedTime = Carbon::createFromFormat('d/m/Y', $voucher['Reimbursed Date'], 'UTC');
+//        $this->info(sprintf(
+//            "%s %s %s %s",
+//            $reimbursedTime,
+//            $this->startDate,
+//            $this->endDate,
+//            !(($reimbursedTime < $this->startDate || $reimbursedTime > $this->endDate)),
+//        ));
 
-        // return true, if any of these are true
-        return
-            // are all the fields we care about null?
-            $this->containsOnlyNull($voucher) ||
-            // is this date filled?
-            !is_null($voucher['Void Voucher Date']) ||
-            // is this date dilled *and* less than the cut-off date
-            ($reimbursedTime >= strtotime($this->startDate) && $reimbursedTime < strtotime($this->endDate));
+        if ($this->containsOnlyNull($voucher)) {
+            $this->rejectReasons[self::REJECT_REASON_CONTAINS_ONLY_NULL]++;
+            return true;
+        }
+
+        if (!is_null($voucher['Void Voucher Date'])) {
+            $this->rejectReasons[self::REJECT_REASON_VOIDED_VOUCHER]++;
+            return true;
+        }
+
+        if ($reimbursedTime < $this->startDate || $reimbursedTime > $this->endDate) {
+            $this->rejectReasons[self::REJECT_REASON_DATE_OUT_OF_RANGE]++;
+            return true;
+        }
+
+        return false;
     }
 
     /**

@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property Voucher $voucher;
  * @property User $user;
  * @property StateToken $stateToken;
+ * @property string $created_at;
+ * @property string $updated_at;
  *
  * Notre sure what these are?  'user_type', 'source',
  */

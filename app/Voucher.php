@@ -23,6 +23,7 @@ use Throwable;
  * @property Trader $trader
  * @property Bundle $bundle
  * @property Delivery $delivery
+ * @property string $rvid
  * @property VoucherState $paymentPendedOn
  * @property VoucherState $recordedOn
  * @property VoucherState $reimbursedOn
