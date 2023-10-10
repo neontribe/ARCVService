@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\TextFormatter;
 use App\Voucher;
 use App\VoucherState;
 use Carbon\Exceptions\InvalidFormatException;
@@ -65,41 +66,50 @@ class MvlExport extends Command
             )
         );
 
-        $query = VoucherState::join("vouchers", "vouchers.id", "=", "voucher_states.id")
-            ->whereBetween('voucher_states.created_at', [$this->startDate, $this->endDate])
-            ->where("voucher_states.to", "=", "reimbursed");
+        $query = Voucher::where("currentstate", "=", "reimbursed")
+            ->whereBetween('updated_at', [$this->startDate, $this->endDate])
+            ->orderBy("updated_at");
 
         $count = $query->count();
         $this->info(sprintf("Exporting %d vouchers.", $count));
 
-        $today = Carbon::now()->format("Y-m-d_H-i");
+        $today = Carbon::now()->format("Y-m-d");
 
-        $outputDir = sprintf("%s/mvl/export", Storage::path(self::DISK));
-        $this->info($outputDir);
+        $outputDir = sprintf("%s/mvl/export/$today", Storage::path(self::DISK));
         if (!is_dir($outputDir)) {
             mkdir($outputDir, 0755, true);
         }
 
+        $this->info(sprintf(
+            "Starting mem=%s",
+            TextFormatter::formatBytes(memory_get_usage())
+        ));
         $offset = 0;
         while ($offset < $count) {
             $filename = sprintf(
-                "%s/vouchers.%s.%04d.csv",
+                "%s/vouchers.%s-to-%s.%04d.txt",
                 $outputDir,
-                $today,
+                $this->startDate->format("Ymd"),
+                $this->endDate->format("Ymd"),
                 floor(($offset + 1) / $this->chunkSize)
             );
 
-            $voucher_states = $query->offset($offset)->limit($this->chunkSize)->get();
-            $this->info(sprintf("Writing %d vouchers to %s", count($voucher_states), $filename));
+            $voucherIds = $query->offset($offset)
+                ->limit($this->chunkSize)
+                ->pluck('id')
+                ->toArray();
 
-            $fh = fopen($filename, "w");
-            foreach ($voucher_states as $voucher_state) {
-                fwrite($fh, $voucher_state->voucher_id . "\n");
-            }
-            fclose($fh);
+            $this->info(sprintf(
+                "Writing %d vouchers to %s, Mem: %s",
+                count($voucherIds),
+                $filename,
+                TextFormatter::formatBytes(memory_get_usage())
+            ));
+            file_put_contents($filename, join("\n", $voucherIds));
 
             $offset += $this->chunkSize;
         }
+
     }
 
     /**

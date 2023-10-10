@@ -26,6 +26,7 @@ use Log;
  * @property Note[] $notes
  * @property Registration[] $registrations
  * @property Centre $initialCentre
+ * @property string $rvid
  *
  */
 class Family extends Model implements IEvaluee
