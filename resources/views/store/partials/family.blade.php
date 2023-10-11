@@ -138,48 +138,5 @@
         }
 
         $(document).on('childInput:validated', addDobRow);
-
-        // In the case of failed submission, iterate the children previously submitted
-        $(".js-old-child").each(function (index) {
-            // Grab the data out of the data attributes
-            var dob = $(this).data("dob");
-            // Have they ticked the ID box?
-            var verified = $(this).data("verified");
-            // Intval is the only way to stop the JS throwing an error
-            // when the value is zero.
-            var displayVerified = {{intval($sponsorsRequiresID)}};
-
-            // Convert to useful formats - add_child_form partial should have validated these
-            var dateObj = moment(dob, "YYYY-MM", true).format("MMM YYYY");
-            var childKey = Math.random();
-            var childTickedIDBox = verified ? "checked" : "";
-            var displayMonths = moment().diff(dob, 'months') % 12;
-            var displayYears = moment().diff(dob, 'years');
-
-            // Create and append new style columns
-            if (displayMonths > 0) {
-                var ageColumn = '<td class="age-col">' + displayYears + ' yr, ' + displayMonths + ' mo</td>';
-            } else {
-                ageColumn = '<td class="age-col">P</td>';
-            }
-
-            var dobColumn = '<td class="dob-col"><input name="children[' + childKey + '][dob]" type="hidden" value="' + dob + '" >' + dateObj + '</td>';
-
-            var idColumn = (displayVerified === 1)
-                ? '<td class="verified-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][verified]" id="child' + childKey + '" ' + childTickedIDBox + ' value="' + verified + '"><label for="child' + childKey + '"><span class="visually-hidden">Toggle ID checked</span></label>' + '</td>'
-                : '';
-
-            var deferColumn = ($('#added').find('td.can-defer-col').length > 0)
-                ? '<td class="can-defer-col relative"><input type="checkbox" class="styled-checkbox inline-dob" name="children[' + childKey + '][deferred]" id="children[' + childKey + '][deferred]" value="0"><label for="children[' + childKey + '][deferred]"><span class="visually-hidden">Toggle canDefer checked</span></label></td>'
-                : '';
-
-            var removeColumn = '<td class="remove-col"><button type="button" class="remove_date_field"><i class="fa fa-minus" aria-hidden="true"></i></button></td>';
-
-            $(this).append(ageColumn);
-            $(this).append(dobColumn);
-            $(this).append(idColumn);
-            $(this).append(deferColumn)
-            $(this).append(removeColumn);
-        });
     </script>
 @endpushonce
