@@ -62,13 +62,17 @@ class MvlProcess extends Command
             $this->error(sprintf("File not found: %s", $in_file));
         }
 
-        if (!file_exists(dirname($in_file) . "/_headers.csv")) {
-            $fh = fopen(dirname($in_file) . "/_headers.csv", "w");
+        $targetDir = dirname($in_file);
+        if (!file_exists($targetDir . "/_headers.csv")) {
+            if (!is_dir($targetDir)) {
+                mkdir($targetDir, 0755, true);
+            }
+            $fh = fopen($targetDir . "/_headers.csv", "w");
             fputcsv($fh, $this->headers);
             fclose($fh);
         }
 
-        $out_file = dirname($in_file) . "/" . basename($in_file, ".txt") . ".csv";
+        $out_file = $targetDir . "/" . basename($in_file, ".txt") . ".csv";
         $this->info(sprintf("Writing ids to %s", $out_file));
 
         $fh_out = fopen($out_file, 'w');

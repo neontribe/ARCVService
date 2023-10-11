@@ -410,8 +410,9 @@ class Voucher extends Model
     public function rvid(): ?string
     {
         $centreSequence = $this->bundle?->registration->family->centre_sequence;
+        $centrePrefix = $this->bundle?->registration->family->initialCentre->prefix;
         if ($centreSequence) {
-            return str_pad($centreSequence, 4, "0", STR_PAD_LEFT);
+            return $centrePrefix . str_pad($centreSequence, 4, "0", STR_PAD_LEFT);
         }
 
         return null;
@@ -544,12 +545,12 @@ class Voucher extends Model
         return [
             $this->code,
             $this->sponsor?->name,
-            $this->delivery?->dispatched_at->format("Y/m/d h:i"),
+            $this->delivery?->dispatched_at->format("Y/m/d"),
             $this->delivery?->centre->name,
             $this->delivery?->centre->sponsor->name,
             $this->bundle?->disbursed_at ? "True" : "False",
             $this->bundle?->disbursed_at?->format("Y/m/d"),
-            $this->rvid(),
+            (string)$this->rvid(),
             $this->bundle?->registration->family->carers[0]->name,
             $this->bundle?->registration->centre->name,
             $this->recordedOn->created_at->format("Y/m/d"),

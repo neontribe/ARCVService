@@ -100,7 +100,7 @@ class MvlExport extends Command
         while ($offset < $count) {
             $this->time = microtime(true);
             $filename = sprintf(
-                "%s/vouchers.%s-to-%s.%04d.txt",
+                "%s/vouchers.%s-to-%s.%04d.arcx",
                 $outputDir,
                 $this->startDate->format("Ymd"),
                 $this->endDate->format("Ymd"),
