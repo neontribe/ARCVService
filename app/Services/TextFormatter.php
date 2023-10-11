@@ -47,17 +47,18 @@ class TextFormatter
      */
     public static function secondsToTime($seconds): string
     {
+        $secs = (int)$seconds;
         $format = '%s seconds';
-        if ($seconds > 60 * 60 * 24) {
+        if ($secs > 60 * 60 * 24) {
             $format = '%a days, %h hours, %i minutes and %s seconds';
-        } elseif ($seconds > 60 * 60) {
+        } elseif ($secs > 60 * 60) {
             $format = '%h hours, %i minutes and %s seconds';
-        } elseif ($seconds > 60) {
+        } elseif ($secs > 60) {
             $format = '%i minutes and %s seconds';
         } // else Use default value set above
 
         $dtF = new \DateTime('@0');
-        $dtT = new \DateTime("@$seconds");
+        $dtT = new \DateTime("@$secs");
         return $dtF->diff($dtT)->format($format);
     }
 }

@@ -548,16 +548,16 @@ class Voucher extends Model
             $this->delivery?->centre->name,
             $this->delivery?->centre->sponsor->name,
             $this->bundle?->disbursed_at ? "True" : "False",
-            $this->bundle?->disbursed_at->format("Y/m/d h:i"),
+            $this->bundle?->disbursed_at?->format("Y/m/d"),
             $this->rvid(),
             $this->bundle?->registration->family->carers[0]->name,
             $this->bundle?->registration->centre->name,
-            $this->recordedOn->created_at->format("Y/m/d h:i"),
+            $this->recordedOn->created_at->format("Y/m/d"),
             $this->trader->name,
             $this->trader->market->name,
             $this->trader->market->sponsor->name,
-            $this->paymentPendedOn->created_at->format("Y/m/d h:i"),
-            $this->reimbursedOn->created_at->format("Y/m/d h:i"),
+            $this->paymentPendedOn->created_at->format("Y/m/d"),
+            $this->reimbursedOn->created_at->format("Y/m/d"),
         ];
     }
 }

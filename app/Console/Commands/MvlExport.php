@@ -51,6 +51,12 @@ class MvlExport extends Command
     private int $chunkSize = 100000;
 
     /**
+     * Used to track execution time
+     * @var float
+     */
+    private float $time;
+
+    /**
      * Execute the console command.
      */
     public function handle(): void
@@ -70,8 +76,14 @@ class MvlExport extends Command
             ->whereBetween('updated_at', [$this->startDate, $this->endDate])
             ->orderBy("updated_at");
 
+        $this->info("Counting rows");
+        $this->time = microtime(true);
         $count = $query->count();
-        $this->info(sprintf("Exporting %d vouchers.", $count));
+        $this->info(sprintf(
+            "Got %d vouchers in %s",
+            $count,
+            TextFormatter::secondsToTime(microtime(true) - $this->time)
+        ));
 
         $today = Carbon::now()->format("Y-m-d");
 
@@ -81,11 +93,12 @@ class MvlExport extends Command
         }
 
         $this->info(sprintf(
-            "Starting mem=%s",
+            "Starting memory: %s",
             TextFormatter::formatBytes(memory_get_usage())
         ));
         $offset = 0;
         while ($offset < $count) {
+            $this->time = microtime(true);
             $filename = sprintf(
                 "%s/vouchers.%s-to-%s.%04d.txt",
                 $outputDir,
@@ -99,17 +112,17 @@ class MvlExport extends Command
                 ->pluck('id')
                 ->toArray();
 
+            file_put_contents($filename, join("\n", $voucherIds));
             $this->info(sprintf(
-                "Writing %d vouchers to %s, Mem: %s",
+                "Wrote %d voucher ids to %s in %s, Mem: %s",
                 count($voucherIds),
                 $filename,
+                TextFormatter::secondsToTime(microtime(true) - $this->time),
                 TextFormatter::formatBytes(memory_get_usage())
             ));
-            file_put_contents($filename, join("\n", $voucherIds));
 
             $offset += $this->chunkSize;
         }
-
     }
 
     /**
