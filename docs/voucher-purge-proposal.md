@@ -2,7 +2,7 @@
 
 ## Introduction
 
-In an effort to improve the efficiency and performance of our database system, we propose the implementation of a database records archiving project. Over time, our database has accumulated a significant amount of historical data that is rarely accessed but consumes valuable storage and processing resources. Archiving old records will help us optimize database performance, reduce storage costs, and maintain data integrity.
+In an effort to improve the efficiency and performance of the Rose Voucher Scheme's database system, we propose the implementation of a records archiving project. Over time, the database has accumulated a significant amount of historical data that is rarely accessed but consumes valuable storage and processing resources; in particular during reporting operations. Archiving old records will help us optimise database performance while maintaining data integrity and availability.
 
 ## Objectives
 
@@ -26,7 +26,7 @@ The following steps will be taken to achieve the objectives:
 
 1. **Review Existing Data**: Analyze the database to identify data that is suitable for archiving. Vouchers that were archived more than 12 months old and were in the reimbursed state are considered finished.
 
-2. **Archiving Process Design**: A snapshot containing a time stamped copy of the database will be taken along with a recorded software version. This would allow the system to be recreated at any time in the future if detailed analysis was needed.
+2. **Archiving Process Design**: A snapshot containing a time stamped copy of the database will be taken along with a record of the software version at that point. This would allow the entire system to be recreated, precisely as it was at any date at any date, at any time in the future, should detailed analysis be needed.
 
 3. **Archive Storage Selection**: Each snapshot would be shared with ARC and stored on the Neontribe backup server.
 
@@ -36,8 +36,8 @@ The following steps will be taken to achieve the objectives:
 
 6. **Security and Compliance Measures**: The snapshots will all be password protected. The password will be rotated each year and stored in a secure password manager. 
 
-7. **Documentation**: The backup, retention, security and any other pertinent details will be stored in files in the ARC server git repository.
+7. **Documentation**: The backup, retention, security and any other pertinent details will be stored as files in the ARC server git repository.
 
 ## Conclusion
 
-Archiving old records from our database is a crucial step towards optimizing database performance and reducing storage costs. By implementing this project, we can ensure that our database remains efficient, compliant, and secure, while also adhering to data retention policies and industry best practices.
+Archiving old records from our database is a crucial step towards optimising database performance and reducing server costs. By implementing this project, we can ensure that our database remains efficient, compliant, and secure, while also adhering to data retention policies and industry good practices.
