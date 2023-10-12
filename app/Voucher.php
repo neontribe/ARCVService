@@ -18,12 +18,13 @@ use Throwable;
 
 /**
  * @mixin Eloquent
- * @property integer id
+ * @property integer $id
  * @property string $code
  * @property Sponsor $sponsor
  * @property Trader $trader
  * @property Bundle $bundle
  * @property Delivery $delivery
+ * @property VoucherState $history
  * @property string $rvid
  * @property VoucherState $paymentPendedOn
  * @property VoucherState $recordedOn
@@ -543,22 +544,41 @@ class Voucher extends Model
     public function deepExport(): array
     {
         return [
-            $this->code,
-            $this->sponsor?->name,
-            $this->delivery?->dispatched_at->format("Y/m/d"),
-            $this->delivery?->centre->name,
-            $this->delivery?->centre->sponsor->name,
-            $this->bundle?->disbursed_at ? "True" : "False",
-            $this->bundle?->disbursed_at?->format("Y/m/d"),
-            (string)$this->rvid(),
-            $this->bundle?->registration->family->carers[0]->name,
-            $this->bundle?->registration->centre->name,
-            $this->recordedOn->created_at->format("Y/m/d"),
-            $this->trader->name,
-            $this->trader->market->name,
-            $this->trader->market->sponsor->name,
-            $this->paymentPendedOn->created_at->format("Y/m/d"),
-            $this->reimbursedOn->created_at->format("Y/m/d"),
+            "Voucher Number" => $this->code,
+            "Voucher Area" => $this->sponsor?->name,
+            "Date Distributed" => $this->delivery?->dispatched_at->format("Y/m/d"),
+            "Distributed to Centre" => $this->delivery?->centre->name,
+            "Distributed to Area" => $this->delivery?->centre->sponsor->name,
+            "Waiting for collection" => $this->bundle?->disbursed_at ? "True" : "False",
+            "Date Issued" => $this->bundle?->disbursed_at?->format("Y/m/d"),
+            "RVID" => (string)$this->rvid(),
+            "Main Carer" => $this->bundle?->registration->family->carers[0]->name,
+            "Disbursing Centre" => $this->bundle?->registration->centre->name,
+            "Date Trader Recorded Voucher" => $this->recordedOn->created_at->format("Y/m/d"),
+            "Retailer Name" => $this->trader->name,
+            "Retail Outlet" => $this->trader->market->name,
+            "Trader's Area" => $this->trader->market->sponsor->name,
+            "Date Received for Reimbursement" => $this->paymentPendedOn->created_at->format("Y/m/d"),
+            "Reimbursed Date" => $this->reimbursedOn->created_at->format("Y/m/d"),
         ];
+    }
+
+    /**
+     * Gets this voucher including all extended attributes and history as an array.
+     *
+     * Named asArray, so it does not override the Model.toArray()
+     *
+     * @return array
+     */
+    public function asArray(): array
+    {
+        $base = $this->deepExport();
+        $history = [];
+        foreach ($this->history as $vs) {
+            $history[] = $vs->asArray();
+        }
+        $base["Voucher History"] = $history;
+
+        return $base;
     }
 }

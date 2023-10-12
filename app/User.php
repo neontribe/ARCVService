@@ -13,6 +13,7 @@ use Laravel\Passport\HasApiTokens;
 
 /**
  * @mixin Eloquent
+ * @property integer $id
  * @property string $name
  * @property string $email
  * @property string $password

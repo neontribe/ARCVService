@@ -92,4 +92,28 @@ class VoucherState extends Model
     {
         return $this->belongsTo(StateToken::class);
     }
+
+    /**
+     * Gets this voucher state including user details as an array.
+     *
+     * Named asArray, so it does not override the Model.toArray()
+     *
+     * @return array
+     */
+    public function asArray(): array
+    {
+        $base = $this->toArray();
+
+        $user = null;
+        if ($base["user_id"]) {
+            $user = [
+                "id" => $this->user->id,
+                "name" => $this->user->name,
+            ];
+        }
+        $base["user"] = $user;
+        unset($base["user_id"]);
+
+        return $base;
+    }
 }
