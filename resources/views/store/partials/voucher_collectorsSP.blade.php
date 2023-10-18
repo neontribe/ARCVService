@@ -17,7 +17,6 @@
                    autocorrect="off"
                    spellcheck="false"
             ><br></br>
-            @if(App::environment(['local', 'staging']))
                 <label for="pri_carer_ethnicity">Main participant's ethnic background (optional)</label><br>
                 <select name="pri_carer_ethnicity[{{ $pri_carer->id }}]" id="pri_carer_ethnicity">
                     <option value=0>Please select</option>
@@ -41,7 +40,6 @@
                        autocorrect="off"
                        spellcheck="false"
                 ><br></br>
-            @endif
         @else
             {{-- If this is a new record do this instead --}}
             <input id="carer"
