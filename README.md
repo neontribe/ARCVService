@@ -50,16 +50,16 @@ Use [semver](https://semver.org/) for versioning. Each sprint is considered a mi
 ### Hotfix
 
  * Find the trello card and grab the URL, e.g. `https://trello.com/c/P5aKkOWJ/2099-HOTFIX-something-is-broken`
- * Create a branch off main that uses the ticket number and title, e.g. `hotfix/2099-HOTFIX-something-is-broken`
+ * Create a branch off **main** that uses the ticket number and title, e.g. `hotfix/2099-HOTFIX-something-is-broken`
  * Work on the ticket
- * Raise a PR into develop
+ * Raise a PR merging into **main**
  * Add a link to the PR into the Trello card
  * Wait for at least one approval on the PR
  * Merge and delete branch
  * Once testing is passed create a release with an incremented patch number e.g. `git checkout develop && git tag v1.16.1`
- * Release to staging
- * Test on staging
- * Merge `develop` into `main`, the tag points at a commit so the tag is now pointing to `HEAD` on main
+ * Release main to staging *This will change when we are containerised*
+ * Test on staging *This will change when we are containerised*
+ * Cherry-pick the hotfix commits back into develop
  * Release to live
 
 
