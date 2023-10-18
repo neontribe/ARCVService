@@ -108,6 +108,10 @@ It also requires PHP's `zip` extension installed and enabled.
 5. `./deploy-service ARCVService_v<x.y.z>(-[beta|RC]X).tgz service_v<x.y.z>(-[beta|RC]X)`
 6. update the `.env` file
 
+# MVL Export
+
+See [MVL-EXPORT.md](./docs/MVL-EXPORT.md).
+
 # Copyright
 This project was developed by :
 

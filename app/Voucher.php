@@ -4,8 +4,8 @@ namespace App;
 
 use App\Traits\Statable;
 use Auth;
-use DB;
 use DateTimeInterface;
+use DB;
 use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -18,19 +18,26 @@ use Throwable;
 
 /**
  * @mixin Eloquent
+ * @property integer id
  * @property string $code
  * @property Sponsor $sponsor
  * @property Trader $trader
  * @property Bundle $bundle
  * @property Delivery $delivery
+ * @property string $rvid
  * @property VoucherState $paymentPendedOn
  * @property VoucherState $recordedOn
  * @property VoucherState $reimbursedOn
  */
 class Voucher extends Model
 {
-    use Statable; // import the state transition stuff.
-    use SoftDeletes; // import soft delete.
+    use Statable;
+
+    // import the state transition stuff.
+
+    use SoftDeletes;
+
+    // import soft delete.
     protected $dates = ['deleted_at'];
 
     const HISTORY_MODEL = 'App\VoucherState'; // the related model to store the history
@@ -156,7 +163,7 @@ class Voucher extends Model
             if ($start <= $end &&           // query is properly formed
                 $start >= $range->start &&  // our start is gte range start
                 $end <= $range->end         // our end is lte range end
-                ) {
+            ) {
                 // early return on success
                 return $range;
             }
@@ -180,14 +187,14 @@ class Voucher extends Model
 
         // Slightly complicated way of making an object that represents the range.
         // Destructure the output of into an assoc array
-        [ 'shortcode' => $rangeDef['shortcode'], 'number' => $rangeDef['start'] ] = self::splitShortcodeNumeric($startCode);
-        [ 'number' => $rangeDef['end'] ] = self::splitShortcodeNumeric($endCode);
+        ['shortcode' => $rangeDef['shortcode'], 'number' => $rangeDef['start']] = self::splitShortcodeNumeric($startCode);
+        ['number' => $rangeDef['end']] = self::splitShortcodeNumeric($endCode);
 
         // Modify the start/end numbers to integers
         $rangeDef["start"] = intval($rangeDef["start"]);
         $rangeDef["end"] = intval($rangeDef["end"]);
 
-        return (object) $rangeDef;
+        return (object)$rangeDef;
     }
 
     /**
@@ -218,7 +225,7 @@ class Voucher extends Model
         $matches = [];
         // split into named matche and return
         if (preg_match("/^(?<shortcode>\D*)(?<number>\d+)$/", $code, $matches) == 1) {
-             return $matches;
+            return $matches;
         } else {
             return false;
         }
@@ -367,11 +374,11 @@ class Voucher extends Model
      *
      * @return HasOne
      */
-    public function paymentPendedOn()
+    public function paymentPendedOn(): HasOne
     {
         return $this->hasOne(VoucherState::class)
-                ->where('to', 'payment_pending')
-                ->orderBy('created_at', 'desc');
+            ->where('to', 'payment_pending')
+            ->orderBy('created_at', 'desc');
     }
 
     /**
@@ -380,11 +387,11 @@ class Voucher extends Model
      *
      * @return HasOne
      */
-    public function recordedOn()
+    public function recordedOn(): HasOne
     {
         return $this->hasOne(VoucherState::class)
-                ->where('to', 'recorded')
-                ->orderBy('created_at', 'desc');
+            ->where('to', 'recorded')
+            ->orderBy('created_at', 'desc');
     }
 
     /**
@@ -393,11 +400,36 @@ class Voucher extends Model
      *
      * @return HasOne
      */
-    public function reimbursedOn()
+    public function reimbursedOn(): HasOne
     {
         return $this->hasOne(VoucherState::class)
-                ->where('to', 'reimbursed')
-                ->orderBy('created_at', 'desc');
+            ->where('to', 'reimbursed')
+            ->orderBy('created_at', 'desc');
+    }
+
+    public function rvid(): ?string
+    {
+        $centreSequence = $this->bundle?->registration->family->centre_sequence;
+        $centrePrefix = $this->bundle?->registration->family->initialCentre->prefix;
+        if ($centreSequence) {
+            return $centrePrefix . str_pad($centreSequence, 4, "0", STR_PAD_LEFT);
+        }
+
+        return null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function voucherHasBeenResurrected(): bool
+    {
+        $vs = $this->history()->get()->last();
+        if ($vs) {
+            return $vs->to != "reimbursed";
+        }
+
+        // ???? can a voucher have no state?
+        return false;
     }
 
     /**
@@ -431,13 +463,13 @@ class Voucher extends Model
         return self::whereIn('code', $codes)->get();
     }
 
-  /**
-   * Retrieve the min and max paymentPendedOn date of a collection of vouchers.
-   *
-   * @param Collection $vouchers
-   *
-   * @return array
-   */
+    /**
+     * Retrieve the min and max paymentPendedOn date of a collection of vouchers.
+     *
+     * @param Collection $vouchers
+     *
+     * @return array
+     */
     public static function getMinMaxVoucherDates(Collection $vouchers)
     {
         $sorted_vouchers = $vouchers->sortBy(function ($voucher) {
@@ -481,33 +513,52 @@ class Voucher extends Model
     public function scopeInOneOfStates(Builder $query, $states)
     {
         return $query
-            ->whereIn('currentstate', $states)
-        ;
+            ->whereIn('currentstate', $states);
     }
 
     /**
      * Gets a set of vouchers that are voidable.
      *
      * @param Builder $query
-     * @param array $states
      * @return Builder
      */
     public function scopeInVoidableState(Builder $query)
     {
         $voidable_states = ['dispatched'];
         return $query
-            ->inOneOfStates($voidable_states)
-        ;
+            ->inOneOfStates($voidable_states);
     }
 
     /**
      * Prepare a date for array / JSON serialization.
      *
-     * @param  \DateTimeInterface  $date
+     * @param \DateTimeInterface $date
      * @return string
      */
     protected function serializeDate(DateTimeInterface $date)
     {
         return $date->format('Y-m-d H:i:s');
+    }
+
+    public function deepExport(): array
+    {
+        return [
+            $this->code,
+            $this->sponsor?->name,
+            $this->delivery?->dispatched_at->format("Y/m/d"),
+            $this->delivery?->centre->name,
+            $this->delivery?->centre->sponsor->name,
+            $this->bundle?->disbursed_at ? "True" : "False",
+            $this->bundle?->disbursed_at?->format("Y/m/d"),
+            (string)$this->rvid(),
+            $this->bundle?->registration->family->carers[0]->name,
+            $this->bundle?->registration->centre->name,
+            $this->recordedOn->created_at->format("Y/m/d"),
+            $this->trader->name,
+            $this->trader->market->name,
+            $this->trader->market->sponsor->name,
+            $this->paymentPendedOn->created_at->format("Y/m/d"),
+            $this->reimbursedOn->created_at->format("Y/m/d"),
+        ];
     }
 }

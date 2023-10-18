@@ -19,7 +19,7 @@ use Throwable;
  * @property Carer $collectingCarer
  * @property Centre $disbursingCentre
  * @property User $disbursingUser
- * @property string $disbursed_at
+ * @property Carbon $disbursed_at
  */
 class Bundle extends Model
 {

@@ -4,6 +4,7 @@ namespace App;
 
 use Eloquent;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 // hard deletes on these; if only because we'll data-warehouse them at some point.
 
@@ -15,6 +16,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property Voucher $voucher;
  * @property User $user;
  * @property StateToken $stateToken;
+ * @property Carbon $created_at;
+ * @property Carbon $updated_at;
  *
  * Notre sure what these are?  'user_type', 'source',
  */
