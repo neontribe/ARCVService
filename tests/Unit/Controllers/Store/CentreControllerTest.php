@@ -113,7 +113,7 @@ class CentreControllerTest extends StoreTestCase
         $expected_headers = [
             "RVID",
             "Area",
-            "Distribution Centre",
+            "Centre",
             "Primary Carer",
             "Entitlement",
             "Last Collection",
@@ -152,7 +152,7 @@ class CentreControllerTest extends StoreTestCase
             // Make a hash, test it and add it to the end
             $hash =
                 $line["Area"] . '#' .
-                $line["Distribution Centre"] . '#' .
+                $line["Centre"] . '#' .
                 $line["Primary Carer"];
 
             if (!empty($hashes)) {
@@ -170,7 +170,7 @@ class CentreControllerTest extends StoreTestCase
             $this->assertNotFalse($reg);
 
             // It has the correct centre name
-            $this->assertEquals($reg->centre->name, $line["Distribution Centre"]);
+            $this->assertEquals($reg->centre->name, $line["Centre"]);
 
             // It has the correct area/sponsor name
             $this->assertEquals($reg->centre->sponsor->name, $line["Area"]);
@@ -204,7 +204,7 @@ class CentreControllerTest extends StoreTestCase
         $expected_headers = [
             "RVID",
             "Area",
-            "Distribution Centre",
+            "Centre",
             "Main Participant",
             "Entitlement",
             "Last Collection",
@@ -255,7 +255,7 @@ class CentreControllerTest extends StoreTestCase
             // Make a hash, test it and add it to the end
             $hash =
                 $line["Area"] . '#' .
-                $line["Distribution Centre"] . '#' .
+                $line["Centre"] . '#' .
                 $line["Main Participant"];
 
             if (!empty($hashes)) {
@@ -273,7 +273,7 @@ class CentreControllerTest extends StoreTestCase
             $this->assertNotFalse($reg);
 
             // It has the correct centre name
-            $this->assertEquals($reg->centre->name, $line["Distribution Centre"]);
+            $this->assertEquals($reg->centre->name, $line["Centre"]);
 
             // It has the correct area/sponsor name
             $this->assertEquals($reg->centre->sponsor->name, $line["Area"]);

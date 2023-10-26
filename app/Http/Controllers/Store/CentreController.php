@@ -188,7 +188,7 @@ class CentreController extends Controller
             $row = [
                 'RVID' => ($reg->family->rvid) ?? 'Family not found',
                 'Area' => ($reg->centre->sponsor->name) ?? 'Area not found',
-                'Distribution Centre' => ($reg->centre->name) ?? 'Centre not found',
+                'Centre' => ($reg->centre->name) ?? 'Centre not found',
                 'Primary Carer' => ($reg->family->pri_carer) ?? 'Primary Carer not Found',
                 'Ethnicity' => ($pri_carer_ethnicity) ?? 'not answered',
                 'Main Language' => $main_language,
@@ -321,21 +321,21 @@ class CentreController extends Controller
             $bActiveDate = ($b['Last Collection'])
                 ? Carbon::createFromFormat($dateFormats['lastCollection'], $b['Last Collection'])
                 : Carbon::parse('1970-01-01');
-            if (!isset($a['Distribution Centre'])) {
-                $a['Distribution Centre'] = '';
+            if (!isset($a['Centre'])) {
+                $a['Centre'] = '';
             }
             $hashA = strtolower(
                 $a['Area'] . '#' .
-                $a['Distribution Centre'] . '#' .
+                $a['Centre'] . '#' .
                 $aActiveDate->toDateString() . '#' .
                 $a['Primary Carer']
             );
-            if (!isset($b['Distribution Centre'])) {
-                $b['Distribution Centre'] = '';
+            if (!isset($b['Centre'])) {
+                $b['Centre'] = '';
             }
             $hashB = strtolower(
                 $b['Area'] . '#' .
-                $b['Distribution Centre'] . '#' .
+                $b['Centre'] . '#' .
                 $bActiveDate->toDateString() . '#' .
                 $b['Primary Carer']
             );
@@ -404,7 +404,7 @@ class CentreController extends Controller
             $row = [
                 'RVID' => ($reg->family->rvid) ?? 'Household not found',
                 'Area' => ($reg->centre->sponsor->name) ?? 'Area not found',
-                'Distribution Centre' => ($reg->centre->name) ?? 'Centre not found',
+                'Centre' => ($reg->centre->name) ?? 'Centre not found',
                 'Main Participant' => ($reg->family->pri_carer) ?? 'Main Participant not Found',
                 'Entitlement' => $reg->getValuation()->getEntitlement(),
                 'Last Collection' => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format($dateFormats['lastCollection']) : null,
@@ -529,21 +529,21 @@ class CentreController extends Controller
                 ? Carbon::createFromFormat($dateFormats['lastCollection'], $b['Last Collection'])
                 : Carbon::parse('1970-01-01');
 
-            if (!isset($a['Distribution Centre'])) {
-                $a['Distribution Centre'] = '';
+            if (!isset($a['Centre'])) {
+                $a['Centre'] = '';
             }
             $hashA = strtolower(
                 $a['Area'] . '#' .
-                $a['Distribution Centre'] . '#' .
+                $a['Centre'] . '#' .
                 $aActiveDate->toDateString() . '#' .
                 $a['Main Participant']
             );
-            if (!isset($b['Distribution Centre'])) {
-                $b['Distribution Centre'] = '';
+            if (!isset($b['Centre'])) {
+                $b['Centre'] = '';
             }
             $hashB = strtolower(
                 $b['Area'] . '#' .
-                $b['Distribution Centre'] . '#' .
+                $b['Centre'] . '#' .
                 $bActiveDate->toDateString() . '#' .
                 $b['Main Participant']
             );
