@@ -33,3 +33,4 @@ tests/Browser/screenshots/
 passport.install
 coverage
 .php-cs-fixer.cache
+*.swp
