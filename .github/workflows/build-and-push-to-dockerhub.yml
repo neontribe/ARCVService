@@ -27,7 +27,7 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        docker build -t arcvouchers/service:v${EVENT_NUMBER} .
-        docker push arcvouchers/service:v${EVENT_NUMBER}
+        docker build -t arcvouchers/service:${EVENT_NUMBER} .
+        docker push arcvouchers/service:${EVENT_NUMBER}
       env:
         EVENT_NUMBER: "${{ github.ref_name }}"
