@@ -32,7 +32,7 @@ Use [semver](https://semver.org/) for versioning. Each sprint is considered a mi
  * Raise a PR into develop
  * Add a link to the PR into the Trello card
  * Wait for at least one approval on the PR
- * Merge and delete branch
+ * Merge into develop and delete branch
 
 ### Create a Release candidate
 
@@ -43,8 +43,9 @@ Use [semver](https://semver.org/) for versioning. Each sprint is considered a mi
 ### Creating a Release
 
  * Merge `develop` into `main`
- * Tag main with a release, e.g. `git checkout main && git tag v1.16.0`
- * Push the tag, `git push --tags`
+ * Create and tag a release
+ * Release to staging
+ * Test
  * Release to live
 
 ### Hotfix
@@ -93,7 +94,7 @@ It also requires PHP's `zip` extension installed and enabled.
 - Service styling is in `resources/assets/sass/app.scss`
 - When amending the styles in development, switching to a new branch or pulling code, run `yarn watch` to watch for changes
 - Service is compiled from Sass with `yarn prod`
-- 
+-
 #### Store
 
 - Store styling is in `public/store/css/main.css`
