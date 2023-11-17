@@ -38,4 +38,27 @@ class TextFormatter
         // Format the number with the specified precision
         return round($bytes, $precision) . ' ' . $units[$pow];
     }
+
+    /**
+     * Produce a human-readable time elapsed sting from a number of seconds.
+     *
+     * @param $seconds
+     * @return string
+     */
+    public static function secondsToTime($seconds): string
+    {
+        $secs = (int)$seconds;
+        $format = '%s seconds';
+        if ($secs > 60 * 60 * 24) {
+            $format = '%a days, %h hours, %i minutes and %s seconds';
+        } elseif ($secs > 60 * 60) {
+            $format = '%h hours, %i minutes and %s seconds';
+        } elseif ($secs > 60) {
+            $format = '%i minutes and %s seconds';
+        } // else Use default value set above
+
+        $dtF = new \DateTime('@0');
+        $dtT = new \DateTime("@$secs");
+        return $dtF->diff($dtT)->format($format);
+    }
 }

@@ -9,6 +9,7 @@ use App\User;
 use App\Voucher;
 use App\VoucherState;
 use Carbon\Carbon;
+use Faker\Factory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
 
@@ -87,5 +88,20 @@ class LargeVouchersSeeder extends Seeder
         // Make a transition definition
         $reimbursedTransitionDef = Voucher::createTransitionDef("payment_pending", "payout");
         VoucherState::batchInsert($reimbursedVouchers, $date, 1, 'User', $reimbursedTransitionDef);
+
+        // To make the vouchers usable to test MVL export we need random created dates but batch insert forces the date
+        // to be now
+        // THIS DOES NOT SEEM TO WORK, use this SQL instead see docs/README.md
+        /*
+        $faker = Factory::create();
+        $voucherStates = VoucherState::where("to", "=", "reimbursed")->get();
+        print "Got vouchers " . count($voucherStates) . "\n";
+        foreach ($voucherStates as $vs) {
+            $createdAt = $faker->dateTimeBetween("-3 years")->format('Y-m-d H:i:s');
+            $vs->created_at = $createdAt;
+            print "Voucher " . $vs->id . ", date: " . $createdAt . "\n";
+            $vs->save();
+        }
+        */
     }
 }

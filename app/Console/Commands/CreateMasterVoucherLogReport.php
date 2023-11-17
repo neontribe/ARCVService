@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\TextFormatter;
 use DateTime;
 use DB;
 use Exception;

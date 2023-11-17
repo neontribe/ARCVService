@@ -15,6 +15,8 @@ return [
         'travel to get/spend vouchers too expensive',
         'disliked market shopping',
         'no attendance',
+        'too challenging to use vouchers with health conditions',
+        'reached time limit on project',
         'unspecified',
     ],
 

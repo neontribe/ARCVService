@@ -20,6 +20,50 @@ ARCV Service is the service portal and API for ARCV Market.
 
 We suggest that you use the TLD `.test` as others, like `.app` may now be in the public domain and you will experience difficulty with respect to browser behavior over HTTP/HTTPS.
 
+## Versioning, branching and tags
+
+Use [semver](https://semver.org/) for versioning. Each sprint is considered a minor release until the customer asks for a major, non backwardly compatible re-write.
+
+### Sprint development
+
+ * Find the trello card and grab the URL, e.g. `https://trello.com/c/P5aKkOWJ/2056-market-roll-up-repo`
+ * Create a branch off develop that uses the ticket number and title, e.g. `dev/2056-market-roll-up-repo`
+ * Work on the ticket
+ * Raise a PR into develop
+ * Add a link to the PR into the Trello card
+ * Wait for at least one approval on the PR
+ * Merge into develop and delete branch
+
+### Create a Release candidate
+
+ * Tag develop with the incremented release number, e.g. `git checkout develop && git tag v1.16.0-rc.1`
+ * Push the tag, `git push --tags`
+ * Release to staging
+
+### Creating a Release
+
+ * Merge `develop` into `main`
+ * Create and tag a release
+ * Release to staging
+ * Test
+ * Release to live
+
+### Hotfix
+
+ * Find the trello card and grab the URL, e.g. `https://trello.com/c/P5aKkOWJ/2099-HOTFIX-something-is-broken`
+ * Create a branch off **main** that uses the ticket number and title, e.g. `hotfix/2099-HOTFIX-something-is-broken`
+ * Work on the ticket
+ * Raise a PR merging into **main**
+ * Add a link to the PR into the Trello card
+ * Wait for at least one approval on the PR
+ * Merge and delete branch
+ * Once testing is passed create a release with an incremented patch number e.g. `git checkout develop && git tag v1.16.1`
+ * Release main to staging *This will change when we are containerised*
+ * Test on staging *This will change when we are containerised*
+ * Cherry-pick the hotfix commits back into develop
+ * Release to live
+
+
 ## Setting up reporting
 
 This project can run reports at set times using the Artisan scheduler. This requires some means of periodic triggering. Add to crontab the following:
@@ -36,7 +80,7 @@ where
 
 It also requires PHP's `zip` extension installed and enabled.
 
-### To use the Reset data buttton on the dashboard:
+### To use the Reset data button on the dashboard:
  - chown `env` to the console user and web user group e.g. `chown neontribe:www-data .env`
  - And `chmod 775 .env`
 
@@ -50,17 +94,24 @@ It also requires PHP's `zip` extension installed and enabled.
 - Service styling is in `resources/assets/sass/app.scss`
 - When amending the styles in development, switching to a new branch or pulling code, run `yarn watch` to watch for changes
 - Service is compiled from Sass with `yarn prod`
+-
 #### Store
+
 - Store styling is in `public/store/css/main.css`
 - Run `yarn dev` to make sure packages Store shares with Service have been included.
 
 ## Deployment
 
-1. `./makedeploy.sh ARCVService_v<x.y.z>(-[beta|RC]X)`
-2. copy the tgz file up to the server
-3. login and move to the correct folder
-4. `./deploy-service ARCVService_v<x.y.z>(-[beta|RC]X).tgz service_v<x.y.z>(-[beta|RC]X)`
-5. update the `.env` file
+1. checkout the release tag, `git checkout v<x.y.z>`
+2. `./makedeploy.sh ARCVService_v<x.y.z>(-[beta|RC]X)`
+3. copy the tgz file up to the server
+4. login and move to the correct folder
+5. `./deploy-service ARCVService_v<x.y.z>(-[beta|RC]X).tgz service_v<x.y.z>(-[beta|RC]X)`
+6. update the `.env` file
+
+# MVL Export
+
+See [MVL-EXPORT.md](./docs/MVL-EXPORT.md).
 
 # Copyright
 This project was developed by :
