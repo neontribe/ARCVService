@@ -168,22 +168,17 @@ Route::group(['middleware' => 'auth:store'], function () {
             ]);
 
             // Intern 4 test route
-            Route::get('/vouchers/gabriel', [
-                'as' => 'store.vouchers.mvl.gabriel',
+            Route::get('/vouchers/historical', [
+                'as' => 'store.vouchers.mvl.historical',
                 'uses' => 'VoucherController@listVoucherLogs',
             ]);
 
             // Intern 4 test route
             Route::get('/vouchers/download', [
                 'as' => 'store.vouchers.mvl.download',
-                'uses' => 'VoucherController@downloadVoucherLogs',
+                'uses' => 'VoucherController@downloadAndDecryptVoucherLogs',
             ]);
 
-            // Intern 4 test test route DELETE !!
-            Route::get("/vouchers/gabriel/testing", [
-                "as" => "store.vouchers.gabriel.testing",
-                "uses" => "VoucherController@testEncryptToDisk",
-            ]);
         }
     );
 

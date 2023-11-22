@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Services\TextFormatter;
 use URL;
 
 class VoucherController extends Controller
@@ -100,9 +101,9 @@ class VoucherController extends Controller
     {
         // by gabriel (intern 4)
 
-        $directoryPath = storage_path("app/local");
+        $directoryPath = storage_path("app/local"); # I think I'm using the wrong function to access files?
 
-        $logFiles = File::glob($directoryPath . '/*.log');
+        $logFiles = File::glob($directoryPath . '/*.arcx.csv');
 
         $downloadLinks = [];
         $logMetadata = [];
@@ -113,15 +114,12 @@ class VoucherController extends Controller
 
             $rawFileSize = filesize($logFile);
 
-            $i = floor(log($rawFileSize) / log(1024));
-            $sizes = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-            $formattedFileSize = sprintf('%.02F', $rawFileSize / pow(1024, $i)) * 1 . ' ' . $sizes[$i];
+            $formattedFileSize = TextFormatter::formatBytes($rawFileSize);
 
-            // get metadata
             $logMetadata[$baseFileName] = [
                 "fileName" => $baseFileName,
-                "rawSize" => filesize($logFile), // to use for sorting
-                "formattedSize" => $formattedFileSize, // to use for displaying
+                "rawSize" => filesize($logFile), // Use for sorting.
+                "formattedSize" => $formattedFileSize, // Use for displaying.
                 "lastModified" => filemtime($logFile)];
         }
 
@@ -135,58 +133,75 @@ class VoucherController extends Controller
     }
 
 
-    public function testEncryptToDisk()
+    public function downloadAndDecryptVoucherLogs(Request $request)
     {
-        // testing how encryption works
-        // TODO: Delete this
+        $logFile = $request->query('logFile');
+        // Is there a way for people to maliciously pass bad queries?
+        // I don't think they can do this, since it checks only searches within storage/app/local.
+        // The website will crash though if the file isn't encrypted properly/at all.
 
-        $app_key = config("app.key");
-        $base64Key = substr($app_key, 7, strlen($app_key));
-        $binaryKey = base64_decode($base64Key, true);
-        if ($binaryKey === false) {
-            throw new Exception("Invalid Base64 key");
-        }
-        $secretKey = substr(hash('sha256', $binaryKey, true), 0, SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
-        $message = "Hello World!";
-        $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+        $pathToVouchers = "app/local/";
 
-        $encryptedMessage = sodium_crypto_secretbox($message, $nonce, $secretKey);
-
-        $filePath = storage_path("app/local/") . "helloworld.enc";
-
-        $file = fopen($filePath, "w");
-        //fwrite($file, $encryptedMessage);
-        fwrite($file, $nonce.$encryptedMessage);
-        fclose($file);
-        // return $encryptedMessage;
-        return $this->testDecryptFromDisk();
-
-    }
-
-    public function testDecryptFromDisk()
-    {
-        $filePath = storage_path("app/local/") . "helloworld.enc";
-        $app_key = config("app.key");
-        $base64Key = substr($app_key, 7, strlen($app_key));
-        $binaryKey = base64_decode($base64Key, true);
-        if ($binaryKey === false) {
-            throw new Exception("Invalid Base64 key");
+        // Check the log exists, so we can error-out before we declare a streamed response.
+        if (!file_exists(storage_path($pathToVouchers . $logFile))) {
+            // Return to dashboard with an error that indicates we don't have a file.
+            return redirect(URL::route('store.dashboard'))
+                ->with('error_message', "Sorry, we couldn't find the file you were looking for. Please contact support if this error persists.");
         }
 
-        $secretKey = substr(hash('sha256', $binaryKey, true), 0, SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
-        if (file_exists($filePath)) {
-            $file = fopen($filePath, "r");
-        } else {
-            return "Error: File " . $filePath . " does not exist.";
+        // Do as much IO as we can comfortably before we begin streaming.
+        $file = fopen(storage_path($pathToVouchers . $logFile), 'r');
+
+        $header = fread($file, SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES);
+
+        try {
+            // Initialise the decryption stream with its initial header. For more documentation, SecretStreamWrapper.
+            $stream = sodium_crypto_secretstream_xchacha20poly1305_init_pull($header, SecretStreamWrapper::getKey());
+        } catch (\SodiumException $e) {
+            // TODO : This error copy needs some UI.
+            return redirect(URL::route('store.dashboard'))
+                ->with('error_message', "Sorry, the export file was unreadable. Please contact support.");
         }
 
-        $fileData = fread($file, filesize($filePath));
-        $nonce = substr($fileData,0,SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-        // Double check the lines above and below this because this feels incredibly wrong
-        $encryptedMessage = substr($fileData, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, strlen($fileData));
-        // return $encryptedMessage;
-        return sodium_crypto_secretbox_open($encryptedMessage, $nonce, $secretKey);
+        # slightly (very) reused
+        return new StreamedResponse(function () use ($file, &$stream) {
+            do {
+                // Read the next message.
+                $part = fread($file, SecretStreamWrapper::MESSAGE_SIZE + SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_ABYTES);
 
+                if ($part === false) {
+                    // We couldn't read from the file. Log that as an error.
+                    Log::error("IO error when reading log");
+                    throw new \RuntimeException("IO error when reading log");
+                }
+
+                // Decrypt the message.
+                $part = sodium_crypto_secretstream_xchacha20poly1305_pull($stream, $part);
+
+                if ($part === false) {
+                    // Decryption failed. Log that as an error.
+                    Log::error("Decryption error when reading log");
+                    throw new \RuntimeException("Decryption error when reading log");
+                }
+
+                // Split the decrypted message into content and metadata.
+                list($message, $tag) = $part;
+
+                // The last message should be tagged as such, to ensure there was no tampering after encryption.
+                $eof = feof($file);
+                $lastMessage = $tag === SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_FINAL;
+                if ($eof != $lastMessage) {
+                    // We met the end of the file before the last message or vice-versa. Log that error.
+                    Log::error("Log read ended prematurely");
+                    throw new \RuntimeException("Log read ended prematurely");
+                }
+
+                // Stream the decrypted content.
+                echo $message;
+            } while (!$eof); // While there is more to do, continue.
+        }, 200, [
+            'Content-Disposition' => 'attachment; filename="' . $logFile . '"'
+        ]);
 
     }
 }

@@ -57,6 +57,12 @@
                         Export Voucher Log
                     </li>
                 </a>
+                <a href="{{ URL::route('store.vouchers.mvl.historical') }}" target="_blank" rel="noopener noreferrer">
+                    <li>
+                        <img src="{{ asset('store/assets/history-light.svg') }}" id="export-mvl">
+                        View Historic Voucher Logs
+                    </li>
+                </a>
             @endcan
         </ul>
     </div>
