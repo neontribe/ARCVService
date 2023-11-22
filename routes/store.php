@@ -166,6 +166,24 @@ Route::group(['middleware' => 'auth:store'], function () {
                 'as' => 'store.vouchers.mvl.export',
                 'uses' => 'VoucherController@exportMasterVoucherLog',
             ]);
+
+            // Intern 4 test route
+            Route::get('/vouchers/gabriel', [
+                'as' => 'store.vouchers.mvl.gabriel',
+                'uses' => 'VoucherController@listVoucherLogs',
+            ]);
+
+            // Intern 4 test route
+            Route::get('/vouchers/download', [
+                'as' => 'store.vouchers.mvl.download',
+                'uses' => 'VoucherController@downloadVoucherLogs',
+            ]);
+
+            // Intern 4 test test route DELETE !!
+            Route::get("/vouchers/gabriel/testing", [
+                "as" => "store.vouchers.gabriel.testing",
+                "uses" => "VoucherController@testEncryptToDisk",
+            ]);
         }
     );
 
