@@ -167,13 +167,13 @@ Route::group(['middleware' => 'auth:store'], function () {
                 'uses' => 'VoucherController@exportMasterVoucherLog',
             ]);
 
-            // Intern 4 test route
+            // Table of all historical voucher logs stored in our system.
             Route::get('/vouchers/historical', [
                 'as' => 'store.vouchers.mvl.historical',
                 'uses' => 'VoucherController@listVoucherLogs',
             ]);
 
-            // Intern 4 test route
+            // Downloads and decrypts voucher log file when the button at /vouchers/historical is pressed.
             Route::get('/vouchers/download', [
                 'as' => 'store.vouchers.mvl.download',
                 'uses' => 'VoucherController@downloadAndDecryptVoucherLogs',

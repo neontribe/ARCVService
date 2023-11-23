@@ -70,15 +70,6 @@ class MvlProcess extends Command
         $targetDir = "storage/app/local";
         $sswTargetDir = "ssw://" . $targetDir;
 
-//        if (!file_exists($targetDir . "/_headers.csv")) {
-//            if (!is_dir($targetDir)) {
-//                mkdir($targetDir, 0755, true);
-//            }
-//            $fh = fopen($sswTargetDir . "/_headers.csv", "w");
-//            fputcsv($fh, $this->headers);
-//            fclose($fh);
-//        }
-
         $out_file = $sswTargetDir . "/" . basename($in_file, ".txt") . ".csv";
         $this->info(sprintf("Writing ids to %s", $out_file));
 
