@@ -2,10 +2,13 @@ name: Build and Push to Docker Hub
 
 on:
   workflow_dispatch:
-# on:
-#   push:
-#     branches:
-#       - main # Replace with your branch name
+  push:
+    branches:
+      - '*'
+  pull_request:
+    types:
+      - 'opened'
+      - 'synchronize'
 
 jobs:
   build-and-push:
@@ -20,5 +23,5 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        docker build -t arc/service:latest .
-        docker push arc/service:latest
+        docker build -t arcvouchers/service:$(echo ${GITHUB_REF#refs/heads/} | tr '/' '-') .
+        docker push arcvouchers/service:$(echo ${GITHUB_REF#refs/heads/} | tr '/' '-')
