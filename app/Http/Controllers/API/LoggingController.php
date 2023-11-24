@@ -29,7 +29,7 @@ class LoggingController extends Controller
         if (!empty($json)) {
 
             $headers = ["hash", "url", "status", "created", "data","trader-id"];
-            $csvFilePath = "logs/market_logs.csv";
+            $csvFilePath = "logs/market_logs.arcx.csv";
 
             // Add encryption wrapper
             if (!in_array("ssw", stream_get_wrappers())) {
