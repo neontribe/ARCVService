@@ -34,6 +34,9 @@ class MvlCat extends Command
         if (!file_exists($in_file)) {
             $this->error(sprintf("Log file not found: %s", $in_file));
         }
+
+        // Opens any given file from root folder - allows any encrypted file using SecretStreamWrapper to be decrypted.
+        // Might not be an issue, given that if a bad actor has access to ./artisan to run this we have bigger problems :)
         $file = fopen($in_file, 'r');
 
         // Get header for SSW.
