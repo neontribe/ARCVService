@@ -26,30 +26,35 @@
                 </thead>
                 <tbody>
                     @foreach ($pending as $key => $paymentDatum)
-                    <tr  class="accordion-toggle">
-                        <td><span class="glyphicon glyphicon-th-list" data-toggle="collapse" data-target=".varea{{$key}}"></span></td>
-                        <td>{{ $paymentDatum["traderName"]}}</td>
-                        <td>{{ $paymentDatum["marketName"]}}</td>
-                        <td>{{ $paymentDatum["area"]}}</td>
-                        <td>{{ $paymentDatum["requestedBy"]}}</td>
-                        <td>All</td>
-                        <td>{{ $paymentDatum["vouchersTotal"]}}</td>
-                        <td>
-                            <a href="{{ route('admin.payment-request.show', ['paymentUuid' => $key]) }}" class="link">
-                                <div class="link-button">
-                                    Pay Request
-                                </div>
-                            </a>
-                        </td>
-                    </tr>
-                        @foreach($paymentDatum["voucherAreas"] as $area=>$value)
-                        <tr class="accordian-body collapse varea{{$key}}"><td colspan="5"></td>
-                            <td>{{ $area }}</td>
-                            <td>{{ $value }}</td>
-                            <td></td>
-                        </tr>
-                        @endforeach
+                        @if (array_key_exists("traderName", $paymentDatum))
+                            <tr class="accordion-toggle">
+                                <td><span class="glyphicon glyphicon-th-list" data-toggle="collapse" data-target=".varea{{$key}}"></span></td>
+                                <td>{{ $paymentDatum["traderName"]}}</td>
+                                <td>{{ $paymentDatum["marketName"]}}</td>
+                                <td>{{ $paymentDatum["area"]}}</td>
+                                <td>{{ $paymentDatum["requestedBy"]}}</td>
+                                <td>All</td>
+                                <td>{{ $paymentDatum["vouchersTotal"]}}</td>
+                                <td>
+                                    <a href="{{ route('admin.payment-request.show', ['paymentUuid' => $key]) }}" class="link">
+                                        <div class="link-button">
+                                            Pay Request
+                                        </div>
+                                    </a>
+                                </td>
+                            </tr>
+                            @foreach($paymentDatum["voucherAreas"] as $area=>$value)
+                            <tr class="accordian-body collapse varea{{$key}}"><td colspan="5"></td>
+                                <td>{{ $area }}</td>
+                                <td>{{ $value }}</td>
+                                <td></td>
+                            </tr>
+                            @endforeach
+                        @else
+                            {{ logger('TRADER DATA MISSING: ' . $key) }}
+                        @endif
                     @endforeach
+
                     @foreach ($reimbursed as $key => $paymentDatum)
                     <tr  class="accordion-toggle">
                         <td><span class="glyphicon glyphicon-th-list" data-toggle="collapse" data-target=".varea{{$key}}"></span></td>
