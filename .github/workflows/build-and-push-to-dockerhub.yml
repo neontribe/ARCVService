@@ -2,9 +2,6 @@ name: Build and Push to Docker Hub
 
 on:
   workflow_dispatch:
-  merge:
-    branches:
-      - '*'
   push:
     branches:
       - '*'
