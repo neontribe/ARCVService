@@ -16,8 +16,6 @@ class LoggingController extends Controller
 
     public function log(Request $request): JsonResponse
     {
-        // Doesn't work, why not?
-        // $json = $request->json();
 
         try {
             $json = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
@@ -40,6 +38,8 @@ class LoggingController extends Controller
                 stream_wrapper_register("ssw", "App\Wrappers\SecretStreamWrapper");
             }
 
+            // Opens the file using the ssw:// (SecretSteamWrapper) wrapper,
+            // so anything written to $csvFile is encrypted.
             $csvFile = fopen("ssw://" . $csvFilePath, "a");
 
             if (!$csvFile) {
@@ -47,6 +47,7 @@ class LoggingController extends Controller
                 return response()->json();
             }
 
+            // Add headers to the CSV if its empty, prevents headers being appended to existing CSV files.
             $csvIsEmpty = (filesize($csvFilePath) === 0);
             if ($csvIsEmpty) {
                 fputcsv($csvFile, $headers);
@@ -60,6 +61,7 @@ class LoggingController extends Controller
                 $trader_id = $item['trader'] ?? -1;
                 $processed[] = $hash;
 
+                // Write data to CSV - this is encrypted because $csvFile is opened using ssw://.
                 fputcsv($csvFile, [$hash, $url, $status, $created, $jsonData, $trader_id]);
             }
 
