@@ -18,13 +18,16 @@ class MvlCat extends Command
      *
      * @var string $description
      */
-    protected $description = 'Decrypts an MVL log file and dumps to std out.';
+    protected $description = 'Decrypts an MVL log file and dumps to std out. This can be used to decrypt any ".arcx" file.';
 
     /**
      * Execute the console command.
      */
     public function handle(): void
     {
+        // This decryption is based on ExportMasterVoucherLog() @ app/Http/Controllers/Store/VoucherController.php.
+        // Since this has been used a lot of times, maybe a generalised version should be made a function somewhere?
+
         $in_file = $this->argument("file");
 
         $this->info(sprintf("Reading logs from %s", $in_file));
