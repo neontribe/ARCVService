@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Wrappers\SecretStreamWrapper;
+use App\Wrappers\SecretStreamWrapper; // Not sure if this is used? It might be used when declaring ssw:// in log().
 use App\Http\Controllers\Controller;
-use App\MarketLog;
-use False\True;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
