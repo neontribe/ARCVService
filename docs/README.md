@@ -1,5 +1,3 @@
-
-
 ## Links
 
  * [Using Plant UML to generate diagrams](plantuml.md)
@@ -35,3 +33,4 @@ Just connect to the mysql instance and call it, dev help version:
 And then check it worked:
 
     select count(*), created_at from voucher_states where `to` = 'reimbursed' group by created_at limit 30;
+
