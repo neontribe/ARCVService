@@ -2,13 +2,13 @@ name: Build and Push to Docker Hub
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - '*'
-  pull_request:
-    types:
-      - 'opened'
-      - 'synchronize'
+#  push:
+#    branches:
+#      - '*'
+#  pull_request:
+#    types:
+#      - 'opened'
+#      - 'synchronize'
 
 jobs:
   build-and-push:

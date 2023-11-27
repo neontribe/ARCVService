@@ -1,3 +1,6 @@
+LABEL licence="proprietary"
+LABEL maintainer="tobias@neontribe.co.uk"
+
 ARG PHP_VER="8.1"
 ARG COMPOSER_VER="latest"
 ARG BRANCH="develop"
