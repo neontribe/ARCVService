@@ -1,6 +1,3 @@
-LABEL licence="proprietary"
-LABEL maintainer="tobias@neontribe.co.uk"
-
 ARG PHP_VER="8.1"
 ARG COMPOSER_VER="latest"
 ARG BRANCH="develop"
@@ -113,6 +110,8 @@ WORKDIR /opt/project
 ARG BRANCH
 ARG TIMEZONE
 LABEL maintainer="tobias@neontribe.co.uk"
+LABEL licence="proprietary"
+
 ENV BRANCH=${BRANCH}
 ENV TIMEZONE=${TIMEZONE}
 RUN ln -snf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && echo ${TIMEZONE} > /etc/timezone && \
