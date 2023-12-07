@@ -1,0 +1,22 @@
+@startuml
+
+package "systemd" {
+  [supervisord]
+}
+
+package [PHP] {
+  https - [Fast CGI]
+  [CLI]
+}
+
+database "MySql" {
+  folder "Shared store/admin DB" {
+    [DB]
+  }
+}
+
+[Fast CGI] --> [DB]
+[CLI] --> [DB]
+[supervisord] -> [CLI]
+
+@enduml

@@ -1,0 +1,337 @@
+@startuml
+
+top to bottom direction
+skinparam linetype ortho
+
+class admin_users {
+   name: varchar(191)
+   email: varchar(191)
+   password: varchar(191)
+   remember_token: varchar(100)
+   created_at: timestamp
+   updated_at: timestamp
+   deleted_at: timestamp
+   id: int(10) unsigned
+}
+class bundles {
+   entitlement: int(10) unsigned
+   registration_id: int(10) unsigned
+   collecting_carer_id: int(10) unsigned
+   disbursing_centre_id: int(10) unsigned
+   disbursing_user_id: int(10) unsigned
+   disbursed_at: timestamp
+   created_at: timestamp
+   updated_at: timestamp
+   id: int(10) unsigned
+}
+class carers {
+   name: varchar(191)
+   family_id: int(10) unsigned
+   created_at: timestamp
+   updated_at: timestamp
+   deleted_at: timestamp
+   ethnicity: varchar(191)
+   language: varchar(191)
+   id: int(10) unsigned
+}
+class centre_centre_user {
+   homeCentre: tinyint(1)
+   centre_user_id: int(10) unsigned
+   centre_id: int(10) unsigned
+}
+class centre_users {
+   name: varchar(191)
+   email: varchar(191)
+   password: varchar(191)
+   role: varchar(191)
+   downloader: tinyint(1)
+   remember_token: varchar(100)
+   centre_id: int(10) unsigned
+   created_at: timestamp
+   updated_at: timestamp
+   deleted_at: timestamp
+   id: int(10) unsigned
+}
+class centres {
+   name: varchar(191)
+   prefix: varchar(5)
+   sponsor_id: int(10) unsigned
+   print_pref: enum('collection', 'individual')
+   created_at: timestamp
+   updated_at: timestamp
+   id: int(10) unsigned
+}
+class children {
+   dob: datetime
+   born: tinyint(1)
+   verified: tinyint(1)
+   family_id: int(10) unsigned
+   created_at: timestamp
+   updated_at: timestamp
+   deferred: tinyint(1)
+   is_pri_carer: tinyint(1)
+   id: int(10) unsigned
+}
+class deliveries {
+   centre_id: int(10) unsigned
+   range: varchar(191)
+   dispatched_at: datetime
+   created_at: timestamp
+   updated_at: timestamp
+   id: int(10) unsigned
+}
+class evaluations {
+   sponsor_id: int(11)
+   name: varchar(191)
+   entity: varchar(191)
+   purpose: varchar(191)
+   value: int(11)
+   created_at: timestamp
+   updated_at: timestamp
+   id: int(10) unsigned
+}
+class failed_jobs {
+   uuid: varchar(191)
+   connection: text
+   queue: text
+   payload: longtext
+   exception: longtext
+   failed_at: timestamp
+   id: bigint(20) unsigned
+}
+class families {
+   initial_centre_id: int(10) unsigned
+   centre_sequence: int(11)
+   leaving_on: datetime
+   leaving_reason: varchar(128)
+   created_at: timestamp
+   updated_at: timestamp
+   rejoin_on: timestamp
+   leave_amount: int(11)
+   id: int(10) unsigned
+}
+class job_statuses {
+   job_id: varchar(191)
+   type: varchar(191)
+   queue: varchar(191)
+   attempts: int(11)
+   progress_now: int(11)
+   progress_max: int(11)
+   status: varchar(16)
+   input: longtext
+   output: longtext
+   created_at: timestamp
+   updated_at: timestamp
+   started_at: timestamp
+   finished_at: timestamp
+   id: int(10) unsigned
+}
+class jobs {
+   queue: varchar(191)
+   payload: longtext
+   attempts: tinyint(3) unsigned
+   reserved_at: int(10) unsigned
+   available_at: int(10) unsigned
+   created_at: int(10) unsigned
+   id: bigint(20) unsigned
+}
+class market_logs {
+   created_at: timestamp
+   updated_at: timestamp
+   url: varchar(191)
+   status: int(11)
+   created: varchar(191)
+   data: longtext
+   hash: varchar(191)
+   trader_id: int(11)
+   id: int(10) unsigned
+}
+class markets {
+   name: varchar(191)
+   location: varchar(191)
+   sponsor_id: int(10) unsigned
+   created_at: timestamp
+   updated_at: timestamp
+   deleted_at: timestamp
+   payment_message: varchar(191)
+   id: int(10) unsigned
+}
+class migrations {
+   migration: varchar(191)
+   batch: int(11)
+   id: int(10) unsigned
+}
+class notes {
+   content: text
+   family_id: int(10) unsigned
+   user_id: int(10) unsigned
+   created_at: timestamp
+   updated_at: timestamp
+   id: int(10) unsigned
+}
+class oauth_access_tokens {
+   user_id: bigint(20) unsigned
+   client_id: bigint(20) unsigned
+   name: varchar(191)
+   scopes: text
+   revoked: tinyint(1)
+   created_at: timestamp
+   updated_at: timestamp
+   expires_at: datetime
+   id: varchar(100)
+}
+class oauth_auth_codes {
+   user_id: bigint(20) unsigned
+   client_id: bigint(20) unsigned
+   scopes: text
+   revoked: tinyint(1)
+   expires_at: datetime
+   id: varchar(100)
+}
+class oauth_clients {
+   user_id: bigint(20) unsigned
+   name: varchar(191)
+   secret: varchar(100)
+   provider: varchar(191)
+   redirect: text
+   personal_access_client: tinyint(1)
+   password_client: tinyint(1)
+   revoked: tinyint(1)
+   created_at: timestamp
+   updated_at: timestamp
+   id: bigint(20) unsigned
+}
+class oauth_personal_access_clients {
+   client_id: bigint(20) unsigned
+   created_at: timestamp
+   updated_at: timestamp
+   id: bigint(20) unsigned
+}
+class oauth_refresh_tokens {
+   access_token_id: varchar(100)
+   revoked: tinyint(1)
+   expires_at: datetime
+   id: varchar(100)
+}
+class password_resets {
+   email: varchar(191)
+   token: varchar(191)
+   created_at: timestamp
+}
+class registrations {
+   family_id: int(10) unsigned
+   centre_id: int(10) unsigned
+   eligibility_nrpf: varchar(191)
+   eligibility_hsbs: varchar(191)
+   consented_on: datetime
+   created_at: timestamp
+   updated_at: timestamp
+   eligible_from: timestamp
+   id: int(10) unsigned
+}
+class sponsors {
+   name: varchar(191)
+   shortcode: varchar(191)
+   programme: int(11)
+   created_at: timestamp
+   updated_at: timestamp
+   deleted_at: timestamp
+   can_tap: tinyint(1)
+   id: int(10) unsigned
+}
+class state_tokens {
+   uuid: varchar(191)
+   user_id: int(10) unsigned
+   created_at: timestamp
+   admin_user_id: int(10) unsigned
+   updated_at: timestamp
+   id: int(10) unsigned
+}
+class trader_user {
+   trader_id: int(10) unsigned
+   user_id: int(10) unsigned
+}
+class traders {
+   name: varchar(191)
+   pic_url: varchar(191)
+   market_id: int(10) unsigned
+   created_at: timestamp
+   updated_at: timestamp
+   deleted_at: timestamp
+   disabled_at: timestamp
+   id: int(10) unsigned
+}
+class users {
+   name: varchar(191)
+   email: varchar(191)
+   password: varchar(191)
+   remember_token: varchar(100)
+   created_at: timestamp
+   updated_at: timestamp
+   deleted_at: timestamp
+   id: int(10) unsigned
+}
+class voucher_states {
+   transition: varchar(191)
+   from: varchar(191)
+   user_id: int(10) unsigned
+   user_type: varchar(191)
+   voucher_id: int(10) unsigned
+   to: varchar(191)
+   state_token_id: int(10) unsigned
+   source: varchar(191)
+   created_at: timestamp
+   updated_at: timestamp
+   id: int(10) unsigned
+}
+class vouchers {
+   bundle_id: int(10) unsigned
+   delivery_id: int(10) unsigned
+   trader_id: int(10) unsigned
+   code: varchar(32)
+   currentstate: varchar(24)
+   sponsor_id: int(10) unsigned
+   created_at: timestamp
+   updated_at: timestamp
+   deleted_at: timestamp
+   id: int(10) unsigned
+}
+
+bundles                        -[#595959,plain]-^  carers                        : "collecting_carer_id:id"
+bundles                        -[#595959,plain]-^  centre_users                  : "disbursing_user_id:id"
+bundles                        -[#595959,plain]-^  centres                       : "disbursing_centre_id:id"
+bundles                        -[#595959,plain]-^  registrations                 : "registration_id:id"
+carers                         -[#595959,plain]-^  families                      : "family_id:id"
+centre_centre_user             -[#595959,plain]-^  centre_users                  : "centre_user_id:id"
+centre_centre_user             -[#595959,plain]-^  centres                       : "centre_id:id"
+centre_users                   -[#595959,plain]-^  centres                       : "centre_id:id"
+centres                        -[#595959,plain]-^  sponsors                      : "sponsor_id:id"
+children                       -[#595959,plain]-^  families                      : "family_id:id"
+deliveries                     -[#595959,plain]-^  centres                       : "centre_id:id"
+evaluations                    -[#595959,plain]-^  sponsors                      : "sponsor_id:id"
+families                       -[#595959,plain]-^  centres                       : "initial_centre_id:id"
+job_statuses                   -[#595959,plain]-^  jobs                          : "job_id:id"
+market_logs                    -[#595959,plain]-^  traders                       : "trader_id:id"
+markets                        -[#595959,plain]-^  sponsors                      : "sponsor_id:id"
+notes                          -[#595959,plain]-^  centre_users                  : "user_id:id"
+notes                          -[#595959,plain]-^  families                      : "family_id:id"
+notes                          -[#595959,plain]-^  users                         : "user_id:id"
+oauth_access_tokens            -[#595959,plain]-^  users                         : "user_id:id"
+oauth_auth_codes               -[#595959,plain]-^  users                         : "user_id:id"
+oauth_clients                  -[#595959,plain]-^  users                         : "user_id:id"
+registrations                  -[#595959,plain]-^  centres                       : "centre_id:id"
+registrations                  -[#595959,plain]-^  families                      : "family_id:id"
+state_tokens                   -[#595959,plain]-^  admin_users                   : "admin_user_id:id"
+state_tokens                   -[#595959,plain]-^  users                         : "user_id:id"
+trader_user                    -[#595959,plain]-^  traders                       : "trader_id:id"
+trader_user                    -[#595959,plain]-^  users                         : "user_id:id"
+traders                        -[#595959,plain]-^  markets                       : "market_id:id"
+voucher_states                 -[#595959,plain]-^  state_tokens                  : "state_token_id:id"
+voucher_states                 -[#595959,plain]-^  users                         : "user_id:id"
+voucher_states                 -[#595959,plain]-^  vouchers                      : "voucher_id:id"
+vouchers                       -[#595959,plain]-^  bundles                       : "bundle_id:id"
+vouchers                       -[#595959,plain]-^  deliveries                    : "delivery_id:id"
+vouchers                       -[#595959,plain]-^  sponsors                      : "sponsor_id:id"
+vouchers                       -[#595959,plain]-^  traders                       : "trader_id:id"
+@enduml
+
