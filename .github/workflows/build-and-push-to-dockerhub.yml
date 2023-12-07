@@ -1,13 +1,14 @@
 name: Build and Push to Docker Hub
 
 on:
-  push:
-    branches:
-      - '*'
-  pull_request:
-    types:
-      - 'opened'
-      - 'synchronize'
+  workflow_dispatch:
+#  push:
+#    branches:
+#      - '*'
+#  pull_request:
+#    types:
+#      - 'opened'
+#      - 'synchronize'
 
 jobs:
   build-and-push:
@@ -16,11 +17,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
-    - name: Dump GitHub context
-      env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
-      run: echo "$GITHUB_CONTEXT"
 
     - name: Login to Docker Hub
       run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
