@@ -12,7 +12,7 @@ Basic / 4 GB / 2 vCPUs / 80Gb / $24.00 per month
 
 ## Software stacks
 
-Both machines have the same software stack. Rolled by hand?
+The staging server was hand rolled to provide the LAMP stack below. Live was a VM clone of staging. These have been live since March 2023 so may have some package drift.
 
 ```
 [neontribe@rocky9-arc-staging ~]$ apachectl -v
