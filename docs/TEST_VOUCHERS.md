@@ -2,7 +2,7 @@
 
 Defined in [voucher-state-transitions.txt](voucher-state-transitions.puml)
 
-![Transition table](voucher-state-transitions.png "Voucher transitions")
+![Transition table](./images/voucher-state-transitions.png "Voucher transitions")
 
 ## Setting up vouchers for testing MVL
 
