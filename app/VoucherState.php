@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * @mixin Eloquent
+ * @property int $id;
  * @property string $transition;
  * @property string $from;
  * @property string $to;
@@ -91,5 +92,22 @@ class VoucherState extends Model
     public function stateToken()
     {
         return $this->belongsTo(StateToken::class);
+    }
+
+    public function toArray()
+    {
+        return [
+            "id" => $this->id,
+            "transition" => $this->transition,
+            "from" => $this->from,
+            "user_id" => $this->user_id,
+            "user_type" => $this->user_type,
+            "voucher_id" => $this->voucher_id,
+            "to" => $this->to,
+            "state_token_id" => $this->state_token_id,
+            "source" => $this->source,
+            "created_at" => $this->created_at,
+            "updated_at" => $this->updated_at,
+        ];
     }
 }

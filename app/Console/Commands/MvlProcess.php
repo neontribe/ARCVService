@@ -84,7 +84,7 @@ class MvlProcess extends Command
         foreach ($lines as $id) {
             $v = Voucher::find($id);
             if ($v) {
-                fputcsv($fh_out, array_merge($v->deepExport(), $sharedData));
+                fputcsv($fh_out, array_merge(array_values($v->deepExport()), $sharedData));
                 if ($count++ % self::TICK_SIZE === 0) {
                     $this->info(sprintf(
                         "Writing vouchers %d to %d, Mem: %s, elapsed time %f seconds",

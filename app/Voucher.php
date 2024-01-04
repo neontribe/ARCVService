@@ -540,25 +540,41 @@ class Voucher extends Model
         return $date->format('Y-m-d H:i:s');
     }
 
-    public function deepExport(): array
+    public function getVoucherStateHistory()
     {
-        return [
-            $this->code,
-            $this->sponsor?->name,
-            $this->delivery?->dispatched_at->format("Y/m/d"),
-            $this->delivery?->centre->name,
-            $this->delivery?->centre->sponsor->name,
-            $this->bundle?->disbursed_at ? "True" : "False",
-            $this->bundle?->disbursed_at?->format("Y/m/d"),
-            (string)$this->rvid(),
-            $this->bundle?->registration->family->carers[0]->name,
-            $this->bundle?->registration->centre->name,
-            $this->recordedOn->created_at->format("Y/m/d"),
-            $this->trader->name,
-            $this->trader->market->name,
-            $this->trader->market->sponsor->name,
-            $this->paymentPendedOn->created_at->format("Y/m/d"),
-            $this->reimbursedOn->created_at->format("Y/m/d"),
+        $vss = VoucherState::where("voucher_id", $this->id)->orderBy('updated_at')->get();
+        $states = [];
+        if ($vss) {
+            foreach ($vss as $vs) {
+                $states[] = $vs->toArray();
+            }
+        }
+        return $states;
+    }
+
+    public function deepExport(bool $includeVoucherStates = false): array
+    {
+        $v = [
+            "code" => $this->code,
+            "sponsor_name" => $this->sponsor?->name,
+            "dispatched_at" => $this->delivery?->dispatched_at->format("Y/m/d"),
+            "delivery_centre_name" => $this->delivery?->centre->name,
+            "centre_sponsor_name" => $this->delivery?->centre->sponsor->name,
+            "disbursed" => $this->bundle?->disbursed_at ? "True" : "False",
+            "disbursed_at" => $this->bundle?->disbursed_at?->format("Y/m/d"),
+            "rvid" => (string)$this->rvid(),
+            "primary_carer" => $this->bundle?->registration->family->carers[0]->name,
+            "registration_centre_name," => $this->bundle?->registration->centre->name,
+            "recordedOn" => $this->recordedOn->created_at->format("Y/m/d"),
+            "trader_name" => $this->trader->name,
+            "trader_market_name" => $this->trader->market->name,
+            "trader_market_sponsor_name" => $this->trader->market->sponsor->name,
+            "paymentPendedOn" => $this->paymentPendedOn->created_at->format("Y/m/d"),
+            "reimbursedOn" => $this->reimbursedOn->created_at->format("Y/m/d"),
         ];
+        if ($includeVoucherStates) {
+            $v["vouchere_states"] = $this->getVoucherStateHistory();
+        }
+        return $v;
     }
 }
