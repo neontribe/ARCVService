@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * @mixin Eloquent
+ * @property int $id;
  * @property string $transition;
  * @property string $from;
  * @property string $to;
