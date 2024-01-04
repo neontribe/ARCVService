@@ -546,10 +546,39 @@ class Voucher extends Model
         $states = [];
         if ($vss) {
             foreach ($vss as $vs) {
-                $states[] = $vs->toArray();
+                $states[] = [
+                    "id" => $this->id,
+                    "transition" => $vs->transition,
+                    "from" => $vs->from,
+                    "user_id" => $vs->user_id,
+                    "user_type" => $vs->user_type,
+                    "voucher_id" => $vs->voucher_id,
+                    "to" => $vs->to,
+                    "state_token_id" => $vs->state_token_id,
+                    "source" => $vs->source,
+                    "created_at" => $vs->created_at,
+                    "updated_at" => $vs->updated_at,
+                ];
             }
         }
         return $states;
+    }
+
+    public function voucherStateoArray()
+    {
+        return [
+            "id" => $this->id,
+            "transition" => $this->transition,
+            "from" => $this->from,
+            "user_id" => $this->user_id,
+            "user_type" => $this->user_type,
+            "voucher_id" => $this->voucher_id,
+            "to" => $this->to,
+            "state_token_id" => $this->state_token_id,
+            "source" => $this->source,
+            "created_at" => $this->created_at,
+            "updated_at" => $this->updated_at,
+        ];
     }
 
     public function deepExport(bool $includeVoucherStates = false): array
