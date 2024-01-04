@@ -540,7 +540,7 @@ class Voucher extends Model
         return $date->format('Y-m-d H:i:s');
     }
 
-    public function getVoucherStateHistory()
+    public function getVoucherStateHistory(): array
     {
         $vss = VoucherState::where("voucher_id", $this->id)->orderBy('updated_at')->get();
         $states = [];
@@ -562,23 +562,6 @@ class Voucher extends Model
             }
         }
         return $states;
-    }
-
-    public function voucherStateoArray()
-    {
-        return [
-            "id" => $this->id,
-            "transition" => $this->transition,
-            "from" => $this->from,
-            "user_id" => $this->user_id,
-            "user_type" => $this->user_type,
-            "voucher_id" => $this->voucher_id,
-            "to" => $this->to,
-            "state_token_id" => $this->state_token_id,
-            "source" => $this->source,
-            "created_at" => $this->created_at,
-            "updated_at" => $this->updated_at,
-        ];
     }
 
     public function deepExport(bool $includeVoucherStates = false): array
