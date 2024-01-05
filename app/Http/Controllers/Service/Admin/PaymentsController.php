@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\StateToken;
 use App\Trader;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -35,10 +36,15 @@ class PaymentsController extends Controller
      * Lists the payments paid and pending
      * @return Factory|View|Application
      */
-    public function index(): Factory|View|Application
+    public function index(Request $request): Factory|View|Application
     {
-        $pendingPaymentData = self::getStateTokensFromDate();
-        $reimbursedPaymentData = self::getStateTokensFromDate(true);
+        // This allows a URL hack to adjust the number of days history displayed
+        $days = Carbon::now()->subDays(7)->startOfDay();
+        if ($request->input('days')) {
+            $days = Carbon::now()->subDays(max(7, intval($request->input('days'))))->startOfDay();
+        }
+        $pendingPaymentData = self::getStateTokensFromDate(false, $days);
+        $reimbursedPaymentData = self::getStateTokensFromDate(true, $days);
         return view('service.payments.index', [
             'pending' => $pendingPaymentData,
             'reimbursed' => $reimbursedPaymentData,
