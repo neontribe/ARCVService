@@ -208,6 +208,16 @@ class PaymentsController extends Controller
 
             // Transition the vouchers
             $success = true;
+            Log::info(sprintf(
+                "%s: Processing %d vouchers, uuid=%s, user=%s(%d), admin user=%s(%d)",
+                __CLASS__,
+                count($vouchers),
+                $state_token->uuid,
+                $state_token->user?->name,
+                $state_token->user?->id,
+                Auth::user()->name,
+                Auth::user()->id,
+            ));
             foreach ($vouchers as $v) {
                 if ($v->transitionAllowed('payout')) {
                     $v->applyTransition('payout');
