@@ -10,6 +10,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Log;
@@ -183,7 +184,7 @@ class PaymentsController extends Controller
      * @param $paymentUuid
      * @return mixed
      */
-    public function update($paymentUuid)
+    public function update(Request $request, $paymentUuid)
     {
         // Initialise
         $vouchers = [];
@@ -208,6 +209,17 @@ class PaymentsController extends Controller
 
             // Transition the vouchers
             $success = true;
+            Log::info(sprintf(
+                "%s: Processing %d vouchers, uuid=%s, user=%s(%d), admin user=%s(%d), ip=%s",
+                __CLASS__,
+                count($vouchers),
+                $state_token->uuid,
+                $state_token->user?->name,
+                $state_token->user?->id,
+                Auth::user()->name,
+                Auth::user()->id,
+                $request->ip(),
+            ));
             foreach ($vouchers as $v) {
                 if ($v->transitionAllowed('payout')) {
                     $v->applyTransition('payout');
