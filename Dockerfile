@@ -227,4 +227,3 @@ ENV SESSION_SECURE_COOKIE=true
 
 # docker push 192.168.21.97:5000/arcvouchers/service:develop
 # docker push 192.168.21.97:5000/arcvouchers/service:prod
-
