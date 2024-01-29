@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\MarketLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use JsonException;
 
 class LoggingController extends Controller
 {
+    public const LOG_NAME = 'market-app.log';
 
     public function log(Request $request): JsonResponse
     {
@@ -24,21 +25,24 @@ class LoggingController extends Controller
             return response()->json([]);
         }
 
+        $path = Storage::disk('log')->path(self::LOG_NAME);
+        $fh = fopen($path, "a");
+
         $processed = [];
         if (!empty($json)) {
             foreach ($json as $hash => $item) {
-                // write to DB
-                $marketLog = new MarketLog();
-                $marketLog->hash = $hash;
-                $marketLog->url = $item['config']['url'] ?? '';
-                $marketLog->status = $item['status'] ?? -1;
-                $marketLog->created = $item['created'] ?? '' ;
-                $marketLog->data = json_encode($item);
-                $marketLog->trader_id = $item['trader'] ?? -1;
-                $marketLog->save();
+                fputcsv($fh, [
+                    $hash,
+                    $item['config']['url'] ?? '',
+                    $item['status'] ?? -1,
+                    $item['created'] ?? '',
+                    json_encode($item),
+                    $item['trader'] ?? -1,
+                ]);
                 $processed[] = $hash;
             }
         }
+        fclose($fh);
         return response()->json($processed);
     }
 }
