@@ -2,6 +2,7 @@ name: Build and Push to Docker Hub
 
 on:
   workflow_dispatch:
+<<<<<<< HEAD
 #  push:
 #    branches:
 #      - '*'
@@ -9,6 +10,15 @@ on:
 #    types:
 #      - 'opened'
 #      - 'synchronize'
+=======
+  push:
+    branches:
+      - '*'
+  pull_request:
+    types:
+      - 'opened'
+      - 'synchronize'
+>>>>>>> main
 
 jobs:
   build-and-push:
