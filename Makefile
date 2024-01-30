@@ -1,23 +1,16 @@
-NAME = dockerhost.neontribe.net:5000/arc
-BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
-VERSION = $(subst /,_,$(BRANCH))
-
-test:
-	env NAME=$(NAME) VERSION=$(VERSION) bats .docker/tests.bats
+NAME = 192.168.21.97:5000/arcvouchers
+#BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
+#VERSION = $(subst /,_,$(BRANCH))
 
 build:
-	docker build -t $(NAME):$(VERSION) -f .docker/Dockerfile --rm .
-
-build-nocache:
-	docker build -t $(NAME):$(VERSION) -f .docker/Dockerfile --rm --no-cache .
-
-tag-latest:
-	docker tag $(NAME):$(VERSION) $(NAME):latest
+	docker build -t $(NAME)/service:develop --target=dev .
+	docker build -t $(NAME)/service:prod .
 
 push:
-	docker push $(NAME):$(VERSION)
+	docker push $(NAME)/service:develop
+	docker push $(NAME)/service:prod
 
-release: build test tag-latest push
+release: build push
 
 info:
 	@echo Branch is $(BRANCH)

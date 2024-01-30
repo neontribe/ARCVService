@@ -24,6 +24,7 @@ class AdminController extends Controller
      */
     public function index()
     {
+        \Log::error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>HERE");
         return view('service.dashboard');
     }
 }

@@ -78,6 +78,9 @@ if [ -n "$RUN_AS" ]; then
   chown -R $USER_NAME:$GROUP_NAME /opt/project/storage
 fi
 
+echo "***********************"
+echo "* STARTING FPM SERVER *"
+echo "***********************"
 exec php-fpm
 
 exit
