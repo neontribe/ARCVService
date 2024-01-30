@@ -6,6 +6,10 @@ build:
 	docker build -t $(NAME)/service:develop --target=dev .
 	docker build -t $(NAME)/service:prod .
 
+build-no-cache:
+	docker build -t $(NAME)/service:develop --target=dev --no-cache .
+	docker build -t $(NAME)/service:prod --no-cache .
+
 push:
 	docker push $(NAME)/service:develop
 	docker push $(NAME)/service:prod

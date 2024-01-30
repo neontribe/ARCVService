@@ -93,16 +93,17 @@ RUN apk add --no-cache \
         libzip \
         nodejs \
         npm \
-        tzdata && \
+        tzdata \
+        vim && \
     touch /use_fpm && \
     npm -g i yarn
 EXPOSE 9000
-HEALTHCHECK --interval=20s --timeout=10s --retries=3 \
-    CMD \
-    SCRIPT_NAME=/ping \
-    SCRIPT_FILENAME=/ping \
-    REQUEST_METHOD=GET \
-    cgi-fcgi -bind -connect 127.0.0.1:9000 || exit 1
+#HEALTHCHECK --interval=20s --timeout=10s --retries=3 \
+#    CMD \
+#    SCRIPT_NAME=/ping \
+#    SCRIPT_FILENAME=/ping \
+#    REQUEST_METHOD=GET \
+#    cgi-fcgi -bind -connect 127.0.0.1:9000 || exit 1
 
 
 FROM fpm-base AS base
