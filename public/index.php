@@ -52,6 +52,10 @@ $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 $response = $kernel->handle(
     $request = Illuminate\Http\Request::capture()
 );
+//foreach ($_SERVER as $k => $v) {
+//    \Log::info(sprintf("%20s = %s", $k, $v));
+//}
+\Log::info(sprintf("SERVER['HTTP_HOST'] = %s", $_SERVER['HTTP_HOST']));
 
 $response->send();
 

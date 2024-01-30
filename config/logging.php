@@ -35,7 +35,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['laravel', 'debug', 'info', 'warning_and_above' ],
+            'channels' => ['laravel', 'debug', 'info', 'warning_and_above', "stdout" ],
 //            'channels' => ['laravel', 'debug', 'info', 'warning_and_above'],
         ],
 

@@ -47,11 +47,14 @@ class LoginController extends Controller
      */
     public function showLoginForm()
     {
+        \Log::info(__FUNCTION__ . ":" . __LINE__);
         return view('service.auth.login');
     }
 
     public function login(Request $request)
     {
+        \Log::info(__FUNCTION__ . ":" . __LINE__ . ": " . $request->fullUrl());
+        \Log::info(__FUNCTION__ . ":" . __LINE__ . ": " . $request->getHttpHost());
         // Validate the form data
         $this->validate($request, [
             'email' => 'required|email',
