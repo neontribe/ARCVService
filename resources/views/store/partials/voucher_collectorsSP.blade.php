@@ -28,7 +28,11 @@
                         > {{ $ethnicity }}
                         </option>
                     @endforeach
-                </select><br></br>
+                </select>
+            @if(empty($pri_carer->ethnicity))
+                <br><mark>Please complete ethnic background before 1st March.</mark></br>
+            @endif
+            <br></br>
                 <label for="pri_carer_language">Main participant's preferred language (optional)</label><br>
                 <input id="pri_carer_language"
                        name="pri_carer_language[{{ $pri_carer->id }}]"
@@ -39,7 +43,11 @@
                        autocomplete="off"
                        autocorrect="off"
                        spellcheck="false"
-                ><br></br>
+                >
+            @if(!isset($pri_carer->language))
+                <br><mark>Please complete main language before 1st March.</mark></br>
+            @endif
+            <br></br>
         @else
             {{-- If this is a new record do this instead --}}
             <input id="carer"
