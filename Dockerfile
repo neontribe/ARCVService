@@ -219,7 +219,12 @@ RUN \
     sed -i "s/session.gc_maxlifetime = 1440/session.gc_maxlifetime = 604800/g" /usr/local/etc/php/php.ini && \
     chown -R www-data:www-data /opt/project /usr/local/etc/php/php.ini && \
     yarn
+ENV APP_DEBUG=false
 ENV APP_ENV=prod
 ENV SESSION_SECURE_COOKIE=true
 
-# docker build -t arcvouchers/service:develop --target=dev .
+# docker build -t 192.168.21.97:5000/arcvouchers/service:prod .
+# docker build -t 192.168.21.97:5000/arcvouchers/service:develop --target=dev .
+
+# docker push 192.168.21.97:5000/arcvouchers/service:prod
+# docker push 192.168.21.97:5000/arcvouchers/service:develop

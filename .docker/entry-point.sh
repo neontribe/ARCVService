@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 function checkDatabase() {
   echo "Wait for MySQL DB connection ..."
@@ -77,6 +77,11 @@ if [ -n "$RUN_AS" ]; then
 
   chown -R $USER_NAME:$GROUP_NAME /opt/project/storage
 fi
+
+echo USER_NAME=$USER_NAME
+echo GROUP_NAME=$GROUP_NAME
+echo APP_DEBUG=$APP_DEBUG
+echo APP_ENV=$APP_ENV
 
 exec php-fpm
 
