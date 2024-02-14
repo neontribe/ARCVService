@@ -97,7 +97,7 @@ RUN apk add --no-cache \
     touch /use_fpm && \
     npm -g i yarn
 EXPOSE 9000
-HEALTHCHECK --interval=20s --timeout=10s --retries=3 \
+HEALTHCHECK --interval=60s --timeout=10s --retries=3 \
     CMD \
     SCRIPT_NAME=/ping \
     SCRIPT_FILENAME=/ping \
@@ -119,7 +119,6 @@ RUN ln -snf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && echo ${TIMEZONE} >
     mkdir /composer  && \
     chown -R www-data:www-data /composer
 COPY ./.docker/entry-point.sh /entry-point.sh
-COPY ./.docker/logging.php /opt/project/config/logging.php
 COPY ./.docker/dbtest.php /dbtest.php
 COPY ./.docker/passport-install.php /passport-install.php
 COPY --from=composer /usr/bin/composer /usr/bin/composer

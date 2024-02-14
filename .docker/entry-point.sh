@@ -35,13 +35,14 @@ function handleStartup() {
   php /opt/project/artisan migrate
   if [ "$APP_ENV" == "local" ] || [ "$APP_ENV" == "dev" ] || [ "$APP_ENV" == "development" ] ; then
     # check the DB, if there are no vouchers install fixtures
-    voucher_count=$(/opt/project/artisan tinker --execute='print(App\Voucher::all()->count()))')
+    voucher_count=$(/opt/project/artisan tinker --execute='print(App\Voucher::all()->count())')
     if [ "$voucher_count" == "0" ]; then
       php /opt/project/artisan migrate:refresh --seed --force
     fi
   fi
 
   php /passport-install.php
+  chmod 644 /opt/project/storage/oauth-p*
 
   if [ -e /docker-entrypoint-initdb.d ]; then
     for filename in /docker-entrypoint-init.d/*; do
@@ -78,10 +79,7 @@ if [ -n "$RUN_AS" ]; then
   chown -R $USER_NAME:$GROUP_NAME /opt/project/storage
 fi
 
-# TODO check where these files are actually craeted and fix this there
-chmod 644 /opt/project/storage/oauth-p*
-
-env
+env | sort
 
 exec php-fpm
 
