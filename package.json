@@ -24,6 +24,9 @@
     "sass": "^1.62.0",
     "sass-loader": "^13.2.2"
   },
+  "scripts": {
+    "postinstall": "husky install"
+  },
   "browserslist": [
     ">2%",
     "ie 11",
