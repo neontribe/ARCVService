@@ -78,10 +78,10 @@ if [ -n "$RUN_AS" ]; then
   chown -R $USER_NAME:$GROUP_NAME /opt/project/storage
 fi
 
-echo USER_NAME=$USER_NAME
-echo GROUP_NAME=$GROUP_NAME
-echo APP_DEBUG=$APP_DEBUG
-echo APP_ENV=$APP_ENV
+# TODO check where these files are actually craeted and fix this there
+chmod 644 /opt/project/storage/oauth-p*
+
+env
 
 exec php-fpm
 
