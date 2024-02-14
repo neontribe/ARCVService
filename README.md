@@ -3,6 +3,10 @@
 ## About ARC Voucher Service/API
 ARCV Service is the service portal and API for ARCV Market.
 
+## Docker and containers
+
+The service, market and store can be deployed, run locally for training/testing or development without any additional dependencies. Docker instructions are in the [infrastructure repo](https://github.com/neontribe/ARCVInfra/tree/main/docker/README.md) 
+
 ## Installation of Development instance
 
 1. Clone the repo
