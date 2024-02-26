@@ -7,16 +7,25 @@
     "watch-poll": "mix watch -- --watch-options-poll=1000",
     "hot": "mix watch --hot",
     "prod": "yarn production",
-    "production": "mix --production"
+    "production": "mix --production",
+    "prepare": "husky",
+    "commitlint": "commitlint --edit",
+    "test": ""
   },
   "devDependencies": {
+    "@commitlint/cli": "^18.6.1",
+    "@commitlint/config-conventional": "^18.6.2",
     "bootstrap-sass": "^3.4.3",
+    "husky": "^9.0.11",
     "jquery": "^3.6.4",
     "jquery-ui": "^1.13.2",
     "laravel-mix": "^6.0.49",
     "resolve-url-loader": "^5.0.0",
     "sass": "^1.62.0",
     "sass-loader": "^13.2.2"
+  },
+  "scripts": {
+    "postinstall": "husky install"
   },
   "browserslist": [
     ">2%",
