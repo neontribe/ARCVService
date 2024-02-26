@@ -13,6 +13,9 @@ class MysqlStoreTestCase extends StoreTestCase
 
     protected function setUp(): void
     {
+        if (env("PHPUNIT_SKIP_MYSQL_TEST", false)) {
+            $this->markTestSkipped('Skipped test coz it needs a full mysql instance.');
+        }
         parent::setUp();
 
         // Fallback to the MySQL testing database if the default testing database doesn't use the MySQL driver
