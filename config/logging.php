@@ -61,6 +61,14 @@ return [
             'path' => storage_path('logs/warning.log'),
             'level' => 'warning',
         ],
+
+        'stderr' => [
+            'driver' => 'monolog',
+            'handler' => StreamHandler::class,
+            'with' => [
+                'stream' => 'php://stderr',
+            ],
+        ],
     ]
 //    'channels' => [
 //        // Aggregated logs, all channels listed in the channels array

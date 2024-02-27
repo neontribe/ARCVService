@@ -62,20 +62,19 @@ class MvlProcess extends Command
             $this->error(sprintf("File not found: %s", $in_file));
         }
 
-        $targetDir = dirname($in_file);
-        if (!file_exists($targetDir . "/_headers.csv")) {
-            if (!is_dir($targetDir)) {
-                mkdir($targetDir, 0755, true);
-            }
-            $fh = fopen($targetDir . "/_headers.csv", "w");
-            fputcsv($fh, $this->headers);
-            fclose($fh);
+        // Add encryption wrapper
+        if (!in_array("ssw", stream_get_wrappers())) {
+            stream_wrapper_register("ssw", "App\Wrappers\SecretStreamWrapper");
         }
 
-        $out_file = $targetDir . "/" . basename($in_file, ".txt") . ".csv";
+        $targetDir = "storage/app/local";
+        $sswTargetDir = "ssw://" . $targetDir;
+
+        $out_file = $sswTargetDir . "/" . basename($in_file, ".txt") . ".csv";
         $this->info(sprintf("Writing ids to %s", $out_file));
 
         $fh_out = fopen($out_file, 'w');
+        fputcsv($fh_out, $this->headers);
         $count = 0;
         $startTime = microtime(true);
         $time = microtime(true);
@@ -85,7 +84,7 @@ class MvlProcess extends Command
         foreach ($lines as $id) {
             $v = Voucher::find($id);
             if ($v) {
-                fputcsv($fh_out, array_merge($v->deepExport(), $sharedData));
+                fputcsv($fh_out, array_merge(array_values($v->deepExport()), $sharedData));
                 if ($count++ % self::TICK_SIZE === 0) {
                     $this->info(sprintf(
                         "Writing vouchers %d to %d, Mem: %s, elapsed time %f seconds",
@@ -101,5 +100,7 @@ class MvlProcess extends Command
 
         $this->info("Total time: " . TextFormatter::secondsToTime(ceil(microtime(true) - $startTime)));
         fclose($fh_out);
+
+        stream_wrapper_unregister("ssw");
     }
 }

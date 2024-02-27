@@ -28,7 +28,7 @@ Does what it says, it exports data into one file for each financial year up to 2
 
 This takes a directory as input and processes all `.arcx` files in that directory into `.csv` files with a [deep export](https://github.com/neontribe/ARCVService/blob/develop/app/Voucher.php#:~:text=) row of fields. It also creates a file called `_headers.csv` that has the csv row headers.
 
-After running the process commad you can concatonate the csv files into a single file using:
+After running the process command you can concatenate the csv files into a single file using:
 
 ```bash
 cat *.csv > /path/to/dest/FILENAME.csv

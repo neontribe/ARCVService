@@ -9,6 +9,6 @@
 ### Create png from plantuml spec
 
 ```bash
-plantuml docs/voucher-state-transitions.txt
+plantuml docs/voucher-state-transitions.puml
 ```
 
