@@ -1,5 +1,5 @@
 includes:
-    - ./vendor/nunomaduro/larastan/extension.neon
+    - ./vendor/larastan/larastan/extension.neon
 
 parameters:
 
@@ -10,17 +10,17 @@ parameters:
     level: 2
 
     ignoreErrors:
-       - '#^Result of method.*is used.*$#'
-       - '#^Result of static method.*is used.*$#'
+#       - '#^Result of method.*is used.*$#'
+#       - '#^Result of static method.*is used.*$#'
 #      - '#PHPDoc tag @property#'
-       - '#Variable \$testing_string might not be defined#'
-       - '#^Method App.*ancestors.*$#'
-       - '#^.*descendantsAndSelf.*$#'
+#       - '#Variable \$testing_string might not be defined#'
+#       - '#^Method App.*ancestors.*$#'
+#       - '#^.*descendantsAndSelf.*$#'
 
     excludePaths:
 #        - ./*/*/FileToBeExcluded.php
-       - ./vendor
-       - ./node_modules
-       - ./storage
+#       - ./vendor
+#       - ./node_modules
+#       - ./storage
 
 #    checkMissingIterableValueType: false

@@ -18,7 +18,8 @@ use Throwable;
 
 /**
  * @mixin Eloquent
- * @property integer id
+ *
+ * @property integer $id
  * @property string $code
  * @property Sponsor $sponsor
  * @property Trader $trader
