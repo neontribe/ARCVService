@@ -1,6 +1,6 @@
 # Resetting the data via the button on the dashboard:
 
-We use ansible to manipulate the remote servers. You'll need ti instal lit, then you can re-seed the remote DB using:
+We use ansible to manipulate the remote servers. You'll need to install it, then you can re-seed the remote DB using:
 
 See the [infra -> ansible](https://github.com/neontribe/ARCVInfra/blob/main/ansible/UTILS.md#reseed-staging).
 
