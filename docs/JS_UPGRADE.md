@@ -1,4 +1,4 @@
-# Check for latest versions
+# Javascript upgrading
 
 You can use `npm` to check this:
 

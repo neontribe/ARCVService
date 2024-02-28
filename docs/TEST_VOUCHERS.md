@@ -1,6 +1,6 @@
-## Voucher state transitions
+# Voucher state transitions
 
-Defined in [voucher-state-transitions.txt](voucher-state-transitions.puml)
+Defined in [voucher-state-transitions.txt](images/voucher-state-transitions.puml)
 
 ![Transition table](./images/voucher-state-transitions.png "Voucher transitions")
 
