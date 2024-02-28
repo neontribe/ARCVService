@@ -4,7 +4,7 @@ Use [semver](https://semver.org/) for versioning. Each sprint is considered a mi
 
 ## Sprint workflow
 
-During sprint development we create numerous branches off develop. work on them, test locally, raise PRs and merge back into develop. This work won't be visible on staging until we create a release candidate.
+During sprint development we create numerous branches off develop, work on them, test locally, raise PRs and merge back into develop. This work won't be visible on staging until we create a release candidate.
 
 ### Sprint start
 
