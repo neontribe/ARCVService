@@ -1,4 +1,4 @@
-# Javascript upgrading
+# Javascript package upgrading
 
 You can use `npm` to check this:
 
