@@ -45,7 +45,7 @@ When sprint work has been done, we want to release this to staging for testing/U
 
 ## Releasing an RC to live
 
-Sprint work is done and approved or a hotfix is approved. It's been tested on staging and has been accepted. We need to release it to live and staging.
+When sprint work is done and approved or a hotfix is approved. It's been tested on staging and has been accepted. We need to release it to live and staging.
 
  * merge the RC tag into main `git checkout main && git pull origin main && git merge 1.17.0-rc2`
  * create a new release
