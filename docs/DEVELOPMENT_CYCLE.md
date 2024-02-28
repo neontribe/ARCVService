@@ -33,7 +33,7 @@ During the sprint it will be necessary to test the sprint work and show it to th
 
 ## Updating the release candidate
 
-Sprint work has been done, we want to release this to staging for testing/UAT. This release will deploy work done in the sprint cycle to date onto staging.
+When sprint work has been done, we want to release this to staging for testing/UAT. This release will deploy work done in the sprint cycle to date onto staging.
 
  * Tag develop with the release number:
    * If the RC is tagged at `1.17.0-rc2`, the new tag will be 1.17.0-**rc2**
