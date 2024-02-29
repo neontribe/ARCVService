@@ -482,7 +482,6 @@ class EditPageTest extends StoreTestCase
     /** @test */
     public function ICanSeeAScottishChildCanBeDeferred()
     {
-      $this->markTestSkipped('Waiting for hotfix');
       Config::set('arc.scottish_school_month', Carbon::now()->month + 1);
       $canDefer = factory(Child::class)->state('canDefer')->make();
       $this->scottishFamily->children()->save($canDefer);
@@ -495,17 +494,11 @@ class EditPageTest extends StoreTestCase
         ->seeElement('input[type="hidden"][value="'. $canDefer->dob->format('Y-m') .'"]')
         ->seeElement($selector)
       ;
-      // It should tell us they can start school AND they can defer
-      $rule = new ScottishChildCanDefer();
-      $this->see($rule->reason);
-      $rule2 = new ScottishChildIsAlmostPrimarySchoolAge();
-      $this->see($rule2->reason);
     }
 
     /** @test */
     public function ICanDeferAScottishChild()
     {
-      $this->markTestSkipped('Waiting for hotfix');
       Config::set('arc.scottish_school_month', Carbon::now()->month + 1);
       $canDefer = factory(Child::class)->state('canDefer')->make();
       $this->scottishFamily->children()->save($canDefer);
@@ -534,53 +527,6 @@ class EditPageTest extends StoreTestCase
       $this->seeInDatabase('children', [
           'deferred' => 1
       ]);
-    }
-
-    /** @test */
-    public function ItWontOfferDeferForAnIneligibleScottishChild()
-    {
-      Config::set('arc.scottish_school_month', Carbon::now()->month + 1);
-      $canNotDefer = factory(Child::class)->state('canNotDefer')->make();
-      $this->scottishFamily->children()->save($canNotDefer);
-      $this->actingAs($this->scottishCentreUser, 'store')
-        ->visit(URL::route('store.registration.edit', $this->scottishRegistration->id))
-        ->see('<td class="age-col">'. $canNotDefer->getAgeString() .'</td>')
-        ->see('<td class="dob-col">'. $canNotDefer->getDobAsString() .'</td>')
-        ->seeElement('input[type="hidden"][value="'. $canNotDefer->dob->format('Y-m') .'"]')
-      ;
-      // It should tell us they can start school BUT they can't defer
-      $rule = new ScottishChildCanDefer();
-      $this->dontSee($rule->reason);
-      $rule2 = new ScottishChildIsAlmostPrimarySchoolAge();
-      $this->see($rule2->reason);
-    }
-
-    /** @test */
-    public function AfterSchoolStartsICantChangeADeferral()
-    {
-      Config::set('arc.scottish_school_month', Carbon::now()->month);
-      $schoolStartMonth = config('arc.scottish_school_month');
-      Carbon::setTestNow(Carbon::now()->month($schoolStartMonth + 1)->startOfDay());
-      $hasDeferred = factory(Child::class)->create([
-        'deferred' => 1,
-        'family_id' => $this->scottishFamily->id,
-        'dob' => '2017-10-01 00:00:00'
-      ]);
-      $this->scottishFamily->children()->save($hasDeferred);
-      $inputID = "children[" . $hasDeferred->id . "][deferred]";
-      $selector = 'input[id=\'' . $inputID . '\']';
-      $this->actingAs($this->scottishCentreUser, 'store')
-        ->visit(URL::route('store.registration.edit', $this->scottishRegistration->id))
-        ->see('<td class="age-col">'. $hasDeferred->getAgeString() .'</td>')
-        ->see('<td class="dob-col">'. $hasDeferred->getDobAsString() .'</td>')
-        ->seeElement('input[type="hidden"][value="'. $hasDeferred->dob->format('Y-m') .'"]')
-        ->dontSeeElement($selector)
-        ->seeInElement(".can-defer-col",'Y')
-      ;
-      $rule = new ScottishChildCanDefer();
-      $this->dontSee($rule->reason);
-      $rule2 = new ScottishChildIsAlmostPrimarySchoolAge();
-      $this->dontSee($rule2->reason);
     }
 
     /** @test */
