@@ -47,9 +47,8 @@
                                 </label>
                             </td>
                         @endif
-                        @if ( $deferrable )
+                        @if ( !empty($deferrable) )
                             <td class="can-defer-col relative">
-                                @if ( $child->can_defer && $can_change_defer)
                                     <input type="checkbox"
                                            class="styled-checkbox inline-dob"
                                            name="children[{{ $child->id }}][deferred]"
@@ -59,9 +58,6 @@
                                     <label for="children[{{ $child->id }}][deferred]">
                                         <span class="visually-hidden">Toggle canDefer checked</span>
                                     </label>
-                                @elseif (isset($child->deferred) && !$can_change_defer)
-                                    {{ $child->deferred ? 'Y' : 'N' }}
-                                @endif
                             </td>
                         @endif
                         <td class="remove-col">
