@@ -420,20 +420,6 @@ class Voucher extends Model
     }
 
     /**
-     * @return bool
-     */
-    public function voucherHasBeenResurrected(): bool
-    {
-        $vs = $this->history()->get()->last();
-        if ($vs) {
-            return $vs->to != "reimbursed";
-        }
-
-        // ???? can a voucher have no state?
-        return false;
-    }
-
-    /**
      * Limit Vouchers to ones that have been confirmed for payment.
      * This will include both pending and reimbursed vouchers.
      *
@@ -515,19 +501,6 @@ class Voucher extends Model
     {
         return $query
             ->whereIn('currentstate', $states);
-    }
-
-    /**
-     * Gets a set of vouchers that are voidable.
-     *
-     * @param Builder $query
-     * @return Builder
-     */
-    public function scopeInVoidableState(Builder $query)
-    {
-        $voidable_states = ['dispatched'];
-        return $query
-            ->inOneOfStates($voidable_states);
     }
 
     /**
