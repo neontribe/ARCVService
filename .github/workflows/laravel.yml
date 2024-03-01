@@ -38,4 +38,10 @@ jobs:
 
     - name: Run tests
       run: |
-       PHPUNIT_SKIP_MYSQL_TEST=1  vendor/bin/phpunit
+       PHPUNIT_SKIP_MYSQL_TEST=1 XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-xml target/coverage
+
+    - name: Check coverage
+      run: |
+       php artisan arc:test:coverage target/coverage/index.xml
+
+# gh act -j test

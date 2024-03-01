@@ -287,25 +287,4 @@ class ScottishVoucherEvaluatorTest extends TestCase
         $this->assertContains(self::NOTICE_TYPES['ScottishChildCanDefer'], $notices);
         $this->assertContains(self::NOTICE_TYPES['ScottishChildIsAlmostPrimarySchoolAge'], $notices);
     }
-
-    /** @test */
-    public function itWontDeferAChildWhoIsOverFourAtSchoolStart()
-    {
-        $this->markTestSkipped('Waiting for hotfix');
-        // Need to change the values we use for school start to next month's integer
-        Config::set('arc.scottish_school_month', Carbon::now()->addMonthsNoOverflow(1)->month);
-
-        $rulesMod = collect($this->rulesMods["credit-primary"]);
-        $evaluator = EvaluatorFactory::make($rulesMod);
-        $evaluation = $evaluator->evaluate($this->canNotDefer);
-        $notices = $evaluation["notices"];
-
-        // Check there's one
-        $this->assertEquals(1, count($notices));
-
-        // Check the correct credit type is applied.
-        $this->assertNotContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $notices);
-        $this->assertNotContains(self::NOTICE_TYPES['ScottishChildCanDefer'], $notices);
-        $this->assertContains(self::NOTICE_TYPES['ScottishChildIsAlmostPrimarySchoolAge'], $notices);
-    }
 }

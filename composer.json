@@ -39,7 +39,8 @@
     "symfony/lock": "^6.2.8",
     "symfony/mailchimp-mailer": "^6.2.7",
     "usmanhalalit/laracsv": "^2.1.0",
-    "werk365/etagconditionals": "1.4.2"
+    "werk365/etagconditionals": "1.4.2",
+    "ext-simplexml": "*"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^2.13.0",
