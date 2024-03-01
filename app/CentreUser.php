@@ -3,7 +3,7 @@
 namespace App;
 
 use Eloquent;
-use Illuminate\Database\Eloquent\Relations\belongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
@@ -107,7 +107,7 @@ class CentreUser extends Authenticatable
     /**
      * Get the centres assigned to a user
      *
-     * @return belongsToMany
+     * @return BelongsToMany
      */
     public function centres()
     {
@@ -128,7 +128,7 @@ class CentreUser extends Authenticatable
      * Get the home centres for this user
      * Alas, we lack a belongsToThrough method to this is a collections.
      *
-     * @return belongsToMany
+     * @return BelongsToMany
      */
     protected function homeCentres()
     {

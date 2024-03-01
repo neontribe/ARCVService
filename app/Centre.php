@@ -63,7 +63,7 @@ class Centre extends Model
     /**
      * Get the CentreUsers who belong to this Centre
      *
-     * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function centreUsers()
     {
