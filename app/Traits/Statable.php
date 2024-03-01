@@ -9,6 +9,7 @@
 namespace App\Traits;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use SM\Factory\FactoryInterface;
 use SM\SMException;
 use SM\StateMachine\StateMachine;
@@ -45,7 +46,11 @@ trait Statable
      */
     public function getPriorState()
     {
-        return $this->history()->get("*")->last();
+        // Inefficient for large data sets
+        // return $this->history()->get("*")->last();
+        return DB::table('history')->where('model_id', $this->id)
+                                  ->orderBy('created_at', 'desc')
+                                  ->first();
     }
 
     /**

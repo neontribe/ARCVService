@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property string $dob
+ * @property Carbon $dob
  * @property bool $born
  * @property bool $verified
  * @property bool $defer
