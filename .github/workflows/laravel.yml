@@ -3,8 +3,8 @@ name: Laravel
 on:
   workflow_dispatch:
   push:
-   pull_request:
-    branches: [ "1.16/release" ]
+  # pull_request:
+  #  branches: [ "1.16/release" ]
 
 jobs:
   test:
