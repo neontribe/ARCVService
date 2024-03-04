@@ -30,7 +30,7 @@
                     @endforeach
                 </select>
             @if(empty($pri_carer->ethnicity))
-                <br><mark>Please complete ethnic background before 1st March.</mark></br>
+                <br><mark>Please complete ethnic background.</mark></br>
             @endif
                 <br></br>
                 <label for="pri_carer_language">Carer's main language (optional)</label><br>
@@ -45,7 +45,7 @@
                        spellcheck="false"
                 >
             @if(!isset($pri_carer->language))
-                <br><mark>Please complete main language before 1st March.</mark></br>
+                <br><mark>Please complete main language.</mark></br>
             @endif
             <br></br>
         @else
