@@ -39,43 +39,8 @@ class Voucher extends Model
     use SoftDeletes;
 
     // import soft delete.
-    protected $dates = ['deleted_at'];
-
-    const HISTORY_MODEL = 'App\VoucherState'; // the related model to store the history
-    const SM_CONFIG = 'Voucher'; // the SM graph to use
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'sponsor_id',
-        'trader_id',
-        'code',
-        'currentstate', // SM_CONFIG looks at this.
-        'bundle_id',
-    ];
-
-    /**
-     * The attributes that should be case to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'sponsor_id' => 'int',
-        'trader_id' => 'int',
-        'bundle_id' => 'int',
-    ];
-
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
-    protected $hidden = [
-    ];
-
+    const HISTORY_MODEL = 'App\VoucherState';
+    const SM_CONFIG = 'Voucher'; // the related model to store the history
     /**
      * Rules for validation.
      *
@@ -89,24 +54,37 @@ class Voucher extends Model
         // Not sure about this one. We might be able to secify config instead.
         'currentstate' => ['required', 'in_array:voucher_state,to', 'max:24'],
         'sponsor_id' => ['numeric', 'required', 'exists:sponsors,id'],
-    ];
-
-
+    ]; // the SM graph to use
+    protected $dates = ['deleted_at'];
     /**
-     * Voucher can clean its codes.
-     * @param array $codes
-     * @return array
+     * The attributes that are mass assignable.
+     *
+     * @var array
      */
-    public static function cleanCodes(array $codes)
-    {
-        return array_map(
-            function ($code) {
-                $badChars = [" ",];
-                return str_replace($badChars, "", $code);
-            },
-            $codes
-        );
-    }
+    protected $fillable = [
+        'sponsor_id',
+        'trader_id',
+        'code',
+        'currentstate', // SM_CONFIG looks at this.
+        'bundle_id',
+    ];
+    /**
+     * The attributes that should be case to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'sponsor_id' => 'int',
+        'trader_id' => 'int',
+        'bundle_id' => 'int',
+    ];
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+    ];
 
     /**
      * Will generate a code range from start to end in the start range
@@ -137,41 +115,52 @@ class Voucher extends Model
                 // We appear to be producing codes that are "0" str_pad on the left, to variable characters
                 // We'll use the $start's numeric length as the value to pad to.
                 $voucherCodes[] = $startMatch['shortcode'] . str_pad(
-                    $val,
-                    strlen($startMatch['number']),
-                    "0",
-                    STR_PAD_LEFT
-                );
+                        $val,
+                        strlen($startMatch['number']),
+                        "0",
+                        STR_PAD_LEFT
+                    );
             }
         }
         return $voucherCodes;
     }
 
     /**
-     * Gets the range that contains our range from an array of ranges
+     * Splits a voucher code up
      *
-     * @param $start
-     * @param $end
-     * @param $ranges array of range objects.
-     *
-     * @return object|null
+     * @param string $code
+     * @return array|bool
      */
-    private static function getContainingRange($start, $end, array $ranges): ?object
+    public static function splitShortcodeNumeric(string $code)
     {
-        /** @var object $range */
-        foreach ($ranges as $range) {
-            // Are Start and End both in the range?
-            if ($start <= $end &&           // query is properly formed
-                $start >= $range->start &&  // our start is gte range start
-                $end <= $range->end         // our end is lte range end
-            ) {
-                // early return on success
-                return $range;
-            }
+        // Clean the code
+        $clean = self::cleanCodes([$code]);
+        $code = array_shift($clean);
+        // Init matches
+        $matches = [];
+        // split into named matche and return
+        if (preg_match("/^(?<shortcode>\D*)(?<number>\d+)$/", $code, $matches) == 1) {
+            return $matches;
+        } else {
+            return false;
         }
-        return null;
     }
 
+    /**
+     * Voucher can clean its codes.
+     * @param array $codes
+     * @return array
+     */
+    public static function cleanCodes(array $codes)
+    {
+        return array_map(
+            function ($code) {
+                $badChars = [" ",];
+                return str_replace($badChars, "", $code);
+            },
+            $codes
+        );
+    }
 
     /**
      * Creates a rangeDef structure
@@ -209,27 +198,6 @@ class Voucher extends Model
         $freeRangesArray = self::getDeliverableVoucherRangesByShortCode($rangeDef->shortcode);
         $containingRange = self::getContainingRange($rangeDef->start, $rangeDef->end, $freeRangesArray);
         return (!is_null($containingRange) && is_object($containingRange));
-    }
-
-    /**
-     * Splits a voucher code up
-     *
-     * @param string $code
-     * @return array|bool
-     */
-    public static function splitShortcodeNumeric(string $code)
-    {
-        // Clean the code
-        $clean = self::cleanCodes([$code]);
-        $code = array_shift($clean);
-        // Init matches
-        $matches = [];
-        // split into named matche and return
-        if (preg_match("/^(?<shortcode>\D*)(?<number>\d+)$/", $code, $matches) == 1) {
-            return $matches;
-        } else {
-            return false;
-        }
     }
 
     /**
@@ -328,6 +296,70 @@ class Voucher extends Model
         }
     }
 
+    /**
+     * Gets the range that contains our range from an array of ranges
+     *
+     * @param $start
+     * @param $end
+     * @param $ranges array of range objects.
+     *
+     * @return object|null
+     */
+    private static function getContainingRange($start, $end, array $ranges): ?object
+    {
+        /** @var object $range */
+        foreach ($ranges as $range) {
+            // Are Start and End both in the range?
+            if ($start <= $end &&           // query is properly formed
+                $start >= $range->start &&  // our start is gte range start
+                $end <= $range->end         // our end is lte range end
+            ) {
+                // early return on success
+                return $range;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param string $code
+     * @return Voucher
+     */
+    public static function findByCode($code)
+    {
+        return self::where('code', $code)->first();
+    }
+
+    /**
+     * @param array $codes
+     * @return Collection
+     */
+    public static function findByCodes($codes)
+    {
+        return self::whereIn('code', $codes)->get();
+    }
+
+    /**
+     * Retrieve the min and max paymentPendedOn date of a collection of vouchers.
+     *
+     * @param Collection $vouchers
+     *
+     * @return array
+     */
+    public static function getMinMaxVoucherDates(Collection $vouchers)
+    {
+        $sorted_vouchers = $vouchers->sortBy(function ($voucher) {
+            return $voucher->paymentPendedOn->created_at->timestamp;
+        })->values()->all();
+
+        $min_date = $sorted_vouchers[0]->paymentPendedOn->created_at->format('d-m-Y');
+        $max_date = $sorted_vouchers[count($sorted_vouchers) - 1]->paymentPendedOn->created_at->format('d-m-Y');
+
+        // If max date is the same as min date return null.
+        $max_date = ($min_date === $max_date) ? null : $max_date;
+
+        return [$min_date, $max_date];
+    }
 
     /**
      * The Sponsor that backs this voucher
@@ -408,15 +440,22 @@ class Voucher extends Model
             ->orderBy('created_at', 'desc');
     }
 
-    public function rvid(): ?string
+    /**
+     * @return bool
+     */
+    public function voucherHasBeenResurrected(): bool
     {
-        $centreSequence = $this->bundle?->registration->family->centre_sequence;
-        $centrePrefix = $this->bundle?->registration->family->initialCentre->prefix;
-        if ($centreSequence) {
-            return $centrePrefix . str_pad($centreSequence, 4, "0", STR_PAD_LEFT);
+        $vs = DB::table('history')
+            ->where('model_id', $this->id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if ($vs) {
+            return $vs->to != "reimbursed";
         }
 
-        return null;
+        // ???? can a voucher have no state?
+        return false;
     }
 
     /**
@@ -430,46 +469,6 @@ class Voucher extends Model
     {
         $states = ['payment_pending', 'reimbursed'];
         return $query->whereIn('currentstate', $states);
-    }
-
-    /**
-     * @param string $code
-     * @return Voucher
-     */
-    public static function findByCode($code)
-    {
-        return self::where('code', $code)->first();
-    }
-
-    /**
-     * @param array $codes
-     * @return Collection
-     */
-    public static function findByCodes($codes)
-    {
-        return self::whereIn('code', $codes)->get();
-    }
-
-    /**
-     * Retrieve the min and max paymentPendedOn date of a collection of vouchers.
-     *
-     * @param Collection $vouchers
-     *
-     * @return array
-     */
-    public static function getMinMaxVoucherDates(Collection $vouchers)
-    {
-        $sorted_vouchers = $vouchers->sortBy(function ($voucher) {
-            return $voucher->paymentPendedOn->created_at->timestamp;
-        })->values()->all();
-
-        $min_date = $sorted_vouchers[0]->paymentPendedOn->created_at->format('d-m-Y');
-        $max_date = $sorted_vouchers[count($sorted_vouchers) - 1]->paymentPendedOn->created_at->format('d-m-Y');
-
-        // If max date is the same as min date return null.
-        $max_date = ($min_date === $max_date) ? null : $max_date;
-
-        return [$min_date, $max_date];
     }
 
     /**
@@ -504,38 +503,16 @@ class Voucher extends Model
     }
 
     /**
-     * Prepare a date for array / JSON serialization.
+     * Gets a set of vouchers that are voidable.
      *
-     * @param \DateTimeInterface $date
-     * @return string
+     * @param Builder $query
+     * @return Builder
      */
-    protected function serializeDate(DateTimeInterface $date)
+    public function scopeInVoidableState(Builder $query)
     {
-        return $date->format('Y-m-d H:i:s');
-    }
-
-    public function getVoucherStateHistory(): array
-    {
-        $vss = VoucherState::where("voucher_id", $this->id)->orderBy('updated_at')->get();
-        $states = [];
-        if ($vss) {
-            foreach ($vss as $vs) {
-                $states[] = [
-                    "id" => $this->id,
-                    "transition" => $vs->transition,
-                    "from" => $vs->from,
-                    "user_id" => $vs->user_id,
-                    "user_type" => $vs->user_type,
-                    "voucher_id" => $vs->voucher_id,
-                    "to" => $vs->to,
-                    "state_token_id" => $vs->state_token_id,
-                    "source" => $vs->source,
-                    "created_at" => $vs->created_at,
-                    "updated_at" => $vs->updated_at,
-                ];
-            }
-        }
-        return $states;
+        $voidable_states = ['dispatched'];
+        return $query
+            ->inOneOfStates($voidable_states);
     }
 
     public function deepExport(bool $includeVoucherStates = false): array
@@ -562,5 +539,51 @@ class Voucher extends Model
             $v["vouchere_states"] = $this->getVoucherStateHistory();
         }
         return $v;
+    }
+
+    public function rvid(): ?string
+    {
+        $centreSequence = $this->bundle?->registration->family->centre_sequence;
+        $centrePrefix = $this->bundle?->registration->family->initialCentre->prefix;
+        if ($centreSequence) {
+            return $centrePrefix . str_pad($centreSequence, 4, "0", STR_PAD_LEFT);
+        }
+
+        return null;
+    }
+
+    public function getVoucherStateHistory(): array
+    {
+        $vss = VoucherState::where("voucher_id", $this->id)->orderBy('updated_at')->get();
+        $states = [];
+        if ($vss) {
+            foreach ($vss as $vs) {
+                $states[] = [
+                    "id" => $this->id,
+                    "transition" => $vs->transition,
+                    "from" => $vs->from,
+                    "user_id" => $vs->user_id,
+                    "user_type" => $vs->user_type,
+                    "voucher_id" => $vs->voucher_id,
+                    "to" => $vs->to,
+                    "state_token_id" => $vs->state_token_id,
+                    "source" => $vs->source,
+                    "created_at" => $vs->created_at,
+                    "updated_at" => $vs->updated_at,
+                ];
+            }
+        }
+        return $states;
+    }
+
+    /**
+     * Prepare a date for array / JSON serialization.
+     *
+     * @param \DateTimeInterface $date
+     * @return string
+     */
+    protected function serializeDate(DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
     }
 }
