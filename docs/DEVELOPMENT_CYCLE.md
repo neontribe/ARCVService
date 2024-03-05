@@ -61,10 +61,9 @@ When sprint work is done and approved or a hotfix is approved. It's been tested 
  * Add a link to the PR into the Trello card
  * Wait for at least one approval on the PR
  * Merge into main and delete the dev branch
- * Tag main with a patch bump x.y.**Z**
- * [Create a release](#creating-a-release)
+ * Tag main with a pre-release with an incremented patch number x.y.**Z**-pr1
  * [Release to staging](https://github.com/neontribe/ARCVInfra/blob/main/ansible/DEPLOY.md#deploying-a-release-candidate-to-staging)
- * Once testing is passed create a release with an incremented patch number e.g. `1.17.0` will become `1.17.1`
+ * Once testing is passed [create a release](#creating-a-release) without the **pr** bit, e.g. x.y.**Z**
  * Tag and release main to staging *This will change when we are containerised*
  * Test on staging *This will change when we are containerised*
  * Cherry-pick the hotfix commits back into develop
