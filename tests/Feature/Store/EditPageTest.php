@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Store;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\StoreTestCase;
 use App\Carer;
 use App\Centre;
@@ -25,6 +26,7 @@ use URL;
 class EditPageTest extends StoreTestCase
 {
     use DatabaseMigrations;
+    use RefreshDatabase;
 
     /**
      * @var Centre $centre
