@@ -35,3 +35,4 @@ coverage
 .php-cs-fixer.cache
 *.swp
 app/local
+.env.local
