@@ -47,10 +47,10 @@ When sprint work has been done, we want to release this to staging for testing/U
 
 When sprint work is done and approved or a hotfix is approved. It's been tested on staging and has been accepted. We need to release it to live and staging.
 
- * merge the RC tag into main `git checkout main && git pull origin main && git merge 1.17.0-rc2`
- * create a new release
- * [release to live](https://github.com/neontribe/ARCVInfra/blob/main/ansible/DEPLOY.md#deploy-and-releasing-to-live)
- * [release to staging](https://github.com/neontribe/ARCVInfra/blob/main/ansible/DEPLOY.md#deploying-a-release-candidate-to-staging)
+ * merge the RC tag into main `git checkout main git pull origin main git merge 1.17.0-rc2`
+ * [Create a release](#creating-a-release)
+ * [Release to staging](https://github.com/neontribe/ARCVInfra/blob/main/ansible/DEPLOY.md#deploying-a-release-candidate-to-staging)
+ * [Release to live](https://github.com/neontribe/ARCVInfra/blob/main/ansible/DEPLOY.md#deploy-and-releasing-to-live)
 
 ## Hotfix
 
@@ -62,9 +62,23 @@ When sprint work is done and approved or a hotfix is approved. It's been tested 
  * Wait for at least one approval on the PR
  * Merge into main and delete the dev branch
  * Tag main with a patch bump x.y.**Z**
+ * [Create a release](#creating-a-release)
  * [Release to staging](https://github.com/neontribe/ARCVInfra/blob/main/ansible/DEPLOY.md#deploying-a-release-candidate-to-staging)
  * Once testing is passed create a release with an incremented patch number e.g. `1.17.0` will become `1.17.1`
  * Tag and release main to staging *This will change when we are containerised*
  * Test on staging *This will change when we are containerised*
  * Cherry-pick the hotfix commits back into develop
- * [release to live](https://github.com/neontribe/ARCVInfra/blob/main/ansible/DEPLOY.md#deploy-and-releasing-to-live)
+ * [Release to live](https://github.com/neontribe/ARCVInfra/blob/main/ansible/DEPLOY.md#deploy-and-releasing-to-live)
+
+## Creating a release
+
+We need to tag a given commit with a version tag before we release it. First we make sure we are up to date and then we tag the release. After creating the release it can be deployed and released to the target environment.
+
+The tag name depends on the work that has been done. Hotfixes and patches change the last number, e.g. 1.3.5 would become 1.3.6. If it is part of a sprint, or is the release of a new feature/page/route etc then it is a minor release and changes the middle number, e.g. 1.3.5 would become 1.4.0 
+
+```bash
+git checkout main
+git pull origin main
+git push origin main
+gh release create 1.17.1 --generate-notes
+```
