@@ -12,6 +12,7 @@ use Tests\StoreTestCase;
 class AdminNewCentreRequestTest extends StoreTestCase
 {
     use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var Validator */
     private $validator;
