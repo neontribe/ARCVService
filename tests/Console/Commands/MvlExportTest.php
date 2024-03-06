@@ -31,7 +31,6 @@ class MvlExportTest extends TestCase
             "Starting voucher export from 2022/04/01 to 2023/03/31 in chunks of 54321.\n",
             $result
         );
-        print $result;
     }
 
 }
