@@ -4,17 +4,35 @@ namespace Tests\Console\Commands;
 
 use App\Centre;
 use App\CentreUser;
+use Faker\Factory;
 use App\Sponsor;
 use Artisan;
+use Faker\Generator;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
 
+/**
+ * @property Generator $faker
+ */
 class AddCentreTest extends TestCase
 {
     use DatabaseMigrations;
-    use RefreshDatabase;
+
+    private Generator $faker;
+    private Centre $centre;
+    private CentreUser $centreUser;
+    private Sponsor $sponsor;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->faker = Factory::create(config('app.locale'));
+        $this->centre = factory(Centre::class)->create();
+        $this->centreUser = factory(CentreUser::class)->create();
+        $this->sponsor = factory(Sponsor::class)->create();
+    }
 
     public function createApplication(): Application
     {
@@ -25,31 +43,17 @@ class AddCentreTest extends TestCase
 
     public function testCommand()
     {
-        $count = Sponsor::all()->count();
-        print("Sponsors count = " . $count . "\n");
-
-        $sponsor = new Sponsor();
-        $sponsor->name = "Mr Bolt";
-        $sponsor->shortcode = "TR";
-        $sponsor->save();
-
-        $centreUser = new CentreUser();
-        $centreUser->name = "Barney McGrew";
-        $centreUser->email = "b.mcgrew@example.com";
-        $centreUser->password = "password";
-        $centreUser->role = "foo";
-        $centreUser->save();
-
         $args = sprintf(
             "%s %s %s %s %s",
             "Trumpton", # name
             "NA", # prefix
-            "TR", # shortcode
-            "individual", # pref
-            $centreUser->email # email
+            $this->sponsor->shortcode, # shortcode
+            $this->centre->print_pref,
+            $this->centreUser->email # email
         );
-        $cli = "arc:addCentre " . $args;
-        $this->withoutMockingConsoleOutput()->artisan("arc:addCentre " . $args);
+        $this
+            ->artisan("arc:addCentre " . $args)
+            ->expectsConfirmation('Do you wish to continue?', 'yes');
         $result = Artisan::output();
         $this->assertEquals(
             "Starting voucher export from 2022/04/01 to 2023/03/31 in chunks of 54321.\n",
