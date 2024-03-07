@@ -20,11 +20,6 @@ class CreateMasterVoucherLogReportTest extends MysqlStoreTestCase
         return $app;
     }
 
-//    public function setUp(): void
-//    {
-//            $this->markTestSkipped('Good luck. The SQL query in here is a cluster fudge');
-//    }
-
     public function testCommandOk()
     {
         $results = $this
