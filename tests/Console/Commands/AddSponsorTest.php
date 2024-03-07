@@ -2,7 +2,6 @@
 
 namespace Tests\Console\Commands;
 
-use App\Centre;
 use App\CentreUser;
 use App\Sponsor;
 use Faker\Factory;
