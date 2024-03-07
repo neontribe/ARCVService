@@ -58,17 +58,18 @@ class LegacyImport extends Command
 
         switch (true) {
             case (!$this->authUser):
-                exit("Can't find the AdminUser");
-                break;
+                $this->error("Can't find the AdminUser");
+                return 1;
             case (!$this->sponsor):
-                exit("Can't find the Sponsor");
-                break;
+                $this->error("Can't find the Sponsor");
+                return 2;
             case (empty($this->codes)):
-                exit("There are no codes");
-                break;
+                $this->error("There are no codes");
+                return 3;
             default:
                 if (!$this->warnUser()) {
-                    exit("Failed to log in\n");
+                    $this->error("Failed to log in\n");
+                    return 4;
                 };
                 Auth::login($this->authUser);
                 $bar = $this->output->createProgressBar(count($this->codes));
