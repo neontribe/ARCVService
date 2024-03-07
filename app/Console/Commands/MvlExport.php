@@ -159,5 +159,7 @@ class MvlExport extends Command
 
             $offset += $this->chunkSize;
         }
+
+        return 0;
     }
 }
