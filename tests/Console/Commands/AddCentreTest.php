@@ -4,13 +4,12 @@ namespace Tests\Console\Commands;
 
 use App\Centre;
 use App\CentreUser;
-use Faker\Factory;
 use App\Sponsor;
 use Artisan;
+use Faker\Factory;
 use Faker\Generator;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
 
 /**
@@ -41,7 +40,7 @@ class AddCentreTest extends TestCase
         return $app;
     }
 
-    public function testCommand()
+    public function testCommandOk()
     {
         $args = sprintf(
             "%s %s %s %s %s",
@@ -51,13 +50,35 @@ class AddCentreTest extends TestCase
             $this->centre->print_pref,
             $this->centreUser->email # email
         );
-        $this
+        $results = $this
             ->artisan("arc:addCentre " . $args)
-            ->expectsConfirmation('Do you wish to continue?', 'yes');
-        $result = Artisan::output();
-        $this->assertEquals(
-            "Starting voucher export from 2022/04/01 to 2023/03/31 in chunks of 54321.\n",
-            $result
-        );
+            ->expectsConfirmation('Do you wish to continue?', 'yes')
+            ->execute();
+
+        $this->assertEquals(0, $results);
+    }
+
+    public function testCommandNoUser()
+    {
+    }
+
+    public function testCommandNoSponsor()
+    {
+    }
+
+    public function testCommandCenterExists()
+    {
+    }
+
+    public function testCommandPreferenceDoesNotExist()
+    {
+    }
+
+    public function testCommandUserWarningDenied()
+    {
+    }
+
+    public function testCommandFailedLoggedIn()
+    {
     }
 }
