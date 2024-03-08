@@ -37,3 +37,4 @@ coverage
 app/local
 .env.local
 arc_test_file_*
+build
