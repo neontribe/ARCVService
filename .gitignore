@@ -36,3 +36,4 @@ coverage
 *.swp
 app/local
 .env.local
+arc_test_file_*

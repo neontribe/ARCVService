@@ -24,7 +24,7 @@ class MvlCrypt extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(): int
     {
         $in_file = $this->argument("file");
         if (!file_exists($in_file)) {
@@ -54,6 +54,8 @@ class MvlCrypt extends Command
         fclose($fh_out);
 
         stream_wrapper_unregister("ssw");
+
+        return 0;
     }
 
     private function yeildyFileReader($handle)

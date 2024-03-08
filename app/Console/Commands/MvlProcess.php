@@ -54,7 +54,7 @@ class MvlProcess extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(): int
     {
         $in_file = $this->argument("file");
         $this->info(sprintf("Reading ids from %s", $in_file));
@@ -102,5 +102,6 @@ class MvlProcess extends Command
         fclose($fh_out);
 
         stream_wrapper_unregister("ssw");
+        return 0;
     }
 }
