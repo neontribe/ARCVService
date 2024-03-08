@@ -2,10 +2,12 @@
 
 namespace App;
 
+use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 
 
 /**
+ * @mixin Eloquent
  * @property string $name
  * @property string $prefix
  * @property string $print_pref

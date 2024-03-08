@@ -24,11 +24,12 @@ class MvlCrypt extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(): int
     {
         $in_file = $this->argument("file");
         if (!file_exists($in_file)) {
             $this->error(sprintf("File not found: %s", $in_file));
+            return 1;
         }
 
         // Add encryption wrapper
@@ -39,7 +40,7 @@ class MvlCrypt extends Command
         $targetDir = dirname($in_file);
         $sswTargetDir = "ssw://" . $targetDir;
 
-        $out_file = $sswTargetDir . "/" . $in_file . ".enc";
+        $out_file = $sswTargetDir . "/" . basename($in_file) . ".enc";
         $this->info(sprintf("Encrypting %s to %s", $in_file, $out_file));
 
         $fh_out = fopen($out_file, 'w');
@@ -54,6 +55,8 @@ class MvlCrypt extends Command
         fclose($fh_out);
 
         stream_wrapper_unregister("ssw");
+
+        return 0;
     }
 
     private function yeildyFileReader($handle)

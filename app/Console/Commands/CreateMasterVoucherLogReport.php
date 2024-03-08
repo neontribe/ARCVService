@@ -235,9 +235,9 @@ EOD;
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $this->initSettings();
 
@@ -299,7 +299,7 @@ EOD;
                 } catch (OverflowException $e) {
                     Log::error($e->getMessage());
                     Log::error("Overflow when attempting to finish a significantly large Zip file");
-                    exit(1);
+                    return 1;
                 }
 
                 // Manually close our stream. This is especially important when the stream is encrypted, as a little
@@ -308,7 +308,7 @@ EOD;
             }
         }
         // Set 0, above for expected outcomes
-        exit(0);
+        return 0;
     }
 
     /**

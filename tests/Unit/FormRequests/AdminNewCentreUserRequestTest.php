@@ -5,12 +5,14 @@ namespace Tests\Unit\FormRequests;
 use App\Centre;
 use App\Http\Requests\AdminNewCentreUserRequest;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\Validator;
 use Tests\StoreTestCase;
 
 class AdminNewCentreUserRequestTest extends StoreTestCase
 {
     use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var Validator */
     private $validator;

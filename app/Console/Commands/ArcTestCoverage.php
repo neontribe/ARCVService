@@ -22,7 +22,7 @@ class ArcTestCoverage extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(): int
     {
         $file = $this->argument("file");
         $acceptance = (double) $this->argument("acceptance");
@@ -31,15 +31,15 @@ class ArcTestCoverage extends Command
         $coverage = simplexml_load_file($file);
         $ratio = (double)$coverage->project->directory->totals->lines["percent"];
 
-        echo "Line coverage: $ratio%\n";
-        echo "Threshold: $acceptance%\n";
+        $this->info("Line coverage: $ratio%");
+        $this->info("Threshold: $acceptance%");
 
         if ($ratio < $acceptance) {
-            echo "FAILED!\n";
-            exit(-1);
+            $this->error("FAILED!");
+            return -1;
         }
 
-        echo "SUCCESS!\n";
-
+        $this->info("SUCCESS!");
+        return 0;
     }
 }

@@ -2,11 +2,13 @@
 
 namespace Tests;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\BrowserKitTesting\TestCase as BaseTestCase;
 
 abstract class StoreTestCase extends BaseTestCase
 {
     use CreatesApplication;
+    use RefreshDatabase;
 
     /**
      * @param $selector string Selector string to find a bunch of elements

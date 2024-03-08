@@ -121,7 +121,8 @@ class AddCentre extends Command
                 $this->centre->sponsor()->associate($this->sponsor);
                 $this->centre->save();
 
-                $this->info("Done.\n");
+                $this->info("Done.");
+                return 0;
         }
     }
 

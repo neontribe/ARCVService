@@ -96,6 +96,7 @@ class MvlExport extends Command
             $this->chunkSize = intval($chunkSize);
             if ($this->chunkSize === 0) {
                 $this->error("Chunk size does not seem to be a valid int: " . $chunkSize);
+                return 3;
             }
         }
 
@@ -159,5 +160,7 @@ class MvlExport extends Command
 
             $offset += $this->chunkSize;
         }
+
+        return 0;
     }
 }
