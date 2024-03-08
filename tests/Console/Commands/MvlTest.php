@@ -6,19 +6,19 @@ use App\Console\Commands\MvlExport;
 use App\Market;
 use App\Sponsor;
 use App\Trader;
-use App\User;
 use App\Voucher;
 use Faker\Factory;
 use Faker\Generator;
-use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Tests\CreatesApplication;
 
 class MvlTest extends TestCase
 {
     use DatabaseMigrations;
+    use CreatesApplication;
 
     private Generator $faker;
 
@@ -54,14 +54,6 @@ class MvlTest extends TestCase
             $voucher->applyTransition('confirm');
             $voucher->applyTransition('payout');
         }
-    }
-
-
-    public function createApplication(): Application
-    {
-        $app = require __DIR__ . '/../../../bootstrap/app.php';
-        $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
-        return $app;
     }
 
 
@@ -120,9 +112,6 @@ class MvlTest extends TestCase
         $cypherFileName = $testFilename . ".enc";
         $cypherText = file_get_contents($cypherFileName);
         $this->assertNotEquals($plainText, $cypherText);
-
-        fclose(STDOUT);
-        $fakestdout = fopen('php://memory', 'r+');
 
         $results = $this
             ->artisan("arc:mvl:cat $cypherFileName")

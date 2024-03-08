@@ -10,6 +10,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Facades\Auth;
+use Tests\CreatesApplication;
 
 /**
  * @property Generator $faker
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 class AddSponsorTest extends TestCase
 {
     use DatabaseMigrations;
+    use CreatesApplication;
 
     private Generator $faker;
     private CentreUser $centreUser;
@@ -28,13 +30,6 @@ class AddSponsorTest extends TestCase
         $this->faker = Factory::create(config('app.locale'));
         $this->centreUser = factory(CentreUser::class)->create();
         $this->sponsor = factory(Sponsor::class)->create();
-    }
-
-    public function createApplication(): Application
-    {
-        $app = require __DIR__ . '/../../../bootstrap/app.php';
-        $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
-        return $app;
     }
 
     public function testCommandOk()

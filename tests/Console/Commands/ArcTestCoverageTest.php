@@ -5,16 +5,12 @@ namespace Tests\Console\Commands;
 use Facebook\WebDriver\Exception\Internal\RuntimeException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\TestCase;
+use Tests\CreatesApplication;
 
 class ArcTestCoverageTest extends TestCase
 {
 
-    public function createApplication(): Application
-    {
-        $app = require __DIR__ . '/../../../bootstrap/app.php';
-        $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
-        return $app;
-    }
+    use CreatesApplication;
 
     public function testCommandOK()
     {

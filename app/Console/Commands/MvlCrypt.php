@@ -39,7 +39,7 @@ class MvlCrypt extends Command
         $targetDir = dirname($in_file);
         $sswTargetDir = "ssw://" . $targetDir;
 
-        $out_file = $sswTargetDir . "/" . $in_file . ".enc";
+        $out_file = $sswTargetDir . "/" . basename($in_file) . ".enc";
         $this->info(sprintf("Encrypting %s to %s", $in_file, $out_file));
 
         $fh_out = fopen($out_file, 'w');

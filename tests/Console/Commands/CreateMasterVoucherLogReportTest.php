@@ -9,16 +9,12 @@ use Mockery\Mock;
 use PDO;
 use PDOStatement;
 use Tests\MysqlStoreTestCase;
+use Tests\CreatesApplication;
 
 class CreateMasterVoucherLogReportTest extends MysqlStoreTestCase
 {
+    use CreatesApplication;
 
-    public function createApplication(): Application
-    {
-        $app = require __DIR__ . '/../../../bootstrap/app.php';
-        $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
-        return $app;
-    }
 
     public function testCommandOk()
     {

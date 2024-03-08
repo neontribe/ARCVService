@@ -5,17 +5,13 @@ namespace Tests\Console\Commands;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Facades\Artisan;
+use Tests\CreatesApplication;
 
 class MvlExportTest extends TestCase
 {
     use DatabaseMigrations;
+    use CreatesApplication;
 
-    public function createApplication()
-    {
-        $app = require __DIR__ . '/../../../bootstrap/app.php';
-        $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
-        return $app;
-    }
 
     public function testParameters(): void
     {
