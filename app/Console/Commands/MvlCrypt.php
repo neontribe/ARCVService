@@ -29,6 +29,7 @@ class MvlCrypt extends Command
         $in_file = $this->argument("file");
         if (!file_exists($in_file)) {
             $this->error(sprintf("File not found: %s", $in_file));
+            return 1;
         }
 
         // Add encryption wrapper

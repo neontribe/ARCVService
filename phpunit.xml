@@ -26,7 +26,7 @@
         <report>
             <html outputDirectory="build/coverage-html"/>
             <text outputFile="build/coverage.txt"/>
-            <php outputFile="build/dcoverage.php"/>
+            <php outputFile="build/coverage.php"/>
             <xml outputDirectory="build/coverage-xml"/>
         </report>
     </coverage>
