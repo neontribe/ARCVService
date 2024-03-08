@@ -100,7 +100,7 @@ class MvlTest extends TestCase
 
     public function testCryptAndCat()
     {
-        $testFilename = "arc_test_file_" . $this->faker->randomNumber(5, true);
+        $testFilename = "build/arc_test_file_" . $this->faker->randomNumber(5, true);
         $plainText = $this->faker->text(500);
         file_put_contents($testFilename, $plainText);
 
@@ -119,8 +119,32 @@ class MvlTest extends TestCase
             ->execute();
         $this->assertEquals(0, $results);
 
+        unlink($testFilename);
+    }
 
-//        unlink($testFilename);
-//        unlink($cypherFileName);
+    public function testEncryptNoFile()
+    {
+        $results = $this
+            ->artisan("arc:mvl:encrypt build/no_such_file")
+            ->execute();
+        $this->assertEquals(1, $results);
+    }
+
+    public function testCatNoFile()
+    {
+        $results = $this
+            ->artisan("arc:mvl:cat build/no_such_file")
+            ->execute();
+        $this->assertEquals(1, $results);
+    }
+
+    public function testCatSodiumError()
+    {
+        $testFilename = "build/arc_test_file_" . $this->faker->randomNumber(5, true);
+        file_put_contents($testFilename, "not cypher text");
+        $results = $this
+            ->artisan("arc:mvl:cat " . $testFilename)
+            ->execute();
+        $this->assertEquals(2, $results);
     }
 }
