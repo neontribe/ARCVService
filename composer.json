@@ -33,7 +33,7 @@
     "neontribe/laravel-specification": "dev-master",
     "ramsey/uuid": "4.7.5",
     "sebdesign/laravel-state-machine": "3.4.3",
-    "symfony/console": "6.3.0",
+    "symfony/console": "6.4.4",
     "symfony/event-dispatcher": "6.3.0",
     "symfony/http-client": "^6.3",
     "symfony/lock": "^6.2.8",
