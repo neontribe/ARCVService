@@ -11,7 +11,7 @@ class ArcTestCoverage extends Command
      *
      * @var string $signature
      */
-    protected $signature = 'arc:test:coverage {file : path to XML coverage report} { acceptance=65 : minimum % to pass }';
+    protected $signature = 'arc:test:coverage {file : path to XML coverage report} { acceptance=75 : minimum % to pass }';
     /**
      * The console command description.
      *

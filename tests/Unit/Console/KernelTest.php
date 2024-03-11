@@ -1,22 +1,16 @@
 <?php
 
-namespace Tests\Console;
+namespace Tests\Unit\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Foundation\Application;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\TestCase;
+use Tests\CreatesApplication;
 
 class KernelTest extends TestCase
 {
-
-    public function createApplication(): Application
-    {
-        $app = require __DIR__ . '/../../bootstrap/app.php';
-        $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
-        return $app;
-    }
-
+    use CreatesApplication;
     /**
      * @throws BindingResolutionException
      */

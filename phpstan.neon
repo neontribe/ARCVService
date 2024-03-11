@@ -22,5 +22,6 @@ parameters:
        - ./vendor
        - ./node_modules
        - ./storage
+       - ./_ide_helper.php
 
 #    checkMissingIterableValueType: false

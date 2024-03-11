@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Console\Commands;
+namespace Tests\Unit\Console\Commands;
 
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\TestCase;

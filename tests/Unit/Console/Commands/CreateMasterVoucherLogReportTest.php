@@ -1,15 +1,9 @@
 <?php
 
-namespace Tests\Console\Commands;
+namespace Tests\Unit\Console\Commands;
 
-use Illuminate\Foundation\Application;
-use Illuminate\Foundation\Testing\TestCase;
-use DB;
-use Mockery\Mock;
-use PDO;
-use PDOStatement;
-use Tests\MysqlStoreTestCase;
 use Tests\CreatesApplication;
+use Tests\MysqlStoreTestCase;
 
 class CreateMasterVoucherLogReportTest extends MysqlStoreTestCase
 {

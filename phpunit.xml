@@ -42,19 +42,45 @@
     </logging>
     <testsuites>
         <testsuite name="all">
-            <directory>./tests/Console</directory>
             <directory>./tests/Feature</directory>
             <directory>./tests/Unit</directory>
         </testsuite>
     </testsuites>
     <php>
+        <env name="APP_DEBUG" value="true"/>
         <env name="APP_ENV" value="testing"/>
+        <!-- This is a *real* key lifted from a dev env. We could update ./config/app.php to generate one -->
+        <env name="APP_KEY" value="base64:8etz+VluwsIWQ3swYmLmAtwtNaJKNg3zDqlD9DIs4XU="/>
         <env name="APP_LOG" value="single"/>
+        <env name="APP_LOG_LEVEL" value="debug"/>
+        <env name="APP_NAME" value="ARCVService"/>
+        <env name="APP_SEEDS" value="Dev"/>
+        <env name="APP_TIMEZONE" value="Europe/London"/>
+        <env name="APP_URL" value="http://arc-service.expample.com"/>
+        <env name="APP_VER" value="1.9.0"/>
+        <env name="ARC_MARKET_URL" value="http://arc-market.expample.com"/>
+        <env name="ARC_SCHOOL_MONTH" value="9"/>
+        <env name="ARC_SERVICE_DOMAIN" value="arcv-service.test"/>
+        <env name="ARC_STORE_DOMAIN" value="arcv-store.test"/>
+        <env name="BROADCAST_DRIVER" value="log"/>
         <env name="CACHE_DRIVER" value="array"/>
         <env name="DB_CONNECTION" value="testing"/>
         <env name="MAIL_DRIVER" value="log"/>
+        <env name="MAIL_ENCRYPTION" value="null"/>
+        <env name="MAIL_FROM_ADDRESS" value="from@example.com"/>
+        <env name="MAIL_FROM_NAME" value="Mailer Name"/>
+        <env name="MAIL_HOST" value="127.0.0.1"/>
+        <env name="MAIL_PASSWORD" value="null"/>
+        <env name="MAIL_PORT" value="1025"/>
+        <env name="MAIL_TO_ADMIN_ADDRESS" value="buck@example.com"/>
+        <env name="MAIL_TO_ADMIN_NAME" value="Buck Rogers"/>
+        <env name="MAIL_TO_DEVELOPER_NAME" value="User Support"/>
+        <env name="MAIL_TO_DEVELOPER_TEAM" value="arc@neontribe.co.uk"/>
+        <env name="MAIL_USERNAME" value="null"/>
+        <env name="PASSWORD_CLIENT" value="1"/>
+        <env name="PASSWORD_CLIENT_SECRET" value="0"/>
         <env name="QUEUE_DRIVER" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
-        <env name="XDEBUG_MODE" value="coverage"/>
+        <env name="SESSION_SECURE_COOKIE" value="false"/>
     </php>
 </phpunit>

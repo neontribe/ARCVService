@@ -1,9 +1,7 @@
 <?php
 
-namespace Tests\Console\Commands;
+namespace Tests\Unit\Console\Commands;
 
-use Facebook\WebDriver\Exception\Internal\RuntimeException;
-use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\TestCase;
 use Tests\CreatesApplication;
 

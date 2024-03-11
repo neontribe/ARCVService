@@ -14,8 +14,6 @@ use Tests\StoreTestCase;
 
 class StoreRoutesTest extends StoreTestCase
 {
-    use DatabaseMigrations;
-
     /** @var CentreUser $fmUser */
     private $fmUser;
 
