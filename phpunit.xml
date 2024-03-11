@@ -23,6 +23,10 @@
         <include>
             <directory suffix=".php">app</directory>
         </include>
+        <exclude>
+<!--          <directory suffix=".php">src/Legacy/</directory>-->
+          <file>app/Console/Commands/Debug.php</file>
+        </exclude>
         <report>
             <html outputDirectory="build/coverage-html"/>
             <text outputFile="build/coverage.txt"/>
