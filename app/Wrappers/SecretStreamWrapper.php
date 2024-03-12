@@ -58,11 +58,10 @@ class SecretStreamWrapper
      * @param $path string the full path provided to @see fopen() or similar
      * @param $mode string only "r" is supported
      * @param $options int some options encoded as bits
-     * @param $open mixed not used?
      *
      * @return bool whether opening was successful
      */
-    public function stream_open($path, $mode, $options, &$open) {
+    public function stream_open($path, $mode, $options) {
         // Check that we are in write mode.
         if ($mode !== "w") {
             if ($options & STREAM_REPORT_ERRORS) {

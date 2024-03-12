@@ -41,7 +41,7 @@ jobs:
 
     - name: Run tests
       run: |
-       PHPUNIT_SKIP_MYSQL_TEST=1 XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-xml target/coverage
+       PHPUNIT_SKIP_MYSQL_TEST=1 XDEBUG_MODE=coverage vendor/bin/phpunit
 
     - name: Check coverage
       run: |
