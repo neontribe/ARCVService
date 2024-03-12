@@ -19,19 +19,10 @@ jobs:
     - name: Install Dependencies
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-    - name: Create DB
-      run: |
-        php artisan migrate
-      env:
-        APP_ENV: testing
-
     - name: Generate key
       run: php artisan key:generate
       env:
         APP_ENV: testing
-
-    - name: Passport install
-      run: php .docker/passport-install.php .
 
     - name: Directory Permissions
       run: chmod -R 777 storage bootstrap/cache
