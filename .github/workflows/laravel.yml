@@ -27,9 +27,6 @@ jobs:
     - name: Directory Permissions
       run: chmod -R 777 storage bootstrap/cache
 
-    - name: Key Permissions
-      run: chmod 600 ./storage/*.key
-
     - name: Run tests
       run: |
        PHPUNIT_SKIP_MYSQL_TEST=1 XDEBUG_MODE=coverage vendor/bin/phpunit
