@@ -4,6 +4,7 @@ namespace Tests;
 
 use Hash;
 use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Contracts\Foundation\Application;
 
 trait CreatesApplication
 {

@@ -4,7 +4,6 @@ namespace Tests\Unit\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\TestCase;
 use Tests\CreatesApplication;
 

@@ -57,6 +57,7 @@ class Handler extends ExceptionHandler
      */
     protected function shallWeStackTrace(Throwable $e): bool
     {
+        $x = config('app.env');
         if (config('app.env') === 'production') {
             foreach ($this->dontStackTrace as $type) {
                 if ($e instanceof $type) {
@@ -117,15 +118,15 @@ class Handler extends ExceptionHandler
                 ->guest('/login')
                 // We anticipate expiry to be the most common reason.
                 ->withErrors(['error_message' => trans('auth.expired')])
-                ;
+            ;
         }
 
         if ($exception instanceof MethodNotAllowedHttpException) {
             // User somehow tried an HTTP verb a resource doesn't support
             // Send them somewhere safe. '' is the "/" equivalent.
             return redirect('');
-                // For some reason ->withErrors() won't "take";
-                // The session gets flashed, but it doesn't survive.
+            // For some reason ->withErrors() won't "take";
+            // The session gets flashed, but it doesn't survive.
         }
 
         return parent::render($request, $exception);
@@ -150,7 +151,7 @@ class Handler extends ExceptionHandler
             case 'api':
                 $login = route('api.login');
                 break;
-            //TODO: merge
+                //TODO: merge
             case 'store':
                 $login = route('store.login');
                 break;
