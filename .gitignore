@@ -38,3 +38,4 @@ app/local
 .env.local
 arc_test_file_*
 build
+.cache_ggshield
