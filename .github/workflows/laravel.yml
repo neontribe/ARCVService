@@ -40,6 +40,6 @@ jobs:
 
     - name: Check coverage
       run: |
-       php artisan arc:test:coverage target/coverage/index.xml
+       php artisan arc:test:coverage build/coverage-xml/index.xml
 
 # gh act -j test
