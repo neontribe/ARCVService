@@ -9,7 +9,6 @@ use Tests\StoreTestCase;
 
 class CreateMarketsPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
 
     /** @var AdminUser $adminUser */
     private $adminUser;

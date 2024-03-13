@@ -55,13 +55,13 @@ class SecretStreamWrapper
      * We setup the resource we're wrapping and the cryptography we're going to rely on, deriving our key from
      * self::getKey().
      *
-     * @param $path the full path provided to @see fopen() or similar
-     * @param $mode only "r" is supported
-     * @param $options some options encoded as bits
-     * @param $open
+     * @param $path string the full path provided to @see fopen() or similar
+     * @param $mode string only "r" is supported
+     * @param $options int some options encoded as bits
+     *
      * @return bool whether opening was successful
      */
-    public function stream_open($path, $mode, $options, &$open) {
+    public function stream_open($path, $mode, $options) {
         // Check that we are in write mode.
         if ($mode !== "w") {
             if ($options & STREAM_REPORT_ERRORS) {

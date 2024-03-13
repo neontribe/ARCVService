@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Console\Commands;
+namespace Tests\Unit\Console\Commands;
 
 use App\Console\Commands\MvlExport;
 use App\Market;

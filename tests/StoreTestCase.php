@@ -2,11 +2,13 @@
 
 namespace Tests;
 
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\BrowserKitTesting\TestCase as BaseTestCase;
 
 abstract class StoreTestCase extends BaseTestCase
 {
+    use DatabaseMigrations;
     use CreatesApplication;
     use RefreshDatabase;
 

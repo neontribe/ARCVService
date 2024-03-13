@@ -4,6 +4,10 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property Family $family;
+ * @property CentreUser $user;
+ */
 class Note extends Model
 {
     /**

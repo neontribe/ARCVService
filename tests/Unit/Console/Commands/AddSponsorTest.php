@@ -1,12 +1,11 @@
 <?php
 
-namespace Tests\Console\Commands;
+namespace Tests\Unit\Console\Commands;
 
 use App\CentreUser;
 use App\Sponsor;
 use Faker\Factory;
 use Faker\Generator;
-use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Facades\Auth;

@@ -9,6 +9,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      DB_CONNECTION: testing
+      APP_ENV: testing
     steps:
 
     - uses: actions/checkout@v4
@@ -18,11 +21,6 @@ jobs:
 
     - name: Install Dependencies
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-
-    - name: Create DB
-      run: |
-        touch /tmp/data.db
-        php artisan migrate
 
     - name: Generate key
       run: php artisan key:generate
@@ -38,10 +36,10 @@ jobs:
 
     - name: Run tests
       run: |
-       PHPUNIT_SKIP_MYSQL_TEST=1 XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-xml target/coverage
+       PHPUNIT_SKIP_MYSQL_TEST=1 XDEBUG_MODE=coverage vendor/bin/phpunit
 
     - name: Check coverage
       run: |
-       php artisan arc:test:coverage target/coverage/index.xml
+       php artisan arc:test:coverage build/coverage-xml/index.xml
 
 # gh act -j test

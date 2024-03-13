@@ -1,0 +1,5 @@
+version: 2
+secret:
+  secret:
+    - tests/Unit/Controllers/Service/Auth/LoginControllerTest.php
+    - .env.ghactions
