@@ -57,7 +57,6 @@ class Handler extends ExceptionHandler
      */
     protected function shallWeStackTrace(Throwable $e): bool
     {
-        $x = config('app.env');
         if (config('app.env') === 'production') {
             foreach ($this->dontStackTrace as $type) {
                 if ($e instanceof $type) {
