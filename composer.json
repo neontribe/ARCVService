@@ -50,7 +50,7 @@
     "laravel/browser-kit-testing": "6.3.1",
     "laravel/dusk": "^7.7.0",
     "mockery/mockery": "^1.5.1",
-    "nunomaduro/collision": "6.4.0",
+    "nunomaduro/collision": "7.1.0",
     "nunomaduro/larastan": "^2.5.1",
     "phpmd/phpmd": "^2.13.0",
     "phpstan/phpstan": "^1.10.13",
