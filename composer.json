@@ -32,7 +32,7 @@
     "maennchen/zipstream-php": "^2.4.0",
     "neontribe/laravel-specification": "dev-master",
     "ramsey/uuid": "4.7.5",
-    "sebdesign/laravel-state-machine": "3.4.3",
+    "sebdesign/laravel-state-machine": "3.4.4",
     "symfony/console": "6.4.4",
     "symfony/event-dispatcher": "6.4.3",
     "symfony/http-client": "^6.3",
