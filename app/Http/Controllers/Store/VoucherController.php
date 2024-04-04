@@ -200,7 +200,7 @@ class VoucherController extends Controller
                 echo $message;
             } while (!$eof); // While there is more to do, continue.
         }, 200, [
-            'Content-Disposition' => 'attachment; filename="' . str_replace(".enc", "", $logFile) . '"'
+            'Content-Disposition' => 'attachment; filename="' . str_replace(".enc", ".csv", $logFile) . '"'
         ]);
 
     }
