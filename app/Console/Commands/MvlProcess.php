@@ -70,7 +70,7 @@ class MvlProcess extends Command
         $targetDir = "storage/app/local";
         $sswTargetDir = "ssw://" . $targetDir;
 
-        $out_file = $sswTargetDir . "/" . basename($in_file, ".txt") . ".csv";
+        $out_file = $sswTargetDir . "/" . basename($in_file, ".txt") . ".enc";
         $this->info(sprintf("Writing ids to %s", $out_file));
 
         $fh_out = fopen($out_file, 'w');
@@ -100,6 +100,7 @@ class MvlProcess extends Command
 
         $this->info("Total time: " . TextFormatter::secondsToTime(ceil(microtime(true) - $startTime)));
         fclose($fh_out);
+        chmod($out_file, 0644);
 
         stream_wrapper_unregister("ssw");
         return 0;

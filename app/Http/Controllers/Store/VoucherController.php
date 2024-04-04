@@ -103,7 +103,7 @@ class VoucherController extends Controller
 
         $directoryPath = storage_path("app/local"); # I think I'm using the wrong function to access files?
 
-        $logFiles = File::glob($directoryPath . '/*.arcx.csv');
+        $logFiles = File::glob($directoryPath . '/*.enc');
 
         $downloadLinks = [];
         $logMetadata = [];
@@ -200,7 +200,7 @@ class VoucherController extends Controller
                 echo $message;
             } while (!$eof); // While there is more to do, continue.
         }, 200, [
-            'Content-Disposition' => 'attachment; filename="' . $logFile . '"'
+            'Content-Disposition' => 'attachment; filename="' . str_replace(".enc", "", $logFile) . '"'
         ]);
 
     }
