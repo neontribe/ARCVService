@@ -15,20 +15,20 @@
         <table id='voucherExportTable'>
             <thead>
             <tr>
-                <th class="center">File Name</th>
+                <th class="center">Date Included</th>
                 <th class="center">File Size</th>
                 <th class="center">Last Modified</th>
                 <th class="center">Download Link</th>
             </tr>
             </thead>
             <tbody>
-            @foreach ($downloadLinks as $fileName => $web_link)
+            @foreach ($data as $displayName => $metadata)
                 <tr class="active">
-                    <td class="center">{{$fileName}}</td>
-                    <td class="center">{{$logMetadata[$fileName]["formattedSize"]}}</td>
-                    <td class="center">{{gmdate("D, d M Y H:i:s", $logMetadata[$fileName]["lastModified"])}}</td>
-                    <td class="center"> {{--WHY IS IT OFF-CENTRE--}}
-                        <a href="{{$web_link}}" target="_blank" class="centre link inline-link-button">
+                    <td class="center">{{$displayName}}</td>
+                    <td class="center">{{$metadata["fileSize"]}}</td>
+                    <td class="center">{{$metadata["displayDate"]}}</td>
+                    <td class="center">
+                        <a href="{{$metadata["downloadLink"]}}" target="_blank" class="centre link inline-link-button">
                             <div class="link-button">
                                 <i class="fa fa-download" aria-hidden="true"></i> Download
                             </div>
