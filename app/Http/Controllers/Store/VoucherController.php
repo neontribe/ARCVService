@@ -101,37 +101,26 @@ class VoucherController extends Controller
     {
         // by gabriel (intern 4)
 
-        $directoryPath = storage_path("app/local"); # I think I'm using the wrong function to access files?
+        $directoryPath = Storage::path('enc');
 
         $logFiles = File::glob($directoryPath . '/*.arcx.csv');
-
-        $downloadLinks = [];
-        $logMetadata = [];
+        rsort($logFiles);
+        $logFilesMetadata = [];
         foreach ($logFiles as $logFile) {
-            $baseFileName = basename($logFile);
-
-            $downloadLinks[$baseFileName] = "/vouchers/download?logFile=" . $baseFileName;
-
-            $rawFileSize = filesize($logFile);
-
-            $formattedFileSize = TextFormatter::formatBytes($rawFileSize);
-
-            $logMetadata[$baseFileName] = [
-                "fileName" => $baseFileName,
-                "rawSize" => filesize($logFile), // Use for sorting.
-                "formattedSize" => $formattedFileSize, // Use for displaying.
-                "lastModified" => filemtime($logFile)];
+            $logFilesMetadata[$logFile] = "xxx";
         }
 
-        return view('store.list_voucher_logs', ["downloadLinks" => $downloadLinks, "logMetadata" => $logMetadata]);
-    }
+        $data = [];
+        foreach ($logFilesMetadata as $fileName => $metadata) {
+            $data[$this->makeDisplayName($fileName)] = [
+                "displayDate" => date("d/m/Y H:s", filemtime($fileName)),
+                "fileSize" => TextFormatter::formatBytes(filesize($fileName)),
+                "downloadLink" => "/vouchers/download?logFile=" . $fileName,
+            ];
+        }
 
-    public function downloadVoucherLogs(Request $request)
-    {
-        $logFile = $request->query('logFile');
-        return response()->download(storage_path("app/local/" . $logFile));
+        return view('store.list_voucher_logs', ["data" => $data]);
     }
-
 
     public function downloadAndDecryptVoucherLogs(Request $request)
     {
@@ -140,17 +129,17 @@ class VoucherController extends Controller
         // I don't think they can do this, since it checks only searches within storage/app/local.
         // The website will crash though if the file isn't encrypted properly/at all.
 
-        $pathToVouchers = "app/local/";
+        $pathToVouchers = Storage::path('enc') . '/' . $logFile;
 
         // Check the log exists, so we can error-out before we declare a streamed response.
-        if (!file_exists(storage_path($pathToVouchers . $logFile))) {
+        if (!file_exists($pathToVouchers)) {
             // Return to dashboard with an error that indicates we don't have a file.
             return redirect(URL::route('store.dashboard'))
                 ->with('error_message', "Sorry, we couldn't find the file you were looking for. Please contact support if this error persists.");
         }
 
         // Do as much IO as we can comfortably before we begin streaming.
-        $file = fopen(storage_path($pathToVouchers . $logFile), 'r');
+        $file = fopen($pathToVouchers, 'r');
 
         $header = fread($file, SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES);
 
@@ -203,5 +192,28 @@ class VoucherController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $logFile . '"'
         ]);
 
+    }
+
+    private function makeDisplayName($filename)
+    {
+        $basename = basename($filename);
+        $start = date_parse_from_format(
+            "Ymd",
+            substr($basename, 9, 8)
+        );
+        $end = date_parse_from_format(
+            "Ymd",
+            substr($basename, 21, 8)
+        );
+
+        return sprintf(
+            "%02d/%02d/%d to %02d/%02d/%d",
+            $start["day"],
+            $start["month"],
+            $start["year"],
+            $end["day"],
+            $end["month"],
+            $end["year"],
+        );
     }
 }
