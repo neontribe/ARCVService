@@ -18,7 +18,7 @@
     "ext-sodium": "*",
     "ext-zip": "*",
     "barryvdh/laravel-debugbar": "^v3.8.1",
-    "barryvdh/laravel-dompdf": "2.0.1",
+    "barryvdh/laravel-dompdf": "2.2.0",
     "doctrine/dbal": "3.6.3",
     "fakerphp/faker": "^1.21.0",
     "highsolutions/laravel-searchy": "^9.0",
