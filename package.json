@@ -10,7 +10,8 @@
     "production": "mix --production",
     "prepare": "husky",
     "commitlint": "commitlint --edit",
-    "test": ""
+    "test": "",
+    "postinstall": "husky install"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.6.1",
@@ -23,9 +24,6 @@
     "resolve-url-loader": "^5.0.0",
     "sass": "^1.62.0",
     "sass-loader": "^13.2.2"
-  },
-  "scripts": {
-    "postinstall": "husky install"
   },
   "browserslist": [
     ">2%",
