@@ -186,9 +186,9 @@ ENTRYPOINT /entry-point.sh
 FROM base AS dev
 # copy kimai develop source
 COPY --from=git-dev --chown=www-data:www-data /opt/project /opt/project
-COPY ./.docker/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 COPY --from=php-ext-xdebug /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 COPY --from=php-ext-xdebug /usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so
+COPY ./.docker/xdebug.ini /usr/local/etc/php/conf.d/zz_xdebug-config.ini
 RUN \
     export COMPOSER_HOME=/composer && \
     composer --no-ansi install --working-dir=/opt/project --optimize-autoloader && \
@@ -197,11 +197,6 @@ RUN \
     chown -R www-data:www-data /opt/project /usr/local/etc/php/php.ini && \
     chown -R www-data:www-data /opt/project /usr/local/etc/php/php.ini && \
     echo "error_reporting=E_ALL" > /usr/local/etc/php/conf.d/error_reporting.ini && \
-    echo xdebug.remote_enable=on >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini && \
-    echo xdebug.remote_autostart=off >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini && \
-    echo xdebug.remote_port = 9000 >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini && \
-    echo xdebug.mode=debug >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini && \
-    echo xdebug.remote_host = host.docker.internal >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini && \
     yarn
 ENV APP_ENV=dev
 ENV memory_limit=256M
