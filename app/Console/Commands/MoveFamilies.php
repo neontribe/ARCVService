@@ -24,7 +24,7 @@ class MoveFamilies extends Command
      *
      * @var string
      */
-    protected $description = 'Move families between centres, e.g. ./artisan arc:move:families 103 101 4,42,44,46,39,40,41,45';
+    protected $description = 'Move families between centres, e.g. ./artisan arc:move:families 101 113 4,42,44,46,39,40,41,45';
 
     /**
      * Execute the console command.
@@ -80,14 +80,14 @@ class MoveFamilies extends Command
                 ));
                 if ($bundle->disbursing_centre_id != null && $bundle->disbursing_centre_id != $from_centre_id) {
                     $bundle->disbursing_centre_id = $to_centre_id;
-                    $this->info(sprintf("  Updating bundle->disbursing_centre_id = %s", $to_centre_id));
+//                    $this->info(sprintf("  Updating bundle->disbursing_centre_id = %s", $to_centre_id));
                     $bundle->save();
                 }
             }
             $this->info(sprintf("  Locking family %s to centre %s", $singleReg->family->id, $to_centre->id));
             $singleReg->family->lockToCentre($to_centre, true);
             $singleReg->family->save();
-            $singleReg->centre = $to_centre;
+            $singleReg->centre_id = $to_centre->id;
             $singleReg->save();
         }
     }
