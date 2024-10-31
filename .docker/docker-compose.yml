@@ -1,15 +1,19 @@
-version: '3.5'
 services:
 
   sqldb:
     image: mysql:5.7
     environment:
-      - MYSQL_DATABASE=arcv
+      - MYSQL_DATABASE=arcv_service
       - MYSQL_USER=arcvuser
       - MYSQL_PASSWORD=arcvpassword
       - MYSQL_ROOT_PASSWORD=changemeplease
+    volumes:
+      - ./initdb.d:/docker-entrypoint-initdb.d
+      - mysql-data:/var/lib/mysql
     command: --default-storage-engine innodb
     restart: unless-stopped
+    ports:
+      - 3336:3306
     healthcheck:
       test: mysqladmin -p$$MYSQL_ROOT_PASSWORD ping -h localhost
       interval: 20s
@@ -24,6 +28,8 @@ services:
     volumes:
       - ./nginx_default.conf:/etc/nginx/conf.d/default.conf
       - ../:/opt/project:ro
+    restart: unless-stopped
+    depends_on: [service]
 
   service:
     image: arc-service:dev
@@ -37,7 +43,7 @@ services:
       - DB_CONNECTION=mysql
       - DB_HOST=sqldb
       - DB_PORT=3306
-      - DB_DATABASE=arcv
+      - DB_DATABASE=arcv_service
       - DB_USERNAME=arcvuser
       - DB_PASSWORD=arcvpassword
       - LOG_CHANNEL=stderr
@@ -52,11 +58,21 @@ services:
       - "arcv-service.test:host-gateway"
       - "arcv-store.test:host-gateway"
       - "arcv-market.test:host-gateway"
+    restart: unless-stopped
+    depends_on: [sqldb]
 
   mailer:
     image: schickling/mailcatcher
     ports:
       - "${MAILER_ADMIN_PORT:-2080}:1080"
+    restart: unless-stopped
 
 volumes:
   service_public:
+  mysql-data:
+
+# docker compose -f .docker/docker-compose.yml up -d
+# docker compose -f .docker/docker-compose.yml logs -f
+# docker compose -f .docker/docker-compose.yml exec service bash
+# docker compose -f .docker/docker-compose.yml exec service /opt/project/artisan
+# docker compose -f .docker/docker-compose.yml exec sqldb mysql -uarcvuser -parcvpassword arcv_service
