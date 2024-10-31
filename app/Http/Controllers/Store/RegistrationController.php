@@ -113,7 +113,12 @@ class RegistrationController extends Controller
 //        $_centre = null
         $_rm = $q->get();
         foreach ($_rm as $r) {
-            \Log::info($r);
+            \Log::info(
+                sprintf(
+                    "Reg id: %d, family id: %d, centre id: %d",
+                    $r->id, $r->family_id, $r->centre_id
+                )
+            );
         }
 
         // This isn't ideal as it relies on getting all the families, then sorting them.

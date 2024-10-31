@@ -17,14 +17,14 @@ class MoveFamilies extends Command
      *
      * @var string
      */
-    protected $signature = 'arc:skunk {from_centre} {to_centre} {family_ids} ';
+    protected $signature = 'arc:move:families {from_centre} {to_centre} {family_ids} ';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Move families between centres, e.g. ./artisan arc:skunk 103 101 4,42,44,46,39,40,41,45';
+    protected $description = 'Move families between centres, e.g. ./artisan arc:move:families 103 101 4,42,44,46,39,40,41,45';
 
     /**
      * Execute the console command.
@@ -57,6 +57,9 @@ class MoveFamilies extends Command
             ->filter(function ($f) use ($family_list) {
                 return in_array($f->family->centre_sequence, $family_list);
             });
+        if (count($reg_associated_with_fam) == 0) {
+            $this->warn("No matching registrations found");
+        }
 
         foreach ($reg_associated_with_fam as $singleReg) {
             /* @var Registration $singleReg */
@@ -84,8 +87,8 @@ class MoveFamilies extends Command
             $this->info(sprintf("  Locking family %s to centre %s", $singleReg->family->id, $to_centre->id));
             $singleReg->family->lockToCentre($to_centre, true);
             $singleReg->family->save();
-            $_family = Family::where("id", $singleReg->family->id)->first();
-            \Log::info($_family);
+            $singleReg->centre = $to_centre;
+            $singleReg->save();
         }
     }
 }
