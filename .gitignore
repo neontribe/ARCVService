@@ -32,3 +32,4 @@ tests/Browser/screenshots/
 .docker-installed
 passport.install
 coverage
+.docker/initdb.d/
