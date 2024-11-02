@@ -30,6 +30,67 @@ Or you can open an interactive shell:
 docker compose -f .docker/docker-compose.yml exec service bash
 ```
 
+## Attach a debugger (PHPStorm)
+
+Start the docker compose [as above](#running-the-whole-stack-in-containers)
+
+### Set up your browser extension
+
+ * Chrome: https://chromewebstore.google.com/detail/xdebug-helper/eadndfjplgieldjbigjakmdgkmoaaaoc
+ * Firefox: https://addons.mozilla.org/en-US/firefox/addon/xdebug-helper-for-firefox/
+
+The firefox extension defaults to eclipse as it's IDE, in the preferences, switch it to PHP Storm
+
+### In PHPStorm
+
+#### Set the project PHP interpreter to be lifted from the container
+
+* Alt+Ctrl+s
+* Search - PHP
+* Click three dots next to "CLI Interpreter" (...)
+* Click "+"
+* Choose "From Docker, Vagrant, VM, WSL, Remote..."
+* Choose "Docker"
+* Choose New on the sever line, click OK
+* Click OK
+* Click OK
+
+#### Create a run config
+
+Wait for indexes to build in phpstorm, when PHP starts it takes a few seconds/minutes to build them, without the indexes it create a run config.  The **server** created in this section can be re-used in later run configs.
+
+* Edit configurations (Run menu)
+* Click "+" (Add new configuration)
+* Choose "PHP Web page"
+* Give it a name
+* Click three dots next to "Server" (...)
+* Click "+" (Add)
+* Give it a name
+* Set host to "arcv-service.test" and port to 8080
+* Tick "Use path mappings"
+* Set the "Absolute path on the server" that matches local project root to be "/opt/project"
+* Click OK
+* Click Run, see the service login page
+
+#### Set a break point and run the debgger
+
+* Open public/index.php
+* Add a break point (Click next to the line numbers, see a red dot)
+* Enable the debug browser extension, there's bug somewhere that needs to go green
+* Turn on debug listener (Bug left of the run config)
+* Click "debug" the run config
+
+#### Example images
+
+Enabling browser extension<br />
+![xdebug-helper.png](images/xdebug-helper.png)
+
+Php Storm run dialog, disabled<br />
+![phpstorm-debugger-inactive.png](images/phpstorm-debugger-inactive.png)
+
+Php Storm run dialog, enabled<br />
+![phpstorm-debugger-active.png](images/phpstorm-debugger-active.png)
+
 ## Docker for just the DB
 
 If you have a native PHP you can use a docker to provide your mysql DB. This is a transient docker, content will not persist between container restarts.
