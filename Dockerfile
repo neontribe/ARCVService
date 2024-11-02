@@ -117,7 +117,8 @@ ENV TIMEZONE=${TIMEZONE}
 RUN ln -snf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && echo ${TIMEZONE} > /etc/timezone && \
     # make composer home dir
     mkdir /composer  && \
-    chown -R www-data:www-data /composer
+    chown -R www-data:www-data /composer && \
+    touch /opt/project/.env
 COPY ./.docker/entry-point.sh /entry-point.sh
 COPY ./.docker/dbtest.php /dbtest.php
 COPY ./.docker/passport-install.php /passport-install.php
