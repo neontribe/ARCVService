@@ -68,27 +68,12 @@ class RegistrationController extends Controller
 			->pluck('min_id')
 			->toArray();
 
-		// Get the current database driver
-		$connection = config('database.default');
-		$driver = config("database.connections.{$connection}.driver");
-
-		if ($driver == 'mysql') {
-			// We can use Searchy for mysql; defaults to "fuzzy" search;
-			// results are a collection of basic objects, but we can still "pluck()"
-			$filtered_family_ids = Searchy::search('carers')
-				->fields('name')
-				->query($family_name)
-				->getQuery()
-				->whereIn('id', $pri_carers)
-				->pluck('family_id')
-				->toArray();
-		} else {
-			// We may not be able to use Searchy, so we default to unfuzzy.
-			$filtered_family_ids = Carer::whereIn('id', $pri_carers)
-				->where('name', 'like', '%' . $family_name . '%')
-				->pluck('family_id')
-				->toArray();
-		}
+        $fuzzy = $request->get('fuzzy');
+        if ($fuzzy) {
+            $filtered_family_ids = $this->fuzzySearch($family_name, $pri_carers);
+        } else {
+            $filtered_family_ids = $this->exactSearch($family_name, $pri_carers);
+        }
 
 		//find the registrations
 		$q = Registration::query();
@@ -100,10 +85,10 @@ class RegistrationController extends Controller
 		if (Auth::user()->centres->count() > 1) {
 			// get the centre_id from the masthead dropdown which is set by session (so we can filter reg selection)
 			$filtered_centre_id = session('CentreUserCurrentCentreId');
-		if ($filtered_centre_id) {
-			$q = $q->where('centre_id', '=', $filtered_centre_id);
-		}
-	}
+            if ($filtered_centre_id && $filtered_centre_id != "all") {
+                $q = $q->where('centre_id', '=', $filtered_centre_id);
+            }
+        }
 
 		if (!empty($filtered_family_ids)) {
 			$q = $q->whereIn('family_id', $filtered_family_ids)
@@ -159,6 +144,7 @@ class RegistrationController extends Controller
 			[
 				'registrations' => $registrations,
 				'programme' => $programme,
+                'fuzzy' => (boolean)$fuzzy,
 			]
 		);
 		return view('store.index_registration', $data);
@@ -693,4 +679,57 @@ class RegistrationController extends Controller
 			->route('store.registration.edit', ['registration' => $registration->id])
 			->with('message', 'Registration updated.');
 	}
+
+    private function exactSearch($family_name, $pri_carers): array
+    {
+        $carers = Carer::query()
+            ->where('name', 'LIKE', "%$family_name%")
+            ->whereIn('id', $pri_carers)
+            ->get();
+
+        $startsWithExact = [];
+        $wholeWord = [];
+        $theRest = [];
+
+        foreach ($carers as $carer) {
+            $names = array_map('strtolower', explode(" ", $carer->name));
+
+            if (count($names) == 0) {
+                // WTF?
+                continue;
+            } elseif (strtolower($names[0]) === strtolower($family_name)) {
+                $startsWithExact[] = $carer->family_id;
+            } elseif (in_array($family_name, $names)) {
+                $wholeWord[] = $carer->family_id;
+            } else {
+                $theRest[] = $carer->family_id;
+            }
+        }
+
+        return array_merge($startsWithExact, $wholeWord, $theRest);
+    }
+
+    private function fuzzySearch($family_name, $pri_carers): array
+    {
+		// Get the current database driver
+		$connection = config('database.default');
+		$driver = config("database.connections.{$connection}.driver");
+
+		if ($driver == 'mysql') {
+			// We can use Searchy for mysql; defaults to "fuzzy" search;
+			// results are a collection of basic objects, but we can still "pluck()"
+			$filtered_family_ids = Searchy::search('carers')
+				->fields('name')
+				->query($family_name)
+				->getQuery()
+				->whereIn('id', $pri_carers)
+				->pluck('family_id')
+				->toArray();
+		} else {
+			// We may not be able to use Searchy, so we default to unfuzzy.
+            $filtered_family_ids = $this->exactSearch($family_name, $pri_carers);
+		}
+
+        return $filtered_family_ids;
+    }
 }

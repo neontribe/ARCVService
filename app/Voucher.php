@@ -4,8 +4,9 @@ namespace App;
 
 use App\Traits\Statable;
 use Auth;
-use DB;
 use DateTimeInterface;
+use DB;
+use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,10 +16,28 @@ use Illuminate\Support\Collection;
 use Log;
 use Throwable;
 
+/**
+ * @mixin Eloquent
+ * @property integer id
+ * @property string $code
+ * @property Sponsor $sponsor
+ * @property Trader $trader
+ * @property Bundle $bundle
+ * @property Delivery $delivery
+ * @property string $rvid
+ * @property VoucherState $paymentPendedOn
+ * @property VoucherState $recordedOn
+ * @property VoucherState $reimbursedOn
+ */
 class Voucher extends Model
 {
-    use Statable; // import the state transition stuff.
-    use SoftDeletes; // import soft delete.
+    use Statable;
+
+    // import the state transition stuff.
+
+    use SoftDeletes;
+
+    // import soft delete.
     protected $dates = ['deleted_at'];
 
     const HISTORY_MODEL = 'App\VoucherState'; // the related model to store the history
@@ -73,7 +92,7 @@ class Voucher extends Model
 
 
     /**
-     * Voucher can clean it's codes.
+     * Voucher can clean its codes.
      * @param array $codes
      * @return array
      */
@@ -144,7 +163,7 @@ class Voucher extends Model
             if ($start <= $end &&           // query is properly formed
                 $start >= $range->start &&  // our start is gte range start
                 $end <= $range->end         // our end is lte range end
-                ) {
+            ) {
                 // early return on success
                 return $range;
             }
@@ -168,14 +187,14 @@ class Voucher extends Model
 
         // Slightly complicated way of making an object that represents the range.
         // Destructure the output of into an assoc array
-        [ 'shortcode' => $rangeDef['shortcode'], 'number' => $rangeDef['start'] ] = self::splitShortcodeNumeric($startCode);
-        [ 'number' => $rangeDef['end'] ] = self::splitShortcodeNumeric($endCode);
+        ['shortcode' => $rangeDef['shortcode'], 'number' => $rangeDef['start']] = self::splitShortcodeNumeric($startCode);
+        ['number' => $rangeDef['end']] = self::splitShortcodeNumeric($endCode);
 
         // Modify the start/end numbers to integers
         $rangeDef["start"] = intval($rangeDef["start"]);
         $rangeDef["end"] = intval($rangeDef["end"]);
 
-        return (object) $rangeDef;
+        return (object)$rangeDef;
     }
 
     /**
@@ -206,7 +225,7 @@ class Voucher extends Model
         $matches = [];
         // split into named matche and return
         if (preg_match("/^(?<shortcode>\D*)(?<number>\d+)$/", $code, $matches) == 1) {
-             return $matches;
+            return $matches;
         } else {
             return false;
         }
@@ -314,7 +333,7 @@ class Voucher extends Model
      *
      * @return BelongsTo
      */
-    public function sponsor()
+    public function sponsor(): BelongsTo
     {
         return $this->belongsTo(Sponsor::class);
     }
@@ -324,7 +343,7 @@ class Voucher extends Model
      *
      * @return BelongsTo
      */
-    public function trader()
+    public function trader(): BelongsTo
     {
         return $this->belongsTo(Trader::class);
     }
@@ -334,7 +353,7 @@ class Voucher extends Model
      *
      * @return BelongsTo
      */
-    public function bundle()
+    public function bundle(): BelongsTo
     {
         return $this->belongsTo(Bundle::class);
     }
@@ -344,7 +363,7 @@ class Voucher extends Model
      *
      * @return BelongsTo
      */
-    public function delivery()
+    public function delivery(): BelongsTo
     {
         return $this->belongsTo(Delivery::class);
     }
@@ -355,11 +374,11 @@ class Voucher extends Model
      *
      * @return HasOne
      */
-    public function paymentPendedOn()
+    public function paymentPendedOn(): HasOne
     {
         return $this->hasOne(VoucherState::class)
-                ->where('to', 'payment_pending')
-                ->orderBy('created_at', 'desc');
+            ->where('to', 'payment_pending')
+            ->orderBy('created_at', 'desc');
     }
 
     /**
@@ -368,24 +387,49 @@ class Voucher extends Model
      *
      * @return HasOne
      */
-    public function recordedOn()
+    public function recordedOn(): HasOne
     {
         return $this->hasOne(VoucherState::class)
-                ->where('to', 'recorded')
-                ->orderBy('created_at', 'desc');
+            ->where('to', 'recorded')
+            ->orderBy('created_at', 'desc');
     }
 
     /**
-     * Get the most recent voucher_state change to reimbursed.
+     * Get the most recent voucher_state change to 'reimbursed'.
      * There should only ever be one per voucher - but most recent safer.
      *
      * @return HasOne
      */
-    public function reimbursedOn()
+    public function reimbursedOn(): HasOne
     {
         return $this->hasOne(VoucherState::class)
-                ->where('to', 'reimbursed')
-                ->orderBy('created_at', 'desc');
+            ->where('to', 'reimbursed')
+            ->orderBy('created_at', 'desc');
+    }
+
+    public function rvid(): ?string
+    {
+        $centreSequence = $this->bundle?->registration->family->centre_sequence;
+        $centrePrefix = $this->bundle?->registration->family->initialCentre->prefix;
+        if ($centreSequence) {
+            return $centrePrefix . str_pad($centreSequence, 4, "0", STR_PAD_LEFT);
+        }
+
+        return null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function voucherHasBeenResurrected(): bool
+    {
+        $vs = $this->history()->get()->last();
+        if ($vs) {
+            return $vs->to != "reimbursed";
+        }
+
+        // ???? can a voucher have no state?
+        return false;
     }
 
     /**
@@ -419,13 +463,13 @@ class Voucher extends Model
         return self::whereIn('code', $codes)->get();
     }
 
-  /**
-   * Retrieve the min and max paymentPendedOn date of a collection of vouchers.
-   *
-   * @param Collection $vouchers
-   *
-   * @return array
-   */
+    /**
+     * Retrieve the min and max paymentPendedOn date of a collection of vouchers.
+     *
+     * @param Collection $vouchers
+     *
+     * @return array
+     */
     public static function getMinMaxVoucherDates(Collection $vouchers)
     {
         $sorted_vouchers = $vouchers->sortBy(function ($voucher) {
@@ -469,33 +513,80 @@ class Voucher extends Model
     public function scopeInOneOfStates(Builder $query, $states)
     {
         return $query
-            ->whereIn('currentstate', $states)
-        ;
+            ->whereIn('currentstate', $states);
     }
 
     /**
      * Gets a set of vouchers that are voidable.
      *
      * @param Builder $query
-     * @param array $states
      * @return Builder
      */
     public function scopeInVoidableState(Builder $query)
     {
         $voidable_states = ['dispatched'];
         return $query
-            ->inOneOfStates($voidable_states)
-        ;
+            ->inOneOfStates($voidable_states);
     }
 
     /**
      * Prepare a date for array / JSON serialization.
      *
-     * @param  \DateTimeInterface  $date
+     * @param \DateTimeInterface $date
      * @return string
      */
     protected function serializeDate(DateTimeInterface $date)
     {
         return $date->format('Y-m-d H:i:s');
+    }
+
+    public function getVoucherStateHistory(): array
+    {
+        $vss = VoucherState::where("voucher_id", $this->id)->orderBy('updated_at')->get();
+        $states = [];
+        if ($vss) {
+            foreach ($vss as $vs) {
+                $states[] = [
+                    "id" => $this->id,
+                    "transition" => $vs->transition,
+                    "from" => $vs->from,
+                    "user_id" => $vs->user_id,
+                    "user_type" => $vs->user_type,
+                    "voucher_id" => $vs->voucher_id,
+                    "to" => $vs->to,
+                    "state_token_id" => $vs->state_token_id,
+                    "source" => $vs->source,
+                    "created_at" => $vs->created_at,
+                    "updated_at" => $vs->updated_at,
+                ];
+            }
+        }
+        return $states;
+    }
+
+    public function deepExport(bool $includeVoucherStates = false): array
+    {
+        $v = [
+            "code" => $this->code,
+            "sponsor_name" => $this->sponsor?->name,
+            "dispatched_at" => $this->delivery?->dispatched_at->format("Y/m/d"),
+            "delivery_centre_name" => $this->delivery?->centre->name,
+            "centre_sponsor_name" => $this->delivery?->centre->sponsor->name,
+            "disbursed" => $this->bundle?->disbursed_at ? "True" : "False",
+            "disbursed_at" => $this->bundle?->disbursed_at?->format("Y/m/d"),
+            "rvid" => (string)$this->rvid(),
+            "primary_carer" => $this->bundle?->registration->family->carers[0]->name,
+            "registration_centre_name," => $this->bundle?->registration->centre->name,
+            "recordedOn" => $this->recordedOn->created_at->format("Y/m/d"),
+            "trader_name" => $this->trader->name,
+            "trader_market_name" => $this->trader->market->name,
+            "trader_market_sponsor_name" => $this->trader->market->sponsor->name,
+            "paymentPendedOn" => $this->paymentPendedOn->created_at->format("Y/m/d"),
+            "reimbursedOn" => $this->reimbursedOn->created_at->format("Y/m/d"),
+        ];
+        if ($includeVoucherStates) {
+            $v["vouchere_states"] = $this->getVoucherStateHistory();
+        }
+        return $v;
     }
 }

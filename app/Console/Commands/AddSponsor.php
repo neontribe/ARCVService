@@ -60,26 +60,29 @@ class AddSponsor extends Command
 
         switch (true) {
             case (!$this->centreUser):
-                exit("Can't find that User.\n");
-                break;
+                $this->error("Can't find that User.\n");
+                return 1;
             case ($this->sponsor):
-                exit("Sponsor " .
+                $this->error("Sponsor " .
                     $this->sponsor->name .
                     ", " .
                     $this->sponsor->shortcode .
                     " exists, exit without change.\n");
+                return 2;
 
             default:
                 // Check the centreuser is happy to proceed
                 if (!$this->warnUser()) {
-                    exit("Exit without change.\n");
+                    $this->error("Exit without change.\n");
+                    return 3;
                 };
                 // Log the centreuser in.
                 Auth::login($this->centreUser);
 
                 // Did that work?
                 if (!Auth::check()) {
-                    exit("Failed to login.\n");
+                    $this->error("Failed to login.\n");
+                    return 4;
                 };
 
                 $this->sponsor = new Sponsor([
@@ -89,7 +92,7 @@ class AddSponsor extends Command
 
                 $this->sponsor->save();
 
-                exit("Done.\n");
+                $this->info("Done.\n");
         }
     }
 

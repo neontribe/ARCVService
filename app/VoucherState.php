@@ -2,10 +2,26 @@
 
 namespace App;
 
+use Eloquent;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 // hard deletes on these; if only because we'll data-warehouse them at some point.
 
+/**
+ * @mixin Eloquent
+ * @property int $id;
+ * @property string $transition;
+ * @property string $from;
+ * @property string $to;
+ * @property Voucher $voucher;
+ * @property User $user;
+ * @property StateToken $stateToken;
+ * @property Carbon $created_at;
+ * @property Carbon $updated_at;
+ *
+ * Notre sure what these are?  'user_type', 'source',
+ */
 class VoucherState extends Model
 {
     /**

@@ -122,7 +122,8 @@ class VouchersSeeder extends Seeder
         $delivery->vouchers()->saveMany($rvnt4);
 
         $user = User::where('name', 'Rolf Billabong')->first();
-        $date = Carbon::now()->subMonths(3);
+        // Upped to 4 so can clearly see if 90 day history limit failing
+        $date = Carbon::now()->subMonths(4);
         // Create 50 vouchers that have a state of payment_pending
         // and attach to Rolf Billabong
         factory(Voucher::class, 50)->state('printed')->create([

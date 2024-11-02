@@ -78,33 +78,38 @@ class AddCentre extends Command
 
         switch (true) {
             case (!$this->centreUser):
-                exit("Can't find that User.\n");
-                break;
+                $this->error("Can't find that User.");
+                return 1;
             case (!$this->sponsor):
-                exit("Sponsor " .
+                $this->error("Sponsor " .
                     $this->argument('shortcode') .
                     " does not exist, exit without change.\n");
+                return 2;
             case ($this->centre):
-                exit("Centre " .
+                $this->error("Centre " .
                     $this->centre->name .
                     ", " .
                     $this->centre->prefix .
                     " exists, exit without change.\n");
+                return 3;
             case (!in_array($this->argument('preference'), $this->preferences)):
-                exit("The preference " .
+                $this->error("The preference " .
                     $this->argument('preference') .
                     " does not exist, exit without change.\n");
+                return 4;
             default:
                 // Check the centreuser is happy to proceed
                 if (!$this->warnUser()) {
-                    exit("Exit without change.\n");
+                    $this->error("Exit without change.\n");
+                    return 5;
                 };
                 // Log the centreuser in.
                 Auth::login($this->centreUser);
 
                 // Did that work?
                 if (!Auth::check()) {
-                    exit("Failed to login.\n");
+                    $this->error("Failed to login.\n");
+                    return 6;
                 };
 
                 $this->centre = new Centre([
@@ -116,7 +121,8 @@ class AddCentre extends Command
                 $this->centre->sponsor()->associate($this->sponsor);
                 $this->centre->save();
 
-                exit("Done.\n");
+                $this->info("Done.");
+                return 0;
         }
     }
 

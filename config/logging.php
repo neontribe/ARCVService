@@ -35,28 +35,31 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single'],
+            'channels' => ['laravel', 'debug', 'info', 'warning_and_above'],
         ],
 
-        'single' => [
+        'laravel' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
             'level' => 'debug',
         ],
 
-        'daily' => [
-            'driver' => 'daily',
-            'path' => storage_path('logs/laravel.log'),
+        'debug' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/debug.log'),
             'level' => 'debug',
-            'days' => 7,
         ],
 
-        'slack' => [
-            'driver' => 'slack',
-            'url' => env('LOG_SLACK_WEBHOOK_URL'),
-            'username' => 'Laravel Log',
-            'emoji' => ':boom:',
-            'level' => 'critical',
+        'info' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/info.log'),
+            'level' => 'info',
+        ],
+
+        'warning_and_above' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/warning.log'),
+            'level' => 'warning',
         ],
 
         'stderr' => [
@@ -66,16 +69,52 @@ return [
                 'stream' => 'php://stderr',
             ],
         ],
-
-        'syslog' => [
-            'driver' => 'syslog',
-            'level' => 'debug',
-        ],
-
-        'errorlog' => [
-            'driver' => 'errorlog',
-            'level' => 'debug',
-        ],
-    ],
+    ]
+//    'channels' => [
+//        // Aggregated logs, all channels listed in the channels array
+//        'stack' => [
+//            'driver' => 'stack',
+//            'channels' => ['single'],
+//        ],
+//
+//        'single' => [
+//            'driver' => 'single',
+//            'path' => storage_path('logs/laravel.log'),
+//            'level' => 'debug',
+//        ],
+//
+//        'daily' => [
+//            'driver' => 'daily',
+//            'path' => storage_path('logs/laravel.log'),
+//            'level' => 'debug',
+//            'days' => 7,
+//        ],
+//
+//        'slack' => [
+//            'driver' => 'slack',
+//            'url' => env('LOG_SLACK_WEBHOOK_URL'),
+//            'username' => 'Laravel Log',
+//            'emoji' => ':boom:',
+//            'level' => 'critical',
+//        ],
+//
+//        'stderr' => [
+//            'driver' => 'monolog',
+//            'handler' => StreamHandler::class,
+//            'with' => [
+//                'stream' => 'php://stderr',
+//            ],
+//        ],
+//
+//        'syslog' => [
+//            'driver' => 'syslog',
+//            'level' => 'debug',
+//        ],
+//
+//        'errorlog' => [
+//            'driver' => 'errorlog',
+//            'level' => 'debug',
+//        ],
+//    ],
 
 ];

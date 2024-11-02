@@ -8,11 +8,27 @@ use App\Services\VoucherEvaluator\IEvaluee;
 use App\Traits\Aliasable;
 use App\Traits\Evaluable;
 use DB;
+use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Log;
 
+/**
+ * @mixin Eloquent
+ * @property string $leaving_on
+ * @property string $leaving_leaving_reason
+ * @property string $rejoin_on
+ * @property string $leave_amount
+ * @property int $centre_sequence
+ * @property Carer[] $carers
+ * @property Child[] $children
+ * @property Note[] $notes
+ * @property Registration[] $registrations
+ * @property Centre $initialCentre
+ * @property string $rvid
+ *
+ */
 class Family extends Model implements IEvaluee
 {
     use Aliasable;

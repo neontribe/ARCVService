@@ -32,4 +32,13 @@ tests/Browser/screenshots/
 .docker-installed
 passport.install
 coverage
+<<<<<<< HEAD
 .docker/initdb.d/
+=======
+.php-cs-fixer.cache
+*.swp
+app/local
+.env.local
+arc_test_file_*
+build
+>>>>>>> develop

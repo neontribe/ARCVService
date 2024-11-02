@@ -15,6 +15,8 @@ return [
         'travel to get/spend vouchers too expensive',
         'disliked market shopping',
         'no attendance',
+        'too challenging to use vouchers with health conditions',
+        'reached time limit on project',
         'unspecified',
     ],
 
@@ -104,24 +106,34 @@ return [
 
 	/*
     |--------------------------------------------------------------------------
-    | Demographic fields for primary carer - ethnic background and main language
+    | Demographic fields for primary carer - ethnic background
     |
     |--------------------------------------------------------------------------
      */
-	'ethnicity' => [
-		'white',
-		'mixed',
-		'asian',
-		'black',
-		'other',
-		'not',
-	],
-	'ethnicity_long' => [
-		'white' => 'White: Scottish/ British / Irish / Traveller / Any other White background',
-		'mixed' => 'Mixed/Multiple ethnic groups: White and Black Caribbean / White and Black African / White and Asian / Latin American / Any other Mixed/Multiple ethnic background',
-		'asian' => 'Asian/Asian British: Indian / Pakistani / Bangladeshi / Chinese / Afghani / Any other Asian background',
-		'black' => 'Black/Black British: African / Caribbean / Moroccan / Somalian / Any other Black/British background',
-		'other' => 'Other ethnic group: Arabic / Turkish / Iranian / Syrian / Any other ethnic group',
-		'not' => 'Not answered',
-	],
+
+    'ethnicity_desc' => [
+        'AAFG' => 'Asian/Asian British - Afghani',
+        'ABAN' => 'Asian/Asian British - Bangladeshi',
+        'ACHN' => 'Asian/Asian British - Chinese',
+        'AIND' => 'Asian/Asian British - Indian',
+        'APKN' => 'Asian/Asian British - Pakistani',
+        'AOTH' => 'Asian/Asian British - Any other Asian background',
+        'BAFR' => 'Black/Black British - African',
+        'BCRB' => 'Black/Black British - Caribbean',
+        'BMOR' => 'Black/Black British - Moroccan',
+        'BSOM' => 'Black/Black British - Somalian',
+        'BOTH' => 'Black/Black British - Any other Black/British background',
+        'MLAM' => 'Mixed - Latin American',
+        'MWAS' => 'Mixed - White and Asian',
+        'MWBA' => 'Mixed - White and Black African',
+        'MWBC' => 'Mixed - White and Black Caribbean',
+        'MOTH' => 'Mixed - Any other Mixed/Multiple background',
+        'OARA' => 'Other ethnic group - Arab',
+        'OSYR' => 'Other ethnic group - Syrian',
+        'OTUR' => 'Other ethnic group - Turkish',
+        'OOTH' => 'Other ethnic group - Any other ethnic group',
+        'WBRI' => 'White - British',
+        'WOTH' => 'White - Any other White background',
+        'NOBT' => 'Not answered',
+    ],
 ];

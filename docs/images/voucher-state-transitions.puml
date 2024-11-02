@@ -1,0 +1,13 @@
+@startuml
+printed -> dispatched: dispatch
+dispatched -> voided: void
+dispatched -> expired: expire
+printed -> recorded: collect
+dispatched -> recorded: collect
+recorded -> printed: reject-to-printed
+recorded -> dispatched: reject-to-dispatched
+recorded -> payment_pending: confirm
+payment_pending -> reimbursed: payout
+voided -> retired: retire
+expired -> retired: retire
+@enduml

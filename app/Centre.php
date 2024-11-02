@@ -2,8 +2,21 @@
 
 namespace App;
 
+use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 
+
+/**
+ * @mixin Eloquent
+ * @property string $name
+ * @property string $prefix
+ * @property string $print_pref
+ * @property Sponsor $sponsor
+ * @property Registration[] $registrations
+ * @property CentreUser[] $centreUsers
+ * @property Centre[] $neighbours
+ * @property Family[] $families
+ */
 class Centre extends Model
 {
     /**

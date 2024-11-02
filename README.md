@@ -1,10 +1,14 @@
-# ARCV Service
+# Alexandra Rose Charity Vouchers Service
 
-## About ARC Voucher Service/API
-ARCV Service is the service portal and API for ARCV Market.
+## Table of contents
 
-## Installation of Development instance
+ * [Deployment set up](./DEPLOYMENT.md); some notes on how the system's components hang together
+ * [MVL Export](./MVL-EXPORT.md); reference for commands used to export reports required by ARC
+ * [Setting up testing vouchers](./TEST_VOUCHERS.md); reference for populating the dataset for substantial numbers of vouchers
+ * [Voucher state transition](./VOUCHER_STATE_TRANSITIONS.md); reference for the voucher state machine that are enforces valid voucher state flow
+ * [Database schema](./DATABASE_SCHEMA.md); reference diagram of the current database schema
 
+<<<<<<< HEAD
 1. Clone the repo
 2. Create a database and user (homestead, sqlite or mysql)
 3. If not using [Homestead](https://laravel.com/docs/6.x/homestead) or Valet - you will need to configure permissions on `storage` and `bootstrap/cache`. See [Laravel 6.x Installation](https://laravel.com/docs/6.x) for more info.
@@ -65,6 +69,8 @@ It also requires PHP's `zip` extension installed and enabled.
 3. login and move to the correct folder
 4. `./deploy-service ARCVService_v<x.y.z>(-[beta|RC]X).tgz service_v<x.y.z>(-[beta|RC]X)`
 5. update the `.env` file
+=======
+>>>>>>> develop
 
 # Copyright
 This project was developed by :

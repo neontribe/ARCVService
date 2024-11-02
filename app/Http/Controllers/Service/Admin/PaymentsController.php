@@ -10,6 +10,8 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Log;
@@ -70,7 +72,7 @@ class PaymentsController extends Controller
             ->whereNotNull('user_id')
             // if $paid = true will make this a NotNull, thereby getting paid things
             ->whereNull('admin_user_id', 'and', $paid)
-            ->orderBy('created_at','desc')
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return self::makePaymentDataStructure($tokens);
@@ -99,6 +101,10 @@ class PaymentsController extends Controller
                 $trader = $voucherState->voucher->trader;
                 //These are the main headers; check once and then take that going forward
                 $currentTokenResults['traderName'] ??= $trader->name;
+                if (empty($currentTokenResults['traderName'])) {
+                    \Log::warning("Bad voucher trader name: ", json_encode($voucherStates));
+                    continue;
+                }
                 $currentTokenResults['marketName'] ??= $trader->market->name;
                 $currentTokenResults['area'] ??= $trader->market->sponsor->name;
 
@@ -109,6 +115,20 @@ class PaymentsController extends Controller
                     : 1;
                 $currentTokenResults['voucherAreas'] = $areaList;
             }
+            foreach ($pendingResults as $index => $result) {
+                if (
+                    empty($result['requestedBy']) ||
+                    empty($result['vouchersTotal']) ||
+                    empty($result['traderName']) ||
+                    empty($result['marketName']) ||
+                    empty($result['area']) ||
+                    empty($result['voucherAreas'])
+                ) {
+                    \Log::error("Bad pending results at index " . $index . " - " . json_encode($result));
+                    unset($pendingResults[$index]);
+                }
+            }
+
             // chuck that in the results array.
             $pendingResults[$stateToken->uuid] = $currentTokenResults;
         }
@@ -161,11 +181,13 @@ class PaymentsController extends Controller
         ]);
     }
 
-    /** Pay a specific payment request by link
+    /**
+     * Pay a specific payment request by link
+     * @param Request $request
      * @param $paymentUuid
-     * @return mixed
+     * @return RedirectResponse
      */
-    public function update($paymentUuid)
+    public function update(Request $request, $paymentUuid): RedirectResponse
     {
         // Initialise
         $vouchers = [];
@@ -190,6 +212,17 @@ class PaymentsController extends Controller
 
             // Transition the vouchers
             $success = true;
+            Log::info(sprintf(
+                "%s: Processing %d vouchers, uuid=%s, user=%s(%d), admin user=%s(%d), ip=%s",
+                __CLASS__,
+                count($vouchers),
+                $state_token->uuid,
+                $state_token->user?->name,
+                $state_token->user?->id,
+                Auth::user()->name,
+                Auth::user()->id,
+                $request->ip(),
+            ));
             foreach ($vouchers as $v) {
                 if ($v->transitionAllowed('payout')) {
                     $v->applyTransition('payout');
@@ -200,8 +233,11 @@ class PaymentsController extends Controller
                 }
             }
             if ($success) {
+                \Log::debug("Transition successful");
                 $state_token->admin_user_id = Auth::user()->id;
                 $state_token->save();
+            } else {
+                \Log::debug("Transition failed");
             }
         }
         return redirect()->route('admin.payments.index')->with('notification', 'Vouchers Paid!');

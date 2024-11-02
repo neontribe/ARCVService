@@ -4,12 +4,20 @@ namespace App;
 
 use App\Notifications\ApiPasswordResetNotification;
 use DateTimeInterface;
+use Eloquent;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 
+/**
+ * @mixin Eloquent
+ * @property string $name
+ * @property string $email
+ * @property string $password
+ * @property Trader[] $traders
+ */
 class User extends Authenticatable
 {
     use HasApiTokens, Notifiable, SoftDeletes;
