@@ -292,18 +292,14 @@ $factory->define(App\VoucherState::class, function (Faker\Generator $faker) {
 // Centre, with random sponsor
 $factory->define(App\Centre::class, function (Faker\Generator $faker) {
 
-    static $usedPrefixes = [];
-
     $sponsors = App\Sponsor::get();
 
     $sponsor = ($sponsors->count() > 0)
         ? $sponsors->random()
         : factory(App\Sponsor::class)->create();
 
-    do {
-        $name = $faker->unique()->streetName;
-        $prefix = substr(metaphone($name, 5), 0, 5);
-    } while (in_array($prefix, $usedPrefixes, true));
+    $name = $faker->unique()->streetName;
+    $prefix = $faker->unique()->lexify('?????');
 
     return [
         'name' => $name,
