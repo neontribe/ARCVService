@@ -2,12 +2,6 @@
 
 namespace Tests\Console\Commands;
 
-use Illuminate\Foundation\Application;
-use Illuminate\Foundation\Testing\TestCase;
-use DB;
-use Mockery\Mock;
-use PDO;
-use PDOStatement;
 use Tests\MysqlStoreTestCase;
 use Tests\CreatesApplication;
 
@@ -16,12 +10,10 @@ class CreateMasterVoucherLogReportTest extends MysqlStoreTestCase
     use CreatesApplication;
 
 
-    public function testCommandOk()
+    public function testCommandOk(): void
     {
         $results = $this
-            ->artisan("arc:createMVLReport")
-            ->expectsConfirmation('Do you wish to continue?', 'yes')
-            ->execute();
+            ->artisan("arc:createMVLReport", ["--force" => true]);
         $this->assertEquals(0, $results);
     }
 

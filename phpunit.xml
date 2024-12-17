@@ -51,6 +51,7 @@
         <env name="MAIL_DRIVER" value="log"/>
         <env name="QUEUE_DRIVER" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <!-- php-fpm will ignore this entirely, by default -->
         <env name="XDEBUG_MODE" value="coverage"/>
     </php>
 </phpunit>

@@ -6,7 +6,7 @@ use App\Centre;
 use App\Http\Requests\AdminNewCentreUserRequest;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Validation\Validator;
+use Illuminate\Support\Facades\Validator;
 use Tests\StoreTestCase;
 
 class AdminNewCentreUserRequestTest extends StoreTestCase
@@ -14,13 +14,9 @@ class AdminNewCentreUserRequestTest extends StoreTestCase
     use DatabaseMigrations;
     use RefreshDatabase;
 
-    /** @var Validator */
-    private $validator;
-
     public function setUp(): void
     {
         parent::setUp();
-        $this->validator = app()->get('validator');
         factory(Centre::class, 4)->create([]);
     }
 
@@ -28,26 +24,21 @@ class AdminNewCentreUserRequestTest extends StoreTestCase
      * General validator
      * @param $mockedRequestData
      * @param $rules
-     * @return mixed
+     * @return bool
      */
-    protected function validate($mockedRequestData, $rules)
+    protected function validate($mockedRequestData, $rules): bool
     {
-        return $this->validator
-            ->make($mockedRequestData, $rules)
-            ->passes();
+        return Validator::make($mockedRequestData, $rules)->passes();
     }
 
     /**
-     * @test
      * @dataProvider storeValidationProvider
      * @param bool $shouldPass
      * @param array $mockedRequestData
      */
-    public function testICannotSubmitInvalidValues($shouldPass, $mockedRequestData)
+    public function testICannotSubmitInvalidValues(bool $shouldPass, array $mockedRequestData): void
     {
-        $alternatives = (isset($mockedRequestData['alternative_centres']))
-            ? $mockedRequestData['alternative_centres']
-            : null;
+        $alternatives = $mockedRequestData['alternative_centres'] ?? null;
 
         // Copy the rules out of the FormRequest.
         $rules = (new AdminNewCentreUserRequest())->rules($alternatives);
@@ -60,9 +51,9 @@ class AdminNewCentreUserRequestTest extends StoreTestCase
 
     /**
      * must return hardcoded values
-     * @return array
+     * @return array[]
      */
-    public function storeValidationProvider()
+    public function storeValidationProvider(): array
     {
         return [
             'requestShouldSucceedWhenRequiredDataIsProvided' => [
