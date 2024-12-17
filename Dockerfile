@@ -117,7 +117,8 @@ ENV TIMEZONE=${TIMEZONE}
 RUN ln -snf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && echo ${TIMEZONE} > /etc/timezone && \
     # make composer home dir
     mkdir /composer  && \
-    chown -R www-data:www-data /composer
+    chown -R www-data:www-data /composer && \
+    touch /opt/project/.env
 COPY ./.docker/entry-point.sh /entry-point.sh
 COPY ./.docker/dbtest.php /dbtest.php
 COPY ./.docker/passport-install.php /passport-install.php
@@ -186,9 +187,9 @@ ENTRYPOINT /entry-point.sh
 FROM base AS dev
 # copy kimai develop source
 COPY --from=git-dev --chown=www-data:www-data /opt/project /opt/project
-COPY ./.docker/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 COPY --from=php-ext-xdebug /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 COPY --from=php-ext-xdebug /usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so
+COPY ./.docker/xdebug.ini /usr/local/etc/php/conf.d/zz_xdebug-config.ini
 RUN \
     export COMPOSER_HOME=/composer && \
     composer --no-ansi install --working-dir=/opt/project --optimize-autoloader && \

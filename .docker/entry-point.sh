@@ -10,6 +10,12 @@ function checkDatabase() {
   echo " ✅ Connection established"
 }
 
+function checkVendor() {
+  # the repo is cloned and just run the project folder has been mounted from the host and composer has not installed the deps. In this case we assume we will be a dev image:
+  composer --no-ansi install --working-dir=/opt/project --no-dev --optimize-autoloader
+  composer --no-ansi clearcache
+}
+
 function handleStartup() {
   # in production we will have a .env mounted into the container, this will have (at least) a
   # APP_KEY, if we don't have a .env we will create one
@@ -24,11 +30,12 @@ function handleStartup() {
     fi
   fi
 
-  grep APP_KEY .env
-  # shellcheck disable=SC2181
-  if [ "$?" != 0 ]; then
-    echo "APP_KEY=''" > .env
+  $_APP_KEY=$(grep -E '^\s*APP_KEY\s*=' .env | sed -E "s/.*=\s*'([^']*)'.*/\1/")
+  if [[ -z "$APP_KEY" ]]; then
+    echo "APP_KEY is empty."
     php /opt/project/artisan key:generate
+  else
+    echo "APP_KEY set not overwriting"
   fi
 
   # These are idempotent, run them anyway
@@ -52,10 +59,12 @@ function handleStartup() {
       fi
     done
   fi
+  yarn
   yarn production
 }
 
 checkDatabase
+checkVendor
 handleStartup
 
 if [ -n "$RUN_AS" ]; then
@@ -84,3 +93,4 @@ env | sort
 exec php-fpm
 
 exit
+
