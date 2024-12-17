@@ -12,4 +12,4 @@ Use this on local, or on staging if you're unfamiliar with Ansible.
  - And `chmod 775 .env`
 
  - Reseed with `php artisan migrate:refresh --seed`
- - Run tests with `phpunit`
+ - Run tests with `./vendor/bin/phpunit`
