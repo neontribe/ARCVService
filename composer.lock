@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2c8723bd1812cd0a1d9c261dea9b561d",
+    "content-hash": "ff1b38e37f807788bee4af0012d37686",
     "packages": [
         {
             "name": "barryvdh/laravel-debugbar",
@@ -10087,26 +10087,26 @@
         },
         {
             "name": "laravel/browser-kit-testing",
-            "version": "v6.3.1",
+            "version": "v6.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/browser-kit-testing.git",
-                "reference": "7447ad7d1b19c6205d8fb648d01992222b0ec89c"
+                "reference": "1f7c5d61c63e9e43072d3900f25cb4a66ad31fed"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/browser-kit-testing/zipball/7447ad7d1b19c6205d8fb648d01992222b0ec89c",
-                "reference": "7447ad7d1b19c6205d8fb648d01992222b0ec89c",
+                "url": "https://api.github.com/repos/laravel/browser-kit-testing/zipball/1f7c5d61c63e9e43072d3900f25cb4a66ad31fed",
+                "reference": "1f7c5d61c63e9e43072d3900f25cb4a66ad31fed",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
                 "ext-json": "*",
-                "illuminate/contracts": "^7.0|^8.0|^9.0",
-                "illuminate/database": "^7.0|^8.0|^9.0",
-                "illuminate/http": "^7.0|^8.0|^9.0",
-                "illuminate/support": "^7.0|^8.0|^9.0",
-                "illuminate/testing": "^7.0|^8.0|^9.0",
+                "illuminate/contracts": "^7.0|^8.0|^9.0|^10.0",
+                "illuminate/database": "^7.0|^8.0|^9.0|^10.0",
+                "illuminate/http": "^7.0|^8.0|^9.0|^10.0",
+                "illuminate/support": "^7.0|^8.0|^9.0|^10.0",
+                "illuminate/testing": "^7.0|^8.0|^9.0|^10.0",
                 "mockery/mockery": "^1.0",
                 "php": "^7.2|^8.0",
                 "phpunit/phpunit": "^8.5|^9.0",
@@ -10117,7 +10117,7 @@
                 "symfony/http-kernel": "^5.0|^6.0"
             },
             "require-dev": {
-                "laravel/framework": "^7.0|^8.0|^9.0"
+                "laravel/framework": "^7.0|^8.0|^9.0|^10.0"
             },
             "type": "library",
             "extra": {
@@ -10147,9 +10147,9 @@
             ],
             "support": {
                 "issues": "https://github.com/laravel/browser-kit-testing/issues",
-                "source": "https://github.com/laravel/browser-kit-testing/tree/v6.3.1"
+                "source": "https://github.com/laravel/browser-kit-testing/tree/v6.4.0"
             },
-            "time": "2022-04-13T17:44:04+00:00"
+            "time": "2023-01-06T15:53:22+00:00"
         },
         {
             "name": "laravel/dusk",
