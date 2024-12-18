@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0702181a4bb0127a05f7ca62e32baa53",
+    "content-hash": "2c8723bd1812cd0a1d9c261dea9b561d",
     "packages": [
         {
             "name": "barryvdh/laravel-debugbar",
@@ -1576,25 +1576,25 @@
         },
         {
             "name": "highsolutions/laravel-searchy",
-            "version": "9.0",
+            "version": "11.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/highsolutions/laravel-searchy.git",
-                "reference": "e2dd320ecb44d2fd27e8a5017da41baba49b7b61"
+                "reference": "5feb5456a57b25e7d9cde7fb9ca390c10fe82a58"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/highsolutions/laravel-searchy/zipball/e2dd320ecb44d2fd27e8a5017da41baba49b7b61",
-                "reference": "e2dd320ecb44d2fd27e8a5017da41baba49b7b61",
+                "url": "https://api.github.com/repos/highsolutions/laravel-searchy/zipball/5feb5456a57b25e7d9cde7fb9ca390c10fe82a58",
+                "reference": "5feb5456a57b25e7d9cde7fb9ca390c10fe82a58",
                 "shasum": ""
             },
             "require": {
-                "illuminate/support": "5.*|^6.0|^7.0|^8.0|^9.0",
-                "php": "^5.5.9 || ^7.0 || ^8.0"
+                "illuminate/support": "5.*|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0",
+                "php": "^5.5.9 || ^7.0 || ^8.0 || ^8.1 || ^8.2 || ^8.3"
             },
             "require-dev": {
-                "orchestra/testbench": "3.*|4.*|5.*|6.*|7.*",
-                "phpunit/phpunit": "6.*|7.*|8.*|9.*"
+                "orchestra/testbench": "3.*|4.*|5.*|6.*|7.*|8.*|9.*|10.*",
+                "phpunit/phpunit": "6.*|7.*|8.*|9.*|10.*|11.*"
             },
             "type": "library",
             "extra": {
@@ -1636,9 +1636,9 @@
                 "search"
             ],
             "support": {
-                "source": "https://github.com/highsolutions/laravel-searchy/tree/9.0"
+                "source": "https://github.com/highsolutions/laravel-searchy/tree/11.0"
             },
-            "time": "2022-03-29T12:20:21+00:00"
+            "time": "2024-04-22T14:05:28+00:00"
         },
         {
             "name": "imtigger/laravel-job-status",
