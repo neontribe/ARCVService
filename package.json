@@ -16,7 +16,7 @@
     "laravel-mix": "^6.0.49",
     "resolve-url-loader": "^5.0.0",
     "sass": "^1.83.0",
-    "sass-loader": "^13.3.3"
+    "sass-loader": "^16.0.4"
   },
   "browserslist": [
     ">2%",
