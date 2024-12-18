@@ -51,7 +51,7 @@
     "laravel/dusk": "^7.13.0",
     "mockery/mockery": "^1.6.12",
     "nunomaduro/collision": "6.4.0",
-    "nunomaduro/larastan": "^2.9.12",
+    "larastan/larastan": "^2.9.12",
     "phpmd/phpmd": "^2.15.0",
     "phpstan/phpstan": "^1.12.13",
     "phpunit/phpunit": "9.5.27",
