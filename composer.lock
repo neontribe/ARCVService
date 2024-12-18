@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "37a932d82219dbd96974af509f9bc076",
+    "content-hash": "0702181a4bb0127a05f7ca62e32baa53",
     "packages": [
         {
             "name": "barryvdh/laravel-debugbar",
@@ -5147,28 +5147,28 @@
         },
         {
             "name": "sebdesign/laravel-state-machine",
-            "version": "v3.4.3",
+            "version": "v3.4.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebdesign/laravel-state-machine.git",
-                "reference": "41115e50ff978d2b4bd377e91a92429ab642fad5"
+                "reference": "9d4b37f4ea3694d4dd219ce689d77cafe1e52999"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebdesign/laravel-state-machine/zipball/41115e50ff978d2b4bd377e91a92429ab642fad5",
-                "reference": "41115e50ff978d2b4bd377e91a92429ab642fad5",
+                "url": "https://api.github.com/repos/sebdesign/laravel-state-machine/zipball/9d4b37f4ea3694d4dd219ce689d77cafe1e52999",
+                "reference": "9d4b37f4ea3694d4dd219ce689d77cafe1e52999",
                 "shasum": ""
             },
             "require": {
-                "illuminate/support": "^7.0 | ^8.0 | ^9.0 | ^10.0",
+                "illuminate/support": "^7.0 | ^8.0 | ^9.0 | ^10.0 | ^11.0",
                 "php": "^7.2.5 | ^8.0",
                 "winzou/state-machine": "^0.4.2|^0.4"
             },
             "require-dev": {
                 "mockery/mockery": "^1.3.1",
-                "orchestra/testbench": "^5.0 | ^6.0 | ^7.0 | ^8.0",
-                "phpunit/phpunit": "^8.5 | ^9.3",
-                "symfony/process": "^4.3 | ^5.0 | ^6.0"
+                "orchestra/testbench": "^5.0 | ^6.0 | ^7.0 | ^8.0 | ^9.0",
+                "phpunit/phpunit": "^8.5 | ^9.3 | ^10.5",
+                "symfony/process": "^4.3 | ^5.0 | ^6.0 | ^7.0"
             },
             "type": "library",
             "extra": {
@@ -5208,9 +5208,9 @@
             ],
             "support": {
                 "issues": "https://github.com/sebdesign/laravel-state-machine/issues",
-                "source": "https://github.com/sebdesign/laravel-state-machine/tree/v3.4.3"
+                "source": "https://github.com/sebdesign/laravel-state-machine/tree/v3.4.4"
             },
-            "time": "2024-01-30T10:56:25+00:00"
+            "time": "2024-03-12T09:18:49+00:00"
         },
         {
             "name": "symfony/cache",
