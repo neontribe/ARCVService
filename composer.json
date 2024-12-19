@@ -33,8 +33,6 @@
     "neontribe/laravel-specification": "dev-master",
     "ramsey/uuid": "4.7.6",
     "sebdesign/laravel-state-machine": "3.4.4",
-    "symfony/console": "6.4.4",
-    "symfony/event-dispatcher": "6.4.3",
     "symfony/http-client": "^6.4.16",
     "symfony/lock": "^6.4.13",
     "symfony/mailchimp-mailer": "^6.4.13",
