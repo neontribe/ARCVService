@@ -80,7 +80,7 @@ class CreateMasterVoucherLogReport extends Command
      * The date that we care about for last year's data.
      * @var string $cutOffDate
      */
-    private string $cutOffDate;
+    private string $cutOffDate = '2023-09-01';
 
     /**
      * @var ZipStream $za;
@@ -208,7 +208,7 @@ EOD;
     {
         $thisYearsApril = Carbon::parse('april')->startOfMonth();
         $years = ($thisYearsApril->isPast()) ? 2 : 1;
-        $this->cutOffDate = $thisYearsApril->subYearsNoOverflow($years)->format('Y-m-d');
+       // $this->cutOffDate = $thisYearsApril->subYearsNoOverflow($years)->format('Y-m-d');
 
         // Set the disk
         $this->disk = ($this->option('plain'))
@@ -411,17 +411,16 @@ EOD;
             // are all the fields we care about null?
             $this->containsOnlyNull($voucher) ||
             // is this date filled?
-            !is_null($voucher['Void Voucher Date']);
-//            ||
-//            // is this date dilled *and* less than the cut-off date
-//            (!is_null($voucher['Reimbursed Date']) &&
-//                strtotime(
-//                    DateTime::createFromFormat(
-//                        'd/m/Y',
-//                        $voucher['Reimbursed Date']
-//                    )->format('Y-m-d')
-//                ) < strtotime($this->cutOffDate)
-//            );
+            !is_null($voucher['Void Voucher Date']) ||
+            // is this date filled *and* less than the cut-off date
+            (!is_null($voucher['Reimbursed Date']) &&
+                strtotime(
+                    DateTime::createFromFormat(
+                        'd/m/Y',
+                        $voucher['Reimbursed Date']
+                    )->format('Y-m-d')
+                ) < strtotime($this->cutOffDate)
+            );
     }
 
     /**
