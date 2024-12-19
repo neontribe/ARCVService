@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Services\TextFormatter;
 use DateTime;
 use DB;
 use Exception;
@@ -12,8 +11,8 @@ use Illuminate\Support\Facades\Storage;
 use Log;
 use PDO;
 use ZipStream\Exception\OverflowException;
-use ZipStream\Option\Archive;
 use ZipStream\ZipStream;
+use App\Wrappers\SecretStreamWrapper;
 
 class CreateMasterVoucherLogReport extends Command
 {
@@ -90,7 +89,7 @@ class CreateMasterVoucherLogReport extends Command
     private $zaOutput;
 
     // Excel can't deal with large CSVs
-    const ROW_LIMIT = 900000;
+    const ROW_LIMIT = 950000;
 
     /**
      * The report's query template
@@ -195,7 +194,7 @@ EOD;
         // Enable the secret stream protocol (ssw://). See SecretStreamWrapper for more information.
         // Registering here guarantees availability but there's probably a more Laravel-y place to put this.
         if (!in_array("ssw", stream_get_wrappers())) {
-            stream_wrapper_register("ssw", "App\Wrappers\SecretStreamWrapper");
+            stream_wrapper_register("ssw", SecretStreamWrapper::class);
         }
 
         $this->archiveName = config('arc.mvl_filename');
@@ -225,10 +224,12 @@ EOD;
             }
 
             // Stream directly to what is either a file or a file wrapped in a secret stream.
-            $options = new Archive();
             $this->zaOutput = fopen($path, 'w');
-            $options->setOutputStream($this->zaOutput);
-            $this->za = new ZipStream(null, $options);
+            $this->za = new ZipStream(
+                outputStream: $this->zaOutput,
+                sendHttpHeaders: false,
+                outputName: null
+            );
         }
     }
 
