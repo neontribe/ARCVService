@@ -136,11 +136,11 @@ class Voucher extends Model
                 // We appear to be producing codes that are "0" str_pad on the left, to variable characters
                 // We'll use the $start's numeric length as the value to pad to.
                 $voucherCodes[] = $startMatch['shortcode'] . str_pad(
-                    $val,
-                    strlen($startMatch['number']),
-                    "0",
-                    STR_PAD_LEFT
-                );
+                        $val,
+                        strlen($startMatch['number']),
+                        "0",
+                        STR_PAD_LEFT
+                    );
             }
         }
         return $voucherCodes;
@@ -578,9 +578,9 @@ class Voucher extends Model
             "primary_carer" => $this->bundle?->registration->family->carers[0]->name,
             "registration_centre_name," => $this->bundle?->registration->centre->name,
             "recordedOn" => $this->recordedOn->created_at->format("Y/m/d"),
-            "trader_name" => $this->trader->name,
-            "trader_market_name" => $this->trader->market->name,
-            "trader_market_sponsor_name" => $this->trader->market->sponsor->name,
+            "trader_name" => $this->trader?->name,
+            "trader_market_name" => $this->trader?->market->name,
+            "trader_market_sponsor_name" => $this->trader?->market->sponsor->name,
             "paymentPendedOn" => $this->paymentPendedOn->created_at->format("Y/m/d"),
             "reimbursedOn" => $this->reimbursedOn->created_at->format("Y/m/d"),
         ];

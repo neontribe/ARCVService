@@ -26,6 +26,7 @@ class VoucherController extends Controller
         if (!$disk->exists($archiveName)) {
             // Return to dashboard with an error that indicates we don't have a file.
             // TODO : This error copy needs some UI.
+            Log::error("File does not exist: " . $archiveName);
             return redirect(URL::route('store.dashboard'))
                 ->with('error_message', "Sorry, couldn't find a current export. Please check the exporter ran on schedule");
         }

@@ -11,8 +11,9 @@ use Storage;
 use Tests\StoreTestCase;
 use URL;
 use ZipArchive;
-use ZipStream\Option\Archive;
+use ZipStream\Exception\OverflowException;
 use ZipStream\ZipStream;
+use App\Wrappers\SecretStreamWrapper;
 
 class StoreVoucherControllerTest extends StoreTestCase
 {
@@ -31,17 +32,13 @@ class StoreVoucherControllerTest extends StoreTestCase
     /** @var CentreUser $centreUser */
     private $centreUser;
 
-    /** @var FilesystemAdapter $disk */
-    private $disk;
+    private FilesystemAdapter $disk;
 
-    /** @var string $archiveName */
-    private $archiveName;
+    private string $archiveName;
 
-    /** @var string $dashboard_route */
-    private $dashboard_route;
+    private string $dashboard_route;
 
-    /** @var string $export_route */
-    private $export_route;
+    private string $export_route;
 
     public function setUp(): void
     {
@@ -87,11 +84,9 @@ class StoreVoucherControllerTest extends StoreTestCase
     }
 
     /**
-     * @test
-     *
-     * @throws \ZipStream\Exception\OverflowException
+     * @throws OverflowException
      */
-    public function testItCanDecryptAStoredZip()
+    public function testItCanDecryptAStoredZip(): void
     {
         // Some meaningful content.
         $sourceContent = <<<EOD
@@ -105,16 +100,17 @@ EOD;
         // Enable the secret stream protocol (ssw://). See SecretStreamWrapper for more information.
         // Registering here guarantees availability but there's probably a static place to put this.
         if (!in_array("ssw", stream_get_wrappers())) {
-            stream_wrapper_register("ssw", "App\Wrappers\SecretStreamWrapper");
+            stream_wrapper_register("ssw", SecretStreamWrapper::class);
         }
 
         // Stream a zip to a file in storage, encrypting as we write (with the secret stream wrapper).
         $storagePath = Storage::path('enc');
-        $options = new Archive();
         $output = fopen('ssw://' . $storagePath . '/' . $this->archiveName, 'w');
-        $options->setOutputStream($output);
-
-        $za = new ZipStream(null, $options);
+        $za = new ZipStream(
+            outputStream: $output,
+            sendHttpHeaders: false,
+            outputName: null
+        );
         $za->addFile('a.txt', $sourceContent);
         $za->addFile('b.txt', $sourceContent);
         $za->finish();
@@ -183,8 +179,7 @@ EOD;
         ;
     }
 
-    /** @test */
-    public function testItRedirectsToDashboardWhenNoStoredZip()
+    public function testItRedirectsToDashboardWhenNoStoredZip(): void
     {
         // Setup removes the report file.
         // Get the response when we go to the page.
@@ -213,8 +208,7 @@ EOD;
         ;
     }
 
-    /** @test */
-    public function testItRedirectsToDashboardWhenEmptyZip()
+    public function testItRedirectsToDashboardWhenEmptyZip(): void
     {
         // Make a file that isn't a zip file.
         $this->disk->put($this->archiveName, "");
