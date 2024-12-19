@@ -19,7 +19,7 @@
     "ext-zip": "*",
     "barryvdh/laravel-debugbar": "^v3.14.9",
     "barryvdh/laravel-dompdf": "v3.0.0",
-    "doctrine/dbal": "3.6.3",
+    "doctrine/dbal": "3.9.3",
     "fakerphp/faker": "^1.24.1",
     "highsolutions/laravel-searchy": "^11.0",
     "imtigger/laravel-job-status": "^1.2.0",
