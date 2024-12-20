@@ -23,7 +23,7 @@
     "fakerphp/faker": "^1.24.1",
     "highsolutions/laravel-searchy": "^11.0",
     "imtigger/laravel-job-status": "^1.2.0",
-    "laravel/framework": "^9.52.18",
+    "laravel/framework": "^v10.48.25",
     "laravel/helpers": "^1.7.1",
     "laravel/legacy-factories": "^1.4.0",
     "laravel/passport": "v11.8.7",
@@ -42,17 +42,17 @@
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^2.15.1",
-    "filp/whoops": "2.16.0",
+    "spatie/laravel-ignition": "^2.0",
     "friendsofphp/php-cs-fixer": "^3.65.0",
     "laracasts/generators": "^2.0.2",
-    "laravel/browser-kit-testing": "v6.4.0",
+    "laravel/browser-kit-testing": "v7.0.0",
     "laravel/dusk": "^7.13.0",
     "mockery/mockery": "^1.6.12",
-    "nunomaduro/collision": "6.4.0",
+    "nunomaduro/collision": "v7.0.0",
     "larastan/larastan": "^2.9.12",
     "phpmd/phpmd": "^2.15.0",
     "phpstan/phpstan": "^1.12.13",
-    "phpunit/phpunit": "^9.6.22",
+    "phpunit/phpunit": "10.0.7",
     "squizlabs/php_codesniffer": "^3.11.2"
   },
   "autoload": {
@@ -88,16 +88,12 @@
     ]
   },
   "config": {
+    "minimum-stability": "stable",
     "preferred-install": "dist",
     "sort-packages": true,
     "optimize-autoloader": true,
     "platform": {
       "php": "8.1"
-    }
-  },
-  "extra": {
-    "laravel": {
-      "dont-discover": []
     }
   }
 }

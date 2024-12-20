@@ -14,14 +14,11 @@ use App\Voucher;
 use Auth;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use URL;
 
 class SendVoucherPaymentRequestEmailTest extends TestCase
 {
     use DatabaseMigrations;
-    use RefreshDatabase;
 
     protected $traders;
     protected $vouchers;
