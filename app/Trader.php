@@ -22,7 +22,10 @@ class Trader extends Model
 {
     use SoftDeletes;
 
-    protected $dates = ['deleted_at', 'disabled_at'];
+    protected $casts = [
+        'deleted_at' => 'datetime',
+        'disabled_at' => 'datetime',
+    ];
 
     /**
      * The attributes that are mass assignable.

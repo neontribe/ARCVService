@@ -29,8 +29,8 @@ class Delivery extends Model
      *
      * @var array
      */
-    protected $dates = [
-        'dispatched_at',
+    protected $casts = [
+        'dispatched_at' => 'datetime',
     ];
 
     /**

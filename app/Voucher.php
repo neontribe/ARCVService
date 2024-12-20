@@ -37,9 +37,6 @@ class Voucher extends Model
 
     use SoftDeletes;
 
-    // import soft delete.
-    protected $dates = ['deleted_at'];
-
     const HISTORY_MODEL = 'App\VoucherState'; // the related model to store the history
     const SM_CONFIG = 'Voucher'; // the SM graph to use
 
@@ -65,6 +62,7 @@ class Voucher extends Model
         'sponsor_id' => 'int',
         'trader_id' => 'int',
         'bundle_id' => 'int',
+        'deleted_at' => 'datetime',
     ];
 
     /**

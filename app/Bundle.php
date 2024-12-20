@@ -46,6 +46,9 @@ class Bundle extends Model
      * @var array
      */
     protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at'  => 'datetime',
+        'disbursed_at'  => 'datetime',  // When it was handed out.
     ];
 
     /**
@@ -62,17 +65,6 @@ class Bundle extends Model
      * @var array
      */
     protected $appends = [
-    ];
-
-    /**
-     * These are turned into Date objects on get
-     *
-     * @var array
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'disbursed_at'  // When it was handed out.
     ];
 
     /**

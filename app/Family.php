@@ -57,9 +57,9 @@ class Family extends Model implements IEvaluee
      *
      * @var array
      */
-    protected $dates = [
-        'leaving_on',
-        'rejoin_on',
+    protected $casts = [
+        'leaving_on' => 'datetime',
+        'rejoin_on' => 'datetime',
     ];
 
     /**

@@ -49,18 +49,7 @@ class Child extends Model implements IEvaluee
      */
     protected $hidden = [];
 
-    /**
-     * These are turned into Date objects on get
-     *
-     * @var array
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'dob'
-    ];
-
-    /**
+     /**
      * The attributes that should be appended.
      *
      * @var array
@@ -87,6 +76,9 @@ class Child extends Model implements IEvaluee
      * @var array
      */
     protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'dob' => 'datetime',
         'verified' => 'boolean',
         'deferred' => 'boolean',
     ];

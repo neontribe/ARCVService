@@ -56,11 +56,11 @@ class Registration extends Model implements IEvaluee
      * @var array
      */
 
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'consented_on',
-        'eligible_from'
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'consented_on' => 'datetime',
+        'eligible_from' => 'datetime',
     ];
 
     /**
