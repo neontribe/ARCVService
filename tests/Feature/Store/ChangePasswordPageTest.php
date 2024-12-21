@@ -80,8 +80,6 @@ class ChangePasswordPageTest extends StoreTestCase
             Carbon::now()->subMinutes(5)
         ]);
 
-        DB::select(DB::raw("select * from password_resets limit 1"));
-
         // Has it saved the original password against the centreuser?
         $this->assertTrue(Hash::check('test_user_pass', $centreUser->password));
 

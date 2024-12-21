@@ -51,7 +51,7 @@ class AdminNewCentreUserRequestTest extends StoreTestCase
      * must return hardcoded values
      * @return array[]
      */
-    public function storeValidationProvider(): array
+    public static function storeValidationProvider(): array
     {
         return [
             'requestShouldSucceedWhenRequiredDataIsProvided' => [

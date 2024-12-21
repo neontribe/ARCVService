@@ -76,10 +76,8 @@ class DeliveryControllerMysqlTest extends MysqlStoreTestCase
         Auth::logout();
     }
 
-    /** @test */
-    public function testItCanMakeADelivery()
+    public function testItCanMakeADelivery(): void
     {
-
         // Set some routes
         $formRoute = route('admin.deliveries.create');
         $requestRoute = route('admin.deliveries.store');
@@ -114,8 +112,7 @@ class DeliveryControllerMysqlTest extends MysqlStoreTestCase
         });
     }
 
-    /** @test */
-    public function testItCannotMakeADeliveryBecauseAVoucherIsDelivered()
+    public function testItCannotMakeADeliveryBecauseAVoucherIsDelivered(): void
     {
         // Record a voucher on a delivery
         $v = Voucher::findByCode("TST0103");

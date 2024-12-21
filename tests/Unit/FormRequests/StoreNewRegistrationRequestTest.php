@@ -54,7 +54,7 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
      * must return hardcoded values
      * @return array
      */
-    public function storeValidationProvider()
+    public static function storeValidationProvider(): array
     {
         return [
             'requestShouldSucceedWhenRequiredDataIsProvided' => [
