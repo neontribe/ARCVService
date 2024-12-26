@@ -5,7 +5,6 @@ namespace App\Providers;
 use App\Views\Composers\PaymentsComposer;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
@@ -24,19 +23,6 @@ class AppServiceProvider extends ServiceProvider
         // Recommended at https://laravel-news.com/laravel-5-4-key-too-long-error/
         Schema::defaultStringLength(191);
 
-        // Extend Builder to add a new sub-querys
-        Builder::macro('orderBySub', function (Builder $query, $direction = 'asc') {
-            // Prevents passing sql as the "direction" component.
-            $direction = (in_array($direction, ['asc', 'desc', '']))
-                ? $direction
-                : 'asc';
-            return $this->orderByRaw("({$query->limit(1)->toSql()}) {$direction}");
-        });
-
-        Builder::macro('orderBySubDesc', function (Builder $query) {
-            return $this->orderBySub($query, 'desc');
-        });
-
         Paginator::useBootstrap();
 
         // Needed because we're still serialising cookies!
@@ -47,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('pushonce', static function ($expression) {
             [$pushName, $pushSub] = explode(':', trim(substr($expression, 1, -1)));
 
-            $key = '__pushonce_'.str_replace('-', '_', $pushName).'_'.str_replace('-', '_', $pushSub);
+            $key = '__pushonce_' . str_replace('-', '_', $pushName) . '_' . str_replace('-', '_', $pushSub);
 
             return "<?php if(! isset(\$__env->{$key})): \$__env->{$key} = 1; \$__env->startPush('{$pushName}'); ?>";
         });
@@ -56,7 +42,6 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer('*', PaymentsComposer::class);
-
     }
 
     /**
