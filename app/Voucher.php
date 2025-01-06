@@ -18,7 +18,7 @@ use Throwable;
 
 /**
  * @mixin Eloquent
- * @property integer id
+ * @property integer $id
  * @property string $code
  * @property Sponsor $sponsor
  * @property Trader $trader
@@ -29,6 +29,7 @@ use Throwable;
  * @property VoucherState $recordedOn
  * @property VoucherState $reimbursedOn
  */
+
 class Voucher extends Model
 {
     use Statable;
@@ -37,8 +38,8 @@ class Voucher extends Model
 
     use SoftDeletes;
 
-    const HISTORY_MODEL = 'App\VoucherState'; // the related model to store the history
-    const SM_CONFIG = 'Voucher'; // the SM graph to use
+    public const HISTORY_MODEL = 'App\VoucherState'; // the related model to store the history
+    public const SM_CONFIG = 'Voucher'; // the SM graph to use
 
     /**
      * The attributes that are mass assignable.
@@ -240,7 +241,7 @@ class Voucher extends Model
             return DB::transaction(static function () use ($shortcode) {
 
                 // Set some important variables for the query. breaks SQLlite.
-                DB::statement(DB::raw('SET @t5initialId=0, @t5start=0, @t5previous=0, @t4initialId=0, @t4start=0, @t4previous=0;'));
+                DB::statement('SET @t5initialId=0, @t5start=0, @t5previous=0, @t4initialId=0, @t4start=0, @t4previous=0;');
 
                 /* This seems to be the fastest way to find the start and end of each "range" of vouchers;
                  * in this case specified by vouchers that are not in deliveries.

@@ -14,7 +14,7 @@ class VoucherModelMysqlTest extends MysqlStoreTestCase
     use CreatesApplication;
 
     protected $user;
-    protected $rangeCodes;
+    protected array $rangeCodes;
     protected $vouchers;
     protected $sponsor;
 
@@ -51,9 +51,7 @@ class VoucherModelMysqlTest extends MysqlStoreTestCase
         Auth::login($this->user);
     }
 
-
-    /** @test */
-    public function testItCanGetDeliverableVouchersByShortcode()
+    public function testItCanGetDeliverableVouchersByShortcode(): void
     {
         // Make vouchers from them
         foreach ($this->rangeCodes as $rangeCode) {
