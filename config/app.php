@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\Facade;
+use Illuminate\Support\ServiceProvider;
+
 return [
 
     /*
@@ -21,6 +24,7 @@ return [
     | This value is the name of your application. This value is used when the
     | framework needs to place the application's name in a notification or
     | any other location as required by the application or its packages.
+    |
     */
 
     'name' => env('APP_NAME', 'Laravel'),
@@ -32,7 +36,7 @@ return [
     |
     | This value determines the "environment" your application is currently
     | running in. This may determine how you prefer to configure various
-    | services your application utilizes. Set this in your ".env" file.
+    | services the application utilizes. Set this in your ".env" file.
     |
     */
 
@@ -49,7 +53,7 @@ return [
     |
     */
 
-    'debug' => env('APP_DEBUG', false),
+    'debug' => (bool) env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -63,6 +67,8 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
+
+    'asset_url' => env('ASSET_URL'),
 
     /*
     |--------------------------------------------------------------------------
@@ -87,6 +93,7 @@ return [
     */
 
     'timezone' => env('APP_TIMEZONE', 'UTC'),
+    // 'timezone' => 'UTC',
 
     /*
     |--------------------------------------------------------------------------
@@ -116,6 +123,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Faker Locale
+    |--------------------------------------------------------------------------
+    |
+    | This locale will be used by the Faker PHP library when generating fake
+    | data for your database seeds. For example, this will be used to get
+    | localized telephone numbers, street address information and more.
+    |
+    */
+
+    //'faker_locale' => 'en_US',
+    'faker_locale' => 'en_GB',
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |
@@ -131,20 +152,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Logging Configuration
+    | Maintenance Mode Driver
     |--------------------------------------------------------------------------
     |
-    | Here you may configure the log settings for your application. Out of
-    | the box, Laravel uses the Monolog PHP logging library. This gives
-    | you a variety of powerful log handlers / formatters to utilize.
+    | These configuration options determine the driver used to determine and
+    | manage Laravel's "maintenance mode" status. The "cache" driver will
+    | allow maintenance mode to be controlled across multiple machines.
     |
-    | Available Settings: "single", "daily", "syslog", "errorlog"
+    | Supported drivers: "file", "cache"
     |
     */
 
-    'log' => env('APP_LOG', 'single'),
-
-    'log_level' => env('APP_LOG_LEVEL', 'debug'),
+    'maintenance' => [
+        'driver' => 'file',
+        // 'store' => 'redis',
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -207,16 +229,8 @@ return [
         /*
          * Extra packages
          */
-        // Optimus\ApiConsumer\Provider\LaravelServiceProvider::class, //Passport assistance
         Chalcedonyt\Specification\Providers\SpecificationServiceProvider::class,
         Imtigger\LaravelJobStatus\LaravelJobStatusBusServiceProvider::class,
-
-        // Auto-discovery on
-        // Barryvdh\Debugbar\ServiceProvider::class, //DebugBar
-        // Barryvdh\Cors\ServiceProvider::class, //CORS framework
-        // Barryvdh\DomPDF\ServiceProvider::class, //PDF Maker
-        // Maatwebsite\Excel\ExcelServiceProvider::class, //Excel sheet generation
-        // Sebdesign\SM\ServiceProvider::class, //FSM
     ],
 
     /*

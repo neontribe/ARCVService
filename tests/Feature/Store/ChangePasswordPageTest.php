@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Feature\Store;
 
 use App\Centre;
@@ -13,8 +14,7 @@ class ChangePasswordPageTest extends StoreTestCase
 {
     use DatabaseMigrations;
 
-    /** @test */
-    public function itCanResetAPasswordWithAValidLink()
+    public function testItCanResetAPasswordWithAValidLink(): void
     {
         // Invent a Centre for our centreuser
         $centre = factory(Centre::class)->create();
@@ -56,8 +56,7 @@ class ChangePasswordPageTest extends StoreTestCase
         $this->assertTrue(Hash::check('mynewpassword', $user2->password));
     }
 
-    /** @test */
-    public function itCannotResetAPasswordWithAnInvalidLink()
+    public function testItCannotResetAPasswordWithAnInvalidLink(): void
     {
         // Invent a Centre for our centreuser
         $centre = factory(Centre::class)->create();
