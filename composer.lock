@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "92c20c88dbf450aa6a1a9c034849182e",
+    "content-hash": "cf474cd95039a2678807f26c89c3d6bb",
     "packages": [
         {
             "name": "barryvdh/laravel-debugbar",
@@ -8671,32 +8671,26 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/365Werk/etagconditionals.git",
-                "reference": "2ce75f2efda1f58560c44252f8b281834b132237"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/365Werk/etagconditionals/zipball/2ce75f2efda1f58560c44252f8b281834b132237",
-                "reference": "2ce75f2efda1f58560c44252f8b281834b132237",
-                "shasum": ""
+                "url": "https://github.com/neontribe/etagconditionals.git",
+                "reference": "b0e07ea9d1abd9feef53160b9bb80aff06e96a60"
             },
             "require": {
-                "illuminate/support": "~7|~8|~9|~10"
+                "illuminate/support": "~7|~8|~9|~10|~11"
             },
             "require-dev": {
-                "orchestra/testbench": "~5|~6|~7|~8",
-                "phpunit/phpunit": "~8.0|~9.0"
+                "orchestra/testbench": "~5|~6|~7|~8|^9.0",
+                "phpunit/phpunit": "~8.0|~9.0|~10.5"
             },
             "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
-                    "aliases": {
-                        "EtagConditionals": "Werk365\\EtagConditionals\\Facades\\EtagConditionals"
-                    },
                     "providers": [
                         "Werk365\\EtagConditionals\\EtagConditionalsServiceProvider"
-                    ]
+                    ],
+                    "aliases": {
+                        "EtagConditionals": "Werk365\\EtagConditionals\\Facades\\EtagConditionals"
+                    }
                 }
             },
             "autoload": {
@@ -8704,7 +8698,11 @@
                     "Werk365\\EtagConditionals\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Werk365\\EtagConditionals\\Tests\\": "tests"
+                }
+            },
             "license": [
                 "MIT"
             ],
@@ -8719,13 +8717,9 @@
             "homepage": "https://github.com/werk365/etagconditionals",
             "keywords": [
                 "EtagConditionals",
-                "laravel"
+                "Laravel"
             ],
-            "support": {
-                "issues": "https://github.com/365Werk/etagconditionals/issues",
-                "source": "https://github.com/365Werk/etagconditionals/tree/1.4.2"
-            },
-            "time": "2023-03-22T10:32:46+00:00"
+            "time": "2025-01-08T10:10:15+00:00"
         },
         {
             "name": "winzou/state-machine",

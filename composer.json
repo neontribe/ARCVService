@@ -9,6 +9,10 @@
     {
       "type": "git",
       "url": "https://github.com/neontribe/laravel-specification.git"
+    },
+    {
+      "type": "git",
+      "url": "https://github.com/neontribe/etagconditionals.git"
     }
   ],
   "require": {
