@@ -48,7 +48,6 @@
     "barryvdh/laravel-ide-helper": "^v3.1.0",
     "spatie/laravel-ignition": "^2.0",
     "friendsofphp/php-cs-fixer": "^3.65.0",
-    "laracasts/generators": "^2.0.2",
     "laravel/browser-kit-testing": "v7.0.0",
     "laravel/dusk": "^7.13.0",
     "mockery/mockery": "^1.6.12",

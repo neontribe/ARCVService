@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cf474cd95039a2678807f26c89c3d6bb",
+    "content-hash": "cad078012ce39dc7f712b953e2f3c3dc",
     "packages": [
         {
             "name": "barryvdh/laravel-debugbar",
@@ -9947,64 +9947,6 @@
                 "source": "https://github.com/hamcrest/hamcrest-php/tree/v2.0.1"
             },
             "time": "2020-07-09T08:09:16+00:00"
-        },
-        {
-            "name": "laracasts/generators",
-            "version": "2.0.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/laracasts/Laravel-5-Generators-Extended.git",
-                "reference": "94d454e3b5940ec4df9e33d2e6dc44e84c4f3113"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/laracasts/Laravel-5-Generators-Extended/zipball/94d454e3b5940ec4df9e33d2e6dc44e84c4f3113",
-                "reference": "94d454e3b5940ec4df9e33d2e6dc44e84c4f3113",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/support": "~6.0|~7.0|~8.0|~9.0|^10.0"
-            },
-            "require-dev": {
-                "phpspec/phpspec": "~6.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Laracasts\\Generators\\GeneratorsServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Laracasts\\Generators\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Jeffrey Way",
-                    "email": "jeffrey@laracasts.com"
-                },
-                {
-                    "name": "Cristian Tabacitu",
-                    "email": "hello@tabaciu.ro"
-                }
-            ],
-            "description": "Advanced Laravel generators, that include schema information.",
-            "keywords": [
-                "generators",
-                "laravel"
-            ],
-            "support": {
-                "issues": "https://github.com/laracasts/Laravel-5-Generators-Extended/issues",
-                "source": "https://github.com/laracasts/Laravel-5-Generators-Extended/tree/2.0.2"
-            },
-            "time": "2023-03-22T14:23:28+00:00"
         },
         {
             "name": "larastan/larastan",
