@@ -1,5 +1,7 @@
 <?php
 
+
+
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -11,9 +13,9 @@ class CreateNotesTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('notes', function (Blueprint $table) {
+        Schema::create('notes', static function (Blueprint $table) {
             $table->increments('id');
             $table->text('content'); // 64k
             $table->integer('family_id')->unsigned(); // FK Families
@@ -35,7 +37,7 @@ class CreateNotesTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('notes');
     }

@@ -1,5 +1,8 @@
 <?php
 
+
+
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -11,17 +14,17 @@ class AddDisbursingFieldsToBundle extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
         // We can drop the allocating_centre, it's not a thing
-        Schema::table('bundles', function (Blueprint $table) {
+        Schema::table('bundles', static function (Blueprint $table) {
             if (DB::getDriverName() !== 'sqlite') {
                 $table->dropForeign('bundles_allocating_centre_id_foreign');
             }
             $table->dropColumn('allocating_centre_id');
         });
 
-        Schema::table('bundles', function (Blueprint $table) {
+        Schema::table('bundles', static function (Blueprint $table) {
 
             $table->integer('disbursing_user_id')
                 ->after('disbursing_centre_id')
@@ -48,9 +51,9 @@ class AddDisbursingFieldsToBundle extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('bundles', function (Blueprint $table) {
+        Schema::table('bundles', static function (Blueprint $table) {
             if (DB::getDriverName() !== 'sqlite') {
                 $table->dropForeign('bundles_disbursing_user_id_foreign');
                 $table->dropForeign('bundles_collecting_carer_id_foreign');

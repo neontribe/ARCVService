@@ -1,5 +1,8 @@
 <?php
 
+
+
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -11,9 +14,9 @@ class CreateVouchersTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('vouchers', function (Blueprint $table) {
+        Schema::create('vouchers', static function (Blueprint $table) {
             $table->increments('id'); // a voucher *instance*.
             $table->integer('trader_id')->unsigned()->nullable(); // who's owed money for this.
             $table->string('code', 32); // the actual voucher code.
@@ -23,7 +26,7 @@ class CreateVouchersTable extends Migration
             $table->softDeletes();
         });
 
-        Schema::table('vouchers', function (Blueprint $table) {
+        Schema::table('vouchers', static function (Blueprint $table) {
             $table->foreign('trader_id')
                 ->references('id')
                 ->on('traders');
@@ -39,9 +42,9 @@ class CreateVouchersTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('vouchers', function (Blueprint $table) {
+        Schema::table('vouchers', static function (Blueprint $table) {
             if (DB::getDriverName() !== 'sqlite') {
                 $table->dropForeign(['trader_id']);
                 $table->dropForeign(['sponsor_id']);

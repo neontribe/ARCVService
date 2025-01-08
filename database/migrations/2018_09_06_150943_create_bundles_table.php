@@ -1,5 +1,7 @@
 <?php
 
+
+
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -11,9 +13,9 @@ class CreateBundlesTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('bundles', function (Blueprint $table) {
+        Schema::create('bundles', static function (Blueprint $table) {
             $table->increments('id');
             $table->integer('entitlement')->unsigned(); // for recording actual entitlement when issued
             $table->integer('registration_id')->unsigned(); // FK Registrations
@@ -41,7 +43,7 @@ class CreateBundlesTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('bundles');
     }

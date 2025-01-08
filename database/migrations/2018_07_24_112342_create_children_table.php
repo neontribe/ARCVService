@@ -1,5 +1,7 @@
 <?php
 
+
+
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -11,9 +13,9 @@ class CreateChildrenTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('children', function (Blueprint $table) {
+        Schema::create('children', static function (Blueprint $table) {
             $table->increments('id');
             $table->dateTime('dob');
             $table->boolean('born')->default(true); // Expect most people will be signed up
@@ -31,7 +33,7 @@ class CreateChildrenTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('children');
     }

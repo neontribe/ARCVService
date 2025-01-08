@@ -42,7 +42,6 @@ Licence - The Laravel framework is open-sourced software licensed under the MIT
 Third Party Packages
 - https://github.com/barryvdh/laravel-cors MIT Licence https://github.com/barryvdh/laravel-cors/blob/master/LICENSE
 - https://github.com/barryvdh/laravel-dompdf MIT Licence https://opensource.org/licenses/MIT
-- https://github.com/doctrine/dbal MIT Licence https://github.com/doctrine/dbal/blob/master/LICENSE
 - https://github.com/moontoast/math Apache Licence 2.0 https://github.com/moontoast/math/blob/master/LICENSE
 - https://github.com/esbenp/laravel-api-consumer None Stated
 - https://github.com/ramsey/uuid MIT Licence https://github.com/ramsey/uuid/blob/master/LICENSE

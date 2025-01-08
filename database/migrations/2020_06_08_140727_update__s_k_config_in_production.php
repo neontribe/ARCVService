@@ -1,8 +1,12 @@
 <?php
 
+
+
+use Illuminate\Support\Facades\App;
 use App\Evaluation;
 use App\Sponsor;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\Log;
 
 class UpdateSKConfigInProduction extends Migration
 {
@@ -11,7 +15,7 @@ class UpdateSKConfigInProduction extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
         // Only run in production
         if (App::environment('production')) {
@@ -22,7 +26,7 @@ class UpdateSKConfigInProduction extends Migration
                 Log::warning(self::class . ": up() - unable to find SK area");
                 return;
             }
-            
+
             // Changes for crediting primary schoolers if they are qualified.
             $modfyingEvaluations = [
                 // warn when primary schoolers are approaching end of school
@@ -32,7 +36,7 @@ class UpdateSKConfigInProduction extends Migration
                     "purpose" => "notices",
                     "entity" => "App\Child",
                 ]),
-                
+
                 // credit primary schoolers
                 new Evaluation([
                     "name" => "ChildIsPrimarySchoolAge",
@@ -40,7 +44,7 @@ class UpdateSKConfigInProduction extends Migration
                     "purpose" => "credits",
                     "entity" => "App\Child",
                 ]),
-                
+
                 // don't disqualify primary schoolers
                 new Evaluation([
                     "name" => "ChildIsPrimarySchoolAge",
@@ -48,7 +52,7 @@ class UpdateSKConfigInProduction extends Migration
                     "purpose" => "disqualifiers",
                     "entity" => "App\Child",
                 ]),
-                
+
                 // disqualify secondary schoolers instead
                 new Evaluation([
                     "name" => "ChildIsSecondarySchoolAge",
@@ -56,7 +60,7 @@ class UpdateSKConfigInProduction extends Migration
                     "purpose" => "disqualifiers",
                     "entity" => "App\Child",
                 ]),
-                
+
                 // Turn on disqualifier for primary school kids without younger siblings
                 new Evaluation([
                     "name" => "FamilyHasNoEligibleChildren",
@@ -77,7 +81,6 @@ class UpdateSKConfigInProduction extends Migration
             }
             // Log success
             Log::info(self::class . ": ip() - SK area evaluations added");
-            return;
         }
     }
 
@@ -86,7 +89,7 @@ class UpdateSKConfigInProduction extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         // Only run in production
         if (App::environment('production')) {
@@ -109,7 +112,6 @@ class UpdateSKConfigInProduction extends Migration
             }
             // Log success
             Log::info(self::class . ": down() - SK area evaluations removed");
-            return;
         }
     }
 }

@@ -1,5 +1,8 @@
 <?php
 
+
+
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -11,9 +14,9 @@ class CreateMarketsTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('markets', function (Blueprint $table) {
+        Schema::create('markets', static function (Blueprint $table) {
             $table->increments('id');
             $table->string('name'); // Name of the market
             $table->string('location'); // Where it is.
@@ -22,7 +25,7 @@ class CreateMarketsTable extends Migration
             $table->softDeletes();
         });
 
-        Schema::table('markets', function (Blueprint $table) {
+        Schema::table('markets', static function (Blueprint $table) {
             $table->foreign('sponsor_id')
                 ->references('id')
                 ->on('sponsors');
@@ -34,9 +37,9 @@ class CreateMarketsTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('markets', function (Blueprint $table) {
+        Schema::table('markets', static function (Blueprint $table) {
             if (DB::getDriverName() !== 'sqlite') {
                 $table->dropForeign(['sponsor_id']);
             }

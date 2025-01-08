@@ -1,7 +1,10 @@
 <?php
 
+
+
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\Schema;
 
 class CreateTraderUserPivotTable extends Migration
 {
@@ -10,9 +13,9 @@ class CreateTraderUserPivotTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('trader_user', function (Blueprint $table) {
+        Schema::create('trader_user', static function (Blueprint $table) {
             $table->integer('trader_id')->unsigned()->index();
             $table->foreign('trader_id')->references('id')->on('traders')->onDelete('cascade');
             $table->integer('user_id')->unsigned()->index();
@@ -26,9 +29,9 @@ class CreateTraderUserPivotTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('trader_user', function ($table) {
+        Schema::table('trader_user', static function ($table) {
             if (DB::getDriverName() !== 'sqlite') {
                 $table->dropForeign(['trader_id']);
                 $table->dropForeign(['user_id']);
