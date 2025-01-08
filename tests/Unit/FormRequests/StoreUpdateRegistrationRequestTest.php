@@ -58,8 +58,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
     {
         return [
             'requestShouldSucceedWhenRequiredDataIsProvided' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'pri_carer' => ['A String'],
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes'
@@ -67,42 +67,42 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
             ],
             // this can now pass when eligibility is missing due to SP
             'requestCanPassWhenEligibilityIsMissing' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'pri_carer' => ['A String'],
                 ]
             ],
             'requestShouldFailWhenRequiredDataIsMissing' => [
-                'passed' => false,
-                'data' => []
+                false,
+                []
             ],
             'requestShouldFailWhenTooManyPriCarers' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'pri_carer' => ['A String', 'B String'],
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldFailWhenNoPriCarers' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'pri_carer' => [],
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldFailWhenNonStringPriCarers' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'pri_carer' => [1],
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes'
                 ]
             ],
             'requestShouldSucceedWithSecondaryCarers' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'pri_carer' => ['A String'],
                     'sec_carers' => ['B String', 'C String'],
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -110,8 +110,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWithEmptySecondaryCarers' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'pri_carer' => ['A String'],
                     'sec_carers' => [],
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -119,8 +119,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWithNonStringSecondaryCarers' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'pri_carer' => ['A String'],
                     'sec_carers' => [1,2,3,4],
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -128,8 +128,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldSucceedWithNewCarers' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'pri_carer' => ['A String'],
                     'new_carers' => ['B String', 'C String'],
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -137,8 +137,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWithEmptyNewCarers' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'pri_carer' => ['A String'],
                     'new_carers' => [],
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -146,8 +146,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWithNonStringNewCarers' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'pri_carer' => ['A String'],
                     'new_carers' => [1,2,3,4],
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -155,8 +155,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldSucceedWithMinimalChildren' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'pri_carer' => ['A String'],
                     'children' => [
                         0 => ['dob' => '2017-09']
@@ -166,8 +166,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWithChildInvalidDobFormat' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'pri_carer' => ['A String'],
                     'children' => [
                         0 => ['dob' => '2017-09-01']
@@ -177,15 +177,15 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWithEmptyChildren' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'pri_carer' => ['A String'],
                     'children' => [],
                 ]
             ],
             'requestShouldSucceedWithManyChildren' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'pri_carer' => ['A String'],
                     'children' => [
                         0 => ['dob' => '2017-09'],
@@ -197,8 +197,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldSucceedWithManyVerifiableChildren' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'pri_carer' => ['A String'],
                     'children' => [
                         0 => [
@@ -219,8 +219,8 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWhenAVerifiableChildHasNoDoB' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'pri_carer' => ['A String'],
                     'children' => [
                         0 => [

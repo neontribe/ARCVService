@@ -75,40 +75,40 @@ class SponsorControllerTest extends StoreTestCase
     {
         return [
             'requestShouldSucceedWhenRequiredDataIsProvided' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'name' => 'Test-shire Sponsor',
                     'voucher_prefix' => 'TSTSR',
                 ]
             ],
             'requestShouldFailWhenNameIsMissing' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'voucher_prefix' => 'TSTSR',                ]
             ],
             'requestShouldFailWhenNameIsNotString' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 1,
                     'voucher_prefix' => 'TSTSR',
                 ]
             ],
             'requestShouldFailWhenVoucherPrefixIsMissing' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'Test-shire Sponsor',
                 ]
             ],
             'requestShouldFailWhenVoucherPrefixIsNotString' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'Test-shire Sponsor',
                     'voucher_prefix' => 1,
                 ]
             ],
             'requestShouldFailWhenVoucherPrefixExists' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'Test-shire Sponsor',
                     'voucher_prefix' => 'EXIST',
                 ]
