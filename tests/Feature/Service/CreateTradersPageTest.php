@@ -5,12 +5,12 @@ namespace Tests\Feature\Service;
 use App\AdminUser;
 use App\Sponsor;
 use App\Market;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\StoreTestCase;
 
 class CreateTradersPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var AdminUser $adminUser */
     private $adminUser;

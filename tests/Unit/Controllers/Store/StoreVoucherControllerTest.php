@@ -5,7 +5,7 @@ namespace Tests\Unit\Controllers\Store;
 use App\Centre;
 use App\CentreUser;
 use Illuminate\Filesystem\FilesystemAdapter;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Session;
 use Storage;
 use Tests\StoreTestCase;
@@ -24,7 +24,7 @@ class StoreVoucherControllerTest extends StoreTestCase
      * ...although problems here would soon be spotted by the single person who uses this feature directly.
      */
 
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var Centre $centre */
     private $centre;

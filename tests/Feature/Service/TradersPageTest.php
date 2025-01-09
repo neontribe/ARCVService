@@ -2,13 +2,13 @@
 
 namespace Tests\Feature\Service;
 
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\AdminUser;
 use Tests\StoreTestCase;
 
 class TradersPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var AdminUser */
     private $adminUser;

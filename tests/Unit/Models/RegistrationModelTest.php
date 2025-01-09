@@ -6,12 +6,12 @@ use App\Centre;
 use App\Family;
 use App\Registration;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class RegistrationModelTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @test */
     public function itCanBeCreated()

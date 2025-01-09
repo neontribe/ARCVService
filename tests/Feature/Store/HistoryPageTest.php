@@ -6,12 +6,12 @@ use Tests\StoreTestCase;
 use App\Centre;
 use App\CentreUser;
 use App\Registration;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use URL;
 
 class HistoryPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /**
      * @var Centre $centre

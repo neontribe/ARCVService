@@ -10,12 +10,12 @@ use App\Registration;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
 use Carbon\Carbon;
 use Config;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class VoucherEvaluatorTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     // This has a | in the reason field because we want to carry the entity with it.
     const NOTICE_TYPES = [

@@ -6,7 +6,7 @@ use App\Centre;
 use App\Delivery;
 use Carbon\Carbon;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Voucher;
 use App\Trader;
 use App\User;
@@ -17,7 +17,7 @@ use DB;
 
 class ApiRoutesTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     protected $trader;
     protected $vouchers;

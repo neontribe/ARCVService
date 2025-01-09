@@ -3,12 +3,12 @@
 namespace Tests\Feature\Service;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\AdminUser;
 
 class SessionCookiesTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /**
      *

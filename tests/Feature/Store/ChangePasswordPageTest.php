@@ -6,13 +6,13 @@ use App\Centre;
 use App\CentreUser;
 use Carbon\Carbon;
 use DB;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Hash;
 use Tests\StoreTestCase;
 
 class ChangePasswordPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     public function testItCanResetAPasswordWithAValidLink(): void
     {

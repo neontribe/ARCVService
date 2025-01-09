@@ -2,7 +2,7 @@
 
 namespace Tests\Browser;
 
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 use App\AdminUser;
@@ -12,7 +12,7 @@ use App\Sponsor;
 
 class AdminViewWorkersTest extends DuskTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @test */
     public function the_view_workers_datatable_is_functioning()

@@ -4,13 +4,13 @@ namespace Tests\Unit\FormRequests;
 
 use App\Voucher;
 use App\Http\Requests\VoucherSearchRequest;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Tests\StoreTestCase;
 
 class AdminVoucherSearchRequestTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     private array $rules;
 

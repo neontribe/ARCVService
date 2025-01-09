@@ -6,13 +6,13 @@ use App\AdminUser;
 use App\Http\Controllers\Service\Admin\SponsorsController;
 use App\Http\Requests\AdminNewSponsorRequest;
 use App\Sponsor;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\Validator;
 use Tests\StoreTestCase;
 
 class SponsorControllerTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var Validator */
     private $validator;

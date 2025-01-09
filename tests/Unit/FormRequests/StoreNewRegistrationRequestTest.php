@@ -3,13 +3,13 @@
 namespace Tests\Unit\FormRequests;
 
 use App\Http\Requests\StoreNewRegistrationRequest;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\Validator;
 use Tests\StoreTestCase;
 
 class StoreNewRegistrationRequestTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var Validator */
     private $validator;

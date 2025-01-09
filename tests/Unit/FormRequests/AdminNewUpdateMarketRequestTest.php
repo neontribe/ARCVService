@@ -4,13 +4,13 @@ namespace Tests\Unit\FormRequests;
 
 use App\Http\Requests\AdminNewUpdateMarketRequest;
 use App\Sponsor;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Tests\StoreTestCase;
 
 class AdminNewUpdateMarketRequestTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     private array $rules;
 

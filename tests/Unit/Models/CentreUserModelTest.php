@@ -6,11 +6,11 @@ use App\Centre;
 use App\CentreUser;
 use App\Note;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CentreUserModelTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     protected $centreUser;
     protected $notes;

@@ -5,12 +5,12 @@ namespace Tests\Unit\Controllers\Service\Admin;
 use App\AdminUser;
 use App\Centre;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class DeliveriesControllerTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var AdminUser $adminUser */
     private $adminUser;

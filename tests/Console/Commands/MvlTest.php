@@ -9,7 +9,7 @@ use App\Trader;
 use App\Voucher;
 use Faker\Factory;
 use Faker\Generator;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -17,7 +17,7 @@ use Tests\CreatesApplication;
 
 class MvlTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
     use CreatesApplication;
 
     private Generator $faker;

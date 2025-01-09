@@ -16,12 +16,12 @@ use App\Services\VoucherEvaluator\Evaluations\ChildIsPrimarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\FamilyHasNoEligibleChildren;
 use Carbon\Carbon;
 use Config;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use URL;
 
 class EditPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /**
      * @var Centre $centre

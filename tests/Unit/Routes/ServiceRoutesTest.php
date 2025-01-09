@@ -9,12 +9,12 @@ use App\Market;
 use App\Sponsor;
 use App\Trader;
 use Auth;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\StoreTestCase;
 
 class ServiceRoutesTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     private $authAdminRoutes = [
         'GET' => [

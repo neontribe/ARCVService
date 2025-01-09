@@ -6,7 +6,6 @@ use App\AdminUser;
 use App\Voucher;
 use App\Http\Requests\VoucherSearchRequest;
 use Tests\StoreTestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -14,7 +13,7 @@ use Illuminate\Support\Facades\Validator;
 
 class ServiceLiveVouchersPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     public function testAdminCanViewLiveVouchers()
     {

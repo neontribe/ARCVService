@@ -2,14 +2,14 @@
 
 namespace Tests\Browser;
 
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Dusk\Browser;
 use Tests\Browser\Pages\StoreLogin;
 use Tests\DuskTestCase;
 
 class StoreFamilySearchTest extends DuskTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @test */
     public function family_search_datatable_is_working()
