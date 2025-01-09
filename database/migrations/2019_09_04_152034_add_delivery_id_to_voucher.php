@@ -17,7 +17,9 @@ class AddDeliveryIdToVoucher extends Migration
     {
         Schema::table('vouchers', static function (Blueprint $table) {
             $table->integer('delivery_id')->unsigned()->after('bundle_id')->nullable();
-            $table->foreign('delivery_id')->references('id')->on('deliveries');
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->foreign('delivery_id')->references('id')->on('deliveries');
+            }
         });
     }
 

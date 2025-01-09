@@ -18,7 +18,9 @@ class AddBundleIdFieldToVouchersTable extends Migration
     {
         Schema::table('vouchers', static function (Blueprint $table) {
             $table->integer('bundle_id')->unsigned()->after('id')->nullable();
-            $table->foreign('bundle_id')->references('id')->on('bundles');
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->foreign('bundle_id')->references('id')->on('bundles');
+            }
         });
     }
 

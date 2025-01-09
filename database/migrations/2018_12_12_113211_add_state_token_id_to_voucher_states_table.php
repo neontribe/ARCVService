@@ -23,9 +23,11 @@ class AddStateTokenIdToVoucherStatesTable extends Migration
                 ->nullable()
             ;
 
-            $table->foreign('state_token_id')
-                ->references('id')
-                ->on('state_tokens');
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->foreign('state_token_id')
+                    ->references('id')
+                    ->on('state_tokens');
+            }
         });
     }
 
@@ -38,7 +40,7 @@ class AddStateTokenIdToVoucherStatesTable extends Migration
     {
         Schema::table('voucher_states', static function (Blueprint $table) {
             if (DB::getDriverName() !== 'sqlite') {
-                $table->dropForeign('voucher_states_state_token_id_foreign');
+                $table->dropForeign(['state_token_id']);
             }
             $table->dropColumn('state_token_id');
         });

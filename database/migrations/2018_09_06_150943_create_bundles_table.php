@@ -24,17 +24,19 @@ class CreateBundlesTable extends Migration
             $table->timestamp('disbursed_at')->nullable();
             $table->timestamps(); //created at and updated at
 
-            $table->foreign('registration_id')
-                ->references('id')
-                ->on('registrations');
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->foreign('registration_id')
+                    ->references('id')
+                    ->on('registrations');
 
-            $table->foreign('allocating_centre_id')
-                ->references('id')
-                ->on('centres');
+                $table->foreign('allocating_centre_id')
+                    ->references('id')
+                    ->on('centres');
 
-            $table->foreign('disbursing_centre_id')
-                ->references('id')
-                ->on('centres');
+                $table->foreign('disbursing_centre_id')
+                    ->references('id')
+                    ->on('centres');
+            }
         });
     }
 
