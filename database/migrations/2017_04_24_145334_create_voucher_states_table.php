@@ -28,15 +28,17 @@ class CreateVoucherStatesTable extends Migration
             $table->timestamps(); // captures "When"
         });
 
-        Schema::table('voucher_states', static function (Blueprint $table) {
-            $table->foreign('user_id')
-                ->references('id')
-                ->on('users');
+        if (DB::getDriverName() !== 'sqlite') {
+            Schema::table('voucher_states', static function (Blueprint $table) {
+                $table->foreign('user_id')
+                    ->references('id')
+                    ->on('users');
 
-            $table->foreign('voucher_id')
-                ->references('id')
-                ->on('vouchers');
-        });
+                $table->foreign('voucher_id')
+                    ->references('id')
+                    ->on('vouchers');
+            });
+        }
     }
 
     /**

@@ -57,7 +57,7 @@ class MvlTest extends TestCase
     }
 
 
-    public function testExportAndProcess()
+    public function testExportAndProcess(): void
     {
         $start = Carbon::now()->subMonths(1);
         $end = Carbon::now()->addMonths(1);
@@ -98,7 +98,7 @@ class MvlTest extends TestCase
     }
 
 
-    public function testCryptAndCat()
+    public function testCryptAndCat(): void
     {
         $testFilename = "build/arc_test_file_" . $this->faker->randomNumber(5, true);
         $plainText = $this->faker->text(500);
@@ -122,7 +122,7 @@ class MvlTest extends TestCase
         unlink($testFilename);
     }
 
-    public function testEncryptNoFile()
+    public function testEncryptNoFile(): void
     {
         $results = $this
             ->artisan("arc:mvl:encrypt build/no_such_file")
@@ -130,7 +130,7 @@ class MvlTest extends TestCase
         $this->assertEquals(1, $results);
     }
 
-    public function testCatNoFile()
+    public function testCatNoFile(): void
     {
         $results = $this
             ->artisan("arc:mvl:cat build/no_such_file")
@@ -138,7 +138,7 @@ class MvlTest extends TestCase
         $this->assertEquals(1, $results);
     }
 
-    public function testCatSodiumError()
+    public function testCatSodiumError(): void
     {
         $testFilename = "build/arc_test_file_" . $this->faker->randomNumber(5, true);
         file_put_contents($testFilename, "not cypher text");

@@ -17,8 +17,11 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
+        // Passport 12 doesn't enable this by default
+        Passport::enablePasswordGrant();
+
         // Fix for MySQL < v5.7.7 and MariaDB environs.
         // Recommended at https://laravel-news.com/laravel-5-4-key-too-long-error/
         Schema::defaultStringLength(191);
@@ -49,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         // manual registration of non-auto-discovered packages
     }
