@@ -36,15 +36,13 @@ class AddDisbursingFieldsToBundle extends Migration
                 ->unsigned()
                 ->nullable();
 
-            if (DB::getDriverName() !== 'sqlite') {
-                $table->foreign('disbursing_user_id')
-                    ->references('id')
-                    ->on('centre_users');
+            $table->foreign('disbursing_user_id')
+                ->references('id')
+                ->on('centre_users');
 
-                $table->foreign('collecting_carer_id')
-                    ->references('id')
-                    ->on('carers');
-            }
+            $table->foreign('collecting_carer_id')
+                ->references('id')
+                ->on('carers');
         });
     }
 
@@ -55,12 +53,12 @@ class AddDisbursingFieldsToBundle extends Migration
      */
     public function down(): void
     {
-        Schema::table('bundles', static function (Blueprint $table) {
-            if (DB::getDriverName() !== 'sqlite') {
+        Schema::withoutForeignKeyConstraints(static function () {
+            Schema::table('bundles', static function (Blueprint $table) {
                 $table->dropForeign(['disbursing_user_id']);
                 $table->dropForeign(['collecting_carer_id']);
-            }
-            $table->dropColumn(['disbursing_user_id', 'collecting_carer_id']);
+                $table->dropColumn(['disbursing_user_id', 'collecting_carer_id']);
+            });
         });
     }
 }
