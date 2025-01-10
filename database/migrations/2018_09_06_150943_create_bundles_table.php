@@ -1,7 +1,5 @@
 <?php
 
-
-
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -24,19 +22,17 @@ class CreateBundlesTable extends Migration
             $table->timestamp('disbursed_at')->nullable();
             $table->timestamps(); //created at and updated at
 
-            if (DB::getDriverName() !== 'sqlite') {
-                $table->foreign('registration_id')
-                    ->references('id')
-                    ->on('registrations');
+            $table->foreign('registration_id')
+                ->references('id')
+                ->on('registrations');
 
-                $table->foreign('allocating_centre_id')
-                    ->references('id')
-                    ->on('centres');
+            $table->foreign('allocating_centre_id')
+                ->references('id')
+                ->on('centres');
 
-                $table->foreign('disbursing_centre_id')
-                    ->references('id')
-                    ->on('centres');
-            }
+            $table->foreign('disbursing_centre_id')
+                ->references('id')
+                ->on('centres');
         });
     }
 
@@ -47,6 +43,13 @@ class CreateBundlesTable extends Migration
      */
     public function down(): void
     {
+        Schema::withoutForeignKeyConstraints(static function () {
+            Schema::table('bundles', static function ($table) {
+                $table->dropForeign(['registration_id']);
+                $table->dropForeign(['allocating_centre_id']);
+                $table->dropForeign(['disbursing_centre_id']);
+            });
+        });
         Schema::dropIfExists('bundles');
     }
 }
