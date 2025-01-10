@@ -1,11 +1,8 @@
 <?php
 
-
-
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateTradersTable extends Migration
 {
@@ -28,9 +25,7 @@ class CreateTradersTable extends Migration
         });
 
         Schema::table('traders', static function (Blueprint $table) {
-            $table->foreign('market_id')
-                ->references('id')
-                ->on('markets');
+            $table->foreign('market_id')->references('id')->on('markets');
         });
     }
 
@@ -41,10 +36,10 @@ class CreateTradersTable extends Migration
      */
     public function down(): void
     {
-        Schema::table('traders', static function (Blueprint $table) {
-            if (DB::getDriverName() !== 'sqlite') {
+        Schema::withoutForeignKeyConstraints(static function () {
+            Schema::table('traders', static function (Blueprint $table) {
                 $table->dropForeign(['market_id']);
-            }
+            });
         });
         Schema::dropIfExists('traders');
     }

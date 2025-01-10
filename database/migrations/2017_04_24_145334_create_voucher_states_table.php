@@ -28,17 +28,15 @@ class CreateVoucherStatesTable extends Migration
             $table->timestamps(); // captures "When"
         });
 
-        if (DB::getDriverName() !== 'sqlite') {
-            Schema::table('voucher_states', static function (Blueprint $table) {
-                $table->foreign('user_id')
-                    ->references('id')
-                    ->on('users');
+        Schema::table('voucher_states', static function (Blueprint $table) {
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users');
 
-                $table->foreign('voucher_id')
-                    ->references('id')
-                    ->on('vouchers');
-            });
-        }
+            $table->foreign('voucher_id')
+                ->references('id')
+                ->on('vouchers');
+        });
     }
 
     /**
@@ -48,11 +46,11 @@ class CreateVoucherStatesTable extends Migration
      */
     public function down(): void
     {
-        Schema::table('voucher_states', static function (Blueprint $table) {
-            if (DB::getDriverName() !== 'sqlite') {
+        Schema::withoutForeignKeyConstraints(static function () {
+            Schema::table('voucher_states', static function (Blueprint $table) {
                 $table->dropForeign(['user_id']);
                 $table->dropForeign(['voucher_id']);
-            }
+            });
         });
         Schema::dropIfExists('voucher_states');
     }

@@ -1,9 +1,8 @@
 <?php
 
 
-
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 class CreateTraderUserPivotTable extends Migration
@@ -31,11 +30,11 @@ class CreateTraderUserPivotTable extends Migration
      */
     public function down(): void
     {
-        Schema::table('trader_user', static function ($table) {
-            if (DB::getDriverName() !== 'sqlite') {
+        Schema::withoutForeignKeyConstraints(static function () {
+            Schema::table('trader_user', static function ($table) {
                 $table->dropForeign(['trader_id']);
                 $table->dropForeign(['user_id']);
-            }
+            });
         });
 
         Schema::drop('trader_user');

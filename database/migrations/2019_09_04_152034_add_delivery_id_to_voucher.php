@@ -17,9 +17,7 @@ class AddDeliveryIdToVoucher extends Migration
     {
         Schema::table('vouchers', static function (Blueprint $table) {
             $table->integer('delivery_id')->unsigned()->after('bundle_id')->nullable();
-            if (DB::getDriverName() !== 'sqlite') {
-                $table->foreign('delivery_id')->references('id')->on('deliveries');
-            }
+            $table->foreign('delivery_id')->references('id')->on('deliveries');
         });
     }
 
@@ -30,11 +28,11 @@ class AddDeliveryIdToVoucher extends Migration
      */
     public function down(): void
     {
-        Schema::table('vouchers', static function (Blueprint $table) {
-            if (DB::getDriverName() !== 'sqlite') {
+        Schema::withoutForeignKeyConstraints(static function () {
+            Schema::table('vouchers', static function (Blueprint $table) {
                 $table->dropForeign(['delivery_id']);
-            }
-            $table->dropColumn('delivery_id');
+                $table->dropColumn('delivery_id');
+            });
         });
     }
 }

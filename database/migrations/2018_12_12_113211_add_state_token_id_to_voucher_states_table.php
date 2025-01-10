@@ -1,7 +1,5 @@
 <?php
 
-
-
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
@@ -23,11 +21,10 @@ class AddStateTokenIdToVoucherStatesTable extends Migration
                 ->nullable()
             ;
 
-            if (DB::getDriverName() !== 'sqlite') {
-                $table->foreign('state_token_id')
-                    ->references('id')
-                    ->on('state_tokens');
-            }
+            $table->foreign('state_token_id')
+                ->references('id')
+                ->on('state_tokens');
+
         });
     }
 
@@ -38,11 +35,11 @@ class AddStateTokenIdToVoucherStatesTable extends Migration
      */
     public function down(): void
     {
-        Schema::table('voucher_states', static function (Blueprint $table) {
-            if (DB::getDriverName() !== 'sqlite') {
+        Schema::withoutForeignKeyConstraints(static function () {
+            Schema::table('voucher_states', static function (Blueprint $table) {
                 $table->dropForeign(['state_token_id']);
-            }
-            $table->dropColumn('state_token_id');
+                $table->dropColumn('state_token_id');
+            });
         });
     }
 }

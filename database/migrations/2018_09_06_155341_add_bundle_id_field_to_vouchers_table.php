@@ -18,9 +18,7 @@ class AddBundleIdFieldToVouchersTable extends Migration
     {
         Schema::table('vouchers', static function (Blueprint $table) {
             $table->integer('bundle_id')->unsigned()->after('id')->nullable();
-            if (DB::getDriverName() !== 'sqlite') {
-                $table->foreign('bundle_id')->references('id')->on('bundles');
-            }
+            $table->foreign('bundle_id')->references('id')->on('bundles');
         });
     }
 
@@ -31,11 +29,11 @@ class AddBundleIdFieldToVouchersTable extends Migration
      */
     public function down(): void
     {
-        Schema::table('vouchers', static function (Blueprint $table) {
-            if (DB::getDriverName() !== 'sqlite') {
+        Schema::withoutForeignKeyConstraints(static function () {
+            Schema::table('vouchers', static function (Blueprint $table) {
                 $table->dropForeign(['bundle_id']);
-            }
-            $table->dropColumn('bundle_id');
+                $table->dropColumn('bundle_id');
+            });
         });
     }
 }

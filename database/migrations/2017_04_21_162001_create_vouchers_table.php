@@ -1,7 +1,5 @@
 <?php
 
-
-
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
@@ -44,11 +42,11 @@ class CreateVouchersTable extends Migration
      */
     public function down(): void
     {
-        Schema::table('vouchers', static function (Blueprint $table) {
-            if (DB::getDriverName() !== 'sqlite') {
+        Schema::withoutForeignKeyConstraints(static function () {
+            Schema::table('vouchers', static function (Blueprint $table) {
                 $table->dropForeign(['trader_id']);
                 $table->dropForeign(['sponsor_id']);
-            }
+            });
         });
         Schema::dropIfExists('vouchers');
     }
