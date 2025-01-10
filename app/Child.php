@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property string $dob
+ * @property Carbon $dob
  * @property bool $born
  * @property bool $verified
  * @property bool $defer
@@ -49,11 +49,11 @@ class Child extends Model implements IEvaluee
      */
     protected $hidden = [];
 
-     /**
-     * The attributes that should be appended.
-     *
-     * @var array
-     */
+    /**
+    * The attributes that should be appended.
+    *
+    * @var array
+    */
     protected $appends = ['can_defer'];
 
     /**
@@ -63,7 +63,7 @@ class Child extends Model implements IEvaluee
      */
     public function getEvaluator(): AbstractEvaluator
     {
-        if ($this->has('family')) {
+        if (!empty($this->family)) {
             return $this->family->getEvaluator();
         }
         $this->_evaluator = ($this->_evaluator) ?? EvaluatorFactory::make();
@@ -89,7 +89,7 @@ class Child extends Model implements IEvaluee
      * @param string $format
      * @return string
      */
-    public function getAgeString(string $format = '%y yr, %m mo') : string
+    public function getAgeString(string $format = '%y yr, %m mo'): string
     {
         $currentDate = Carbon::now();
         $startOfMonth = Carbon::now()->startOfMonth();
@@ -134,7 +134,7 @@ class Child extends Model implements IEvaluee
         // If we're born BEFORE the month
         $years = ($this->dob->month < $month)
             // ... then we'll start one year earlier
-            ? $years -1
+            ? $years - 1
             // ... else we're a late starter and it'll be the number given.
             : $years
         ;

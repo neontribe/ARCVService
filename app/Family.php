@@ -86,7 +86,7 @@ class Family extends Model implements IEvaluee
      */
     public function getEvaluator(): AbstractEvaluator
     {
-        if ($this->has('registrations')) {
+        if (!empty($this->registrations)) {
             return $this->registrations()->first()->getEvaluator();
         }
 
@@ -153,7 +153,7 @@ class Family extends Model implements IEvaluee
      *
      * @return HasMany
      */
-    public function carers()
+    public function carers(): HasMany
     {
         return $this->hasMany('App\Carer');
     }
@@ -162,7 +162,7 @@ class Family extends Model implements IEvaluee
      * Get the Family's Children
      * @return HasMany
      */
-    public function children()
+    public function children(): HasMany
     {
         return $this->hasMany('App\Child');
     }
@@ -172,7 +172,7 @@ class Family extends Model implements IEvaluee
      *
      * @return HasMany
      */
-    public function notes()
+    public function notes(): HasMany
     {
         return $this->hasMany('App\Note');
     }
@@ -182,7 +182,7 @@ class Family extends Model implements IEvaluee
      *
      * @return HasMany
      */
-    public function registrations()
+    public function registrations(): HasMany
     {
         return $this->hasMany('App\Registration');
     }
@@ -191,7 +191,7 @@ class Family extends Model implements IEvaluee
      * Get the Family's intial registered Centre.
      * @return BelongsTo
      */
-    public function initialCentre()
+    public function initialCentre(): BelongsTo
     {
         return $this->belongsTo('App\Centre', 'initial_centre_id');
     }
