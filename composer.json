@@ -36,7 +36,7 @@
     "neontribe/laravel-specification": "dev-master",
     "ramsey/uuid": "4.7.6",
     "sebdesign/laravel-state-machine": "3.4.4",
-    "symfony/http-client": "^6.4.16",
+    "symfony/http-client": "^v7.2.2",
     "symfony/lock": "v7.2.0",
     "symfony/mailchimp-mailer": "^v7.2.0",
     "usmanhalalit/laracsv": "^2.1.0",
