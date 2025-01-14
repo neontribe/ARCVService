@@ -4,7 +4,7 @@ namespace Tests\Feature\Service;
 
 use App\User;
 use Tests\StoreTestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\AdminUser;
 use App\Voucher;
 use App\StateToken;
@@ -14,7 +14,7 @@ use URL;
 class PaymentsPageTest extends StoreTestCase
 {
     //All these are copied and adapted from old store payment page tests that were at Feature\Store and now defunct.
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     protected $voucher;
 

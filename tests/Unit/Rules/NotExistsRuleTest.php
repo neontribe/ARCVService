@@ -4,12 +4,12 @@ namespace Tests\Unit\Rules;
 
 use App\User;
 use App\Rules\NotExistsRule;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class NotExistsRuleTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @test */
     public function theNotExistsRuleValidates()

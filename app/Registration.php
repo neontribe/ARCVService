@@ -56,18 +56,18 @@ class Registration extends Model implements IEvaluee
      * @var array
      */
 
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'consented_on',
-        'eligible_from'
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'consented_on' => 'datetime',
+        'eligible_from' => 'datetime',
     ];
 
     /**
      * Magically gets a public evaluator.
      * @return AbstractEvaluator
      */
-    public function getEvaluator()
+    public function getEvaluator(): AbstractEvaluator
     {
         // if the private var is null, make a new one, stash it and return it.
         $this->_evaluator = ($this->_evaluator) ?? EvaluatorFactory::makeFromRegistration($this);
@@ -79,7 +79,7 @@ class Registration extends Model implements IEvaluee
      *
      * @return bool
      */
-    public function isActive()
+    public function isActive(): bool
     {
         // Get the last disbursement, if any.
         $lastCollection = $this->bundles()
@@ -113,7 +113,7 @@ class Registration extends Model implements IEvaluee
      *
      * @return BelongsTo
      */
-    public function family()
+    public function family(): BelongsTo
     {
         return $this->belongsTo('App\Family');
     }
@@ -123,7 +123,7 @@ class Registration extends Model implements IEvaluee
      *
      * @return BelongsTo
      */
-    public function centre()
+    public function centre(): BelongsTo
     {
         return $this->belongsTo('App\Centre');
     }
@@ -148,7 +148,7 @@ class Registration extends Model implements IEvaluee
                 "registration_id" => $this->id,
                 "entitlement" => $this->getValuation()->getEntitlement()
                 ]);
-        };
+        }
 
         return $bundle;
     }
@@ -158,7 +158,7 @@ class Registration extends Model implements IEvaluee
      *
      * @return HasMany
      */
-    public function bundles()
+    public function bundles(): HasMany
     {
         return $this->hasMany('App\Bundle');
     }
@@ -189,7 +189,7 @@ class Registration extends Model implements IEvaluee
     {
         return $query->whereHas('family', function ($q) {
             $q->whereNull('leaving_on');
-            $q->orWhere('rejoin_on', '>', 'leaving_on');
+            $q->orWhereColumn('rejoin_on', '>', 'leaving_on');
         });
     }
 }

@@ -7,12 +7,12 @@ use App\Registration;
 use App\Sponsor;
 use Carbon\Carbon;
 use Tests\StoreTestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use URL;
 
 class SearchPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @test */
     public function itShowsTheLoggedInUser()

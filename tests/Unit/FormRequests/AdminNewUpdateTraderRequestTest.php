@@ -6,298 +6,176 @@ use App\Http\Requests\AdminNewUpdateTraderRequest;
 use App\Market;
 use App\Sponsor;
 use App\Trader;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Validation\Validator;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Validator;
 use Tests\StoreTestCase;
 
 class AdminNewUpdateTraderRequestTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
-    /** @var Validator */
-    private $validator;
+    private array $rules;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
-        $this->validator = app()->get('validator');
 
         $sponsor = factory(Sponsor::class)->create();
-
         $market = factory(Market::class)->create(['sponsor_id' => $sponsor->id]);
-
         factory(Trader::class)->create(['market_id' => $market->id]);
+
+        $this->rules = (new AdminNewUpdateTraderRequest())->rules();
+    }
+
+    private function validate(array $data): bool
+    {
+        return Validator::make($data, $this->rules)->passes();
     }
 
     /**
-     * General validator
-     * @param $mockedRequestData
-     * @param $rules
-     * @return mixed
+     * @dataProvider validationCases
      */
-    protected function validate($mockedRequestData, $rules)
+    public function testItValidatesTraderRequests(bool $expected, array $data): void
     {
-        return $this->validator
-            ->make($mockedRequestData, $rules)
-            ->passes();
+        $this->assertEquals($expected, $this->validate($data));
     }
 
-    /**
-     * @test
-     * @dataProvider storeValidationProvider
-     * @param bool $shouldPass
-     * @param array $mockedRequestData
-     */
-    public function testICannotSubmitInvalidValues($shouldPass, $mockedRequestData)
+    public static function validationCases(): array
     {
-        // Copy the rules out of the FormRequest.
-        $rules = (new AdminNewUpdateTraderRequest())->rules();
-
-        $this->assertEquals(
-            $shouldPass,
-            $this->validate($mockedRequestData, $rules)
-        );
-    }
-
-    /**
-     * must return hardcoded values
-     * @return array
-     */
-    public function storeValidationProvider()
-    {
-        // We need to do this as this provider gets made before laravel normally gets out of bed.
-        $this->createApplication();
-
         return [
-            'requestShouldSucceedWhenMinRequiredDataIsProvided' => [
-                'passed' => true,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                ]
-            ],
-            'requestShouldSucceedWhenOptionalProvidedAsBooleanInt' => [
-                'passed' => true,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                    'disabled' => 1,
-                ]
-            ],
-            'requestShouldSucceedWhenOptionalDataProvidedAsNull' => [
-                'passed' => true,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                    'disabled' => null,
-                ]
-            ],
-            'requestShouldSucceedWhenOptionalDataProvidedAsBoolean' => [
-                'passed' => true,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                    'disabled' => true,
-                ]
-            ],
-            'requestShouldSucceedWhenOptionalDataProvidedAsBooleanText' => [
-                'passed' => true,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                    'disabled' => "on",
-                ]
-            ],
-            'requestShouldFailWhenNameIsMissing' => [
-                'passed' => false,
-                'data' => [
-                    'market' => 1,
-                ]
-            ],
-            'requestShouldFailWhenNameIsNotString' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 1,
-                    'market' => 1,
-                ]
-            ],
-            'requestShouldFailWhenNameIsMoreThan160Chars' => [
-                'passed' => false,
-                'data' => [
-                    'market' => 1,
-                    'name' => '1234567890123456789012345678901234567890' .
-                        '1234567890123456789012345678901234567890' .
-                        '1234567890123456789012345678901234567890' .
-                        '1234567890123456789012345678901234567890' .
-                        '1'
-                    ,
-                ]
-            ],
-            'requestShouldPassWhenNameIsLessThan161Chars' => [
-                'passed' => true,
-                'data' => [
-                    'market' => 1,
-                    'name' => '1234567890123456789012345678901234567890' .
-                        '1234567890123456789012345678901234567890' .
-                        '1234567890123456789012345678901234567890' .
-                        '1234567890123456789012345678901234567890'
-                    ,
-                ]
-            ],
-            'requestShouldFailWhenMarketIsMissing' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'payment_message' => 'a message',
-                ]
-            ],
-            'requestShouldFailWhenMarketIsNotInteger' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 'f',
-                ]
-            ],
-            'requestShouldFailWhenMarketIsInvalid' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 999,
-                ]
-            ],
-            'requestShouldSucceedWhenMinRequiredUserDataIsProvided' => [
-                'passed' => true,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                    'users' => [
-                        10 => ['name' => 'Test Name', 'email' => 'valid@example.com'],
-                    ]
-                ]
-            ],
-            'requestShouldFailWhenUsersIsNotAnArray' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                    'users' => "thing"
-                ]
-            ],
-            'requestShouldFailWhenUsersIsAnEmptyAnArray' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                    'users' => []
-                ]
-            ],
-            'requestShouldFailWhenUserNameDataIsNotString' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                    'users' => [
-                        10 => ['name' => 1, 'email' => 'valid@example.com'],
-                    ]
-                ]
-            ],
-            'requestShouldSucceedWhenUserNameDataIsLTE160' => [
-                'passed' => true,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                    'users' => [
-                        10 => [
-                            'name' => '1234567890123456789012345678901234567890' .
-                                '1234567890123456789012345678901234567890' .
-                                '1234567890123456789012345678901234567890' .
-                                '1234567890123456789012345678901234567890',
-                            'email' => 'valid@example.com'
-                        ],
-                    ]
-                ]
-            ],
-            'requestShouldFailWhenUserNameDataIsGT160' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                    'users' => [
-                        10 => [
-                            'name' => '1234567890123456789012345678901234567890' .
-                                '1234567890123456789012345678901234567890' .
-                                '1234567890123456789012345678901234567890' .
-                                '1234567890123456789012345678901234567890' .
-                                '1',
-                            'email' => 'valid@example.com'
-                        ],
-                    ]
-                ]
-            ],
-            'requestShouldFailWhenUserNameDataIsMissing' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                    'users' => [
-                        10 => ['email' => 'valid@example.com'],
-                    ]
-                ]
-            ],
-            'requestShouldFailWhenUserEmailDataIsMissing' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                    'users' => [
-                        10 => ['name' => 'Test Name'],
-                    ]
-                ]
-            ],
-            'requestShouldFailWhenUserEmailIsInvalid' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                    'users' => [
-                        10 => ['name' => 'Test Name', 'email' => 'notAValidMail.com'],
-                    ]
-                ]
-            ],
-            'requestShouldSucceedWhenMultiRequiredUserDataIsProvided' => [
-                'passed' => true,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                    'users' => [
-                        10 => ['name' => 'Test Name', 'email' => 'valid@example.com'],
-                        11 => ['name' => 'Test Name 2', 'email' => 'valid2@example.com'],
-                    ]
-                ]
-            ],
-            'requestShouldFailWhenMultiUserDataIsMissing' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                    'users' => [
-                        10 => ['email' => 'valid@example.com'],
-                        11 => ['name' => 'Test Name 2'],
-                    ]
-                ]
-            ],
-            'requestShouldFailWhenMultiUserEmailsAreDuplicated' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Trader',
-                    'market' => 1,
-                    'users' => [
-                        10 => ['name' => 'Test Name', 'email' => 'valid@example.com'],
-                        11 => ['name' => 'Test Name 2', 'email' => 'valid@example.com'],
-                    ]
-                ]
-            ],
-
+            'Valid minimal data' => [true, [
+                'name' => 'Test Trader',
+                'market' => 1,
+            ]],
+            'Valid optional data (boolean int)' => [true, [
+                'name' => 'Test Trader',
+                'market' => 1,
+                'disabled' => 1,
+            ]],
+            'Valid optional data (null)' => [true, [
+                'name' => 'Test Trader',
+                'market' => 1,
+                'disabled' => null,
+            ]],
+            'Valid optional data (boolean)' => [true, [
+                'name' => 'Test Trader',
+                'market' => 1,
+                'disabled' => true,
+            ]],
+            'Valid optional data (text boolean)' => [true, [
+                'name' => 'Test Trader',
+                'market' => 1,
+                'disabled' => 'on',
+            ]],
+            'Missing name' => [false, [
+                'market' => 1,
+            ]],
+            'Name not a string' => [false, [
+                'name' => 1,
+                'market' => 1,
+            ]],
+            'Name exceeds 160 characters' => [false, [
+                'name' => str_repeat('a', 161),
+                'market' => 1,
+            ]],
+            'Valid name within 160 characters' => [true, [
+                'name' => str_repeat('a', 160),
+                'market' => 1,
+            ]],
+            'Missing market' => [false, [
+                'name' => 'Test Trader',
+            ]],
+            'Market not an integer' => [false, [
+                'name' => 'Test Trader',
+                'market' => 'f',
+            ]],
+            'Invalid market' => [false, [
+                'name' => 'Test Trader',
+                'market' => 999,
+            ]],
+            'Valid minimal user data' => [true, [
+                'name' => 'Test Trader',
+                'market' => 1,
+                'users' => [
+                    10 => ['name' => 'Test Name', 'email' => 'valid@example.com'],
+                ],
+            ]],
+            'Users not an array' => [false, [
+                'name' => 'Test Trader',
+                'market' => 1,
+                'users' => 'thing',
+            ]],
+            'Users is an empty array' => [false, [
+                'name' => 'Test Trader',
+                'market' => 1,
+                'users' => [],
+            ]],
+            'User name not a string' => [false, [
+                'name' => 'Test Trader',
+                'market' => 1,
+                'users' => [
+                    10 => ['name' => 1, 'email' => 'valid@example.com'],
+                ],
+            ]],
+            'Valid user name within 160 characters' => [true, [
+                'name' => 'Test Trader',
+                'market' => 1,
+                'users' => [
+                    10 => ['name' => str_repeat('a', 160), 'email' => 'valid@example.com'],
+                ],
+            ]],
+            'User name exceeds 160 characters' => [false, [
+                'name' => 'Test Trader',
+                'market' => 1,
+                'users' => [
+                    10 => ['name' => str_repeat('a', 161), 'email' => 'valid@example.com'],
+                ],
+            ]],
+            'Missing user name' => [false, [
+                'name' => 'Test Trader',
+                'market' => 1,
+                'users' => [
+                    10 => ['email' => 'valid@example.com'],
+                ],
+            ]],
+            'Missing user email' => [false, [
+                'name' => 'Test Trader',
+                'market' => 1,
+                'users' => [
+                    10 => ['name' => 'Test Name'],
+                ],
+            ]],
+            'Invalid user email' => [false, [
+                'name' => 'Test Trader',
+                'market' => 1,
+                'users' => [
+                    10 => ['name' => 'Test Name', 'email' => 'notAValidMail.com'],
+                ],
+            ]],
+            'Valid multiple users' => [true, [
+                'name' => 'Test Trader',
+                'market' => 1,
+                'users' => [
+                    10 => ['name' => 'Test Name', 'email' => 'valid@example.com'],
+                    11 => ['name' => 'Test Name 2', 'email' => 'valid2@example.com'],
+                ],
+            ]],
+            'Multiple users with missing data' => [false, [
+                'name' => 'Test Trader',
+                'market' => 1,
+                'users' => [
+                    10 => ['email' => 'valid@example.com'],
+                    11 => ['name' => 'Test Name 2'],
+                ],
+            ]],
+            'Duplicated emails among users' => [false, [
+                'name' => 'Test Trader',
+                'market' => 1,
+                'users' => [
+                    10 => ['name' => 'Test Name', 'email' => 'valid@example.com'],
+                    11 => ['name' => 'Test Name 2', 'email' => 'valid@example.com'],
+                ],
+            ]],
         ];
     }
 }

@@ -2,14 +2,14 @@
 
 namespace Tests\Console\Commands;
 
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Facades\Artisan;
 use Tests\CreatesApplication;
 
 class MvlExportTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
     use CreatesApplication;
 
 

@@ -8,11 +8,9 @@ use Chalcedonyt\Specification\AbstractSpecification;
 
 class IsAlmostYears extends AbstractSpecification
 {
-    /** @var integer $years */
-    protected $years;
+    protected int $years;
 
-    /** @var Carbon $offsetDate */
-    protected $offsetDate;
+    protected Carbon $offsetDate;
 
     /**
     *  @param integer $years        How many years old they'll be
@@ -29,12 +27,12 @@ class IsAlmostYears extends AbstractSpecification
     * @param Child $candidate
     * @return  Boolean
     */
-    public function isSatisfiedBy(Child $candidate)
+    public function isSatisfiedBy(Child $candidate): bool
     {
         /** @var Carbon $targetDate */
         $targetDate = $candidate->dob->endOfMonth()->addYears($this->years);
         return $targetDate->isFuture() &&
-            $this->offsetDate->diffInMonths($targetDate) <=1;
+            (int) $this->offsetDate->diffInMonths($targetDate) <= 1;
     }
 
 }

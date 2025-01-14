@@ -76,10 +76,8 @@ class DeliveryControllerMysqlTest extends MysqlStoreTestCase
         Auth::logout();
     }
 
-    /** @test */
-    public function testItCanMakeADelivery()
+    public function testItCanMakeADelivery(): void
     {
-
         // Set some routes
         $formRoute = route('admin.deliveries.create');
         $requestRoute = route('admin.deliveries.store');
@@ -114,14 +112,13 @@ class DeliveryControllerMysqlTest extends MysqlStoreTestCase
         });
     }
 
-    /** @test */
-    public function testItCannotMakeADeliveryBecauseAVoucherIsDelivered()
+    public function testItCannotMakeADeliveryBecauseAVoucherIsDelivered(): void
     {
         // Record a voucher on a delivery
         $v = Voucher::findByCode("TST0103");
         $d = new Delivery([
             'centre_id' => $this->centre->id,
-            'range' =>'TST0103-TST0103',
+            'range' => 'TST0103-TST0103',
             'dispatched_at' => $this->now,
         ]);
         $d->save();
@@ -145,12 +142,11 @@ class DeliveryControllerMysqlTest extends MysqlStoreTestCase
         ;
     }
 
-    /** @test */
-    public function testItCannotMakeADeliveryBecauseAVoucherIsNotPrinted()
+    public function testItCannotMakeADeliveryBecauseAVoucherIsNotPrinted(): void
     {
         // Record a voucher that is recorded
         $v = Voucher::findByCode("TST0103");
-        $v->currentstate="recorded";
+        $v->currentstate = "recorded";
         $v->save();
 
         // Set some routes

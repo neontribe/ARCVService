@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 class MvlProcess extends Command
 {
-    const TICK_SIZE=1000;
+    const TICK_SIZE=5000;
 
     /**
      * The name and signature of the console command.
@@ -81,9 +81,27 @@ class MvlProcess extends Command
         $lines = explode("\n", file_get_contents($in_file));
 
         $sharedData = [ null, null, $now = Carbon::now()->format("Y/m/d")];
-        foreach ($lines as $id) {
-            $v = Voucher::find($id);
-            if ($v) {
+
+        // turn into a collection and chunk
+        $lines = Collect($lines);
+        $chunks = $lines->chunk(self::TICK_SIZE);
+        // for each TICK_SIZE chunk
+        foreach ($chunks as $chunk) {
+            // get all those vouchers at once, with some data.
+            $Vs = Voucher::whereIn('id', $chunk)->with([
+                'reimbursedOn',
+                'recordedOn',
+                'paymentPendedOn',
+                'trader',
+                'trader.market',
+                'bundle',
+                'bundle.registration',
+                'delivery',
+                'sponsor'
+            ])->get();
+            // iterate in mem
+            foreach ($Vs as $v) {
+                // check this
                 fputcsv($fh_out, array_merge(array_values($v->deepExport()), $sharedData));
                 if ($count++ % self::TICK_SIZE === 0) {
                     $this->info(sprintf(

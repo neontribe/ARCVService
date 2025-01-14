@@ -4,8 +4,9 @@ namespace Tests;
 use Config;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Laravel\BrowserKitTesting\TestCase as BaseTestCase;
 
-class MysqlStoreTestCase extends StoreTestCase
+class MysqlStoreTestCase extends BaseTestCase
 {
     use DatabaseMigrations;
 

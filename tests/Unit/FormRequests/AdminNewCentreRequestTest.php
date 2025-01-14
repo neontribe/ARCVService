@@ -5,190 +5,126 @@ namespace Tests\Unit\FormRequests;
 use App\Centre;
 use App\Http\Requests\AdminNewCentreRequest;
 use App\Sponsor;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Generator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Validation\Validator;
+use Illuminate\Support\Facades\Validator;
 use Tests\StoreTestCase;
 
 class AdminNewCentreRequestTest extends StoreTestCase
 {
-    use DatabaseMigrations;
     use RefreshDatabase;
 
-    /** @var Validator */
-    private $validator;
+    private array $rules;
 
-    /** @var array $print_prefs */
-    private $print_prefs;
-
-    /** @var Centre $existingCentre */
-    private $existingCentre;
-
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
-        $this->validator = app()->get('validator');
-        $this->print_prefs = array_random(config('arc.print_preferences'));
-        $this->existingCentre = factory(Centre::class)->create([
-           'prefix' => 'EXISTS',
-        ]);
+
+        $this->rules = (new AdminNewCentreRequest())->rules();
+        factory(Centre::class)->create(['prefix' => 'EXISTS']);
         factory(Sponsor::class)->create();
     }
 
-    /**
-     * General validator
-     * @param $mockedRequestData
-     * @param $rules
-     * @return mixed
-     */
-    protected function validate($mockedRequestData, $rules)
+    private function validate(array $mockedRequestData): bool
     {
-        return $this->validator
-            ->make($mockedRequestData, $rules)
-            ->passes();
+        return Validator::make($mockedRequestData, $this->rules)->passes();
     }
 
     /**
-     * @test
-     * @dataProvider storeValidationProvider
-     * @param bool $shouldPass
-     * @param array $mockedRequestData
+     * @dataProvider validationCases
      */
-    public function testICannotSubmitInvalidValues($shouldPass, $mockedRequestData)
+    public function testItValidatesCentreRequests(bool $shouldPass, array $mockedRequestData): void
     {
-        // Copy the rules out of the FormRequest.
-        $rules = (new AdminNewCentreRequest())->rules();
-
-        $this->assertEquals(
-            $shouldPass,
-            $this->validate($mockedRequestData, $rules)
-        );
+        $this->assertEquals($shouldPass, $this->validate($mockedRequestData));
     }
 
-    /**
-     * must return hardcoded values
-     * @return array
-     */
-    public function storeValidationProvider()
+    public static function validationCases(): Generator
     {
-        // We need to do this as this provider gets made before laravel normally gets out of bed.
-        $this->createApplication();
-        $prefs = array_random(config('arc.print_preferences'));
+        yield 'Valid request' => [true, [
+            'name' => 'Test Centre',
+            'sponsor' => 1,
+            'rvid_prefix' => 'TSTCT',
+            'print_pref' => 'individual',
+        ]];
 
-        return [
-            'requestShouldSucceedWhenRequiredDataIsProvided' => [
-                'passed' => true,
-                'data' => [
-                    'name' => 'Test Centre',
-                    'sponsor' => 1,
-                    'rvid_prefix' => 'TSTCT',
-                    'print_pref' => $prefs
-                ]
-            ],
-            'requestShouldFailWhenNameIsMissing' => [
-                'passed' => false,
-                'data' => [
-                    'sponsor' => 1,
-                    'rvid_prefix' => 'TSTCT',
-                    'print_pref' => $prefs
-                ]
-            ],
-            'requestShouldFailWhenNameIsNotString' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 1,
-                    'sponsor' => 1,
-                    'rvid_prefix' => 'TSTCT',
-                    'print_pref' => $prefs
-                ]
-            ],
-            'requestShouldFailWhenSponsorIsMissing' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Centre',
-                    'rvid_prefix' => 'TSTCT',
-                    'print_pref' => $prefs
-                ]
-            ],
-            'requestShouldFailWhenSponsorIsNotInteger' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Centre',
-                    'sponsor' => 'not an integer',
-                    'rvid_prefix' => 'TSTCT',
-                    'print_pref' => $prefs
-                ]
-            ],
-            'requestShouldFailWhenSponsorIsInvalid' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Centre',
-                    'sponsor' => 999,
-                    'rvid_prefix' => 'TSTCT',
-                    'print_pref' => $prefs
-                ]
-            ],
-            'requestShouldFailWhenRvidIsMissing' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Centre',
-                    'sponsor' => 1,
-                    'print_pref' => $prefs
-                ]
-            ],
-            'requestShouldFailWhenRvidIsNotAString' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Centre',
-                    'sponsor' => 1,
-                    'rvid_prefix' => 1,
-                    'print_pref' => $prefs
-                ]
-            ],
-            'requestShouldFailWhenRvidIsLessThanOneChar' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Centre',
-                    'sponsor' => 1,
-                    'rvid_prefix' => '',
-                    'print_pref' => $prefs
-                ]
-            ],
-            'requestShouldFailWhenRvidIsMoreThan5Chars' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Centre',
-                    'sponsor' => 1,
-                    'rvid_prefix' => 'ABCDEF',
-                    'print_pref' => $prefs
-                ]
-            ],
-            'requestShouldFailWhenRvidExists' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Centre',
-                    'sponsor' => 1,
-                    'rvid_prefix' => 'EXISTS',
-                    'print_pref' => 'not even slightly a print pref'
-                ]
-            ],
-            'requestShouldFailWhenPrintPrefIsMissing' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Centre',
-                    'sponsor' => 1,
-                    'rvid_prefix' => 'ABCDEF',
-                ]
-            ],
-            'requestShouldFailWhenPrintPrefIsNotInList' => [
-                'passed' => false,
-                'data' => [
-                    'name' => 'Test Centre',
-                    'sponsor' => 1,
-                    'rvid_prefix' => 'ABCDEF',
-                    'print_pref' => 'not even slightly a print pref'
-                ]
-            ],
-        ];
+        yield 'Missing name' => [false, [
+            'sponsor' => 1,
+            'rvid_prefix' => 'TSTCT',
+            'print_pref' => 'individual',
+        ]];
+
+        yield 'Name is not a string' => [false, [
+            'name' => 1,
+            'sponsor' => 1,
+            'rvid_prefix' => 'TSTCT',
+            'print_pref' => 'individual',
+        ]];
+
+        yield 'Missing sponsor' => [false, [
+            'name' => 'Test Centre',
+            'rvid_prefix' => 'TSTCT',
+            'print_pref' => 'individual',
+        ]];
+
+        yield 'Sponsor is not an integer' => [false, [
+            'name' => 'Test Centre',
+            'sponsor' => 'not an integer',
+            'rvid_prefix' => 'TSTCT',
+            'print_pref' => 'individual',
+        ]];
+
+        yield 'Invalid sponsor' => [false, [
+            'name' => 'Test Centre',
+            'sponsor' => 999,
+            'rvid_prefix' => 'TSTCT',
+            'print_pref' => 'individual',
+        ]];
+
+        yield 'Missing RVID prefix' => [false, [
+            'name' => 'Test Centre',
+            'sponsor' => 1,
+            'print_pref' => 'individual',
+        ]];
+
+        yield 'RVID is not a string' => [false, [
+            'name' => 'Test Centre',
+            'sponsor' => 1,
+            'rvid_prefix' => 1,
+            'print_pref' => 'individual',
+        ]];
+
+        yield 'RVID is less than one character' => [false, [
+            'name' => 'Test Centre',
+            'sponsor' => 1,
+            'rvid_prefix' => '',
+            'print_pref' => 'individual',
+        ]];
+
+        yield 'RVID is more than five characters' => [false, [
+            'name' => 'Test Centre',
+            'sponsor' => 1,
+            'rvid_prefix' => 'ABCDEF',
+            'print_pref' => 'individual',
+        ]];
+
+        yield 'RVID already exists' => [false, [
+            'name' => 'Test Centre',
+            'sponsor' => 1,
+            'rvid_prefix' => 'EXISTS',
+            'print_pref' => 'not even slightly a print pref',
+        ]];
+
+        yield 'Missing print preference' => [false, [
+            'name' => 'Test Centre',
+            'sponsor' => 1,
+            'rvid_prefix' => 'ABCDEF',
+        ]];
+
+        yield 'Invalid print preference' => [false, [
+            'name' => 'Test Centre',
+            'sponsor' => 1,
+            'rvid_prefix' => 'ABCDEF',
+            'print_pref' => 'not even slightly a print pref',
+        ]];
     }
 }

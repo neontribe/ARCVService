@@ -3,7 +3,7 @@
 namespace Tests\Feature\Service;
 
 use Tests\StoreTestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\AdminUser;
 use App\Centre;
 use App\CentreUser;
@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 
 class EditWorkerPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var AdminUser $adminUser */
     private $adminUser;

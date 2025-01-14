@@ -1,5 +1,7 @@
 <?php
 
+
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,11 +13,11 @@ class UpdateChildrensTableWithDeferred extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-      Schema::table('children', function (Blueprint $table) {
-          $table->boolean('deferred')->default(false)->nullable();
-      });
+        Schema::table('children', static function (Blueprint $table) {
+            $table->boolean('deferred')->default(false)->nullable();
+        });
     }
 
     /**
@@ -23,10 +25,10 @@ class UpdateChildrensTableWithDeferred extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-      Schema::table('children', function (Blueprint $table) {
-          $table->dropColumn('deferred');
-      });
+        Schema::table('children', static function (Blueprint $table) {
+            $table->dropColumn('deferred');
+        });
     }
 }

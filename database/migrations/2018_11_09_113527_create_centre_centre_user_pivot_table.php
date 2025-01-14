@@ -1,8 +1,11 @@
 <?php
 
+
+
 use App\CentreUser;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\Schema;
 
 class CreateCentreCentreUserPivotTable extends Migration
 {
@@ -11,9 +14,9 @@ class CreateCentreCentreUserPivotTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('centre_centre_user', function (Blueprint $table) {
+        Schema::create('centre_centre_user', static function (Blueprint $table) {
             $table->integer('centre_user_id')->unsigned()->index();
             $table->foreign('centre_user_id')->references('id')->on('centre_users')->onDelete('cascade');
             $table->integer('centre_id')->unsigned()->index();
@@ -30,7 +33,7 @@ class CreateCentreCentreUserPivotTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::drop('centre_centre_user');
     }
@@ -38,7 +41,7 @@ class CreateCentreCentreUserPivotTable extends Migration
     /**
      * Updates the relationships for all pre-existing CentreUsers to use this pivot.
      */
-    public function migrateRelationships()
+    public function migrateRelationships(): void
     {
         // Find CentreUsers with a Centre
         $centreUsers = CentreUser::whereNotNull('centre_id');

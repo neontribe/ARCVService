@@ -13,7 +13,7 @@ abstract class StoreTestCase extends BaseTestCase
     /**
      * @param $selector string Selector string to find a bunch of elements
      * @param $text string String you're looking for
-     * @param $pos int Postion in the returned element array you think the text will be.
+     * @param $pos int Position in the returned element array you think the text will be.
      * @return $this
      */
     public function seeInElementAtPos($selector, $text, $pos)
