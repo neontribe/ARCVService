@@ -14,7 +14,7 @@ use App\Http\Controllers\API\TraderController;
 use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Mail\PendingMail;
 use Illuminate\Support\Facades\Mail;
 use Mockery;
@@ -22,7 +22,7 @@ use Tests\TestCase;
 
 class TraderControllerTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     protected $traders;
     protected $vouchers;

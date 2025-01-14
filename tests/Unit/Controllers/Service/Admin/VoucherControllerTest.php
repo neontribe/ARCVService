@@ -5,12 +5,12 @@ namespace Tests\Unit\Controllers\Service\Admin;
 use App\AdminUser;
 use App\Market;
 use App\Voucher;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class VoucherControllerTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     protected $market;
     protected $admin_user;

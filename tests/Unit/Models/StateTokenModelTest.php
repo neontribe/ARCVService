@@ -6,11 +6,11 @@ use App\StateToken;
 use Illuminate\Database\QueryException;
 use Ramsey\Uuid\Uuid;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class StateTokenModelTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @test */
     public function testItCanGenerateAPaymentUUID()

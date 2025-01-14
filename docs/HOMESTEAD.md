@@ -75,7 +75,7 @@ Do the steps below:
 This application relies on a queue to run a number of tasks.
 The queue workers are kep alive by supervisor
 
-Remember to set `QUEUE_DRIVER=database` in th `.env` file.
+Remember to set `QUEUE_CONNECTION=database` in th `.env` file.
 
 You should probably have something like this in 
 

@@ -6,12 +6,12 @@ use App\AdminUser;
 use App\Market;
 use App\Sponsor;
 use App\Trader;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\StoreTestCase;
 
 class MarketsPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var AdminUser $adminUser */
     private $adminUser;

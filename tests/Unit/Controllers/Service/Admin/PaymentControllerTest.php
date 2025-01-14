@@ -14,13 +14,13 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Auth;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\StoreTestCase;
 
 
 class PaymentControllerTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     protected $admin_user;
     protected $trader;

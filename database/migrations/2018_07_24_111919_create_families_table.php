@@ -1,5 +1,7 @@
 <?php
 
+
+
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -11,9 +13,9 @@ class CreateFamiliesTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('families', function (Blueprint $table) {
+        Schema::create('families', static function (Blueprint $table) {
             $table->increments('id');
             $table->integer('initial_centre_id')->nullable()->unsigned(); // Where we registered first.
             $table->integer('centre_sequence')->nullable(); //Component for RVID.
@@ -32,7 +34,7 @@ class CreateFamiliesTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('families');
     }

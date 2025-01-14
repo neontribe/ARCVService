@@ -6,13 +6,13 @@ use App\StateToken;
 use App\Trader;
 use App\User;
 use App\Voucher;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\AdminUser;
 use Tests\StoreTestCase;
 
 class TraderPaymentHistoryPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     private $adminUser;
 

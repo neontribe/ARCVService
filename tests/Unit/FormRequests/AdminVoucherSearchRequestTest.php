@@ -2,62 +2,37 @@
 
 namespace Tests\Unit\FormRequests;
 
-use App\AdminUser;
 use App\Voucher;
 use App\Http\Requests\VoucherSearchRequest;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Validation\Validator;
+use Illuminate\Support\Facades\Validator;
 use Tests\StoreTestCase;
 
 class AdminVoucherSearchRequestTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
-    /** @var Validator */
-    private $validator;
+    private array $rules;
 
-    /**
-     * General validator
-     * @param $mockedRequestData
-     * @param $rules
-     * @return mixed
-     */
-    protected function validate($mockedRequestData, $rules)
+    protected function setUp(): void
     {
-        $validator = app()->get('validator');
-        return $validator
-            ->make($mockedRequestData, $rules)
-            ->passes();
+        parent::setUp();
+        $this->rules = (new VoucherSearchRequest())->rules();
     }
 
-    /**
-     * @test
-     */
-    public function testICanSubmitASearchWithValidCode()
+    private function validate(array $data): bool
     {
-        $voucherToSearch = factory(Voucher::class)->state('dispatched')->create();
-        $rules = (new VoucherSearchRequest())->rules();
-        $mockedRequestData = ['voucher_code' => $voucherToSearch->code];
-
-        $this->assertEquals(
-            true,
-            $this->validate($mockedRequestData, $rules)
-        );
+        return Validator::make($data, $this->rules)->passes();
     }
 
-    /**
-     * @test
-     */
-    public function testICannotSubmitASearchWithInvalidValues()
+    public function testAllowsSearchWithValidVoucherCode(): void
     {
-        $rules = (new VoucherSearchRequest())->rules();
-        $mockedRequestData = ['voucher_code' => 'This is not a voucher code'];
+        $voucher = factory(Voucher::class)->state('dispatched')->create();
+        $this->assertTrue($this->validate(['voucher_code' => $voucher->code]));
+    }
 
-        $this->assertEquals(
-            false,
-            $this->validate($mockedRequestData, $rules)
-        );
+    public function testRejectsSearchWithInvalidVoucherCode(): void
+    {
+        $this->assertFalse($this->validate(['voucher_code' => 'InvalidCode']));
     }
 }

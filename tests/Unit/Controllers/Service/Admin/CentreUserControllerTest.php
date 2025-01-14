@@ -5,13 +5,13 @@ namespace Tests\Unit\Controllers\Service\Admin;
 use App\AdminUser;
 use App\Centre;
 use App\CentreUser;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Tests\StoreTestCase;
 
 class CentreUserControllerTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var AdminUser $adminUser */
     private $adminUser;

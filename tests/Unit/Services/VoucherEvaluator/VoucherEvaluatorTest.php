@@ -10,32 +10,36 @@ use App\Registration;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
 use Carbon\Carbon;
 use Config;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class VoucherEvaluatorTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     // This has a | in the reason field because we want to carry the entity with it.
-    const NOTICE_TYPES = [
+    public const NOTICE_TYPES = [
         'ChildIsAlmostOne' => ['reason' => 'Child|almost 1 year old'],
         'ChildIsAlmostPrimarySchoolAge' => ['reason' => 'Child|almost primary school age'],
         'ChildIsAlmostSecondarySchoolAge' => ['reason' => 'Child|almost secondary school age'],
         'ChildIsPrimarySchoolAge' => ['reason' => 'Child|primary school age'],
         'ChildIsSecondarySchoolAge' => ['reason' => 'Child|secondary school age'],
-        'FamilyHasUnverifiedChildren' => ['reason' => 'Family|has one or more children that you haven\'t checked ID for yet']
+        'FamilyHasUnverifiedChildren' => [
+            'reason' => 'Family|has one or more children that you haven\'t checked ID for yet'
+        ]
     ];
 
     // This has a | in the reason field because we want to carry the entity with it.
-    const CREDIT_TYPES = [
+    public const CREDIT_TYPES = [
         'ChildIsUnderOne' => ['reason' => 'Child|under 1 year old', 'value' => 6],
-        'ChildIsBetweenOneAndPrimarySchoolAge' => ['reason' => 'Child|between 1 and start of primary school age', 'value' => 4],
+        'ChildIsBetweenOneAndPrimarySchoolAge' => [
+            'reason' => 'Child|between 1 and start of primary school age', 'value' => 4
+        ],
         'ChildIsPrimarySchoolAge' => ['reason' => 'Child|primary school age', 'value' => 4],
         'FamilyIsPregnant' => ['reason' => 'Family|pregnant', 'value' => 4],
     ];
 
-    private $rulesMods = [];
+    private array $rulesMods = [];
 
     private $family;
     private $pregnancy;
@@ -117,12 +121,13 @@ class VoucherEvaluatorTest extends TestCase
         $this->underOne = factory(Child::class)->state('underOne')->make();
         $this->isSecondarySchoolAge = factory(Child::class)->state('isSecondarySchoolAge')->make();
         $this->isAlmostOne = factory(Child::class)->state('almostOne')->make();
+        $c = $this->isAlmostOne->toArray();
         $this->readyForPrimarySchool = factory(Child::class)->state('readyForPrimarySchool')->make();
         $this->readyForSecondarySchool = factory(Child::class)->state('readyForSecondarySchool')->make();
     }
 
     /** @test */
-    public function itNoticesWhenAFamilyStillRequiresIDForChildren()
+    public function itNoticesWhenAFamilyStillRequiresIDForChildren(): void
     {
         $unverifiedKids = factory(Child::class, 3)->states('unverified')->make();
         $this->family->children()->saveMany($unverifiedKids);
@@ -155,7 +160,7 @@ class VoucherEvaluatorTest extends TestCase
     }
 
     /** @test */
-    public function itCreditsWhenAFamilyIsPregnant()
+    public function itCreditsWhenAFamilyIsPregnant(): void
     {
         $this->family->children()->save($this->pregnancy);
 
@@ -165,12 +170,12 @@ class VoucherEvaluatorTest extends TestCase
         $credits = $evaluation["credits"];
 
         // There should be a credit reason of 'FamilyIsPregnant'
-        $this->assertEquals(1, count($credits));
+        $this->assertCount(1, $credits);
         $this->assertContains(self::CREDIT_TYPES['FamilyIsPregnant'], $credits);
     }
 
     /** @test */
-    public function itCreditsUnrestrictedPrimarySchoolChildren()
+    public function itCreditsUnrestrictedPrimarySchoolChildren(): void
     {
         // get rules mods
         $rulesMods = collect($this->rulesMods["credit-primary"]);
@@ -191,7 +196,7 @@ class VoucherEvaluatorTest extends TestCase
     }
 
     /** @test */
-    public function itCreditsQualifiedPrimarySchoolChildrenButNotUnqualifiedOnes()
+    public function itCreditsQualifiedPrimarySchoolChildrenButNotUnqualifiedOnes(): void
     {
         // get rules mods
         $rulesMods = collect($this->rulesMods["credit-primary-qualified"]);
@@ -231,14 +236,14 @@ class VoucherEvaluatorTest extends TestCase
     }
 
     /** @test */
-    public function itCreditsWhenAChildIsUnderOne()
+    public function itCreditsWhenAChildIsUnderOne(): void
     {
         // Make standard evaluator for a child under one
         $evaluator = EvaluatorFactory::make();
         $evaluation = $evaluator->evaluate($this->underOne);
         $credits = $evaluation["credits"];
 
-        $this->assertEquals(1, count($credits));
+        $this->assertCount(1, $credits);
 
         // Check the correct credit type is applied.
         $this->assertContains(self::CREDIT_TYPES['ChildIsUnderOne'], $credits);
@@ -246,7 +251,7 @@ class VoucherEvaluatorTest extends TestCase
     }
 
     /** @test */
-    public function itCreditsWhenAChildIsBetweenOneAndPrimarySchoolAge()
+    public function itCreditsWhenAChildIsBetweenOneAndPrimarySchoolAge(): void
     {
         // Make standard evaluator for a child under school age
         $evaluator = EvaluatorFactory::make();
@@ -254,7 +259,7 @@ class VoucherEvaluatorTest extends TestCase
         $credits = $evaluation["credits"];
 
         // Check there's one, because child is not under one.
-        $this->assertEquals(1, count($credits));
+        $this->assertCount(1, $credits);
 
         // Check the correct credit type is applied.
         $this->assertContains(self::CREDIT_TYPES['ChildIsBetweenOneAndPrimarySchoolAge'], $credits);
@@ -262,7 +267,7 @@ class VoucherEvaluatorTest extends TestCase
     }
 
     /** @test */
-    public function itDoesNotCreditWhenAChildisSecondarySchoolAge()
+    public function itDoesNotCreditWhenAChildisSecondarySchoolAge(): void
     {
         $rulesMod = collect($this->rulesMods["credit-primary"]);
 
@@ -272,21 +277,20 @@ class VoucherEvaluatorTest extends TestCase
         $credits = $evaluation["credits"];
 
         // Check there's none, because child is not primary or under.
-        $this->assertEquals(0, count($credits));
+        $this->assertCount(0, $credits);
         $this->assertEquals(0, $evaluation->getEntitlement());
     }
 
     /** @test */
-    public function itNoticesWhenAChildIsAlmostOne()
+    public function itNoticesWhenAChildIsAlmostOne(): void
     {
         // Make standard evaluator
         $evaluator = EvaluatorFactory::make();
         $evaluation = $evaluator->evaluate($this->isAlmostOne);
         $notices = $evaluation["notices"];
 
-
         // Check there's one, because no other event is pending.
-        $this->assertEquals(1, count($notices));
+        $this->assertCount(1, $notices);
 
         // Check the correct credit type is applied
         $this->assertContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $notices);
@@ -294,7 +298,7 @@ class VoucherEvaluatorTest extends TestCase
     }
 
     /** @test */
-    public function itNoticesWhenAChildIsAlmostPrimarySchoolAge()
+    public function itNoticesWhenAChildIsAlmostPrimarySchoolAge(): void
     {
         // Need to change the values we use for school start to next month's integer
         Config::set('arc.school_month', Carbon::now()->addMonthsNoOverflow(1)->month);
@@ -305,7 +309,7 @@ class VoucherEvaluatorTest extends TestCase
         $notices = $evaluation["notices"];
 
         // Check there's one, because no other event is pending.
-        $this->assertEquals(1, count($notices));
+        $this->assertCount(1, $notices);
 
         // Check the correct credit type is applied.
         $this->assertNotContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $notices);
@@ -313,7 +317,7 @@ class VoucherEvaluatorTest extends TestCase
     }
 
     /** @test */
-    public function itNoticesWhenAChildIsAlmostSecondarySchoolAge()
+    public function itNoticesWhenAChildIsAlmostSecondarySchoolAge(): void
     {
         // Need to change the values we use for school start to next month's integer
         Config::set('arc.school_month', Carbon::now()->addMonthsNoOverflow(1)->month);
@@ -327,7 +331,7 @@ class VoucherEvaluatorTest extends TestCase
         $notices = $evaluation["notices"];
 
         // Check there's one
-        $this->assertEquals(1, count($notices));
+        $this->assertCount(1, $notices);
 
         // Check the correct credit type is applied.
         $this->assertNotContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $notices);
@@ -335,7 +339,7 @@ class VoucherEvaluatorTest extends TestCase
     }
 
     /** @test */
-    public function roundingUpAgeToEndOfMonth()
+    public function roundingUpAgeToEndOfMonth(): void
     {
         // Create a child with a DOB of 12th April 2000
         $dob = Carbon::create(2000, 4, 12, 0, 0, 0, 'Europe/London');
@@ -365,7 +369,7 @@ class VoucherEvaluatorTest extends TestCase
     }
 
     /** @test */
-    public function itHasADefaultSetOfRulesAndCanAcceptVariableValuesForEvaluations()
+    public function itHasADefaultSetOfRulesAndCanAcceptVariableValuesForEvaluations(): void
     {
         // We make a registration in a non-SK area
         $centre = factory(Centre::class)->create();

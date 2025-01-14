@@ -3,14 +3,14 @@
 namespace Tests\Browser;
 
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Dusk\Browser;
 use Tests\Browser\Pages\StoreLogin;
 use Tests\DuskTestCase;
 
 class StoreAddRegistrationTest extends DuskTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @test */
     public function the_JS_is_working_correctly_on_the_create_reg_page()

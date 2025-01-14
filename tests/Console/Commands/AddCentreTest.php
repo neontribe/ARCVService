@@ -8,7 +8,7 @@ use App\Sponsor;
 use Faker\Factory;
 use Faker\Generator;
 use Illuminate\Foundation\Application;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Facades\Auth;
 use Tests\CreatesApplication;
@@ -18,7 +18,7 @@ use Tests\CreatesApplication;
  */
 class AddCentreTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
     use CreatesApplication;
 
     private Generator $faker;

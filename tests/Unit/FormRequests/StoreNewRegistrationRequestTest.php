@@ -3,13 +3,13 @@
 namespace Tests\Unit\FormRequests;
 
 use App\Http\Requests\StoreNewRegistrationRequest;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\Validator;
 use Tests\StoreTestCase;
 
 class StoreNewRegistrationRequestTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var Validator */
     private $validator;
@@ -54,12 +54,12 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
      * must return hardcoded values
      * @return array
      */
-    public function storeValidationProvider()
+    public static function storeValidationProvider(): array
     {
         return [
             'requestShouldSucceedWhenRequiredDataIsProvided' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'consent' => 'yes',
                     'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -67,12 +67,12 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWhenRequiredDataIsMissing' => [
-                'passed' => false,
-                'data' => []
+                false,
+                []
             ],
             'requestShouldFailWhenConsentIsMissing' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
                     'eligibility-nrpf' => 'yes'
@@ -80,15 +80,15 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
             ],
             // this can now pass when eligibility is missing due to SP
             'requestCanPassWhenEligibilityIsMissing' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'consent' => 'on',
                     'pri_carer' => 'A String',
                 ]
             ],
             'requestShouldFailWhenCarerIsNotAString' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'consent' => true,
                     'pri_carer' => 1,
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -96,8 +96,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWhenEligibilityIsNotInEnum' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'consent' => 'yes',
                     'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'hello',
@@ -105,8 +105,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWhenConsentIsNotTruthy' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'consent' => 2,
                     'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -114,8 +114,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldSucceedWithSecondaryCarers' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'consent' => 1,
                     'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -124,8 +124,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWithEmptySecondaryCarers' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'consent' => 1,
                     'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -134,8 +134,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWithNonStringSecondaryCarers' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'consent' => 1,
                     'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -144,8 +144,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldSucceedWithMinimalChildren' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'consent' => 1,
                     'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -156,8 +156,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWithChildInvalidDobFormat' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'consent' => 1,
                     'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -168,8 +168,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWithEmptyChildren' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'consent' => 1,
                     'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -178,8 +178,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldSucceedWithManyChildren' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'consent' => 1,
                     'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -192,8 +192,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldSucceedWithManyVerifiableChildren' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'consent' => 1,
                     'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',
@@ -215,8 +215,8 @@ class StoreNewRegistrationRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWhenAVerifiableChildHasNoDoB' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'consent' => 1,
                     'pri_carer' => 'A String',
                     'eligibility-hsbs' => 'healthy-start-applying',

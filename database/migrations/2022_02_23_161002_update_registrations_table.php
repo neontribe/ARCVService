@@ -1,7 +1,10 @@
 <?php
 
+
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class UpdateRegistrationsTable extends Migration
@@ -11,7 +14,7 @@ class UpdateRegistrationsTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('registrations', static function (Blueprint $table) {
             $table->string('eligibility_hsbs')->nullable()->after('centre_id');
@@ -52,9 +55,9 @@ class UpdateRegistrationsTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('registrations', function (Blueprint $table) {
+        Schema::table('registrations', static function (Blueprint $table) {
             $table->string('eligibility')->nullable()->after('centre_id');
         });
 
@@ -73,10 +76,10 @@ class UpdateRegistrationsTable extends Migration
           ");
         }
 
-        Schema::table('registrations', function (Blueprint $table) {
+        Schema::table('registrations', static function (Blueprint $table) {
             $table->dropColumn('eligibility_hsbs');
         });
-        Schema::table('registrations', function (Blueprint $table) {
+        Schema::table('registrations', static function (Blueprint $table) {
             $table->dropColumn('eligibility_nrpf');
         });
     }

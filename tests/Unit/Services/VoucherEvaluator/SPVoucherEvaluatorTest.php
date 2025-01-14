@@ -11,12 +11,12 @@ use App\Sponsor;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
 use Carbon\Carbon;
 use Config;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class SPVoucherEvaluatorTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     const CREDIT_TYPES = [
         'HouseholdExists' => ['reason' => 'Family|exists', 'value' => 10],

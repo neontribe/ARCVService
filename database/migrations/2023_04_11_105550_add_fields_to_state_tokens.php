@@ -4,18 +4,17 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::table('state_tokens', function (Blueprint $table) {
-              $table->integer('user_id')->unsigned()->after('uuid')->nullable();
-              $table->integer('admin_user_id')->unsigned()->after('created_at')->nullable();
+        Schema::table('state_tokens', static function (Blueprint $table) {
+            $table->integer('user_id')->unsigned()->after('uuid')->nullable();
+            $table->integer('admin_user_id')->unsigned()->after('created_at')->nullable();
         });
     }
 
@@ -24,9 +23,9 @@ return new class extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('state_tokens', function (Blueprint $table) {
+        Schema::table('state_tokens', static function (Blueprint $table) {
             $table->dropColumn(['user_id','admin_user_id']);
         });
     }

@@ -1,20 +1,20 @@
 <?php
+
 namespace Tests\Feature\Store;
 
 use App\Centre;
 use App\CentreUser;
 use Carbon\Carbon;
 use DB;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Hash;
 use Tests\StoreTestCase;
 
 class ChangePasswordPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
-    /** @test */
-    public function itCanResetAPasswordWithAValidLink()
+    public function testItCanResetAPasswordWithAValidLink(): void
     {
         // Invent a Centre for our centreuser
         $centre = factory(Centre::class)->create();
@@ -56,8 +56,7 @@ class ChangePasswordPageTest extends StoreTestCase
         $this->assertTrue(Hash::check('mynewpassword', $user2->password));
     }
 
-    /** @test */
-    public function itCannotResetAPasswordWithAnInvalidLink()
+    public function testItCannotResetAPasswordWithAnInvalidLink(): void
     {
         // Invent a Centre for our centreuser
         $centre = factory(Centre::class)->create();
@@ -79,8 +78,6 @@ class ChangePasswordPageTest extends StoreTestCase
             bcrypt($token),
             Carbon::now()->subMinutes(5)
         ]);
-
-        DB::select(DB::raw("select * from password_resets limit 1"));
 
         // Has it saved the original password against the centreuser?
         $this->assertTrue(Hash::check('test_user_pass', $centreUser->password));

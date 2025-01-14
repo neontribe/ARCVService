@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Store;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\StoreTestCase;
 use App\Carer;
 use App\Centre;
@@ -15,17 +14,13 @@ use App\Sponsor;
 use App\Http\Controllers\Service\Admin\SponsorsController;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsPrimarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\FamilyHasNoEligibleChildren;
-use App\Services\VoucherEvaluator\Evaluations\ScottishChildCanDefer;
-use App\Services\VoucherEvaluator\Evaluations\ScottishChildIsAlmostPrimarySchoolAge;
-use App\Services\VoucherEvaluator\Evaluations\ScottishChildIsPrimarySchoolAge;
 use Carbon\Carbon;
 use Config;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use URL;
 
 class EditPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
     use RefreshDatabase;
 
     /**

@@ -14,13 +14,13 @@ use App\Voucher;
 use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class SendVoucherHistoryEmailTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     protected $traders;
     protected $vouchers;

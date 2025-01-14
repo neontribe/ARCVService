@@ -9,7 +9,7 @@ use App\Trader;
 use App\Voucher;
 use Faker\Factory;
 use Faker\Generator;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -17,7 +17,7 @@ use Tests\CreatesApplication;
 
 class MvlTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
     use CreatesApplication;
 
     private Generator $faker;
@@ -57,7 +57,7 @@ class MvlTest extends TestCase
     }
 
 
-    public function testExportAndProcess()
+    public function testExportAndProcess(): void
     {
         $start = Carbon::now()->subMonths(1);
         $end = Carbon::now()->addMonths(1);
@@ -98,7 +98,7 @@ class MvlTest extends TestCase
     }
 
 
-    public function testCryptAndCat()
+    public function testCryptAndCat(): void
     {
         $testFilename = "build/arc_test_file_" . $this->faker->randomNumber(5, true);
         $plainText = $this->faker->text(500);
@@ -122,7 +122,7 @@ class MvlTest extends TestCase
         unlink($testFilename);
     }
 
-    public function testEncryptNoFile()
+    public function testEncryptNoFile(): void
     {
         $results = $this
             ->artisan("arc:mvl:encrypt build/no_such_file")
@@ -130,7 +130,7 @@ class MvlTest extends TestCase
         $this->assertEquals(1, $results);
     }
 
-    public function testCatNoFile()
+    public function testCatNoFile(): void
     {
         $results = $this
             ->artisan("arc:mvl:cat build/no_such_file")
@@ -138,7 +138,7 @@ class MvlTest extends TestCase
         $this->assertEquals(1, $results);
     }
 
-    public function testCatSodiumError()
+    public function testCatSodiumError(): void
     {
         $testFilename = "build/arc_test_file_" . $this->faker->randomNumber(5, true);
         file_put_contents($testFilename, "not cypher text");

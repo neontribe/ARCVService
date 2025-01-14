@@ -1,5 +1,7 @@
 <?php
 
+
+use App\User;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -11,9 +13,9 @@ class AddNullableUserIdToVoucherStatesTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::table('voucher_states', function (Blueprint $table) {
+        Schema::table('voucher_states', static function (Blueprint $table) {
             $table->integer('user_id')
                 ->unsigned()
                 ->nullable()
@@ -31,17 +33,22 @@ class AddNullableUserIdToVoucherStatesTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('voucher_states', function (Blueprint $table) {
-            $table->integer('user_id')
-                ->unsigned()
-                ->change();
+        Schema::withoutForeignKeyConstraints(static function () {
+            DB::table('voucher_states')->whereNull('user_id')->update(['user_id' => 0]);
+            DB::table('voucher_states')->whereNull('user_type')->update(['user_type' => '']);
+            Schema::table('voucher_states', static function (Blueprint $table) {
+                $table->integer('user_id')
+                    ->unsigned()
+                    ->default(1)
+                    ->change();
 
-            $table->string('user_type')
-                ->after('user_id')
-                ->default("")
-                ->change();
+                $table->string('user_type')
+                    ->after('user_id')
+                    ->default("")
+                    ->change();
+            });
         });
     }
 }

@@ -3,13 +3,13 @@
 namespace Tests\Unit\Models;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Trader;
 use App\User;
 
 class UserModelTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     protected $users;
     protected $traders;

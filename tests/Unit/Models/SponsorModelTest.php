@@ -4,14 +4,14 @@ namespace Tests\Unit\Models;
 
 use App\Evaluation;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Sponsor;
 use App\Voucher;
 use App\Centre;
 
 class SponsorModelTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     protected $sponsor;
     protected function setUp(): void

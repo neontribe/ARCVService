@@ -4,14 +4,14 @@ namespace Tests\Feature\Store;
 use App\Centre;
 use App\CentreUser;
 use App\Notifications\StorePasswordResetNotification;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Tests\StoreTestCase;
 
 class ForgotPasswordPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
 
     /**

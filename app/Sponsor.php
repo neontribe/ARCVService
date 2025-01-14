@@ -23,8 +23,6 @@ class Sponsor extends Model
 {
     use SoftDeletes;
 
-    protected $dates = ['deleted_at'];
-
     /**
      * The attributes that are mass assignable.
      *
@@ -57,6 +55,7 @@ class Sponsor extends Model
     protected $casts = [
         'can_tap' => 'boolean',
         'programme' => 'integer',
+        'deleted_at' => 'datetime',
     ];
 
     /**

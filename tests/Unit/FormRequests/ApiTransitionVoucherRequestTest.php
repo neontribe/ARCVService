@@ -5,13 +5,13 @@ namespace Tests\Unit\FormRequests;
 
 use App\Http\Requests\ApiTransitionVoucherRequest;
 use App\Trader;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\Validator;
 use Tests\StoreTestCase;
 
 class ApiTransitionVoucherRequestTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var Validator */
     private $validator;
@@ -60,85 +60,85 @@ class ApiTransitionVoucherRequestTest extends StoreTestCase
      * must return hardcoded values
      * @return array
      */
-    public function storeValidationProvider(): array
+    public static function storeValidationProvider(): array
     {
         return [
             'requestShouldSucceedWhenRequiredDataIsProvided' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'trader_id' => 1,
                     'transition' => 'collect',
                     'vouchers' => ['code1', 'code2'],
                 ]
             ],
             'requestShouldFailWhenRequiredDataIsMissing' => [
-                'passed' => false,
-                'data' => []
+                false,
+                []
             ],
             'requestShouldFailWhenTraderIsMissing' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'transition' => 'collect',
                     'vouchers' => ['code1'],
                 ]
             ],
             'requestShouldFailWhenTraderIsNull' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'trader_id' => null,
                     'transition' => 'collect',
                     'vouchers' => ['code1', 'code2'],
                 ]
             ],
             'requestShouldFailWhenTraderIsNotInDB' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'trader_id' => 2,
                     'transition' => 'collect',
                     'vouchers' => ['code1', 'code2'],
                 ]
             ],
             'requestShouldFailWhenTransitionIsMissing' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'trader_id' => 1,
                     'vouchers' => ['code1', 'code2'],
                 ]
             ],
             'requestShouldFailWhenTransitionIsNull' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'trader_id' => 1,
                     'transition' => null,
                     'vouchers' => ['code1', 'code2'],
                 ]
             ],
             'requestShouldFailWhenTransitionIsNotAString' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'trader_id' => 1,
                     'transition' => 12345,
                     'vouchers' => ['code1', 'code2'],
                 ]
             ],
             'requestShouldFailWhenVouchersIsMissing' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'trader_id' => 1,
                     'transition' => 'collect',
                 ]
             ],
             'requestShouldFailWhenVouchersIsEmpty' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'trader_id' => 1,
                     'transition' => 'collect',
                     'vouchers' => [],
                 ]
             ],
             'requestShouldFailWhenVouchersIsNotAnArray' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'trader_id' => 1,
                     'transition' => 'collect',
                     'vouchers' => "fish",
