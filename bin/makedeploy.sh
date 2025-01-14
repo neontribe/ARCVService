@@ -33,6 +33,8 @@ while [[ "$#" -gt 0 ]]; do
     esac
 done
 
+cd ..
+
 # Load nvm (adjust paths as needed for your environment)
 source ~/.nvm/nvm.sh
 source ~/.profile
@@ -99,9 +101,6 @@ EXCLUDES=(
     "--exclude=${SRCNAME}/composer.lock"
     "--exclude=${SRCNAME}/staging_rsa.enc"
     "--exclude=${SRCNAME}/webpack.mix.js"
-
-    # This deployment file
-    "--exclude=${SRCNAME}/makedeploy.sh"
 )
 
 # Only exclude tests if --tests is NOT provided
