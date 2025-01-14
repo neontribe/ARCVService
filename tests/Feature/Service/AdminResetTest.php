@@ -3,7 +3,7 @@
 namespace Tests\Feature\Service;
 
 use App\AdminUser;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Laravel\BrowserKitTesting\TestCase;
 use Mockery;
@@ -12,7 +12,7 @@ use Tests\CreatesApplication;
 
 class AdminResetTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
     use CreatesApplication;
 
     /** @var AdminUser $adminUser */

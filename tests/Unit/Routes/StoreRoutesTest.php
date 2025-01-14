@@ -8,13 +8,13 @@ use App\Centre;
 use App\CentreUser;
 use App\Registration;
 use App\Sponsor;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use URL;
 use Tests\StoreTestCase;
 
 class StoreRoutesTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var CentreUser $fmUser */
     private $fmUser;

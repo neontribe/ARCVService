@@ -8,12 +8,12 @@ use App\AdminUser;
 use App\CentreUser;
 use App\Voucher;
 use Auth;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class StateHistoryManagerTest extends TestCase
 {
 
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     protected $adminUser;
     protected $centreUser;

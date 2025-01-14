@@ -7,13 +7,13 @@ use App\Sponsor;
 use App\User;
 use App\Voucher;
 use Auth;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Tests\StoreTestCase;
 
 class AdminUpdateVoucherRequestTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     private array $rules;
 

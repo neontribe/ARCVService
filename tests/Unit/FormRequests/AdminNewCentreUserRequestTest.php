@@ -4,13 +4,13 @@ namespace Tests\Unit\FormRequests;
 
 use App\Centre;
 use App\Http\Requests\AdminNewCentreUserRequest;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Tests\StoreTestCase;
 
 class AdminNewCentreUserRequestTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     public function setUp(): void
     {
@@ -55,69 +55,69 @@ class AdminNewCentreUserRequestTest extends StoreTestCase
     {
         return [
             'requestShouldSucceedWhenRequiredDataIsProvided' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 1
                 ]
             ],
             'requestShouldFailWhenNameIsMissing' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 1
                 ]
             ],
             'requestShouldFailWhenNameIsNotString' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 1,
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 1
                 ]
             ],
             'requestShouldFailWhenEmailIsMissing' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'bobby testee',
                     'worker_centre' => 1
                 ]
             ],
             'requestShouldFailWhenEmailIsInvalid' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'bobby testee',
                     'email' => 'notAnEmail',
                     'worker_centre' => 1
                 ]
             ],
             'requestShouldFailWhenCentreIsMissing' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk'
                 ]
             ],
             'requestShouldFailWhenCentreIsInvalid' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 100
                 ]
             ],
             'requestShouldFailWhenCentreIsNotInteger' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => "not an integer"
                 ]
             ],
             'requestShouldPassWhenItHasValidAlternatives' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 1,
@@ -125,8 +125,8 @@ class AdminNewCentreUserRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldPassWhenItHasAlternativesThatAreNotValidCentres' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 1,
@@ -134,8 +134,8 @@ class AdminNewCentreUserRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWhenAlternativesAreNotIntegers' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 1,
@@ -143,8 +143,8 @@ class AdminNewCentreUserRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWhenCentreIsInAlternatives' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 1,

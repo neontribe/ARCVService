@@ -2,14 +2,14 @@
 
 namespace Tests\Browser;
 
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Dusk\Browser;
 use Tests\Browser\Pages\AdminLogin;
 use Tests\DuskTestCase;
 
 class AdminEditWorkersJSTest extends DuskTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @test */
     public function edit_workers_javascript_is_working()

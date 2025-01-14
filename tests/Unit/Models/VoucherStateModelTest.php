@@ -4,9 +4,9 @@ namespace Tests\Unit\Models;
 
 use App\AdminUser;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use SM\SMException;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use App\Voucher;
 use App\VoucherState;
@@ -17,7 +17,8 @@ use Auth;
 // We might move these out of Model tests - as they are really StateMachine tests.
 class VoucherStateModelTest extends TestCase
 {
-    use DatabaseMigrations, DatabaseTransactions;
+    use DatabaseMigrations;
+    use DatabaseTransactions;
 
     protected $marketUser;
     protected $adminUser;
@@ -111,7 +112,7 @@ class VoucherStateModelTest extends TestCase
         $route = [
             'dispatch' => 'dispatched',
             'collect' => 'recorded',
-            'confirm' =>'payment_pending',
+            'confirm' => 'payment_pending',
             'payout' => 'reimbursed',
         ];
 

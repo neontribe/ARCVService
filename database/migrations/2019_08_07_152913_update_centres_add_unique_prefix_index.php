@@ -1,5 +1,7 @@
 <?php
 
+
+
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -11,9 +13,9 @@ class UpdateCentresAddUniquePrefixIndex extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::table('centres', function (Blueprint $table) {
+        Schema::table('centres', static function (Blueprint $table) {
             $table->unique('prefix');
         });
     }
@@ -23,9 +25,9 @@ class UpdateCentresAddUniquePrefixIndex extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('centres', function (Blueprint $table) {
+        Schema::table('centres', static function (Blueprint $table) {
             $table->dropUnique('centres_prefix_unique');
         });
     }

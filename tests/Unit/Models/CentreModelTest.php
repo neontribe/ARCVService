@@ -6,13 +6,13 @@ use App\Centre;
 use App\Registration;
 use App\Sponsor;
 use App\CentreUser;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Tests\TestCase;
 
 class CentreModelTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @test */
     public function itHasExpectedAttributes()

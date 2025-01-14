@@ -10,12 +10,12 @@ use App\Sponsor;
 use App\Voucher;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\StoreTestCase;
 
 class CentreControllerTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var Centre $centre */
     protected $centre;

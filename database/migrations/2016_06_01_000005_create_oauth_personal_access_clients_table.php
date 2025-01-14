@@ -7,25 +7,21 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up(): void
     {
-        Schema::table('sponsors', static function (Blueprint $table) {
-            $table->boolean('can_tap')->default(0)->change();
+        Schema::create('oauth_personal_access_clients', static function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('client_id');
+            $table->timestamps();
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down(): void
     {
-        Schema::table('sponsors', static function (Blueprint $table) {
-            $table->boolean('can_tap')->default(1)->change();
-        });
+        Schema::dropIfExists('oauth_personal_access_clients');
     }
 };

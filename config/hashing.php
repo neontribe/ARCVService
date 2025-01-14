@@ -51,4 +51,14 @@ return [
         'verify' => true,
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Auto Rehashing
+    |--------------------------------------------------------------------------
+    | Laravel 11 will automatically rehash your user's passwords during
+    | authentication if your hashing algorithm's "workfactor" has been updated
+    | since the password was last hashed.
+    */
+    //'rehash_on_login' => false,
+    'rehash_on_login' => false,
 ];

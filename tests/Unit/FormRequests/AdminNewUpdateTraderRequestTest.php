@@ -6,13 +6,13 @@ use App\Http\Requests\AdminNewUpdateTraderRequest;
 use App\Market;
 use App\Sponsor;
 use App\Trader;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Tests\StoreTestCase;
 
 class AdminNewUpdateTraderRequestTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     private array $rules;
 

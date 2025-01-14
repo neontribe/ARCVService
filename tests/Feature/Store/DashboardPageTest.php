@@ -7,12 +7,12 @@ use App\Centre;
 use App\Registration;
 use App\CentreUser;
 use Auth;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use URL;
 
 class DashboardPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /**
      * @var Centre $centre

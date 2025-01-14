@@ -6,13 +6,13 @@ use App\Centre;
 use App\Http\Requests\AdminNewCentreRequest;
 use App\Sponsor;
 use Generator;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Tests\StoreTestCase;
 
 class AdminNewCentreRequestTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     private array $rules;
 

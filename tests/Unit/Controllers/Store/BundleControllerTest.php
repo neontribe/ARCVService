@@ -11,13 +11,13 @@ use App\Sponsor;
 use App\Voucher;
 use Auth;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Session;
 use Tests\StoreTestCase;
 
 class BundleControllerTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     protected $centre;
     protected $centreUser;

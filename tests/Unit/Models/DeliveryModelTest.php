@@ -6,12 +6,12 @@ use App\Centre;
 use App\Delivery;
 use App\Voucher;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class DeliveryModelTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var Delivery delivery */
     protected $delivery;
