@@ -14,23 +14,26 @@ Basic / 4 GB / 2 "regular" Intel vCPUs / 50Gb SSD / 4TB transfer @ $24.00 per mo
 
 Basic / 8 GB / 4 "Premium" Intel vCPUs / 160Gb SSD / 5TB transfer @ $56.00 per month
 
-### Networking
-
-The Machines each have virtual NICs with an internal IP4 address and an internet facing static IP4 address. These addresses are supplied by Digital Ocean. 
-
-Firewalling is provided via the OS firewall.
-
-Access is via keyed SSH with restricted IP.
-
 ## OS Platform
 
 Both virtual machines have [Rocky linux](https://rockylinux.org/) (v9.x) and have identical baseline configurations, regardless of underlying hardware.
 
+### Updates
+
 The machines have their packages updated monthly using the OS update facility (DNF) and so a fresh install of the current 9.x should be fine.
 
-## Software stacks
+### Command Line access
+Access is via keyed SSH with restricted IP, or in extremis, the console functionality at Digital Ocean.
 
-The staging server was hand rolled to provide the LAMP stack below. Live was a VM clone of staging. These have been live since March 2023 so may have some package drift.
+### Networking
+
+The Machines each have virtual NICs with an internal IP4 address and an internet facing static IP4 address. These addresses are supplied by Digital Ocean.
+
+Firewalling is provided via the OS firewall.
+
+## Application Software stacks
+
+The staging server was hand rolled to provide the LAMP stack below. Live was a VM clone of staging. These have been live since March 2023.
 
 ### Apache Web Server
 
@@ -42,45 +45,35 @@ Server built:   Aug  3 2024 00:00:00
 
 Apache binds multiple virtual hosts:
 
-Staging:
-- voucher-store.alexandrarose.org.uk
-- voucher-admin.alexandrarose.org.uk
+Staging: (138.68.180.157)
+- voucher-staging.alexadrarose.org.uk -> static Market App files
+- voucher-store-staging.alexandrarose.org.uk -> Laravel 
+- voucher-admin-staging.alexandrarose.org.uk -> Laravel
 
-Live:
-- voucher-store.alexandrarose.org.uk
-- voucher-admin.alexandrarose.org.uk
-
+Live: (138.68.140.141)
+- voucher.alexandrarose.org.uk -> static Market App files
+- voucher-store.alexandrarose.org.uk -> Laravel
+- voucher-admin.alexandrarose.org.uk -> Laravel
 
 The application can disambiguate requests for the web route based on the request parameters.
+
+### DNS
+
+Entries for the hostnames are in the `alexandrarose.org.uk` subdomain, managed by ARC's DNS and Email support staff.
 
 ### PHP 
 
 ```
 [neontribe@rocky9-arc-staging ~]$  php-fpm -v
-PHP 8.1.31 (fpm-fcgi) (built: Nov 19 2024 15:24:51)
+PHP 8.2.27 (cli) (built: Dec 17 2024 11:39:23) (NTS gcc x86_64)
 Copyright (c) The PHP Group
-Zend Engine v4.1.31, Copyright (c) Zend Technologies
-    with Zend OPcache v8.1.31, Copyright (c), by Zend Technologies
+Zend Engine v4.2.27, Copyright (c) Zend Technologies
+    with Zend OPcache v8.2.27, Copyright (c), by Zend Technologies
 ```
 
 PHP has the following modules enabled:
 
-|              |              |              |              |
-|--------------|--------------|--------------|--------------|
-| bcmath       | bz2          | calendar     | core         |
-| ctype        | curl         | date         | dom          |
-| exif         | fileinfo     | filter       | ftp          |
-| gd           | gettext      | hash         | iconv        |
-| intl         | json         | libxml       | mbstring     |
-| mysqli       | mysqlnd      | openssl      | pcntl        |
-| pcre         | PDO          | pdo_mysql    | pdo_sqlite   |
-| Phar         | posix        | readline     | Reflection   |
-| session      | shmop        | SimpleXML    | sockets      |
-| sodium       | SPL          | sqlite3      | standard     |
-| sync         | sysvmsg      | sysvsem      | sysvshm      |
-| tokenizer    | wddx         | xml          | xmlreader    |
-| xmlrpc       | xmlwriter    | xsl          | Zend OPcache |
-| zip          | zlib         |
+bcmath,bz2,calendar,Core,ctype,curl,date,dom,exif,fileinfo,filter,ftp,gd,gettext,hash,iconv,json,libxml,mbstring,mysql,mysqli,mysqlnd,openssl,pcntl,pcre,PDO,pdo_mysql,pdo_sqlite,Phar,posix,random,readline,Reflection,session,shmop,SimpleXML,sockets,sodium,SPL,sqlite3,standard,sysvmsg,sysvsem,sysvshm,tokenizer,xml,xmlreader,xmlwriter,xsl,Zend OPcache,zip,zlib
 
 ### MySQL
 
@@ -89,7 +82,11 @@ PHP has the following modules enabled:
 mysql  Ver 8.0.36 for Linux on x86_64 (Source distribution)
 ```
 
-### Application
+### Mail
+
+The service does not require an email service. It passes any mail it needs to send using the Laravel mandrill plugin to ARCs MailChimp account for forwarding.
+
+### Application Components
 
 The ARC service comprises 
 
@@ -98,7 +95,6 @@ The ARC service comprises
     - that installs on the user's device where it can
     - manages the redemption and reconciliation of trader's voucher transactions 
     - uses the Laravel instance as REST API to read/write data.
-
 
 * A Laravel application that serves:
 
@@ -109,11 +105,12 @@ The ARC service comprises
 
 The raw mysql files for this instance are:
 
+Staging
 ```
 [root@rocky9-arc-staging mysql]# du -sh .
 208M    .
 ```
-
+Live
 ```
 [root@Arc-live-04-2023 mysql]# du -sh .
 5.1G     .
