@@ -1,15 +1,11 @@
 <?php
+
 namespace Database\Seeders;
 
-use App\Delivery;
-use App\Sponsor;
-use App\StateToken;
-use App\Trader;
 use App\User;
 use App\Voucher;
 use App\VoucherState;
 use Carbon\Carbon;
-use Faker\Factory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
 
@@ -44,7 +40,7 @@ class LargeVouchersSeeder extends Seeder
         $user = User::where('name', 'demoseeder')->first();
         if (!$user) {
             $user = factory(User::class)->create(['name' => 'demoseeder']);
-        };
+        }
 
         Auth::login($user);
 
@@ -60,8 +56,10 @@ class LargeVouchersSeeder extends Seeder
             'currentstate' => 'recorded'
         ]);
 
-        // Make a transition definition
+        // Make some transition definitions
         $collectTransitionDef = Voucher::createTransitionDef("printed", "collect");
+        $confirmTransitionDef = Voucher::createTransitionDef("recorded", "confirm");
+        $payoutTransitionDef = Voucher::createTransitionDef("payment_pending", "payout");
 
         VoucherState::batchInsert($recordedVouchers, $date, 1, 'User', $collectTransitionDef);
 
@@ -73,10 +71,9 @@ class LargeVouchersSeeder extends Seeder
             'currentstate' => 'payment_pending'
         ]);
 
-        // Make a transition definition
-        $existingTransitionDef = Voucher::createTransitionDef("recorded", "confirm");
-
-        VoucherState::batchInsert($pendingVouchers, $date, 1, 'User', $existingTransitionDef);
+        // insert payment pending history for vouchers.
+        VoucherState::batchInsert($pendingVouchers, $date, 1, 'User', $collectTransitionDef);
+        VoucherState::batchInsert($pendingVouchers, $date, 1, 'User', $confirmTransitionDef);
 
         // Create 5000 vouchers that have a state of reimbursed
         $reimbursedVouchers = factory(Voucher::class, 5000)->state('printed')->create([
@@ -85,9 +82,10 @@ class LargeVouchersSeeder extends Seeder
             'updated_at' => $date,
             'currentstate' => 'payment_pending'
         ]);
-        // Make a transition definition
-        $reimbursedTransitionDef = Voucher::createTransitionDef("payment_pending", "payout");
-        VoucherState::batchInsert($reimbursedVouchers, $date, 1, 'User', $reimbursedTransitionDef);
+        // insert payment pending history for vouchers.
+        VoucherState::batchInsert($reimbursedVouchers, $date, 1, 'User', $collectTransitionDef);
+        VoucherState::batchInsert($reimbursedVouchers, $date, 1, 'User', $confirmTransitionDef);
+        VoucherState::batchInsert($reimbursedVouchers, $date, 1, 'User', $payoutTransitionDef);
 
         // To make the vouchers usable to test MVL export we need random created dates but batch insert forces the date
         // to be now

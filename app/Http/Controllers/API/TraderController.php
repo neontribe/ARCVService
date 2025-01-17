@@ -109,7 +109,7 @@ class TraderController extends Controller
                     // use inner join
                     ->join('voucher_states', 'vouchers.id', 'voucher_states.voucher_id')
                     ->where('voucher_states.to', 'payment_pending')
-                    ->where('voucher_states.created_at', '>=',$threeMonthsAgo->format('Y-m-d'))
+                    ->where('voucher_states.created_at', '>=', $threeMonthsAgo->format('Y-m-d'))
                     ->where('vouchers.trader_id', $trader->id)
                     // cut down the recorded
                     ->where('vouchers.currentstate', '!=', 'recorded')
@@ -217,9 +217,9 @@ class TraderController extends Controller
             $sponsorName = $voucher->sponsor->name;
             $index = $voucher->sponsor->programme;
             $programme_area_amounts[$index][$sponsorName] = isset($programme_area_amounts[$index][$sponsorName])
-                ? $programme_area_amounts[$index][$sponsorName] +1
+                ? $programme_area_amounts[$index][$sponsorName] + 1
                 : 1
-                ;
+            ;
         }
         return $programme_area_amounts;
     }
@@ -232,7 +232,7 @@ class TraderController extends Controller
     public static function getProgrammeAmounts(ArrayAccess|array $vouchers): array
     {
         $programme_amounts = [];
-        $programme_amounts_numbers =self::calculateProgrammeVoucherAmounts($vouchers);
+        $programme_amounts_numbers = self::calculateProgrammeVoucherAmounts($vouchers);
         $programme_area_amounts = self::calculateProgrammeVoucherAreas($vouchers);
         $programme_amounts['numbers'] = $programme_amounts_numbers;
         $programme_amounts['byArea'] = $programme_area_amounts;
@@ -254,8 +254,7 @@ class TraderController extends Controller
         string $title,
         string $date = null,
         string $userName = '',
-    ): string
-    {
+    ): string {
         $data = [
             'report_title' => $title,
             'user' => $userName,
@@ -308,29 +307,29 @@ class TraderController extends Controller
      * @param string $toDate
      * @return Collection
      */
-    public static function paymentHistoryBetweenDateTimes(Trader $trader, string $fromDate, string $toDate) : Collection
+    public static function paymentHistoryBetweenDateTimes(Trader $trader, string $fromDate, string $toDate): Collection
     {
-         return DB::table('vouchers')
-            ->select(['vouchers.code', 'voucher_states.created_at as payment_pending'])
-            ->addSelect([
-                'recorded' => VoucherState::select('created_at')
-                    ->whereColumn('voucher_id', 'vouchers.id')
-                    ->where('to', 'recorded')
-                    ->orderByDesc('id')
-                    ->limit(1),
-                'reimbursed' => VoucherState::select('created_at')
-                    ->whereColumn('voucher_id', 'vouchers.id')
-                    ->where('to', 'reimbursed')
-                    ->orderByDesc('id')
-                    ->limit(1),
-            ])
-             // use inner join
-            ->join('voucher_states', 'vouchers.id', 'voucher_states.voucher_id')
-            ->where('voucher_states.to', 'payment_pending')
-            ->where('vouchers.trader_id', $trader->id)
-            ->whereBetween('voucher_states.created_at', [$fromDate, $toDate])
-            ->orderByDesc('recorded')
-            ->get();
+        return DB::table('vouchers')
+           ->select(['vouchers.code', 'voucher_states.created_at as payment_pending'])
+           ->addSelect([
+               'recorded' => VoucherState::select('created_at')
+                   ->whereColumn('voucher_id', 'vouchers.id')
+                   ->where('to', 'recorded')
+                   ->orderByDesc('id')
+                   ->limit(1),
+               'reimbursed' => VoucherState::select('created_at')
+                   ->whereColumn('voucher_id', 'vouchers.id')
+                   ->where('to', 'reimbursed')
+                   ->orderByDesc('id')
+                   ->limit(1),
+           ])
+            // use inner join
+           ->join('voucher_states', 'vouchers.id', 'voucher_states.voucher_id')
+           ->where('voucher_states.to', 'payment_pending')
+           ->where('vouchers.trader_id', $trader->id)
+           ->whereBetween('voucher_states.created_at', [$fromDate, $toDate])
+           ->orderByDesc('recorded')
+           ->get();
     }
 
     /**
@@ -338,7 +337,7 @@ class TraderController extends Controller
      * @param array $histories
      * @return array
      */
-    public static function historyGroupByDate(array $histories) : array
+    public static function historyGroupByDate(array $histories): array
     {
         $data = [];
         foreach ($histories as $history) {
