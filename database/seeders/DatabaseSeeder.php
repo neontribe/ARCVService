@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -10,7 +11,7 @@ class DatabaseSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         // Pick a seed scenario
         switch (config('app.seeds')) {
@@ -27,7 +28,7 @@ class DatabaseSeeder extends Seeder
     /**
      * Standard scenario for development
      */
-    public function devSeeds()
+    public function devSeeds(): void
     {
         $this->call(SponsorsSeeder::class);
         $this->call(CentresSeeder::class);
@@ -46,7 +47,7 @@ class DatabaseSeeder extends Seeder
         $this->call(TestActiveUsersSeeder::class);
         if (getenv("LARGE_SEED")) {
             $this->call(LargeVouchersSeeder::class);
-        };
+        }
     }
 
     /**
