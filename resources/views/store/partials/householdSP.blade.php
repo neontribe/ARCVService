@@ -1,5 +1,5 @@
 @section('hoist-head')
-    <script src="{{ asset('store/js/moment-2.20.1.min.js')}}"></script>
+    <script src="{{ asset('store/js/moment-2.30.1.min.js')}}"></script>
 @endsection
 
 <div class="col fit-height">
@@ -18,7 +18,7 @@
             <tr>
                 <td class="age-col">Age</td>
                 <td class="dob-col"></td>
-                <td class="is-pri-carer-col"></td>
+                <td class="is-pri-carer-col"k></td>
                 <td class="remove-col"></td>
             </tr>
             </thead>
