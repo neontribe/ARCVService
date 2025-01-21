@@ -18,7 +18,7 @@
             <tr>
                 <td class="age-col">Age</td>
                 <td class="dob-col"></td>
-                <td class="is-pri-carer-col"k></td>
+                <td class="is-pri-carer-col"></td>
                 <td class="remove-col"></td>
             </tr>
             </thead>
