@@ -1,8 +1,8 @@
-# Check for latest versions
+# Javascript package upgrading
 
 You can use `npm` to check this:
 
-Check outpdated
+Check outdated
 
 ```bash
 npm outdated

@@ -12,13 +12,13 @@ use App\Registration;
 use App\Voucher;
 use Carbon\Carbon;
 use Faker\Factory;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class BundleModelTest extends TestCase
 {
 
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var Bundle bundle */
     protected $bundle;

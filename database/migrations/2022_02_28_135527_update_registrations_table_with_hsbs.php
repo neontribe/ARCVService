@@ -1,5 +1,7 @@
 <?php
 
+
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,11 +13,11 @@ class UpdateRegistrationsTableWithHsbs extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-      Schema::table('registrations', function (Blueprint $table) {
-        $table->timestamp('eligible_from')->nullable()->before('created_at');
-      });
+        Schema::table('registrations', static function (Blueprint $table) {
+            $table->timestamp('eligible_from')->nullable()->before('created_at');
+        });
     }
 
     /**
@@ -23,10 +25,10 @@ class UpdateRegistrationsTableWithHsbs extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-      Schema::table('registrations', function (Blueprint $table) {
-          $table->dropColumn('eligible_from');
-      });
+        Schema::table('registrations', static function (Blueprint $table) {
+            $table->dropColumn('eligible_from');
+        });
     }
 }

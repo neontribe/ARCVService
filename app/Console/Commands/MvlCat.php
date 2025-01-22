@@ -23,7 +23,7 @@ class MvlCat extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(): int
     {
         // This decryption is based on ExportMasterVoucherLog() @ app/Http/Controllers/Store/VoucherController.php.
         // Since this has been used a lot of times, maybe a generalised version should be made a function somewhere?
@@ -33,6 +33,7 @@ class MvlCat extends Command
         $this->info(sprintf("Reading logs from %s", $in_file));
         if (!file_exists($in_file)) {
             $this->error(sprintf("Log file not found: %s", $in_file));
+            return 1;
         }
 
         // Opens any given file from root folder - allows any encrypted file using SecretStreamWrapper to be decrypted.
@@ -48,6 +49,7 @@ class MvlCat extends Command
             $stream = sodium_crypto_secretstream_xchacha20poly1305_init_pull($header, SecretStreamWrapper::getKey());
         } catch (\SodiumException $e) {
             $this->error("Decryption stream could not be initialised.");
+            return 2;
         }
 
         do {
@@ -76,11 +78,13 @@ class MvlCat extends Command
             if ($eof != $lastMessage) {
                 // We met the end of the file before the last message or vice-versa. Log that error.
                 $this->error("Log read ended prematurely");
+                return 3;
             }
 
             // Stream the decrypted content.
-            echo $message;
+            $this->info($message);
         } while (!$eof); // While there is more to do, continue.
 
+        return 0;
     }
 }

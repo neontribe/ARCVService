@@ -3,13 +3,13 @@
 namespace Tests\Unit\Passport;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\User;
 use DB;
 
 class RoutesTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     protected $user;
     protected $client;

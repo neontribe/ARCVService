@@ -10,13 +10,13 @@ use App\User;
 use App\Voucher;
 use Auth;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class ApiVoucherControllerTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     protected $trader;
     protected $user;

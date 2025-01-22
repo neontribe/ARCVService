@@ -7,12 +7,12 @@ use App\Centre;
 use App\Sponsor;
 use Faker\Factory;
 use Faker\Generator;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\StoreTestCase;
 
 class CentreControllerTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var AdminUser $adminUser */
     private $adminUser;

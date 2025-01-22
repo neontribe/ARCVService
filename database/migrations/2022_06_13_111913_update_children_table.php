@@ -1,5 +1,7 @@
 <?php
 
+
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,10 +13,10 @@ class UpdateChildrenTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::table('children', function (Blueprint $table) {
-          $table->boolean('is_pri_carer')->nullable()->default(null);
+        Schema::table('children', static function (Blueprint $table) {
+            $table->boolean('is_pri_carer')->nullable()->default(null);
         });
     }
 
@@ -23,9 +25,9 @@ class UpdateChildrenTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('children', function (Blueprint $table) {
+        Schema::table('children', static function (Blueprint $table) {
             $table->dropColumn('is_pri_carer');
         });
     }

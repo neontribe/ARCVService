@@ -1,5 +1,5 @@
 @section('hoist-head')
-    <script src="{{ asset('store/js/moment-2.20.1.min.js')}}"></script>
+    <script src="{{ asset('store/js/moment-2.30.1.min.js')}}"></script>
 @endsection
 
 <div class="col fit-height">

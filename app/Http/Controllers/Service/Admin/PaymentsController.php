@@ -10,6 +10,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -71,7 +72,7 @@ class PaymentsController extends Controller
             ->whereNotNull('user_id')
             // if $paid = true will make this a NotNull, thereby getting paid things
             ->whereNull('admin_user_id', 'and', $paid)
-            ->orderBy('created_at','desc')
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return self::makePaymentDataStructure($tokens);
@@ -180,11 +181,13 @@ class PaymentsController extends Controller
         ]);
     }
 
-    /** Pay a specific payment request by link
+    /**
+     * Pay a specific payment request by link
+     * @param Request $request
      * @param $paymentUuid
-     * @return mixed
+     * @return RedirectResponse
      */
-    public function update(Request $request, $paymentUuid)
+    public function update(Request $request, $paymentUuid): RedirectResponse
     {
         // Initialise
         $vouchers = [];
@@ -230,8 +233,11 @@ class PaymentsController extends Controller
                 }
             }
             if ($success) {
+                \Log::debug("Transition successful");
                 $state_token->admin_user_id = Auth::user()->id;
                 $state_token->save();
+            } else {
+                \Log::debug("Transition failed");
             }
         }
         return redirect()->route('admin.payments.index')->with('notification', 'Vouchers Paid!');

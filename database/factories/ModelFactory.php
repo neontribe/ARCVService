@@ -294,24 +294,16 @@ $factory->define(App\Centre::class, function (Faker\Generator $faker) {
 
     $sponsors = App\Sponsor::get();
 
-    if ($sponsors->count() > 0) {
-        // Pick a random Sponsor
-        $sponsor = $sponsors[random_int(0, $sponsors->count()-1)];
-    } else {
-        // There must be at least one Sponsor
-        $sponsor = factory(App\Sponsor::class)->create();
-    }
+    $sponsor = ($sponsors->count() > 0)
+        ? $sponsors->random()
+        : factory(App\Sponsor::class)->create();
 
     $name = $faker->unique()->streetName;
+    $prefix = $faker->unique()->lexify('?????');
 
     return [
         'name' => $name,
-        // *Probably* not going to generate a duplicate...
-        // TODO : This generated a duplicate: https://travis-ci.org/neontribe/ARCVService/builds/583632956
-        // But metaphone will occasionally return 6 chars if end char is an X -> KS
-        // https://bugs.php.net/bug.php?id=60123
-        // Also might return 4 chars - but that's ok for seeds? Or do we pad?
-        'prefix' => substr(metaphone($name, 5), 0, 5),
+        'prefix' => $prefix,
         'sponsor_id' => $sponsor->id,
         // print_pref will be 'collection' by default.
         // To ensure we always have one 'individual', adding to seeder as well.

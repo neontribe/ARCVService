@@ -59,9 +59,46 @@ class MvlExport extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(): int
     {
-        $this->initSettings();
+        $from = $this->option('from');
+        if ($from) {
+            try {
+                $this->startDate = Carbon::createFromFormat('d/m/Y', $from, 'UTC');
+            } catch (InvalidFormatException $exception) {
+                // Not a date
+                $this->error("From date was not a valid date: " . $from);
+                return 1;
+            }
+        } else {
+            // We were going to start this financial year
+            // $this->startDate = $this->getStartOfThisFinancialYear()->format('d/m/Y');
+            $this->startDate = Carbon::createFromFormat('d/m/Y', "01/01/1970", 'UTC');
+        }
+
+        $to = $this->option('to');
+        if ($to) {
+            try {
+                $this->endDate = Carbon::createFromFormat('d/m/Y', $to, 'UTC');
+            } catch (InvalidFormatException $exception) {
+                // Not a date
+                $this->error("To date was not a valid date: " . $to);
+                return 2;
+            }
+        } else {
+            // We were going to use till now
+            // $this->endDate = Carbon::now()->format('d/m/Y');
+            $this->endDate = Carbon::createFromFormat('d/m/Y', "31/08/2023", 'UTC');
+        }
+
+        $chunkSize = $this->option("chunk-size");
+        if ($chunkSize) {
+            $this->chunkSize = intval($chunkSize);
+            if ($this->chunkSize === 0) {
+                $this->error("Chunk size does not seem to be a valid int: " . $chunkSize);
+                return 3;
+            }
+        }
 
         $this->info(
             sprintf(
@@ -123,50 +160,7 @@ class MvlExport extends Command
 
             $offset += $this->chunkSize;
         }
-    }
 
-    /**
-     * @return void
-     */
-    public function initSettings(): void
-    {
-        $from = $this->option('from');
-        if ($from) {
-            try {
-                $this->startDate = Carbon::createFromFormat('d/m/Y', $from, 'UTC');
-            } catch (InvalidFormatException $exception) {
-                // Not a date
-                $this->error("From date was not a valid date: " . $from);
-                exit(1);
-            }
-        } else {
-            // We were going to start this financial year
-            // $this->startDate = $this->getStartOfThisFinancialYear()->format('d/m/Y');
-            $this->startDate = Carbon::createFromFormat('d/m/Y', "01/01/1970", 'UTC');
-        }
-
-        $to = $this->option('to');
-        if ($to) {
-            try {
-                $this->endDate = Carbon::createFromFormat('d/m/Y', $to, 'UTC');
-            } catch (InvalidFormatException $exception) {
-                // Not a date
-                $this->error("To date was not a valid date: " . $to);
-                exit(1);
-            }
-        } else {
-            // We were going to use till now
-            // $this->endDate = Carbon::now()->format('d/m/Y');
-            $this->endDate = Carbon::createFromFormat('d/m/Y', "31/08/2023", 'UTC');
-        }
-
-        $chunkSize = $this->option("chunk-size");
-        if ($chunkSize) {
-            $this->chunkSize = intval($chunkSize);
-            if ($this->chunkSize === 0) {
-                $this->error("Chunk size does not seem to be a valid int: " . $chunkSize);
-            }
-        }
-
+        return 0;
     }
 }

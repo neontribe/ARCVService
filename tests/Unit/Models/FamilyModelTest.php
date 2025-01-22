@@ -7,12 +7,12 @@ use App\Child;
 use App\Centre;
 use App\Family;
 use App\Registration;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class FamilyModelTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @test */
     public function itCanHaveRegistrations()

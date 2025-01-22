@@ -148,10 +148,15 @@ class ProcessTransitionJob implements ShouldQueue
      */
     public function handle(): void
     {
+        Auth::logout();
+
         // Login if we're not
         if (!Auth::check()) {
-            Auth::login(User::find($this->runAsId));
-        }
+	        Auth::login(User::find($this->runAsId));
+	        Log::info("This session logged in [" . Auth::user()->id . "]");
+        } else {
+	        Log::info("This session already has a user [" . Auth::user()->id . "]");
+	    }
 
         if (Auth::user()->id === $this->runAsId) {
 
@@ -165,8 +170,8 @@ class ProcessTransitionJob implements ShouldQueue
             Cache::put($key, $responseData);
             $this->setOutput(['key' => $key]);
             Auth::logout();
-        } else {
-            Log::error('Incorrect user for transition job');
+	    } else {
+            Log::error("Incorrect user [" . Auth::user()->id . "] for transition job expecting [" . $this->runAsId . "]");
         }
     }
 }

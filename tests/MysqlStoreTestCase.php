@@ -2,10 +2,11 @@
 namespace Tests;
 
 use Config;
-use http\Exception;
+use Exception;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Laravel\BrowserKitTesting\TestCase as BaseTestCase;
 
-class MysqlStoreTestCase extends StoreTestCase
+class MysqlStoreTestCase extends BaseTestCase
 {
     use DatabaseMigrations;
 
@@ -13,6 +14,9 @@ class MysqlStoreTestCase extends StoreTestCase
 
     protected function setUp(): void
     {
+        if (env("PHPUNIT_SKIP_MYSQL_TEST", false)) {
+            $this->markTestSkipped('Skipped test - it needs a full mysql instance.');
+        }
         parent::setUp();
 
         // Fallback to the MySQL testing database if the default testing database doesn't use the MySQL driver

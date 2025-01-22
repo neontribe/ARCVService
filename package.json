@@ -7,27 +7,21 @@
     "watch-poll": "mix watch -- --watch-options-poll=1000",
     "hot": "mix watch --hot",
     "prod": "yarn production",
-    "production": "mix --production",
-    "prepare": "husky",
-    "commitlint": "commitlint --edit",
-    "test": "",
-    "postinstall": "husky install"
+    "production": "mix --production"
   },
   "devDependencies": {
-    "@commitlint/cli": "^18.6.1",
-    "@commitlint/config-conventional": "^18.6.2",
     "bootstrap-sass": "^3.4.3",
-    "husky": "^9.0.11",
-    "jquery": "^3.6.4",
-    "jquery-ui": "^1.13.2",
+    "jquery": "^3.7.1",
+    "jquery-ui": "^1.14.1",
     "laravel-mix": "^6.0.49",
     "resolve-url-loader": "^5.0.0",
-    "sass": "^1.62.0",
-    "sass-loader": "^13.2.2"
+    "sass": "^1.83.4",
+    "sass-loader": "^16.0.4"
   },
   "browserslist": [
     ">2%",
     "ie 11",
     "last 3 versions"
-  ]
+  ],
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }

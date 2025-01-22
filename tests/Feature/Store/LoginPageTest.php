@@ -2,7 +2,7 @@
 namespace Tests\Feature\Store;
 
 use Tests\StoreTestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Centre;
 use App\CentreUser;
 use URL;
@@ -10,7 +10,7 @@ use URL;
 class LoginPageTest extends StoreTestCase
 {
 
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     private $centreUser = null;
     private $centre = null;

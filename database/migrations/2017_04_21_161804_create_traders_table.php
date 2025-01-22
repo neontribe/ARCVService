@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateTradersTable extends Migration
 {
@@ -11,23 +11,21 @@ class CreateTradersTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('traders', function (Blueprint $table) {
+        Schema::create('traders', static function (Blueprint $table) {
             $table->increments('id');
             $table->string('name'); // name of the trader
             $table->string('pic_url')->nullable(); // some kind of pic link
             $table->integer('market_id')->unsigned()->nullable();
-                // Q: is it possible to have an unassigned trader?
-                // Q: can a trader belong to many markets
+            // Q: is it possible to have an unassigned trader?
+            // Q: can a trader belong to many markets
             $table->timestamps();
             $table->softDeletes();
         });
 
-        Schema::table('traders', function (Blueprint $table) {
-            $table->foreign('market_id')
-                ->references('id')
-                ->on('markets');
+        Schema::table('traders', static function (Blueprint $table) {
+            $table->foreign('market_id')->references('id')->on('markets');
         });
     }
 
@@ -36,12 +34,12 @@ class CreateTradersTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('traders', function (Blueprint $table) {
-            if (DB::getDriverName() !== 'sqlite') {
+        Schema::withoutForeignKeyConstraints(static function () {
+            Schema::table('traders', static function (Blueprint $table) {
                 $table->dropForeign(['market_id']);
-            }
+            });
         });
         Schema::dropIfExists('traders');
     }

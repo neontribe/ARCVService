@@ -2,7 +2,7 @@
 
 ## Pre-requisites
 - Before launching your Homestead environment, make sure you've installed VirtualBox and Vagrant
-- You can use VMWare, Parellels or Hyper-V instead of VirtualBox but this guide refers to VirtualBox unless otherwise specified
+- You can use VMWare, Parallels or Hyper-V instead of VirtualBox but this guide refers to VirtualBox unless otherwise specified
 - Read the steps below before you begin the setup process to get an idea of what you're getting into
 
 ## Installation
@@ -31,7 +31,7 @@
 	      to: /home/vagrant/code/ARCVService/public
 	      php: "add php version number"
 ```
-7. If using VirtualBox, you may need to create a `/etc/vbox/networks.conf` containing
+1. If using VirtualBox, you may need to create a `/etc/vbox/networks.conf` containing
 
 ```
 * 192.168.10.0/24
@@ -75,7 +75,7 @@ Do the steps below:
 This application relies on a queue to run a number of tasks.
 The queue workers are kep alive by supervisor
 
-Remember to set `QUEUE_DRIVER=database` in th `.env` file.
+Remember to set `QUEUE_CONNECTION=database` in th `.env` file.
 
 You should probably have something like this in 
 

@@ -6,13 +6,13 @@ use App\AdminUser;
 use App\Http\Controllers\Service\Admin\SponsorsController;
 use App\Http\Requests\AdminNewSponsorRequest;
 use App\Sponsor;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\Validator;
 use Tests\StoreTestCase;
 
 class SponsorControllerTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @var Validator */
     private $validator;
@@ -71,44 +71,44 @@ class SponsorControllerTest extends StoreTestCase
      * must return hardcoded values
      * @return array
      */
-    public function storeValidationProvider()
+    public static function storeValidationProvider(): array
     {
         return [
             'requestShouldSucceedWhenRequiredDataIsProvided' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'name' => 'Test-shire Sponsor',
                     'voucher_prefix' => 'TSTSR',
                 ]
             ],
             'requestShouldFailWhenNameIsMissing' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'voucher_prefix' => 'TSTSR',                ]
             ],
             'requestShouldFailWhenNameIsNotString' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 1,
                     'voucher_prefix' => 'TSTSR',
                 ]
             ],
             'requestShouldFailWhenVoucherPrefixIsMissing' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'Test-shire Sponsor',
                 ]
             ],
             'requestShouldFailWhenVoucherPrefixIsNotString' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'Test-shire Sponsor',
                     'voucher_prefix' => 1,
                 ]
             ],
             'requestShouldFailWhenVoucherPrefixExists' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'Test-shire Sponsor',
                     'voucher_prefix' => 'EXIST',
                 ]

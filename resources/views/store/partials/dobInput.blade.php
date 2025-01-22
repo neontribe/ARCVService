@@ -72,7 +72,7 @@
                         errorMsg = 'Invalid Date';
                     } else {
                         // try to make a date
-                        var dateObj = moment(year + '-' + month, "YYYY-M", true).startOf('month');
+                        var dateObj = moment(year + '-' + month, "YYYY-MM", false).startOf('month');
                         // basic validation
                         if (!dateObj.isValid()) {
                             switch (dateObj.invalidAt()) {

@@ -262,14 +262,14 @@ class CentreController extends Controller
             if ($reg->family->leaving_on && !$reg->family->rejoin_on) {
                 $startDate = Carbon::parse($reg->created_at);
                 $leaveDate = Carbon::parse($reg->family->leaving_on);
-                $diff = $startDate->diffInDays($leaveDate);
+                $diff = (int) $startDate->diffInDays($leaveDate);
             } elseif ($reg->family->rejoin_on) {
                 $startDate = Carbon::parse($reg->created_at);
                 $leaveDate = Carbon::parse($reg->family->leaving_on);
                 $rejoinDate = Carbon::parse($reg->family->rejoin_on);
                 $now = Carbon::now();
-                $firstCount = $startDate->diffInDays($leaveDate);
-                $secondCount = $rejoinDate->diffInDays($now);
+                $firstCount = (int) $startDate->diffInDays($leaveDate);
+                $secondCount = (int) $rejoinDate->diffInDays($now);
                 $diff = $firstCount + $secondCount;
             } else {
                 $diff = false;
@@ -469,14 +469,14 @@ class CentreController extends Controller
             if ($reg->family->leaving_on && !$reg->family->rejoin_on) {
                 $startDate = Carbon::parse($reg->created_at);
                 $leaveDate = Carbon::parse($reg->family->leaving_on);
-                $diff = $startDate->diffInDays($leaveDate);
+                $diff = (int) $startDate->diffInDays($leaveDate);
             } elseif ($reg->family->rejoin_on) {
                 $startDate = Carbon::parse($reg->created_at);
                 $leaveDate = Carbon::parse($reg->family->leaving_on);
                 $rejoinDate = Carbon::parse($reg->family->rejoin_on);
                 $now = Carbon::now();
-                $firstCount = $startDate->diffInDays($leaveDate);
-                $secondCount = $rejoinDate->diffInDays($now);
+                $firstCount = (int) $startDate->diffInDays($leaveDate);
+                $secondCount = (int) $rejoinDate->diffInDays($now);
                 $diff = $firstCount + $secondCount;
             } else {
                 $diff = false;

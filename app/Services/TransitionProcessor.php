@@ -57,6 +57,7 @@ class TransitionProcessor
         $factory = new LockFactory($store);
         $lock = $factory->createLock('transition');
 
+        \Log::debug("Acquiring lock for vouchers " . join(", ", $voucherCodes));
         if ($lock->acquire()) {
             // get and the available vouchers
             $this->vouchers = Voucher::findByCodes($voucherCodes);
@@ -103,6 +104,7 @@ class TransitionProcessor
         $transition = $this->transition;
 
         foreach ($this->vouchers as $voucher) {
+            \Log::debug("handleCollect on voucher " . $voucher->code);
             // Don't transition newer, undelivered vouchers
             if (// delivery_id is null
                 $voucher->delivery_id === null &&
@@ -111,6 +113,7 @@ class TransitionProcessor
             ) {
                 // Don't proceed, just file this voucher for a message
                 $this->responses['undelivered'][] = $voucher->code;
+                \Log::debug("Undelivered voucher " . $voucher->code);
                 continue;
             }
 
@@ -133,15 +136,18 @@ class TransitionProcessor
             if ($voucher->transitionAllowed($transition)) {
                 $voucher->trader_id = $againstTraderId;
                 $voucher->applyTransition($transition);
+                \Log::debug(sprintf("Transition %s on %s for %d", $transition, $voucher, $againstTraderId));
             } else {
                 // No? drop vouchers into a relevant bin
                 if ($voucher->trader_id === $againstTraderId) {
                     // Trader has already submitted this voucher
                     $this->responses['own_duplicate'][] = $voucher->code;
+                    \Log::debug(sprintf("Transition denied %s on %s for %d, own_duplicate", $transition, $voucher, $againstTraderId));
                 } else {
                     // Another trader has mistakenly submitted this voucher,
-                    // Or the transition isn't valid (i.e expired state)
+                    // Or the transition isn't valid (i.e. expired state)
                     $this->responses['other_duplicate'][] = $voucher->code;
+                    \Log::debug(sprintf("Transition denied %s on %s for %d, other_duplicate", $transition, $voucher, $againstTraderId));
                 }
                 return false;
             }

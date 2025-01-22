@@ -11,9 +11,9 @@ class CreateBundlesTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('bundles', function (Blueprint $table) {
+        Schema::create('bundles', static function (Blueprint $table) {
             $table->increments('id');
             $table->integer('entitlement')->unsigned(); // for recording actual entitlement when issued
             $table->integer('registration_id')->unsigned(); // FK Registrations
@@ -41,8 +41,15 @@ class CreateBundlesTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
+        Schema::withoutForeignKeyConstraints(static function () {
+            Schema::table('bundles', static function ($table) {
+                $table->dropForeign(['registration_id']);
+                $table->dropForeign(['allocating_centre_id']);
+                $table->dropForeign(['disbursing_centre_id']);
+            });
+        });
         Schema::dropIfExists('bundles');
     }
 }

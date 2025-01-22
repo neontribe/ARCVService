@@ -4,21 +4,17 @@ namespace Tests\Unit\FormRequests;
 
 use App\Centre;
 use App\Http\Requests\AdminNewCentreUserRequest;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Validation\Validator;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Validator;
 use Tests\StoreTestCase;
 
 class AdminNewCentreUserRequestTest extends StoreTestCase
 {
-    use DatabaseMigrations;
-
-    /** @var Validator */
-    private $validator;
+    use RefreshDatabase;
 
     public function setUp(): void
     {
         parent::setUp();
-        $this->validator = app()->get('validator');
         factory(Centre::class, 4)->create([]);
     }
 
@@ -26,26 +22,21 @@ class AdminNewCentreUserRequestTest extends StoreTestCase
      * General validator
      * @param $mockedRequestData
      * @param $rules
-     * @return mixed
+     * @return bool
      */
-    protected function validate($mockedRequestData, $rules)
+    protected function validate($mockedRequestData, $rules): bool
     {
-        return $this->validator
-            ->make($mockedRequestData, $rules)
-            ->passes();
+        return Validator::make($mockedRequestData, $rules)->passes();
     }
 
     /**
-     * @test
      * @dataProvider storeValidationProvider
      * @param bool $shouldPass
      * @param array $mockedRequestData
      */
-    public function testICannotSubmitInvalidValues($shouldPass, $mockedRequestData)
+    public function testICannotSubmitInvalidValues(bool $shouldPass, array $mockedRequestData): void
     {
-        $alternatives = (isset($mockedRequestData['alternative_centres']))
-            ? $mockedRequestData['alternative_centres']
-            : null;
+        $alternatives = $mockedRequestData['alternative_centres'] ?? null;
 
         // Copy the rules out of the FormRequest.
         $rules = (new AdminNewCentreUserRequest())->rules($alternatives);
@@ -58,75 +49,75 @@ class AdminNewCentreUserRequestTest extends StoreTestCase
 
     /**
      * must return hardcoded values
-     * @return array
+     * @return array[]
      */
-    public function storeValidationProvider()
+    public static function storeValidationProvider(): array
     {
         return [
             'requestShouldSucceedWhenRequiredDataIsProvided' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 1
                 ]
             ],
             'requestShouldFailWhenNameIsMissing' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 1
                 ]
             ],
             'requestShouldFailWhenNameIsNotString' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 1,
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 1
                 ]
             ],
             'requestShouldFailWhenEmailIsMissing' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'bobby testee',
                     'worker_centre' => 1
                 ]
             ],
             'requestShouldFailWhenEmailIsInvalid' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'bobby testee',
                     'email' => 'notAnEmail',
                     'worker_centre' => 1
                 ]
             ],
             'requestShouldFailWhenCentreIsMissing' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk'
                 ]
             ],
             'requestShouldFailWhenCentreIsInvalid' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 100
                 ]
             ],
             'requestShouldFailWhenCentreIsNotInteger' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => "not an integer"
                 ]
             ],
             'requestShouldPassWhenItHasValidAlternatives' => [
-                'passed' => true,
-                'data' => [
+                true,
+                [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 1,
@@ -134,8 +125,8 @@ class AdminNewCentreUserRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldPassWhenItHasAlternativesThatAreNotValidCentres' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 1,
@@ -143,8 +134,8 @@ class AdminNewCentreUserRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWhenAlternativesAreNotIntegers' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 1,
@@ -152,8 +143,8 @@ class AdminNewCentreUserRequestTest extends StoreTestCase
                 ]
             ],
             'requestShouldFailWhenCentreIsInAlternatives' => [
-                'passed' => false,
-                'data' => [
+                false,
+                [
                     'name' => 'bobby testee',
                     'email' => 'bobby@test.co.uk',
                     'worker_centre' => 1,

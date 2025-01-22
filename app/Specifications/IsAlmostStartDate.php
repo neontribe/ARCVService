@@ -8,15 +8,11 @@ use Chalcedonyt\Specification\AbstractSpecification;
 
 class IsAlmostStartDate extends AbstractSpecification
 {
+    protected Carbon $offsetDate;
 
-    /** @var Carbon $offsetDate */
-    protected $offsetDate;
+    private int $yearsAhead;
 
-    /** @var int $yearsAhead */
-    private $yearsAhead;
-
-    /** @var int $offsetMonth */
-    private $offsetMonth;
+    private int $offsetMonth;
 
     /**
      * IsAlmostStartDate constructor.
@@ -38,15 +34,14 @@ class IsAlmostStartDate extends AbstractSpecification
      * @param Child $candidate
      * @return  Boolean
      */
-    public function isSatisfiedBy(Child $candidate)
+    public function isSatisfiedBy(Child $candidate): bool
     {
-        /** @var Carbon $targetDate */
         // Generate the date of the event in question
         $targetDate = $candidate->calcFutureMonthYear($this->yearsAhead, $this->offsetMonth);
 
         // Return (bool) if it's not happened yet AND If that date will happen this OR next month
         return $targetDate->isFuture() &&
             // If it's *this* month or *next* month, not *last* month
-            $this->offsetDate->diffInMonths($targetDate) <=1;
+            (int) $this->offsetDate->diffInMonths($targetDate) <= 1;
     }
 }

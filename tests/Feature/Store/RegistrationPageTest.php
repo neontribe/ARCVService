@@ -8,12 +8,12 @@ use App\Sponsor;
 use App\Http\Controllers\Service\Admin\SponsorsController;
 use InvalidArgumentException;
 use Tests\StoreTestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use URL;
 
 class RegistrationPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /**
      * @var Centre $centre

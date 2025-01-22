@@ -27,8 +27,6 @@ class CentreUser extends Authenticatable
     use Notifiable;
     use SoftDeletes;
 
-    protected $dates = ['deleted_at'];
-
     protected $guard = 'store';
 
     /**
@@ -65,6 +63,7 @@ class CentreUser extends Authenticatable
      */
     protected $casts = [
         'downloader' => 'boolean',
+        'deleted_at' => 'datetime',
     ];
 
     /**

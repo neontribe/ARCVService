@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Services\TextFormatter;
 use DateTime;
 use DB;
 use Exception;
@@ -12,8 +11,8 @@ use Illuminate\Support\Facades\Storage;
 use Log;
 use PDO;
 use ZipStream\Exception\OverflowException;
-use ZipStream\Option\Archive;
 use ZipStream\ZipStream;
+use App\Wrappers\SecretStreamWrapper;
 
 class CreateMasterVoucherLogReport extends Command
 {
@@ -80,7 +79,7 @@ class CreateMasterVoucherLogReport extends Command
      * The date that we care about for last year's data.
      * @var string $cutOffDate
      */
-    private string $cutOffDate;
+    private string $cutOffDate = '2023-09-01';
 
     /**
      * @var ZipStream $za;
@@ -90,7 +89,7 @@ class CreateMasterVoucherLogReport extends Command
     private $zaOutput;
 
     // Excel can't deal with large CSVs
-    const ROW_LIMIT = 900000;
+    const ROW_LIMIT = 950000;
 
     /**
      * The report's query template
@@ -195,7 +194,7 @@ EOD;
         // Enable the secret stream protocol (ssw://). See SecretStreamWrapper for more information.
         // Registering here guarantees availability but there's probably a more Laravel-y place to put this.
         if (!in_array("ssw", stream_get_wrappers())) {
-            stream_wrapper_register("ssw", "App\Wrappers\SecretStreamWrapper");
+            stream_wrapper_register("ssw", SecretStreamWrapper::class);
         }
 
         $this->archiveName = config('arc.mvl_filename');
@@ -208,7 +207,7 @@ EOD;
     {
         $thisYearsApril = Carbon::parse('april')->startOfMonth();
         $years = ($thisYearsApril->isPast()) ? 2 : 1;
-        $this->cutOffDate = $thisYearsApril->subYearsNoOverflow($years)->format('Y-m-d');
+       // $this->cutOffDate = $thisYearsApril->subYearsNoOverflow($years)->format('Y-m-d');
 
         // Set the disk
         $this->disk = ($this->option('plain'))
@@ -225,19 +224,21 @@ EOD;
             }
 
             // Stream directly to what is either a file or a file wrapped in a secret stream.
-            $options = new Archive();
             $this->zaOutput = fopen($path, 'w');
-            $options->setOutputStream($this->zaOutput);
-            $this->za = new ZipStream(null, $options);
+            $this->za = new ZipStream(
+                outputStream: $this->zaOutput,
+                sendHttpHeaders: false,
+                outputName: null
+            );
         }
     }
 
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $this->initSettings();
 
@@ -299,7 +300,7 @@ EOD;
                 } catch (OverflowException $e) {
                     Log::error($e->getMessage());
                     Log::error("Overflow when attempting to finish a significantly large Zip file");
-                    exit(1);
+                    return 1;
                 }
 
                 // Manually close our stream. This is especially important when the stream is encrypted, as a little
@@ -308,7 +309,7 @@ EOD;
             }
         }
         // Set 0, above for expected outcomes
-        exit(0);
+        return 0;
     }
 
     /**
@@ -411,17 +412,16 @@ EOD;
             // are all the fields we care about null?
             $this->containsOnlyNull($voucher) ||
             // is this date filled?
-            !is_null($voucher['Void Voucher Date']);
-//            ||
-//            // is this date dilled *and* less than the cut-off date
-//            (!is_null($voucher['Reimbursed Date']) &&
-//                strtotime(
-//                    DateTime::createFromFormat(
-//                        'd/m/Y',
-//                        $voucher['Reimbursed Date']
-//                    )->format('Y-m-d')
-//                ) < strtotime($this->cutOffDate)
-//            );
+            !is_null($voucher['Void Voucher Date']) ||
+            // is this date filled *and* less than the cut-off date
+            (!is_null($voucher['Reimbursed Date']) &&
+                strtotime(
+                    DateTime::createFromFormat(
+                        'd/m/Y',
+                        $voucher['Reimbursed Date']
+                    )->format('Y-m-d')
+                ) < strtotime($this->cutOffDate)
+            );
     }
 
     /**

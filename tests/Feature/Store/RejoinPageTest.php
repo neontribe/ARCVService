@@ -9,12 +9,12 @@ use App\CentreUser;
 use App\Family;
 use App\Registration;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use URL;
 
 class RejoinPageTest extends StoreTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /**
      * @var Centre $centre

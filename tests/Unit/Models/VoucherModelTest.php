@@ -11,13 +11,13 @@ use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use SM\StateMachine\StateMachine;
 use Tests\TestCase;
 
 class VoucherModelTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     protected $voucher;
     protected function setUp(): void

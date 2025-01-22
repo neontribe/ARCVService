@@ -5,13 +5,13 @@ namespace Tests\Unit\Models;
 use App\Child;
 use App\Family;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ChildModelTest extends TestCase
 {
 
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     /** @test */
     public function itHasExpectedAttributes()

@@ -21,7 +21,9 @@ class Delivery extends Model
      * @var array
      */
     protected $fillable = [
-        'range', 'centre_id', 'dispatched_at'
+        'range',
+        'centre_id',
+        'dispatched_at'
     ];
 
     /**
@@ -29,14 +31,14 @@ class Delivery extends Model
      *
      * @var array
      */
-    protected $dates = [
-        'dispatched_at',
+    protected $casts = [
+        'dispatched_at' => 'datetime',
     ];
 
     /**
      * @return HasMany
      */
-    public function vouchers()
+    public function vouchers(): HasMany
     {
         return $this->hasMany(Voucher::class);
     }
@@ -44,7 +46,7 @@ class Delivery extends Model
     /**
      * @return BelongsTo
      */
-    public function centre()
+    public function centre(): BelongsTo
     {
         return $this->belongsTo(Centre::class);
     }
@@ -55,11 +57,11 @@ class Delivery extends Model
      * @param Builder $query
      * @param string $direction
      */
-    public function scopeOrderByCentre(Builder $query, $direction = 'asc')
+    public function scopeOrderByCentre(Builder $query, string $direction = 'asc'): void
     {
-        $query->orderBySub(
+        $query->orderBy(
             Centre::select('name')
-                ->whereRaw('deliveries.centre_id = centres.id'),
+                ->whereColumn('centres.id', 'deliveries.centre_id'),
             $direction
         );
     }
@@ -70,7 +72,7 @@ class Delivery extends Model
      * @param Builder $query
      * @param string $direction
      */
-    public function scopeOrderByRange(Builder $query, $direction = 'asc')
+    public function scopeOrderByRange(Builder $query, string $direction = 'asc'): void
     {
         $query->orderBy('range', $direction);
     }
@@ -81,7 +83,7 @@ class Delivery extends Model
      * @param Builder $query
      * @param string $direction
      */
-    public function scopeOrderByDispatchDate(Builder $query, $direction = 'asc')
+    public function scopeOrderByDispatchDate(Builder $query, string $direction = 'asc'): void
     {
         $query->orderBy('dispatched_at', $direction);
     }
@@ -91,26 +93,24 @@ class Delivery extends Model
      *
      * @param Builder $query
      * @param array $sort
-     * @return Builder
      */
-    public function scopeOrderByField(Builder $query, array $sort)
+    public function scopeOrderByField(Builder $query, array $sort): void
     {
+        $direction = $sort['direction'] ?? 'asc';
         switch ($sort['orderBy']) {
             case 'centre':
-                $query->orderByCentre($sort['direction']);
+                $query->orderByCentre($direction);
                 break;
             case 'range':
-                $query->orderByRange($sort['direction']);
+                $query->orderByRange($direction);
                 break;
             case 'dispatchDate':
-                $query->orderByDispatchDate($sort['direction']);
+                $query->orderByDispatchDate($direction);
                 break;
             default:
                 // default to date order ascending, so new things are on the BOTTOM.
                 $query->orderByDispatchDate('asc');
                 break;
-
         }
-        return $query;
     }
 }

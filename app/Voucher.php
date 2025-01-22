@@ -18,7 +18,7 @@ use Throwable;
 
 /**
  * @mixin Eloquent
- * @property integer id
+ * @property integer $id
  * @property string $code
  * @property Sponsor $sponsor
  * @property Trader $trader
@@ -29,6 +29,7 @@ use Throwable;
  * @property VoucherState $recordedOn
  * @property VoucherState $reimbursedOn
  */
+
 class Voucher extends Model
 {
     use Statable;
@@ -37,11 +38,8 @@ class Voucher extends Model
 
     use SoftDeletes;
 
-    // import soft delete.
-    protected $dates = ['deleted_at'];
-
-    const HISTORY_MODEL = 'App\VoucherState'; // the related model to store the history
-    const SM_CONFIG = 'Voucher'; // the SM graph to use
+    public const HISTORY_MODEL = 'App\VoucherState'; // the related model to store the history
+    public const SM_CONFIG = 'Voucher'; // the SM graph to use
 
     /**
      * The attributes that are mass assignable.
@@ -65,6 +63,7 @@ class Voucher extends Model
         'sponsor_id' => 'int',
         'trader_id' => 'int',
         'bundle_id' => 'int',
+        'deleted_at' => 'datetime',
     ];
 
     /**
@@ -80,7 +79,7 @@ class Voucher extends Model
      *
      * @var array
      */
-    public static $rules = [
+    public static array $rules = [
         // Might need to add a 'sometimes' if any required fields can be absent from requests.
         'trader_id' => ['numeric', 'exists:traders,id'],
         // My regex might be pants... but until we get the edit form spun up who cares?
@@ -96,12 +95,11 @@ class Voucher extends Model
      * @param array $codes
      * @return array
      */
-    public static function cleanCodes(array $codes)
+    public static function cleanCodes(array $codes): array
     {
         return array_map(
-            function ($code) {
-                $badChars = [" ",];
-                return str_replace($badChars, "", $code);
+            static function ($code) {
+                return str_replace(" ", "", $code);
             },
             $codes
         );
@@ -127,8 +125,8 @@ class Voucher extends Model
             $endMatch = self::splitShortcodeNumeric($end);
 
             // Grab integer versions of each thing.
-            $startVal = intval($startMatch['number']);
-            $endVal = intval($endMatch['number']);
+            $startVal = (int)$startMatch['number'];
+            $endVal = (int)$endMatch['number'];
 
             // Generate codes!
             for ($val = $startVal + 1; $val <= $endVal; $val++) {
@@ -136,11 +134,11 @@ class Voucher extends Model
                 // We appear to be producing codes that are "0" str_pad on the left, to variable characters
                 // We'll use the $start's numeric length as the value to pad to.
                 $voucherCodes[] = $startMatch['shortcode'] . str_pad(
-                        $val,
-                        strlen($startMatch['number']),
-                        "0",
-                        STR_PAD_LEFT
-                    );
+                    $val,
+                    strlen($startMatch['number']),
+                    "0",
+                    STR_PAD_LEFT
+                );
             }
         }
         return $voucherCodes;
@@ -160,7 +158,8 @@ class Voucher extends Model
         /** @var object $range */
         foreach ($ranges as $range) {
             // Are Start and End both in the range?
-            if ($start <= $end &&           // query is properly formed
+            if (
+                $start <= $end &&           // query is properly formed
                 $start >= $range->start &&  // our start is gte range start
                 $end <= $range->end         // our end is lte range end
             ) {
@@ -187,12 +186,13 @@ class Voucher extends Model
 
         // Slightly complicated way of making an object that represents the range.
         // Destructure the output of into an assoc array
-        ['shortcode' => $rangeDef['shortcode'], 'number' => $rangeDef['start']] = self::splitShortcodeNumeric($startCode);
+        ['shortcode' => $rangeDef['shortcode'],
+            'number' => $rangeDef['start']] = self::splitShortcodeNumeric($startCode);
         ['number' => $rangeDef['end']] = self::splitShortcodeNumeric($endCode);
 
         // Modify the start/end numbers to integers
-        $rangeDef["start"] = intval($rangeDef["start"]);
-        $rangeDef["end"] = intval($rangeDef["end"]);
+        $rangeDef["start"] = (int)$rangeDef["start"];
+        $rangeDef["end"] = (int)$rangeDef["end"];
 
         return (object)$rangeDef;
     }
@@ -203,11 +203,11 @@ class Voucher extends Model
      * @param $rangeDef object { 'start', 'end', 'shortcode', 'sponsor_id' }
      * @return bool
      */
-    public static function rangeIsDeliverable($rangeDef)
+    public static function rangeIsDeliverable(object $rangeDef): bool
     {
         $freeRangesArray = self::getDeliverableVoucherRangesByShortCode($rangeDef->shortcode);
         $containingRange = self::getContainingRange($rangeDef->start, $rangeDef->end, $freeRangesArray);
-        return (!is_null($containingRange) && is_object($containingRange));
+        return is_object($containingRange);
     }
 
     /**
@@ -216,19 +216,17 @@ class Voucher extends Model
      * @param string $code
      * @return array|bool
      */
-    public static function splitShortcodeNumeric(string $code)
+    public static function splitShortcodeNumeric(string $code): bool|array
     {
         // Clean the code
         $clean = self::cleanCodes([$code]);
         $code = array_shift($clean);
         // Init matches
         $matches = [];
-        // split into named matche and return
-        if (preg_match("/^(?<shortcode>\D*)(?<number>\d+)$/", $code, $matches) == 1) {
-            return $matches;
-        } else {
-            return false;
-        }
+        // split into named matches and return
+        return preg_match("/^(?<shortcode>\D*)(?<number>\d+)$/", $code, $matches) === 1
+            ? $matches
+            : false;
     }
 
     /**
@@ -237,13 +235,13 @@ class Voucher extends Model
      * @param string $shortcode
      * @return array
      */
-    public static function getDeliverableVoucherRangesByShortCode(string $shortcode)
+    public static function getDeliverableVoucherRangesByShortCode(string $shortcode): array
     {
         try {
-            return DB::transaction(function () use ($shortcode) {
+            return DB::transaction(static function () use ($shortcode) {
 
                 // Set some important variables for the query. breaks SQLlite.
-                DB::statement(DB::raw('SET @t5initialId=0, @t5start=0, @t5previous=0, @t4initialId=0, @t4start=0, @t4previous=0;'));
+                DB::statement('SET @t5initialId=0, @t5start=0, @t5previous=0, @t4initialId=0, @t4start=0, @t4previous=0;');
 
                 /* This seems to be the fastest way to find the start and end of each "range" of vouchers;
                  * in this case specified by vouchers that are not in deliveries.
@@ -264,7 +262,7 @@ class Voucher extends Model
                         t1.*,
                         v1.code as initial_code,
                         v2.code as final_code,
-                        (t1.end - t1.start) + 1 as size 
+                        (t1.end - t1.start) + 1 as size
                     FROM (
                         SELECT
                             # Variables! allows us to compare the _actual_ start ranges of vouchers.
@@ -314,7 +312,7 @@ class Voucher extends Model
                         ON initial_id = v1.id
 
                     LEFT JOIN vouchers as v2
-                        ON final_id = v2.id  
+                        ON final_id = v2.id
                         
                     ORDER BY t1.start
                     "
@@ -532,10 +530,10 @@ class Voucher extends Model
     /**
      * Prepare a date for array / JSON serialization.
      *
-     * @param \DateTimeInterface $date
+     * @param DateTimeInterface $date
      * @return string
      */
-    protected function serializeDate(DateTimeInterface $date)
+    protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format('Y-m-d H:i:s');
     }

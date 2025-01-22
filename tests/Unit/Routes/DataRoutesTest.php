@@ -8,12 +8,12 @@ use App\Trader;
 use App\User;
 use App\Voucher;
 use Config;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class DataRoutesTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     protected $vouchers;
     protected $users;
