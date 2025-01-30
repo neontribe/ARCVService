@@ -4,17 +4,31 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Log;
+use Illuminate\Support\Facades\Schema;
 
 class ArchiveVouchers extends Command
 {
-    protected $date = "2023-09-01";
+    protected array $tableData = [];
+
+    protected string $date = "2023-09-01";
     protected $signature = 'arc:archiveVouchers';
     protected $description = 'archive vouchers and their histories';
 
     public function handle(): void
     {
+        $this->tableData['vouchers'] = [
+            'keys' => Schema::getForeignKeys('vouchers'),
+            'indexes' => Schema::getIndexes('vouchers'),
+        ];
+
+        $this->tableData['voucher_states'] = [
+            'keys' => Schema::getForeignKeys('voucher_states'),
+            'indexes' => Schema::getIndexes('voucher_states'),
+        ];
+
         $this->info('Starting the archive process.');
 
         $this->info('Selecting vouchers for archiving and storing IDs in a table...');
@@ -35,15 +49,23 @@ class ArchiveVouchers extends Command
                 JOIN archive_voucher_ids ON voucher_states.voucher_id = archive_voucher_ids.voucher_id
         ");
 
+        $this->info('Removing indexes');
+        DB::statement("SET FOREIGN_KEY_CHECKS=0");
+        $this->dropIndexes('voucher_states');
+        $this->dropIndexes('vouchers');
+
         $this->info('Deleting archived data from original tables...');
-        $this->dropIndexes();
         DB::statement("
             DELETE vouchers, voucher_states FROM vouchers JOIN voucher_states
                 ON voucher_states.voucher_id = vouchers.id
                 WHERE vouchers.updated_at < '$this->date'
                 AND vouchers.currentstate IN ('reimbursed', 'retired', 'voided', 'expired')
             ");
-        $this->makeIndexes();
+
+        $this->info('Rebuilding indexes');
+        $this->makeIndexes('vouchers');
+        $this->makeIndexes('voucher_states');
+        DB::statement("SET FOREIGN_KEY_CHECKS=1");
 
         $this->info('Optimizing original tables...');
         DB::statement('OPTIMIZE TABLE vouchers');
@@ -82,9 +104,7 @@ class ArchiveVouchers extends Command
         // Populate the temporary table in batches
         $query->orderBy('id')->chunk($batchSize, function ($vouchers) use (&$processedVouchers, $totalVouchers) {
             $ids = $vouchers->pluck('id')->toArray();
-            DB::table('archive_voucher_ids')->insert(
-                array_map(fn($id) => ['voucher_id' => $id], $ids)
-            );
+            DB::table('archive_voucher_ids')->insert(array_map(static fn($id) => ['voucher_id' => $id], $ids));
 
             // Update the progress counter
             $processedVouchers += count($vouchers);
@@ -100,49 +120,49 @@ class ArchiveVouchers extends Command
     private function getSelectionCriteria(): Builder
     {
         // Define and return the query for selecting vouchers to archive
-        return DB::table('vouchers')
-            ->whereIn('currentstate', ['reimbursed', 'retired', 'voided', 'expired'])
-            ->where('updated_at', '<', $this->date);
+        return DB::table('vouchers')->whereIn('currentstate',
+            ['reimbursed', 'retired', 'voided', 'expired'])->where('updated_at', '<', $this->date);
     }
 
-    private function dropIndexes(): void
+    private function dropIndexes($tableName): void
     {
-        DB::statement("SET FOREIGN_KEY_CHECKS=0");
-        $dropIndexStatements = [
-            "DROP INDEX voucher_states_created_at_index ON homestead.voucher_states",
-            "DROP INDEX voucher_states_to_voucher_id_index ON homestead.voucher_states",
-            "DROP INDEX voucher_states_voucher_id_index ON homestead.voucher_states",
-            "DROP INDEX vouchers_code_index ON homestead.vouchers",
-            "DROP INDEX vouchers_currentstate_index ON homestead.vouchers",
-        ];
-
-        foreach ($dropIndexStatements as $statement) {
-            try {
-                DB::statement($statement);
-            } catch (\Exception $e) {
-                Log::info("Could not drop index: " . $e->getMessage());
+        Schema::table($tableName, function (Blueprint $table) use ($tableName) {
+            $foreignKeys = $this->tableData[$tableName]['keys'];
+            foreach ($foreignKeys as $fk) {
+                $table->dropForeign($fk['name']);
             }
-        }
+
+            $indexes = $this->tableData[$tableName]['indexes'];
+            foreach ($indexes as $index) {
+                if (!$index['primary']) {
+                    $table->dropIndex($index['name']);
+                }
+            }
+        });
     }
 
-    private function makeIndexes(): void
+    private function makeIndexes($tableName): void
     {
-        $createIndexStatements = [
-            "CREATE INDEX voucher_states_created_at_index ON homestead.voucher_states (created_at)",
-            "CREATE INDEX voucher_states_to_voucher_id_index ON homestead.voucher_states (`to`, voucher_id)",
-            "CREATE INDEX voucher_states_voucher_id_index ON homestead.voucher_states (voucher_id)",
-            "CREATE INDEX vouchers_code_index ON homestead.vouchers (code(10))",
-            "CREATE INDEX vouchers_currentstate_index ON homestead.vouchers (currentstate)",
-        ];
-
-        foreach ($createIndexStatements as $statement) {
-            try {
-                DB::statement($statement);
-            } catch (\Exception $e) {
-                Log::info("Index creation failed: " . $e->getMessage());
+        Schema::table($tableName, function (Blueprint $table) use ($tableName) {
+            // Re-add foreign keys
+            $foreignKeys = $this->tableData[$tableName]['keys'];
+            $keysFound = Arr::pluck(Schema::getForeignKeys($tableName), 'name');
+            foreach ($foreignKeys as $fk) {
+                if (!array_key_exists($fk['name'], $keysFound)) {
+                    $table->foreign($fk['columns'],
+                        $fk['name'])->references($fk['foreign_columns'])->on($fk['foreign_table']);
+                }
             }
-        }
 
-        DB::statement("SET FOREIGN_KEY_CHECKS=1");
+            $indexes = $this->tableData[$tableName]["indexes"];
+            $indexesFound = Arr::pluck(Schema::getIndexes($tableName), 'name');
+
+            // Re-add indexes
+            foreach ($indexes as $index) {
+                if (!array_key_exists($index['name'], $indexesFound) && !$index['primary']) {
+                    $table->index($index['columns'], $index['name']);
+                }
+            }
+        });
     }
 }
