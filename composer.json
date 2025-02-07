@@ -44,18 +44,18 @@
     "ext-simplexml": "*"
   },
   "require-dev": {
-    "barryvdh/laravel-ide-helper": "v3.5.3",
-    "friendsofphp/php-cs-fixer": "3.67.0",
-    "larastan/larastan": "2.9.12",
-    "laravel/browser-kit-testing": "7.2.2",
-    "laravel/dusk": "8.2.12",
+    "barryvdh/laravel-ide-helper": "v3.5.4",
+    "friendsofphp/php-cs-fixer": "3.68.5",
+    "larastan/larastan": "v2.9.13",
+    "laravel/browser-kit-testing": "7.2.3",
+    "laravel/dusk": "8.2.14",
     "mockery/mockery": "1.6.12",
     "nunomaduro/collision": "v8.5.0",
     "phpmd/phpmd": "2.15.0",
-    "phpstan/phpstan": "1.12.15",
-    "phpunit/phpunit": "10.5.40",
+    "phpstan/phpstan": "1.12.16",
+    "phpunit/phpunit": "10.5.44",
     "spatie/laravel-ignition": "2.9.0",
-    "squizlabs/php_codesniffer": "3.11.2"
+    "squizlabs/php_codesniffer": "3.11.3"
   },
   "autoload": {
     "psr-4": {
