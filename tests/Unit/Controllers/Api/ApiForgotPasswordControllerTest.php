@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
-class ApiForgotPasswordControllerTeat extends TestCase
+class ApiForgotPasswordControllerTest extends TestCase
 {
     use RefreshDatabase;
 
