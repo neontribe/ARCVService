@@ -17,6 +17,11 @@
                    autocorrect="off"
                    spellcheck="false"
             ><br></br>
+            @includeWhen(
+                $errors->has('pri_carer'),
+                'store.partials.errors',
+                ['error_array' => ['This field is required'], 'id' => 'carer-alert']
+            )
                 <label for="pri_carer_ethnicity">Main carer's ethnic background (optional)</label><br>
                 <select name="pri_carer_ethnicity[{{ $pri_carer->id }}]" id="pri_carer_ethnicity">
                     <option value=0>Please select</option>
@@ -59,12 +64,18 @@
                    spellcheck="false"
                    value="{{ old('pri_carer') }}"
             ><br></br>
+            @includeWhen(
+                $errors->has('pri_carer'),
+                'store.partials.errors',
+                ['error_array' => ['This field is required'], 'id' => 'carer-alert']
+            )
                 <label for="pri_carer_ethnicity">Main carer's ethnic background (optional)</label><br>
                 <select name="pri_carer_ethnicity" id="pri_carer_ethnicity">
                     <option value=0>Please select</option>
                     @foreach (config('arc.ethnicity_desc') as $index => $ethnicity)
-                        <option value="{{ $index }}">{{ $ethnicity }}
-                        </option>
+                        <option value="{{ $index }}"
+                                @selected(old('pri_carer_ethnicity') === $index)
+                        >{{ $ethnicity }}</option>
                     @endforeach
                 </select><br></br>
                 <label for="pri_carer_language">Carer's main language (optional)</label><br>
@@ -80,11 +91,6 @@
                 ><br></br>
         @endif
     </div>
-    @includeWhen(
-        $errors->has('pri_carer'),
-        'store.partials.errors',
-        ['error_array' => ['This field is required'], 'id' => 'carer-alert']
-    )
     <div>
         <label for="carer_adder_input">Voucher collectors (optional)</label>
         <div id="carer_adder" class="small-button-container">

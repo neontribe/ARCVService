@@ -294,6 +294,7 @@ strong {
 }
 
 input[type="text"].invalid,
+select.invalid,
 .invalid + label:before {
     border: 2px solid #d2232a;
 }

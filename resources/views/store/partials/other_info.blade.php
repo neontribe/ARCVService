@@ -57,14 +57,16 @@
         <label for="eligibility-hsbs">
             Are you receiving Healthy Start or Best Start?
         </label><br>
-        <select name="eligibility-hsbs" id="eligibility-hsbs">
-            <option value=0>Please select</option>
+        <select name="eligibility-hsbs"
+                id="eligibility-hsbs"
+                class="@if($errors->has('eligibility-hsbs')) invalid @endif"
+            >
+            <option value=0
+                    @selected(!isset($registration) || old('eligibility-hsbs') === 0)
+            >Please select</option>
             @foreach (config('arc.reg_eligibilities_hsbs') as $index => $reg_eligibility)
                 <option value="{{ $reg_eligibility }}"
-                    @selected(
-                        (!isset($registration) && $index === 0) ||
-                        (isset($registration) && $registration->eligibility_hsbs === $reg_eligibility)
-                        )
+                    @selected(old('eligibility-hsbs') === $reg_eligibility || (isset($registration) && $registration->eligibility_hsbs === $reg_eligibility))
                 >@lang('arc.reg_eligibilities_hsbs.' . $reg_eligibility)
                 </option>
             @endforeach
@@ -73,28 +75,40 @@
             <br><mark>Please check if status has changed to receiving.</mark></br>
         @endif
     </div>
+    @includeWhen($errors->has('eligibility-hsbs'),
+    'store.partials.errors',
+    ['error_array' => ['Please choose an option'],'id' => 'nrpf-alert']
+)
     <div>
         <label for="eligibility-nrpf">
             No recourse to public funds (NRPF) family?
         </label><br>
-        <select name="eligibility-nrpf" id="eligibility-nrpf">
-            <option value=0>Please select</option>
+
+        <select name="eligibility-nrpf"
+                id="eligibility-nrpf"
+                class="@if($errors->has('eligibility-nrpf')) invalid @endif"
+            >
+            <option value=0
+                    @selected(!isset($registration) || old('eligibility-nrpf') === 0)
+            >Please select</option>
             @foreach (config('arc.reg_eligibilities_nrpf') as $index => $reg_eligibility)
                 <option value="{{ $reg_eligibility }}"
-                    @selected(
-                        (!isset($registration) && $index === 1) ||
-                        (isset($registration) && $registration->eligibility_nrpf === $reg_eligibility)
+                    @selected(old('eligibility-nrpf') === $reg_eligibility || (isset($registration) && $registration->eligibility_nrpf === $reg_eligibility))
                         )
                 >@lang('arc.reg_eligibilities_nrpf.' . $reg_eligibility)
                 </option>
             @endforeach
         </select>
     </div>
-    {{-- This section should only exist in edit rather than add new --}}
+    @includeWhen($errors->has('eligibility-nrpf'),
+        'store.partials.errors',
+        ['error_array' => ['Please choose an option'],'id' => 'nrpf-alert']
+    )
+    {{-- This section should only exist in `edit` rather than `add new` --}}
     @if (isset($noticeReasons))
         @includeWhen(!empty($noticeReasons), 'store.partials.notice_box', ['noticeReasons' => $noticeReasons])
     @endif
-    {{-- This section should only exist in add new rather than existing records --}}
+    {{-- This section should only exist in `add new` rather than existing records --}}
     @if (!isset($family))
         <div>
             <div class="user-control">
@@ -148,3 +162,4 @@
         @endif
     @endif
 </div>
+{{  dump(json_encode(session()->get('_old_input', []))) }}
