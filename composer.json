@@ -48,7 +48,7 @@
     "friendsofphp/php-cs-fixer": "3.68.5",
     "larastan/larastan": "v3.0.4",
     "laravel/browser-kit-testing": "7.2.3",
-    "laravel/dusk": "8.2.14",
+    "laravel/dusk": "8.3.0",
     "mockery/mockery": "1.6.12",
     "nunomaduro/collision": "v8.5.0",
     "phpmd/phpmd": "2.15.0",
