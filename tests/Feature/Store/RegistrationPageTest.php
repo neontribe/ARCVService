@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Feature\Store;
 
 use App\Centre;
@@ -102,7 +103,8 @@ class RegistrationPageTest extends StoreTestCase
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
-            ->seeElement('#eligibility-hsbs>option[value="healthy-start-applying"][selected]')
+            ->seeElement('#eligibility-hsbs>option[value="0"][selected]')
+            ->seeElement('#eligibility-hsbs>option[value="healthy-start-applying"]')
             ->seeElement('#eligibility-hsbs>option[value="healthy-start-receiving"]')
             ->seeElement('#eligibility-hsbs>option[value="healthy-start-receiving-not-eligible-or-rejected"]')
             ->seeElement('#eligibility-nrpf>option[value="yes"]')
@@ -164,6 +166,8 @@ class RegistrationPageTest extends StoreTestCase
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->type('Test Carer', 'pri_carer')
+            ->select('healthy-start-applying', 'eligibility-hsbs')
+            ->select('no', 'eligibility-nrpf')
             ->check('consent')
             ->press('Save Family')
             ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
@@ -223,12 +227,13 @@ class RegistrationPageTest extends StoreTestCase
     /** @test */
     public function selectingReceivingHSPutsDateInTable()
     {
-        $this->assertEquals(0, Registration::get()->count());
+        $this->assertEquals(0, Registration::count());
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->type('Test Carer', 'pri_carer')
             ->check('consent')
             ->select('healthy-start-receiving', 'eligibility-hsbs')
+            ->select('no', 'eligibility-nrpf')
             ->press('Save Family')
             ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
         ;
@@ -246,6 +251,7 @@ class RegistrationPageTest extends StoreTestCase
             ->type('Test Carer', 'pri_carer')
             ->check('consent')
             ->select('healthy-start-applying', 'eligibility-hsbs')
+            ->select('no', 'eligibility-nrpf')
             ->press('Save Family')
             ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
         ;
@@ -263,6 +269,7 @@ class RegistrationPageTest extends StoreTestCase
             ->type('Test Carer', 'pri_carer')
             ->check('consent')
             ->select('healthy-start-receiving', 'eligibility-hsbs')
+            ->select('no', 'eligibility-nrpf')
             ->press('Save Family')
             ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
         ;
@@ -289,6 +296,7 @@ class RegistrationPageTest extends StoreTestCase
             ->type('Test Carer', 'pri_carer')
             ->check('consent')
             ->select('healthy-start-receiving', 'eligibility-hsbs')
+            ->select('no', 'eligibility-nrpf')
             ->press('Save Family')
             ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
         ;

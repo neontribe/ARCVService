@@ -45,13 +45,11 @@ class RegistrationController extends Controller
         // Masthead bit
         /** @var User $user */
         $user = Auth::user();
-        $programme = Auth::user()->centre->sponsor->programme;
         $data = [
-            "user_name" => $user->name,
-            "centre_name" => ($user->centre) ? $user->centre->name : null,
-            "programme" => $programme,
+            'user_name' => $user->name,
+            'centre_name' => $user->centre?->name,
+            'programme' => $user->centre?->sponsor?->programme,
         ];
-        $programme = Auth::user()->centre->sponsor->programme;
 
         // Slightly roundabout method of getting the permitted centres to poll
         $neighbour_centre_ids = $user
@@ -68,20 +66,19 @@ class RegistrationController extends Controller
             ->toArray();
 
         $fuzzy = $request->get('fuzzy');
-        if ($fuzzy) {
-            $filtered_family_ids = $this->fuzzySearch($family_name, $pri_carers);
-        } else {
-            $filtered_family_ids = $this->exactSearch($family_name, $pri_carers);
-        }
+        $filtered_family_ids = $fuzzy
+            ? $this->fuzzySearch($family_name, $pri_carers)
+            : $this->exactSearch($family_name, $pri_carers);
 
         //find the registrations
         $q = Registration::query();
+
         if (!empty($neighbour_centre_ids)) {
             $q = $q->whereIn('centre_id', $neighbour_centre_ids);
         }
 
         // only for cc users with access to more than 1 centre
-        if (Auth::user()->centres->count() > 1) {
+        if ($user->centres->count() > 1) {
             // get the centre_id from the masthead dropdown which is set by session (so we can filter reg selection)
             $filtered_centre_id = session('CentreUserCurrentCentreId');
             if ($filtered_centre_id && $filtered_centre_id !== "all") {
@@ -107,21 +104,8 @@ class RegistrationController extends Controller
         // However, the whereIn statements above destroy any sorted order on family_ids.
         $reg_models = $q->WithFullFamily()
             ->get()
-            ->values();
-
-        // Get any sorting direction from the request
-        $direction = $request->get('direction') ? $request->get('direction') : 'asc';
-
-        // Sort by desc if requested to, for anything else sort by asc as usual
-        if ($direction === 'desc') {
-            $reg_models = $reg_models->sortByDesc(function ($registration) {
-                return strtolower($registration->family->pri_carer);
-            });
-        } else {
-            $reg_models = $reg_models->sortBy(function ($registration) {
-                return strtolower($registration->family->pri_carer);
-            });
-        }
+            ->values()
+            ->sortBy('family.pri_carer', SORT_NATURAL, $request->get('direction') === 'desc');
 
         // throw it into a paginator.
         $page = LengthAwarePaginator::resolveCurrentPage();
@@ -142,7 +126,6 @@ class RegistrationController extends Controller
             $data,
             [
                 'registrations' => $registrations,
-                'programme' => $programme,
                 'fuzzy' => (bool)$fuzzy,
             ]
         );
@@ -161,16 +144,14 @@ class RegistrationController extends Controller
 
         // Check if we verify, based on the currently logged in user's context
         // as we have no registration to refer to yet.
-        $sponsor = $user->centre->sponsor;
-        $evaluator = EvaluatorFactory::make($sponsor->evaluations);
+        $evaluator = EvaluatorFactory::make($user->centre->sponsor->evaluations);
         $sponsorsRequiresID = $evaluator->isVerifyingChildren();
-        $programme = Auth::user()->centre->sponsor->programme;
 
         $data = [
             "user_name" => $user->name,
-            "centre_name" => ($user->centre) ? $user->centre->name : null,
+            "centre_name" => $user->centre?->name,
             "sponsorsRequiresID" => $sponsorsRequiresID,
-            "programme" => $programme,
+            "programme" => $user->centre->sponsor->programme,
             'leaver' => false,
         ];
         return view('store.create_registration', $data);
@@ -189,27 +170,15 @@ class RegistrationController extends Controller
         $user = Auth::user();
         $data = [
             'user_name' => $user->name,
-            'centre_name' => ($user->centre) ? $user->centre->name : null,
+            'centre_name' => $user->centre?->name,
+            'programme' => $user->centre?->sponsor->programme
         ];
 
         // Get the registration, with deep eager-loaded Family (with Children and Carers)
-        if ($registration) {
-            $registration = Registration::withFullFamily()->find($registration->id);
-        } else {
-            abort(404, 'Registration not found.');
-        }
+        $registration = Registration::withFullFamily()->find($registration->id);
+
         $evaluations = $registration->centre->sponsor->evaluations;
-        $deferrable = false;
-        foreach ($evaluations as $evaluation) {
-            if ($evaluation['nam    e'] === 'ScottishChildCanDefer') {
-                $deferrable = true;
-            }
-        }
-        $can_change_defer = true;
-        $this_month = Carbon::now()->month;
-        if ($this_month > config('arc.scottish_school_month')) {
-            $can_change_defer = false;
-        }
+        $deferrable = $evaluations->contains('name', 'ScottishChildCanDefer');
 
         // Get the valuation
         /** @var Valuation $valuation */
@@ -223,8 +192,6 @@ class RegistrationController extends Controller
 
         $evaluations["creditables"] = $registration->getEvaluator()->getPurposeFilteredEvaluations("credits");
         $evaluations["disqualifiers"] = $registration->getEvaluator()->getPurposeFilteredEvaluations("disqualifiers");
-        $programme = Auth::user()->centre->sponsor->programme;
-
 
         return view('store.edit_registration', array_merge(
             $data,
@@ -241,8 +208,7 @@ class RegistrationController extends Controller
                 'sponsorsRequiresID' => $registration->getEvaluator()->isVerifyingChildren(),
                 'evaluations' => $evaluations,
                 'deferrable' => $deferrable,
-                'can_change_defer' => $can_change_defer,
-                'programme' => $programme,
+                'can_change_defer' => Carbon::now()->month <= config('arc.scottish_school_month'),
                 'leaver' => false,
             ]
         ));
@@ -261,16 +227,12 @@ class RegistrationController extends Controller
         $user = Auth::user();
         $data = [
             'user_name' => $user->name,
-            'centre_name' => ($user->centre) ? $user->centre->name : null,
+            'centre_name' => $user->centre?->name,
+            'programme' => $user->centre?->sponsor->programme,
         ];
 
         // Get the registration, with deep eager-loaded Family (with Children and Carers)
-        if ($registration) {
-            $registration = Registration::withFullFamily()->find($registration->id);
-        } else {
-            abort(404, 'Registration not found.');
-        }
-        $evaluations = $registration->centre->sponsor->evaluations;
+        $registration = Registration::withFullFamily()->find($registration->id);
 
         // Get the valuation
         /** @var Valuation $valuation */
@@ -278,10 +240,6 @@ class RegistrationController extends Controller
 
         // Grab carers copy for shift)ing without altering family->carers
         $carers = $registration->family->carers->all();
-
-        $evaluations["creditables"] = $registration->getEvaluator()->getPurposeFilteredEvaluations("credits");
-        $evaluations["disqualifiers"] = $registration->getEvaluator()->getPurposeFilteredEvaluations("disqualifiers");
-        $programme = Auth::user()->centre->sponsor->programme;
 
         return view('store.view_registration', array_merge(
             $data,
@@ -291,7 +249,6 @@ class RegistrationController extends Controller
                 'pri_carer' => array_shift($carers),
                 'children' => $registration->family->children,
                 'entitlement' => $valuation->getEntitlement(),
-                'programme' => $programme,
                 'leaver' => true,
             ]
         ));
@@ -309,11 +266,7 @@ class RegistrationController extends Controller
         $user = Auth::user();
 
         // Get the registration, with deep eager-loaded Family (with Children and Carers)
-        if ($registration) {
-            $registration = Registration::withFullFamily()->find($registration->id);
-        } else {
-            abort(404, 'Registration not found.');
-        }
+        $registration = Registration::withFullFamily()->find($registration->id);
 
         // Get the valuation
         /** @var Valuation $valuation */
@@ -325,7 +278,7 @@ class RegistrationController extends Controller
         // Setup common data
         $data = [
             'user_name' => $user->name,
-            'centre_name' => ($user->centre) ? $user->centre->name : null,
+            'centre_name' => $user->centre?->name,
             'sheet_title' => 'Printable Family Sheet',
             'sheet_header' => 'Family Collection Sheet',
         ];
@@ -355,11 +308,11 @@ class RegistrationController extends Controller
     {
         // Get the user and Centre
         $user = Auth::user();
-        $centre = ($user->centre) ? $user->centre : null;
+        $centre = $user?->centre;
 
         // Cope if User has no Centre.
         if (!$centre) {
-            Log::info('User ' . $user->id . " has no Centre");
+            Log::info("User $user?->id has no Centre");
             // Send me back to dashboard
             return redirect()
                 ->route('store.dashboard')
@@ -370,12 +323,9 @@ class RegistrationController extends Controller
             ->whereActiveFamily()
             ->withFullFamily()
             ->get()
-            ->sortBy(function ($registration) {
-                // Need strtolower because case comparison sucks.
-                return strtolower($registration->family->pri_carer);
-            });
+            ->sortBy('family.pri_carer', SORT_NATURAL);
 
-        if ($registrations->count() < 1) {
+        if (empty($registrations)) {
             return redirect()
                 ->route('store.dashboard')
                 ->with('error_message', 'No Registrations in that centre.');
@@ -386,8 +336,8 @@ class RegistrationController extends Controller
 
         // Set up the common view data.
         $data = [
-            'user_name' => $user->name,
-            'centre_name' => ($user->centre) ? $user->centre->name : null,
+            'user_name' => $user?->name,
+            'centre_name' => $user?->centre?->name,
             'sheet_title' => 'Printable Family Sheet',
             'sheet_header' => 'Family Collection Sheet',
         ];
@@ -428,7 +378,7 @@ class RegistrationController extends Controller
     {
         // Create Carers, merge primary carer
         $carers = array_map(
-            function ($carer) use ($request) {
+            static function ($carer) use ($request) {
                 return new Carer([
                     'name' => $carer,
                     'ethnicity' => $request->get("pri_carer_ethnicity"),
@@ -446,18 +396,14 @@ class RegistrationController extends Controller
             (array)$request->get('children')
         );
 
-        $hsbs = $request->get('eligibility-hsbs');
-        $eligible_from = null;
-        if ($hsbs === 'healthy-start-receiving') {
-            $eligible_from = Carbon::now();
-        }
-
         // Create Registration
         $registration = new Registration([
             'consented_on' => Carbon::now(),
             'eligibility_hsbs' => $request->get('eligibility-hsbs'),
             'eligibility_nrpf' => $request->get('eligibility-nrpf'),
-            'eligible_from' => $eligible_from,
+            'eligible_from' => ($request->get('eligibility-hsbs') === 'healthy-start-receiving')
+                ? Carbon::now()
+                : null,
         ]);
 
         // Duplicate families are fine at this point.
@@ -550,17 +496,12 @@ class RegistrationController extends Controller
         // Fetch eligibility
         $eligibility_hsbs = $request->get('eligibility-hsbs');
         $eligibility_nrpf = $request->get('eligibility-nrpf');
-        $eligible_from = $registration->eligible_from;
         $deferred = $request->get('deferred');
 
         //Prevent the date changing if you're just editing a different field
-        if ($registration->eligible_from === null && $eligibility_hsbs === 'healthy-start-receiving') {
-            $eligible_from = Carbon::now();
-        } else {
-            if ($eligibility_hsbs !== 'healthy-start-receiving') {
-                $eligible_from = null;
-            }
-        }
+        $eligible_from = ($eligibility_hsbs === 'healthy-start-receiving' && !$registration->eligible_from)
+            ? Carbon::now()
+            : null;
 
         // NOTE: Following refactor where we needed to retain Carer ids.
         // Possible that we might want to add flag to carer to distinguish Main from Secondary,
@@ -572,6 +513,7 @@ class RegistrationController extends Controller
         $carerLanguage = $request->get('pri_carer_language');
         $carerKey = key($carerInput);
         $carer = Carer::find($carerKey);
+
         if ($carer->name !== $carerInput[$carer->id]) {
             $carer->name = $carerInput[$carer->id];
             $amendedCarers[] = $carer;
@@ -625,7 +567,7 @@ class RegistrationController extends Controller
 
         // Try to transact, so we can roll it back
         try {
-            DB::transaction(function () use (
+            DB::transaction(static function () use (
                 $registration,
                 $family,
                 $amendedCarers,
@@ -669,7 +611,8 @@ class RegistrationController extends Controller
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getTraceAsString());
             // Throw it back to the user
-            return redirect()->route('store.registration.edit', ['registration' => $registration->id])->withErrors('Registration update failed.');
+            return redirect()->route('store.registration.edit', ['registration' => $registration->id])
+                ->withErrors('Registration update failed.');
         }
         // Or return the success
         Log::info('Registration ' . $registration->id . ' updated by service user ' . Auth::id());
