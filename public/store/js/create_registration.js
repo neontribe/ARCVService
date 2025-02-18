@@ -68,6 +68,13 @@ $("#child_wrapper").on('click', '.remove_date_field', function (e) {
     return false;
 });
 
+// remove existing wrapper rows
+$('#existing_wrapper').on('click', '.remove_date_field', function (e) {
+  e.preventDefault();
+  $(this).closest('tr').remove();
+  return false;
+});
+
 // emit button clicked event
 $("#add-carer-age").click(function (e) {
     e.preventDefault();

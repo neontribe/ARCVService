@@ -25,6 +25,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Log;
 use PDF;
 use Throwable;
@@ -147,12 +148,20 @@ class RegistrationController extends Controller
         $evaluator = EvaluatorFactory::make($user->centre->sponsor->evaluations);
         $sponsorsRequiresID = $evaluator->isVerifyingChildren();
 
+        // did we reload with some child data that needs fixing?
+        if (old('children')) {
+            $children = $this->makeChildrenFromInput(
+                (array)old('children')
+            );
+        }
+
         $data = [
             "user_name" => $user->name,
             "centre_name" => $user->centre?->name,
             "sponsorsRequiresID" => $sponsorsRequiresID,
             "programme" => $user->centre->sponsor->programme,
             'leaver' => false,
+            'children' => $children ?? []
         ];
         return view('store.create_registration', $data);
     }
@@ -440,11 +449,12 @@ class RegistrationController extends Controller
     /**
      * Makes children from input data
      * @param array $children
-     * @return Child[]
+     * @return array
      */
     private function makeChildrenFromInput(array $children = []): array
     {
-        return array_map(
+        return Arr::map(
+            $children,
             static function ($child) {
                 // Note: Carbon uses different time formats than laravel validation
                 // For crazy reasons known only to the creators of Carbon, when no day provided,
@@ -477,8 +487,7 @@ class RegistrationController extends Controller
                     'deferred' => $deferred,
                     'is_pri_carer' => $is_pri_carer,
                 ]);
-            },
-            $children
+            }
         );
     }
 

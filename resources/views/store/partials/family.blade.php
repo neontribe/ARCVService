@@ -31,18 +31,18 @@
             </thead>
             @if(!empty($children))
                 <tbody id="existing_wrapper">
-                @foreach ( $children as $child )
+                @foreach ( $children as $index => $child )
                     <tr>
                         <td class="age-col">{{ $child->getAgeString() }}</td>
                         <td class="dob-col">{{ $child->getDobAsString() }}</td>
                         @if ( $sponsorsRequiresID )
                             <td class="verified-col relative">
                                 <input type="checkbox" class="styled-checkbox inline-dob"
-                                       name="children[{{ $child->id }}][verified]"
-                                       id="child{{ $child->id }}"
+                                       name="children[{{ $child->id ?? $index }}][verified]"
+                                       id="child{{ $child->id ?? $index }}"
                                        {{ $child->verified ? "checked" : null }} value="1"
                                 >
-                                <label for="child{{ $child->id }}">
+                                <label for="child{{ $child->id ?? $index }}">
                                     <span class="visually-hidden">Toggle ID checked</span>
                                 </label>
                             </td>
@@ -51,17 +51,17 @@
                             <td class="can-defer-col relative">
                                     <input type="checkbox"
                                            class="styled-checkbox inline-dob"
-                                           name="children[{{ $child->id }}][deferred]"
-                                           id="children[{{ $child->id }}][deferred]"
+                                           name="children[{{ $child->id ?? $index }}][deferred]"
+                                           id="children[{{ $child->id ?? $index }}][deferred]"
                                            {{ $child->deferred ? "checked" : null }} value="1"
                                     >
-                                    <label for="children[{{ $child->id }}][deferred]">
+                                    <label for="children[{{ $child->id ?? $index }}][deferred]">
                                         <span class="visually-hidden">Toggle canDefer checked</span>
                                     </label>
                             </td>
                         @endif
                         <td class="remove-col">
-                            <input type="hidden" name="children[{{ $child->id }}][dob]"
+                            <input type="hidden" name="children[{{ $child->id ?? $index }}][dob]"
                                    value="{{ Carbon\Carbon::parse($child->dob)->format('Y-m') }}"
                             >
                             <button class="remove_date_field">
