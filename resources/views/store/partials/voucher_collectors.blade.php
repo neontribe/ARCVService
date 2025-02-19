@@ -10,18 +10,19 @@
             {{-- This section should only exist in edit rather than add new record --}}
             <input id="carer"
                    name="pri_carer[{{ $pri_carer->id }}]"
-                   class="@if($errors->has('pri_carer')) invalid @endif"
+                   class="@if($errors->has("pri_carer.$pri_carer->id")) invalid @endif"
                    type="text"
                    value="{{ $pri_carer->name }}"
                    autocomplete="off"
                    autocorrect="off"
                    spellcheck="false"
-            ><br></br>
+            ><br>
             @includeWhen(
-                $errors->has('pri_carer'),
+                $errors->has("pri_carer.$pri_carer->id"),
                 'store.partials.errors',
                 ['error_array' => ['This field is required'], 'id' => 'carer-alert']
             )
+            <br>
                 <label for="pri_carer_ethnicity">Main carer's ethnic background (optional)</label><br>
                 <select name="pri_carer_ethnicity[{{ $pri_carer->id }}]" id="pri_carer_ethnicity">
                     <option value=0>Please select</option>
