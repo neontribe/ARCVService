@@ -98,7 +98,7 @@
 
             // Organise the ID verification values and display
             var verifiedValue = verified ? 1 : 0;
-            var displayVerified = verified ? "checked" : null;
+            var displayVerified = verified ? "checked" : '';
 
             // give the kids a random key
             var childKey = Math.random();
