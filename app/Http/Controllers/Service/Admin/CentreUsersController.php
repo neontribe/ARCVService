@@ -9,7 +9,6 @@ use App\Http\Requests\AdminIndexCentreUsersRequest;
 use App\Http\Requests\AdminNewCentreUserRequest;
 use App\Http\Requests\AdminUpdateCentreUserRequest;
 use App\Sponsor;
-use Carbon\Carbon;
 use DB;
 use Debugbar;
 use Exception;
@@ -42,12 +41,12 @@ class CentreUsersController extends Controller
             'name' => 'name',
             'homeCentreArea' => 'homeCentre.sponsor.name',
             'homeCentre' => 'homeCentre.name',
-            default => function ($item) {
+            default => static function ($item) {
                 $homeCentre = $item->homeCentre;
-                return $homeCentre->sponsor->name . '#' . $homeCentre->name . '#' . $item->name;
+                return $homeCentre?->sponsor?->name . '#' . $homeCentre?->name . '#' . $item->name;
             },
         };
-        $workers = CentreUser::get()->sortBy($sorter, SORT_REGULAR, ($direction === 'desc'));
+        $workers = CentreUser::withTrashed()->get()->sortBy($sorter, SORT_REGULAR, ($direction === 'desc'));
 
         return view('service.centreusers.index', compact('workers'));
     }
