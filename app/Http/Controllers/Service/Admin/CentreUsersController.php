@@ -23,6 +23,7 @@ use League\Csv\CannotInsertRecord;
 use Log;
 use Ramsey\Uuid\Uuid;
 use Throwable;
+use function PHPUnit\Framework\isNan;
 
 class CentreUsersController extends Controller
 {
@@ -69,10 +70,10 @@ class CentreUsersController extends Controller
     public function edit($id): View|Factory|Application
     {
         // Find the worker or throw a 500
-        $worker = CentreUser::findOrFail($id);
+        $worker = CentreUser::withTrashed()->findOrFail($id);
 
         // Get the homeCentreId
-        $homeCentreId = $worker->homeCentre->id;
+        $homeCentreId = $worker->homeCentre?->id;
 
         // Work out current worker-centre selections
         $workerCentres = [
@@ -252,16 +253,37 @@ class CentreUsersController extends Controller
 
     /**
      * Handle deleting a centre user
-	 * later if needed
      * @param int $id
      * @return RedirectResponse
      */
     public function delete(int $id): RedirectResponse
     {
-        $centreUser = CentreUser::findOrFail($id);
+        // must be disabled to delete
+        $centreUser = CentreUser::onlyTrashed()->findOrFail($id);
+        $name = $centreUser->name;
+        // remove any connections
         $centreUser->centre->centreUsers()->detach($id);
-        $centreUser->delete();
+        // boot them
+        $centreUser->forceDelete();
         return redirect()->route('admin.centreusers.index')
-            ->with('message', 'Worker ' . $centreUser->name . ' deleted');
+            ->with('message', 'Worker ' . $name . ' deleted');
+    }
+
+    /**
+     * Handle toggling of a centre user
+     * @param int $id
+     * @return RedirectResponse
+     */
+    public function toggle(int $id): RedirectResponse
+    {
+        $centreUser = CentreUser::withTrashed()->findOrFail($id);
+        $name = $centreUser->name;
+        if ($centreUser->deleted_at === null) {
+            $centreUser->delete();
+        } else {
+            $centreUser->restore();
+        }
+        return redirect()->route('admin.centreusers.index')
+            ->with('message', 'Worker ' . $name . ' updated');
     }
 }
