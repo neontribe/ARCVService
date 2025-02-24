@@ -15,6 +15,7 @@ use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
@@ -22,8 +23,8 @@ class SendVoucherHistoryEmailTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected Trader $traders;
-    protected Voucher $vouchers;
+    protected Collection $traders;
+    protected Collection $vouchers;
     protected User $user;
 
     protected function setUp(): void
