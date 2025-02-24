@@ -26,17 +26,17 @@
             </thead>
             <tbody>
                 @foreach ($workers as $worker)
-                <tr>
+                <tr @class(['disabled' => $worker->deleted_at !== null])">
                     <td>{{ $worker->name }}</td>
                     <td>{{ $worker->email }}</td>
-                    <td> {{ $worker->homeCentre->sponsor->name }}</td>
-                    <td>{{ $worker->homeCentre->name }}</td>
+                    <td> {{ $worker->homeCentre?->sponsor->name }}</td>
+                    <td>{{ $worker->homeCentre?->name }}</td>
                     <td>
                         <ul class="table-list">
                             @foreach ($worker->centres as $centre)
-                            @if ($centre->id !== $worker->homeCentre->id)
-                            <li>{{ $centre->name }}</li>
-                            @endif
+                                @if ($centre->id !== $worker->homeCentre?->id)
+                                    <li>{{ $centre->name }}</li>
+                                @endif
                             @endforeach
                         </ul>
                     </td>

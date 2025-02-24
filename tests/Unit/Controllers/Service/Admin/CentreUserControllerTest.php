@@ -13,17 +13,13 @@ class CentreUserControllerTest extends StoreTestCase
 {
     use RefreshDatabase;
 
-    /** @var AdminUser $adminUser */
-    private $adminUser;
+    private AdminUser $adminUser;
 
-    /** @var Centre $centre */
-    private $centre;
+    private Centre $centre;
 
-    /** @var Collection $altCentres */
-    private $altCentres;
+    private Collection $altCentres;
 
-    /** @var array $data */
-    private $data;
+    private array $data;
 
     public function setUp(): void
     {
@@ -39,8 +35,7 @@ class CentreUserControllerTest extends StoreTestCase
         ];
     }
 
-    /** @test */
-    public function testICanStoreACentreUser()
+    public function testICanStoreACentreUser(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->post(
@@ -62,8 +57,7 @@ class CentreUserControllerTest extends StoreTestCase
         $this->assertEquals($this->data['worker_centre'], $cu->homeCentre->id);
     }
 
-    /** @test */
-    public function testItCanUpdateACentreUser()
+    public function testItCanUpdateACentreUser(): void
     {
         // Make a CentreUser from the data with 1 homeCentre.
         $cu = factory(CentreUser::class)->create([
@@ -117,8 +111,7 @@ class CentreUserControllerTest extends StoreTestCase
         $this->assertEquals($this->data['worker_centre'], $cu->homeCentre->id);
     }
 
-    /** @test */
-    public function testItCanDeleteACentreUser()
+    public function testItCanDisableACentreUser(): void
     {
         $cu = factory(CentreUser::class)->create([
             'name' => "testman",
@@ -133,22 +126,59 @@ class CentreUserControllerTest extends StoreTestCase
 
         $this->actingAs($this->adminUser, 'admin')
             ->get(
-                route('admin.centreusers.delete', $cu->id),
+                route('admin.centreusers.toggle', $cu->id),
                 $this->data
             )
             ->followRedirects()
             ->assertResponseOk()
-            ->seePageIs(route('admin.centreusers.index'))
-            ->dontSee($cu->email)
-            ->dontSeeInDatabase('centre_centre_user', [
+            // returns to edit page
+            ->seePageIs(route('admin.centreusers.edit', ['id' => $cu->id]))
+            // retains old information
+            ->seeInDatabase('centre_centre_user', [
                 'centre_user_id' => $cu->id,
                 'centre_id' => $this->altCentres->last()->id,
             ])
+            ->see('This worker is <i>disabled</i>')
+            ->seeInElement('#toggleWorker', ' Enable worker')
+            // There is a delete button
+            ->seeElement('#deleteWorker')
         ;
     }
 
-    /** @test */
-    public function testICannotSeeDeletedCentreUsers()
+    public function testItCanEnableACentreUser(): void
+    {
+        $cu = factory(CentreUser::class)->create([
+            'name' => "testman",
+            'email' => "testman@test.co.uk",
+            'deleted_at' => date("Y-m-d H:i:s")
+        ]);
+        $cu->centres()->attach($this->altCentres->last()->id, ['homeCentre' => true]);
+
+        $this->seeInDatabase('centre_users', [
+            'name' => $cu->name,
+            'email' => $cu->email,
+        ]);
+
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(
+                route('admin.centreusers.toggle', $cu->id),
+                $this->data
+            )
+            ->followRedirects()
+            ->assertResponseOk()
+            // returns to edit page
+            ->seePageIs(route('admin.centreusers.edit', ['id' => $cu->id]))
+            // retains old information
+            ->seeInDatabase('centre_centre_user', [
+                'centre_user_id' => $cu->id,
+                'centre_id' => $this->altCentres->last()->id,
+            ])
+            ->dontSee('This worker is <i>disabled</i>')
+            ->seeInElement('#toggleWorker', 'Disable worker')
+        ;
+    }
+
+    public function testICanSeeDisabledCentreUsers(): void
     {
         $cu = factory(CentreUser::class)->create([
             'name' => "testman",
@@ -161,6 +191,30 @@ class CentreUserControllerTest extends StoreTestCase
             'email' => $cu->email,
             'deleted_at' => date("Y-m-d H:i:s")
         ]);
+
+        $this->actingAs($this->adminUser, 'admin')
+            ->visit(route('admin.centreusers.index'))
+            ->assertResponseOk()
+            ->see($cu->email)
+        ;
+    }
+
+    public function testICannotSeeDeletedCentreUsers(): void
+    {
+        $cu = factory(CentreUser::class)->create([
+            'name' => "testman",
+            'email' => "testman@test.co.uk",
+            'deleted_at' => date("Y-m-d H:i:s")
+        ]);
+
+        $this->seeInDatabase('centre_users', [
+            'name' => $cu->name,
+            'email' => $cu->email,
+            'deleted_at' => date("Y-m-d H:i:s")
+        ]);
+
+        // remove it!
+        $cu->forceDelete();
 
         $this->actingAs($this->adminUser, 'admin')
             ->visit(route('admin.centreusers.index'))

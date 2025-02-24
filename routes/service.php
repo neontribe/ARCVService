@@ -115,6 +115,12 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.centreusers.download',
         'uses' => 'Admin\CentreUsersController@download',
     ]);
+
+    Route::get('workers/{id}/toggle', [
+        'as' => 'admin.centreusers.toggle',
+        'uses' => 'Admin\CentreUsersController@toggle',
+    ])->where('id', '^[0-9]+$');
+
     Route::get('workers/{id}/delete', [
         'as' => 'admin.centreusers.delete',
         'uses' => 'Admin\CentreUsersController@delete',
