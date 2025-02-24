@@ -77,7 +77,7 @@
         </form>
         <form role="form" id="toggleForm" class="styled-form" method="GET" action="{{ route('admin.centreusers.toggle', ['id' => $worker->id]) }}">
             {!! csrf_field() !!}
-            <button type="submit" id="toggleWorker">@empty($worker->deleted_at)Disable @else Enable @endif worker</button>
+            <button type="submit" id="toggleWorker">@empty($worker->deleted_at)Disable worker @else Enable worker @endif</button>
         </form>
         @if($worker->deleted_at)
         <form role="form" id="deleteForm" class="styled-form" method="GET"
