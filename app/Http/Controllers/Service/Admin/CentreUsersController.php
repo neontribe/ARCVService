@@ -283,7 +283,7 @@ class CentreUsersController extends Controller
         } else {
             $centreUser->restore();
         }
-        return redirect()->route('admin.centreusers.index')
+        return redirect()->route('admin.centreusers.edit', ['id' => $centreUser->id])
             ->with('message', 'Worker ' . $name . ' updated');
     }
 }

@@ -9,6 +9,10 @@
 
         <p>Use the form below to amend a Children's Centre Worker's details.</p>
 
+        @if($worker->deleted_at)
+            <h2>This worker is <i>disabled</i></h2>
+        @endif
+
         <form role="form" class="styled-form" method="POST"
             action="{{ route('admin.centreusers.update', ['id' => $worker->id]) }}">
             {!! method_field('PUT') !!}
