@@ -4,6 +4,7 @@ namespace App;
 
 use DateTimeInterface;
 use Eloquent;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -14,10 +15,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $shortcode
  * @property bool $can_tap
  * @property int $programme
- * @property Voucher[] $vouchers
- * @property Centre[] $centres
- * @property Market[] $markets
- * @property Evaluation[] $evaluations
+ * @property Collection<Voucher> $vouchers
+ * @property Collection<Centre> $centres
+ * @property Collection<Market> $markets
+ * @property Collection<Evaluation> $evaluations
  */
 class Sponsor extends Model
 {

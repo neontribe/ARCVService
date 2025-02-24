@@ -10,13 +10,18 @@
             {{-- This section should only exist in edit rather than add new record --}}
             <input id="carer"
                    name="pri_carer[{{ $pri_carer->id }}]"
-                   class="@if($errors->has('pri_carer'))invalid @endif"
+                   class="@if($errors->has("pri_carer.$pri_carer->id"))invalid @endif"
                    type="text"
                    value="{{ $pri_carer->name }}"
                    autocomplete="off"
                    autocorrect="off"
                    spellcheck="false"
-            ><br></br>
+            ><br>
+            @includeWhen($errors->has("pri_carer.$pri_carer->id"),
+                'store.partials.errors',
+                ['error_array' => ['This field is required']]
+            )
+            <br>
                 <label for="pri_carer_ethnicity">Main participant's ethnic background (optional)</label><br>
                 <select name="pri_carer_ethnicity[{{ $pri_carer->id }}]" id="pri_carer_ethnicity">
                     <option value=0>Please select</option>
@@ -32,7 +37,7 @@
             @if(empty($pri_carer->ethnicity))
                 <br><mark>Please complete ethnic background.</mark></br>
             @endif
-            <br></br>
+            <br>
                 <label for="pri_carer_language">Main participant's preferred language (optional)</label><br>
                 <input id="pri_carer_language"
                        name="pri_carer_language[{{ $pri_carer->id }}]"
@@ -47,7 +52,7 @@
             @if(!isset($pri_carer->language))
                 <br><mark>Please complete main language.</mark></br>
             @endif
-            <br></br>
+            <br>
         @else
             {{-- If this is a new record do this instead --}}
             <input id="carer"
@@ -58,7 +63,12 @@
                    autocorrect="off"
                    spellcheck="false"
                    value="{{ old('pri_carer') }}"
-            ><br></br>
+            ><br>
+            @includeWhen($errors->has("pri_carer"),
+                'store.partials.errors',
+                ['error_array' => ['This field is required']]
+            )
+            <br>
             <label for="pri_carer_ethnicity">Main participant's ethnic background (optional)</label><br>
             <select name="pri_carer_ethnicity" id="pri_carer_ethnicity">
                 <option value=0>Please select</option>
@@ -80,11 +90,6 @@
             >
         @endif
     </div>
-
-    @includeWhen($errors->has("pri_carer"),
-        'store.partials.errors',
-        ['error_array' => ['This field is required']]
-        )
 
     <div id="addCarerAgeInput" class="age-input-container">
         @include('store.partials.ageInput')

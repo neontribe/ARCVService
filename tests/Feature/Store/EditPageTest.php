@@ -230,7 +230,8 @@ class EditPageTest extends StoreTestCase
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
-            ->seeElement('#eligibility-hsbs>option[value="healthy-start-applying"][selected]')
+            ->seeElement('#eligibility-hsbs>option[value="0"][selected]')
+            ->seeElement('#eligibility-hsbs>option[value="healthy-start-applying"]')
             ->seeElement('#eligibility-hsbs>option[value="healthy-start-receiving"]')
             ->seeElement('#eligibility-hsbs>option[value="healthy-start-receiving-not-eligible-or-rejected"]')
             ->seeElement('#eligibility-nrpf>option[value="yes"]')
