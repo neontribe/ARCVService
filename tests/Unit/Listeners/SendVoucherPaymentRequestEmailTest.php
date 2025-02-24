@@ -20,9 +20,9 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $traders;
-    protected $vouchers;
-    protected $user;
+    protected Trader $traders;
+    protected Voucher $vouchers;
+    protected User $user;
 
     protected function setUp(): void
     {
@@ -50,8 +50,7 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
         }
     }
 
-    /** @test */
-    public function testRequestVoucherPayment()
+    public function testRequestVoucherPayment(): void
     {
         Mail::fake();
 
