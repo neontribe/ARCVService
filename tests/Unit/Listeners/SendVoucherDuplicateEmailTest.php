@@ -18,9 +18,9 @@ class SendVoucherDuplicateEmailTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $trader;
-    protected $voucher;
-    protected $user;
+    protected Trader $trader;
+    protected Voucher $voucher;
+    protected User $user;
 
     protected function setUp(): void
     {
@@ -29,7 +29,7 @@ class SendVoucherDuplicateEmailTest extends TestCase
         $this->user = factory(User::class)->create();
     }
 
-    public function testVoucherDuplicateEmail()
+    public function testVoucherDuplicateEmail(): void
     {
         Mail::fake();
 
@@ -37,7 +37,6 @@ class SendVoucherDuplicateEmailTest extends TestCase
         $user = $this->user;
         $vouchercode = $this->voucher->code;
         $market = $trader->market;
-        $title = 'Test Voucher Duplicate Email';
 
         $viewData = [
             'user' => $user,
@@ -52,7 +51,7 @@ class SendVoucherDuplicateEmailTest extends TestCase
         $listener->handle($event);
 
         Mail::assertSent(VoucherDuplicateEnteredEmail::class, 1);
-        
+
         // Some of the original tests had to be tweaked, because the email body has things like:
         // {&quot;name&quot;:&quot;Rosamond Conn&quot;,&quot;email&quot;:&quot;
         // making it tricky to check the contents exactly.
@@ -63,17 +62,17 @@ class SendVoucherDuplicateEmailTest extends TestCase
             $user_name = $viewData['user']->name;
             $this->assertStringContainsString('Voucher Duplicate Entered', $body);
             $this->assertStringContainsString('Hi ' . config('mail.to_admin.name'), $body);
-            $this->assertStringContainsString($user_name, $body);
+            $this->assertStringContainsString(e($user_name), $body);
             $this->assertStringContainsString(' has tried to submit voucher', $body);
             $this->assertStringContainsString($viewData['vouchercode'] . ' against', $body);
-            $this->assertStringContainsString($viewData['trader']->name, $body);
+            $this->assertStringContainsString(e($viewData['trader']->name), $body);
             $this->assertStringContainsString('however that voucher has already been submitted by another trader.', $body);
-            $this->assertStringContainsString(e($viewData['market']->name) , $body);
+            $this->assertStringContainsString(e($viewData['market']->name), $body);
             return true;
         });
     }
 
-    public function testVoucherDuplicateEmailNoMarket()
+    public function testVoucherDuplicateEmailNoMarket(): void
     {
         Mail::fake();
 
@@ -102,12 +101,12 @@ class SendVoucherDuplicateEmailTest extends TestCase
             $user_name = $viewData['user']->name;
             $this->assertStringContainsString('Voucher Duplicate Entered', $body);
             $this->assertStringContainsString('Hi ' . config('mail.to_admin.name'), $body);
-            $this->assertStringContainsString($user_name, $body);
+            $this->assertStringContainsString(e($user_name), $body);
             $this->assertStringContainsString(' has tried to submit voucher', $body);
             $this->assertStringContainsString($viewData['vouchercode'] . ' against', $body);
-            $this->assertStringContainsString($viewData['trader']->name, $body);
+            $this->assertStringContainsString(e($viewData['trader']->name), $body);
             $this->assertStringContainsString('however that voucher has already been submitted by another trader.', $body);
-            $this->assertStringContainsString('no associated market' , $body);
+            $this->assertStringContainsString('no associated market', $body);
             return true;
         });
     }

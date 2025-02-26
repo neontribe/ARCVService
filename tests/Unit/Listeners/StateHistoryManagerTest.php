@@ -12,12 +12,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class StateHistoryManagerTest extends TestCase
 {
-
     use RefreshDatabase;
 
-    protected $adminUser;
-    protected $centreUser;
-    protected $user;
+    protected AdminUser $adminUser;
+    protected CentreUser $centreUser;
+    protected User $user;
 
     protected function setUp(): void
     {
@@ -28,8 +27,7 @@ class StateHistoryManagerTest extends TestCase
         $this->user = factory(User::class)->create();
     }
 
-    /** @test */
-    public function testStateIsUpdatedAsExpected()
+    public function testStateIsUpdatedAsExpected(): void
     {
         Auth::login($this->adminUser);
 

@@ -15,6 +15,7 @@ use App\VoucherState;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
@@ -22,9 +23,9 @@ class SendVoucherHistoryEmailTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $traders;
-    protected $vouchers;
-    protected $user;
+    protected Collection $traders;
+    protected Collection $vouchers;
+    protected User $user;
 
     protected function setUp(): void
     {
@@ -67,7 +68,7 @@ class SendVoucherHistoryEmailTest extends TestCase
         $this->vouchers[9]->save();
     }
 
-    public function testRequestVoucherHistoryEmail()
+    public function testRequestVoucherHistoryEmail(): void
     {
         Mail::fake();
 
@@ -81,7 +82,7 @@ class SendVoucherHistoryEmailTest extends TestCase
 
         $file = TraderController::createVoucherListFile($trader, $vouchers, $title, Auth::user()->name);
 
-        list($min_date, $max_date) = Voucher::getMinMaxVoucherDates($vouchers);
+        [$min_date, $max_date] = Voucher::getMinMaxVoucherDates($vouchers);
         $event = new VoucherHistoryEmailRequested($user, $trader, $file, $min_date, $max_date);
         $listener = new SendVoucherHistoryEmail();
         $listener->handle($event);

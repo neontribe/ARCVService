@@ -13,6 +13,7 @@ use App\User;
 use App\Voucher;
 use Auth;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
@@ -20,9 +21,9 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $traders;
-    protected $vouchers;
-    protected $user;
+    protected Collection $traders;
+    protected Collection $vouchers;
+    protected User $user;
 
     protected function setUp(): void
     {
@@ -50,8 +51,7 @@ class SendVoucherPaymentRequestEmailTest extends TestCase
         }
     }
 
-    /** @test */
-    public function testRequestVoucherPayment()
+    public function testRequestVoucherPayment(): void
     {
         Mail::fake();
 
