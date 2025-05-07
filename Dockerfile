@@ -1,4 +1,4 @@
-ARG PHP_VER="8.1"
+ARG PHP_VER="8.3"
 ARG COMPOSER_VER="latest"
 ARG BRANCH="develop"
 ARG TIMEZONE="Europe/London"
@@ -123,15 +123,15 @@ COPY ./.docker/dbtest.php /dbtest.php
 COPY ./.docker/passport-install.php /passport-install.php
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 COPY --from=php-ext-xsl /usr/local/etc/php/conf.d/docker-php-ext-xsl.ini /usr/local/etc/php/conf.d/docker-php-ext-xsl.ini
-COPY --from=php-ext-xsl /usr/local/lib/php/extensions/no-debug-non-zts-20210902/xsl.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/xsl.so
+COPY --from=php-ext-xsl /usr/local/lib/php/extensions/no-debug-non-zts-20230831/xsl.so /usr/local/lib/php/extensions/no-debug-non-zts-20230831/xsl.so
 COPY --from=php-ext-pdo_mysql /usr/local/etc/php/conf.d/docker-php-ext-pdo_mysql.ini /usr/local/etc/php/conf.d/docker-php-ext-pdo_mysql.ini
-COPY --from=php-ext-pdo_mysql /usr/local/lib/php/extensions/no-debug-non-zts-20210902/pdo_mysql.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/pdo_mysql.so
+COPY --from=php-ext-pdo_mysql /usr/local/lib/php/extensions/no-debug-non-zts-20230831/pdo_mysql.so /usr/local/lib/php/extensions/no-debug-non-zts-20230831/pdo_mysql.so
 COPY --from=php-ext-zip /usr/local/etc/php/conf.d/docker-php-ext-zip.ini /usr/local/etc/php/conf.d/docker-php-ext-zip.ini
-COPY --from=php-ext-zip /usr/local/lib/php/extensions/no-debug-non-zts-20210902/zip.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/zip.so
+COPY --from=php-ext-zip /usr/local/lib/php/extensions/no-debug-non-zts-20230831/zip.so /usr/local/lib/php/extensions/no-debug-non-zts-20230831/zip.so
 COPY --from=php-ext-gd /usr/local/etc/php/conf.d/docker-php-ext-gd.ini /usr/local/etc/php/conf.d/docker-php-ext-gd.ini
-COPY --from=php-ext-gd /usr/local/lib/php/extensions/no-debug-non-zts-20210902/gd.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/gd.so
+COPY --from=php-ext-gd /usr/local/lib/php/extensions/no-debug-non-zts-20230831/gd.so /usr/local/lib/php/extensions/no-debug-non-zts-20230831/gd.so
 COPY --from=php-ext-intl /usr/local/etc/php/conf.d/docker-php-ext-intl.ini /usr/local/etc/php/conf.d/docker-php-ext-intl.ini
-COPY --from=php-ext-intl /usr/local/lib/php/extensions/no-debug-non-zts-20210902/intl.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/intl.so
+COPY --from=php-ext-intl /usr/local/lib/php/extensions/no-debug-non-zts-20230831/intl.so /usr/local/lib/php/extensions/no-debug-non-zts-20230831/intl.so
 COPY --from=php-ext-opcache /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini  /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini
 ENV LOG_CHANNEL=stderr
 ENV DATABASE_URL=sqlite:///%kernel.project_dir%/storage/data/db.sqlite
@@ -188,7 +188,7 @@ FROM base AS dev
 COPY --from=git-dev --chown=www-data:www-data /opt/project /opt/project
 COPY ./.docker/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 COPY --from=php-ext-xdebug /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-COPY --from=php-ext-xdebug /usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so
+COPY --from=php-ext-xdebug /usr/local/lib/php/extensions/no-debug-non-zts-20230831/xdebug.so /usr/local/lib/php/extensions/no-debug-non-zts-20230831/xdebug.so
 RUN \
     export COMPOSER_HOME=/composer && \
     composer --no-ansi install --working-dir=/opt/project --optimize-autoloader && \
@@ -222,8 +222,8 @@ ENV APP_DEBUG=false
 ENV APP_ENV=prod
 ENV SESSION_SECURE_COOKIE=true
 
-# docker build -t 192.168.21.97:5000/arcvouchers/service:prod .
-# docker build -t 192.168.21.97:5000/arcvouchers/service:develop --target=dev .
+# docker build -t arcvouchers/service:prod .
+# docker build -t arcvouchers/service:develop --target=dev .
 
-# docker push 192.168.21.97:5000/arcvouchers/service:prod
-# docker push 192.168.21.97:5000/arcvouchers/service:develop
+# docker push arcvouchers/service:prod
+# docker push arcvouchers/service:develop

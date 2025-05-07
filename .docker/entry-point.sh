@@ -16,7 +16,7 @@ function handleStartup() {
   if [ ! -e /opt/project/.env ]; then
     if [ "$APP_ENV" == "production" ]; then
       echo "No .env file present."
-      echo "Your are running a prod environment version but there is no .env file present"
+      echo "You are running a prod environment version but there is no .env file present"
       echo "You need to mount one into this container or the system cannot proceed."
       exit 1
     else
