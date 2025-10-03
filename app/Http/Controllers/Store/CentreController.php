@@ -2,53 +2,76 @@
 
 namespace App\Http\Controllers\Store;
 
-use App\Carer;
 use App\Centre;
 use App\CentreUser;
-use App\Child;
 use App\Http\Controllers\Controller;
 use App\Registration;
-use App\Services\VoucherEvaluator\Valuation;
 use Auth;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Contracts\Routing\ResponseFactory;
-use Illuminate\Http\Response;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use PDF;
 
 class CentreController extends Controller
 {
+    protected array $defaultDateFormats = [
+        'lastCollection' => 'd/m/Y',
+        'due' => 'd/m/Y',
+        'dob' => 'd/m/Y',
+        'join' => 'd/m/Y',
+        'leave' => 'd/m/Y',
+        'eligible_from' => 'd/m/Y',
+        'rejoin' => 'd/m/Y',
+    ];
+
+    protected array $labels = [
+        'family' => [
+            'carer' => 'Primary Carer',
+            'rvid' => 'Family',
+            'dob_header' => 'Child %d DoB',
+        ],
+        'sp' => [
+            'carer' => 'Main Participant',
+            'rvid' => 'Household',
+            'dob_header' => 'Household member %d DoB',
+        ],
+    ];
+
+    // Default date formats for both files
+    protected array $dateFormats;
+
+    // Different labels for family vs SP programmes
+    protected array $excludeColumns;
+    protected int $programme;
+    protected string $labelType;
+
     /**
      * Displays a printable version of the families registered with the center.
-     *
-     * @param Centre $centre
-     * @return Response
      */
-    public function printCentreCollectionForm(Centre $centre)
+    public function printCentreCollectionForm(Centre $centre): Response
     {
-        $registrations = $centre->registrations()
-            ->whereActiveFamily()
-            ->withFullFamily()
-            ->get()
-            ->sortBy(function ($registration) {
-                // Need strtolower because case comparison sucks.
-                return strtolower($registration->family->pri_carer);
-            });
+        $registrations = $centre->registrations()->whereActiveFamily()->withFullFamily()->get()->sortBy(function (
+            $registration
+        ): string {
+            // Need strtolower because case comparison sucks.
+            return strtolower($registration->family->pri_carer);
+        });
 
         $filename = 'CC' . $centre->id . 'Regs_' . Carbon::now()->format('YmdHis') . '.pdf';
 
         $programme = $centre->sponsor->programme;
         $pdf_route = $programme ? 'store.printables.household' : 'store.printables.families';
-        $pdf = PDF::loadView(
-            $pdf_route,
-            [
-                'sheet_title' => 'Printable Register',
-                'sheet_header' => 'Register',
-                'centre' => $centre,
-                'registrations' => $registrations,
-            ]
-        );
+        $pdf = PDF::loadView($pdf_route, [
+            'sheet_title' => 'Printable Register',
+            'sheet_header' => 'Register',
+            'centre' => $centre,
+            'registrations' => $registrations,
+        ]);
         $pdf->setPaper('A4', 'landscape');
 
         return @$pdf->download($filename);
@@ -56,12 +79,11 @@ class CentreController extends Controller
 
     /**
      * Exports a summary of registrations from the User's relevant Centres or specified Centre.
-     *
-     * @param Centre $centre
-     * @return ResponseFactory|\Symfony\Component\HttpFoundation\Response
      */
-    public function exportRegistrationsSummary(Request $request, Centre $centre)
-    {
+    public function exportRegistrationsSummary(
+        Request $request,
+        Centre $centre
+    ): Application|Response|RedirectResponse|ResponseFactory {
         $programme = (int)$request->input('programme', 0);
 
         // Get User
@@ -73,7 +95,7 @@ class CentreController extends Controller
             // Set for specified centre
             $centre_ids = [$centre->id];
             $dateFormats = [
-                'dob' => 'm/Y'
+                'dob' => 'm/Y',
             ];
             $excludeColumns = [
                 'Active',
@@ -86,17 +108,16 @@ class CentreController extends Controller
             $excludeColumns = [];
         }
 
-        $summary = ($programme)
-            ? $this->getCentreSPRegistrationsSummary($centre_ids, $dateFormats, $excludeColumns, $programme)
-            : $this->getCentreFamilyRegistrationsSummary($centre_ids, $dateFormats, $excludeColumns, $programme)
-        ;
+        $this->dateFormats = array_merge($this->defaultDateFormats, $dateFormats);
+        $this->excludeColumns = $excludeColumns;
+        $this->programme = $programme;
+        $this->labelType = $programme ? 'sp' : 'family';
 
-        list($rows, $headers) = $summary;
+
+        [$rows, $headers] = $this->generate($centre_ids);
 
         if (count($headers) < 1 || count($rows) < 1) {
-            return redirect()
-                ->route('store.dashboard')
-                ->with('error_message', 'No Registrations in that centre.');
+            return redirect()->route('store.dashboard')->with('error_message', 'No Registrations in that centre.');
         }
 
         $tmp = fopen('php://temp', 'r+');
@@ -108,458 +129,250 @@ class CentreController extends Controller
         $csv = stream_get_contents($tmp);
         fclose($tmp);
 
-        return response(
-            $csv,
-            200,
-            [
-                'Content-Type' => "text/csv",
-                'Content-Disposition' => 'attachment; filename="RegSummary_' . Carbon::now()->format('YmdHis') . '.csv"',
-                'Expires' => Carbon::createFromTimestamp(0)->format('D, d M Y H:i:s'),
-                'Last-Modified' => Carbon::now()->format('D, d M Y H:i:s'),
-                'Cache-Control' => 'cache, must-revalidate',
-                'Pragma' => 'public',
-            ]
-        );
+        return response($csv, 200, [
+            'Content-Type' => "text/csv",
+            'Content-Disposition' => 'attachment; filename="RegSummary_' . Carbon::now()->format('YmdHis') . '.csv"',
+            'Expires' => Carbon::createFromTimestamp(0)->format('D, d M Y H:i:s'),
+            'Last-Modified' => Carbon::now()->format('D, d M Y H:i:s'),
+            'Cache-Control' => 'cache, must-revalidate',
+            'Pragma' => 'public',
+        ]);
     }
 
-    /**
-     * Returns array of formatted data about the Centre's Registrations
-     *
-     * @param array $centre_ids
-     * @param array $dateFormats
-     * @param array $excludeColumns
-     * @return array
-     */
-    private function getCentreFamilyRegistrationsSummary(array $centre_ids, $dateFormats = [], $excludeColumns = [], $programme = 0)
+    // Generate summary rows and headers based on centreIDs
+
+    public function generate(array $centreIds): array
     {
-        $dateFormats = array_replace([
-            'lastCollection' => 'd/m/Y',
-            'due' => 'd/m/Y',
-            'dob' => 'd/m/Y',
-            'join' => 'd/m/Y',
-            'leave' => 'd/m/Y',
-            'eligible_from' => 'd/m/Y',
-            'rejoin' => 'd/m/Y',
-        ], $dateFormats);
-
-        // Get registrations decorated - may no longer be terribly efficient.
-        /** @var Collection $registrations */
-        $registrations = Registration::withFullFamily()
-            ->whereIn(
-                'centre_id',
-                $centre_ids
-            )
-            ->with(['centre', 'centre.sponsor'])
-            ->get();
-
+        $registrations = $this->getRegistrations($centreIds);
         $rows = [];
         $headers = [];
 
-        // Per registration...
-        foreach ($registrations as $reg) {
-            $lastCollection = $reg->bundles()
-                ->whereNotNull('disbursed_at')
-                ->orderBy('disbursed_at', 'desc')
-                ->first();
+        foreach ($registrations as $registration) {
+            $row = $this->buildBaseRow($registration);
+            $childrenData = $this->processChildren($registration);
 
-            $lastCollectionDate = $lastCollection
-                ? $lastCollection->disbursed_at
-                : null;
-
-			// Get full carer details as we need ethnicity and language
-			$pri_carer_full = Carer::where('name', $reg->family->pri_carer)->first(['name', 'ethnicity', 'language']);
-			$pri_carer_ethnicity = config('arc.ethnicity_desc.' . $pri_carer_full->ethnicity);
-
-			if ($pri_carer_full->language === null) {
-				// then they haven't answered
-				$main_language = 'not answered';
-				$other_language = '';
-			} elseif ($pri_carer_full->language !== 'english') {
-				// record main language as 'other' then add extra column for actual language
-				$main_language = 'other';
-				$other_language = strtolower($pri_carer_full->language);
-			} else {
-				// english and blank 'other language'
-				$main_language = strtolower($pri_carer_full->language);
-				$other_language = '';
-			}
-
-            // Null coalesce `??` does not trigger `Trying to get property of non-object` explosions
-            $row = [
-                'RVID' => ($reg->family->rvid) ?? 'Family not found',
-                'Area' => ($reg->centre->sponsor->name) ?? 'Area not found',
-                'Centre' => ($reg->centre->name) ?? 'Centre not found',
-                'Primary Carer' => ($reg->family->pri_carer) ?? 'Primary Carer not Found',
-                'Ethnicity' => ($pri_carer_ethnicity) ?? 'not answered',
-                'Main Language' => $main_language,
-                'Other Language' => $other_language,
-                'Entitlement' => $reg->getValuation()->getEntitlement(),
-                'Last Collection' => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format($dateFormats['lastCollection']) : null,
-                'Active' => ($reg->isActive()) ? 'true' : 'false'
-            ];
-
-
-            // Per child dependent things
-            $kids = [];
-            $due_date = null;
-            $eligibleKids = 0;
-            // Total includes pregnancies
-            $totalKids = 0;
-
-            // Evaluate it.
-            $regValuation = $reg->valuatation;
-
-            if ($programme) {
-                $pri_carer = $reg->family->children->firstWhere('is_pri_carer', 1);
-                $dob_header = 'Main Carer DoB';
-                if ($pri_carer) {
-                    $kids[$dob_header] = $pri_carer->dob->lastOfMonth()->format($dateFormats['dob']);
-                }
+            $fullRow = array_merge(
+                $row,
+                $childrenData['child_rows'],
+                $this->addProgrammeSpecificFields($registration, $childrenData)
+            );
+            // Remove excluded columns
+            foreach ($this->excludeColumns as $column) {
+                unset($fullRow[$column]);
             }
 
-            if ($reg->family) {
-                /** @var Valuation $familyValuation */
-                $familyValuation = $reg->family->getValuation();
-                $child_index = 1;
-                $totalKids = count($reg->family->children);
-                foreach ($reg->family->children as $child) {
-                    if (!$programme || !$child->is_pri_carer) {
-                        // Will run a child valuation if we don't already have one.
-                        /** @var Valuation $childValuation */
-                        $childValuation = $child->getValuation();
-
-                        if ($child->dob->isFuture()) {
-                            // If it's a pregnancy, set due date and move on.
-                            $due_date = $child->dob->format($dateFormats['dob']);
-                        } else {
-                            // Otherwise, set the header
-                            $dob_header = Child::getAlias($programme) . ' ' . (string)$child_index . ' DoB';
-                            $kids[$dob_header] = $child->dob->lastOfMonth()->format($dateFormats['dob']);
-                            $child_index += 1;
-                            // A child is eligible if it's family is AND it has no disqualifications of it's own.
-                            if ($familyValuation->getEligibility() && $childValuation->getEligibility()) {
-                                $eligibleKids += 1;
-                            }
-                        }
-                    }
-                }
-            }
-            if ($programme) {
-                // Add count of eligible household members
-                $row['Eligible Household Members'] = $eligibleKids;
-            } else {
-                // Add total including pregnancies
-                $row['Total Children'] = $totalKids;
-                // Add count of eligible kids
-                $row['Eligible Children'] = $eligibleKids;
+            if (count($headers) < count($fullRow)) {
+                $headers = array_keys($fullRow);
             }
 
-
-            // Add our kids back in
-            $row = array_merge($row, $kids);
-
-            // Calculate number of days on programme
-            if ($reg->family->leaving_on && !$reg->family->rejoin_on) {
-                $startDate = Carbon::parse($reg->created_at);
-                $leaveDate = Carbon::parse($reg->family->leaving_on);
-                $diff = (int) $startDate->diffInDays($leaveDate);
-            } elseif ($reg->family->rejoin_on) {
-                $startDate = Carbon::parse($reg->created_at);
-                $leaveDate = Carbon::parse($reg->family->leaving_on);
-                $rejoinDate = Carbon::parse($reg->family->rejoin_on);
-                $now = Carbon::now();
-                $firstCount = (int) $startDate->diffInDays($leaveDate);
-                $secondCount = (int) $rejoinDate->diffInDays($now);
-                $diff = $firstCount + $secondCount;
-            } else {
-                $diff = false;
-            }
-
-            // Set the last dates.
-            if (!$programme) {
-                $row['Due Date'] = $due_date;
-            }
-            $row['Join Date'] = $reg->created_at ? $reg->created_at->format($dateFormats['join']) : null;
-            $row['Leaving Date'] = $reg->family->leaving_on ? $reg->family->leaving_on->format($dateFormats['leave']) : null;
-            // Would be confusing if an old reason was left in - so check leaving date is there.
-            $row["Leaving Reason"] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
-            $row['Rejoin Date'] = $reg->family->rejoin_on ? $reg->family->rejoin_on->format($dateFormats['rejoin']) : null;
-            $row['Days on programme'] = $diff ?? null;
-            $row['Leave Count'] = $reg->family->leave_amount ?? null;
-            if (!$programme) {
-                $row["Family Eligibility (HSBS)"] = ($reg->eligibility_hsbs) ?? null;
-                $row["Family Eligibility (NRPF)"] = (ucfirst($reg->eligibility_nrpf)) ?? null;
-                $row["Eligible From"] = ($reg->eligible_from) ? $reg->eligible_from->format($dateFormats['eligible_from']): null;
-            }
-
-            // Create the Date Downloaded column if this user can export registrations
-            if (!in_array('Date file was Downloaded', $excludeColumns, true)) {
-                $row['Date file was Downloaded'] = Carbon::today()->toDateString();
-            };
-
-            // Remove any keys we don't want
-            foreach ($excludeColumns as $excludeColumn) {
-                unset($row[$excludeColumn]);
-            }
-
-            // Update the headers if necessary...
-            if (count($headers) < count($row)) {
-                $headers = array_keys($row);
-            }
-
-            // And add to the list.
-            $rows[] = $row;
+            $rows[] = $fullRow;
         }
 
-        // Sort the columns
-        usort($rows, function ($a, $b) use ($dateFormats) {
-            // If we haven't ever collected, with unix epoch start (far past)
-            $aActiveDate = ($a['Last Collection'])
-                ? Carbon::createFromFormat($dateFormats['lastCollection'], $a['Last Collection'])
-                : Carbon::parse('1970-01-01');
-
-            $bActiveDate = ($b['Last Collection'])
-                ? Carbon::createFromFormat($dateFormats['lastCollection'], $b['Last Collection'])
-                : Carbon::parse('1970-01-01');
-            if (!isset($a['Centre'])) {
-                $a['Centre'] = '';
-            }
-            $hashA = strtolower(
-                $a['Area'] . '#' .
-                $a['Centre'] . '#' .
-                $aActiveDate->toDateString() . '#' .
-                $a['Primary Carer']
-            );
-            if (!isset($b['Centre'])) {
-                $b['Centre'] = '';
-            }
-            $hashB = strtolower(
-                $b['Area'] . '#' .
-                $b['Centre'] . '#' .
-                $bActiveDate->toDateString() . '#' .
-                $b['Primary Carer']
-            );
-            // PHP 7 feature; comparison "spaceship" opertator "<=>" : returns -1/0/1
-            return $hashA <=> $hashB;
-        });
-
-        // en-sparsen the rows with empty fields for unused header.
-        foreach ($rows as $index => $row) {
-            $sparse_row = [];
-            foreach ($headers as $header) {
-                $sparse_row[$header] = (array_key_exists($header, $row)) ? $row[$header] : null;
-            }
-            // Key/value order matters to laravel-excel - Does this still matter?
-            $rows[$index] = $sparse_row;
-        }
-
-        return [$rows, $headers];
+        return $this->sortRows($rows, $headers);
     }
 
-    /**
-     * Returns array of formatted data about the Centre's Registrations
-     *
-     * @param array $centre_ids
-     * @param array $dateFormats
-     * @param array $excludeColumns
-     * @return array
-     */
-    private function getCentreSPRegistrationsSummary(array $centre_ids, $dateFormats = [], $excludeColumns = [], $programme = 0)
+    // methods used by both report types
+
+    protected function getRegistrations(array $centreIds): Collection
     {
-        $dateFormats = array_replace([
-            'lastCollection' => 'd/m/Y',
-            'due' => 'd/m/Y',
-            'dob' => 'd/m/Y',
-            'join' => 'd/m/Y',
-            'leave' => 'd/m/Y',
-            'eligible_from' => 'd/m/Y',
-            'rejoin' => 'd/m/Y',
-        ], $dateFormats);
+        return Registration::withFullFamily()->whereIn('centre_id', $centreIds)->with([
+            'centre',
+            'centre.sponsor',
+        ])->get();
+    }
 
-        // Get registrations decorated - may no longer be terribly efficient.
-        /** @var Collection $registrations */
-        $registrations = Registration::withFullFamily()
-            ->whereIn(
-                'centre_id',
-                $centre_ids
-            )
-            ->with(['centre', 'centre.sponsor'])
-            ->get();
+    protected function buildBaseRow(Registration $registration): array
+    {
+        $lastCollection = $this->getLastCollectionDate($registration);
+        $label = $this->labels[$this->labelType];
 
-        $rows = [];
-        $headers = [];
+        return [
+            'RVID' => $registration->family->rvid ?? "{$label['rvid']} not found",
+            'Area' => $registration->centre->sponsor->name ?? 'Area not found',
+            'Centre' => $registration->centre->name ?? 'Centre not found',
+            $label['carer'] => $registration->family->pri_carer ?? "{$label['carer']} not found",
+            'Entitlement' => $registration->getValuation()->getEntitlement(),
+            'Last Collection' => $lastCollection ? $lastCollection->format($this->dateFormats['lastCollection']) : null,
+            'Active' => $registration->isActive() ? 'true' : 'false',
+        ];
+    }
 
-        // Per registration...
-        foreach ($registrations as $reg) {
-            $lastCollection = $reg->bundles()
-                ->whereNotNull('disbursed_at')
-                ->orderBy('disbursed_at', 'desc')
-                ->first();
+    protected function getLastCollectionDate(Registration $registration)
+    {
+        $lastCollection = $registration->bundles()->whereNotNull('disbursed_at')->orderBy(
+            'disbursed_at',
+            'desc'
+        )->first();
+        return $lastCollection?->disbursed_at;
+    }
 
-            $lastCollectionDate = $lastCollection
-                ? $lastCollection->disbursed_at
-                : null;
+    protected function processChildren(Registration $registration): array
+    {
+        $result = [
+            'child_rows' => [],
+            'due_date' => null,
+            'eligible_count' => 0,
+            'total_count' => 0,
+        ];
 
-            // Null coalesce `??` does not trigger `Trying to get property of non-object` explosions
-            $row = [
-                'RVID' => ($reg->family->rvid) ?? 'Household not found',
-                'Area' => ($reg->centre->sponsor->name) ?? 'Area not found',
-                'Centre' => ($reg->centre->name) ?? 'Centre not found',
-                'Main Participant' => ($reg->family->pri_carer) ?? 'Main Participant not Found',
-                'Entitlement' => $reg->getValuation()->getEntitlement(),
-                'Last Collection' => (!is_null($lastCollectionDate)) ? $lastCollectionDate->format($dateFormats['lastCollection']) : null,
-                'Active' => ($reg->isActive()) ? 'true' : 'false'
-            ];
-
-            // Per child dependent things
-            $kids = [];
-            $due_date = null;
-            $eligibleKids = 0;
-
-            // Evaluate it.
-            $regValuation = $reg->valuatation;
-
-            if ($programme) {
-                $pri_carer = $reg->family->children->firstWhere('is_pri_carer', 1);
-                $dob_header = 'Main Participant DoB';
-                if ($pri_carer) {
-                    $kids[$dob_header] = $pri_carer->dob->lastOfMonth()->format($dateFormats['dob']);
-                }
-            }
-
-            if ($reg->family) {
-                /** @var Valuation $familyValuation */
-                $familyValuation = $reg->family->getValuation();
-                $child_index = 1;
-                foreach ($reg->family->children as $child) {
-                    if (!$programme || !$child->is_pri_carer) {
-                        // Will run a child valuation if we don't already have one.
-                        /** @var Valuation $childValuation */
-                        $childValuation = $child->getValuation();
-
-                        if ($child->dob->isFuture()) {
-                            // If it's a pregnancy, set due date and move on.
-                            $due_date = $child->dob->format($dateFormats['dob']);
-                        } else {
-                            // Otherwise, set the header
-                            $dob_header = "Household member $child_index DoB";
-                            $kids[$dob_header] = $child->dob->lastOfMonth()->format($dateFormats['dob']);
-                            $child_index += 1;
-                            // A child is eligible if it's family is AND it has no disqualifications of it's own.
-                            if ($familyValuation->getEligibility() && $childValuation->getEligibility()) {
-                                $eligibleKids += 1;
-                            }
-                        }
-                    }
-                }
-            }
-            if ($programme) {
-                // Add count of eligible household members
-                $row['Eligible Household Members'] = $eligibleKids;
-            } else {
-                // Add count of eligible kids
-                $row['Eligible Children'] = $eligibleKids;
-            }
-
-
-            // Add our kids back in
-            $row = array_merge($row, $kids);
-
-            // Calculate number of days on programme
-            if ($reg->family->leaving_on && !$reg->family->rejoin_on) {
-                $startDate = Carbon::parse($reg->created_at);
-                $leaveDate = Carbon::parse($reg->family->leaving_on);
-                $diff = (int) $startDate->diffInDays($leaveDate);
-            } elseif ($reg->family->rejoin_on) {
-                $startDate = Carbon::parse($reg->created_at);
-                $leaveDate = Carbon::parse($reg->family->leaving_on);
-                $rejoinDate = Carbon::parse($reg->family->rejoin_on);
-                $now = Carbon::now();
-                $firstCount = (int) $startDate->diffInDays($leaveDate);
-                $secondCount = (int) $rejoinDate->diffInDays($now);
-                $diff = $firstCount + $secondCount;
-            } else {
-                $diff = false;
-            }
-
-            // Set the last dates.
-            if (!$programme) {
-                $row['Due Date'] = $due_date;
-            }
-            $row['Join Date'] = $reg->created_at ? $reg->created_at->format($dateFormats['join']) : null;
-            $row['Leaving Date'] = $reg->family->leaving_on ? $reg->family->leaving_on->format($dateFormats['leave']) : null;
-            // Would be confusing if an old reason was left in - so check leaving date is there.
-            $row["Leaving Reason"] = $reg->family->leaving_on ? $reg->family->leaving_reason : null;
-            $row['Rejoin Date'] = $reg->family->rejoin_on ? $reg->family->rejoin_on->format($dateFormats['rejoin']) : null;
-            $row['Days on programme'] = $diff ?? null;
-            $row['Leave Count'] = $reg->family->leave_amount ?? null;
-            if (!$programme) {
-                $row["Family Eligibility (HSBS)"] = ($reg->eligibility_hsbs) ?? null ;
-                $row["Family Eligibility (NRPF)"] = ($reg->eligibility_nrpf) ?? null ;
-                $row["Eligible From"] = ($reg->eligible_from) ? $reg->eligible_from->format($dateFormats['eligible_from']): null;
-            }
-
-            // Create the Date Downloaded column if this user can export registrations
-            if (!in_array('Date file was Downloaded', $excludeColumns, true)) {
-                $row['Date file was Downloaded'] = Carbon::today()->format('Y-m-d');
-            }
-
-            // Remove any keys we don't want
-            foreach ($excludeColumns as $excludeColumn) {
-                unset($row[$excludeColumn]);
-            }
-
-            // Update the headers if necessary...
-            if (count($headers) < count($row)) {
-                $headers = array_keys($row);
-            }
-
-            // And add to the list.
-            $rows[] = $row;
+        if (!$registration->family) {
+            return $result;
         }
 
-        // Sort the columns
-        usort($rows, function ($a, $b) use ($dateFormats) {
-            // If we haven't ever collected, with unix epoch start (far past)
-            $aActiveDate = ($a['Last Collection'])
-                ? Carbon::createFromFormat($dateFormats['lastCollection'], $a['Last Collection'])
-                : Carbon::parse('1970-01-01');
+        $familyValuation = $registration->family->getValuation();
+        $childIndex = 1;
 
-            $bActiveDate = ($b['Last Collection'])
-                ? Carbon::createFromFormat($dateFormats['lastCollection'], $b['Last Collection'])
-                : Carbon::parse('1970-01-01');
+        if ($this->programme === 1) {
+            $pri_carer = $registration->family->children->firstWhere('is_pri_carer', 1);
+            if (!empty($pri_carer)) {
+                $result['child_rows']['Main Participant DoB'] = $pri_carer
+                    ->dob
+                    ->lastOfMonth()
+                    ->format($this->dateFormats['dob']);
+            }
+        }
 
-            if (!isset($a['Centre'])) {
-                $a['Centre'] = '';
+        foreach ($registration->family->children as $child) {
+            if ($this->programme && $child->is_pri_carer) {
+                continue;
             }
-            $hashA = strtolower(
-                $a['Area'] . '#' .
-                $a['Centre'] . '#' .
-                $aActiveDate->toDateString() . '#' .
-                $a['Main Participant']
-            );
-            if (!isset($b['Centre'])) {
-                $b['Centre'] = '';
+
+            if ($child->dob->isFuture()) {
+                $result['due_date'] = $child->dob->format($this->dateFormats['dob']);
+                continue;
             }
-            $hashB = strtolower(
-                $b['Area'] . '#' .
-                $b['Centre'] . '#' .
-                $bActiveDate->toDateString() . '#' .
-                $b['Main Participant']
-            );
-            // PHP 7 feature; comparison "spaceship" opertator "<=>" : returns -1/0/1
-            return $hashA <=> $hashB;
+
+            $header = sprintf($this->labels[$this->labelType]['dob_header'], $childIndex);
+            $result['child_rows'][$header] = $child->dob->lastOfMonth()->format($this->dateFormats['dob']);
+            $childIndex++;
+
+            if ($familyValuation->getEligibility() && $child->getValuation()->getEligibility()) {
+                $result['eligible_count']++;
+            }
+
+            $result['total_count']++;
+        }
+
+        return $result;
+    }
+
+    protected function addProgrammeSpecificFields(Registration $registration, array $childrenData): array
+    {
+        $family = $registration->family;
+
+        $fields = [
+            'Join Date' => $registration->created_at->format($this->dateFormats['join']),
+            'Leaving Date' => $family->leaving_on?->format($this->dateFormats['leave']),
+            'Leaving Reason' => $family->leaving_reason ?? null,
+            'Rejoin Date' => $family->rejoin_on?->format($this->dateFormats['rejoin']),
+            'Days on programme' => $this->calculateDaysOnProgramme($registration),
+            'Leave Count' => $family->leave_amount ?? null,
+        ];
+
+        switch ($this->programme) {
+            case 0: // Family mode
+                $fields = [
+                    ...$fields,
+                    'Due Date' => $childrenData['due_date'],
+                    'Total Children' => $childrenData['total_count'],
+                    'Eligible Children' => $childrenData['eligible_count'],
+                    'Family Eligibility (HSBS)' => $registration->eligibility_hsbs ?? null,
+                    'Family Eligibility (NRPF)' => ucfirst($registration->eligibility_nrpf ?? ''),
+                    'Eligible From' => $registration->eligible_from?->format($this->dateFormats['eligible_from']),
+                    ...$this->getCarerDetails($registration),
+                ];
+                break;
+            case 1: // SP mode
+                $fields = [
+                    ...$fields,
+                    'Eligible Household Members' => $childrenData['eligible_count'],
+                ];
+                break;
+            default:
+                break;
+        }
+
+        if (!in_array('Date file was Downloaded', $this->excludeColumns, true)) {
+            $fields['Date file was Downloaded'] = Carbon::today()->toDateString();
+        }
+
+        return $fields;
+    }
+
+    protected function calculateDaysOnProgramme(Registration $registration): ?int
+    {
+        $family = $registration->family;
+
+        $startDate = $registration->created_at;
+        $leaveDate = $family->leaving_on;
+        $rejoinDate = $family->rejoin_on;
+
+        if ($leaveDate && !$rejoinDate) {
+            return $startDate->diffInDays($leaveDate);
+        }
+
+        if ($rejoinDate) {
+            return $startDate->diffInDays($leaveDate) + $rejoinDate->diffInDays(now());
+        }
+        return null;
+    }
+
+    protected function getCarerDetails(Registration $registration): array
+    {
+        $carer = $registration->family->carers()->first(['ethnicity', 'language']);
+
+        $language = 'not answered';
+        $otherLanguage = '';
+
+        if ($carer && $carer->language !== null) {
+            $language = ($carer->language === 'english') ? 'english' : 'other';
+            $otherLanguage = ($language === 'other') ? strtolower($carer->language) : '';
+        }
+
+        return [
+            'Ethnicity' => config('arc.ethnicity_desc.' . ($carer->ethnicity ?? '')),
+            'Main Language' => $language,
+            'Other Language' => $otherLanguage,
+        ];
+    }
+
+    protected function sortRows(array $rows, array $headers): array
+    {
+        $carerKey = $this->labels[$this->labelType]['carer'];
+        $dateFormat = $this->dateFormats['lastCollection'];
+
+        $parseDate = static function (?string $date) use ($dateFormat) {
+            try {
+                return $date ? Carbon::createFromFormat($dateFormat, $date) : Carbon::create(1970, 1, 1);
+            } catch (Exception $e) {
+                return Carbon::create(1970, 1, 1);
+            }
+        };
+
+        usort($rows, static function ($a, $b) use ($parseDate, $carerKey) {
+            $aDate = $parseDate($a['Last Collection']);
+            $bDate = $parseDate($b['Last Collection']);
+
+            $aHash = strtolower(implode('#', [
+                $a['Area'] ?? '',
+                $a['Centre'] ?? '',
+                $aDate->toDateString(),
+                $a[$carerKey] ?? '',
+            ]));
+
+            $bHash = strtolower(implode('#', [
+                $b['Area'] ?? '',
+                $b['Centre'] ?? '',
+                $bDate->toDateString(),
+                $b[$carerKey] ?? '',
+            ]));
+
+            return $aHash <=> $bHash;
         });
 
-        // en-sparsen the rows with empty fields for unused header.
-        foreach ($rows as $index => $row) {
-            $sparse_row = [];
-            foreach ($headers as $header) {
-                $sparse_row[$header] = (array_key_exists($header, $row)) ? $row[$header] : null;
-            }
-            // Key/value order matters to laravel-excel - Does this still matter?
-            $rows[$index] = $sparse_row;
-        }
+        $rows = array_map(static function ($row) use ($headers) {
+            return [...array_fill_keys($headers, null), ...$row];
+        }, $rows);
 
         return [$rows, $headers];
     }
