@@ -24,7 +24,7 @@
     "barryvdh/laravel-debugbar": "v3.16.1",
     "barryvdh/laravel-dompdf": "v3.1.1",
     "fakerphp/faker": "1.24.1",
-    "highsolutions/laravel-searchy": "11.0",
+    "highsolutions/laravel-searchy": "12.0",
     "imtigger/laravel-job-status": "1.2.0",
     "laravel/framework": "v11.46.2",
     "laravel/helpers": "v1.8.2",
