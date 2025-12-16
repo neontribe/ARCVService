@@ -70,8 +70,8 @@ class SponsorsController extends Controller
             abort(404);
         }
         $sponsor = Sponsor::find($id);
-        $householdExistsValue = $sponsor?->evaluations->where('name', 'HouseholdExists')->pluck('value') ?? collect();
-        $householdMemberValue = $sponsor?->evaluations->where('name', 'HouseholdMember')->pluck('value') ?? collect();
+        $householdExistsValue = $sponsor?->evaluations->where('name', 'HouseholdExists')->first()->value ?? 0;
+        $householdMemberValue = $sponsor?->evaluations->where('name', 'HouseholdMember')->first()->value ?? 0;
         return view('service.sponsors.edit', compact('sponsor', 'householdExistsValue', 'householdMemberValue'));
     }
 
