@@ -8,10 +8,9 @@ use App\Http\Requests\UpdateRulesRequest;
 use App\Evaluation;
 use App\Sponsor;
 use Auth;
-use DB;
+use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -19,35 +18,19 @@ use Log;
 
 class SponsorsController extends Controller
 {
-    /**
-     * Display a listing of Sponsors.
-     *
-     * @return Factory|View
-     */
-    public function index()
+    public function index(): Factory|View
     {
         $sponsors = Sponsor::get();
 
         return view('service.sponsors.index', compact('sponsors'));
     }
 
-      /**
-     * Show the form for creating new Sponsors.
-     *
-     * @return Factory|View
-     */
-    public function create()
+    public function create(): Factory|View
     {
         return view('service.sponsors.create');
     }
 
-    /**
-     * Store a Sponsor
-     *
-     * @param AdminNewSponsorRequest $request
-     * @return RedirectResponse
-     */
-    public function store(AdminNewSponsorRequest $request)
+    public function store(AdminNewSponsorRequest $request): RedirectResponse
     {
         // Validation done already
         $sponsor = new Sponsor([
@@ -73,14 +56,9 @@ class SponsorsController extends Controller
             ->with('message', 'Sponsor ' . $sponsor->name . ' created.');
     }
 
-    /**
-     * Show the form for editing an SP Sponsor's rule values.
-     *
-     * @return Factory|View
-     */
-    public function edit($id)
+    public function edit($id): Factory|View
     {
-        $validation = Validator::make(['id' => $id],[
+        $validation = Validator::make(['id' => $id], [
             'id' => [
                 'required',
                 'integer',
@@ -92,44 +70,39 @@ class SponsorsController extends Controller
             abort(404);
         }
         $sponsor = Sponsor::find($id);
-        $householdExistsValue = $sponsor->evaluations->where('name', 'HouseholdExists')->pluck('value');
-        $householdMemberValue = $sponsor->evaluations->where('name', 'HouseholdMember')->pluck('value');
+        $householdExistsValue = $sponsor?->evaluations->where('name', 'HouseholdExists')->pluck('value') ?? collect();
+        $householdMemberValue = $sponsor?->evaluations->where('name', 'HouseholdMember')->pluck('value') ?? collect();
         return view('service.sponsors.edit', compact('sponsor', 'householdExistsValue', 'householdMemberValue'));
     }
 
-    /**
-     * Update an SP Sponsor's rule values.
-     *
-     * @return Factory|View
-     */
-    public function update(UpdateRulesRequest $request, int $id)
+    public function update(UpdateRulesRequest $request, int $id): RedirectResponse
     {
-      $sponsor = Sponsor::findOrFail($id);
-      try {
-          Evaluation::where('sponsor_id', $id)
+        $sponsor = Sponsor::findOrFail($id);
+        try {
+            Evaluation::where('sponsor_id', $id)
               ->where('name', 'HouseholdExists')
               ->update(['value' => (int)$request->input('householdExistsValue')]);
-          Evaluation::where('sponsor_id', $id)
+            Evaluation::where('sponsor_id', $id)
               ->where('name', 'HouseholdMember')
               ->update(['value' => (int)$request->input('householdMemberValue')]);
-          Evaluation::where('sponsor_id', $id)
+            Evaluation::where('sponsor_id', $id)
               ->where('name', 'DeductFromCarer')
               ->update(['value' => (int)$request->input('householdMemberValue') * -1]);
-      } catch (Exception $e) {
-          // Oops! Log that
-          Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
-          Log::error($e->getTraceAsString());
-          // Throw it back to the user
-          return redirect()
+        } catch (Exception $e) {
+            // Oops! Log that
+            Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+            Log::error($e->getTraceAsString());
+            // Throw it back to the user
+            return redirect()
               ->route('admin.sponsors.index')
               ->withErrors('Update failed - DB Error.');
-      }
-      return redirect()
+        }
+        return redirect()
           ->route('admin.sponsors.index')
           ->with('message', 'Sponsor ' . $sponsor->name . ' rule values edited');
     }
 
-    public static function scottishFamilyOverrides()
+    public static function scottishFamilyOverrides(): array
     {
         return [
             // Scotland has 4 not 3
@@ -188,7 +161,7 @@ class SponsorsController extends Controller
             // Get rid of this rule
             new Evaluation([
                     "name" => "ChildIsAlmostPrimarySchoolAge",
-                    "value" => NULL,
+                    "value" => null,
                     "purpose" => "notices",
                     "entity" => "App\Child",
             ]),
@@ -214,7 +187,7 @@ class SponsorsController extends Controller
         ];
     }
 
-    public static function socialPrescribingOverrides()
+    public static function socialPrescribingOverrides(): array
     {
         return [
             new Evaluation([
@@ -261,16 +234,16 @@ class SponsorsController extends Controller
             ]),
             new Evaluation([
                 "name" => "ChildIsAlmostPrimarySchoolAge",
-                "value" => NULL,
+                "value" => null,
                 "purpose" => "notices",
                 "entity" => "App\Child",
             ]),
             new Evaluation([
                 "name" => "ChildIsAlmostOne",
-                "value" => NULL,
+                "value" => null,
                 "purpose" => "notices",
                 "entity" => "App\Child",
-            ]),
+            ]),``
         ];
     }
 }
