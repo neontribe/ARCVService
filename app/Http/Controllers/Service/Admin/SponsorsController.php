@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Service\Admin;
 
+use App\Evaluation;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminNewSponsorRequest;
 use App\Http\Requests\UpdateRulesRequest;
-use App\Evaluation;
 use App\Sponsor;
 use Auth;
-use DB;
+use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -19,35 +20,33 @@ use Log;
 
 class SponsorsController extends Controller
 {
-    /**
-     * Display a listing of Sponsors.
-     *
-     * @return Factory|View
-     */
-    public function index()
+    public static function scottishFamilyOverrides(): array
+    {
+        return Arr::map(Config::get('evaluations.overrides.scottish-family'), static function (array $item) {
+            return new Evaluation($item);
+        });
+    }
+
+    public static function socialPrescribingOverrides(): array
+    {
+        return Arr::map(Config::get('evaluations.overrides.social-prescribing', []), static function (array $item) {
+            return new Evaluation($item);
+        });
+    }
+
+    public function index(): Factory|View
     {
         $sponsors = Sponsor::get();
 
         return view('service.sponsors.index', compact('sponsors'));
     }
 
-      /**
-     * Show the form for creating new Sponsors.
-     *
-     * @return Factory|View
-     */
-    public function create()
+    public function create(): Factory|View
     {
         return view('service.sponsors.create');
     }
 
-    /**
-     * Store a Sponsor
-     *
-     * @param AdminNewSponsorRequest $request
-     * @return RedirectResponse
-     */
-    public function store(AdminNewSponsorRequest $request)
+    public function store(AdminNewSponsorRequest $request): RedirectResponse
     {
         // Validation done already
         $sponsor = new Sponsor([
@@ -62,215 +61,79 @@ class SponsorsController extends Controller
             // Oops! Log that
             Log::error('Bad save for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             // Throw it back to the user
-            return redirect()
-                ->route('admin.sponsors.create')
-                ->withErrors('Creation failed - DB Error.');
+            return redirect()->route('admin.sponsors.create')->withErrors('Creation failed - DB Error.');
         }
 
         // Send to index with a success message
-        return redirect()
-            ->route('admin.sponsors.index')
-            ->with('message', 'Sponsor ' . $sponsor->name . ' created.');
+        return redirect()->route('admin.sponsors.index')->with('message', 'Sponsor ' . $sponsor->name . ' created.');
     }
 
-    /**
-     * Show the form for editing an SP Sponsor's rule values.
-     *
-     * @return Factory|View
-     */
-    public function edit($id)
+    public function edit($id): Factory|View
     {
-        $validation = Validator::make(['id' => $id],[
+        $validation = Validator::make(['id' => $id], [
             'id' => [
                 'required',
                 'integer',
-                Rule::exists('sponsors', 'id')
-                ->where('programme', 1),
+                Rule::exists('sponsors', 'id')->where('programme', 1),
             ],
         ]);
         if ($validation->fails()) {
             abort(404);
         }
         $sponsor = Sponsor::find($id);
-        $householdExistsValue = $sponsor->evaluations->where('name', 'HouseholdExists')->pluck('value');
-        $householdMemberValue = $sponsor->evaluations->where('name', 'HouseholdMember')->pluck('value');
+        $householdExistsValue = $sponsor?->evaluations->where('name', 'HouseholdExists')->first()->value ?? 0;
+        $householdMemberValue = $sponsor?->evaluations->where('name', 'HouseholdMember')->first()->value ?? 0;
         return view('service.sponsors.edit', compact('sponsor', 'householdExistsValue', 'householdMemberValue'));
     }
 
-    /**
-     * Update an SP Sponsor's rule values.
-     *
-     * @return Factory|View
-     */
-    public function update(UpdateRulesRequest $request, int $id)
+    public function update(UpdateRulesRequest $request, int $id): RedirectResponse
     {
-      $sponsor = Sponsor::findOrFail($id);
-      try {
-          Evaluation::where('sponsor_id', $id)
-              ->where('name', 'HouseholdExists')
-              ->update(['value' => (int)$request->input('householdExistsValue')]);
-          Evaluation::where('sponsor_id', $id)
-              ->where('name', 'HouseholdMember')
-              ->update(['value' => (int)$request->input('householdMemberValue')]);
-          Evaluation::where('sponsor_id', $id)
-              ->where('name', 'DeductFromCarer')
-              ->update(['value' => (int)$request->input('householdMemberValue') * -1]);
-      } catch (Exception $e) {
-          // Oops! Log that
-          Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
-          Log::error($e->getTraceAsString());
-          // Throw it back to the user
-          return redirect()
-              ->route('admin.sponsors.index')
-              ->withErrors('Update failed - DB Error.');
-      }
-      return redirect()
-          ->route('admin.sponsors.index')
-          ->with('message', 'Sponsor ' . $sponsor->name . ' rule values edited');
-    }
+        $sponsor = Sponsor::findOrFail($id);
 
-    public static function scottishFamilyOverrides()
-    {
-        return [
-            // Scotland has 4 not 3
-            new Evaluation([
-                "name" => "FamilyIsPregnant",
-                "value" => 4,
-                "purpose" => "credits",
-                "entity" => "App\Family",
-            ]),
-            // Scotland has 4 not 3
-            new Evaluation([
-                "name" => "ScottishChildIsBetweenOneAndPrimarySchoolAge",
-                "value" => 4,
-                "purpose" => "credits",
-                "entity" => "App\Child",
-            ]),
-            new Evaluation([
-                "name" => "ChildIsBetweenOneAndPrimarySchoolAge",
-                "value" => null,
-                "purpose" => "credits",
-                "entity" => "App\Child",
-            ]),
-            // Scotland has 4 not 3
-            new Evaluation([
-                "name" => "ScottishChildIsPrimarySchoolAge",
-                "value" => "4",
-                "purpose" => "credits",
-                "entity" => "App\Child",
-            ]),
-            // Turn off ChildIsPrimarySchoolAge rule
-            new Evaluation([
-                "name" => "ChildIsPrimarySchoolAge",
-                "value" => null,
-                "purpose" => "disqualifiers",
-                "entity" => "App\Child",
-            ]),
-            new Evaluation([
-                    "name" => "ScottishFamilyHasNoEligibleChildren",
-                    "value" => 0,
-                    "purpose" => "disqualifiers",
-                    "entity" => "App\Family",
-            ]),
-            new Evaluation([
-                    "name" => "FamilyHasNoEligibleChildren",
-                    "value" => null,
-                    "purpose" => "disqualifiers",
-                    "entity" => "App\Family",
-            ]),
-            // Needs a different check than England
-            new Evaluation([
-                    "name" => "ScottishChildIsAlmostPrimarySchoolAge",
-                    "value" => 0,
-                    "purpose" => "notices",
-                    "entity" => "App\Child",
-            ]),
-            // Get rid of this rule
-            new Evaluation([
-                    "name" => "ChildIsAlmostPrimarySchoolAge",
-                    "value" => NULL,
-                    "purpose" => "notices",
-                    "entity" => "App\Child",
-            ]),
-            // New rule for Scotland
-            new Evaluation([
-                    "name" => "ScottishChildCanDefer",
-                    "value" => 0,
-                    "purpose" => "notices",
-                    "entity" => "App\Child",
-            ]),
-            new Evaluation([
-                "name" => "FamilyHasUnverifiedChildren",
-                "value" => 0,
-                "purpose" => "notices",
-                "entity" => "App\Family",
-            ]),
-            new Evaluation([
-                    "name" => "ChildIsSecondarySchoolAge",
-                    "value" => 0,
-                    "purpose" => "disqualifiers",
-                    "entity" => "App\Child",
-            ]),
-        ];
-    }
+        $updates = collect($request->only(['householdExistsValue', 'householdMemberValue']))
+            // remove null entries
+            ->reject(function ($value) {
+                return is_null($value);
+            })
+            // turn it into keys
+            ->mapWithKeys(function ($value, $key) {
+                return match ($key) {
+                    'householdExistsValue' => ['HouseholdExists' => (int)$value],
+                    'householdMemberValue' => [
+                        'HouseholdMember' => (int)$value,
+                        'DeductFromCarer' => (int)$value * -1,
+                    ],
+                    default => [],
+                };
+            });
 
-    public static function socialPrescribingOverrides()
-    {
-        return [
-            new Evaluation([
-                "name" => "FamilyIsPregnant",
-                "value" => null,
-                "purpose" => "credits",
-                "entity" => "App\Family",
-            ]),
-            new Evaluation([
-                "name" => "ChildIsBetweenOneAndPrimarySchoolAge",
-                "value" => null,
-                "purpose" => "credits",
-                "entity" => "App\Child",
-            ]),
-            new Evaluation([
-                "name" => "ChildIsUnderOne",
-                "value" => null,
-                "purpose" => "credits",
-                "entity" => "App\Child",
-            ]),
-            new Evaluation([
-                "name" => "ChildIsPrimarySchoolAge",
-                "value" => null,
-                "purpose" => "disqualifiers",
-                "entity" => "App\Child",
-            ]),
-            new Evaluation([
-                "name" => "DeductFromCarer",
-                "value" => -7,
-                "purpose" => "credits",
-                "entity" => "App\Family",
-            ]),
-            new Evaluation([
-                "name" => "HouseholdMember",
-                "value" => 7,
-                "purpose" => "credits",
-                "entity" => "App\Child",
-            ]),
-            new Evaluation([
-                "name" => "HouseholdExists",
-                "value" => 10,
-                "purpose" => "credits",
-                "entity" => "App\Family",
-            ]),
-            new Evaluation([
-                "name" => "ChildIsAlmostPrimarySchoolAge",
-                "value" => NULL,
-                "purpose" => "notices",
-                "entity" => "App\Child",
-            ]),
-            new Evaluation([
-                "name" => "ChildIsAlmostOne",
-                "value" => NULL,
-                "purpose" => "notices",
-                "entity" => "App\Child",
-            ]),
-        ];
+        $evals = collect(Config::get('evaluations.overrides.social-prescribing', []));
+
+        foreach ($updates as $key => $value) {
+            // get the defaults
+            $default = $evals->firstWhere('name', $key);
+
+            if (!$default) {
+                continue;
+            }
+
+            $payload = array_merge($default, [
+                'value' => $value,
+                'sponsor_id' => $id,
+            ]);
+
+            try {
+                Evaluation::updateOrCreate(['sponsor_id' => $id, 'name' => $key], $payload);
+            } catch (Exception $e) {
+                Log::error("Failed to update evaluation $key for sponsor #{$id} by user " . Auth::id(), [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+
+                return redirect()->route('admin.sponsors.index')->withErrors('Update failed - DB Error.');
+            }
+        }
+        return redirect()->route('admin.sponsors.index')->with('message',
+                'Sponsor ' . $sponsor->name . ' rule values edited');
     }
 }
