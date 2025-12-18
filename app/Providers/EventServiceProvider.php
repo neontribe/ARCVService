@@ -18,6 +18,9 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\VoucherPaymentRequested' => [
             'App\Listeners\SendVoucherPaymentRequestEmail',
         ],
+        'Illuminate\Auth\Events\Authenticated' => [
+            'App\Listeners\CentreUserAuthenticated',
+        ],
         \SM\Event\SMEvents::POST_TRANSITION => [
             'App\Listeners\StateHistoryManager@postTransition',
         ],
