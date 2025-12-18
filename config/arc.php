@@ -145,6 +145,6 @@ return [
     |--------------------------------------------------------------------------
      */
 
-    'default_to_home_centre' => env('ARC_DEFAULT_TO_HOME_CENTRE', true),
+    'default_to_home_centre' => env('ARC_DEFAULT_TO_HOME_CENTRE', false),
 
 ];
