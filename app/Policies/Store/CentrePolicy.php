@@ -13,7 +13,7 @@ class CentrePolicy
     // Can view the relevant centre...
     public function viewRelevantCentre(CentreUser $user, Centre $centre): bool
     {
-        // ...because it's ours, or a neighbor
+        // ...because it's ours, or a neighbour
         return $user->isRelevantCentre($centre);
     }
 }
