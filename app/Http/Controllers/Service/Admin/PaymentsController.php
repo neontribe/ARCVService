@@ -18,12 +18,14 @@ use Log;
 
 class PaymentsController extends Controller
 {
+    private const HISTORY_CUTOFF = 21;
+
     /** Lightweight check for outstanding payments to highlight in dashboard
      * @return bool
      */
     public static function checkIfOutstandingPayments(): bool
     {
-        $date = Carbon::now()->subDays(7)->startOfDay();
+        $date = Carbon::now()->subDays(self::HISTORY_CUTOFF)->startOfDay();
 
         $payments = DB::table('state_tokens')
             ->where('created_at', '>', $date)
@@ -57,7 +59,7 @@ class PaymentsController extends Controller
     {
 
         //set the period we want scoped
-        $fromDate = $date ?? Carbon::now()->subDays(7)->startOfDay();
+        $fromDate = $date ?? Carbon::now()->subDays(self::HISTORY_CUTOFF)->startOfDay();
         //get all the StateTokens for unpaid (pending) payment requests in the past 7 days
         // (in theory nothing is ever unpaid for that long anyway)
         $tokens = StateToken::with([
