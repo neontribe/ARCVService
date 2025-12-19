@@ -286,6 +286,7 @@ class CentreController extends Controller
                 $fields = [
                     ...$fields,
                     'Eligible Household Members' => $childrenData['eligible_count'],
+                    ...$this->getCarerDetails($registration),
                 ];
                 break;
             default:
@@ -324,7 +325,7 @@ class CentreController extends Controller
         $language = 'not answered';
         $otherLanguage = '';
 
-        if ($carer && $carer->language !== null) {
+        if ($carer && ($carer->language !== null)) {
             $language = ($carer->language === 'english') ? 'english' : 'other';
             $otherLanguage = ($language === 'other') ? strtolower($carer->language) : '';
         }
