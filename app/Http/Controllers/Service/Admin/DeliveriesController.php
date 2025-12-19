@@ -50,33 +50,34 @@ class DeliveriesController extends Controller
     }
 
     /**
-     * @param AdminNewDeliveryRequest $request
-     * @return RedirectResponse
      * @throws Throwable
      */
-    public function store(AdminNewDeliveryRequest $request)
+    public function store(AdminNewDeliveryRequest $request): RedirectResponse
     {
         // Make a rangeDef
-        $rangeDef = Voucher::createRangeDefFromVoucherCodes($request->input('voucher-start'), $request->input('voucher-end'));
+        $rangeDef = Voucher::createRangeDefFromVoucherCodes(
+            $request->input('voucher-start'),
+            $request->input('voucher-end')
+        );
 
-        // Check the voucher range is clear to be delivered.
+        // Ensure vouchers in range are deliverable
         if (!Voucher::rangeIsDeliverable($rangeDef)) {
             // Whoops! Some of the vouchers may have been delivered
             return redirect()
                 ->route('admin.deliveries.create')
                 ->withInput()
                 ->with('error_message', trans('service.messages.vouchers_delivery.blocked'));
-        };
+        }
 
         // Get centre
         $centre = Centre::findOrFail($request->input('centre'));
 
-        // Make a transition definition
-        $transitions[] = Voucher::createTransitionDef("printed", "dispatch");
+        // Define allowed transition(s)
+        $transitions = [Voucher::createTransitionDef('printed', 'dispatch')];
 
         // Create delivery or roll back
         try {
-            DB::transaction(function () use ($rangeDef, $transitions, $centre, $request) {
+            DB::transaction(static function () use ($rangeDef, $transitions, $centre, $request) {
 
                 $delivery = Delivery::create([
                     'centre_id' => $centre->id,
@@ -86,31 +87,39 @@ class DeliveriesController extends Controller
                     'dispatched_at' => Carbon::createFromFormat('Y-m-d', $request->input('date-sent')),
                 ]);
 
-                $now_time = $delivery->created_at;
-                $user_id = auth()->id();
-                $user_type = class_basename(auth()->user());
+                $nowTime  = $delivery->created_at;
+                $user     = auth()->user();
+                $userId   = $user->id;
+                $userType = class_basename($user);
 
-                // Bulk update VoucherStates for speed.
                 foreach ($transitions as $transitionDef) {
-                    Voucher::select('id')
-                        ->whereNull('delivery_id')
+                    Voucher::whereNull('delivery_id')
                         ->inDefinedRange($rangeDef)
                         ->inOneOfStates(['printed'])
-                        ->chunk(
-                            // should be big enough chunks to avoid memory problems
-                            5000,
-                            // Closure only has 1 param...
-                            function ($vouchers) use ($now_time, $user_id, $user_type, $transitionDef, $delivery) {
-                                // ... but method needs 'em.
-                                VoucherState::batchInsert($vouchers, $now_time, $user_id, $user_type, $transitionDef);
-                                // Get all the vouchers in the current chunk and update them with the delivery Id and state
-                                Voucher::whereIn('id', $vouchers->pluck('id'))
-                                    ->update([
-                                        'delivery_id' => $delivery->id,
-                                        'currentState' => $transitionDef->to
-                                    ]);
-                            }
-                        );
+                        ->orderBy('id')
+                        ->chunkById(2000, function ($vouchers) use (
+                            $nowTime,
+                            $userId,
+                            $userType,
+                            $transitionDef,
+                            $delivery
+                        ) {
+                            // Insert state history records
+                            VoucherState::batchInsert(
+                                $vouchers,
+                                $nowTime,
+                                $userId,
+                                $userType,
+                                $transitionDef
+                            );
+
+                            // Update vouchers atomically
+                            Voucher::whereIn('id', $vouchers->pluck('id'))
+                                ->update([
+                                    'delivery_id'  => $delivery->id,
+                                    'currentState' => $transitionDef->to,
+                                ]);
+                        });
                 }
             });
         } catch (Throwable $e) {

@@ -92,87 +92,99 @@ class VouchersController extends Controller
      */
     public function retireBatch(AdminUpdateVoucherRequest $request): RedirectResponse
     {
-        // Make a rangeDef & get the vouchers in it.
         $rangeDef = Voucher::createRangeDefFromVoucherCodes(
             $request->input('voucher-start'),
             $request->input('voucher-end')
         );
 
-        $voidableVouchers = Voucher::inDefinedRange($rangeDef)->inVoidableState()->pluck('code');
-        $allVouchersInRange = Voucher::inDefinedRange($rangeDef)->pluck('code');
+        // Fetch once, reuse
+        $voidableCodes = Voucher::inDefinedRange($rangeDef)
+            ->inVoidableState()
+            ->pluck('code');
 
-        // Check if any vouchers in range are clear to be voided.
-        if ($voidableVouchers->count() === 0) {
-            // Whoops! None of the vouchers are voidable
+        if ($voidableCodes->isEmpty()) {
             return redirect()
                 ->route('admin.vouchers.void')
                 ->withInput()
                 ->with('error_message', trans('service.messages.vouchers_batchretiretransition.blocked'));
         }
 
-        // Create and reset the transitions route to start point
-        $transitions[] = Voucher::createTransitionDef("dispatched", $request->input("transition"));
-        $transitions[] = Voucher::createTransitionDef(end($transitions)->to, 'retire');
-        reset($transitions);
+        $allCodes = Voucher::inDefinedRange($rangeDef)->pluck('code');
 
-        // Update vouchers or roll back
+        $transitions = [
+            Voucher::createTransitionDef('dispatched', $request->input('transition')),
+        ];
+
+        $transitions[] = Voucher::createTransitionDef(
+            $transitions[0]->to,
+            'retire'
+        );
+
         try {
             DB::transaction(static function () use ($rangeDef, $transitions) {
 
-                // Some things we'll be using.
-                $now_time = Carbon::now();
-                $user_id = auth()->id();
-                $user_type = class_basename(auth()->user());
+                $nowTime  = now();
+                $user     = auth()->user();
+                $userId   = $user->id;
+                $userType = class_basename($user);
 
-                // Since we usually retire in batches of less than 5 vouchers, probably overkill.
                 foreach ($transitions as $transitionDef) {
-                    // Bulk update VoucherStates for speed.
-                    Voucher::select('id')
-                        ->inDefinedRange($rangeDef)
+                    Voucher::inDefinedRange($rangeDef)
                         ->inOneOfStates([$transitionDef->from])
-                        ->chunk(
-                            // Should be big enough chunks to avoid memory problems
-                            10000,
-                            // Closure only has 1 param...
-                            function ($vouchers) use ($now_time, $user_id, $user_type, $transitionDef) {
-                                // ... but method needs 'em all.
-                                VoucherState::batchInsert($vouchers, $now_time, $user_id, $user_type, $transitionDef);
-                                Voucher::whereIn('id', $vouchers->pluck('id'))
-                                    ->update(['currentState' => $transitionDef->to]);
-                            }
-                        );
+                        ->orderBy('id')
+                        ->chunkById(2000, function ($vouchers) use (
+                            $nowTime,
+                            $userId,
+                            $userType,
+                            $transitionDef
+                        ) {
+                            VoucherState::batchInsert(
+                                $vouchers,
+                                $nowTime,
+                                $userId,
+                                $userType,
+                                $transitionDef
+                            );
+
+                            Voucher::whereKey($vouchers->modelKeys())
+                                ->update([
+                                    'currentState' => $transitionDef->to,
+                                ]);
+                        });
                 }
             });
         } catch (Throwable $e) {
-            // Oops! Log that
-            Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
-            Log::error($e->getMessage()); // Log original error message too
-            Log::error($e->getTraceAsString());
-            // Throw it back to the user
+            Log::error('Bad transaction for ' . __METHOD__, [
+                'user_id' => auth()->id(),
+                'error'   => $e->getMessage(),
+            ]);
+
             return redirect()
                 ->route('admin.vouchers.void')
                 ->withInput()
-                ->with('error_message', 'Database error, unable to transition a voucher.');
+                ->with('error_message', 'Database error, unable to transition vouchers.');
         }
 
-        // I don't like building up message data separate from the update function.
-        // But now does not seem the time to undo that code.
-        $voidableVouchersArr = $voidableVouchers->toArray();
-        $allVouchersInRangeArr = $allVouchersInRange->toArray();
-        $success_codes = implode(' ', $voidableVouchersArr);
-        $fail_codes = implode(' ', array_diff($allVouchersInRangeArr, $voidableVouchersArr));
+        $successCodes = implode(' ', $voidableCodes->all());
+        $failedCodes  = implode(
+            ' ',
+            array_diff($allCodes->all(), $voidableCodes->all())
+        );
 
-        // Prepare the message
-        $notification_msg = trans('service.messages.vouchers_batchretiretransition.success', [
-            'transition_to' => end($transitions)->to,
-            'success_codes' => $success_codes,
-            'fail_code_details' => $fail_codes ? $fail_codes . ' could not be retired.' : '',
-        ]);
+        $notificationMsg = trans(
+            'service.messages.vouchers_batchretiretransition.success',
+            [
+                'transition_to'    => end($transitions)->to,
+                'success_codes'    => $successCodes,
+                'fail_code_details'=> $failedCodes
+                    ? "{$failedCodes} could not be retired."
+                    : '',
+            ]
+        );
 
-        // Send it.
         return redirect()
             ->route('admin.vouchers.index')
-            ->with('notification', $notification_msg);
+            ->with('notification', $notificationMsg);
     }
 
     /**
