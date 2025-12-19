@@ -37,10 +37,6 @@
                                                 @if($centre->id == session('CentreUserCurrentCentreId'))
                                                     selected
                                                 @endif
-                                            @else
-                                                @if($centre->id == Auth::user()->centre->id)
-                                                    selected
-                                                @endif
                                             @endif
                                     >{{ $centre->name }}</option>
                                 @endforeach

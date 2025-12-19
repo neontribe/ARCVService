@@ -3,6 +3,7 @@
 namespace App;
 
 use Eloquent;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\belongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -27,7 +28,7 @@ class CentreUser extends Authenticatable
     use Notifiable;
     use SoftDeletes;
 
-    protected $guard = 'store';
+    protected string $guard = 'store';
 
     /**
      * The attributes that are mass assignable.
@@ -68,21 +69,17 @@ class CentreUser extends Authenticatable
 
     /**
      * Get the Notes that belong to this CentreUser
-     *
-     * @return HasMany
      */
     //Because of merge and refactoring User to CentreUser, FK has to be explicitly stated here
-    public function notes()
+    public function notes(): HasMany
     {
-        return $this->hasMany('App\Note', 'user_id');
+        return $this->hasMany(Note::class, 'user_id');
     }
 
     /**
      * Get the CentreUser's Current Centre
-     *
-     * @return Centre
      */
-    public function getCentreAttribute()
+    public function getCentreAttribute(): Centre
     {
         // Check the session for a variable.
         $currentCentreId = session('CentreUserCurrentCentreId');
@@ -105,20 +102,16 @@ class CentreUser extends Authenticatable
 
     /**
      * Get the centres assigned to a user
-     *
-     * @return belongsToMany
      */
-    public function centres()
+    public function centres(): BelongsToMany
     {
-        return $this->belongsToMany('App\Centre');
+        return $this->belongsToMany(Centre::class);
     }
 
     /**
      * Gets the first homeCentre, makes it an attribute.
-     *
-     * @return Centre
      */
-    public function getHomeCentreAttribute()
+    public function getHomeCentreAttribute(): ?Model
     {
         return $this->homeCentres()->first();
     }
@@ -126,49 +119,32 @@ class CentreUser extends Authenticatable
     /**
      * Get the home centres for this user
      * Alas, we lack a belongsToThrough method to this is a collections.
-     *
-     * @return belongsToMany
      */
-    protected function homeCentres()
+    protected function homeCentres(): BelongsToMany
     {
-        return $this->belongsToMany('App\Centre')->wherePivot('homeCentre', true);
+        return $this->belongsToMany(Centre::class)->wherePivot('homeCentre', true);
     }
 
     /**
      * Get the relevant centres for this CentreUser, accounting for it's role
-     *
-     * @return Collection
      */
-    public function relevantCentres($programme = 0)
+    public function relevantCentres($programme = 0): Collection
     {
-        // default to empty collection
-        $centres = collect([]);
-        switch ($this->role) {
-            case "foodmatters_user":
-                $centres = collect(Centre::get()->all());
-                $centres = $centres->filter(function($model) use ($programme) {
-                    return $model->sponsor->programme === $programme;
-                });
-                break;
-            case "centre_user":
-                // If we have one, get our centre's neighbours
-                /** @var Centre $centre */
-                $centre = $this->centre;
-                if (!is_null($centre)) {
-                    $centres = collect($centre->neighbours()->get()->all());
-                }
-                break;
-        }
-        return $centres;
+        return match ($this->role) {
+            'foodmatters_user' => Centre::whereHas('sponsor', static function ($query) use ($programme) {
+                $query->where('programme', $programme);
+            })->get(),
+
+            'centre_user' => $this->centre?->neighbours()->get() ?? collect(),
+
+            default => collect(),
+        };
     }
 
     /**
      * Is a given centre relevant to this CentreUser?
-     *
-     * @param Centre $centre
-     * @return bool
      */
-    public function isRelevantCentre(Centre $centre)
+    public function isRelevantCentre(Centre $centre): bool
     {
         return $this->relevantCentres()->contains('id', $centre->id);
     }
@@ -177,9 +153,8 @@ class CentreUser extends Authenticatable
      * Send the password reset notification.
      *
      * @param  string  $token
-     * @return void
      */
-    public function sendPasswordResetNotification($token)
+    public function sendPasswordResetNotification($token): void
     {
         $this->notify(new StorePasswordResetNotification($token, $this->name));
     }

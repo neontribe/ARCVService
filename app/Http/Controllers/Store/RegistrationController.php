@@ -52,21 +52,31 @@ class RegistrationController extends Controller
             'programme' => $user->centre?->sponsor?->programme,
         ];
 
+        // get the inputs
+        $family_name = $request->get('family_name');
+        $fuzzy = $request->get('fuzzy');
+
         // Slightly roundabout method of getting the permitted centres to poll
         $neighbour_centre_ids = $user
             ->relevantCentres()
             ->pluck('id')
             ->toArray();
 
-        $family_name = $request->get('family_name');
-
-        // Fetch the list of primary carers, the first carer in the family.
-        $pri_carers = Carer::select([DB::raw('MIN(id) as min_id')])
-            ->groupBy('family_id')
+        // get primary carers
+        $pri_carers = Carer::query()
+            ->selectRaw('MIN(carers.id) AS min_id')
+            ->whereIn('carers.family_id', function ($q) use ($neighbour_centre_ids) {
+                // limited to families that have registration in our centres
+                $q->select('registrations.family_id')
+                    ->from('registrations')
+                    ->whereIn('registrations.centre_id', $neighbour_centre_ids)
+                    ->distinct();
+            })
+            ->groupBy('carers.family_id')
             ->pluck('min_id')
             ->toArray();
 
-        $fuzzy = $request->get('fuzzy');
+        // pick a search type
         $filtered_family_ids = $fuzzy
             ? $this->fuzzySearch($family_name, $pri_carers)
             : $this->exactSearch($family_name, $pri_carers);
