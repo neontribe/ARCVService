@@ -11,6 +11,7 @@ use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @mixin Eloquent
@@ -191,5 +192,12 @@ class Registration extends Model implements IEvaluee
             $q->whereNull('leaving_on');
             $q->orWhereColumn('rejoin_on', '>', 'leaving_on');
         });
+    }
+
+    public function lastBundle(): HasOne
+    {
+        return $this->hasOne(Bundle::class)
+            ->whereNotNull('disbursed_at')
+            ->latest('disbursed_at');
     }
 }

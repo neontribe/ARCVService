@@ -176,14 +176,23 @@ class CentreController extends Controller
     protected function getRegistrations(array $centreIds): Collection
     {
         return Registration::withFullFamily()->whereIn('centre_id', $centreIds)->with([
-            'centre',
-            'centre.sponsor',
+            'centre:id,name,sponsor_id',
+            'centre.sponsor:id,name',
+            'lastBundle:id,registration_id,disbursed_at',
+        ])->select([
+            'id',
+            'centre_id',
+            'family_id',
+            'created_at',
+            'eligibility_hsbs',
+            'eligibility_nrpf',
+            'eligible_from',
         ])->get();
     }
 
     protected function buildBaseRow(Registration $registration): array
     {
-        $lastCollection = $this->getLastCollectionDate($registration);
+        $lastCollection = $registration->lastBundle?->disbursed_at;
         $label = $this->labels[$this->labelType];
 
         return [
@@ -195,15 +204,6 @@ class CentreController extends Controller
             'Last Collection' => $lastCollection ? $lastCollection->format($this->dateFormats['lastCollection']) : null,
             'Active' => $registration->isActive() ? 'true' : 'false',
         ];
-    }
-
-    protected function getLastCollectionDate(Registration $registration)
-    {
-        $lastCollection = $registration->bundles()->whereNotNull('disbursed_at')->orderBy(
-            'disbursed_at',
-            'desc'
-        )->first();
-        return $lastCollection?->disbursed_at;
     }
 
     protected function processChildren(Registration $registration): array
@@ -286,6 +286,7 @@ class CentreController extends Controller
                 $fields = [
                     ...$fields,
                     'Eligible Household Members' => $childrenData['eligible_count'],
+                    ...$this->getCarerDetails($registration),
                 ];
                 break;
             default:
@@ -324,7 +325,7 @@ class CentreController extends Controller
         $language = 'not answered';
         $otherLanguage = '';
 
-        if ($carer && $carer->language !== null) {
+        if ($carer && ($carer->language !== null)) {
             $language = ($carer->language === 'english') ? 'english' : 'other';
             $otherLanguage = ($language === 'other') ? strtolower($carer->language) : '';
         }
