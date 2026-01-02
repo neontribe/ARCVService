@@ -100,8 +100,8 @@ return [
     |--------------------------------------------------------------------------
      */
     'programmes' => [
-        'Standard',
-        'Social Prescribing',
+        0 => 'Standard',
+        1 => 'Social Prescribing',
     ],
 
 	/*

@@ -77,24 +77,29 @@ class SponsorControllerTest extends StoreTestCase
                 [
                     'name' => 'Test-shire Sponsor',
                     'voucher_prefix' => 'TSTSR',
+                    'programme' => 0,
                 ]
             ],
             'requestShouldFailWhenNameIsMissing' => [
                 false,
                 [
-                    'voucher_prefix' => 'TSTSR',                ]
+                    'voucher_prefix' => 'TSTSR',
+                    'programme' => 0,
+                ]
             ],
             'requestShouldFailWhenNameIsNotString' => [
                 false,
                 [
                     'name' => 1,
                     'voucher_prefix' => 'TSTSR',
+                    'programme' => 0,
                 ]
             ],
             'requestShouldFailWhenVoucherPrefixIsMissing' => [
                 false,
                 [
                     'name' => 'Test-shire Sponsor',
+                    'programme' => 0,
                 ]
             ],
             'requestShouldFailWhenVoucherPrefixIsNotString' => [
@@ -102,6 +107,7 @@ class SponsorControllerTest extends StoreTestCase
                 [
                     'name' => 'Test-shire Sponsor',
                     'voucher_prefix' => 1,
+                    'programme' => 0,
                 ]
             ],
             'requestShouldFailWhenVoucherPrefixExists' => [
@@ -109,8 +115,34 @@ class SponsorControllerTest extends StoreTestCase
                 [
                     'name' => 'Test-shire Sponsor',
                     'voucher_prefix' => 'EXIST',
+                    'programme' => 0,
                 ]
             ],
+            'requestShouldFailWhenProgrammeIsMissing' => [
+                false,
+                [
+                    'name' => 'Test-shire Sponsor',
+                    'voucher_prefix' => 'TSTSR',
+                ]
+            ],
+            'requestShouldFailWhenProgrammeIsNotNumeric' => [
+                false,
+                [
+                    'name' => 'Test-shire Sponsor',
+                    'voucher_prefix' => 'TSTSR',
+                    'programme' => 'one',
+                ]
+            ],
+
+            'requestShouldFailWhenProgrammeIsNotEnmerable' => [
+                false,
+                [
+                    'name' => 'Test-shire Sponsor',
+                    'voucher_prefix' => 'TSTSR',
+                    # should not exist
+                    'programme' => 999,
+                ]
+            ]
         ];
     }
 
@@ -123,6 +155,7 @@ class SponsorControllerTest extends StoreTestCase
         $data = [
             'name' => 'Test-shire Sponsor',
             'voucher_prefix' => 'TSTSR',
+            'programme' => 0
         ];
 
         // Check can add a Sponsor
@@ -144,6 +177,7 @@ class SponsorControllerTest extends StoreTestCase
             'shortcode' => $data['voucher_prefix'],
             // controller sets this false
             'can_tap' => false,
+            'programme' => 0
         ]);
     }
 

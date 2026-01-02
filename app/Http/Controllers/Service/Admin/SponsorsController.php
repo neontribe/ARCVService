@@ -54,6 +54,7 @@ class SponsorsController extends Controller
             'shortcode' => $request->input('voucher_prefix'),
             // this is the simplest way to do this
             'can_tap' => false,
+            'programme' => $request->input('programme'),
         ]);
 
         // Atomic action,don't need to transact it
