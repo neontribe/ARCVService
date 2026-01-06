@@ -100,8 +100,8 @@ return [
     |--------------------------------------------------------------------------
      */
     'programmes' => [
-        'Standard',
-        'Social Prescribing',
+        0 => 'Standard',
+        1 => 'Social Prescribing',
     ],
 
 	/*
@@ -136,4 +136,15 @@ return [
         'WOTH' => 'White - Any other White background',
         'NOBT' => 'Not answered',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Default home centre for store dropdown
+    | - `true` for home centre or
+    | - `false` for "all" centres a user can see
+    |--------------------------------------------------------------------------
+     */
+
+    'default_to_home_centre' => env('ARC_DEFAULT_TO_HOME_CENTRE', false),
+
 ];

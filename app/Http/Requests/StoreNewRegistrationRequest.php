@@ -35,10 +35,12 @@ class StoreNewRegistrationRequest extends FormRequest
             // SOMETIMES is present; MUST be in listed states
             'eligibility-hsbs' => [
                 'sometimes',
+                'required',
                 Rule::in(config('arc.reg_eligibilities_hsbs')),
             ],
             'eligibility-nrpf' => [
                 'sometimes',
+                'required',
                 Rule::in(config('arc.reg_eligibilities_nrpf')),
             ],
             // MUST be present; MUST be a not-null string

@@ -34,8 +34,6 @@ class SponsorControllerTest extends StoreTestCase
             'shortcode' => "SPA",
             'programme' => 1
         ]);
-        $socialPrescribingRules = SponsorsController::socialPrescribingOverrides();
-        $this->socialPrescribingSponsor->evaluations()->saveMany($socialPrescribingRules);
     }
 
     /**
@@ -79,24 +77,29 @@ class SponsorControllerTest extends StoreTestCase
                 [
                     'name' => 'Test-shire Sponsor',
                     'voucher_prefix' => 'TSTSR',
+                    'programme' => 0,
                 ]
             ],
             'requestShouldFailWhenNameIsMissing' => [
                 false,
                 [
-                    'voucher_prefix' => 'TSTSR',                ]
+                    'voucher_prefix' => 'TSTSR',
+                    'programme' => 0,
+                ]
             ],
             'requestShouldFailWhenNameIsNotString' => [
                 false,
                 [
                     'name' => 1,
                     'voucher_prefix' => 'TSTSR',
+                    'programme' => 0,
                 ]
             ],
             'requestShouldFailWhenVoucherPrefixIsMissing' => [
                 false,
                 [
                     'name' => 'Test-shire Sponsor',
+                    'programme' => 0,
                 ]
             ],
             'requestShouldFailWhenVoucherPrefixIsNotString' => [
@@ -104,6 +107,7 @@ class SponsorControllerTest extends StoreTestCase
                 [
                     'name' => 'Test-shire Sponsor',
                     'voucher_prefix' => 1,
+                    'programme' => 0,
                 ]
             ],
             'requestShouldFailWhenVoucherPrefixExists' => [
@@ -111,8 +115,34 @@ class SponsorControllerTest extends StoreTestCase
                 [
                     'name' => 'Test-shire Sponsor',
                     'voucher_prefix' => 'EXIST',
+                    'programme' => 0,
                 ]
             ],
+            'requestShouldFailWhenProgrammeIsMissing' => [
+                false,
+                [
+                    'name' => 'Test-shire Sponsor',
+                    'voucher_prefix' => 'TSTSR',
+                ]
+            ],
+            'requestShouldFailWhenProgrammeIsNotNumeric' => [
+                false,
+                [
+                    'name' => 'Test-shire Sponsor',
+                    'voucher_prefix' => 'TSTSR',
+                    'programme' => 'one',
+                ]
+            ],
+
+            'requestShouldFailWhenProgrammeIsNotEnmerable' => [
+                false,
+                [
+                    'name' => 'Test-shire Sponsor',
+                    'voucher_prefix' => 'TSTSR',
+                    # should not exist
+                    'programme' => 999,
+                ]
+            ]
         ];
     }
 
@@ -125,6 +155,7 @@ class SponsorControllerTest extends StoreTestCase
         $data = [
             'name' => 'Test-shire Sponsor',
             'voucher_prefix' => 'TSTSR',
+            'programme' => 0
         ];
 
         // Check can add a Sponsor
@@ -146,6 +177,7 @@ class SponsorControllerTest extends StoreTestCase
             'shortcode' => $data['voucher_prefix'],
             // controller sets this false
             'can_tap' => false,
+            'programme' => 0
         ]);
     }
 
@@ -191,7 +223,11 @@ class SponsorControllerTest extends StoreTestCase
     /** @test */
     public function testIEditRuleValuesForAnSPSponsor()
     {
+        $socialPrescribingRules = SponsorsController::socialPrescribingOverrides();
+        $this->socialPrescribingSponsor->evaluations()->saveMany($socialPrescribingRules);
+
         $adminUser = factory(AdminUser::class)->create();
+
         $this->seeInDatabase('evaluations', [
             'sponsor_id' => $this->socialPrescribingSponsor->id,
             'name' => 'HouseholdExists',
@@ -207,14 +243,16 @@ class SponsorControllerTest extends StoreTestCase
             'name' => 'DeductFromCarer',
             'value' => -7
         ]);
+
         $this->actingAs($adminUser, 'admin')
             ->visit(route('admin.sponsors.index'))
             ->click('Edit')
             ->seePageIs(route('admin.sponsors.edit', ['id' => $this->socialPrescribingSponsor->id]))
             ->type(15, 'householdExistsValue')
             ->type(4, 'householdMemberValue')
-            ->press('Save')
-            ->seeInDatabase('evaluations', [
+            ->press('Save');
+
+        $this->seeInDatabase('evaluations', [
                 'sponsor_id' => $this->socialPrescribingSponsor->id,
                 'name' => 'HouseholdExists',
                 'value' => 15
@@ -230,5 +268,41 @@ class SponsorControllerTest extends StoreTestCase
                 'value' => -4
             ])
         ;
+    }
+
+    /** @test */
+    public function testIEvaluationsAreCreatedIfTheyDoNotExistWhenIUpdate()
+    {
+        $adminUser = factory(AdminUser::class)->create();
+        $sponsor = $this->socialPrescribingSponsor;
+
+        // No Evaluations
+        $this->dontSeeInDatabase('evaluations', ['sponsor_id' => $sponsor->id]);
+
+        // Visit form and submit new evaluation values
+        $this->actingAs($adminUser, 'admin')
+            ->visit(route('admin.sponsors.index'))
+            ->click('Edit')
+            ->seePageIs(route('admin.sponsors.edit', ['id' => $sponsor->id]))
+            ->type(20, 'householdExistsValue')
+            ->type(5, 'householdMemberValue')
+            ->press('Save');
+
+        // Assert all evaluations are created correctly
+        $this->seeInDatabase('evaluations', [
+            'sponsor_id' => $sponsor->id,
+            'name' => 'HouseholdExists',
+            'value' => 20
+        ])
+            ->seeInDatabase('evaluations', [
+                'sponsor_id' => $sponsor->id,
+                'name' => 'HouseholdMember',
+                'value' => 5
+            ])
+            ->seeInDatabase('evaluations', [
+                'sponsor_id' => $sponsor->id,
+                'name' => 'DeductFromCarer',
+                'value' => -5
+            ]);
     }
 }

@@ -407,3 +407,12 @@ span.user-array {
   width: 40px;
   height: 40px;
 }
+
+tr.disabled {
+  color: gray;
+  font-style: italic;
+}
+
+button.remove {
+  background-color: #d2232a;
+}

@@ -9,6 +9,10 @@
 
         <p>Use the form below to amend a Children's Centre Worker's details.</p>
 
+        @if($worker->deleted_at)
+            <h2>This worker is <i>disabled</i></h2>
+        @endif
+
         <form role="form" class="styled-form" method="POST"
             action="{{ route('admin.centreusers.update', ['id' => $worker->id]) }}">
             {!! method_field('PUT') !!}
@@ -67,13 +71,21 @@
                     </div>
                 </div>
             </div>
-            <button type="submit" id="updateWorker">Update worker</button>
+            @empty($worker->deleted_at)
+                <button type="submit" id="updateWorker">Update worker</button>
+            @endempty
         </form>
+        <form role="form" id="toggleForm" class="styled-form" method="GET" action="{{ route('admin.centreusers.toggle', ['id' => $worker->id]) }}">
+            {!! csrf_field() !!}
+            <button type="submit" id="toggleWorker">@empty($worker->deleted_at)Disable worker @else Enable worker @endif</button>
+        </form>
+        @if($worker->deleted_at)
         <form role="form" id="deleteForm" class="styled-form" method="GET"
             action="{{ route('admin.centreusers.delete', ['id' => $worker->id]) }}">
             {!! csrf_field() !!}
-          <button type="submit" id="deleteWorker">Delete worker</button>
+          <button type="submit" id="deleteWorker" class="remove">Delete worker</button>
         </form>
+        @endif
         <script>
             function buildCheckboxes() {
                 // Setup data for checkboxes
@@ -166,7 +178,7 @@
                 $('#deleteWorker').on('click', function (evt) {
                   evt.preventDefault();
                   var deleteForm = document.getElementById('deleteForm');
-                  var areYouSure = confirm('Are you sure you want to delete this worker account?');
+                  var areYouSure = confirm('Are you sure you want to PERMANENTLY delete this worker account?');
                   if (areYouSure === true) {
                     deleteForm.submit();
                   };

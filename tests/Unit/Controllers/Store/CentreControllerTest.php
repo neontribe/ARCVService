@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Tests\Unit\Controllers\Store;
 
 use App\Centre;
@@ -17,16 +16,13 @@ class CentreControllerTest extends StoreTestCase
 {
     use RefreshDatabase;
 
-    /** @var Centre $centre */
-    protected $centre;
+    protected Centre $centre;
 
-    /** @var CentreUser $centreUser */
-    protected $centreUser;
+    protected CentreUser $centreUser;
 
-    /** @var Collection */
-    protected $registrations;
+    protected Collection $registrations;
 
-    protected $dashboard_route;
+    protected string $dashboard_route;
 
     public function setUp(): void
     {
@@ -59,7 +55,7 @@ class CentreControllerTest extends StoreTestCase
             'centre_id' => $this->spCentre->id
         ]);
 
-        foreach ($this->spRegistrations as $key => $reg) {
+        foreach ($this->spRegistrations as $reg) {
             foreach ($reg->family->children as $key => $child) {
                 if ($key === 0) {
                     $child->is_pri_carer = 1;
@@ -92,8 +88,7 @@ class CentreControllerTest extends StoreTestCase
         $this->dashboard_route = route('store.dashboard');
     }
 
-    /** @test */
-    public function testItCanDownloadAStandardRegistrationsSpreadsheet()
+    public function testItCanDownloadAStandardRegistrationsSpreadsheet(): void
     {
         $sheet_route = route('store.centres.registrations.summary');
 
@@ -135,14 +130,14 @@ class CentreControllerTest extends StoreTestCase
 
         // Remap the headers onto each line as keys
         $lines = array_map(
-            function ($line) use ($headers) {
+            static function ($line) use ($headers) {
                 return array_combine($headers, str_getcsv($line));
             },
             $data
         );
 
         // There are the right amount of lines.
-        $this->assertEquals($this->registrations->count(), count($lines));
+        $this->assertCount($this->registrations->count(), $lines);
 
         // Prep for testing hashes
         $hashes = [];
@@ -183,8 +178,7 @@ class CentreControllerTest extends StoreTestCase
         }
     }
 
-    /** @test */
-    public function testItCanDownloadASocialPrescriptionsRegistrationsSpreadsheet()
+    public function testItCanDownloadASocialPrescriptionsRegistrationsSpreadsheet(): void
     {
         $sheet_route = route('store.centres.registrations.summary', ['programme' => 1]);
 
@@ -238,14 +232,14 @@ class CentreControllerTest extends StoreTestCase
 
         // Remap the headers onto each line as keys
         $lines = array_map(
-            function ($line) use ($headers) {
+            static function ($line) use ($headers) {
                 return array_combine($headers, str_getcsv($line));
             },
             $data
         );
 
         // There are the right amount of lines.
-        $this->assertEquals($this->spRegistrations->count(), count($lines));
+        $this->assertCount($this->spRegistrations->count(), $lines);
 
         // Prep for testing hashes
         $hashes = [];
@@ -286,7 +280,7 @@ class CentreControllerTest extends StoreTestCase
         }
     }
 
-    public function testACentreWithNoRegistrationsCanDownloadAnEmptyRecord()
+    public function testACentreWithNoRegistrationsCanDownloadAnEmptyRecord(): void
     {
         $sponsor = factory(Sponsor::class)->create();
         $centre = factory(Centre::class)->create(['sponsor_id' => $sponsor->id]);

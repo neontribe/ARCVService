@@ -16,7 +16,7 @@ Neontribe Ltd (registered in England and Wales #06165574)
 
 Under contract for Alexandra Rose Charity (registered in England and Wales #00279157)
 
-As such, unless otherwise specified in the appropriate component source, associated file or compiled asset, files in this project repository are Copyright &copy; (2025), Alexandra Rose Charity. All rights reserved.
+As such, unless otherwise specified in the appropriate component source, associated file or compiled asset, files in this project repository are Copyright &copy; (2026), Alexandra Rose Charity. All rights reserved.
 
 If you wish to discuss copyright or licensing issues, please contact:
 

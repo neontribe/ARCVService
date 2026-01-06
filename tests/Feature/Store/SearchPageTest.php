@@ -15,7 +15,7 @@ class SearchPageTest extends StoreTestCase
     use RefreshDatabase;
 
     /** @test */
-    public function itShowsTheLoggedInUser()
+    public function itShowsTheLoggedInUser(): void
     {
         // Create some centres
         factory(Centre::class, 4)->create();
@@ -35,7 +35,7 @@ class SearchPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function itShowsRegistrationsFromNeighbourCentres()
+    public function itShowsRegistrationsFromNeighbourCentres(): void
     {
         // Create a single Sponsor
         $sponsor = factory(Sponsor::class)->create();
@@ -81,7 +81,7 @@ class SearchPageTest extends StoreTestCase
 
 
     /** @test */
-    public function itShowsRegistrationsFromMyCentre()
+    public function itShowsRegistrationsFromMyCentre(): void
     {
         // Create a single Sponsor
         $sponsor = factory(Sponsor::class)->create();
@@ -115,7 +115,7 @@ class SearchPageTest extends StoreTestCase
     }
 
     /** test */
-    public function itDoesNotShowRegistrationsFromUnrelatedCentres()
+    public function itDoesNotShowRegistrationsFromUnrelatedCentres(): void
     {
         // Create a single Sponsor
         $sponsor = factory(Sponsor::class)->create();
@@ -166,7 +166,7 @@ class SearchPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function itShowsThePrimaryCarerName()
+    public function itShowsThePrimaryCarerName(): void
     {
 
         // Create a Centre (and, implicitly a random Sponsor)
@@ -195,7 +195,7 @@ class SearchPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function itShowsTheRVID()
+    public function itShowsTheRVID(): void
     {
         // Create a Centre
         $centre = factory(Centre::class)->create();
@@ -221,7 +221,7 @@ class SearchPageTest extends StoreTestCase
 
 
     /** @test */
-    public function itShowsFamilyPrimaryCarersAlphabetically()
+    public function itShowsFamilyPrimaryCarersAlphabetically(): void
     {
         // Create a Centre (and, implicitly a random Sponsor)
         $centre = factory(Centre::class)->create();
@@ -244,20 +244,23 @@ class SearchPageTest extends StoreTestCase
             return $registration->family->carers->first()->name;
         })->toArray();
 
-        sort($pri_carers);
+        sort($pri_carers, SORT_NATURAL);
 
         // Spot the Registration Family's primary carer name
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'));
 
         $selector = 'td.pri_carer';
+
+        $content = $this->crawler->filter($selector);
+
         foreach ($pri_carers as $index => $pri_carer) {
             $this->seeInElementAtPos($selector, $pri_carer, $index);
         }
     }
 
     /** @test */
-    public function itHasTheExpectedResultsPerPage()
+    public function itHasTheExpectedResultsPerPage(): void
     {
         $centre = factory(Centre::class)->create();
 
@@ -285,7 +288,7 @@ class SearchPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function itShowsCentreLabelsForUsersByDefault()
+    public function itShowsCentreLabelsForUsersByDefault(): void
     {
         // Create some centres
         $centre1 = factory(Centre::class)->create([
@@ -329,7 +332,7 @@ class SearchPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function itDoesNotShowLeftFamiliesByDefault()
+    public function itDoesNotShowLeftFamiliesByDefault(): void
     {
         $centre = factory(Centre::class)->create();
 
@@ -358,7 +361,7 @@ class SearchPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function itShowsLeftFamilyRegistrationsAsDistinct()
+    public function itShowsLeftFamilyRegistrationsAsDistinct(): void
     {
         $this->markTestSkipped('Waiting for Dusk');
         $centre = factory(Centre::class)->create();
@@ -391,7 +394,7 @@ class SearchPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function itPreventsAccessToLeftFamilyRegistrations()
+    public function itPreventsAccessToLeftFamilyRegistrations(): void
     {
         $this->markTestSkipped('Waiting for Dusk');
         $centre = factory(Centre::class)->create();
@@ -427,7 +430,7 @@ class SearchPageTest extends StoreTestCase
     }
 
     /** @test */
-    public function aVouchersButtonIsPresent()
+    public function aVouchersButtonIsPresent(): void
     {
         // Create a Centre
         $centre = factory(Centre::class)->create();

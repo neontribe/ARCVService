@@ -1,7 +1,5 @@
 <?php
 
-
-
 use App\CentreUser;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -44,8 +42,7 @@ class CreateCentreCentreUserPivotTable extends Migration
     public function migrateRelationships(): void
     {
         // Find CentreUsers with a Centre
-        $centreUsers = CentreUser::whereNotNull('centre_id');
-
+        $centreUsers = CentreUser::whereNotNull(['centre_id'])->get();
         /** @var CentreUser $centreUser */
         foreach ($centreUsers as $centreUser) {
             $centreUser->centres()->attach($centreUser->centre_id, ['homeCentre' => true]);

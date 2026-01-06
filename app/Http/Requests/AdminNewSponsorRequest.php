@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\NotExistsRule;
+use Illuminate\Validation\Rule;
 
 class AdminNewSponsorRequest extends FormRequest
 {
@@ -12,7 +13,7 @@ class AdminNewSponsorRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         // TODO : determine of existing registration route protection is sufficient.
         return true;
@@ -22,13 +23,13 @@ class AdminNewSponsorRequest extends FormRequest
      * Get the validation rules that apply to the request.
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         /*
          * These rules validate that the form data is well-formed.
          * It is NOT responsible for the context validation of that data.
          */
-        $rules = [
+        return [
             // MUST be present, not null and string
             'name' => 'required|string',
             // MUST be present, not null, string and not used already.
@@ -36,15 +37,19 @@ class AdminNewSponsorRequest extends FormRequest
                 'required',
                 'string',
                 new NotExistsRule('sponsors', 'shortcode'),
-            ]
+            ],
+            'programme' => [
+                'required',
+                'numeric',
+                Rule::in(array_keys(config('arc.programmes')))
+            ],
         ];
-        return $rules;
     }
 
     /**
      * Prep input for validation
      */
-    public function prepareForValidation()
+    public function prepareForValidation(): void
     {
         if ($this->has('voucher_prefix')) {
             $this->merge(
