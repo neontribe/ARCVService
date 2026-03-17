@@ -13,13 +13,13 @@ use Throwable;
 
 class MoveFamilyRegistrationCentre extends Command
 {
+    public array $summary = [];
     protected $signature = 'arc:move-family-reg
         {family_id? : Single family ID to move}
         {centre_id? : to which centre}
         {--csv= : Path to CSV file containing an RVID and CENTRE column}
         {--dry-run : Show what would be deleted}
         {--force : Skip confirmation prompt}';
-
     protected $description = 'Permanently moves a family and related graph data, including voucher handouts';
 
     public function handle(): int
@@ -84,6 +84,12 @@ class MoveFamilyRegistrationCentre extends Command
             $this->warn('Failed family IDs:');
             $this->line(implode(', ', $failed));
             return self::FAILURE;
+        }
+
+        $path = "/tmp/movesDone.csv";
+        if (count($this->summary) > 0) {
+            $this->writeCsv($path, $this->summary);
+            $this->line("Wrote changes to {$path}");
         }
 
         return self::SUCCESS;
@@ -198,11 +204,14 @@ class MoveFamilyRegistrationCentre extends Command
         try {
             return DB::transaction(callback: function () use ($family, $centre, $dryRun, $force) {
 
+                $oldRVID = $family->rvid;
+                $oldName = $family->pri_carer;
+
                 $registrations = Registration::where('family_id', $family->id)->with('centre')->get();
                 $centreNames = $registrations->pluck('centre.name')->all();
                 $centreNames = implode(", ", array_unique(array_sort($centreNames)));
 
-                $this->info("Family: {$family->id}");
+                $this->info("Family: {$family->id} ({$family->rvid})");
                 $this->info("Primary Carer: {$family->pri_carer}");
                 $this->line("Registrations: {$registrations->count()}");
                 $this->line("In Centres: {$centreNames}");
@@ -225,7 +234,13 @@ class MoveFamilyRegistrationCentre extends Command
                 if ($registrations->isNotEmpty()) {
                     $this->moveRegistrations($registrations, $centre);
                     $family->lockToCentre($centre, true);
+                    $family->save();
                 }
+
+                // refresh model.
+                $family->refresh();
+                $newRVID = $family->rvid;
+                $this->summary[] = [$oldRVID, $oldName, $newRVID];
 
                 $this->info('Family Registration permanently moved.');
                 return self::SUCCESS;
@@ -251,5 +266,17 @@ class MoveFamilyRegistrationCentre extends Command
                 "Registration move mismatch. Expected {$expected}, moved {$actioned}."
             );
         }
+    }
+
+    private function writeCsv(string $path, iterable $rows): void
+    {
+        $handle = fopen($path, 'wb');
+        if ($handle === false) {
+            throw new RuntimeException("Cannot write CSV to: {$path}");
+        }
+        foreach ($rows as $row) {
+            fputcsv($handle, $row);
+        }
+        fclose($handle);
     }
 }
