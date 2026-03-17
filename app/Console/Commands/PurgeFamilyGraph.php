@@ -19,7 +19,7 @@ class PurgeFamilyGraph extends Command
 {
     protected $signature = 'arc:purge-family
         {family_id? : Single family ID to purge}
-        {--csv= : Path to CSV file containing an RVID column}
+        {--csv= : Path to CSV file containing an `RVID` column}
         {--dry-run : Show what would be deleted}
         {--force : Skip confirmation prompt}';
 

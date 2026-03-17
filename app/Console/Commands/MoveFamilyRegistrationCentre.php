@@ -17,7 +17,7 @@ class MoveFamilyRegistrationCentre extends Command
     protected $signature = 'arc:move-family-reg
         {family_id? : Single family ID to move}
         {centre_id? : to which centre}
-        {--csv= : Path to CSV file containing an RVID and CENTRE column}
+        {--csv= : Path to CSV file containing `RVID` and `Centre` columns}
         {--dry-run : Show what would be deleted}
         {--force : Skip confirmation prompt}';
     protected $description = 'Permanently moves a family and related graph data, including voucher handouts';
