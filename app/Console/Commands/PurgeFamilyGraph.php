@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Bundle;
 use App\Carer;
+use App\Centre;
 use App\Child;
 use App\Family;
 use App\Registration;
@@ -17,22 +18,147 @@ use Throwable;
 class PurgeFamilyGraph extends Command
 {
     protected $signature = 'arc:purge-family
-                            {family_id : The family ID to purge}
-                            {--dry-run : Show what would be deleted}
-                            {--force : Skip confirmation prompt}';
+        {family_id? : Single family ID to purge}
+        {--csv= : Path to CSV file containing an RVID column}
+        {--dry-run : Show what would be deleted}
+        {--force : Skip confirmation prompt}';
 
     protected $description = 'Permanently deletes a family and related graph data, including voucher handouts';
 
     public function handle(): int
     {
-        $familyId = (int) $this->argument('family_id');
-        $dryRun = (bool) $this->option('dry-run');
-        $force = (bool) $this->option('force');
+        $familyId = $this->argument('family_id');
+        $csvPath = $this->option('csv');
+        $dryRun = (bool)$this->option('dry-run');
+        $force = (bool)$this->option('force');
 
+        if (!$familyId && !$csvPath) {
+            $this->error('Provide either a family_id OR --csv=path');
+            return self::FAILURE;
+        }
+
+        $familyIds = collect();
+
+        if ($familyId) {
+            $familyIds->push((int)$familyId);
+        }
+
+        if ($csvPath) {
+            if (!file_exists($csvPath)) {
+                $this->error("CSV file not found: {$csvPath}");
+                return self::FAILURE;
+            }
+
+            $familyIds = $familyIds->merge(
+                $this->extractFamilyIdsFromCsv($csvPath)
+            );
+        }
+
+        $familyIds = $familyIds->filter()->unique()->values();
+
+        $this->info("Processing {$familyIds->count()} families");
+
+        $failed = [];
+
+        foreach ($familyIds as $id) {
+            $this->line('');
+            $this->line("==== FAMILY {$id} ====");
+
+            $result = $this->purgeSingleFamily($id, $dryRun, $force);
+
+            if ($result !== self::SUCCESS) {
+                $failed[] = $id;
+            }
+        }
+
+        $this->line('');
+        $this->info('Batch complete.');
+
+        if (!empty($failed)) {
+            $this->warn('Failed family IDs:');
+            $this->line(implode(', ', $failed));
+            return self::FAILURE;
+        }
+
+        return self::SUCCESS;
+    }
+
+    private function extractFamilyIdsFromCsv(string $path): Collection
+    {
+        $ids = collect();
+
+        if (($handle = fopen($path, 'rb')) === false) {
+            throw new RuntimeException("Cannot open CSV: {$path}");
+        }
+
+        $header = fgetcsv($handle);
+
+        if (!$header) {
+            fclose($handle);
+            throw new RuntimeException('CSV has no rows.');
+        }
+
+        $rvid = array_search('RVID', $header, true);
+
+        if ($rvid === false) {
+            fclose($handle);
+            throw new RuntimeException('CSV missing RVID header column.');
+        }
+
+        while (($row = fgetcsv($handle)) !== false) {
+            $family = self::findByRvid($row[$rvid]);
+            if ($family !== null) {
+                $ids->push($family->id);
+            } else {
+                $this->line("Invalid rvid: {$rvid}");
+            }
+        }
+
+        fclose($handle);
+        return $ids;
+    }
+
+    public static function findByRvid(string $rvid): ?Family
+    {
+        $rvid = strtoupper(trim($rvid));
+
+        if ($rvid === '') {
+            return null;
+        }
+
+        // IMPORTANT: longest prefix first (prevents AB matching before AB1)
+        $centres = Centre::query()
+            ->select('id', 'prefix')
+            ->orderByRaw('LENGTH(prefix) DESC')
+            ->get()->all();
+
+        foreach ($centres as $centre) {
+            if (!str_starts_with($rvid, $centre->prefix)) {
+                continue;
+            }
+            $sequencePart = substr($rvid, strlen($centre->prefix));
+
+            if (!ctype_digit($sequencePart)) {
+                continue;
+            }
+
+            $sequence = (int)$sequencePart;
+
+            return Family::query()
+                ->where('initial_centre_id', $centre->id)
+                ->where('centre_sequence', $sequence)
+                ->first();
+        }
+
+        return null;
+    }
+
+    private function purgeSingleFamily(int $familyId, bool $dryRun, bool $force): int
+    {
         try {
             return DB::transaction(callback: function () use ($familyId, $dryRun, $force) {
 
-                $family = Family::whereKey($familyId)->lockForUpdate()->first();
+                $family = Family::whereKey($familyId)->lockForUpdate()->withPrimaryCarer()->first();
 
                 if (!$family) {
                     $this->error("Family {$familyId} not found.");
@@ -53,6 +179,7 @@ class PurgeFamilyGraph extends Command
                 $carersCount = Carer::where('family_id', $familyId)->withTrashed()->count();
 
                 $this->info("Family: {$familyId}");
+                $this->info("Primary Carer: {$family->pri_carer}");
                 $this->line("Registrations: {$registrationIds->count()}");
                 $this->line("Bundles: {$bundleIds->count()}");
                 $this->line("Vouchers to detach: {$voucherCount}");
@@ -64,15 +191,13 @@ class PurgeFamilyGraph extends Command
                     return self::SUCCESS;
                 }
 
-                if (!$force) {
-                    $confirmed = $this->confirm(
+                if (
+                    !$force && !$this->confirm(
                         "This will permanently purge family {$familyId} and related data. Continue?"
-                    );
-
-                    if (!$confirmed) {
-                        $this->warn('Aborted.');
-                        return self::FAILURE;
-                    }
+                    )
+                ) {
+                    $this->warn('Aborted.');
+                    return self::FAILURE;
                 }
 
                 if ($bundleIds->isNotEmpty()) {
@@ -120,23 +245,6 @@ class PurgeFamilyGraph extends Command
         }
     }
 
-    private function deleteRegistrations(Collection $registrationIds): void
-    {
-        $expected = $registrationIds->count();
-        $deleted = 0;
-
-        foreach ($registrationIds->chunk(1000) as $chunk) {
-            $affected = Registration::whereIn('id', $chunk->all())->delete();
-            $deleted += $affected;
-        }
-
-        if ($deleted !== $expected) {
-            throw new RuntimeException(
-                "Registration delete mismatch. Expected {$expected}, deleted {$deleted}."
-            );
-        }
-    }
-
     private function deleteBundles(Collection $bundleIds): void
     {
         $expected = $bundleIds->count();
@@ -154,19 +262,36 @@ class PurgeFamilyGraph extends Command
         }
     }
 
+    private function deleteRegistrations(Collection $registrationIds): void
+    {
+        $expected = $registrationIds->count();
+        $deleted = 0;
+
+        foreach ($registrationIds->chunk(1000) as $chunk) {
+            $affected = Registration::whereIn('id', $chunk->all())->delete();
+            $deleted += $affected;
+        }
+
+        if ($deleted !== $expected) {
+            throw new RuntimeException(
+                "Registration delete mismatch. Expected {$expected}, deleted {$deleted}."
+            );
+        }
+    }
+
     private function deleteChildren(int $familyId): int
     {
-        return (int) Child::where('family_id', $familyId)->delete();
+        return (int)Child::where('family_id', $familyId)->delete();
     }
 
     private function deleteCarers(int $familyId): int
     {
         // carers are softDelete-able
-        return (int) Carer::where('family_id', $familyId)->withTrashed()->forceDelete();
+        return (int)Carer::where('family_id', $familyId)->withTrashed()->forceDelete();
     }
 
     private function deleteFamily($family): int
     {
-        return (int) $family->delete();
+        return (int)$family->delete();
     }
 }
