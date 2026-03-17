@@ -2,15 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Bundle;
-use App\Carer;
 use App\Centre;
-use App\Child;
 use App\Family;
 use App\Registration;
-use App\Voucher;
 use Illuminate\Console\Command;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -20,7 +15,7 @@ class MoveFamilyRegistrationCentre extends Command
 {
     protected $signature = 'arc:move-family-reg
         {family_id? : Single family ID to move}
-        {center_id? : to which centre}
+        {centre_id? : to which centre}
         {--csv= : Path to CSV file containing an RVID and CENTRE column}
         {--dry-run : Show what would be deleted}
         {--force : Skip confirmation prompt}';
@@ -45,7 +40,7 @@ class MoveFamilyRegistrationCentre extends Command
         $workList = collect();
 
         if ($familyId && $centreId) {
-            $workList->push(["familyId" => (int)$familyId,"centreId" => (int)$centreId]);
+            $workList->push(["familyId" => (int)$familyId, "centreId" => (int)$centreId]);
         }
 
         if ($csvPath) {
@@ -71,14 +66,14 @@ class MoveFamilyRegistrationCentre extends Command
         $failed = [];
 
         foreach ($workList as $item) {
-            [$id, $centreId] = $item;
+            ['familyId' => $familyId, 'centreId' => $centreId] = $item;
             $this->line('');
-            $this->line("==== FAMILY {$id} ====");
+            $this->line("==== FAMILY {$familyId} ====");
 
-            $result = $this->moveSingleFamily($id, $centreId, $dryRun, $force);
+            $result = $this->moveSingleFamily($familyId, $centreId, $dryRun, $force);
 
             if ($result !== self::SUCCESS) {
-                $failed[] = $id;
+                $failed[] = $familyId;
             }
         }
 
@@ -96,7 +91,7 @@ class MoveFamilyRegistrationCentre extends Command
 
     private function extractFromCsv(string $path): Collection
     {
-        $ids = collect();
+        $pairs = collect();
 
         if (($handle = fopen($path, 'rb')) === false) {
             throw new RuntimeException("Cannot open CSV: {$path}");
@@ -109,24 +104,46 @@ class MoveFamilyRegistrationCentre extends Command
             throw new RuntimeException('CSV has no rows.');
         }
 
-        $rvid = array_search('RVID', $header, true);
+        $rvidIndex = array_search('RVID', $header, true);
+        $centreIndex = array_search('Centre', $header, true);
 
-        if ($rvid === false) {
+        if ($rvidIndex === false) {
             fclose($handle);
             throw new RuntimeException('CSV missing RVID header column.');
         }
 
+        if ($centreIndex === false) {
+            fclose($handle);
+            throw new RuntimeException('CSV missing Centre header column.');
+        }
+
+        $centreMap = Centre::query()->pluck('id', 'name');
+
         while (($row = fgetcsv($handle)) !== false) {
-            $family = self::findByRvid($row[$rvid]);
-            if ($family !== null) {
-                $ids->push($family->id);
-            } else {
-                $this->line("Invalid rvid: {$row[$rvid]}");
+
+            $rvid = trim((string)($row[$rvidIndex] ?? ''));
+            $centreName = trim((string)($row[$centreIndex] ?? ''));
+
+            $family = self::findByRvid($rvid);
+
+            if (!$family) {
+                $this->line("Invalid RVID: {$rvid}");
+                continue;
             }
+
+            $centreId = $centreMap[$centreName] ?? null;
+
+            if (!$centreId) {
+                $this->line("Invalid Centre: {$centreName}");
+                continue;
+            }
+
+            $pairs->push(['familyId' => $family->id, 'centreId' => $centreId]);
         }
 
         fclose($handle);
-        return $ids;
+
+        return $pairs;
     }
 
     public static function findByRvid(string $rvid): ?Family
