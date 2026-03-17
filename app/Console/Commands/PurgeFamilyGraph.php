@@ -110,7 +110,7 @@ class PurgeFamilyGraph extends Command
             if ($family !== null) {
                 $ids->push($family->id);
             } else {
-                $this->line("Invalid rvid: {$rvid}");
+                $this->line("Invalid rvid: {$row[$rvid]}");
             }
         }
 
@@ -158,7 +158,7 @@ class PurgeFamilyGraph extends Command
         try {
             return DB::transaction(callback: function () use ($familyId, $dryRun, $force) {
 
-                $family = Family::whereKey($familyId)->lockForUpdate()->withPrimaryCarer()->first();
+                $family = Family::withPrimaryCarer()->whereKey($familyId)->lockForUpdate()->first();
 
                 if (!$family) {
                     $this->error("Family {$familyId} not found.");
@@ -196,7 +196,7 @@ class PurgeFamilyGraph extends Command
                         "This will permanently purge family {$familyId} and related data. Continue?"
                     )
                 ) {
-                    $this->warn('Aborted.');
+                    $this->warn('Skipped');
                     return self::FAILURE;
                 }
 
