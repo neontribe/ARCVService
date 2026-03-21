@@ -32,7 +32,7 @@ class AddSponsorTest extends TestCase
         $this->sponsor = factory(Sponsor::class)->create();
     }
 
-    public function testCommandOk()
+    public function testCommandOk(): void
     {
         $results = $this
             ->artisan("arc:addSponsor " .
@@ -47,7 +47,7 @@ class AddSponsorTest extends TestCase
         $this->assertEquals(0, $results);
     }
 
-    public function testCommandNoUser()
+    public function testCommandNoUser(): void
     {
         $results = $this
             ->artisan("arc:addSponsor " .
@@ -61,7 +61,7 @@ class AddSponsorTest extends TestCase
         $this->assertEquals(1, $results);
     }
 
-    public function testCommandNoSponsor()
+    public function testCommandNoSponsor(): void
     {
         $results = $this
             ->artisan("arc:addSponsor " .
@@ -76,7 +76,7 @@ class AddSponsorTest extends TestCase
     }
 
 
-    public function testCommandUserWarningDenied()
+    public function testCommandUserWarningDenied(): void
     {
         $results = $this
             ->artisan("arc:addSponsor " .
@@ -91,7 +91,7 @@ class AddSponsorTest extends TestCase
         $this->assertEquals(3, $results);
     }
 
-    public function testCommandFailedLoggedIn()
+    public function testCommandFailedLoggedIn(): void
     {
         Auth::shouldReceive('login')->once();
         Auth::shouldReceive('check')->once()->andreturn(false);

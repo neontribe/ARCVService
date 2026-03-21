@@ -23,20 +23,20 @@ class UserModelTest extends TestCase
         $this->users[1]->traders()->sync([4,5]);
     }
 
-    public function testUserBelongsToManyTraders()
+    public function testUserBelongsToManyTraders(): void
     {
         $this->assertCount(3, $this->users[0]->traders);
         $this->assertCount(2, $this->users[1]->traders);
     }
 
-    public function testSoftDeleteUser()
+    public function testSoftDeleteUser(): void
     {
         $this->users[0]->delete();
         $this->assertCount(2, User::withTrashed()->get());
         $this->assertCount(1, User::all());
     }
 
-    public function testCheckIfTraderBelongsToUser()
+    public function testCheckIfTraderBelongsToUser(): void
     {
         $trader = $this->traders[0];
         $this->assertTrue($this->users[0]->hasEnabledTrader($trader));

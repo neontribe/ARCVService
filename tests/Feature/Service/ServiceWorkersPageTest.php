@@ -79,11 +79,9 @@ class ServiceWorkersPageTest extends StoreTestCase
     }
 
     /**
-     * @test
-     *
      * @return void
      */
-    public function itShowsATableWithHeaders()
+    public function testItShowsATableWithHeaders(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->workersRoute)
@@ -101,11 +99,9 @@ class ServiceWorkersPageTest extends StoreTestCase
     }
 
     /**
-     * @test
-     *
      * @return void
      */
-    public function itShowsAListWithUsers()
+    public function testItShowsAListWithUsers(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->workersRoute)
@@ -119,11 +115,9 @@ class ServiceWorkersPageTest extends StoreTestCase
     }
 
     /**
-    * @test
-    *
     * @return void
     */
-    public function itShowsADownloadWorkersListButton()
+    public function testItShowsADownloadWorkersListButton(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->workersRoute)

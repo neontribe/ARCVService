@@ -16,5 +16,4 @@ class CreateMasterVoucherLogReportTest extends MysqlStoreTestCase
             ->artisan("arc:createMVLReport", ["--force" => true]);
         $this->assertEquals(0, $results);
     }
-
 }

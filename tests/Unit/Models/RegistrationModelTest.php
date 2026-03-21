@@ -13,13 +13,13 @@ class RegistrationModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function itCanBeCreated()
+
+    public function testItCanBeCreated(): void
     {
         $family = factory(Family::class)->create();
         $centre = factory(Centre::class)->create();
 
-        $registration = new Registration;
+        $registration = new Registration();
         $registration->centre_id = $centre->id;
         $registration->eligibility_hsbs = "healthy-start-applying";
         $registration->eligibility_nrpf = "no";
@@ -28,8 +28,8 @@ class RegistrationModelTest extends TestCase
         $this->assertTrue($registration->save());
     }
 
-    /** @test */
-    public function itCanReturnRegistrationsOnlyForActiveFamilies()
+
+    public function testItCanReturnRegistrationsOnlyForActiveFamilies(): void
     {
         // Create a centre
         $centre = factory(Centre::class)->create();
@@ -40,7 +40,7 @@ class RegistrationModelTest extends TestCase
         ]);
 
         // Check that we have 4.
-        $this->assertEquals(Registration::whereActiveFamily()->count(), 4);
+        $this->assertEquals(4, Registration::whereActiveFamily()->count());
 
         // A family has left.
         $family = $registrations->first()->family;
@@ -48,6 +48,6 @@ class RegistrationModelTest extends TestCase
         $family->save();
 
         // check there are only 3.
-        $this->assertEquals(Registration::whereActiveFamily()->count(), 3);
+        $this->assertEquals(3, Registration::whereActiveFamily()->count());
     }
 }

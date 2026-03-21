@@ -24,7 +24,7 @@ class AdminResetTest extends TestCase
         $this->adminUser = factory(AdminUser::class)->create();
     }
 
-    public function testResetRoute()
+    public function testResetRoute(): void
     {
         // Mock the Process command
         $mockProcess = Mockery::mock(Process::class);
@@ -45,26 +45,26 @@ class AdminResetTest extends TestCase
             )
         );
         // Mock DB - DOES NOT WORK. I think the Process call spawns a new thread
-//        $mockDb = Mockery::mock(DatabaseManager::class, );
-//        $mockDb->shouldReceive('table->where->pluck')
-//        ->once()
-//        ->with("secret")
-//        ->andReturn([
-//            [
-//                'id' => 1,
-//                'userId' => 555,
-//                'name' => "0",
-//                'secret' => "0",
-//                'provider' => "0",
-//                'redirect' => "0",
-//                'personal_access_client' => 3,
-//                'password_client' => 4,
-//                'revoked' => 5,
-//                'created_at' => "0",
-//                'updated_at' => "0",
-//            ]
-//        ]);
-//        $cls = get_class(DB::getFacadeRoot());
+        //        $mockDb = Mockery::mock(DatabaseManager::class, );
+        //        $mockDb->shouldReceive('table->where->pluck')
+        //        ->once()
+        //        ->with("secret")
+        //        ->andReturn([
+        //            [
+        //                'id' => 1,
+        //                'userId' => 555,
+        //                'name' => "0",
+        //                'secret' => "0",
+        //                'provider' => "0",
+        //                'redirect' => "0",
+        //                'personal_access_client' => 3,
+        //                'password_client' => 4,
+        //                'revoked' => 5,
+        //                'created_at' => "0",
+        //                'updated_at' => "0",
+        //            ]
+        //        ]);
+        //        $cls = get_class(DB::getFacadeRoot());
 
         // Run the test
         $this->actingAs($this->adminUser, 'admin')

@@ -84,8 +84,8 @@ class ServiceRoutesTest extends StoreTestCase
         $this->trader = factory(Trader::class)->create(['market_id' => $this->market->id]);
     }
 
-    /** @test */
-    public function testServiceLogoutRoute()
+
+    public function testServiceLogoutRoute(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->post(route('admin.logout'))
@@ -93,15 +93,15 @@ class ServiceRoutesTest extends StoreTestCase
             ->seeRouteIs('admin.login');
     }
 
-    /** @test */
-    public function testServiceLoginPageRoute()
+
+    public function testServiceLoginPageRoute(): void
     {
         $this->get(route('admin.login'))
             ->assertResponseStatus(200);
     }
 
-    /** @test */
-    public function testRouteGates()
+
+    public function testRouteGates(): void
     {
         $loginRoute = route('admin.login');
 
@@ -127,7 +127,7 @@ class ServiceRoutesTest extends StoreTestCase
                 // And it's not 403, 404, 500, or a redirect-to-login.
                 $this->assertFalse($response->isNotFound());
                 $this->assertFalse($response->isForbidden());
-                $this->assertFalse($this->currentUri === $loginRoute);
+                $this->assertNotSame($this->currentUri, $loginRoute);
                 $this->assertFalse($response->isServerError());
                 $this->assertTrue(
                     $response->isOK()

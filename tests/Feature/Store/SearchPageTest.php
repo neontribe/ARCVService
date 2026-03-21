@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Feature\Store;
 
 use App\Centre;
@@ -14,8 +15,8 @@ class SearchPageTest extends StoreTestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function itShowsTheLoggedInUser(): void
+
+    public function testItShowsTheLoggedInUser(): void
     {
         // Create some centres
         factory(Centre::class, 4)->create();
@@ -34,8 +35,8 @@ class SearchPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itShowsRegistrationsFromNeighbourCentres(): void
+
+    public function testItShowsRegistrationsFromNeighbourCentres(): void
     {
         // Create a single Sponsor
         $sponsor = factory(Sponsor::class)->create();
@@ -80,8 +81,8 @@ class SearchPageTest extends StoreTestCase
     }
 
 
-    /** @test */
-    public function itShowsRegistrationsFromMyCentre(): void
+
+    public function testItShowsRegistrationsFromMyCentre(): void
     {
         // Create a single Sponsor
         $sponsor = factory(Sponsor::class)->create();
@@ -114,8 +115,7 @@ class SearchPageTest extends StoreTestCase
         }
     }
 
-    /** test */
-    public function itDoesNotShowRegistrationsFromUnrelatedCentres(): void
+    public function testItDoesNotShowRegistrationsFromUnrelatedCentres(): void
     {
         // Create a single Sponsor
         $sponsor = factory(Sponsor::class)->create();
@@ -125,7 +125,7 @@ class SearchPageTest extends StoreTestCase
             "sponsor_id" => $sponsor->id,
         ]);
 
-        $alien_centre = factory(Centre::class, 2)->create([
+        $alien_centre = factory(Centre::class)->create([
             "sponsor_id" => factory(Sponsor::class)->create()->id,
         ]);
 
@@ -160,13 +160,13 @@ class SearchPageTest extends StoreTestCase
 
         // Check we can see the edit link with the registration ID in it.
         foreach ($registrations3 as $registration) {
-            $edit_url_string = URL::route('store.registration.edit', [ 'id' => $registration->id]);
+            $edit_url_string = URL::route('store.registration.edit', [ 'registration' => $registration->id]);
             $this->dontSee($edit_url_string);
         }
     }
 
-    /** @test */
-    public function itShowsThePrimaryCarerName(): void
+
+    public function testItShowsThePrimaryCarerName(): void
     {
 
         // Create a Centre (and, implicitly a random Sponsor)
@@ -194,8 +194,8 @@ class SearchPageTest extends StoreTestCase
             ->see($pri_carer->name);
     }
 
-    /** @test */
-    public function itShowsTheRVID(): void
+
+    public function testItShowsTheRVID(): void
     {
         // Create a Centre
         $centre = factory(Centre::class)->create();
@@ -220,8 +220,8 @@ class SearchPageTest extends StoreTestCase
     }
 
 
-    /** @test */
-    public function itShowsFamilyPrimaryCarersAlphabetically(): void
+
+    public function testItShowsFamilyPrimaryCarersAlphabetically(): void
     {
         // Create a Centre (and, implicitly a random Sponsor)
         $centre = factory(Centre::class)->create();
@@ -259,8 +259,8 @@ class SearchPageTest extends StoreTestCase
         }
     }
 
-    /** @test */
-    public function itHasTheExpectedResultsPerPage(): void
+
+    public function testItHasTheExpectedResultsPerPage(): void
     {
         $centre = factory(Centre::class)->create();
 
@@ -287,8 +287,8 @@ class SearchPageTest extends StoreTestCase
         $this->assertCount(10, $this->crawler->filter($selector));
     }
 
-    /** @test */
-    public function itShowsCentreLabelsForUsersByDefault(): void
+
+    public function testItShowsCentreLabelsForUsersByDefault(): void
     {
         // Create some centres
         $centre1 = factory(Centre::class)->create([
@@ -331,8 +331,8 @@ class SearchPageTest extends StoreTestCase
         $this->assertCount(9, $this->crawler->filter('div.secondary_info'));
     }
 
-    /** @test */
-    public function itDoesNotShowLeftFamiliesByDefault(): void
+
+    public function testItDoesNotShowLeftFamiliesByDefault(): void
     {
         $centre = factory(Centre::class)->create();
 
@@ -360,8 +360,8 @@ class SearchPageTest extends StoreTestCase
             ->dontSee($leavingFamily->carers->first());
     }
 
-    /** @test */
-    public function itShowsLeftFamilyRegistrationsAsDistinct(): void
+
+    public function testItShowsLeftFamilyRegistrationsAsDistinct(): void
     {
         $this->markTestSkipped('Waiting for Dusk');
         $centre = factory(Centre::class)->create();
@@ -393,8 +393,8 @@ class SearchPageTest extends StoreTestCase
         $this->assertCount(9, $this->crawler->filter('tr.active'));
     }
 
-    /** @test */
-    public function itPreventsAccessToLeftFamilyRegistrations(): void
+
+    public function testItPreventsAccessToLeftFamilyRegistrations(): void
     {
         $this->markTestSkipped('Waiting for Dusk');
         $centre = factory(Centre::class)->create();
@@ -429,8 +429,8 @@ class SearchPageTest extends StoreTestCase
         $this->assertCount(18, $this->crawler->filter('tr.active td.right.no-wrap div:not(.disabled)'));
     }
 
-    /** @test */
-    public function aVouchersButtonIsPresent(): void
+
+    public function testAVouchersButtonIsPresent(): void
     {
         // Create a Centre
         $centre = factory(Centre::class)->create();

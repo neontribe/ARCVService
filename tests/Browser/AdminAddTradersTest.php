@@ -11,10 +11,10 @@ class AdminAddTradersTest extends DuskTestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function add_traders_javascript_is_working()
+
+    public function testAddTradersJavascriptIsWorking(): void
     {
-        $adminLogin = new AdminLogin;
+        $adminLogin = new AdminLogin();
 
         $this->browse(function ($browser) use ($adminLogin) {
             $browser->visit($adminLogin)
@@ -33,8 +33,7 @@ class AdminAddTradersTest extends DuskTestCase
                     ->press('.glyphicon-minus')
                     ->assertMissing('@trader_name')
                     ->assertMissing('@trader_email')
-                    ;
-
+            ;
         });
     }
 }

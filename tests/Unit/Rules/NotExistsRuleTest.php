@@ -11,8 +11,8 @@ class NotExistsRuleTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function theNotExistsRuleValidates()
+
+    public function testTheNotExistsRuleValidates(): void
     {
         // Create a rules set.
         $rule = [
@@ -26,7 +26,7 @@ class NotExistsRuleTest extends TestCase
         $user = factory(User::class)->create();
 
         // Succeed at failing to find a user id
-        $this->assertTrue(validator(['user_id' => $user->id +1 ], $rule)->passes());
+        $this->assertTrue(validator(['user_id' => $user->id + 1 ], $rule)->passes());
 
         // Fail at failing to find a user id
         $this->assertFalse(validator(['user_id' => $user->id], $rule)->passes());

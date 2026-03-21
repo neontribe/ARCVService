@@ -45,8 +45,8 @@ class CreateTradersPageTest extends StoreTestCase
         ];
     }
 
-    /** @test */
-    public function testItShowsATraderCreatePage()
+
+    public function testItShowsATraderCreatePage(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->get($this->createRoute)
@@ -67,8 +67,8 @@ class CreateTradersPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function testItShowsAnErrorForBadMarket()
+
+    public function testItShowsAnErrorForBadMarket(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->createRoute)
@@ -91,8 +91,8 @@ class CreateTradersPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function testItShowsAnErrorForBadTraderName()
+
+    public function testItShowsAnErrorForBadTraderName(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->createRoute)

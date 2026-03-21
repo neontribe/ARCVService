@@ -9,6 +9,7 @@ use Generator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Tests\StoreTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class AdminNewCentreRequestTest extends StoreTestCase
 {
@@ -30,9 +31,7 @@ class AdminNewCentreRequestTest extends StoreTestCase
         return Validator::make($mockedRequestData, $this->rules)->passes();
     }
 
-    /**
-     * @dataProvider validationCases
-     */
+    #[DataProvider('validationCases')]
     public function testItValidatesCentreRequests(bool $shouldPass, array $mockedRequestData): void
     {
         $this->assertEquals($shouldPass, $this->validate($mockedRequestData));

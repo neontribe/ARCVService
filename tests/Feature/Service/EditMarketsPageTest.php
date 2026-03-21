@@ -47,8 +47,8 @@ class EditMarketsPageTest extends StoreTestCase
         ];
     }
 
-    /** @test */
-    public function testItShowsAMarketEditPage()
+
+    public function testItShowsAMarketEditPage(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->get($this->editRoute)
@@ -67,8 +67,8 @@ class EditMarketsPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function testItShowsAnErrorForBadPaymentMessage()
+
+    public function testItShowsAnErrorForBadPaymentMessage(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->editRoute)
@@ -90,8 +90,8 @@ class EditMarketsPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function testItShowsAnErrorForBadSponsor()
+
+    public function testItShowsAnErrorForBadSponsor(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->editRoute)
@@ -115,8 +115,8 @@ class EditMarketsPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function testItShowsAnErrorForBadMarket()
+
+    public function testItShowsAnErrorForBadMarket(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->editRoute)

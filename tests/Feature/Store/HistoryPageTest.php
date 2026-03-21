@@ -42,8 +42,7 @@ class HistoryPageTest extends StoreTestCase
         ]);
     }
 
-    /** @test **/
-    public function itShowsAlertWhenRegistrationHasNoBundlesAssigned()
+    public function testItShowsAlertWhenRegistrationHasNoBundlesAssigned(): void
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.collection-history', [ 'registration' => $this->registration ]))

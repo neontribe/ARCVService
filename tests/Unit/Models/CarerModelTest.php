@@ -9,18 +9,17 @@ use Tests\TestCase;
 
 class CarerModelTest extends TestCase
 {
-
     use RefreshDatabase;
 
-    /** @test */
-    public function itHasExpectedAttributes()
+
+    public function testItHasExpectedAttributes(): void
     {
         $carer = factory(Carer::class)->make();
         $this->assertNotNull($carer->name);
     }
 
-    /** @test */
-    public function itCanHaveAFamily()
+
+    public function testItCanHaveAFamily(): void
     {
         // Make a Family
         $family = factory(Family::class)->create();

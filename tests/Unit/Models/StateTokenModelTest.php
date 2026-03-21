@@ -12,8 +12,8 @@ class StateTokenModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function testItCanGenerateAPaymentUUID()
+
+    public function testItCanGenerateAPaymentUUID(): void
     {
         // Create a StateToken
         $token = factory(StateToken::class)->create();
@@ -31,8 +31,8 @@ class StateTokenModelTest extends TestCase
         $this->assertEquals($uuid, $specifiedToken->uuid);
     }
 
-    /** @test */
-    public function testItCannotSaveADuplicateUUID()
+
+    public function testItCannotSaveADuplicateUUID(): void
     {
         $this->expectExceptionMessage("Integrity constraint violation: 19 UNIQUE constraint failed: state_tokens.uuid");
         $this->expectException(QueryException::class);

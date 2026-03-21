@@ -23,7 +23,6 @@ class StoreVoucherControllerTest extends StoreTestCase
      * TODO : Test that decryption failing mid-stream results in a response that is well-marked as failed
      * ...although problems here would soon be spotted by the single person who uses this feature directly.
      */
-
     use RefreshDatabase;
 
     /** @var Centre $centre */
@@ -54,7 +53,7 @@ class StoreVoucherControllerTest extends StoreTestCase
 
         // Remove any file before we start
         if ($this->disk->exists($this->archiveName)) {
-            $this->disk->delete($this>$this->archiveName);
+            $this->disk->delete($this > $this->archiveName);
         }
 
         // Set up a Centre

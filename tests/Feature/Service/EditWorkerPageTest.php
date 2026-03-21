@@ -31,11 +31,9 @@ class EditWorkerPageTest extends StoreTestCase
     }
 
     /**
-     * @test
-     *
      * @return void
      */
-    public function itShowsAWorkerEditPage()
+    public function testItShowsAWorkerEditPage(): void
     {
         // Make a CentreUser from the data with 1 homeCentre.
         $cu = factory(CentreUser::class)->create([

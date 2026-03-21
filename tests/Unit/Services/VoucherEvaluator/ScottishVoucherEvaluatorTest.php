@@ -19,7 +19,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
     use RefreshDatabase;
 
     // This has a | in the reason field because we want to carry the entity with it.
-    const NOTICE_TYPES = [
+    public const NOTICE_TYPES = [
         'ChildIsAlmostOne' => ['reason' => 'Child|almost 1 year old'],
         'ScottishChildIsAlmostPrimarySchoolAge' => ['reason' => 'Child|almost primary school age (SCOTLAND)'],
         'ChildIsAlmostSecondarySchoolAge' => ['reason' => 'Child|almost secondary school age'],
@@ -30,7 +30,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
     ];
 
     // This has a | in the reason field because we want to carry the entity with it.
-    const CREDIT_TYPES = [
+    public const CREDIT_TYPES = [
         'ChildIsUnderOne' => ['reason' => 'Child|under 1 year old', 'value' => 6],
         'ScottishChildIsBetweenOneAndPrimarySchoolAge' => ['reason' => 'Child|between 1 and start of primary school age (SCOTLAND)', 'value' => 4],
         'ChildIsPrimarySchoolAge' => ['reason' => 'Child|primary school age', 'value' => 4],
@@ -156,8 +156,8 @@ class ScottishVoucherEvaluatorTest extends TestCase
         $this->canNotDefer = factory(Child::class)->state('canNotDefer')->make();
     }
 
-    /** @test */
-    public function itCreditsWhenAFamilyIsPregnant(): void
+
+    public function testItCreditsWhenAFamilyIsPregnant(): void
     {
         $this->family->children()->save($this->pregnancy);
 
@@ -168,12 +168,12 @@ class ScottishVoucherEvaluatorTest extends TestCase
         $credits = $evaluation["credits"];
 
         // There should be a credit reason of 'FamilyIsPregnant'
-        $this->assertEquals(1, count($credits));
+        $this->assertCount(1, $credits);
         $this->assertContains(self::CREDIT_TYPES['FamilyIsPregnant'], $credits);
     }
 
-    /** @test */
-    public function itDoesntCreditPrimarySchoolChildren(): void
+
+    public function testItDoesntCreditPrimarySchoolChildren(): void
     {
         // get rules mods
         $rulesMods = collect($this->rulesMods["credit-primary"]);
@@ -192,8 +192,8 @@ class ScottishVoucherEvaluatorTest extends TestCase
         $this->assertEquals('0', $evaluation->getEntitlement());
     }
 
-    /** @test */
-    public function itCreditsQualifiedPrimarySchoolChildrenButNotUnqualifiedOnes(): void
+
+    public function testItCreditsQualifiedPrimarySchoolChildrenButNotUnqualifiedOnes(): void
     {
         $rulesMods = collect($this->rulesMods["credit-primary"]);
         // Make evaluator
@@ -230,8 +230,8 @@ class ScottishVoucherEvaluatorTest extends TestCase
         $this->assertEquals('8', $evaluation->getEntitlement());
     }
 
-    /** @test */
-    public function itCreditsWhenAChildIsBetweenOneAndPrimarySchoolAge()
+
+    public function testItCreditsWhenAChildIsBetweenOneAndPrimarySchoolAge(): void
     {
         $rulesMods = collect($this->rulesMods["credit-primary"]);
         // Make evaluator
@@ -240,7 +240,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
         $credits = $evaluation["credits"];
 
         // Check there's one, because child is not under one.
-        $this->assertEquals(1, count($credits));
+        $this->assertCount(1, $credits);
 
         // Check the correct credit type is applied.
         $this->assertContains(self::CREDIT_TYPES['ScottishChildIsBetweenOneAndPrimarySchoolAge'], $credits);
@@ -248,8 +248,8 @@ class ScottishVoucherEvaluatorTest extends TestCase
     }
 
 
-    /** @test */
-    public function itNoticesWhenAChildIsAlmostPrimarySchoolAge()
+
+    public function testItNoticesWhenAChildIsAlmostPrimarySchoolAge(): void
     {
         $this->markTestSkipped('Waiting for hotfix');
         // Need to change the values we use for school start to next month's integer
@@ -261,18 +261,18 @@ class ScottishVoucherEvaluatorTest extends TestCase
         $notices = $evaluation["notices"];
 
         // Check there's one, because no other event is pending.
-        $this->assertEquals(1, count($notices));
+        $this->assertCount(1, $notices);
 
         // Check the correct credit type is applied.
         $this->assertNotContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $notices);
         $this->assertContains(self::NOTICE_TYPES['ScottishChildIsAlmostPrimarySchoolAge'], $notices);
     }
 
-    /** @test */
+
     // the scottish deferral code doesn't like december dates.
     // this is probably a bug in the Evaluator specification
     // not dealing with a year-wrapping check
-    public function itNoticesWhenAChildCanDefer(): void
+    public function testItNoticesWhenAChildCanDefer(): void
     {
         $this->markTestSkipped('Waiting for hotfix');
         // Need to change the values we use for school start to next month's integer
@@ -284,7 +284,7 @@ class ScottishVoucherEvaluatorTest extends TestCase
         $notices = $evaluation["notices"];
 
         // Check there's one
-        $this->assertEquals(2, count($notices));
+        $this->assertCount(2, $notices);
 
         // Check the correct credit type is applied.
         $this->assertNotContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $notices);

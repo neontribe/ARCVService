@@ -11,10 +11,10 @@ class AddWorkersJSTest extends DuskTestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function add_workers_javascript_is_working()
+
+    public function testAddWorkersJavascriptIsWorking(): void
     {
-        $adminLogin = new AdminLogin;
+        $adminLogin = new AdminLogin();
 
         $this->browse(function ($browser) use ($adminLogin) {
             $browser->visit($adminLogin)
@@ -27,7 +27,7 @@ class AddWorkersJSTest extends DuskTestCase
                     ->assertSee('Set Neighbours as Alternatives')
                     ->assertPresent('#neighbour-' . $adminLogin->centres[1]->id)
                     ->assertMissing('#neighbour-' . $adminLogin->other_centres[1]->id)
-                    ;
+            ;
         });
     }
 }

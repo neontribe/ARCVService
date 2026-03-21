@@ -7,6 +7,7 @@ use App\Sponsor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Tests\StoreTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class AdminNewUpdateMarketRequestTest extends StoreTestCase
 {
@@ -27,9 +28,7 @@ class AdminNewUpdateMarketRequestTest extends StoreTestCase
         return Validator::make($data, $this->rules)->passes();
     }
 
-    /**
-     * @dataProvider validationCases
-     */
+    #[DataProvider('validationCases')]
     public function testItValidatesMarketRequests(bool $expected, array $data): void
     {
         $this->assertEquals($expected, $this->validate($data));

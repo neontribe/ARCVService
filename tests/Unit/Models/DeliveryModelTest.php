@@ -22,8 +22,8 @@ class DeliveryModelTest extends TestCase
         $this->delivery = factory(Delivery::class)->create();
     }
 
-    /** @test */
-    public function testDeliveryIsCreatedWithExpectedAttributes()
+
+    public function testDeliveryIsCreatedWithExpectedAttributes(): void
     {
         $d = $this->delivery;
         $this->assertInstanceOf(Delivery::class, $d);
@@ -35,8 +35,8 @@ class DeliveryModelTest extends TestCase
         $this->assertEmpty($d->range);
     }
 
-    /** @test */
-    public function testPopulatedDeliveryIsCreatedWithExpectedAttributes()
+
+    public function testPopulatedDeliveryIsCreatedWithExpectedAttributes(): void
     {
         $centre = factory(Centre::class)->create();
 
@@ -62,8 +62,8 @@ class DeliveryModelTest extends TestCase
         $this->assertNotEmpty($dispatchedBundle->vouchers);
     }
 
-    /** @test */
-    public function testDeliveryCanHaveManyVouchers()
+
+    public function testDeliveryCanHaveManyVouchers(): void
     {
         // Create three vouchers and transition to dipatched.
         $vs = factory(Voucher::class, 3)->state('printed')
@@ -76,14 +76,14 @@ class DeliveryModelTest extends TestCase
         $this->assertEquals($vs->count(), $this->delivery->vouchers()->count());
     }
 
-    /** @test */
-    public function testDeliveryBelongsToACentre()
+
+    public function testDeliveryBelongsToACentre(): void
     {
         $this->assertInstanceOf('App\Centre', $this->delivery->centre);
     }
 
-    /** @test */
-    public function testOrderDeliveriesByField()
+
+    public function testOrderDeliveriesByField(): void
     {
         factory(Delivery::class)->create([
             'centre_id' => factory(Centre::class)->create(['name' => 'Adriatic Centre'])->id,

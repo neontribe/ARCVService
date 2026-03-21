@@ -58,8 +58,8 @@ class RejoinPageTest extends StoreTestCase
         ]);
     }
 
-    /** @test */
-    public function itShowsTheCorrectViewFields()
+
+    public function testItShowsTheCorrectViewFields(): void
     {
         $pri_carer = $this->registration->family->carers->first();
         $this->actingAs($this->centreUser, 'store')
@@ -69,23 +69,23 @@ class RejoinPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itDoesNotShowTheChildrenNames()
+
+    public function testItDoesNotShowTheChildrenNames(): void
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.view', [ 'registration' => $this->registration ]))
         ;
         // Don't see the names of children in the page
         foreach ($this->children as $child) {
-            $this->dontSee('<td class="age-col">'. $child->getAgeString() .'</td>')
-                ->dontSee('<td class="dob-col">'. $child->getDobAsString() .'</td>')
+            $this->dontSee('<td class="age-col">' . $child->getAgeString() . '</td>')
+                ->dontSee('<td class="dob-col">' . $child->getDobAsString() . '</td>')
                 ->dontSeeInElement('input[type="hidden"]', $child->dob->format('Y-m'))
             ;
         }
     }
 
-    /** @test */
-    public function itShowsARejoinButton()
+
+    public function testItShowsARejoinButton(): void
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.view', [ 'registration' => $this->registration ]))
@@ -93,8 +93,8 @@ class RejoinPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itDoesNotShowRemoveThisFamilyButton()
+
+    public function testItDoesNotShowRemoveThisFamilyButton(): void
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.view', [ 'registration' => $this->registration ]))
@@ -102,8 +102,8 @@ class RejoinPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itDoesNotShowASecondaryCarerInput()
+
+    public function testItDoesNotShowASecondaryCarerInput(): void
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.view', [ 'registration' => $this->registration ]))
@@ -112,8 +112,8 @@ class RejoinPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itWillAllowFamilyToRejoin()
+
+    public function testItWillAllowFamilyToRejoin(): void
     {
         $knownDate = Carbon::create(2023, 1, 13, 12);
         Carbon::setTestNow($knownDate);

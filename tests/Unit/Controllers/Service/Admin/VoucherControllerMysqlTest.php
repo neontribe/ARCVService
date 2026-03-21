@@ -60,8 +60,8 @@ class VoucherControllerMysqlTest extends MysqlStoreTestCase
         Auth::logout();
     }
 
-    /** @test */
-    public function testItCanVoidVoucherCodes()
+
+    public function testItCanVoidVoucherCodes(): void
     {
         // The post data
         $data = [
@@ -106,8 +106,8 @@ class VoucherControllerMysqlTest extends MysqlStoreTestCase
         });
     }
 
-    /** @test */
-    public function testItCanVoidVoucherCodesInABatchWithNonVoidables()
+
+    public function testItCanVoidVoucherCodesInABatchWithNonVoidables(): void
     {
         // The post data
         $data = [
@@ -159,8 +159,8 @@ class VoucherControllerMysqlTest extends MysqlStoreTestCase
         });
     }
 
-    /** @test */
-    public function testItCanExpireVoucherCodes()
+
+    public function testItCanExpireVoucherCodes(): void
     {
         {
             // The post data
@@ -207,8 +207,8 @@ class VoucherControllerMysqlTest extends MysqlStoreTestCase
         }
     }
 
-    /** @test */
-    public function testItCanExpireVoucherCodesInABatchWithNonExpireables()
+
+    public function testItCanExpireVoucherCodesInABatchWithNonExpireables(): void
     {
         {
             // The post data
@@ -262,8 +262,8 @@ class VoucherControllerMysqlTest extends MysqlStoreTestCase
         }
     }
 
-    /** @test */
-    public function testAdminCanVoidASingleVoucher()
+
+    public function testAdminCanVoidASingleVoucher(): void
     {
         $this->adminUser = factory(AdminUser::class)->create();
         $this->voucherToVoid = factory(Voucher::class)->state('dispatched')->create();
@@ -276,10 +276,10 @@ class VoucherControllerMysqlTest extends MysqlStoreTestCase
             ->click('edit')
             ->seeInElement('h1', "Voucher Code: " . $this->voucherToVoid->code)
             ->press('transition')
-            ;
-            $this->seeInDatabase('vouchers', [
-                'code' => $this->voucherToVoid->code,
-                'currentstate' => 'retired'
-            ]);
+        ;
+        $this->seeInDatabase('vouchers', [
+            'code' => $this->voucherToVoid->code,
+            'currentstate' => 'retired'
+        ]);
     }
 }

@@ -9,6 +9,7 @@ use App\Voucher;
 use Auth;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\StoreTestCase;
 
 class AdminUpdateVoucherRequestTest extends StoreTestCase
@@ -50,9 +51,7 @@ class AdminUpdateVoucherRequestTest extends StoreTestCase
         return Validator::make($data, $this->rules)->passes();
     }
 
-    /**
-     * @dataProvider validationCases
-     */
+    #[DataProvider('validationCases')]
     public function testItValidatesVoucherUpdateRequests(bool $expected, array $data): void
     {
         $this->assertEquals($expected, $this->validate($data));

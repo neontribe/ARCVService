@@ -31,11 +31,9 @@ class LoggingTest extends StoreTestCase
     }
 
     /**
-     * @test
-     *
      * @return void
      */
-    public function itLogsData()
+    public function testItLogsData(): void
     {
         $storage = Storage::fake('log');
 
@@ -49,7 +47,7 @@ class LoggingTest extends StoreTestCase
 
         $json = json_decode($response->content());
         foreach (array_keys($this->postData) as $key) {
-            $this->assertTrue(in_array($key, $json));
+            $this->assertContains($key, $json);
         }
     }
 }

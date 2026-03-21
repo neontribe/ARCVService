@@ -21,8 +21,8 @@ class CentreUserModelTest extends TestCase
         $this->notes = factory(Note::class, 2)->create(['user_id' => $this->centreUser->id]);
     }
 
-    /** @test */
-    public function testCentreUserHasExpectedAttributes()
+
+    public function testCentreUserHasExpectedAttributes(): void
     {
         $cu = $this->centreUser;
         $this->assertNotNull($cu->name);
@@ -32,14 +32,14 @@ class CentreUserModelTest extends TestCase
         $this->assertFalse($cu->downloader);
     }
 
-    /** @test */
-    public function testCentreUserCanHaveNotes()
+
+    public function testCentreUserCanHaveNotes(): void
     {
         $this->assertCount(2, $this->centreUser->notes);
     }
 
-    /**@test */
-    public function testCentreUserCanHaveDownloadTrue()
+    /** */
+    public function testCentreUserCanHaveDownloadTrue(): void
     {
         // Standard CU
         $cu = $this->centreUser;
@@ -54,8 +54,8 @@ class CentreUserModelTest extends TestCase
         $this->assertTrue($cu->downloader);
     }
 
-    /** @test */
-    public function testCentreUserCanHaveAHomeCentre()
+
+    public function testCentreUserCanHaveAHomeCentre(): void
     {
         $cu = $this->centreUser;
         // Has no centres;
@@ -72,8 +72,8 @@ class CentreUserModelTest extends TestCase
         $this->assertEquals($centre->id, $cu->homeCentre->id);
     }
 
-    /** @test */
-    public function testCentreUserCanHaveAlternativeCentres()
+
+    public function testCentreUserCanHaveAlternativeCentres(): void
     {
         $cu = $this->centreUser;
         // Has no centres;

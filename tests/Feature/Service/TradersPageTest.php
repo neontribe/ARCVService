@@ -25,11 +25,9 @@ class TradersPageTest extends StoreTestCase
     }
 
     /**
-     * @test
-     *
      * @return void
      */
-    public function itShowsATableWithHeaders()
+    public function testItShowsATableWithHeaders(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->tradersRoute)
@@ -44,15 +42,14 @@ class TradersPageTest extends StoreTestCase
     }
 
     /**
-     * @test
      * @return void
      */
-    public function itShowsADownloadTradersListButton()
+    public function testItShowsADownloadTradersListButton(): void
     {
         $this->actingAs($this->adminUser, 'admin')
         ->visit($this->tradersRoute)
         ->assertResponseOk()
         ->seeInElement('a', 'Download Trader List')
-      ;
+        ;
     }
 }
