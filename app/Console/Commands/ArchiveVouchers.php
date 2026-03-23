@@ -13,7 +13,7 @@ class ArchiveVouchers extends Command
 {
     protected array $tableData = [];
 
-    protected string $date = "2023-09-01";
+    protected string $date = "2024-09-01";
     protected $signature = 'arc:archiveVouchers';
     protected $description = 'archive vouchers and their histories';
 
@@ -120,8 +120,10 @@ class ArchiveVouchers extends Command
     private function getSelectionCriteria(): Builder
     {
         // Define and return the query for selecting vouchers to archive
-        return DB::table('vouchers')->whereIn('currentstate',
-            ['reimbursed', 'retired', 'voided', 'expired'])->where('updated_at', '<', $this->date);
+        return DB::table('vouchers')->whereIn(
+            'currentstate',
+            ['reimbursed', 'retired', 'voided', 'expired']
+        )->where('updated_at', '<', $this->date);
     }
 
     private function dropIndexes($tableName): void
@@ -149,8 +151,10 @@ class ArchiveVouchers extends Command
             $keysFound = Arr::pluck(Schema::getForeignKeys($tableName), 'name');
             foreach ($foreignKeys as $fk) {
                 if (!array_key_exists($fk['name'], $keysFound)) {
-                    $table->foreign($fk['columns'],
-                        $fk['name'])->references($fk['foreign_columns'])->on($fk['foreign_table']);
+                    $table->foreign(
+                        $fk['columns'],
+                        $fk['name']
+                    )->references($fk['foreign_columns'])->on($fk['foreign_table']);
                 }
             }
 
