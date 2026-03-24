@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Bundle;
 use App\Carer;
-use App\Centre;
 use App\Child;
 use App\Family;
 use App\Registration;
@@ -12,6 +11,7 @@ use App\Voucher;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Throwable;
 
@@ -44,13 +44,13 @@ class PurgeFamilyGraph extends Command
         }
 
         if ($csvPath) {
-            if (!file_exists($csvPath)) {
-                $this->error("CSV file not found: {$csvPath}");
+            if (!Storage::exists($csvPath)) {
+                $this->error("CSV file not found: $csvPath");
                 return self::FAILURE;
             }
 
             $familyIds = $familyIds->merge(
-                $this->extractFamilyIdsFromCsv($csvPath)
+                $this->extractFromCsv($csvPath)
             );
         }
 
@@ -62,7 +62,7 @@ class PurgeFamilyGraph extends Command
 
         foreach ($familyIds as $id) {
             $this->line('');
-            $this->line("==== FAMILY {$id} ====");
+            $this->line("==== FAMILY $id ====");
 
             $result = $this->purgeSingleFamily($id, $dryRun, $force);
 
@@ -83,12 +83,14 @@ class PurgeFamilyGraph extends Command
         return self::SUCCESS;
     }
 
-    private function extractFamilyIdsFromCsv(string $path): Collection
+    private function extractFromCsv(string $path): Collection
     {
         $ids = collect();
 
-        if (($handle = fopen($path, 'rb')) === false) {
-            throw new RuntimeException("Cannot open CSV: {$path}");
+        $handle = Storage::readStream($path);
+
+        if ($handle === false) {
+            throw new RuntimeException("Cannot open CSV: $path");
         }
 
         $header = fgetcsv($handle);
@@ -106,11 +108,11 @@ class PurgeFamilyGraph extends Command
         }
 
         while (($row = fgetcsv($handle)) !== false) {
-            $family = self::findByRvid($row[$rvid]);
+            $family = Family::findByRvid($row[$rvid]);
             if ($family !== null) {
                 $ids->push($family->id);
             } else {
-                $this->line("Invalid rvid: {$row[$rvid]}");
+                $this->line("Invalid rvid: $row[$rvid]");
             }
         }
 
@@ -118,50 +120,15 @@ class PurgeFamilyGraph extends Command
         return $ids;
     }
 
-    public static function findByRvid(string $rvid): ?Family
-    {
-        $rvid = strtoupper(trim($rvid));
-
-        if ($rvid === '') {
-            return null;
-        }
-
-        // IMPORTANT: longest prefix first (prevents AB matching before AB1)
-        $centres = Centre::query()
-            ->select('id', 'prefix')
-            ->orderByRaw('LENGTH(prefix) DESC')
-            ->get()->all();
-
-        foreach ($centres as $centre) {
-            if (!str_starts_with($rvid, $centre->prefix)) {
-                continue;
-            }
-            $sequencePart = substr($rvid, strlen($centre->prefix));
-
-            if (!ctype_digit($sequencePart)) {
-                continue;
-            }
-
-            $sequence = (int)$sequencePart;
-
-            return Family::query()
-                ->where('initial_centre_id', $centre->id)
-                ->where('centre_sequence', $sequence)
-                ->first();
-        }
-
-        return null;
-    }
-
     private function purgeSingleFamily(int $familyId, bool $dryRun, bool $force): int
     {
         try {
-            return DB::transaction(callback: function () use ($familyId, $dryRun, $force) {
+            return DB::transaction(callback: function() use ($familyId, $dryRun, $force) {
 
                 $family = Family::withPrimaryCarer()->whereKey($familyId)->lockForUpdate()->first();
 
                 if (!$family) {
-                    $this->error("Family {$familyId} not found.");
+                    $this->error("Family $familyId not found.");
                     return self::FAILURE;
                 }
 
@@ -178,13 +145,13 @@ class PurgeFamilyGraph extends Command
                 $childrenCount = Child::where('family_id', $familyId)->count();
                 $carersCount = Carer::where('family_id', $familyId)->withTrashed()->count();
 
-                $this->info("Family: {$familyId}");
-                $this->info("Primary Carer: {$family->pri_carer}");
+                $this->info("Family: $familyId");
+                $this->info("Primary Carer: $family->pri_carer");
                 $this->line("Registrations: {$registrationIds->count()}");
                 $this->line("Bundles: {$bundleIds->count()}");
-                $this->line("Vouchers to detach: {$voucherCount}");
-                $this->line("Children: {$childrenCount}");
-                $this->line("Carers (including trashed): {$carersCount}");
+                $this->line("Vouchers to detach: $voucherCount");
+                $this->line("Children: $childrenCount");
+                $this->line("Carers (including trashed): $carersCount");
 
                 if ($dryRun) {
                     $this->warn('Dry run complete — nothing deleted.');
@@ -193,7 +160,7 @@ class PurgeFamilyGraph extends Command
 
                 if (
                     !$force && !$this->confirm(
-                        "This will permanently purge family {$familyId} and related data. Continue?"
+                        "This will permanently purge family $familyId and related data. Continue?"
                     )
                 ) {
                     $this->warn('Skipped');
@@ -212,20 +179,20 @@ class PurgeFamilyGraph extends Command
                 $deletedChildren = $this->deleteChildren($familyId);
                 if ($deletedChildren !== $childrenCount) {
                     throw new RuntimeException(
-                        "Child delete mismatch. Expected {$childrenCount}, deleted {$deletedChildren}."
+                        "Child delete mismatch. Expected $childrenCount, deleted $deletedChildren."
                     );
                 }
 
                 $deletedCarers = $this->deleteCarers($familyId);
                 if ($deletedCarers !== $carersCount) {
                     throw new RuntimeException(
-                        "Carer delete mismatch. Expected {$carersCount}, deleted {$deletedCarers}."
+                        "Carer delete mismatch. Expected $carersCount, deleted $deletedCarers."
                     );
                 }
 
                 $deletedFamily = $this->deleteFamily($family);
                 if ($deletedFamily !== 1) {
-                    throw new RuntimeException("Family delete failed for family {$familyId}.");
+                    throw new RuntimeException("Family delete failed for family $familyId.");
                 }
 
                 $this->info('Family graph permanently deleted.');
@@ -257,7 +224,7 @@ class PurgeFamilyGraph extends Command
 
         if ($deleted !== $expected) {
             throw new RuntimeException(
-                "Bundle delete mismatch. Expected {$expected}, deleted {$deleted}."
+                "Bundle delete mismatch. Expected $expected, deleted $deleted."
             );
         }
     }
@@ -274,7 +241,7 @@ class PurgeFamilyGraph extends Command
 
         if ($deleted !== $expected) {
             throw new RuntimeException(
-                "Registration delete mismatch. Expected {$expected}, deleted {$deleted}."
+                "Registration delete mismatch. Expected $expected, deleted $deleted."
             );
         }
     }

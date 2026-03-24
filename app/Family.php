@@ -79,6 +79,41 @@ class Family extends Model implements IEvaluee
         'rvid',
     ];
 
+    public static function findByRvid(string $rvid): ?self
+    {
+        $rvid = strtoupper(trim($rvid));
+
+        if ($rvid === '') {
+            return null;
+        }
+
+        // IMPORTANT: longest prefix first (prevents AB matching before AB1)
+        $centres = Centre::query()
+            ->select('id', 'prefix')
+            ->orderByRaw('LENGTH(prefix) DESC')
+            ->get()->all();
+
+        foreach ($centres as $centre) {
+            if (!str_starts_with($rvid, $centre->prefix)) {
+                continue;
+            }
+            $sequencePart = substr($rvid, strlen($centre->prefix));
+
+            if (!ctype_digit($sequencePart)) {
+                continue;
+            }
+
+            $sequence = (int)$sequencePart;
+
+            return self::query()
+                ->where('initial_centre_id', $centre->id)
+                ->where('centre_sequence', $sequence)
+                ->first();
+        }
+
+        return null;
+    }
+
     /**
      * Gets the evaluator from up the chain.
      *

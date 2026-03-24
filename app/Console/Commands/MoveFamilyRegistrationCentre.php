@@ -8,6 +8,7 @@ use App\Registration;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Throwable;
 
@@ -32,7 +33,8 @@ class MoveFamilyRegistrationCentre extends Command
 
         if (
             ($csvPath && ($centreId || $familyId)) ||
-            (!$csvPath && !($centreId && $familyId))) {
+            (!$csvPath && !($centreId && $familyId))
+        ) {
             $this->error('Provide either a family_id and centre_id OR --csv=path');
             return self::FAILURE;
         }
@@ -44,8 +46,8 @@ class MoveFamilyRegistrationCentre extends Command
         }
 
         if ($csvPath) {
-            if (!file_exists($csvPath)) {
-                $this->error("CSV file not found: {$csvPath}");
+            if (!Storage::exists($csvPath)) {
+                $this->error("CSV file not found: $csvPath");
                 return self::FAILURE;
             }
 
@@ -68,7 +70,7 @@ class MoveFamilyRegistrationCentre extends Command
         foreach ($workList as $item) {
             ['familyId' => $familyId, 'centreId' => $centreId] = $item;
             $this->line('');
-            $this->line("==== FAMILY {$familyId} ====");
+            $this->line("==== FAMILY $familyId ====");
 
             $result = $this->moveSingleFamily($familyId, $centreId, $dryRun, $force);
 
@@ -86,10 +88,10 @@ class MoveFamilyRegistrationCentre extends Command
             return self::FAILURE;
         }
 
-        $path = "/tmp/movesDone.csv";
+        $path = "movesDone.csv";
         if (count($this->summary) > 0) {
             $this->writeCsv($path, $this->summary);
-            $this->line("Wrote changes to {$path}");
+            $this->line("Wrote changes to $path");
         }
 
         return self::SUCCESS;
@@ -99,8 +101,10 @@ class MoveFamilyRegistrationCentre extends Command
     {
         $pairs = collect();
 
-        if (($handle = fopen($path, 'rb')) === false) {
-            throw new RuntimeException("Cannot open CSV: {$path}");
+        $handle = Storage::readStream($path);
+
+        if ($handle === false) {
+            throw new RuntimeException("Cannot open CSV: $path");
         }
 
         $header = fgetcsv($handle);
@@ -126,25 +130,27 @@ class MoveFamilyRegistrationCentre extends Command
         $centreMap = Centre::query()->pluck('id', 'name');
 
         while (($row = fgetcsv($handle)) !== false) {
-
             $rvid = trim((string)($row[$rvidIndex] ?? ''));
             $centreName = trim((string)($row[$centreIndex] ?? ''));
 
-            $family = self::findByRvid($rvid);
+            $family = Family::findByRvid($rvid);
 
             if (!$family) {
-                $this->line("Invalid RVID: {$rvid}");
+                $this->line("Invalid RVID: $rvid");
                 continue;
             }
 
             $centreId = $centreMap[$centreName] ?? null;
 
             if (!$centreId) {
-                $this->line("Invalid Centre: {$centreName}");
+                $this->line("Invalid Centre: $centreName");
                 continue;
             }
 
-            $pairs->push(['familyId' => $family->id, 'centreId' => $centreId]);
+            $pairs->push([
+                'familyId' => $family->id,
+                'centreId' => $centreId,
+            ]);
         }
 
         fclose($handle);
@@ -152,52 +158,17 @@ class MoveFamilyRegistrationCentre extends Command
         return $pairs;
     }
 
-    public static function findByRvid(string $rvid): ?Family
-    {
-        $rvid = strtoupper(trim($rvid));
-
-        if ($rvid === '') {
-            return null;
-        }
-
-        // IMPORTANT: longest prefix first (prevents AB matching before AB1)
-        $centres = Centre::query()
-            ->select('id', 'prefix')
-            ->orderByRaw('LENGTH(prefix) DESC')
-            ->get()->all();
-
-        foreach ($centres as $centre) {
-            if (!str_starts_with($rvid, $centre->prefix)) {
-                continue;
-            }
-            $sequencePart = substr($rvid, strlen($centre->prefix));
-
-            if (!ctype_digit($sequencePart)) {
-                continue;
-            }
-
-            $sequence = (int)$sequencePart;
-
-            return Family::query()
-                ->where('initial_centre_id', $centre->id)
-                ->where('centre_sequence', $sequence)
-                ->first();
-        }
-
-        return null;
-    }
-
     private function moveSingleFamily(int $familyId, int $centreId, bool $dryRun, bool $force): int
     {
         $centre = Centre::find($centreId);
         if (!$centre) {
-            $this->error("Centre {$centreId} not found.");
+            $this->error("Centre $centreId not found.");
             return self::FAILURE;
         }
 
         $family = Family::withPrimaryCarer()->whereKey($familyId)->lockForUpdate()->first();
         if (!$family) {
-            $this->error("Family {$familyId} not found.");
+            $this->error("Family $familyId not found.");
             return self::FAILURE;
         }
 
@@ -211,11 +182,11 @@ class MoveFamilyRegistrationCentre extends Command
                 $centreNames = $registrations->pluck('centre.name')->all();
                 $centreNames = implode(", ", array_unique(array_sort($centreNames)));
 
-                $this->info("Family: {$family->id} ({$family->rvid})");
-                $this->info("Primary Carer: {$family->pri_carer}");
+                $this->info("Family: $family->id ($family->rvid)");
+                $this->info("Primary Carer: $family->pri_carer");
                 $this->line("Registrations: {$registrations->count()}");
-                $this->line("In Centres: {$centreNames}");
-                $this->line("Move to Centre: {$centre->id} ({$centre->name})");
+                $this->line("In Centres: $centreNames");
+                $this->line("Move to Centre: $centre->id ($centre->name)");
 
                 if ($dryRun) {
                     $this->warn('Dry run complete — nothing deleted.');
@@ -224,7 +195,7 @@ class MoveFamilyRegistrationCentre extends Command
 
                 if (
                     !$force && !$this->confirm(
-                        "This will permanently move family {$family->id} and related data to {$centre->name}. Continue?"
+                        "This will permanently move family $family->id and related data to $centre->name. Continue?"
                     )
                 ) {
                     $this->warn('Skipped');
@@ -263,20 +234,27 @@ class MoveFamilyRegistrationCentre extends Command
 
         if ($actioned !== $expected) {
             throw new RuntimeException(
-                "Registration move mismatch. Expected {$expected}, moved {$actioned}."
+                "Registration move mismatch. Expected $expected, moved $actioned."
             );
         }
     }
 
     private function writeCsv(string $path, iterable $rows): void
     {
-        $handle = fopen($path, 'wb');
-        if ($handle === false) {
-            throw new RuntimeException("Cannot write CSV to: {$path}");
+        $stream = fopen('php://temp', 'w+');
+
+        if ($stream === false) {
+            throw new RuntimeException('Cannot open temp stream.');
         }
+
         foreach ($rows as $row) {
-            fputcsv($handle, $row);
+            fputcsv($stream, $row);
         }
-        fclose($handle);
+
+        rewind($stream);
+
+        Storage::put($path, stream_get_contents($stream));
+
+        fclose($stream);
     }
 }
