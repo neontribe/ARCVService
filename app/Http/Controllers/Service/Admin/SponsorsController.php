@@ -126,7 +126,7 @@ class SponsorsController extends Controller
             try {
                 Evaluation::updateOrCreate(['sponsor_id' => $id, 'name' => $key], $payload);
             } catch (Exception $e) {
-                Log::error("Failed to update evaluation $key for sponsor #{$id} by user " . Auth::id(), [
+                Log::error("Failed to update evaluation $key for sponsor #$id by user " . Auth::id(), [
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);

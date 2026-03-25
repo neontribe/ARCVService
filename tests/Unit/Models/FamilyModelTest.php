@@ -14,7 +14,6 @@ class FamilyModelTest extends TestCase
 {
     use RefreshDatabase;
 
-
     public function testItCanHaveRegistrations(): void
     {
         // Create Family
@@ -256,5 +255,39 @@ class FamilyModelTest extends TestCase
         $candidate = $centre->prefix . str_pad((string)$family->centre_sequence, 4, 0, STR_PAD_LEFT);
 
         $this->assertEquals($candidate, $family->rvid);
+    }
+
+    public function testFindByRvidReturnsNullForBlankOrInvalidValues(): void
+    {
+        $this->assertNull(Family::findByRvid(''));
+        $this->assertNull(Family::findByRvid('   '));
+        $this->assertNull(Family::findByRvid('NOT-AN-RVID'));
+    }
+
+    public function testItResolvesLongestPrefixFirstWhenFindingFamilyByRvid(): void
+    {
+        $short = factory(Centre::class)->create([
+            'prefix' => 'AB',
+        ]);
+
+        $long = factory(Centre::class)->create([
+            'prefix' => 'AB1',
+        ]);
+
+        $wrongFamily = factory(Family::class)->create([
+            'initial_centre_id' => $short->id,
+            'centre_sequence' => 23,
+        ]);
+
+        $expectedFamily = factory(Family::class)->create([
+            'initial_centre_id' => $long->id,
+            'centre_sequence' => 23,
+        ]);
+
+        $resolved = Family::findByRvid('ab123');
+
+        $this->assertNotNull($resolved);
+        $this->assertSame($expectedFamily->id, $resolved->id);
+        $this->assertNotSame($wrongFamily->id, $resolved->id);
     }
 }
