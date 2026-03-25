@@ -50,7 +50,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'links' => [
-        'privacy_policy' => 'https://www.alexandrarose.org.uk/arc-childrens-centre-information-sharing-policy',
+        'privacy_policy' => 'https://www.alexandrarose.org.uk/wp-content/uploads/2025/02/Privacy-Policy-Rose-Voucher-Recipient-Feb-25.pdf',
     ],
 
     /*
