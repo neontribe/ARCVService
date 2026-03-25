@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0954b6c405aeaacb84391c2d1ed603b6",
+    "content-hash": "a4e6b2fb63524fc70bd1b51f5abe743e",
     "packages": [
         {
             "name": "barryvdh/laravel-debugbar",
@@ -4088,6 +4088,69 @@
             "time": "2024-09-09T07:06:30+00:00"
         },
         {
+            "name": "paragonie/ciphersweet",
+            "version": "v4.10.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/paragonie/ciphersweet.git",
+                "reference": "06cbd57f5d0af53f30c5e11f52664b7d6d8639db"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/paragonie/ciphersweet/zipball/06cbd57f5d0af53f30c5e11f52664b7d6d8639db",
+                "reference": "06cbd57f5d0af53f30c5e11f52664b7d6d8639db",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "ext-openssl": "*",
+                "paragonie/constant_time_encoding": "^2|^3",
+                "paragonie/sodium_compat": "^1|^2",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "infection/infection": "^0",
+                "phpunit/phpunit": "^10|^11|^12|^13",
+                "vimeo/psalm": "^6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "ParagonIE\\CipherSweet\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "ISC"
+            ],
+            "authors": [
+                {
+                    "name": "Paragon Initiative Enterprises",
+                    "email": "security@paragonie.com"
+                }
+            ],
+            "description": "Searchable field-level encryption library for relational databases",
+            "keywords": [
+                "FIPS 140-3",
+                "NIST cryptography",
+                "SQL encryption",
+                "crm",
+                "cryptography",
+                "database encryption",
+                "encrypt",
+                "encryption",
+                "field-level encryption",
+                "libsodium",
+                "queryable encryption",
+                "searchable encryption"
+            ],
+            "support": {
+                "issues": "https://github.com/paragonie/ciphersweet/issues",
+                "source": "https://github.com/paragonie/ciphersweet/tree/v4.10.0"
+            },
+            "time": "2026-03-05T00:32:31+00:00"
+        },
+        {
             "name": "paragonie/constant_time_encoding",
             "version": "v3.1.3",
             "source": {
@@ -4205,6 +4268,102 @@
                 "source": "https://github.com/paragonie/random_compat"
             },
             "time": "2020-10-15T08:29:30+00:00"
+        },
+        {
+            "name": "paragonie/sodium_compat",
+            "version": "v2.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/paragonie/sodium_compat.git",
+                "reference": "4714da6efdc782c06690bc72ce34fae7941c2d9f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/paragonie/sodium_compat/zipball/4714da6efdc782c06690bc72ce34fae7941c2d9f",
+                "reference": "4714da6efdc782c06690bc72ce34fae7941c2d9f",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "php-64bit": "*"
+            },
+            "require-dev": {
+                "infection/infection": "^0",
+                "nikic/php-fuzzer": "^0",
+                "phpunit/phpunit": "^7|^8|^9|^10|^11",
+                "vimeo/psalm": "^4|^5|^6"
+            },
+            "suggest": {
+                "ext-sodium": "Better performance, password hashing (Argon2i), secure memory management (memzero), and better security."
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0.x-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "autoload.php"
+                ],
+                "psr-4": {
+                    "ParagonIE\\Sodium\\": "namespaced/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "ISC"
+            ],
+            "authors": [
+                {
+                    "name": "Paragon Initiative Enterprises",
+                    "email": "security@paragonie.com"
+                },
+                {
+                    "name": "Frank Denis",
+                    "email": "jedisct1@pureftpd.org"
+                }
+            ],
+            "description": "Pure PHP implementation of libsodium; uses the PHP extension if it exists",
+            "keywords": [
+                "Authentication",
+                "BLAKE2b",
+                "ChaCha20",
+                "ChaCha20-Poly1305",
+                "Chapoly",
+                "Curve25519",
+                "Ed25519",
+                "EdDSA",
+                "Edwards-curve Digital Signature Algorithm",
+                "Elliptic Curve Diffie-Hellman",
+                "Poly1305",
+                "Pure-PHP cryptography",
+                "RFC 7748",
+                "RFC 8032",
+                "Salpoly",
+                "Salsa20",
+                "X25519",
+                "XChaCha20-Poly1305",
+                "XSalsa20-Poly1305",
+                "Xchacha20",
+                "Xsalsa20",
+                "aead",
+                "cryptography",
+                "ecdh",
+                "elliptic curve",
+                "elliptic curve cryptography",
+                "encryption",
+                "libsodium",
+                "php",
+                "public-key cryptography",
+                "secret-key cryptography",
+                "side-channel resistant"
+            ],
+            "support": {
+                "issues": "https://github.com/paragonie/sodium_compat/issues",
+                "source": "https://github.com/paragonie/sodium_compat/tree/v2.5.0"
+            },
+            "time": "2025-12-30T16:12:18+00:00"
         },
         {
             "name": "php-debugbar/php-debugbar",
@@ -5443,6 +5602,138 @@
                 "source": "https://github.com/sebdesign/laravel-state-machine/tree/v3.4.7"
             },
             "time": "2026-03-15T16:54:53+00:00"
+        },
+        {
+            "name": "spatie/laravel-ciphersweet",
+            "version": "1.7.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/laravel-ciphersweet.git",
+                "reference": "0c49f104fd262ab83adbacb0278ef7e399417cea"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/laravel-ciphersweet/zipball/0c49f104fd262ab83adbacb0278ef7e399417cea",
+                "reference": "0c49f104fd262ab83adbacb0278ef7e399417cea",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^10.0|^11.0|^12.0|^13.0",
+                "paragonie/ciphersweet": "^4.0.1",
+                "php": "^8.1",
+                "spatie/laravel-package-tools": "^1.12.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.8",
+                "nunomaduro/collision": "^6.0|^8.0",
+                "orchestra/testbench": "^7.0|^8.0|^9.0|^10.0|^11.0",
+                "pestphp/pest": "^1.21|^2.34|^3.7",
+                "pestphp/pest-plugin-laravel": "^1.1|^2.3|^3.1",
+                "phpstan/extension-installer": "^1.1",
+                "phpstan/phpstan-deprecation-rules": "^1.0|^2.0",
+                "phpstan/phpstan-phpunit": "^1.0|^2.0",
+                "phpunit/phpunit": "^9.5|^10.5|^11.5.3",
+                "spatie/laravel-ray": "^1.26"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "LaravelCipherSweet": "Spatie\\LaravelCipherSweet\\Facades\\LaravelCipherSweet"
+                    },
+                    "providers": [
+                        "Spatie\\LaravelCipherSweet\\LaravelCipherSweetServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\LaravelCipherSweet\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Rias Van der Veken",
+                    "email": "rias@spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Use ciphersweet in your Laravel project",
+            "homepage": "https://github.com/spatie/laravel-ciphersweet",
+            "keywords": [
+                "laravel",
+                "laravel-ciphersweet",
+                "spatie"
+            ],
+            "support": {
+                "source": "https://github.com/spatie/laravel-ciphersweet/tree/1.7.4"
+            },
+            "time": "2026-02-27T17:20:09+00:00"
+        },
+        {
+            "name": "spatie/laravel-package-tools",
+            "version": "1.93.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/laravel-package-tools.git",
+                "reference": "0d097bce95b2bf6802fb1d83e1e753b0f5a948e7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/laravel-package-tools/zipball/0d097bce95b2bf6802fb1d83e1e753b0f5a948e7",
+                "reference": "0d097bce95b2bf6802fb1d83e1e753b0f5a948e7",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^10.0|^11.0|^12.0|^13.0",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.5",
+                "orchestra/testbench": "^8.0|^9.2|^10.0|^11.0",
+                "pestphp/pest": "^2.1|^3.1|^4.0",
+                "phpunit/php-code-coverage": "^10.0|^11.0|^12.0",
+                "phpunit/phpunit": "^10.5|^11.5|^12.5",
+                "spatie/pest-plugin-test-time": "^2.2|^3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\LaravelPackageTools\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Tools for creating Laravel packages",
+            "homepage": "https://github.com/spatie/laravel-package-tools",
+            "keywords": [
+                "laravel-package-tools",
+                "spatie"
+            ],
+            "support": {
+                "issues": "https://github.com/spatie/laravel-package-tools/issues",
+                "source": "https://github.com/spatie/laravel-package-tools/tree/1.93.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/spatie",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-02-21T12:49:54+00:00"
         },
         {
             "name": "symfony/cache",
@@ -14275,9 +14566,9 @@
         "php": "^8.2",
         "ext-json": "*",
         "ext-pdo": "*",
+        "ext-simplexml": "*",
         "ext-sodium": "*",
-        "ext-zip": "*",
-        "ext-simplexml": "*"
+        "ext-zip": "*"
     },
     "platform-dev": {},
     "platform-overrides": {
