@@ -35,7 +35,7 @@ class AddCentreTest extends TestCase
         $this->sponsor = factory(Sponsor::class)->create();
     }
 
-    public function testCommandOk()
+    public function testCommandOk(): void
     {
         $results = $this
             ->artisan("arc:addCentre " .
@@ -52,7 +52,7 @@ class AddCentreTest extends TestCase
         $this->assertEquals(0, $results);
     }
 
-    public function testCommandNoUser()
+    public function testCommandNoUser(): void
     {
         $results = $this
             ->artisan("arc:addCentre " .
@@ -68,7 +68,7 @@ class AddCentreTest extends TestCase
         $this->assertEquals(1, $results);
     }
 
-    public function testCommandNoSponsor()
+    public function testCommandNoSponsor(): void
     {
         $results = $this
             ->artisan("arc:addCentre " .
@@ -84,7 +84,7 @@ class AddCentreTest extends TestCase
         $this->assertEquals(2, $results);
     }
 
-    public function testCommandCenterExists()
+    public function testCommandCenterExists(): void
     {
         $results = $this
             ->artisan("arc:addCentre " .
@@ -100,7 +100,7 @@ class AddCentreTest extends TestCase
         $this->assertEquals(3, $results);
     }
 
-    public function testCommandPreferenceDoesNotExist()
+    public function testCommandPreferenceDoesNotExist(): void
     {
         $results = $this
             ->artisan("arc:addCentre " .
@@ -116,7 +116,7 @@ class AddCentreTest extends TestCase
         $this->assertEquals(4, $results);
     }
 
-    public function testCommandUserWarningDenied()
+    public function testCommandUserWarningDenied(): void
     {
         $results = $this
             ->artisan("arc:addCentre " .
@@ -133,7 +133,7 @@ class AddCentreTest extends TestCase
         $this->assertEquals(5, $results);
     }
 
-    public function testCommandFailedLoggedIn()
+    public function testCommandFailedLoggedIn(): void
     {
         Auth::shouldReceive('login')->once();
         Auth::shouldReceive('check')->once()->andreturn(false);

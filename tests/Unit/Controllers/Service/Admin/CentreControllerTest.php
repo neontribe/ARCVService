@@ -40,8 +40,8 @@ class CentreControllerTest extends StoreTestCase
         ];
     }
 
-    /** @test */
-    public function testItCanStoreACentre()
+
+    public function testItCanStoreACentre(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->post(
@@ -61,44 +61,43 @@ class CentreControllerTest extends StoreTestCase
         $this->assertNotNull($c);
     }
 
-    /** @test */
-    public function testICanSeeAnEditButtonOnTheListOfCentres()
+
+    public function testICanSeeAnEditButtonOnTheListOfCentres(): void
     {
-      $centre = factory(Centre::class)->create([]);
-      $this->actingAs($this->adminUser, 'admin')
-          ->get(route('admin.centres.index'))
-          ->assertResponseOk()
-          ->seeInElement('h1', 'Children\'s Centres')
-          ->seeInElement('td', $centre->name)
-          ->seeInElement('a', 'Edit')
-          ;
+        $centre = factory(Centre::class)->create([]);
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centres.index'))
+            ->assertResponseOk()
+            ->seeInElement('h1', 'Children\'s Centres')
+            ->seeInElement('td', $centre->name)
+            ->seeInElement('a', 'Edit')
+        ;
     }
 
-    /** @test */
-    public function testICanUpdateACentreName()
+
+    public function testICanUpdateACentreName(): void
     {
-      $centre = factory(Centre::class)->create([]);
-      $data = [
-        'id' => $centre->id,
-        'name' => 'New Centre Name'
-      ];
-      $this->seeInDatabase('centres', [
-          'id' => $centre->id,
-          'name' => $centre->name
-      ]);
-      $this->actingAs($this->adminUser, 'admin')
-        ->put(
-            route('admin.centres.update', ['id' => $centre->id]),
-            $data
-        );
-      $this->seeInDatabase('centres', [
+        $centre = factory(Centre::class)->create([]);
+        $data = [
           'id' => $centre->id,
           'name' => 'New Centre Name'
-      ]);
-      $this->dontSeeInDatabase('centres', [
-          'id' => $centre->id,
-          'name' => $centre->name
-      ]);
-
+        ];
+        $this->seeInDatabase('centres', [
+            'id' => $centre->id,
+            'name' => $centre->name
+        ]);
+        $this->actingAs($this->adminUser, 'admin')
+          ->put(
+              route('admin.centres.update', ['id' => $centre->id]),
+              $data
+          );
+        $this->seeInDatabase('centres', [
+            'id' => $centre->id,
+            'name' => 'New Centre Name'
+        ]);
+        $this->dontSeeInDatabase('centres', [
+            'id' => $centre->id,
+            'name' => $centre->name
+        ]);
     }
 }

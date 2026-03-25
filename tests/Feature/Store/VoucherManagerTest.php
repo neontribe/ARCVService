@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Feature\Store;
 
 use Tests\StoreTestCase;
@@ -75,8 +76,8 @@ class VoucherManagerTest extends StoreTestCase
         Auth::logout();
     }
 
-    /** @test */
-    public function testThreeColumnsAreVisible()
+
+    public function testThreeColumnsAreVisible(): void
     {
         // Check we can see the this family div
         // Check we can see the Collection History div
@@ -88,8 +89,8 @@ class VoucherManagerTest extends StoreTestCase
             ->seeElement("#allocate-vouchers");
     }
 
-    /** @test */
-    public function testRVIDVisible()
+
+    public function testRVIDVisible(): void
     {
         // Check we can see "Their RV-ID is" on this page
         // Check it's the right RV-ID for the family/household
@@ -100,8 +101,8 @@ class VoucherManagerTest extends StoreTestCase
             ->see($rvid);
     }
 
-    /** @test */
-    public function itCanShowFamilyWarnings()
+
+    public function testItCanShowFamilyWarnings(): void
     {
         /**
          * Create
@@ -171,8 +172,8 @@ class VoucherManagerTest extends StoreTestCase
         }
     }
 
-    /** @test */
-    public function testFollowLinks()
+
+    public function testFollowLinks(): void
     {
 
         // Check edit family link
@@ -194,8 +195,8 @@ class VoucherManagerTest extends StoreTestCase
             ->assertResponseOk();
     }
 
-    /** @test */
-    public function testAddBulkVoucher()
+
+    public function testAddBulkVoucher(): void
     {
         // check we can bulk add vouchers
         $this->actingAs($this->fmUser, 'store')
@@ -209,16 +210,16 @@ class VoucherManagerTest extends StoreTestCase
             ->see('TST10001')
         ;
         // Three vouchers and the delete all button.
-        $this->assertEquals(4, count($this->crawler->filter('.delete-button')));
+        $this->assertCount(4, $this->crawler->filter('.delete-button'));
 
         // check we can remove a bundle of vouchers
         $this->press('delete-all-button');
         // The delete all button is hidden
-        $this->assertEquals(1, count($this->crawler->filter('.delete-button')));
+        $this->assertCount(1, $this->crawler->filter('.delete-button'));
     }
 
-    /** @test */
-    public function testAddSingleVoucher()
+
+    public function testAddSingleVoucher(): void
     {
         // check we can add a single voucher
         $this->actingAs($this->fmUser, 'store')
@@ -229,11 +230,11 @@ class VoucherManagerTest extends StoreTestCase
             ->see('TST09999')
         ;
         // One voucher and the delete all button.
-        $this->assertEquals(2, count($this->crawler->filter('.delete-button')));
+        $this->assertCount(2, $this->crawler->filter('.delete-button'));
 
         // check we can remove a voucher
         $this->press('delete-button');
         // The delete all button is hidden
-        $this->assertEquals(1, count($this->crawler->filter('.delete-button')));
+        $this->assertCount(1, $this->crawler->filter('.delete-button'));
     }
 }

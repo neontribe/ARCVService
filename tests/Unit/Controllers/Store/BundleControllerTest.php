@@ -22,8 +22,7 @@ class BundleControllerTest extends StoreTestCase
     protected $centre;
     protected $centreUser;
     protected $testCodes;
-    /** @var Registration $registration */
-    protected $registration;
+    protected Registration $registration;
     protected $bundle;
 
     protected function setUp(): void
@@ -65,8 +64,8 @@ class BundleControllerTest extends StoreTestCase
         Auth::logout();
     }
 
-    /** @test */
-    public function testICannotSubmitInvalidValuesToAppendVouchers()
+
+    public function testICannotSubmitInvalidValuesToAppendVouchers(): void
     {
         $dataSets = [
             // no data
@@ -136,8 +135,8 @@ class BundleControllerTest extends StoreTestCase
         }
     }
 
-    /** @test */
-    public function testIMustDisburseWithAllRelevantFields()
+
+    public function testIMustDisburseWithAllRelevantFields(): void
     {
         $dataSets = [
             [
@@ -207,8 +206,8 @@ class BundleControllerTest extends StoreTestCase
         }
     }
 
-    /** @test */
-    public function testICanAddManyVouchers()
+
+    public function testICanAddManyVouchers(): void
     {
         $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
         $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
@@ -219,7 +218,7 @@ class BundleControllerTest extends StoreTestCase
                 $post_route,
                 [
                     'start' => $this->testCodes[0],
-                    'end' => $this->testCodes[count($this->testCodes)-1]
+                    'end' => $this->testCodes[count($this->testCodes) - 1]
                 ]
             );
 
@@ -235,20 +234,20 @@ class BundleControllerTest extends StoreTestCase
         $this->assertEquals(count($this->testCodes), $currentBundle->vouchers()->count());
     }
 
-    /** @test */
-    public function testICannotAddTooManyVouchersToABundle()
+
+    public function testICannotAddTooManyVouchersToABundle(): void
     {
         $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
         $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
 
         // Get the maxAdd value currently 101;
-        $overMaxAdd = config('arc.bundle_max_voucher_append')+1;
+        $overMaxAdd = config('arc.bundle_max_voucher_append') + 1;
 
         // Make the range 1-101,
         $startCode = "BIG00001";
         $endCode = "BIG" . str_pad($overMaxAdd, 5, "0", STR_PAD_LEFT);
         $bigRange = Voucher::generateCodeRange($startCode, $endCode);
-        $this->assertEquals($overMaxAdd, count($bigRange));
+        $this->assertCount($overMaxAdd, $bigRange);
 
         // Create the vouchers for the range;
         Auth::login($this->centreUser);
@@ -292,8 +291,8 @@ class BundleControllerTest extends StoreTestCase
         $this->assertEquals(0, $currentBundle->vouchers()->count());
     }
 
-    /** @test */
-    public function testICanAddSingleVouchers()
+
+    public function testICanAddSingleVouchers(): void
     {
         $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
         $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
@@ -316,8 +315,8 @@ class BundleControllerTest extends StoreTestCase
     }
 
 
-    /** @test */
-    public function testICanDeleteTheCurrentBundle()
+
+    public function testICanDeleteTheCurrentBundle(): void
     {
         /** @var Bundle $currentBundle */
         $currentBundle = $this->registration->currentBundle();
@@ -368,8 +367,8 @@ class BundleControllerTest extends StoreTestCase
         }
     }
 
-    /** @test */
-    public function testICanDeleteANamedVoucher()
+
+    public function testICanDeleteANamedVoucher(): void
     {
         /** @var Bundle $currentBundle */
         $currentBundle = $this->registration->currentBundle();
@@ -411,7 +410,7 @@ class BundleControllerTest extends StoreTestCase
         // refresh bundle
         $currentBundle->refresh();
         // See less vouchers
-        $this->assertEquals(count($testCodes) -1, $currentBundle->vouchers()->count());
+        $this->assertEquals(count($testCodes) - 1, $currentBundle->vouchers()->count());
 
         // Refresh the detached voucher
         $voucher->refresh();
@@ -422,8 +421,8 @@ class BundleControllerTest extends StoreTestCase
         $this->assertEquals('dispatched', $voucher->currentstate);
     }
 
-    /** @test */
-    public function testICanSyncAnArrayOfVouchers()
+
+    public function testICanSyncAnArrayOfVouchers(): void
     {
         $put_route = route('store.registration.vouchers.put', ['registration' => $this->registration->id]);
 
@@ -458,8 +457,8 @@ class BundleControllerTest extends StoreTestCase
         $this->assertEquals(0, $currentBundle->vouchers()->count());
     }
 
-    /** @test */
-    public function testICannotDisburseAnEmptyBundle()
+
+    public function testICannotDisburseAnEmptyBundle(): void
     {
         // Setup bundle
         $currentBundle = $this->registration->currentBundle();
@@ -509,8 +508,8 @@ class BundleControllerTest extends StoreTestCase
             ->assertResponseStatus(200);
     }
 
-    /** @test */
-    public function testICannotAddAVoucherAllocatedInACentreIHaveAccessTo()
+
+    public function testICannotAddAVoucherAllocatedInACentreIHaveAccessTo(): void
     {
         $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
         $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
@@ -553,15 +552,15 @@ class BundleControllerTest extends StoreTestCase
         $this->assertTrue($this->hasMatchingErrorMessage(
             Session::get('error_messages'),
             '~These vouchers are currently allocated to a different ' . $entity . '. Click on the voucher number to view the other ' . $entity . '\'s record: <a href="' . $route . '">' . $this->testCodes[0] . '</a>~'
-            ));
+        ));
 
         // Check the expected error message is in the view
         $this->followRedirects()
             ->seeInElement('div[class="alert-message error"]', 'Click on the voucher number to view the other ' . $entity . '\'s record: <a href="' . $route . '">' . $this->testCodes[0] . '</a>');
     }
 
-    /** @test */
-    public function testICannotAddAVoucherAllocatedInACentreIDoNotHaveAccessTo()
+
+    public function testICannotAddAVoucherAllocatedInACentreIDoNotHaveAccessTo(): void
     {
         $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
         $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
@@ -626,8 +625,8 @@ class BundleControllerTest extends StoreTestCase
         ->seeInElement('div[class="alert-message error"]', 'These vouchers are allocated to a different ' . $entity . ' in a centre you can\'t access: ' . $this->testCodes[1]);
     }
 
-    /** @test */
-    public function itCanAcceptAndCleanVouchersWithSpacesIn()
+
+    public function testItCanAcceptAndCleanVouchersWithSpacesIn(): void
     {
         $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
         $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
@@ -654,8 +653,8 @@ class BundleControllerTest extends StoreTestCase
         $this->assertEquals(1, $currentBundle->vouchers()->count());
     }
 
-    /** @test */
-    public function itHasSparseFormDataCleanedBeforeProcessing()
+
+    public function testItHasSparseFormDataCleanedBeforeProcessing(): void
     {
         $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
         $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
@@ -708,7 +707,8 @@ class BundleControllerTest extends StoreTestCase
      * @param string $regex
      * @return bool whether a matching message was found or not
      */
-    private function hasMatchingErrorMessage($errorMessages, $regex) {
+    private function hasMatchingErrorMessage(array $errorMessages, string $regex): bool
+    {
         foreach ($errorMessages as $error) {
             // If the error message is an array describing some HTML, extract the text, otherwise use as a string directly.
             $string = is_array($error) && array_key_exists('html', $error) ? $error['html'] : $error;

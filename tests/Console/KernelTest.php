@@ -9,7 +9,6 @@ use Illuminate\Foundation\Testing\TestCase;
 
 class KernelTest extends TestCase
 {
-
     public function createApplication(): Application
     {
         $app = require __DIR__ . '/../../bootstrap/app.php';

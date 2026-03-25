@@ -14,8 +14,8 @@ class CentreModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function itHasExpectedAttributes()
+
+    public function testItHasExpectedAttributes(): void
     {
         $centre = factory(Centre::class)->make();
         $this->assertNotNull($centre->name);
@@ -23,8 +23,8 @@ class CentreModelTest extends TestCase
         $this->assertContains($centre->print_pref, config('arc.print_preferences'));
     }
 
-    /** @test */
-    public function itHasASponsor()
+
+    public function testItHasASponsor(): void
     {
         $centre = factory(Centre::class)->create([
             'sponsor_id' => factory(Sponsor::class)->create()->id,
@@ -32,8 +32,8 @@ class CentreModelTest extends TestCase
         $this->assertInstanceOf(Sponsor::class, $centre->sponsor);
     }
 
-    /** @test */
-    public function itCanHaveRegistrations()
+
+    public function testItCanHaveRegistrations(): void
     {
         $centre = factory(Centre::class)->create();
         factory(Registration::class, 3)->create([
@@ -44,8 +44,8 @@ class CentreModelTest extends TestCase
         $this->assertInstanceOf(Registration::class, $registrations[0]);
     }
 
-    /** @test */
-    public function itCanHaveNoRegistrations()
+
+    public function testItCanHaveNoRegistrations(): void
     {
         $centre = factory(Centre::class)->create();
         $registrations = $centre->registrations;
@@ -53,8 +53,8 @@ class CentreModelTest extends TestCase
         $this->assertEquals(0, $registrations->count());
     }
 
-    /** @test */
-    public function itCanHaveUsers()
+
+    public function testItCanHaveUsers(): void
     {
         $centre = factory(Centre::class)->create();
 
@@ -73,8 +73,8 @@ class CentreModelTest extends TestCase
         $this->assertInstanceOf(CentreUser::class, $centreUsers[0]);
     }
 
-    /** @test */
-    public function itCanHaveNeighbours()
+
+    public function testItCanHaveNeighbours(): void
     {
         $sponsor_a = factory(Sponsor::class)->create();
         $sponsor_b = factory(Sponsor::class)->create();

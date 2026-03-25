@@ -53,8 +53,7 @@ class EditTradersPageTest extends StoreTestCase
         ];
     }
 
-    /** @test */
-    public function testItShowsATraderEditPage()
+    public function testItShowsATraderEditPage(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->get($this->createRoute)
@@ -77,8 +76,7 @@ class EditTradersPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function testItShowsAnErrorForBadMarket()
+    public function testItShowsAnErrorForBadMarket(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->createRoute)
@@ -100,8 +98,7 @@ class EditTradersPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function testItShowsAnErrorForBadTraderName()
+    public function testItShowsAnErrorForBadTraderName(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->createRoute)
@@ -125,8 +122,7 @@ class EditTradersPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function testItShowsAnErrorForBadDisabledCheckbox()
+    public function testItShowsAnErrorForBadDisabledCheckbox(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->createRoute)

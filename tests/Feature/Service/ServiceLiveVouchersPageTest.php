@@ -15,7 +15,7 @@ class ServiceLiveVouchersPageTest extends StoreTestCase
 {
     use RefreshDatabase;
 
-    public function testAdminCanViewLiveVouchers()
+    public function testAdminCanViewLiveVouchers(): void
     {
         $this->adminUser = factory(AdminUser::class)->create();
         $this->actingAs($this->adminUser, 'admin')
@@ -24,10 +24,10 @@ class ServiceLiveVouchersPageTest extends StoreTestCase
             ->seeInElement('h1', 'View live vouchers')
             ->seeInElement('button', 'Search')
             ->seeInElement('a', 'Reset')
-            ;
+        ;
     }
 
-    public function testAdminCanSearchASingleLiveVoucher()
+    public function testAdminCanSearchASingleLiveVoucher(): void
     {
         $this->adminUser = factory(AdminUser::class)->create();
         $this->voucherToSearch = factory(Voucher::class)->state('dispatched')->create();
@@ -40,10 +40,10 @@ class ServiceLiveVouchersPageTest extends StoreTestCase
             ->press('Search')
             ->seeInElement('td', $this->voucherToSearch->code)
             ->dontSeeInElement('td', $this->otherVoucher->code)
-            ;
+        ;
     }
 
-    public function testAdminCannotSearchWithBadVoucherCode()
+    public function testAdminCannotSearchWithBadVoucherCode(): void
     {
         $this->adminUser = factory(AdminUser::class)->create();
         $badSearch = "<script type='javascript'>alert();</script>";
@@ -54,10 +54,10 @@ class ServiceLiveVouchersPageTest extends StoreTestCase
             ->type($badSearch, 'voucher_code')
             ->press('Search')
             ->seeInElement('h1', 'View live vouchers')
-            ;
+        ;
     }
 
-    public function testAdminCanViewHistoryOfSingleVoucher()
+    public function testAdminCanViewHistoryOfSingleVoucher(): void
     {
         $this->adminUser = factory(AdminUser::class)->create();
         $this->voucherToSearch = factory(Voucher::class)->state('dispatched')->create();
@@ -69,10 +69,10 @@ class ServiceLiveVouchersPageTest extends StoreTestCase
             ->seeInElement('td', $this->voucherToSearch->code)
             ->click('edit')
             ->seeInElement('h1', "Voucher Code: " . $this->voucherToSearch->code)
-            ;
+        ;
     }
 
-    public function testAdminCanResetSearch()
+    public function testAdminCanResetSearch(): void
     {
         $this->adminUser = factory(AdminUser::class)->create();
         $this->voucherToSearch = factory(Voucher::class)->state('dispatched')->create();
@@ -89,6 +89,6 @@ class ServiceLiveVouchersPageTest extends StoreTestCase
             ->seePageIs(route('admin.vouchers.index'))
             ->seeInElement('td', $this->voucherToSearch->code)
             ->seeInElement('td', $this->otherVoucher->code)
-            ;
+        ;
     }
 }

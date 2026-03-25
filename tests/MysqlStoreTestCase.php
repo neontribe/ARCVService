@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests;
 
 use Config;
@@ -21,7 +22,7 @@ class MysqlStoreTestCase extends BaseTestCase
 
         // Fallback to the MySQL testing database if the default testing database doesn't use the MySQL driver
         $connection = config('database.default');
-        $driver = config("database.connections.{$connection}.driver");
+        $driver = config("database.connections.$connection.driver");
         if ($driver !== 'mysql') {
             $connection = self::TESTING_MYSQL_FALLBACK;
             // Set the default driver

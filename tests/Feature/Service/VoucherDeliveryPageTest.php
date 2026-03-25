@@ -29,11 +29,10 @@ class VoucherDeliveryPageTest extends StoreTestCase
     }
 
     /**
-     * @test
      *
      * @return void
      */
-    public function testItShowsAFormWithInputs()
+    public function testItShowsAFormWithInputs(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->voucherDeliveryRoute)

@@ -13,9 +13,8 @@ class SessionCookiesTest extends TestCase
     /**
      *
      * @return void
-     * @test
      */
-    public function testCookiesOnLogin()
+    public function testCookiesOnLogin(): void
     {
         $response = $this->get(route('store.login'));
         $cookies = $response->headers->getCookies();
@@ -34,7 +33,7 @@ class SessionCookiesTest extends TestCase
         }
     }
 
-    public function testCookiesOnAuthenticatedUser()
+    public function testCookiesOnAuthenticatedUser(): void
     {
         $adminUser = factory(AdminUser::class)->create();
         $response = $this

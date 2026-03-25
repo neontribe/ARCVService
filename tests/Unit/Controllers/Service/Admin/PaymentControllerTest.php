@@ -17,7 +17,6 @@ use Auth;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\StoreTestCase;
 
-
 class PaymentControllerTest extends StoreTestCase
 {
     use RefreshDatabase;
@@ -35,12 +34,10 @@ class PaymentControllerTest extends StoreTestCase
 
         // Create a Trader
         $this->trader = factory(Trader::class)->create();
-
     }
 
-    /** @test */
-    public function testItReturnsASpecificPaymentRequest()
 
+    public function testItReturnsASpecificPaymentRequest(): void
     {
         //Create a token to pass to the route
         //Create some vouchers, give them a sponsor (as otherwise it might error)
@@ -68,20 +65,19 @@ class PaymentControllerTest extends StoreTestCase
         $data = $token->uuid;
 
         //pass the UUID to the route
-        $route = route('admin.payment-request.show',['paymentUuid'=>$data]);
+        $route = route('admin.payment-request.show', ['paymentUuid' => $data]);
 
         $this->actingAs($this->admin_user, 'admin')
             ->get($route)
             ->assertResponseStatus(200);
 
-        foreach($this->vouchers as $voucher){
+        foreach ($this->vouchers as $voucher) {
             $this->see($voucher->code);
         }
         //TODO also test that I cannot see a different UUID in here
     }
-    /** @test */
-    public function testItUpdatesASpecificPaymentRequest()
 
+    public function testItUpdatesASpecificPaymentRequest(): void
     {
         //Create a token to pass to the route
         //Create some vouchers, give them a sponsor (as otherwise it might error)
@@ -120,6 +116,5 @@ class PaymentControllerTest extends StoreTestCase
             ->assertResponseStatus(200)
             ->seePageIs(route('admin.payments.index'))
             ->see('Vouchers Paid!');
-
     }
 }

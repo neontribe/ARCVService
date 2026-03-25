@@ -38,8 +38,7 @@ class CreateMarketsPageTest extends StoreTestCase
         ];
     }
 
-    /** @test */
-    public function testItShowsAMarketCreatePage()
+    public function testItShowsAMarketCreatePage(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->get($this->createRoute)
@@ -58,8 +57,7 @@ class CreateMarketsPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function testItShowsAnErrorForBadPaymentMessage()
+    public function testItShowsAnErrorForBadPaymentMessage(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->createRoute)
@@ -81,8 +79,8 @@ class CreateMarketsPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function testItShowsAnErrorForBadSponsor()
+
+    public function testItShowsAnErrorForBadSponsor(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->createRoute)
@@ -106,8 +104,8 @@ class CreateMarketsPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function testItShowsAnErrorForBadMarket()
+
+    public function testItShowsAnErrorForBadMarket(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->createRoute)

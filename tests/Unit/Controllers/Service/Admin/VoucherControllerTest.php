@@ -23,7 +23,7 @@ class VoucherControllerTest extends TestCase
         $this->market = factory(Market::class)->create();
     }
 
-    public function testStoreBatchWithoutStartEndSponsor()
+    public function testStoreBatchWithoutStartEndSponsor(): void
     {
         $this->actingAs($this->admin_user, 'admin')
             ->post(route('admin.vouchers.storebatch'), [
@@ -40,7 +40,7 @@ class VoucherControllerTest extends TestCase
             ]);
     }
 
-    public function testStoreBatchStartEndSwapped()
+    public function testStoreBatchStartEndSwapped(): void
     {
         $this->actingAs($this->admin_user, 'admin')
             ->post(route('admin.vouchers.storebatch'), [
@@ -55,7 +55,7 @@ class VoucherControllerTest extends TestCase
             ]);
     }
 
-    public function testStoreBatchInvalidSponsor()
+    public function testStoreBatchInvalidSponsor(): void
     {
         $this->actingAs($this->admin_user, 'admin')
             ->post(route('admin.vouchers.storebatch'), [
@@ -68,7 +68,7 @@ class VoucherControllerTest extends TestCase
             ]);
     }
 
-    public function testStoreBatchSuccessMsg()
+    public function testStoreBatchSuccessMsg(): void
     {
         $shortcode = $this->market->sponsor_shortcode;
         $start = '1';
@@ -88,7 +88,7 @@ class VoucherControllerTest extends TestCase
             ->assertSessionHas('notification', $notification_msg);
     }
 
-    public function testStoreBatch()
+    public function testStoreBatch(): void
     {
         $shortcode = $this->market->sponsor_shortcode;
         $this->actingAs($this->admin_user, 'admin')
@@ -114,7 +114,7 @@ class VoucherControllerTest extends TestCase
         }
     }
 
-    public function testItCanStoreZeroPaddedVouchersCorrectly()
+    public function testItCanStoreZeroPaddedVouchersCorrectly(): void
     {
         $shortcode = $this->market->sponsor_shortcode;
         $this->actingAs($this->admin_user, 'admin')

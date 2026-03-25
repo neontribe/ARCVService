@@ -5,6 +5,7 @@ namespace Tests\Unit\FormRequests;
 use App\Http\Requests\StoreUpdateRegistrationRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\Validator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\StoreTestCase;
 
 class StoreUpdateRegistrationRequestTest extends StoreTestCase
@@ -26,7 +27,7 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
      * @param $rules
      * @return mixed
      */
-    protected function validate($mockedRequestData, $rules)
+    protected function validate($mockedRequestData, $rules): mixed
     {
         return $this->validator
             ->make($mockedRequestData, $rules)
@@ -34,12 +35,11 @@ class StoreUpdateRegistrationRequestTest extends StoreTestCase
     }
 
     /**
-     * @test
-     * @dataProvider storeValidationProvider
      * @param bool $shouldPass
      * @param array $mockedRequestData
      */
-    public function testICannotSubmitInvalidValues($shouldPass, $mockedRequestData)
+    #[DataProvider('storeValidationProvider')]
+    public function testICannotSubmitInvalidValues(bool $shouldPass, array $mockedRequestData): void
     {
         // Copy the rules out of the FormRequest.
         $rules = (new StoreUpdateRegistrationRequest())->rules();

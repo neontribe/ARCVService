@@ -9,6 +9,7 @@ use App\Trader;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Tests\StoreTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class AdminNewUpdateTraderRequestTest extends StoreTestCase
 {
@@ -32,9 +33,7 @@ class AdminNewUpdateTraderRequestTest extends StoreTestCase
         return Validator::make($data, $this->rules)->passes();
     }
 
-    /**
-     * @dataProvider validationCases
-     */
+    #[DataProvider('validationCases')]
     public function testItValidatesTraderRequests(bool $expected, array $data): void
     {
         $this->assertEquals($expected, $this->validate($data));

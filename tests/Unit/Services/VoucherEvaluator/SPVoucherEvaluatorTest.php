@@ -18,7 +18,7 @@ class SPVoucherEvaluatorTest extends TestCase
 {
     use RefreshDatabase;
 
-    const CREDIT_TYPES = [
+    public const CREDIT_TYPES = [
         'HouseholdExists' => ['reason' => 'Family|exists', 'value' => 10],
         'HouseholdMember' => ['reason' => 'Child|member of the household', 'value' => 7],
         'DeductFromCarer' => ['reason' => 'Family|', 'value' => -7],
@@ -80,13 +80,13 @@ class SPVoucherEvaluatorTest extends TestCase
             ]),
             new Evaluation([
                 "name" => "ChildIsAlmostPrimarySchoolAge",
-                "value" => NULL,
+                "value" => null,
                 "purpose" => "notices",
                 "entity" => "App\Child",
             ]),
             new Evaluation([
                 "name" => "ChildIsAlmostOne",
-                "value" => NULL,
+                "value" => null,
                 "purpose" => "notices",
                 "entity" => "App\Child",
             ]),
@@ -114,20 +114,20 @@ class SPVoucherEvaluatorTest extends TestCase
         $this->isAlmostOne = factory(Child::class)->state('almostOne')->make();
     }
 
-    /** @test */
-    public function itCreditsWhenAHouseholdExists()
+
+    public function testItCreditsWhenAHouseholdExists(): void
     {
         $rulesMods = collect($this->rulesMods["credit-sp"]);
         $evaluator = EvaluatorFactory::make($rulesMods);
         $evaluation = $evaluator->evaluate($this->family);
         $credits = $evaluation["credits"];
-        $this->assertEquals(2, count($credits));
+        $this->assertCount(2, $credits);
         $this->assertContains(self::CREDIT_TYPES['HouseholdExists'], $credits);
         $this->assertEquals('10', $evaluation->getEntitlement());
     }
 
-    /** @test */
-    public function itCreditsWhenAHouseholdMemberExists()
+
+    public function testItCreditsWhenAHouseholdMemberExists(): void
     {
         $this->family->children()->save($this->isPrimarySchool);
         $rulesMods = collect($this->rulesMods["credit-sp"]);
@@ -137,8 +137,8 @@ class SPVoucherEvaluatorTest extends TestCase
         $this->assertEquals('17', $evaluation->getEntitlement());
     }
 
-    /** @test */
-    public function itCreditsWhenMultipleHouseholdMembersExist()
+
+    public function testItCreditsWhenMultipleHouseholdMembersExist(): void
     {
         $this->family->children()->saveMany([$this->isPrimarySchool, $this->underOne]);
         $rulesMods = collect($this->rulesMods["credit-sp"]);
@@ -147,8 +147,8 @@ class SPVoucherEvaluatorTest extends TestCase
         $this->assertEquals('24', $evaluation->getEntitlement());
     }
 
-    /** @test */
-    public function socialPrescriptionUsersDontSeeNoticesForPrimary()
+
+    public function testSocialPrescriptionUsersDontSeeNoticesForPrimary(): void
     {
         Config::set('arc.school_month', Carbon::now()->addMonth()->month);
         $this->family->children()->save($this->readyForPrimarySchool);
@@ -156,17 +156,17 @@ class SPVoucherEvaluatorTest extends TestCase
         $evaluator = EvaluatorFactory::make($rulesMods);
         $evaluation = $evaluator->evaluate($this->family);
         $notices = $evaluation["notices"];
-        $this->assertEquals(0, count($notices));
+        $this->assertCount(0, $notices);
     }
 
-    /** @test */
-    public function socialPrescriptionUsersDontSeeNoticesForChildIsAlmostOne()
+
+    public function testSocialPrescriptionUsersDontSeeNoticesForChildIsAlmostOne(): void
     {
         $this->family->children()->save($this->isAlmostOne);
         $rulesMods = collect($this->rulesMods["credit-sp"]);
         $evaluator = EvaluatorFactory::make($rulesMods);
         $evaluation = $evaluator->evaluate($this->family);
         $notices = $evaluation["notices"];
-        $this->assertEquals(0, count($notices));
+        $this->assertCount(0, $notices);
     }
 }

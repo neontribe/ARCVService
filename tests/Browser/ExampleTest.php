@@ -9,7 +9,7 @@ use Tests\DuskTestCase;
 class ExampleTest extends DuskTestCase
 {
     use RefreshDatabase;
-    
+
     /**
      * A basic browser test example.
      */

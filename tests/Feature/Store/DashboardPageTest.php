@@ -63,8 +63,8 @@ class DashboardPageTest extends StoreTestCase
         ]);
     }
 
-    /** @test */
-    public function itShowsTheExportButtonsAccordingToUserRole()
+
+    public function testItShowsTheExportButtonsAccordingToUserRole(): void
     {
         // Get FM User
         $fmuser = $this->fmUser;
@@ -110,8 +110,8 @@ class DashboardPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itShowsTheLoggedInUserDetails()
+
+    public function testItShowsTheLoggedInUserDetails(): void
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
@@ -120,8 +120,8 @@ class DashboardPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itShowsTheExportButtonWithReleventTextForRole()
+
+    public function testItShowsTheExportButtonWithReleventTextForRole(): void
     {
         // Get DL user
         $downloaduser = $this->downloadUser;
@@ -134,8 +134,8 @@ class DashboardPageTest extends StoreTestCase
     }
 
 
-    /** @test */
-    public function itShowsThePrintButtonWithReleventTextForPrintPref()
+
+    public function testItShowsThePrintButtonWithReleventTextForPrintPref(): void
     {
         // Set centre print_pref to 'collection'.
         $this->centre->print_pref = config('arc.print_preferences.0');

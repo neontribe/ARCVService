@@ -11,10 +11,10 @@ class StoreFamilySearchTest extends DuskTestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function family_search_datatable_is_working()
+
+    public function testFamilySearchDatatableIsWorking(): void
     {
-        $storeLogin = new StoreLogin;
+        $storeLogin = new StoreLogin();
         $pri_carer = $storeLogin->registrations[0]->family->carers->first()->name;
         $another_pri_carer = $storeLogin->registrations[1]->family->carers->first()->name;
 
@@ -27,17 +27,17 @@ class StoreFamilySearchTest extends DuskTestCase
                     ->assertSee('Next')
                     ->resize(1920, 3000)
                     ->assertSee('Showing 1 to 10 of 15 entries')
-                    ;
+            ;
             $this->assertCount(10, $browser->elements('td.sorting_1'));
 
             $browser->resize(1920, 3000)
                     ->click('#registrationTable_next')
-                    ;
+            ;
             $this->assertCount(5, $browser->elements('td.sorting_1'));
 
             $browser->resize(1920, 3000)
                     ->click('#registrationTable_previous')
-                    ;
+            ;
             $this->assertCount(10, $browser->elements('td.sorting_1'));
             $browser->select('registrationTable_length', '100');
             $this->assertCount(15, $browser->elements('td.sorting_1'));
@@ -47,7 +47,7 @@ class StoreFamilySearchTest extends DuskTestCase
             $browser->assertDontSee($another_pri_carer);
             $browser->resize(1920, 3000)
                     ->assertSee('Showing 1 to 1 of 1 entries (filtered from 15 total entries)')
-                    ;
+            ;
         });
     }
 }

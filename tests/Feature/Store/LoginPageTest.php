@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Feature\Store;
 
 use Tests\StoreTestCase;
@@ -9,7 +10,6 @@ use URL;
 
 class LoginPageTest extends StoreTestCase
 {
-
     use RefreshDatabase;
 
     private $centreUser = null;
@@ -38,8 +38,8 @@ class LoginPageTest extends StoreTestCase
         ]);
     }
 
-    /** @test */
-    public function itShowsALoginPageWhenRouted()
+
+    public function testItShowsALoginPageWhenRouted(): void
     {
         $this->visit(URL::route('store.login'))
             ->assertResponseStatus(200)
@@ -48,8 +48,8 @@ class LoginPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itDoesNotShowTheLoggedInUserDetails()
+
+    public function testItDoesNotShowTheLoggedInUserDetails(): void
     {
         $this->visit(URL::route('store.login'))
             ->dontSee($this->centreUser->name)
@@ -57,40 +57,40 @@ class LoginPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itShowsAForgotPasswordLink()
+
+    public function testItShowsAForgotPasswordLink(): void
     {
         $this->visit(URL::route('store.login'))
-            ->see('href="'. route('store.password.request') .'"')
+            ->see('href="' . route('store.password.request') . '"')
         ;
     }
 
-    /** @test */
-    public function itShowsAUsernameInputBox()
+
+    public function testItShowsAUsernameInputBox(): void
     {
         $this->visit(URL::route('store.login'))
             ->seeElement('input[id=email]')
         ;
     }
 
-    /** @test */
-    public function itShowsAPasswordInputBox()
+
+    public function testItShowsAPasswordInputBox(): void
     {
         $this->visit(URL::route('store.login'))
             ->seeElement('input[id=password]')
         ;
     }
 
-    /** @test */
-    public function itDoesNotShowTheAuthUserMastheadWithLogoutLink()
+
+    public function testItDoesNotShowTheAuthUserMastheadWithLogoutLink(): void
     {
         $this->visit(URL::route('store.login'))
-            ->dontSee('href="'. route('store.login') .'"')
+            ->dontSee('href="' . route('store.login') . '"')
         ;
     }
 
-    /** @test */
-    public function itAllowsAValidUserToLogin()
+
+    public function testItAllowsAValidUserToLogin(): void
     {
         $this->visit(URL::route('store.login'))
             ->type('testuser@example.com', 'email')
@@ -100,8 +100,8 @@ class LoginPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itForbidsAnInvalidUserToLogin()
+
+    public function testItForbidsAnInvalidUserToLogin(): void
     {
         $this->visit(URL::route('store.login'))
             ->type('notauser@example.com', 'email')
@@ -112,8 +112,8 @@ class LoginPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itForbidsADeletedUserToLogin()
+
+    public function testItForbidsADeletedUserToLogin(): void
     {
         $this->visit(URL::route('store.login'))
             ->type($this->deletedcu->email, 'email')
@@ -124,8 +124,8 @@ class LoginPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itRequiresAPasswordToLogin()
+
+    public function testItRequiresAPasswordToLogin(): void
     {
         $this->visit(URL::route('store.login'))
             ->type('testuser@example.com', 'email')
@@ -135,23 +135,22 @@ class LoginPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itRequiresAnEmailToLogin()
+
+    public function testItRequiresAnEmailToLogin(): void
     {
         $this->visit(URL::route('store.login'))
             ->type('test_user_pass', 'password')
             ->press('Log In')
             ->seePageIs(URL::route('store.login'))
             ->see(trans('validation.required', ['attribute' => "email"]));
-        ;
     }
 
-    public function itShowsACookieWarning()
+    public function testItShowsACookieNotice(): void
     {
         $this->visit(URL::route('store.login'))
-            ->see('cookie.agree')
+            ->see('cookie-agree')
             ->see(config('arc.links.privacy_policy'))
-            ->see('cookie-warning')
-            ;
+            ->see('cookie-notice')
+        ;
     }
 }

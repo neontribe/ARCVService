@@ -14,8 +14,8 @@ class AdminViewWorkersTest extends DuskTestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function the_view_workers_datatable_is_functioning()
+
+    public function testTheWiewWorkersDatatableIsFunctioning(): void
     {
         $sponsor = factory(Sponsor::class)
             ->create();
@@ -50,17 +50,17 @@ class AdminViewWorkersTest extends DuskTestCase
                     ->assertSee('Next')
                     ->resize(1920, 3000)
                     ->assertSee('Showing 1 to 10 of 15 entries')
-                    ;
+            ;
             $this->assertCount(10, $browser->elements('td.sorting_1'));
 
             $browser->resize(1920, 3000)
                     ->click('#workersTable_next')
-                    ;
+            ;
             $this->assertCount(5, $browser->elements('td.sorting_1'));
 
             $browser->resize(1920, 3000)
                     ->click('#workersTable_previous')
-                    ;
+            ;
             $this->assertCount(10, $browser->elements('td.sorting_1'));
             $browser->select('workersTable_length', '100');
             $this->assertCount(15, $browser->elements('td.sorting_1'));
@@ -70,7 +70,6 @@ class AdminViewWorkersTest extends DuskTestCase
             $browser->assertDontSee($centreUsers[1]->name);
             $browser->resize(1920, 3000)
                     ->assertSee('Showing 1 to 1 of 1 entries (filtered from 15 total entries)');
-
         });
     }
 }

@@ -12,6 +12,8 @@ use Auth;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use ReflectionClass;
+use ReflectionException;
 use SM\StateMachine\StateMachine;
 use Tests\TestCase;
 
@@ -26,15 +28,15 @@ class VoucherModelTest extends TestCase
         $this->voucher = factory(Voucher::class)->state('dispatched')->create();
     }
 
-    /** @test */
-    public function testAVoucherIsCreatedWithExpectedAttributes()
+
+    public function testAVoucherIsCreatedWithExpectedAttributes(): void
     {
         $v = $this->voucher;
         // Keeping it simple to make writing test suite less onerous.
         // The default error returned by asserts will be enough.
         $this->assertInstanceOf(Voucher::class, $v);
         $this->assertNotNull($v->code);
-        $this->assertTrue(in_array($v->currentstate, config('state-machine.Voucher.states')));
+        $this->assertContains($v->currentstate, config('state-machine.Voucher.states'));
         $this->assertNotNull($v->sponsor_id);
         $this->assertIsInt($v->sponsor_id);
 
@@ -44,29 +46,29 @@ class VoucherModelTest extends TestCase
         $this->assertIsInt($v->trader_id);
     }
 
-    /** @test */
-    public function testCreateVoucherStateMachine()
+
+    public function testCreateVoucherStateMachine(): void
     {
         // Check there's an FSM for the model
         $this->assertInstanceOf(StateMachine::class, $this->voucher->getStateMachine());
     }
 
-    /** @test */
-    public function testSoftDeleteVoucher()
+
+    public function testSoftDeleteVoucher(): void
     {
         $this->voucher->delete();
         $this->assertCount(1, Voucher::withTrashed()->get());
         $this->assertCount(0, Voucher::all());
     }
 
-    /** @test */
-    public function testVoucherBelongsToSponsor()
+
+    public function testVoucherBelongsToSponsor(): void
     {
         $this->assertInstanceOf(Sponsor::class, $this->voucher->sponsor);
     }
 
-    /** @test */
-    public function testVoucherCanBelongToTrader()
+
+    public function testVoucherCanBelongToTrader(): void
     {
         // The voucher factory creates a sponsor because it's required.
         // But not a Trader which is nullable.
@@ -76,8 +78,8 @@ class VoucherModelTest extends TestCase
         $this->assertInstanceOf(Trader::class, $voucher->trader);
     }
 
-    /** @test */
-    public function testVoucherCanBelongToDelivery()
+
+    public function testVoucherCanBelongToDelivery(): void
     {
         $voucher = factory(Voucher::class)->create([
             'delivery_id' => factory(Delivery::class)->create()->id,
@@ -85,8 +87,8 @@ class VoucherModelTest extends TestCase
         $this->assertInstanceOf(Delivery::class, $voucher->delivery);
     }
 
-    /** @test */
-    public function testFindVoucherByCode()
+
+    public function testFindVoucherByCode(): void
     {
         $a = factory(Voucher::class)->create([
             'code' => 'aaaaa',
@@ -102,8 +104,8 @@ class VoucherModelTest extends TestCase
         $this->assertNotEquals($b->fresh(), Voucher::findByCode('aaaaa'));
     }
 
-    /** @test */
-    public function testGetVoucherPendedOnDay()
+
+    public function testGetVoucherPendedOnDay(): void
     {
         $v = $this->voucher;
         $user = factory(User::class)->create();
@@ -117,8 +119,8 @@ class VoucherModelTest extends TestCase
         );
     }
 
-    /** @test */
-    public function testGetVoucherRecordedOnDay()
+
+    public function testGetVoucherRecordedOnDay(): void
     {
         $v = $this->voucher;
         $user = factory(User::class)->create();
@@ -131,8 +133,8 @@ class VoucherModelTest extends TestCase
         );
     }
 
-    /** @test */
-    public function testGetVoucherReimbursedOnDay()
+
+    public function testGetVoucherReimbursedOnDay(): void
     {
         $v = $this->voucher;
         $user = factory(User::class)->create();
@@ -147,8 +149,8 @@ class VoucherModelTest extends TestCase
         );
     }
 
-    /** @test */
-    public function testCleanVouchers()
+
+    public function testCleanVouchers(): void
     {
         $user = factory(User::class)->create();
         Auth::login($user);
@@ -180,8 +182,8 @@ class VoucherModelTest extends TestCase
         $this->assertEquals(count($badCodes), $vouchers->count());
     }
 
-    /** @test */
-    public function testScopeConfirmedVouchers()
+
+    public function testScopeConfirmedVouchers(): void
     {
         $user = factory(User::class)->create();
         Auth::login($user);
@@ -207,9 +209,8 @@ class VoucherModelTest extends TestCase
     /**
      * Here because I can't work out how to test the Stateable Trait well
      *
-     * @test
      */
-    public function testItCanCreateAValidTransitionDefinition()
+    public function testItCanCreateAValidTransitionDefinition(): void
     {
         $validTransDef = Voucher::createTransitionDef("printed", "dispatch");
 
@@ -224,8 +225,8 @@ class VoucherModelTest extends TestCase
         $this->assertNull(Voucher::createTransitionDef("kensington", "dispatched"));
     }
 
-    /** @test */
-    public function testItCanCreateARangeDef()
+
+    public function testItCanCreateARangeDef(): void
     {
         // Make some vouchers
         $sponsor = factory(Sponsor::class)->create([
@@ -256,8 +257,8 @@ class VoucherModelTest extends TestCase
         Voucher::createRangeDefFromVoucherCodes('INV999998', 'INV999999');
     }
 
-    /** @test */
-    public function testItCanFindASupersetRangeFromARangeSet()
+
+    public function testItCanFindASupersetRangeFromARangeSet(): void
     {
         $rangeCodes = [
             'TST0101',
@@ -322,11 +323,11 @@ class VoucherModelTest extends TestCase
     public function invokeMethod(&$object, $methodName, array $parameters = array())
     {
         try {
-            $reflection = new \ReflectionClass(get_class($object));
+            $reflection = new ReflectionClass(get_class($object));
             $method = $reflection->getMethod($methodName);
             $method->setAccessible(true);
             return $method->invokeArgs($object, $parameters);
-        } catch (\ReflectionException $e) {
+        } catch (ReflectionException $e) {
             return null;
         }
     }

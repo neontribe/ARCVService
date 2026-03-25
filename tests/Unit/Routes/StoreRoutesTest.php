@@ -8,6 +8,7 @@ use App\Centre;
 use App\CentreUser;
 use App\Registration;
 use App\Sponsor;
+use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use URL;
 use Tests\StoreTestCase;
@@ -103,9 +104,8 @@ class StoreRoutesTest extends StoreTestCase
      * Verify login direct.
      *
      * @return void
-     * @test
      */
-    public function testLoginGuestRoute()
+    public function testLoginGuestRoute(): void
     {
         Auth::logout();
         $this->get(URL::route('store.login'))
@@ -117,9 +117,8 @@ class StoreRoutesTest extends StoreTestCase
      * Verify forgot password direct
      *
      * @return void
-     * @test
      */
-    public function testForgotPasswordGuestRoute()
+    public function testForgotPasswordGuestRoute(): void
     {
         Auth::logout();
         $this->get(URL::route('store.password.request'))
@@ -127,8 +126,8 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseStatus(200);
     }
 
-    /** @test */
-    public function testDashboardRouteGate()
+
+    public function testDashboardRouteGate(): void
     {
         Auth::logout();
         // You cannot get there logged out.
@@ -142,8 +141,8 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseStatus(200);
     }
 
-    /** @test */
-    public function testSearchRouteGate()
+
+    public function testSearchRouteGate(): void
     {
         $route = URL::route('store.registration.index');
 
@@ -159,8 +158,8 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseStatus(200);
     }
 
-    /** @test */
-    public function testEditRouteGate()
+
+    public function testEditRouteGate(): void
     {
         // Create a random registration with our centre.
         $registration = factory(Registration::class)->create([
@@ -187,8 +186,8 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseStatus(200);
     }
 
-    /** @test */
-    public function testUpdateRouteGate()
+
+    public function testUpdateRouteGate(): void
     {
         // Create a random registration with our centre.
         $registration = factory(Registration::class)->create([
@@ -219,8 +218,8 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseStatus(200);
     }
 
-    /** @test */
-    public function testVoucherManageRouteGate()
+
+    public function testVoucherManageRouteGate(): void
     {
         // Create a random registration with our centre.
         $registration = factory(Registration::class)->create([
@@ -263,13 +262,13 @@ class StoreRoutesTest extends StoreTestCase
         try {
             $this->actingAs($this->unrelatedUser, 'store')
                 ->visit($route);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->assertStringContainsString('Received status code [403]', $e->getMessage());
         }
     }
 
-    /** @test */
-    public function testVoucherManagerUpdateGate()
+
+    public function testVoucherManagerUpdateGate(): void
     {
         // Create a random registration with our centre.
         $registration = factory(Registration::class)->create([
@@ -316,13 +315,12 @@ class StoreRoutesTest extends StoreTestCase
                     $put_route,
                     [] // should erase the vouchers.
                 );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->assertStringContainsString('Received status code [403]', $e->getMessage());
         }
     }
 
-    /** test */
-    public function testCentresRegistrationsSummaryGate()
+    public function testCentresRegistrationsSummaryGate(): void
     {
         // Make some registrations
         factory(Registration::class, 5)->create([
@@ -360,8 +358,7 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseOK();
     }
 
-    /** test */
-    public function testCentreRegistrationsSummaryGate()
+    public function testCentreRegistrationsSummaryGate(): void
     {
         // Make some registrations
         factory(Registration::class, 5)->create([
@@ -400,8 +397,8 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseOK();
     }
 
-    /** @test */
-    public function testSessionUpdateGate()
+
+    public function testSessionUpdateGate(): void
     {
         $put_route = URL::route('store.session.put');
 
@@ -430,8 +427,8 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseStatus(200);
     }
 
-    /** @test */
-    public function testRegistrationFamilyUpdateGate()
+
+    public function testRegistrationFamilyUpdateGate(): void
     {
         $registration = factory(Registration::class)->create([
             'centre_id' => $this->centre->id,
@@ -484,13 +481,13 @@ class StoreRoutesTest extends StoreTestCase
                     $route,
                     ['leaving_reason' => 'found employment']
                 );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->assertStringContainsString('Received status code [403]', $e->getMessage());
         }
     }
 
-    /** @test */
-    public function testMVLRouteGuard()
+
+    public function testMVLRouteGuard(): void
     {
         // Make some registrations
         factory(Registration::class, 5)->create([
@@ -533,8 +530,8 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseOK();
     }
 
-    /** @test */
-    public function testCentreRegistrationCollectionGate()
+
+    public function testCentreRegistrationCollectionGate(): void
     {
         factory(Registration::class, 5)->create([
             'centre_id' => $this->centre->id,

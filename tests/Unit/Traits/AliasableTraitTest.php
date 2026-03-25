@@ -16,7 +16,7 @@ class AliasableTraitTest extends TestCase
     {
         parent::setUp();
 
-        $this->UnaliasedTraitClassObject = new class extends Model {
+        $this->UnaliasedTraitClassObject = new class () extends Model {
             use Aliasable;
 
             /**
@@ -27,7 +27,7 @@ class AliasableTraitTest extends TestCase
         };
 
 
-        $this->AliasedTraitClassObject = new class extends Model {
+        $this->AliasedTraitClassObject = new class () extends Model {
             use Aliasable;
 
             /**
@@ -36,11 +36,10 @@ class AliasableTraitTest extends TestCase
              */
             public const PROGRAMME_ALIASES = ['first', 'second'];
         };
-
     }
 
-    /** @test */
-    public function itCanSupplyAnAlias()
+
+    public function testItCanSupplyAnAlias(): void
     {
         // function exists and returns a string
         $entity = $this->UnaliasedTraitClassObject;

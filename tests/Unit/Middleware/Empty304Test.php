@@ -9,7 +9,6 @@ use Tests\TestCase;
 
 class Empty304Test extends TestCase
 {
-    /** @test */
     public function testContentIsCleared(): void
     {
         $request = new Request();

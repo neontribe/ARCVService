@@ -59,8 +59,8 @@ class RegistrationPageTest extends StoreTestCase
         $this->spCentreUser->centres()->attach($this->spCentre->id, ['homeCentre' => true]);
     }
 
-    /** @test */
-    public function itShowsAPrimaryCarerInput()
+
+    public function testItShowsAPrimaryCarerInput(): void
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
@@ -68,8 +68,8 @@ class RegistrationPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itShowsASecondaryCarerInput()
+
+    public function testItShowsASecondaryCarerInput(): void
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
@@ -78,8 +78,8 @@ class RegistrationPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itShowsAChildInputComplex()
+
+    public function testItShowsAChildInputComplex(): void
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
@@ -89,8 +89,8 @@ class RegistrationPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itShowsAConsentCheckbox()
+
+    public function testItShowsAConsentCheckbox(): void
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
@@ -98,8 +98,8 @@ class RegistrationPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itShowsAnEligibilitySelect()
+
+    public function testItShowsAnEligibilitySelect(): void
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
@@ -112,8 +112,8 @@ class RegistrationPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itShowsAFormSaveButton()
+
+    public function testItShowsAFormSaveButton(): void
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
@@ -121,8 +121,8 @@ class RegistrationPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itShowsALogoutButton()
+
+    public function testItShowsALogoutButton(): void
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
@@ -130,8 +130,8 @@ class RegistrationPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itShowsTheLoggedInUserDetails()
+
+    public function testItShowsTheLoggedInUserDetails(): void
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
@@ -140,10 +140,7 @@ class RegistrationPageTest extends StoreTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function logoDoesntRedirectMeToDashboard()
+    public function testLogoDoesntRedirectMeToDashboard(): void
     {
         $this->expectException(InvalidArgumentException::class);
         // Create some centres
@@ -157,8 +154,8 @@ class RegistrationPageTest extends StoreTestCase
             ->seePageIs(URL::route('store.registration.create'));
     }
 
-    /** @test */
-    public function itCanSaveARegistration()
+
+    public function testItCanSaveARegistration(): void
     {
         // There are no registrations
         $this->assertEquals(0, Registration::get()->count());
@@ -186,8 +183,8 @@ class RegistrationPageTest extends StoreTestCase
         $this->assertEquals('Test Carer', $registration->family->carers->first()->name);
     }
 
-    /** @test */
-    public function itRequiresConsentToSave()
+
+    public function testItRequiresConsentToSave(): void
     {
         // There are no registrations
         $this->assertEquals(0, Registration::get()->count());
@@ -205,8 +202,8 @@ class RegistrationPageTest extends StoreTestCase
         $this->assertEquals(0, Registration::get()->count());
     }
 
-    /** @test */
-    public function itRequiresAPrimaryCarerToSave()
+
+    public function testItRequiresAPrimaryCarerToSave(): void
     {
         // There are no registrations
         $this->assertEquals(0, Registration::get()->count());
@@ -224,8 +221,8 @@ class RegistrationPageTest extends StoreTestCase
         $this->assertEquals(0, Registration::get()->count());
     }
 
-    /** @test */
-    public function selectingReceivingHSPutsDateInTable()
+
+    public function testSelectingReceivingHSPutsDateInTable(): void
     {
         $this->assertEquals(0, Registration::count());
         $this->actingAs($this->centreUser, 'store')
@@ -242,8 +239,8 @@ class RegistrationPageTest extends StoreTestCase
         $this->assertNotNull($registration->eligible_from);
     }
 
-    /** @test */
-    public function selectingNotReceivingHSPutsNullInTable()
+
+    public function testSelectingNotReceivingHSPutsNullInTable(): void
     {
         $this->assertEquals(0, Registration::get()->count());
         $this->actingAs($this->centreUser, 'store')
@@ -260,8 +257,8 @@ class RegistrationPageTest extends StoreTestCase
         $this->assertNull($registration->eligible_from);
     }
 
-    /** @test */
-    public function changingToNotReceivingHSPutsNullInTable()
+
+    public function testChangingToNotReceivingHSPutsNullInTable(): void
     {
         $this->assertEquals(0, Registration::get()->count());
         $this->actingAs($this->centreUser, 'store')
@@ -287,8 +284,8 @@ class RegistrationPageTest extends StoreTestCase
         $this->assertNull($registration->eligible_from);
     }
 
-    /** @test */
-    public function updatingOtherFieldsDoesNotChangeEligibiltyDate()
+
+    public function testUpdatingOtherFieldsDoesNotChangeEligibiltyDate(): void
     {
         $this->assertEquals(0, Registration::get()->count());
         $this->actingAs($this->centreUser, 'store')
@@ -316,8 +313,8 @@ class RegistrationPageTest extends StoreTestCase
         }
     }
 
-    /** @test */
-    public function asAnSPUserICanSeeTheCorrectInputs()
+
+    public function testAsAnSPUserICanSeeTheCorrectInputs(): void
     {
         $this->actingAs($this->spCentreUser, 'store')
             ->visit(URL::route('store.registration.create'))

@@ -32,7 +32,7 @@ class RoutesTest extends TestCase
         ;
     }
 
-    public function testGetAccessTokenWithGoodCredentials()
+    public function testGetAccessTokenWithGoodCredentials(): void
     {
         $this->post('/oauth/token', [
             'grant_type' => 'password',
@@ -44,7 +44,7 @@ class RoutesTest extends TestCase
         ])->assertJsonStructure(['access_token', 'refresh_token']);
     }
 
-    public function testDontGetAccessTokenWithBadClientId()
+    public function testDontGetAccessTokenWithBadClientId(): void
     {
         $response = $this->post('/oauth/token', [
             'grant_type' => 'password',
@@ -55,14 +55,14 @@ class RoutesTest extends TestCase
             'scope' => '',
         ])->getContent();
 
-        $this->assertEquals(json_decode($response, true), [
+        $this->assertEquals([
             'error' => 'invalid_client',
             'error_description' => 'Client authentication failed',
             'message' => 'Client authentication failed',
-        ]);
+        ], json_decode($response, true));
     }
 
-    public function testDontGetAccessTokenWithBadClientSecret()
+    public function testDontGetAccessTokenWithBadClientSecret(): void
     {
         $response = $this->post('/oauth/token', [
             'grant_type' => 'password',
@@ -73,14 +73,14 @@ class RoutesTest extends TestCase
             'scope' => '',
         ])->getContent();
 
-        $this->assertEquals(json_decode($response, true), [
+        $this->assertEquals([
             'error' => 'invalid_client',
             'error_description' => 'Client authentication failed',
             'message' => 'Client authentication failed',
-        ]);
+        ], json_decode($response, true));
     }
 
-    public function testDontGetAccessTokenWithBadUsername()
+    public function testDontGetAccessTokenWithBadUsername(): void
     {
         $response = $this->post('/oauth/token', [
             'grant_type' => 'password',
@@ -101,7 +101,7 @@ class RoutesTest extends TestCase
         );
     }
 
-    public function testDontGetAccessTokenWithBadUserPassword()
+    public function testDontGetAccessTokenWithBadUserPassword(): void
     {
         $response = $this->post('/oauth/token', [
             'grant_type' => 'password',

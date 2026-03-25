@@ -30,11 +30,10 @@ class DeliveriesControllerTest extends TestCase
     }
 
     /**
-     * @test
      *
      * @return void
      */
-    public function testStoreWithoutStartEndDateErrors()
+    public function testStoreWithoutStartEndDateErrors(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->post($this->vouchersDeliveryroute, [
@@ -53,11 +52,10 @@ class DeliveriesControllerTest extends TestCase
     }
 
     /**
-     * @test
      *
      * @return void
      */
-    public function testStoreStartEndSwapped()
+    public function testStoreStartEndSwapped(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->post($this->vouchersDeliveryroute, [
@@ -74,11 +72,10 @@ class DeliveriesControllerTest extends TestCase
     }
 
     /**
-     * @test
      *
      * @return void
      */
-    public function testStoreCentreIsNotNumberErrors()
+    public function testStoreCentreIsNotNumberErrors(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->post($this->vouchersDeliveryroute, [
@@ -93,11 +90,10 @@ class DeliveriesControllerTest extends TestCase
     }
 
     /**
-     * @test
      *
      * @return void
      */
-    public function testStoreStartIsNotTheSameSponsorAsEndErrors()
+    public function testStoreStartIsNotTheSameSponsorAsEndErrors(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->post($this->vouchersDeliveryroute, [

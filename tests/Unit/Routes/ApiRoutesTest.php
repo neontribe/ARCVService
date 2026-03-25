@@ -69,7 +69,7 @@ class ApiRoutesTest extends TestCase
         $this->vouchers[1]->applyTransition('collect');
     }
 
-    public function testMustHaveAtLeastOneEnabledTraderToLogin()
+    public function testMustHaveAtLeastOneEnabledTraderToLogin(): void
     {
         // create 2 traders and add them to the user
         $traders = factory(Trader::class, 2)->create();
@@ -97,7 +97,7 @@ class ApiRoutesTest extends TestCase
             ]);
     }
 
-    public function testGetAccessTokenWithGoodCredentials()
+    public function testGetAccessTokenWithGoodCredentials(): void
     {
         $traders = factory(Trader::class)->create();
         $this->user->traders()->sync($traders);
@@ -109,7 +109,7 @@ class ApiRoutesTest extends TestCase
         $response->assertJsonStructure(['access_token', 'expires_in', 'refresh_token']);
     }
 
-    public function testDontGetAccessTokenWithBadUsername()
+    public function testDontGetAccessTokenWithBadUsername(): void
     {
         $this->post(route('api.login'), [
             'username' => 'nottheusersname@example.com',
@@ -121,7 +121,7 @@ class ApiRoutesTest extends TestCase
             ]);
     }
 
-    public function testDontGetAccessTokenWithBadUserPassword()
+    public function testDontGetAccessTokenWithBadUserPassword(): void
     {
         $traders = factory(Trader::class)->create();
         $this->user->traders()->sync($traders);
@@ -142,7 +142,7 @@ class ApiRoutesTest extends TestCase
     }
 
     /** REQUIRES AUTH ------------------------------------------------- */
-    public function testShowTraderVouchersRoute()
+    public function testShowTraderVouchersRoute(): void
     {
         // This user is not associated with Trader 1.
         $this->actingAs($this->user, 'api')
@@ -158,7 +158,7 @@ class ApiRoutesTest extends TestCase
             ->assertJsonStructure([0 => ['code', 'updated_at']])
         ;
     }
-    public function testVouchersRouteHasEtags()
+    public function testVouchersRouteHasEtags(): void
     {
         $trader = factory(Trader::class)->create();
         $this->user->traders()->sync([$trader->id]);
@@ -168,7 +168,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testVouchersRoute304sWithKnownEtag()
+    public function testVouchersRoute304sWithKnownEtag(): void
     {
         $trader = factory(Trader::class)->create();
         $this->user->traders()->sync([$trader->id]);
@@ -184,7 +184,7 @@ class ApiRoutesTest extends TestCase
             ->assertStatus(304);
     }
 
-    public function testUnauthenticatedDontShowTraderVouchersRoute()
+    public function testUnauthenticatedDontShowTraderVouchersRoute(): void
     {
         $this->json('GET', route('api.trader.vouchers', 1))
             ->assertStatus(401)
@@ -192,7 +192,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testCollectVoucherRoute()
+    public function testCollectVoucherRoute(): void
     {
         // Get a valid code.
         $code = $this->vouchers[0]->code;
@@ -211,7 +211,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testCollectInvalidVoucherRoute()
+    public function testCollectInvalidVoucherRoute(): void
     {
         // Make up a bogus code.
         $code = 'BAD88888888';
@@ -230,7 +230,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testCollectOwnDuplicateVoucherRoute()
+    public function testCollectOwnDuplicateVoucherRoute(): void
     {
         // Get the code already in recorded state.
         $code = $this->vouchers[1]->code;
@@ -253,7 +253,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testCollectOtherDuplicateVoucherRoute()
+    public function testCollectOtherDuplicateVoucherRoute(): void
     {
         // Transfer to trader 2 and get the code already in recorded state.
         $this->vouchers[1]->trader_id = 2;
@@ -278,7 +278,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testCollectUndeliveredVouchersAfterDeliveriesRoute()
+    public function testCollectUndeliveredVouchersAfterDeliveriesRoute(): void
     {
         $created_at = Carbon::parse(config('arc.first_delivery_date'))->addDay();
         $this->vouchers[2]->created_at = $created_at;
@@ -302,7 +302,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testCollectUndeliveredVouchersFromBeforeDeliveriesRoute()
+    public function testCollectUndeliveredVouchersFromBeforeDeliveriesRoute(): void
     {
         $created_at = Carbon::parse(config('arc.first_delivery_date'))->subDays(1);
         $this->vouchers[2]->created_at = $created_at;
@@ -324,7 +324,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testRejectToAllocateVoucherRoute()
+    public function testRejectToAllocateVoucherRoute(): void
     {
         // Get a valid code.
         $code = $this->vouchers[0]->code;
@@ -350,7 +350,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testUnauthenticatedDontCollectVoucherRoute()
+    public function testUnauthenticatedDontCollectVoucherRoute(): void
     {
         $payload = [
             'transition' => 'collect',
@@ -365,7 +365,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testCantCollectVoucherOnBehalfOfNotOwnTraderRoute()
+    public function testCantCollectVoucherOnBehalfOfNotOwnTraderRoute(): void
     {
         $payload = [
             'transition' => 'collect',
@@ -383,7 +383,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testUserCanSeeOwnTraders()
+    public function testUserCanSeeOwnTraders(): void
     {
         $sponsor = factory(Sponsor::class)->create();
         $market = factory(Market::class)->create(["sponsor_id" => $sponsor->id]);
@@ -402,7 +402,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testUnauthenticatedUserCannotSeeTraders()
+    public function testUnauthenticatedUserCannotSeeTraders(): void
     {
         $this->json('GET', route('api.traders'))
             ->assertStatus(401)
@@ -410,7 +410,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testUserCanSeeOwnTrader()
+    public function testUserCanSeeOwnTrader(): void
     {
         $trader = factory(Trader::class)->create();
         $this->user->traders()->sync([$trader->id]);
@@ -420,7 +420,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testUserCannotSeeNotOwnTrader()
+    public function testUserCannotSeeNotOwnTrader(): void
     {
         $trader = factory(Trader::class)->create();
         // Don't sync this trader to our user.
@@ -433,7 +433,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testUnauthenticatedUserCannotSeeTrader()
+    public function testUnauthenticatedUserCannotSeeTrader(): void
     {
         $this->json('GET', route('api.traders'))
             ->assertStatus(401)
@@ -441,7 +441,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testUserCanSeeOwnTraderVoucherHistory()
+    public function testUserCanSeeOwnTraderVoucherHistory(): void
     {
         $trader = factory(Trader::class)->create();
         $this->user->traders()->sync([$trader->id]);
@@ -451,7 +451,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testVoucherHistoryHasEtags()
+    public function testVoucherHistoryHasEtags(): void
     {
         $trader = factory(Trader::class)->create();
         $this->user->traders()->sync([$trader->id]);
@@ -461,7 +461,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testVoucherHistory304sWithKnownEtag()
+    public function testVoucherHistory304sWithKnownEtag(): void
     {
         $trader = factory(Trader::class)->create();
         $this->user->traders()->sync([$trader->id]);
@@ -477,7 +477,7 @@ class ApiRoutesTest extends TestCase
             ->assertStatus(304);
     }
 
-    public function testUserCannotSeeAnotherTradersVoucherHistory()
+    public function testUserCannotSeeAnotherTradersVoucherHistory(): void
     {
         $trader = factory(Trader::class)->create();
         // Don't sync this trader to our user.
@@ -490,7 +490,7 @@ class ApiRoutesTest extends TestCase
         ;
     }
 
-    public function testUnauthenticatedUserCannotSeeTraderVoucherHistory()
+    public function testUnauthenticatedUserCannotSeeTraderVoucherHistory(): void
     {
         $this->json('GET', route('api.trader.voucher-history', 1))
             ->assertStatus(401)

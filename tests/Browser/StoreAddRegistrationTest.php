@@ -12,10 +12,10 @@ class StoreAddRegistrationTest extends DuskTestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function the_JS_is_working_correctly_on_the_create_reg_page()
+
+    public function testTheJSIsWorkingCorrectlyOnTheCreateRegPage(): void
     {
-        $storeLogin = new StoreLogin;
+        $storeLogin = new StoreLogin();
         $age_now = Carbon::now()->subMonths(27)->diff(Carbon::now())->format('%y yr, %m mo');
         $pregnancy = Carbon::now()->addMonths(6);
 
@@ -51,7 +51,7 @@ class StoreAddRegistrationTest extends DuskTestCase
                     ->assertSeeIn('@pregnancy_col', 'P')
                     ->assertSee($pregnancy->format('M') . ' ' . $pregnancy->format('Y'))
                     ->assertChecked('@create_child_dob')
-                    ;
+            ;
         });
     }
 }

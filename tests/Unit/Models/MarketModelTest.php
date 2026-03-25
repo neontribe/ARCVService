@@ -22,7 +22,7 @@ class MarketModelTest extends TestCase
         $this->sponsor = $this->market->sponsor;
     }
 
-    public function testMarketIsCreatedWithExpectedAttributes()
+    public function testMarketIsCreatedWithExpectedAttributes(): void
     {
         $m = $this->market;
         // Keeping it simple to make writing test suite less onerous.
@@ -36,25 +36,25 @@ class MarketModelTest extends TestCase
         $this->assertIsInt($m->sponsor_id);
     }
 
-    public function testMarketBelongsToSponsor()
+    public function testMarketBelongsToSponsor(): void
     {
         $this->assertInstanceOf(BelongsTo::class, $this->market->sponsor());
         $this->assertInstanceOf(Sponsor::class, $this->market->sponsor);
     }
 
-    public function testMarketCanHaveManyTraders()
+    public function testMarketCanHaveManyTraders(): void
     {
         $this->assertInstanceOf(HasMany::class, $this->market->traders());
     }
 
-    public function testGetSponsorShortcodeAttribute()
+    public function testGetSponsorShortcodeAttribute(): void
     {
         $shortcode_market = $this->market->sponsor_shortcode;
         $shortcode_sponsor = $this->sponsor->shortcode;
         $this->assertEquals($shortcode_sponsor, $shortcode_market);
     }
 
-    public function testSoftDeleteMarket()
+    public function testSoftDeleteMarket(): void
     {
         $this->market->delete();
         $this->assertCount(1, Market::withTrashed()->get());

@@ -9,10 +9,9 @@ use Tests\CreatesApplication;
 
 class ArcTestCoverageTest extends TestCase
 {
-
     use CreatesApplication;
 
-    public function testCommandOK()
+    public function testCommandOK(): void
     {
         $data = "<phpuint><project><directory><totals>" .
             "<lines percent='99' />" .
@@ -24,13 +23,13 @@ class ArcTestCoverageTest extends TestCase
         $this->assertEquals(0, $results);
     }
 
-    public function testCommandNoArg()
+    public function testCommandNoArg(): void
     {
         $this->expectException(\Symfony\Component\Console\Exception\RuntimeException::class);
         $this->artisan("arc:test:coverage")->execute();
     }
 
-    public function testCommandFails()
+    public function testCommandFails(): void
     {
         $data = "<phpuint><project><directory><totals>" .
             "<lines percent='20' />" .
@@ -42,7 +41,7 @@ class ArcTestCoverageTest extends TestCase
         $this->assertEquals(-1, $results);
     }
 
-    public function testCommandTestDifferentAcceptance()
+    public function testCommandTestDifferentAcceptance(): void
     {
         $data = "<phpuint><project><directory><totals>" .
             "<lines percent='50' />" .

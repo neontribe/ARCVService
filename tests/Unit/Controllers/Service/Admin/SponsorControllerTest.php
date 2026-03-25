@@ -9,6 +9,7 @@ use App\Sponsor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\Validator;
 use Tests\StoreTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class SponsorControllerTest extends StoreTestCase
 {
@@ -42,7 +43,7 @@ class SponsorControllerTest extends StoreTestCase
      * @param $rules
      * @return mixed
      */
-    protected function validate($mockedRequestData, $rules)
+    protected function validate($mockedRequestData, $rules): mixed
     {
         return $this->validator
             ->make($mockedRequestData, $rules)
@@ -50,12 +51,11 @@ class SponsorControllerTest extends StoreTestCase
     }
 
     /**
-     * @test
-     * @dataProvider storeValidationProvider
      * @param bool $shouldPass
      * @param array $mockedRequestData
      */
-    public function testICannotSubmitInvalidValues($shouldPass, $mockedRequestData)
+    #[DataProvider('storeValidationProvider')]
+    public function testICannotSubmitInvalidValues(bool $shouldPass, array $mockedRequestData): void
     {
         $rules = (new AdminNewSponsorRequest())->rules();
 
@@ -146,8 +146,8 @@ class SponsorControllerTest extends StoreTestCase
         ];
     }
 
-    /** @test */
-    public function testICanStoreASponsor()
+
+    public function testICanStoreASponsor(): void
     {
         $adminUser = factory(AdminUser::class)->create();
 
@@ -181,8 +181,8 @@ class SponsorControllerTest extends StoreTestCase
         ]);
     }
 
-    /** @test */
-    public function testItRedirectsBackOnError()
+
+    public function testItRedirectsBackOnError(): void
     {
         $adminUser = factory(AdminUser::class)->create();
 
@@ -207,8 +207,8 @@ class SponsorControllerTest extends StoreTestCase
         ]);
     }
 
-    /** @test */
-    public function testICanSeeProgrammeTypeOnSponsorListPage()
+
+    public function testICanSeeProgrammeTypeOnSponsorListPage(): void
     {
         $adminUser = factory(AdminUser::class)->create();
         $this->actingAs($adminUser, 'admin')
@@ -220,8 +220,8 @@ class SponsorControllerTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function testIEditRuleValuesForAnSPSponsor()
+
+    public function testIEditRuleValuesForAnSPSponsor(): void
     {
         $socialPrescribingRules = SponsorsController::socialPrescribingOverrides();
         $this->socialPrescribingSponsor->evaluations()->saveMany($socialPrescribingRules);
@@ -270,8 +270,8 @@ class SponsorControllerTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function testIEvaluationsAreCreatedIfTheyDoNotExistWhenIUpdate()
+
+    public function testIEvaluationsAreCreatedIfTheyDoNotExistWhenIUpdate(): void
     {
         $adminUser = factory(AdminUser::class)->create();
         $sponsor = $this->socialPrescribingSponsor;
