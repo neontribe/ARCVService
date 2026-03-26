@@ -2,12 +2,11 @@
 
 namespace App;
 
+use App\Support\SecureModel;
 use App\Traits\Aliasable;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
-use Spatie\LaravelCipherSweet\Concerns\UsesCipherSweet;
 use ParagonIE\CipherSweet\EncryptedRow;
 use ParagonIE\CipherSweet\BlindIndex;
 
@@ -17,11 +16,10 @@ use ParagonIE\CipherSweet\BlindIndex;
  * @property string $language
  * @property Family $family
  */
-class Carer extends Model implements CipherSweetEncrypted
+class Carer extends SecureModel implements CipherSweetEncrypted
 {
     use Aliasable;
     use SoftDeletes;
-    use UsesCipherSweet;
 
     public const PROGRAMME_ALIASES = [
         "Child",
@@ -38,13 +36,6 @@ class Carer extends Model implements CipherSweetEncrypted
         'ethnicity',
         'language',
     ];
-
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
-    protected $hidden = ['emailsecret', 'telnosecret'];
 
     public static function configureCipherSweet(EncryptedRow $encryptedRow): void
     {
