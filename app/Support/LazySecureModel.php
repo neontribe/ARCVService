@@ -3,15 +3,22 @@
 namespace App\Support;
 
 use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
 
 abstract class LazySecureModel extends Model
 {
     use UsesCipherSweetLazy;
 
-    protected bool $secretsHidden = true;
+    /**
+     * Per-class encrypted field cache.
+     */
     protected static array $encryptedFieldCache = [];
 
-    /** when retrieving the model  auto-"hide" the fields */
+    /**
+     * Cached decrypted row for this model instance.
+     */
+    protected ?array $lazyDecryptedRowCache = null;
+
     protected static function booted(): void
     {
         static::retrieved(static function (self $model) {
@@ -19,67 +26,87 @@ abstract class LazySecureModel extends Model
         });
     }
 
-    /** Add to "hidden" fields in model */
-    public function hideEncryptedAttributes(): void
+    public function hideEncryptedAttributes(): static
     {
-        if (!$this->secretsHidden) {
-            return;
-        }
         $this->makeHidden($this->encryptedFields());
+        return $this;
     }
 
-    /** Get list of fields */
-    protected function encryptedFields(): array
+    public function encryptedFields(): array
     {
         return static::$encryptedFieldCache[static::class]
             ??= static::getCipherSweetEncryptedRow()->listEncryptedFields();
     }
 
-    /** Gets the field */
-    public function reveal(string $field): mixed
+    /**
+     * Lazy decrypt full encrypted row once, then cache it on the model instance.
+     */
+    public function decryptEncryptedRowForLazyAccess(): array
     {
-        if (!in_array($field, $this->encryptedFields(), true)) {
-            return $this->getAttribute($field);
+        if ($this->lazyDecryptedRowCache !== null) {
+            return $this->lazyDecryptedRowCache;
         }
 
-        $this->authorizeReveal($field);
+        $row = static::getCipherSweetEncryptedRow()
+            ->setPermitEmpty(config('ciphersweet.permit_empty', false));
 
-        return $this->attributes[$field] ?? null;
-    }
-
-    public function getAttribute($key)
-    {
-        $value = parent::getAttribute($key);
-
-        if (
-            $value !== null
-            && in_array($key, $this->encryptedFields(), true)
-        ) {
-            return new LazySecureValue($this, $key);
-        }
-
-        return $value;
-    }
-
-    /** Place for guards */
-    protected function authorizeReveal(string $field): void
-    {
-        // Override in concrete model / policy layer
-    }
-
-    /** Clone without secrets */
-    public function withoutSecrets(): static
-    {
-        $clone = clone $this;
+        $payload = [];
 
         foreach ($this->encryptedFields() as $field) {
-            unset($clone->{$field});
+            // Important: use raw/original DB values, not accessors.
+            $payload[$field] = $this->getRawOriginal($field);
+
+            // Some hydration paths may not populate "original" as expected.
+            // Fall back to raw attributes if needed.
+            if (!array_key_exists($field, $this->getOriginal()) && array_key_exists($field, $this->getAttributes())) {
+                $payload[$field] = $this->getAttributes()[$field];
+            }
+
+            // Ensure every configured encrypted field exists in the payload,
+            // even when null, to satisfy CipherSweet row expectations.
+            $payload[$field] ??= null;
         }
 
-        return $clone;
+        return $this->lazyDecryptedRowCache = $row->decryptRow($payload);
     }
 
-    /** Stop toArray leaks */
+    /**
+     * If someone accesses $model->email directly and email is encrypted,
+     * return a LazySecretValue instead of plaintext/ciphertext.
+     */
+    public function getAttribute($key): mixed
+    {
+        if (is_string($key) && $this->isEncryptedField($key)) {
+            return $this->secret($key);
+        }
+
+        return parent::getAttribute($key);
+    }
+
+    public function isEncryptedField(string $field): bool
+    {
+        return in_array($field, $this->encryptedFields(), true);
+    }
+
+    /**
+     * Explicit non-magic access to a secret wrapper.
+     */
+    public function secret(string $field): LazySecureValue
+    {
+        if (!$this->isEncryptedField($field)) {
+            throw new InvalidArgumentException(sprintf(
+                '"%s" is not a configured encrypted field on %s.',
+                $field,
+                static::class
+            ));
+        }
+
+        return new LazySecureValue($this, $field);
+    }
+
+    /**
+     * Remove secrets from array serialization regardless of $hidden changes elsewhere.
+     */
     public function toArray(): array
     {
         $array = parent::toArray();
@@ -91,13 +118,68 @@ abstract class LazySecureModel extends Model
         return $array;
     }
 
-    /** Stop debug leaks */
+    /**
+     * Safe debug output.
+     */
     public function __debugInfo(): array
     {
         return [
             'model' => static::class,
             'id' => $this->getKey(),
-            'attributes' => '[secure]',
+            'attributes' => collect(parent::attributesToArray())
+                ->except($this->encryptedFields())
+                ->all(),
+            'hidden_encrypted_fields' => $this->encryptedFields(),
         ];
+    }
+
+    /**
+     * Override in concrete models, policies, or a shared auth trait.
+     */
+    public function authorizeReveal(string $field): void
+    {
+        // no-op by default
+    }
+
+    /**
+     * Optional helper for safe transport into jobs/events/resources.
+     */
+    public function withoutSecrets(): static
+    {
+        $clone = clone $this;
+        $clone->flushSecretCache();
+
+        foreach ($clone->encryptedFields() as $field) {
+            unset($clone->{$field});
+        }
+
+        $clone->makeHidden($clone->encryptedFields());
+
+        return $clone;
+    }
+
+    /**
+     * Clear cached decrypted values after mutation/refresh.
+     */
+    public function flushSecretCache(): static
+    {
+        $this->lazyDecryptedRowCache = null;
+
+        return $this;
+    }
+
+    /**
+     * Important: whenever attributes are replaced wholesale, clear cache.
+     */
+    public function setRawAttributes(array $attributes, $sync = false)
+    {
+        $this->flushSecretCache();
+        return parent::setRawAttributes($attributes, $sync);
+    }
+
+    public function refresh()
+    {
+        $this->flushSecretCache();
+        return parent::refresh();
     }
 }

@@ -7,38 +7,29 @@ use Stringable;
 
 class LazySecureValue implements JsonSerializable, Stringable
 {
-    protected object $model;
-    protected string $field;
-    protected ?string $plaintext = null;
-
-    public function __construct(object $model, string $field)
-    {
-        $this->model = $model;
-        $this->field = $field;
+    public function __construct(
+        protected object $model,
+        protected string $field,
+    ) {
     }
 
-    public function reveal(): ?string
+    public function reveal(): mixed
     {
-        if ($this->plaintext !== null) {
-            return $this->plaintext;
+        if (! method_exists($this->model, 'authorizeReveal')) {
+            throw new \LogicException(sprintf(
+                '%s must define authorizeReveal()',
+                $this->model::class
+            ));
         }
 
-        $row = $this->model::getCipherSweetEncryptedRow();
+        $this->model->authorizeReveal($this->field);
 
-        $payload = [];
+        $row = $this->model->decryptEncryptedRowForLazyAccess();
 
-        foreach ($row->listEncryptedFields() as $field) {
-            $payload[$field] = $this->model->getRawOriginal($field);
-        }
-
-        $decrypted = $row
-            ->setPermitEmpty(config('ciphersweet.permit_empty', false))
-            ->decryptRow($payload);
-
-        return $this->plaintext = $decrypted[$this->field] ?? null;
+        return $row[$this->field] ?? null;
     }
 
-    public function masked(int $visible = 4): string
+    public function masked(int $visible = 4, string $mask = '*'): string
     {
         $value = $this->reveal();
 
@@ -46,13 +37,23 @@ class LazySecureValue implements JsonSerializable, Stringable
             return '';
         }
 
-        return str_repeat('*', strlen($value) - $visible)
-            . substr($value, -$visible);
+        $value = (string) $value;
+        $length = mb_strlen($value);
+
+        if ($visible <= 0) {
+            return str_repeat($mask, $length);
+        }
+
+        if ($length <= $visible) {
+            return $value;
+        }
+
+        return str_repeat($mask, $length - $visible) . mb_substr($value, -$visible);
     }
 
-    public function __toString()
+    public function isNull(): bool
     {
-        return '[secret]';
+        return $this->reveal() === null;
     }
 
     public function jsonSerialize(): mixed
@@ -60,8 +61,17 @@ class LazySecureValue implements JsonSerializable, Stringable
         return '[secret]';
     }
 
-    public function __debugInfo()
+    public function __toString(): string
     {
-        return ['secret' => '[lazy]'];
+        return '[secret]';
+    }
+
+    public function __debugInfo(): array
+    {
+        return [
+            'secret' => '[hidden]',
+            'field' => $this->field,
+            'model' => $this->model::class,
+        ];
     }
 }
