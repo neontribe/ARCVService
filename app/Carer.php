@@ -2,7 +2,8 @@
 
 namespace App;
 
-use App\Support\SecureModel;
+use App\Support\LazySecureModel;
+
 use App\Traits\Aliasable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,7 +17,7 @@ use ParagonIE\CipherSweet\BlindIndex;
  * @property string $language
  * @property Family $family
  */
-class Carer extends SecureModel implements CipherSweetEncrypted
+class Carer extends LazySecureModel implements CipherSweetEncrypted
 {
     use Aliasable;
     use SoftDeletes;
