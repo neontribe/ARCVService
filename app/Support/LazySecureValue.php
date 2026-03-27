@@ -8,7 +8,7 @@ use Stringable;
 class LazySecureValue implements JsonSerializable, Stringable
 {
     public function __construct(
-        protected object $model,
+        protected LazySecureModel $model,
         protected string $field,
     ) {
     }
@@ -27,28 +27,6 @@ class LazySecureValue implements JsonSerializable, Stringable
         $row = $this->model->decryptEncryptedRowForLazyAccess();
 
         return $row[$this->field] ?? null;
-    }
-
-    public function masked(int $visible = 4, string $mask = '*'): string
-    {
-        $value = $this->reveal();
-
-        if ($value === null) {
-            return '';
-        }
-
-        $value = (string) $value;
-        $length = mb_strlen($value);
-
-        if ($visible <= 0) {
-            return str_repeat($mask, $length);
-        }
-
-        if ($length <= $visible) {
-            return $value;
-        }
-
-        return str_repeat($mask, $length - $visible) . mb_substr($value, -$visible);
     }
 
     public function isNull(): bool
@@ -75,3 +53,4 @@ class LazySecureValue implements JsonSerializable, Stringable
         ];
     }
 }
+

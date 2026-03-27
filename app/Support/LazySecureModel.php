@@ -71,7 +71,7 @@ abstract class LazySecureModel extends Model
     }
 
     /**
-     * If someone accesses $model->email directly and email is encrypted,
+     * If someone accesses $model->emailsecret directly and email is encrypted,
      * return a LazySecretValue instead of plaintext/ciphertext.
      */
     public function getAttribute($key): mixed
@@ -105,7 +105,7 @@ abstract class LazySecureModel extends Model
     }
 
     /**
-     * Remove secrets from array serialization regardless of $hidden changes elsewhere.
+     * Belt and Braces: remove secrets from array serialization regardless of $hidden changes elsewhere
      */
     public function toArray(): array
     {
@@ -119,7 +119,7 @@ abstract class LazySecureModel extends Model
     }
 
     /**
-     * Safe debug output.
+     * Safe debug output, prevents secrets in debugs
      */
     public function __debugInfo(): array
     {
@@ -142,7 +142,7 @@ abstract class LazySecureModel extends Model
     }
 
     /**
-     * Optional helper for safe transport into jobs/events/resources.
+     * Optional helper for safe cloning into jobs/events/resources.
      */
     public function withoutSecrets(): static
     {
@@ -161,23 +161,22 @@ abstract class LazySecureModel extends Model
     /**
      * Clear cached decrypted values after mutation/refresh.
      */
-    public function flushSecretCache(): static
+    public function flushSecretCache(): self
     {
         $this->lazyDecryptedRowCache = null;
-
         return $this;
     }
 
     /**
      * Important: whenever attributes are replaced wholesale, clear cache.
      */
-    public function setRawAttributes(array $attributes, $sync = false)
+    public function setRawAttributes(array $attributes, $sync = false): self
     {
         $this->flushSecretCache();
         return parent::setRawAttributes($attributes, $sync);
     }
 
-    public function refresh()
+    public function refresh(): self
     {
         $this->flushSecretCache();
         return parent::refresh();

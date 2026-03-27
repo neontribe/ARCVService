@@ -5,6 +5,10 @@ namespace App\Support;
 use Spatie\LaravelCipherSweet\Concerns\UsesCipherSweet;
 use Spatie\LaravelCipherSweet\Observers\ModelObserver;
 
+/**
+ * Modifies the standard trait to avoid decrypting for convenience on model hydration.
+ * We do not want the secrets in memory.
+ */
 trait UsesCipherSweetLazy
 {
     use UsesCipherSweet {

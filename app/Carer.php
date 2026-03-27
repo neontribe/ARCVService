@@ -3,7 +3,6 @@
 namespace App;
 
 use App\Support\LazySecureModel;
-
 use App\Traits\Aliasable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
