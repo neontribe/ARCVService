@@ -8,7 +8,7 @@
         <label for="pri_carer">Main carer's full name</label>
         @if (isset($pri_carer))
             {{-- This section should only exist in edit rather than add new record --}}
-            <input id="carer"
+            <input id="pri_carer"
                    name="pri_carer[{{ $pri_carer->id }}]"
                    class="@if($errors->has("pri_carer.$pri_carer->id")) invalid @endif"
                    type="text"
@@ -16,14 +16,20 @@
                    autocomplete="off"
                    autocorrect="off"
                    spellcheck="false"
-            ><br>
+            ><br />
             @includeWhen(
                 $errors->has("pri_carer.$pri_carer->id"),
                 'store.partials.errors',
                 ['error_array' => ['This field is required'], 'id' => 'carer-alert']
             )
-            <br>
-                <label for="pri_carer_ethnicity">Main carer's ethnic background (optional)</label><br>
+            <x-secure-input name="pri_carer_telno"
+                            label="Main carer's telephone number"
+            />
+            <x-secure-input name="pri_carer_email"
+                            label="Main carer's email address"
+            />
+            <br />
+                <label for="pri_carer_ethnicity">Main carer's ethnic background (optional)</label><br />
                 <select name="pri_carer_ethnicity[{{ $pri_carer->id }}]" id="pri_carer_ethnicity">
                     <option value=0>Please select</option>
                     @foreach (config('arc.ethnicity_desc') as $index => $ethnicity)
@@ -36,10 +42,10 @@
                     @endforeach
                 </select>
             @if(empty($pri_carer->ethnicity))
-                <br><mark>Please complete ethnic background.</mark></br>
+                <br /><mark>Please complete ethnic background.</mark><br />
             @endif
-                <br></br>
-                <label for="pri_carer_language">Carer's main language (optional)</label><br>
+                <br />
+                <label for="pri_carer_language">Carer's main language (optional)</label><br />
                 <input id="pri_carer_language"
                        name="pri_carer_language[{{ $pri_carer->id }}]"
                        class="@if($errors->has('pri_carer_language')) invalid @endif"
@@ -51,12 +57,12 @@
                        spellcheck="false"
                 >
             @if(!isset($pri_carer->language))
-                <br><mark>Please complete main language.</mark></br>
+                <br /><mark>Please complete main language.</mark><br />
             @endif
-            <br></br>
+            <br />
         @else
             {{-- If this is a new record do this instead --}}
-            <input id="carer"
+            <input id="pri_carer"
                    name="pri_carer"
                    class="@if($errors->has('pri_carer')) invalid @endif"
                    type="text"
@@ -64,32 +70,40 @@
                    autocorrect="off"
                    spellcheck="false"
                    value="{{ old('pri_carer') }}"
-            ><br></br>
+            >
+            <br />
             @includeWhen(
                 $errors->has('pri_carer'),
                 'store.partials.errors',
                 ['error_array' => ['This field is required'], 'id' => 'carer-alert']
             )
-                <label for="pri_carer_ethnicity">Main carer's ethnic background (optional)</label><br>
-                <select name="pri_carer_ethnicity" id="pri_carer_ethnicity">
-                    <option value=0>Please select</option>
-                    @foreach (config('arc.ethnicity_desc') as $index => $ethnicity)
-                        <option value="{{ $index }}"
-                                @selected(old('pri_carer_ethnicity') === $index)
-                        >{{ $ethnicity }}</option>
-                    @endforeach
-                </select><br></br>
-                <label for="pri_carer_language">Carer's main language (optional)</label><br>
-                <input id="pri_carer_language"
-                       name="pri_carer_language"
-                       class="@if($errors->has('pri_carer_language')) invalid @endif"
-                       type="text"
-                       onkeyup="this.value = this.value.replace(/[^a-z ]/,'')"
-                       autocomplete="off"
-                       autocorrect="off"
-                       spellcheck="false"
-                       value="{{ old('pri_carer_language') }}"
-                ><br></br>
+            <x-secure-input name="pri_carer_telno"
+                            label="Main carer's telephone number"
+            />
+            <x-secure-input name="pri_carer_email"
+                            label="Main carer's email address"
+            />
+            <label for="pri_carer_ethnicity">Main carer's ethnic background (optional)</label><br />
+            <select name="pri_carer_ethnicity" id="pri_carer_ethnicity">
+                <option value=0>Please select</option>
+                @foreach (config('arc.ethnicity_desc') as $index => $ethnicity)
+                    <option value="{{ $index }}"
+                            @selected(old('pri_carer_ethnicity') === $index)
+                    >{{ $ethnicity }}</option>
+                @endforeach
+            </select><br />
+            <label for="pri_carer_language">Carer's main language (optional)</label><br />
+            <input id="pri_carer_language"
+                   name="pri_carer_language"
+                   class="@if($errors->has('pri_carer_language')) invalid @endif"
+                   type="text"
+                   onkeyup="this.value = this.value.replace(/[^a-z ]/,'')"
+                   autocomplete="off"
+                   autocorrect="off"
+                   spellcheck="false"
+                   value="{{ old('pri_carer_language') }}"
+            >
+            <br />
         @endif
     </div>
     <div>

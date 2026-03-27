@@ -2,12 +2,12 @@
 
 namespace App\Providers;
 
-use App\Views\Composers\PaymentsComposer;
+use App\View\Composers\PaymentsComposer;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
