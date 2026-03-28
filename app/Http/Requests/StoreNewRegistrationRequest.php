@@ -34,10 +34,12 @@ class StoreNewRegistrationRequest extends FormRequest
             'consent' => 'required|accepted',
             // MUST be present; MUST be a not-null string
             'pri_carer' => 'required|string',
-            // MAY be present; MUST be a not-null string
-            'pri_carer_email' => 'email:rfc',
-            'pri_carer_telno' => 'phone:GB',
+            // May be nullable, MUST be a standard
+            'pri_carer_email' => 'nullable|email:rfc',
+            'pri_carer_telno' => 'nullable|phone:GB',
+            // MAY be present, Min 1
             'new_carers' => 'array|min:1',
+            // MAY be present, fit regexes
             'new_carers.*' => [
                 'not-regex:/^.*[\p{C}].*$/u',
                 'regex:/^[A-Za-z.\s\'—-]+$/',
@@ -49,7 +51,7 @@ class StoreNewRegistrationRequest extends FormRequest
             // MAY be present; MUST be a boolean
             'children.*.verified' => 'boolean',
             'is_pri_carer' => 'boolean',
-            // SOMETIMES is present; MUST be in listed states
+            // SOMETIMES is present (SP doesn't have them) MUST be in listed states
             'eligibility-hsbs' => [
                 'sometimes',
                 'required',

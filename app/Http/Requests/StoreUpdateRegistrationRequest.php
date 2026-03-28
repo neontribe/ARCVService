@@ -37,12 +37,12 @@ class StoreUpdateRegistrationRequest extends FormRequest
             'pri_carer' => "required|array|min:1|max:1",
             // Element MUST be present; MUST be a not-null string
             'pri_carer.*' => 'required|string',
+            // May be nullable, MUST be a standard
+            'pri_carer_email' => 'nullable|email:rfc',
+            'pri_carer_telno' => 'nullable|phone:GB',
             // MAY be present; MUST be a not-null string
-            'pri_carer_email' => 'email:rfc',
-            'pri_carer_telno' => 'phone:GB',
             'sec_carers' => 'array|min:1',
             'sec_carers.*' => 'string',
-            // MAY be present; MUST be a not-null string
             'new_carers' => 'array|min:1',
             'new_carers.*' => [
                 'not-regex:/^.*[\p{C}].*$/u',
@@ -54,7 +54,7 @@ class StoreUpdateRegistrationRequest extends FormRequest
             'children.*.dob' => 'required_if:children.*.verified,=,true|date_format:Y-m',
             // MAY be present; MUST be a boolean
             'children.*.verified' => 'boolean',
-            // SOMETIMES is present; MUST be in listed states
+            // SOMETIMES is present (SP doesn't have them) MUST be in listed states
             'eligibility-hsbs' => [
                 'sometimes',
                 Rule::in(config('arc.reg_eligibilities_hsbs')),

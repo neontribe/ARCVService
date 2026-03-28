@@ -28,8 +28,8 @@ class SecureInput extends Component
         $errors = session('errors', new ViewErrorBag());
 
         return view('components.secure-input', [
-            'hasError'    => $errors->has($this->name),
-            'oldValue'    => old($this->name),
+            'hasError' => $errors->has($this->name),
+            'oldValue' => old($this->name),
             'placeholder' => $this->placeholder ?? (
                 $this->filled
                     ? str_repeat('•', 16)

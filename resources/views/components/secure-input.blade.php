@@ -46,7 +46,7 @@
     @includeWhen(
         $hasError,
         'store.partials.errors',
-        ['error_array' => ['Please check the entry']]
+        ['error_array' => $errors->get($name)]
     )
 
 </div>
