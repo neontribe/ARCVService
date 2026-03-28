@@ -241,4 +241,13 @@ class Family extends Model implements IEvaluee
 
         return $query->select('families.*')->selectSub($subQuery, 'pri_carer');
     }
+
+    /** Check status of family (active or not active)
+     * @return bool
+     */
+    public function status(): bool
+    {
+        return $this->leaving_on === null
+            || ($this->rejoin_on > $this->leaving_on);
+    }
 }
