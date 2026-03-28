@@ -29,23 +29,14 @@ class StoreNewRegistrationRequest extends FormRequest
          * These rules validate that the form data is well-formed.
          * It is NOT responsible for the context validation of that data.
          */
-        $rules = [
+        return [
             // MUST be present; MUST be in "yes, on, 1, or true"
             'consent' => 'required|accepted',
-            // SOMETIMES is present; MUST be in listed states
-            'eligibility-hsbs' => [
-                'sometimes',
-                'required',
-                Rule::in(config('arc.reg_eligibilities_hsbs')),
-            ],
-            'eligibility-nrpf' => [
-                'sometimes',
-                'required',
-                Rule::in(config('arc.reg_eligibilities_nrpf')),
-            ],
             // MUST be present; MUST be a not-null string
             'pri_carer' => 'required|string',
             // MAY be present; MUST be a not-null string
+            'pri_carer_email' => 'email:rfc',
+            'pri_carer_telno' => 'phone:GB',
             'new_carers' => 'array|min:1',
             'new_carers.*' => [
                 'not-regex:/^.*[\p{C}].*$/u',
@@ -57,9 +48,18 @@ class StoreNewRegistrationRequest extends FormRequest
             'children.*.dob' => 'required_if:children.*.verified,=,true|date_format:Y-m',
             // MAY be present; MUST be a boolean
             'children.*.verified' => 'boolean',
-            'is_pri_carer' => 'boolean'
+            'is_pri_carer' => 'boolean',
+            // SOMETIMES is present; MUST be in listed states
+            'eligibility-hsbs' => [
+                'sometimes',
+                'required',
+                Rule::in(config('arc.reg_eligibilities_hsbs')),
+            ],
+            'eligibility-nrpf' => [
+                'sometimes',
+                'required',
+                Rule::in(config('arc.reg_eligibilities_nrpf')),
+            ],
         ];
-
-        return $rules;
     }
 }

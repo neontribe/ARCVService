@@ -32,12 +32,14 @@ class StoreUpdateRegistrationRequest extends FormRequest
          * These rules validate that the form data is well-formed.
          * It is NOT responsible for the context validation of that data.
          */
-        $rules = [
+        return [
             // MUST be present, array, 1 member
             'pri_carer' => "required|array|min:1|max:1",
             // Element MUST be present; MUST be a not-null string
             'pri_carer.*' => 'required|string',
             // MAY be present; MUST be a not-null string
+            'pri_carer_email' => 'email:rfc',
+            'pri_carer_telno' => 'phone:GB',
             'sec_carers' => 'array|min:1',
             'sec_carers.*' => 'string',
             // MAY be present; MUST be a not-null string
@@ -62,7 +64,5 @@ class StoreUpdateRegistrationRequest extends FormRequest
                 Rule::in(config('arc.reg_eligibilities_nrpf')),
             ],
         ];
-
-        return $rules;
     }
 }

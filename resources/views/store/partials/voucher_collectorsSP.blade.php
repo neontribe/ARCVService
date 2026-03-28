@@ -8,7 +8,7 @@
         <label for="carer">Main Participant's full name</label>
         @if (isset($pri_carer))
             {{-- This section should only exist in edit rather than add new record --}}
-            <input id="carer"
+            <input id="pri_carer"
                    name="pri_carer[{{ $pri_carer->id }}]"
                    class="@if($errors->has("pri_carer.$pri_carer->id"))invalid @endif"
                    type="text"
@@ -21,6 +21,12 @@
                 'store.partials.errors',
                 ['error_array' => ['This field is required']]
             )
+            <x-secure-input name="pri_carer_telno"
+                            label="Main carer's telephone number"
+            />
+            <x-secure-input name="pri_carer_email"
+                            label="Main carer's email address"
+            />
             <br>
                 <label for="pri_carer_ethnicity">Main participant's ethnic background (optional)</label><br>
                 <select name="pri_carer_ethnicity[{{ $pri_carer->id }}]" id="pri_carer_ethnicity">
@@ -55,7 +61,7 @@
             <br>
         @else
             {{-- If this is a new record do this instead --}}
-            <input id="carer"
+            <input id="pri_carer"
                    name="pri_carer"
                    class="@if($errors->has('pri_carer'))invalid @endif"
                    type="text"
@@ -68,6 +74,12 @@
                 'store.partials.errors',
                 ['error_array' => ['This field is required']]
             )
+            <x-secure-input name="pri_carer_telno"
+                            label="Main carer's telephone number"
+            />
+            <x-secure-input name="pri_carer_email"
+                            label="Main carer's email address"
+            />
             <br>
             <label for="pri_carer_ethnicity">Main participant's ethnic background (optional)</label><br>
             <select name="pri_carer_ethnicity" id="pri_carer_ethnicity">
