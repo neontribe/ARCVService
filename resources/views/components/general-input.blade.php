@@ -21,10 +21,10 @@
 @props([
     'name',
     'label',
-    'type' => 'text',
-    'filter' => null,
+    'type'        => 'text',
+    'filter'      => null,
     'placeholder' => null,
-    'alertId' => null,
+    'alertId'     => null,
     // Injected by the component class:
     'inputName',
     'hasError',
@@ -58,36 +58,8 @@
     )
 </div>
 
-{{--
-    ── Filter JS ────────────────────────────────────────────────────────────
-    Loaded once per page regardless of how many x-general-input components are
-    rendered.  Uses a data attribute rather than inline onkeyup so that:
-      • No JS is injected into HTML attributes.
-      • All filter logic lives in one place (add new filters here).
-      • Mirrors the @once pattern used in secure-input.blade.php.
-
-    Supported filter names → regex applied on every 'input' event:
-        alpha-space   strips anything that is not a lowercase letter or space
-                      (replicates: this.value.replace(/[^a-z ]/, '') )
---}}
-@once
-    <script>
-        (function () {
-            const FILTERS = {
-                'alpha-space': /[^a-zA-Z ]/g
-            };
-
-            document.addEventListener('input', function (e) {
-                const input = e.target;
-                const filterName = input.dataset.inputFilter;
-
-                if (!filterName) return;
-
-                const pattern = FILTERS[filterName];
-                if (pattern) {
-                    input.value = input.value.replace(pattern, '');
-                }
-            });
-        }());
-    </script>
-@endonce
+{{-- Filter listener extracted to a shared partial so x-password-input can
+     include the same file without duplicating the script.  The @once key
+     inside the partial guarantees one registration per page regardless of
+     how many components include it. --}}
+@include('components.partials.input-filter')

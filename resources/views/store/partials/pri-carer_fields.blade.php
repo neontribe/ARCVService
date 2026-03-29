@@ -3,8 +3,8 @@
     ════════════════════════════════════════════════════════════════════════
     Renders the primary carer / participant input group:
       • name (text, required)
-      • telephone number (secure)
-      • email address (secure)
+      • telephone number (password-input — unmasked entry, phantom-prefill on edit)
+      • email address (password-input — unmasked entry, phantom-prefill on edit)
       • ethnic background (select, optional)
       • language (text, optional, alpha-space filter)
 
@@ -23,43 +23,51 @@
 
 <div>
     <x-general-input name="pri_carer"
-                  :label="$labelName"
-                  :model-id="($pri_carer ?? null)?->id"
-                  :value="($pri_carer ?? null)?->name"
-                  error-message="This field is required"
-                  alert-id="carer-alert"
+                     :label="$labelName"
+                     :model-id="($pri_carer ?? null)?->id"
+                     :value="($pri_carer ?? null)?->name"
+                     error-message="This field is required"
+                     alert-id="carer-alert"
     />
 
-    <x-secure-input name="pri_carer_telno"
-                    :label="$labelTelno"
-    />
-    <x-secure-input name="pri_carer_email"
-                    :label="$labelEmail"
+    <x-password-input name="pri_carer_telno"
+                      :label="$labelTelno"
+                      :model-id="($pri_carer ?? null)?->id"
+                      :value="($pri_carer ?? null)?->telno"
+                      :existing-password="!empty(($pri_carer ?? null)?->telno)"
     />
 
-    <br />
+    <x-password-input name="pri_carer_email"
+                      :label="$labelEmail"
+                      :model-id="($pri_carer ?? null)?->id"
+                      :value="($pri_carer ?? null)?->email"
+                      :existing-password="!empty(($pri_carer ?? null)?->email)"
+    />
+
+    <br/>
 
     <x-general-select name="pri_carer_ethnicity"
-                   :label="$labelEthnicity"
-                   :options="config('arc.ethnicity_desc')"
-                   :model-id="($pri_carer ?? null)?->id"
-                   :value="($pri_carer ?? null)?->ethnicity"
-                   :warning="isset($pri_carer) && empty($pri_carer->ethnicity)"
-                   warning-message="Please complete ethnic background."
+                      :label="$labelEthnicity"
+                      :options="config('arc.ethnicity_desc')"
+                      :model-id="($pri_carer ?? null)?->id"
+                      :value="($pri_carer ?? null)?->ethnicity"
     />
-
-    <br />
-
-    <x-general-input name="pri_carer_language"
-                  :label="$labelLanguage"
-                  :model-id="($pri_carer ?? null)?->id"
-                  :value="($pri_carer ?? null)?->language"
-                  error-key="pri_carer_language"
-                  filter="alpha-space"
-    />
-    @if (isset($pri_carer) && empty($pri_carer->language))
-        <mark>Please complete main language.</mark><br />
+    @if (isset($pri_carer) && empty($pri_carer->ethnicity))
+        <mark>Please complete ethnic background.</mark>
     @endif
 
-    <br />
+    <br/>
+
+    <x-general-input name="pri_carer_language"
+                     :label="$labelLanguage"
+                     :model-id="($pri_carer ?? null)?->id"
+                     :value="($pri_carer ?? null)?->language"
+                     error-key="pri_carer_language"
+                     filter="alpha-space"
+    />
+    @if (isset($pri_carer) && empty($pri_carer->language))
+        <mark>Please complete main language.</mark>
+    @endif
+
+    <br/>
 </div>

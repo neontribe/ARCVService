@@ -29,8 +29,6 @@
     'options',
     'placeholder'       => 'Please select',
     'placeholderValue'  => '0',
-    'warning'           => false,
-    'warningMessage'    => null,
     'alertId'           => null,
     // Injected by the component class:
     'inputName',
@@ -58,11 +56,6 @@
             >{{ $optionLabel }}</option>
         @endforeach
     </select>
-
-    @if ($warning && $warningMessage)
-        <br /><mark>{{ $warningMessage }}</mark><br />
-    @endif
-
     @includeWhen(
         $hasError,
         'store.partials.errors',

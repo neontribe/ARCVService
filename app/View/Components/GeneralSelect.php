@@ -33,10 +33,6 @@ class GeneralSelect extends Component
      * @param  string|null      $alertId           Optional id attribute forwarded to the errors partial.
      * @param  string           $placeholder       Label for the empty/default option. Default: 'Please select'.
      * @param  int|string       $placeholderValue  Value attribute of the placeholder option. Default: '0'.
-     * @param  bool             $warning           When true, renders a <mark> warning below the select.
-     *                                             The caller evaluates the condition and passes the result,
-     *                                             keeping field-specific logic out of the component.
-     * @param  string|null      $warningMessage    Text displayed inside the <mark> tag when $warning is true.
      */
     public function __construct(
         public readonly string $name,
@@ -50,8 +46,6 @@ class GeneralSelect extends Component
         public readonly ?string $alertId = null,
         public readonly string $placeholder = 'Please select',
         public readonly int|string $placeholderValue = '0',
-        public readonly bool $warning = false,
-        public readonly ?string $warningMessage = null,
     ) {
     }
 
