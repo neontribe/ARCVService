@@ -120,7 +120,7 @@ class EditPageTest extends StoreTestCase
         $pri_carer = $this->registration->family->carers->first();
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.edit', [ 'registration' => $this->registration ]))
-            ->seeElement('input[id="carer"][value="' . $pri_carer->name . '"]')
+            ->seeElement('input[id="pri_carer"][value="' . $pri_carer->name . '"]')
         ;
     }
 

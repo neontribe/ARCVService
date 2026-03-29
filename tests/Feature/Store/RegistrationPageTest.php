@@ -117,7 +117,7 @@ class RegistrationPageTest extends StoreTestCase
     {
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
-            ->seeInElement('button[type=Submit]', 'Save Family')
+            ->seeInElement('button[type=submit]', 'Save Family')
         ;
     }
 
