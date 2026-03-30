@@ -13,7 +13,7 @@
         name          – base field name, used for id= and label for=
         label         – visible label text
         type          – input type, default 'text'
-        filter        – named JS sanitiser ('alpha-space' supported)
+        filter        – named JS sanitiser
         placeholder   – optional placeholder text
         alertId       – optional id forwarded to the errors partial
 --}}

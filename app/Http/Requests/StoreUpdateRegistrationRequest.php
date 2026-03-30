@@ -40,6 +40,14 @@ class StoreUpdateRegistrationRequest extends FormRequest
             // May be nullable, MUST be a standard
             'pri_carer_email.*' => 'nullable|email:rfc',
             'pri_carer_telno.*' => 'nullable|phone:GB',
+            'pri_carer_ethnicity.*' => [
+                'required',
+                Rule::in(array_keys(config('arc.ethnicity_desc')))
+            ],
+            'pri_carer_language.*' => [
+                'not-regex:/^.*[\p{C}].*$/u',
+                'regex:/^[A-Za-z.\s\'—-]+$/',
+            ],
             // MAY be present; MUST be a not-null string
             'sec_carers' => 'array|min:1',
             'sec_carers.*' => 'string',

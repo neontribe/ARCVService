@@ -30,9 +30,6 @@ class GeneralInput extends Component
      * @param string|null $alertId Optional id attribute forwarded to the errors partial
      *                                         (matches the existing 'id' => 'carer-alert' usage).
      * @param string|null $filter Named sanitiser applied via JS on the 'input' event.
-     *                                         Supported values: 'alpha-space' (/[^a-z ]/ — strips
-     *                                         anything that isn't a lowercase letter or space, which
-     *                                         is what the language fields currently do inline).
      * @param string|null $placeholder Optional placeholder text.
      */
     public function __construct(

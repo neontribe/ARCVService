@@ -7,10 +7,6 @@
     The @once guard ensures the listener is registered exactly once no matter
     how many components on the page include this file.
 
-    Supported filter names → regex applied on every 'input' event:
-        alpha-space   strips anything that is not a letter or space
-                      replicates: value.replace(/[^a-zA-Z ]/, '')
-
     To add a new filter, add an entry to the FILTERS map below.
 --}}
 @once('input-filter-js')

@@ -299,7 +299,7 @@ class RegistrationController extends Controller
         /** @var Valuation $valuation */
         $valuation = $registration->getValuation();
 
-        // Grab carers copy for shift)ing without altering family->carers
+        // Grab carers copy for shifting without altering family->carers
         $carers = $registration->family->carers->all();
         $pri_carer = array_shift($carers);
         $pri_carer_ethnicity = $pri_carer->ethnicity;
@@ -496,7 +496,7 @@ class RegistrationController extends Controller
                     'ethnicity' => $data['pri_carer_ethnicity'] ?? null,
                     'language' => $data['pri_carer_language'] ?? null,
                     'telnosecret' => $data['pri_carer_telno'] ?? null,
-                    'emailsecret' => $data['pri_carer_email'] ?? null
+                    'emailsecret' => $data['pri_carer_email'] ?? null,
                 ]);
             }, (array)($data['pri_carer'] ?? [])),
             array_map(
@@ -511,9 +511,9 @@ class RegistrationController extends Controller
 
         $registration = new Registration([
             'consented_on' => Carbon::now(),
-            'eligibility_hsbs' => $data['eligibility-hsbs'],
-            'eligibility_nrpf' => $data['eligibility-nrpf'],
-            'eligible_from' => $data['eligibility-hsbs'] === 'healthy-start-receiving' ? Carbon::now() : null,
+            'eligibility_hsbs' => $data['eligibility-hsbs'] ?? null,
+            'eligibility_nrpf' => $data['eligibility-nrpf'] ?? null,
+            'eligible_from' => ($data['eligibility-hsbs'] ?? null) === 'healthy-start-receiving' ? Carbon::now() : null,
         ]);
 
         $family = new Family();
@@ -614,7 +614,10 @@ class RegistrationController extends Controller
 
         $children = $this->makeChildrenFromInput((array)($data['children'] ?? []));
 
-        $eligibleFrom = ($data['eligibility-hsbs'] === 'healthy-start-receiving' && !$registration->eligible_from)
+        $eligibleFrom = (
+            ($data['eligibility-hsbs'] ?? null) === 'healthy-start-receiving' &&
+            !$registration->eligible_from
+        )
             ? Carbon::now()
             : null;
 
@@ -641,9 +644,9 @@ class RegistrationController extends Controller
                 });
 
                 $registration->fill([
-                    'eligibility_hsbs' => $data['eligibility-hsbs'],
-                    'eligibility_nrpf' => $data['eligibility-nrpf'],
-                    'eligible_from' => $eligibleFrom
+                    'eligibility_hsbs' => $data['eligibility-hsbs'] ?? null,
+                    'eligibility_nrpf' => $data['eligibility-nrpf'] ?? null,
+                    'eligible_from' => $eligibleFrom,
                 ])->save();
             });
         } catch (Throwable $e) {

@@ -28,7 +28,7 @@
     ── Props (declared here — consumed directly from the blade tag) ──────────
         name          – base field name, used for id= and label for=
         label         – visible label text
-        filter        – named JS sanitiser ('alpha-space' supported)
+        filter        – named JS sanitiser
         placeholder   – placeholder for virgin state only
         alertId       – optional id forwarded to the errors partial
 
