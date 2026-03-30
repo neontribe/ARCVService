@@ -88,7 +88,7 @@
         </table>
     </div>
 </div>
-@pushonce("bottom:family")
+@pushonce('bottom')
     <script>
         function addDobRow(e, dateObj, verified) {
             // setup fields

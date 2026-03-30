@@ -59,7 +59,7 @@
     </div>
 </div>
 
-@pushonce('bottom:householdSP')
+@pushonce('bottom')
     <script>
         function addAgeRow(e, dateObj, verified, buttonID) {
             // set a default

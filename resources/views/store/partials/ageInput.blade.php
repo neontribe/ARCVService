@@ -12,7 +12,7 @@
     >
 </div>
 
-@pushonce('js:ageinput')
+@pushonce('js')
 <script>
     (function ($, window, document, undefined) {
         'use strict';

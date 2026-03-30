@@ -29,7 +29,7 @@
     ])
 </div>
 
-@pushonce('bottom:vouchercollectorsSP')
+@pushonce('bottom')
     <script>
         $("#addCarerAgeInput").ageInput();
     </script>
