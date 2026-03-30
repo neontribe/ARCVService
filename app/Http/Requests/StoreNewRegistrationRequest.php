@@ -61,6 +61,7 @@ class StoreNewRegistrationRequest extends FormRequest
             'children.*.dob' => 'required_if:children.*.verified,=,true|date_format:Y-m',
             // MAY be present; MUST be a boolean
             'children.*.verified' => 'boolean',
+            'children.*.deferred' => 'boolean',
             'children.*.is_pri_carer' => 'boolean',
             // SOMETIMES is present (SP doesn't have them) MUST be in listed states
             'eligibility-hsbs' => [
