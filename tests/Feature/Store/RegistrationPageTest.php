@@ -158,7 +158,7 @@ class RegistrationPageTest extends StoreTestCase
     public function testItCanSaveARegistration(): void
     {
         // There are no registrations
-        $this->assertEquals(0, Registration::get()->count());
+        $this->assertEquals(0, Registration::count());
 
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
@@ -171,7 +171,7 @@ class RegistrationPageTest extends StoreTestCase
         ;
 
         // There is now a Registration.
-        $this->assertEquals(1, Registration::get()->count());
+        $this->assertEquals(1, Registration::count());
 
         $registration =  Registration::find(1);
 
@@ -187,7 +187,7 @@ class RegistrationPageTest extends StoreTestCase
     public function testItRequiresConsentToSave(): void
     {
         // There are no registrations
-        $this->assertEquals(0, Registration::get()->count());
+        $this->assertEquals(0, Registration::count());
 
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
@@ -199,14 +199,14 @@ class RegistrationPageTest extends StoreTestCase
         ;
 
         // There is still not a Registration.
-        $this->assertEquals(0, Registration::get()->count());
+        $this->assertEquals(0, Registration::count());
     }
 
 
     public function testItRequiresAPrimaryCarerToSave(): void
     {
         // There are no registrations
-        $this->assertEquals(0, Registration::get()->count());
+        $this->assertEquals(0, Registration::count());
 
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
@@ -218,7 +218,7 @@ class RegistrationPageTest extends StoreTestCase
         ;
 
         // There is still not a Registration.
-        $this->assertEquals(0, Registration::get()->count());
+        $this->assertEquals(0, Registration::count());
     }
 
 
@@ -234,7 +234,7 @@ class RegistrationPageTest extends StoreTestCase
             ->press('Save Family')
             ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
         ;
-        $this->assertEquals(1, Registration::get()->count());
+        $this->assertEquals(1, Registration::count());
         $registration = Registration::first();
         $this->assertNotNull($registration->eligible_from);
     }
@@ -242,7 +242,7 @@ class RegistrationPageTest extends StoreTestCase
 
     public function testSelectingNotReceivingHSPutsNullInTable(): void
     {
-        $this->assertEquals(0, Registration::get()->count());
+        $this->assertEquals(0, Registration::count());
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->type('Test Carer', 'pri_carer')
@@ -252,7 +252,7 @@ class RegistrationPageTest extends StoreTestCase
             ->press('Save Family')
             ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
         ;
-        $this->assertEquals(1, Registration::get()->count());
+        $this->assertEquals(1, Registration::count());
         $registration = Registration::first();
         $this->assertNull($registration->eligible_from);
     }
@@ -287,7 +287,7 @@ class RegistrationPageTest extends StoreTestCase
 
     public function testUpdatingOtherFieldsDoesNotChangeEligibiltyDate(): void
     {
-        $this->assertEquals(0, Registration::get()->count());
+        $this->assertEquals(0, Registration::count());
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->type('Test Carer', 'pri_carer')
@@ -297,7 +297,7 @@ class RegistrationPageTest extends StoreTestCase
             ->press('Save Family')
             ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
         ;
-        $this->assertEquals(1, Registration::get()->count());
+        $this->assertEquals(1, Registration::count());
         $registration = Registration::first();
         // SP allows this field to be null so test needed changing to accommodate this
         if ($this->assertNotNull($registration->eligible_from)) {
@@ -330,5 +330,132 @@ class RegistrationPageTest extends StoreTestCase
             ->see('Has the registration form been completed and signed?')
             ->see('Save Household')
         ;
+    }
+
+
+    // ── Presence on page ────────────────────────────────────────────────────────
+
+    /**
+     * The email field is rendered by x-password-input, which always uses
+     * type="text".  On create there is no existing value, so existingPassword
+     * is false and the field renders in virgin state: id and name both equal
+     * "pri_carer_email".
+     */
+    public function testItShowsAPrimaryCarerEmailInput(): void
+    {
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.create'))
+            ->seeElement('input[id="pri_carer_email"][name="pri_carer_email"][type="text"]');
+    }
+
+    /**
+     * Same reasoning as the email field above.
+     */
+    public function testItShowsAPrimaryCarerTelnoInput(): void
+    {
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.create'))
+            ->seeElement('input[id="pri_carer_telno"][name="pri_carer_telno"][type="text"]');
+    }
+
+
+    // ── Successful save with optional contact fields ─────────────────────────
+
+    /**
+     * A valid RFC email address and a valid GB telephone number are both
+     * accepted and persisted on the primary Carer record.
+     */
+    public function testItCanSaveARegistrationWithEmailAndTelno(): void
+    {
+        $this->assertEquals(0, Registration::count());
+
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.create'))
+            ->type('Test Carer', 'pri_carer')
+            ->type('testcarer@example.com', 'pri_carer_email')
+            ->type('7400123456', 'pri_carer_telno')
+            ->select('healthy-start-applying', 'eligibility-hsbs')
+            ->select('no', 'eligibility-nrpf')
+            ->check('consent')
+            ->press('Save Family');
+
+
+        $this->seePageIs(URL::route('store.registration.edit', ['registration' => 1]));
+
+        $this->assertEquals(1, Registration::count());
+
+        $carer = Registration::find(1)->family->carers->first();
+        $this->assertEquals('testcarer@example.com', $carer->emailsecret->reveal());
+        $this->assertEquals('7400123456', $carer->telnosecret->reveal());
+    }
+
+    /**
+     * Both contact fields are nullable — omitting them entirely must not
+     * prevent registration and must leave the Carer columns null.
+     */
+    public function testItAcceptsBlankEmailAndTelnoOnSave(): void
+    {
+        $this->assertEquals(0, Registration::count());
+
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.create'))
+            ->type('Test Carer', 'pri_carer')
+            ->select('healthy-start-applying', 'eligibility-hsbs')
+            ->select('no', 'eligibility-nrpf')
+            ->check('consent')
+            ->press('Save Family')
+            ->seePageIs(URL::route('store.registration.edit', ['registration' => 1]));
+
+        $this->assertEquals(1, Registration::count());
+
+        $carer = Registration::find(1)->family->carers->first();
+        $this->assertNull($carer->emailsecret->reveal());
+        $this->assertNull($carer->telnosecret->reveal());
+    }
+
+
+    // ── Validation rejection ─────────────────────────────────────────────────
+
+    /**
+     * A string that is not a valid RFC email address must be rejected and
+     * the registration must not be created.
+     */
+    public function testItRejectsAnInvalidEmailOnSave(): void
+    {
+        $this->assertEquals(0, Registration::count());
+
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.create'))
+            ->type('Test Carer', 'pri_carer')
+            ->type('not-a-valid-email', 'pri_carer_email')
+            ->select('healthy-start-applying', 'eligibility-hsbs')
+            ->select('no', 'eligibility-nrpf')
+            ->check('consent')
+            ->press('Save Family')
+            ->seePageIs(URL::route('store.registration.create'));
+
+        $this->assertEquals(0, Registration::count());
+    }
+
+    /**
+     * A string that is not a valid GB phone number must be rejected and
+     * the registration must not be created.
+     * The validation rule is  nullable|phone:GB  from the libphonenumber wrapper.
+     */
+    public function testItRejectsAnInvalidTelnoOnSave(): void
+    {
+        $this->assertEquals(0, Registration::count());
+
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.create'))
+            ->type('Test Carer', 'pri_carer')
+            ->type('not-a-phone-number', 'pri_carer_telno')
+            ->select('healthy-start-applying', 'eligibility-hsbs')
+            ->select('no', 'eligibility-nrpf')
+            ->check('consent')
+            ->press('Save Family')
+            ->seePageIs(URL::route('store.registration.create'));
+
+        $this->assertEquals(0, Registration::count());
     }
 }

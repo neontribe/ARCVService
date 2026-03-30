@@ -33,15 +33,13 @@
     <x-password-input name="pri_carer_telno"
                       :label="$labelTelno"
                       :model-id="($pri_carer ?? null)?->id"
-                      :value="($pri_carer ?? null)?->telno"
-                      :existing-password="!empty(($pri_carer ?? null)?->telno)"
+                      :existing-password="!empty(($pri_carer ?? null)?->telnosecret?->reveal())"
     />
 
     <x-password-input name="pri_carer_email"
                       :label="$labelEmail"
                       :model-id="($pri_carer ?? null)?->id"
-                      :value="($pri_carer ?? null)?->email"
-                      :existing-password="!empty(($pri_carer ?? null)?->email)"
+                      :existing-password="!empty(($pri_carer ?? null)?->emailsecret?->reveal())"
     />
 
     <br/>

@@ -612,4 +612,290 @@ class EditPageTest extends StoreTestCase
             ->see('Full Collection History')
         ;
     }
+
+    /**
+     * The email input is always present on the edit page.
+     * x-password-input renders type="text" regardless of state.
+     */
+    public function testItShowsAPrimaryCarerEmailInput(): void
+    {
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->registration]))
+            ->seeElement('input[id="pri_carer_email"][type="text"]');
+    }
+
+    /**
+     * The telephone input is always present on the edit page.
+     */
+    public function testItShowsAPrimaryCarerTelnoInput(): void
+    {
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->registration]))
+            ->seeElement('input[id="pri_carer_telno"][type="text"]');
+    }
+
+
+    // ── Phantom-prefill rendering ────────────────────────────────────────────
+
+    /**
+     * When the primary carer already has an email address the email input must
+     * render in phantom-prefill state:
+     *   • name attribute is empty (nothing submitted → backend leaves it unchanged)
+     *   • placeholder is "••••••••" (visual cue that a value exists)
+     *   • data-pw-prefilled attribute is present (JS hook)
+     */
+    public function testEmailInputIsInPhantomPrefillStateWhenCarerHasAnExistingEmail(): void
+    {
+        $priCarer = $this->registration->family->carers->first();
+        $priCarer->emailsecret = 'existing@example.com';
+        $priCarer->save();
+
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->registration]))
+            ->seeElement('input[id="pri_carer_email"][name=""][data-pw-prefilled][placeholder="••••••••"]');
+    }
+
+    /**
+     * When the primary carer already has a telephone number the telno input
+     * must also render in phantom-prefill state.
+     */
+    public function testTelnoInputIsInPhantomPrefillStateWhenCarerHasAnExistingTelno(): void
+    {
+        $priCarer = $this->registration->family->carers->first();
+        $priCarer->telnosecret = '7400123456';
+        $priCarer->save();
+
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->registration]))
+            ->seeElement('input[id="pri_carer_telno"][name=""][data-pw-prefilled][placeholder="••••••••"]');
+    }
+
+    /**
+     * When the primary carer has no existing email the email input must render
+     * in virgin state — name is set to the array-keyed field name so the value
+     * is submitted normally.
+     */
+    public function testEmailInputIsInVirginStateWhenCarerHasNoExistingEmail(): void
+    {
+        $priCarer = $this->registration->family->carers->first();
+        // Confirm the factory left emailsecret null (virgin starting point).
+        $this->assertEmpty($priCarer->emailsecret->reveal());
+
+        $expectedName = 'pri_carer_email[' . $priCarer->id . ']';
+
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->registration]))
+            ->seeElement('input[id="pri_carer_email"][name="' . $expectedName . '"]')
+            ->dontSeeElement('input[id="pri_carer_email"][data-pw-prefilled]');
+    }
+
+    /**
+     * data-pw-name is rendered whenever existingPassword is true so that the
+     * JS Escape handler can revert from virgin → phantom.  It must carry the
+     * resolved array-style field name.
+     */
+    public function testEmailInputExposesDataPwNameForEscapeRevertWhenCarerHasExistingEmail(): void
+    {
+        $priCarer = $this->registration->family->carers->first();
+        $priCarer->emailsecret = 'existing@example.com';
+        $priCarer->save();
+
+        $expectedName = 'pri_carer_email[' . $priCarer->id . ']';
+
+        $this->actingAs($this->centreUser, 'store')
+            ->visit(URL::route('store.registration.edit', ['registration' => $this->registration]))
+            ->seeElement('input[id="pri_carer_email"][data-pw-name="' . $expectedName . '"]');
+    }
+
+
+    // ── Successful update ────────────────────────────────────────────────────
+
+    /**
+     * Submitting a new valid email for the primary carer must persist it.
+     * The field is submitted as  pri_carer_email[{carer_id}].
+     *
+     * NOTE: this test will fail until the bug in update() is fixed — the
+     * property assignment uses ->emailsecure instead of ->emailsecret (or
+     * whichever name matches the actual DB column used by store()).
+     */
+    public function testItCanUpdateThePrimaryCarerEmail(): void
+    {
+        $priCarer = $this->registration->family->carers->first();
+        $this->assertEmpty($priCarer->emailsecret->reveal());
+
+        $data = [
+            'pri_carer' => [$priCarer->id => $priCarer->name],
+            'pri_carer_email' => [$priCarer->id => 'updated@example.com'],
+            'eligibility-hsbs' => $this->registration->eligibility_hsbs,
+            'eligibility-nrpf' => $this->registration->eligibility_nrpf,
+        ];
+
+        $this->actingAs($this->centreUser, 'store')
+            ->call('PUT', route('store.registration.update', $this->registration->id), $data);
+        $this->assertResponseStatus(302);
+
+        $priCarer = Carer::find($priCarer->id);
+        $this->assertEquals('updated@example.com', $priCarer->emailsecret->reveal());
+    }
+
+    /**
+     * Submitting a new valid GB telephone number for the primary carer must
+     * persist it.
+     *
+     * NOTE: this test will fail until two bugs in update() are fixed:
+     *   (a) $priTelno reads from $data['pri_carer_email'] instead of
+     *       $data['pri_carer_telno'].
+     *   (b) The property assignment uses ->telnosecure instead of ->telnosecret
+     *       (or whichever name matches the actual DB column).
+     */
+    public function testItCanUpdateThePrimaryCarerTelno(): void
+    {
+        $priCarer = $this->registration->family->carers->first();
+        $this->assertEmpty($priCarer->telnosecret->reveal());
+
+        $data = [
+            'pri_carer' => [$priCarer->id => $priCarer->name],
+            'pri_carer_telno' => [$priCarer->id => '7400123456'],
+            'eligibility-hsbs' => $this->registration->eligibility_hsbs,
+            'eligibility-nrpf' => $this->registration->eligibility_nrpf,
+        ];
+
+        $this->actingAs($this->centreUser, 'store')
+            ->call('PUT', route('store.registration.update', $this->registration->id), $data);
+        $this->assertResponseStatus(302);
+
+        $priCarer = Carer::find($priCarer->id);
+        $this->assertEquals('7400123456', $priCarer->telnosecret->reveal());
+    }
+
+    /**
+     * A carer can have both email and telephone updated in a single request.
+     */
+    public function testItCanUpdateBothEmailAndTelnoTogether(): void
+    {
+        $priCarer = $this->registration->family->carers->first();
+
+        $data = [
+            'pri_carer' => [$priCarer->id => $priCarer->name],
+            'pri_carer_email' => [$priCarer->id => 'both@example.com'],
+            'pri_carer_telno' => [$priCarer->id => '7400123456'],
+            'eligibility-hsbs' => $this->registration->eligibility_hsbs,
+            'eligibility-nrpf' => $this->registration->eligibility_nrpf,
+        ];
+
+        $this->actingAs($this->centreUser, 'store')
+            ->call('PUT', route('store.registration.update', $this->registration->id), $data);
+        $this->assertResponseStatus(302);
+
+        $priCarer = Carer::find($priCarer->id);
+        $this->assertEquals('both@example.com', $priCarer->emailsecret->reveal());
+        $this->assertEquals('7400123456', $priCarer->telnosecret->reveal());
+    }
+
+
+    // ── Phantom-prefill "absent = unchanged" contract ────────────────────────
+
+    /**
+     * When the email field is absent from the PUT payload (simulating the
+     * phantom-prefill state where name="" so nothing is submitted), the
+     * existing email on the carer must not be overwritten.
+     */
+    public function testAbsentEmailFieldDoesNotOverwriteExistingEmail(): void
+    {
+        $priCarer = $this->registration->family->carers->first();
+        $priCarer->emailsecret = 'keep-this@example.com';
+        $priCarer->save();
+
+        // No pri_carer_email key — mirrors what the browser sends when the
+        // field is in phantom-prefill state (name is suppressed).
+        $data = [
+            'pri_carer' => [$priCarer->id => $priCarer->name],
+            'eligibility-hsbs' => $this->registration->eligibility_hsbs,
+            'eligibility-nrpf' => $this->registration->eligibility_nrpf,
+        ];
+
+        $this->actingAs($this->centreUser, 'store')
+            ->call('PUT', route('store.registration.update', $this->registration->id), $data);
+        $this->assertResponseStatus(302);
+
+        $priCarer = Carer::find($priCarer->id);
+        $this->assertEquals('keep-this@example.com', $priCarer->emailsecret->reveal());
+    }
+
+    /**
+     * Same contract for the telephone number field.
+     */
+    public function testAbsentTelnoFieldDoesNotOverwriteExistingTelno(): void
+    {
+        $priCarer = $this->registration->family->carers->first();
+        $priCarer->telnosecret = '7400123456';
+        $priCarer->save();
+
+        $data = [
+            'pri_carer' => [$priCarer->id => $priCarer->name],
+            'eligibility-hsbs' => $this->registration->eligibility_hsbs,
+            'eligibility-nrpf' => $this->registration->eligibility_nrpf,
+        ];
+
+        $this->actingAs($this->centreUser, 'store')
+            ->call('PUT', route('store.registration.update', $this->registration->id), $data);
+        $this->assertResponseStatus(302);
+
+        $priCarer = Carer::find($priCarer->id);
+        $this->assertEquals('7400123456', $priCarer->telnosecret->reveal());
+    }
+
+
+    // ── Validation rejection ─────────────────────────────────────────────────
+
+    /**
+     * An invalid email address in the PUT payload must be rejected.
+     * Laravel redirects back (302) with validation errors in the session;
+     * the carer record must remain unchanged.
+     */
+    public function testItRejectsAnInvalidEmailOnUpdate(): void
+    {
+        $priCarer = $this->registration->family->carers->first();
+
+        $data = [
+            'pri_carer' => [$priCarer->id => $priCarer->name],
+            'pri_carer_email' => [$priCarer->id => 'not-a-valid-email'],
+            'eligibility-hsbs' => $this->registration->eligibility_hsbs,
+            'eligibility-nrpf' => $this->registration->eligibility_nrpf,
+        ];
+
+        $this->actingAs($this->centreUser, 'store')
+            ->call('PUT', route('store.registration.update', $this->registration->id), $data);
+
+        // Validation failure on a web route redirects back rather than 422.
+        $this->assertResponseStatus(302);
+
+        // The carer must not have gained a bad email value.
+        $priCarer = Carer::find($priCarer->id);
+        $this->assertEmpty($priCarer->emailsecret->reveal());
+    }
+
+    /**
+     * An invalid GB telephone number in the PUT payload must be rejected and
+     * must not be stored on the carer.
+     */
+    public function testItRejectsAnInvalidTelnoOnUpdate(): void
+    {
+        $priCarer = $this->registration->family->carers->first();
+
+        $data = [
+            'pri_carer' => [$priCarer->id => $priCarer->name],
+            'pri_carer_telno' => [$priCarer->id => 'not-a-phone-number'],
+            'eligibility-hsbs' => $this->registration->eligibility_hsbs,
+            'eligibility-nrpf' => $this->registration->eligibility_nrpf,
+        ];
+
+        $this->actingAs($this->centreUser, 'store')
+            ->call('PUT', route('store.registration.update', $this->registration->id), $data);
+
+        $this->assertResponseStatus(302);
+
+        $priCarer = Carer::find($priCarer->id);
+        $this->assertEmpty($priCarer->telnosecret->reveal());
+    }
 }

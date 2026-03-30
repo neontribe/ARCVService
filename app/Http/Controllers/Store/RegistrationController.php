@@ -575,14 +575,14 @@ class RegistrationController extends Controller
 
         // emailsecure and telnosecure are special
         $priEmail = $data['pri_carer_email'][$priCarerId] ?? null;
-        if ($priEmail !== null && $priCarer->language !== $priEmail) {
-            $priCarer->emailsecure = $priEmail;
+        if ($priEmail !== null && $priCarer->emailsecret->reveal() !== $priEmail) {
+            $priCarer->emailsecret = $priEmail;
             $amendedCarers[] = $priCarer;
         }
 
-        $priTelno = $data['pri_carer_email'][$priCarerId] ?? null;
-        if ($priTelno !== null && $priCarer->language !== $priTelno) {
-            $priCarer->telnosecure = $priTelno;
+        $priTelno = $data['pri_carer_telno'][$priCarerId] ?? null;
+        if ($priTelno !== null && $priCarer->telnosecret->reveal() !== $priTelno) {
+            $priCarer->telnosecret = $priTelno;
             $amendedCarers[] = $priCarer;
         }
 

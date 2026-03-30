@@ -76,7 +76,7 @@ class PasswordInput extends Component
         // submission).  A failed submission must always show the old() value
         // unmasked so the user can correct it.
         $oldValue = old($oldKey);
-        $isPrefilled = $this->existingPassword && $oldValue === null;
+        $isPrefilled = $this->existingPassword && ($oldValue === null);
 
         // ── Display value ─────────────────────────────────────────────────
         // Phantom state: field is visually empty (bullets come from placeholder).
