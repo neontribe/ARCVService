@@ -38,8 +38,8 @@ class StoreUpdateRegistrationRequest extends FormRequest
             // Element MUST be present; MUST be a not-null string
             'pri_carer.*' => 'required|string',
             // May be nullable, MUST be a standard
-            'pri_carer_email' => 'nullable|email:rfc',
-            'pri_carer_telno' => 'nullable|phone:GB',
+            'pri_carer_email.*' => 'nullable|email:rfc',
+            'pri_carer_telno.*' => 'nullable|phone:GB',
             // MAY be present; MUST be a not-null string
             'sec_carers' => 'array|min:1',
             'sec_carers.*' => 'string',
@@ -54,6 +54,7 @@ class StoreUpdateRegistrationRequest extends FormRequest
             'children.*.dob' => 'required_if:children.*.verified,=,true|date_format:Y-m',
             // MAY be present; MUST be a boolean
             'children.*.verified' => 'boolean',
+            'children.*.deferred' => 'boolean',
             // SOMETIMES is present (SP doesn't have them) MUST be in listed states
             'eligibility-hsbs' => [
                 'sometimes',

@@ -614,10 +614,9 @@ class RegistrationController extends Controller
 
         $children = $this->makeChildrenFromInput((array)($data['children'] ?? []));
 
-        // Preserve eligible_from if already set; only stamp it on first transition
         $eligibleFrom = ($data['eligibility-hsbs'] === 'healthy-start-receiving' && !$registration->eligible_from)
             ? Carbon::now()
-            : $registration->eligible_from;
+            : null;
 
         try {
             DB::transaction(static function () use (

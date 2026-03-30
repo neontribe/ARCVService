@@ -260,7 +260,7 @@ class RegistrationPageTest extends StoreTestCase
 
     public function testChangingToNotReceivingHSPutsNullInTable(): void
     {
-        $this->assertEquals(0, Registration::get()->count());
+        $this->assertEquals(0, Registration::count());
         $this->actingAs($this->centreUser, 'store')
             ->visit(URL::route('store.registration.create'))
             ->type('Test Carer', 'pri_carer')
@@ -270,7 +270,7 @@ class RegistrationPageTest extends StoreTestCase
             ->press('Save Family')
             ->seePageIs(URL::route('store.registration.edit', [ 'registration' => 1 ]))
         ;
-        $this->assertEquals(1, Registration::get()->count());
+        $this->assertEquals(1, Registration::count());
         $registration = Registration::first();
         $this->assertNotNull($registration->eligible_from);
 
