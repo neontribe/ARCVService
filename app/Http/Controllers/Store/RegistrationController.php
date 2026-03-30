@@ -260,7 +260,6 @@ class RegistrationController extends Controller
                 if (array_key_exists('is_pri_carer', $child)) {
                     $is_pri_carer = (bool)$child['is_pri_carer'];
                 }
-
                 return new Child([
                     'born' => $month_of_birth->isPast(),
                     'dob' => $month_of_birth->toDateTimeString(),
@@ -573,7 +572,7 @@ class RegistrationController extends Controller
             $amendedCarers[] = $priCarer;
         }
 
-        // emailsecure and telnosecure are special
+        // emailsecret and telnosecret are special
         $priEmail = $data['pri_carer_email'][$priCarerId] ?? null;
         if ($priEmail !== null && $priCarer->emailsecret->reveal() !== $priEmail) {
             $priCarer->emailsecret = $priEmail;

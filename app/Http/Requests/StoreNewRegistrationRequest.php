@@ -35,10 +35,13 @@ class StoreNewRegistrationRequest extends FormRequest
             // MUST be present; MUST be a not-null string
             'pri_carer' => 'required|string',
             'pri_carer_ethnicity' => [
-                'nullable',
-                Rule::in(array_keys(config('arc.ethnicity_desc')))
+                Rule::in(array_merge(
+                    [0, '0'],
+                    array_keys(config('arc.ethnicity_desc'))
+                ))
             ],
             'pri_carer_language' => [
+                'nullable',
                 'not-regex:/^.*[\p{C}].*$/u',
                 'regex:/^[A-Za-z.\s\'—-]+$/',
             ],
