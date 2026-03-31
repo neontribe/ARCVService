@@ -1,12 +1,12 @@
 {
   "private": true,
   "scripts": {
-    "dev": "yarn development",
+    "dev": "npm run development",
     "development": "mix",
     "watch": "mix watch",
     "watch-poll": "mix watch -- --watch-options-poll=1000",
     "hot": "mix watch --hot",
-    "prod": "yarn production",
+    "prod": "npm run production",
     "production": "mix --production"
   },
   "devDependencies": {
@@ -23,6 +23,5 @@
     "ie 11",
     "last 3 versions"
   ],
-  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610",
   "dependencies": {}
 }

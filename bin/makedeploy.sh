@@ -44,12 +44,11 @@ source ~/.bashrc
 nvm install
 nvm use
 
-# Re-install Yarn dependencies
-rm -rf ./node_modules
-yarn install
+# Re-install dependencies
+npm ci
 
 # Build production CSS (or other production assets)
-yarn prod
+npm run prod
 
 # Reduce the size of vendor directory by installing only production dependencies
 rm -rf ./vendor
