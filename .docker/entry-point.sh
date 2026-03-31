@@ -52,7 +52,7 @@ function handleStartup() {
       fi
     done
   fi
-  yarn production
+  npm run production
 }
 
 checkDatabase
