@@ -343,29 +343,6 @@ span.user-array {
   min-height: 100%;
 }
 
-#sidebar {
-  flex: 0 0 300px;
-  font-weight: 600;
-  background-color: $arc_white;
-  border-right: 1px solid #ededed;
-  ul {
-    padding-left: 0;
-    margin-top: 1em;
-    li {
-      color: #656565;
-      display: block;
-      padding: 1em 2em;
-      &:hover,
-      &:active {
-        background-color: #f5f5f5;
-      }
-    }
-    span {
-      padding-right: 10px;
-    }
-  }
-}
-
 #main-content {
   background-color: $arc_bg;
   flex: 1;
@@ -415,4 +392,95 @@ tr.disabled {
 
 button.remove {
   background-color: #d2232a;
+}
+
+#sidebar {
+    flex: 0 0 300px;
+    font-weight: 600;
+    background-color: $arc_white;
+    border-right: 1px solid #ededed;
+
+    ul {
+        padding-left: 0;
+        margin-top: 1em;
+
+        li {
+            color: #656565;
+            display: block;
+            padding: 1em 2em;
+            &:hover,
+            &:active {
+                background-color: #f5f5f5;
+            }
+        }
+
+        span {
+            padding-right: 0px;
+        }
+    }
+}
+
+.sidebar-heading {
+    cursor: pointer;
+    user-select: none;
+    // Override the li padding so we control spacing ourselves
+    padding: 0.75em 1.5em !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75em;
+    letter-spacing: 0.08em;
+    color: #999;
+
+    // Flex layout so icon | label | caret sit cleanly in one row
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+
+    .glyphicon:first-child {
+        padding-right: 0; // gap handles spacing instead
+        flex-shrink: 0;
+    }
+
+    .sidebar-heading-label {
+        flex: 1; // pushes caret to the far right
+    }
+
+    .caret {
+        flex-shrink: 0;
+        transition: transform 0.2s ease;
+    }
+
+    // Rotate caret when section is collapsed
+    &.collapsed .caret {
+        transform: rotate(-90deg);
+    }
+}
+
+.sidebar-section--dev .sidebar-heading {
+    color: #d9534f;
+}
+
+.sidebar-subheading {
+    padding: 4px 1.5em 4px 2.5em !important;
+    font-size: 0.7em;
+    opacity: 0.55;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    &:hover {
+        background-color: transparent !important; // subheading isn't a link
+    }
+}
+
+.sidebar-item--danger a {
+    color: #d9534f;
+}
+
+.sidebar-message {
+    padding: 0.5em 1.5em !important;
+    font-size: 0.85em;
+    font-style: italic;
+    color: #999;
+    &:hover {
+        background-color: transparent !important;
+    }
 }
