@@ -9,7 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
+use Laravel\Passport\ClientRepository;
 
 class ResetDemoEnvironment implements ShouldQueue
 {
@@ -18,17 +18,18 @@ class ResetDemoEnvironment implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public function handle(EnvWriter $envWriter): void
+    public function handle(EnvWriter $envWriter, ClientRepository $clients): void
     {
         Artisan::call('migrate:refresh', ['--seed' => true, '--force' => true]);
 
-        Artisan::call('passport:client', [
-            '--password' => true,
-            '--name'     => 'Rose Vouchers Password Grant Client',
-            '--provider' => 'users',
-        ]);
+        $client = $clients->createPasswordGrantClient(
+            userId: null,
+            name: 'Rose Vouchers Password Grant Client',
+            redirect: '',
+            provider: 'users',
+        );
 
-        $newSecret = DB::table('oauth_clients')->where('id', 1)->pluck('secret')[0];
-        $envWriter->updateKey('PASSWORD_CLIENT_SECRET', $newSecret);
+        $envWriter->updateKey('PASSWORD_CLIENT_SECRET', $client->plainSecret);
     }
 }
+

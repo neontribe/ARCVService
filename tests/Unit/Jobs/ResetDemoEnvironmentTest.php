@@ -5,7 +5,8 @@ namespace Tests\Unit\Jobs;
 use App\Jobs\ResetDemoEnvironment;
 use App\Services\EnvWriter;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
+use Laravel\Passport\Client;
+use Laravel\Passport\ClientRepository;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\TestCase;
@@ -16,23 +17,29 @@ class ResetDemoEnvironmentTest extends TestCase
     // Helpers
     // -------------------------------------------------------------------------
 
-    private function mockOauthClientQuery(string $secret = 'new-test-secret'): void
-    {
-        $builder = Mockery::mock();
-        $builder->shouldReceive('where')->with('id', 1)->andReturnSelf();
-        $builder->shouldReceive('pluck')->with('secret')->andReturn(collect([$secret]));
-
-        DB::shouldReceive('table')->with('oauth_clients')->andReturn($builder);
-    }
-
     private function mockEnvWriter(): MockInterface
     {
         return $this->mock(EnvWriter::class);
     }
 
+    private function mockClientRepository(string $secret = 'new-test-secret'): MockInterface
+    {
+        $client = Mockery::mock(Client::class);
+        $client->plainSecret = $secret;
+
+        $repository = $this->mock(ClientRepository::class);
+        $repository->shouldReceive('createPasswordGrantClient')
+            ->andReturn($client);
+
+        return $repository;
+    }
+
     private function dispatchJob(): void
     {
-        app(ResetDemoEnvironment::class)->handle(app(EnvWriter::class));
+        app(ResetDemoEnvironment::class)->handle(
+            app(EnvWriter::class),
+            app(ClientRepository::class),
+        );
     }
 
     // -------------------------------------------------------------------------
@@ -44,44 +51,28 @@ class ResetDemoEnvironmentTest extends TestCase
         Artisan::shouldReceive('call')
             ->once()
             ->with('migrate:refresh', ['--seed' => true, '--force' => true]);
-        Artisan::shouldReceive('call')
-            ->once()
-            ->with('passport:client', Mockery::any());
         $this->mockEnvWriter()->shouldReceive('updateKey')->andReturnNull();
-        $this->mockOauthClientQuery();
-
-        $this->dispatchJob();
-    }
-
-    public function testCreatesPassportClientWithCorrectArguments(): void
-    {
-        Artisan::shouldReceive('call')->once()->with('migrate:refresh', Mockery::any());
-        Artisan::shouldReceive('call')
-            ->once()
-            ->with('passport:client', [
-                '--password' => true,
-                '--name' => 'Rose Vouchers Password Grant Client',
-                '--provider' => 'users',
-            ]);
-        $this->mockEnvWriter()->shouldReceive('updateKey')->andReturnNull();
-        $this->mockOauthClientQuery();
+        $this->mockClientRepository();
 
         $this->dispatchJob();
     }
 
     // -------------------------------------------------------------------------
-    // Secret retrieval
+    // Passport client creation
     // -------------------------------------------------------------------------
 
-    public function testQueriesOauthClientsForNewSecret(): void
+    public function testCreatesPasswordGrantClientWithCorrectArguments(): void
     {
         Artisan::shouldReceive('call')->andReturn(0);
         $this->mockEnvWriter()->shouldReceive('updateKey')->andReturnNull();
 
-        $builder = Mockery::mock();
-        $builder->shouldReceive('where')->once()->with('id', 1)->andReturnSelf();
-        $builder->shouldReceive('pluck')->once()->with('secret')->andReturn(collect(['expected-secret']));
-        DB::shouldReceive('table')->once()->with('oauth_clients')->andReturn($builder);
+        $this->mock(ClientRepository::class)
+            ->shouldReceive('createPasswordGrantClient')
+            ->once()
+            ->with(null, 'Rose Vouchers Password Grant Client', '', 'users')
+            ->andReturn(tap(Mockery::mock(Client::class), function ($c) {
+                $c->plainSecret = 'test-secret';
+            }));
 
         $this->dispatchJob();
     }
@@ -90,10 +81,10 @@ class ResetDemoEnvironmentTest extends TestCase
     // EnvWriter
     // -------------------------------------------------------------------------
 
-    public function testWritesNewSecretToEnvFile(): void
+    public function testWritesClientSecretToEnvFile(): void
     {
         Artisan::shouldReceive('call')->andReturn(0);
-        $this->mockOauthClientQuery('brand-new-secret');
+        $this->mockClientRepository('brand-new-secret');
 
         $this->mockEnvWriter()
             ->shouldReceive('updateKey')
@@ -106,7 +97,7 @@ class ResetDemoEnvironmentTest extends TestCase
     public function testWritesToCorrectEnvKey(): void
     {
         Artisan::shouldReceive('call')->andReturn(0);
-        $this->mockOauthClientQuery();
+        $this->mockClientRepository();
 
         $this->mockEnvWriter()
             ->shouldReceive('updateKey')
