@@ -3,7 +3,7 @@
     {{-- ===================== Dashboard ===================== --}}
     <ul class="sidebar-section">
         <li class="sidebar-item">
-            <a href="{{ url('/') }}">
+            <a href="{{ route('admin.dashboard') }}">
                 <span class="glyphicon glyphicon-home"></span>
                 Dashboard
             </a>
@@ -19,31 +19,31 @@
         </li>
         <div id="vouchers-menu" class="collapse" aria-expanded="false">
             <li class="sidebar-item">
-                <a href="{{ url('/vouchers/create') }}">
+                <a href="{{ route('admin.vouchers.create') }}">
                     <span class="glyphicon glyphicon-plus"></span>
                     Add voucher codes
                 </a>
             </li>
             <li class="sidebar-item">
-                <a href="{{ url('/vouchers') }}">
+                <a href="{{ route('admin.vouchers.index') }}">
                     <span class="glyphicon glyphicon-th-list"></span>
                     View live vouchers
                 </a>
             </li>
             <li class="sidebar-item">
-                <a href="{{ url('/deliveries') }}">
+                <a href="{{ route('admin.deliveries.index') }}">
                     <span class="glyphicon glyphicon-th-list"></span>
                     View sent vouchers
                 </a>
             </li>
             <li class="sidebar-item">
-                <a href="{{ url('/deliveries/create') }}">
+                <a href="{{ route('admin.deliveries.create') }}">
                     <span class="glyphicon glyphicon-send"></span>
                     Send vouchers
                 </a>
             </li>
             <li class="sidebar-item">
-                <a href="{{ url('/vouchers/void') }}">
+                <a href="{{ route('admin.vouchers.void') }}">
                     <span class="glyphicon glyphicon-fire"></span>
                     Void voucher codes
                 </a>
@@ -64,7 +64,7 @@
         </li>
         <div id="payments-menu" class="collapse" aria-expanded="false">
             <li class="sidebar-item">
-                <a href="{{ url('/payments') }}" @if($hasPayments !== false) class="payments" @endif>
+                <a href="{{ route('admin.payments.index') }}" @if($hasPayments !== false) class="payments" @endif>
                     <span class="glyphicon glyphicon-th-list"></span>
                     Payment Requests
                 </a>
@@ -81,25 +81,25 @@
         </li>
         <div id="people-menu" class="collapse" aria-expanded="false">
             <li class="sidebar-item">
-                <a href="{{ url('/workers') }}">
+                <a href="{{ route('admin.centreusers.index') }}">
                     <span class="glyphicon glyphicon-th-list"></span>
                     View workers
                 </a>
             </li>
             <li class="sidebar-item">
-                <a href="{{ url('/workers/create') }}">
+                <a href="{{ route('admin.centreusers.create') }}">
                     <span class="glyphicon glyphicon-plus"></span>
                     Add workers
                 </a>
             </li>
             <li class="sidebar-item">
-                <a href="{{ url('/centres') }}">
+                <a href="{{ route('admin.centres.index') }}">
                     <span class="glyphicon glyphicon-th-list"></span>
                     View children's centres
                 </a>
             </li>
             <li class="sidebar-item">
-                <a href="{{ url('/centres/create') }}">
+                <a href="{{ route('admin.centres.create') }}">
                     <span class="glyphicon glyphicon-plus"></span>
                     Add children's centres
                 </a>
@@ -116,37 +116,37 @@
         </li>
         <div id="locations-menu" class="collapse" aria-expanded="false">
             <li class="sidebar-item">
-                <a href="{{ url('/sponsors') }}">
+                <a href="{{ route('admin.sponsors.index') }}">
                     <span class="glyphicon glyphicon-th-list"></span>
                     View areas
                 </a>
             </li>
             <li class="sidebar-item">
-                <a href="{{ url('/sponsors/create') }}">
+                <a href="{{ route('admin.sponsors.create') }}">
                     <span class="glyphicon glyphicon-plus"></span>
                     Add areas
                 </a>
             </li>
             <li class="sidebar-item">
-                <a href="{{ url('/markets') }}">
+                <a href="{{ route('admin.markets.index') }}">
                     <span class="glyphicon glyphicon-th-list"></span>
                     View markets
                 </a>
             </li>
             <li class="sidebar-item">
-                <a href="{{ url('/markets/create') }}">
+                <a href="{{ route('admin.markets.create') }}">
                     <span class="glyphicon glyphicon-plus"></span>
                     Add markets
                 </a>
             </li>
             <li class="sidebar-item">
-                <a href="{{ url('/traders') }}">
+                <a href="{{ route('admin.traders.index') }}">
                     <span class="glyphicon glyphicon-th-list"></span>
                     View traders
                 </a>
             </li>
             <li class="sidebar-item">
-                <a href="{{ url('/traders/create') }}">
+                <a href="{{ route('admin.traders.create') }}">
                     <span class="glyphicon glyphicon-plus"></span>
                     Add traders
                 </a>
