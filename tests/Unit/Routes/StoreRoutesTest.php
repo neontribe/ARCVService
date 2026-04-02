@@ -208,7 +208,7 @@ class StoreRoutesTest extends StoreTestCase
             ->press('Save Changes')
             ->seePageIs($edit_route)
             ->assertResponseStatus(200)
-            ->seeElement('input[id=carer][value=changedByTest]');
+            ->seeElement('input[id=pri_carer][value=changedByTest]');
 
         Auth::logout();
 

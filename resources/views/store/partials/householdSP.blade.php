@@ -29,7 +29,7 @@
                         <td class="age-col">{{ explode(',', $child->getAgeString())[0] }}</td>
                         <td class="dob-col"></td>
                         <td class="is-pri-carer-col"><input type="hidden" name="children[{{ $child->id ?? $index }}][is_pri_carer]"
-                               value="{{ $child->is_pri_carer }}"
+                               value={{ $child->is_pri_carer }}
                         ></td>
                         <td class="remove-col">
                             <input type="hidden" name="children[{{ $child->id ?? $index }}][dob]"
@@ -59,7 +59,7 @@
     </div>
 </div>
 
-@pushonce('bottom:householdSP')
+@pushonce('bottom')
     <script>
         function addAgeRow(e, dateObj, verified, buttonID) {
             // set a default

@@ -37,7 +37,7 @@
     </div>
 @endif
 
-@pushonce('js:dobinput')
+@pushonce('js')
     <script>
         (function ($, window, document, undefined) {
             'use strict';

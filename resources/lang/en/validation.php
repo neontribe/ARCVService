@@ -92,6 +92,9 @@ return [
     'not_exists'           => 'The :attribute field already exists.',
     'ge_field'             => 'The :attribute must be greater than or equal to :field.',
 
+    // Laravel-Phone
+    'phone' => 'The :attribute field must be a valid UK number.',
+
     /*
     |--------------------------------------------------------------------------
     | Custom Validation Language Lines

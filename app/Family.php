@@ -9,6 +9,7 @@ use App\Traits\Aliasable;
 use App\Traits\Evaluable;
 use DB;
 use Eloquent;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,10 +22,10 @@ use Log;
  * @property string $rejoin_on
  * @property string $leave_amount
  * @property int $centre_sequence
- * @property Carer[] $carers
- * @property Child[] $children
- * @property Note[] $notes
- * @property Registration[] $registrations
+ * @property Collection|Carer[] $carers
+ * @property Collection|Child[] $children
+ * @property Collection|Note[] $notes
+ * @property Collection|Registration[] $registrations
  * @property Centre $initialCentre
  * @property string $rvid
  *
@@ -63,14 +64,7 @@ class Family extends Model implements IEvaluee
     ];
 
     /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
-    protected $hidden = [];
-
-    /**
-     * Attributes to autocalculate and add when we ask.
+     * Attributes to auto-calculate and add when we ask.
      *
      * @var array
      */
@@ -130,11 +124,9 @@ class Family extends Model implements IEvaluee
     }
 
     /**
-     * Gets the due date or Null;
-     *
-     * @return mixed|null
+     * Gets the due date or Null
      */
-    public function getExpectingAttribute()
+    public function getExpectingAttribute(): mixed
     {
         $due = null;
         foreach ($this->children as $child) {
@@ -190,7 +182,7 @@ class Family extends Model implements IEvaluee
      */
     public function carers(): HasMany
     {
-        return $this->hasMany('App\Carer');
+        return $this->hasMany(Carer::class);
     }
 
     /**
@@ -199,7 +191,7 @@ class Family extends Model implements IEvaluee
      */
     public function children(): HasMany
     {
-        return $this->hasMany('App\Child');
+        return $this->hasMany(Child::class);
     }
 
     /**
@@ -209,7 +201,7 @@ class Family extends Model implements IEvaluee
      */
     public function notes(): HasMany
     {
-        return $this->hasMany('App\Note');
+        return $this->hasMany(Note::class);
     }
 
     /**
@@ -219,7 +211,7 @@ class Family extends Model implements IEvaluee
      */
     public function registrations(): HasMany
     {
-        return $this->hasMany('App\Registration');
+        return $this->hasMany(Registration::class);
     }
 
     /**
@@ -228,7 +220,7 @@ class Family extends Model implements IEvaluee
      */
     public function initialCentre(): BelongsTo
     {
-        return $this->belongsTo('App\Centre', 'initial_centre_id');
+        return $this->belongsTo(Centre::class, 'initial_centre_id');
     }
 
     public function scopeWithPrimaryCarer($query)
@@ -240,5 +232,14 @@ class Family extends Model implements IEvaluee
             ->limit(1);
 
         return $query->select('families.*')->selectSub($subQuery, 'pri_carer');
+    }
+
+    /** Check status of family (active or not active)
+     * @return bool
+     */
+    public function status(): bool
+    {
+        return $this->leaving_on === null
+            || ($this->rejoin_on > $this->leaving_on);
     }
 }

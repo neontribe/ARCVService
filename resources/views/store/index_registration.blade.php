@@ -69,8 +69,7 @@
                 <tbody>
                 @foreach ($registrations as $registration)
                     @if ($registration->family)
-                        @php(\App\Http\Controllers\Store\FamilyController::status($registration))
-                        @if( $registration->family->status === true)
+                        @if( $registration->family->status() === true)
                             <tr class='active'>
                         @else
                             <tr class='inactive'>
@@ -83,7 +82,7 @@
                             </td>
                             <td class="center">{{ $registration->family->rvid }}</td>
                             <td class="right no-wrap">
-                                @if( $registration->family->status === true)
+                                @if( $registration->family->status() === true)
                                     <a href="{{ route('store.registration.voucher-manager', ['registration'=> $registration->id ]) }}"
                                        class="link inline-link-button">
                                         <div class="link-button">

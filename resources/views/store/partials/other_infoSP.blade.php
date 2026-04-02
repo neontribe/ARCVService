@@ -11,7 +11,7 @@
                    class="styled-checkbox @if($errors->has('consent')) invalid @endif"
                    id="privacy-statement"
                    name="consent"
-                   @checked(old('consent'))
+                @checked(old('consent'))
             >
             <label for="privacy-statement">Has the registration form been completed and signed?</label><br></br>
         </div>
@@ -41,8 +41,7 @@
                 <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher manager
             </div>
         </a>
-        @php(\App\Http\Controllers\Store\FamilyController::status($registration))
-        @if ($registration->family->status === true )
+        @if ($registration->family->status() === true )
             <button class="remove long-button" type="button">Remove this household</button>
             <div id="expandable" class="collapsed confirm-leaving">
                 <div class="reason">
@@ -61,7 +60,8 @@
                     <button type="submit"
                             class="submit"
                             formaction="{{ URL::route('store.registration.family',['registration' => $registration]) }}"
-                    >Yes</button>
+                    >Yes
+                    </button>
                     <button id="cancel">Cancel</button>
                 </div>
             </div>
