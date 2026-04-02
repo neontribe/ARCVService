@@ -104,6 +104,12 @@
                     Add children's centres
                 </a>
             </li>
+            <li class="sidebar-item">
+                <a href="{{ route('data.families.contacts.download') }}">
+                    <span class="glyphicon glyphicon-download-alt"></span>
+                    Downlaod Family Conntacts
+                </a>
+            </li>
         </div>
     </ul>
 
@@ -155,7 +161,7 @@
     </ul>
 
     {{-- ===================== Developer Tools (non-production only) ===================== --}}
-    @unless(Config('app.url') === 'https://voucher-admin.alexandrarose.org.uk')
+    @can('take-developer-actions')
         <ul class="sidebar-section sidebar-section--dev">
             <li class="sidebar-heading collapsed" data-toggle="collapse" data-target="#dev-menu" aria-expanded="false">
                 <span class="glyphicon glyphicon-cog"></span>
@@ -199,6 +205,6 @@
                 </li>
             </div>
         </ul>
-    @endUnless
+    @endcan
 
 </div>

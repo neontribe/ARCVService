@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\View\Composers\PaymentsComposer;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -32,6 +32,12 @@ class AppServiceProvider extends ServiceProvider
         Passport::withCookieSerialization();
 
         View::composer('*', PaymentsComposer::class);
+
+        // Gates
+        Gate::define('take-developer-actions', static function () {
+            // permit if the application is debugging
+            return config('app.debug') === true;
+        });
     }
 
     /**
