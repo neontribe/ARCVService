@@ -5,6 +5,7 @@ use App\Http\Controllers\Service\Data\MarketController;
 use App\Http\Controllers\Service\Data\TraderController;
 use App\Http\Controllers\Service\Data\UserController;
 use App\Http\Controllers\Service\Data\VoucherController;
+use App\Services\EnvWriter;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
@@ -43,14 +44,7 @@ Route::name('data.')
 
                 $newSecret = DB::table('oauth_clients')->where('id', 1)->pluck('secret')[0];
 
-                $envFilePath = base_path('.env');
-                $oldSecret = env('PASSWORD_CLIENT_SECRET');
-
-                file_put_contents($envFilePath, preg_replace(
-                    "/^PASSWORD_CLIENT_SECRET={$oldSecret}/m",
-                    "PASSWORD_CLIENT_SECRET={$newSecret}",
-                    file_get_contents($envFilePath)
-                ));
+                app(EnvWriter::class)->updateKey('PASSWORD_CLIENT_SECRET', $newSecret);
 
                 return Redirect::route('admin.dashboard')
                     ->with('message', 'Reseeded @' . Carbon::now());

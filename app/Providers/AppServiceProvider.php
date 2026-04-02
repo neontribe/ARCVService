@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\EnvWriter;
 use App\View\Composers\PaymentsComposer;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
@@ -47,6 +48,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // manual registration of non-auto-discovered packages
+        $this->app->bind(EnvWriter::class, function () {
+            return new EnvWriter(base_path('.env'));
+        });
     }
 }
