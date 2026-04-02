@@ -5,9 +5,7 @@ use App\Http\Controllers\Service\Data\MarketController;
 use App\Http\Controllers\Service\Data\TraderController;
 use App\Http\Controllers\Service\Data\UserController;
 use App\Http\Controllers\Service\Data\VoucherController;
-use App\Services\EnvWriter;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use App\Jobs\ResetDemoEnvironment;
 use Illuminate\Support\Facades\Redirect;
 
 /*
@@ -34,20 +32,10 @@ Route::name('data.')
         // Temporary route for demo only.
         Route::get('reset', static function () {
             if (Gate::allows('take-developer-actions')) {
-                Artisan::call('migrate:refresh', ['--seed' => true, '--force' => true]);
-
-                Artisan::call('passport:client', [
-                    '--password' => true,
-                    '--name' => 'Rose Vouchers Password Grant Client',
-                    '--provider' => 'users',
-                ]);
-
-                $newSecret = DB::table('oauth_clients')->where('id', 1)->pluck('secret')[0];
-
-                app(EnvWriter::class)->updateKey('PASSWORD_CLIENT_SECRET', $newSecret);
+                ResetDemoEnvironment::dispatch();
 
                 return Redirect::route('admin.dashboard')
-                    ->with('message', 'Reseeded @' . Carbon::now());
+                    ->with('message', 'Reset queued');
             }
             return Redirect::route('admin.dashboard')
                 ->with('error', 'Action Denied');

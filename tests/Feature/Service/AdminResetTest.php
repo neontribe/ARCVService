@@ -3,13 +3,11 @@
 namespace Feature\Service;
 
 use App\AdminUser;
-use App\Services\EnvWriter;
+use App\Jobs\ResetDemoEnvironment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Testing\TestResponse;
-use Mockery;
 use Tests\TestCase;
 
 class AdminResetTest extends TestCase
@@ -21,11 +19,7 @@ class AdminResetTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // don't write to our env file!
-        $this->mock(EnvWriter::class)
-            ->shouldReceive('updateKey')
-            ->andReturnNull();
-
+        Bus::fake();
         $this->admin = factory(AdminUser::class)->create();
     }
 
@@ -37,29 +31,6 @@ class AdminResetTest extends TestCase
     {
         return $this->actingAs($this->admin, 'admin')
             ->get(route('data.reset'));
-    }
-
-    /**
-     * Prevents Artisan commands from actually executing in gate-allowed tests
-     * that aren't specifically asserting on Artisan behaviour.
-     * Must be called before mockOauthClientQuery() to avoid DB facade conflicts.
-     */
-    private function mockArtisan(): void
-    {
-        Artisan::shouldReceive('call')->andReturn(0);
-    }
-
-    /**
-     * Mocks the DB::table('oauth_clients') chain. Call this after mockArtisan()
-     * so the DB facade is only locked down once Artisan is already stubbed out.
-     */
-    private function mockOauthClientQuery(string $secret = 'new-test-secret'): void
-    {
-        $builder = Mockery::mock();
-        $builder->shouldReceive('where')->with('id', 1)->andReturnSelf();
-        $builder->shouldReceive('pluck')->with('secret')->andReturn(collect([$secret]));
-
-        DB::shouldReceive('table')->with('oauth_clients')->andReturn($builder);
     }
 
     // -------------------------------------------------------------------------
@@ -76,6 +47,13 @@ class AdminResetTest extends TestCase
         Gate::shouldReceive('allows')->never();
 
         $this->get(route('data.reset'));
+    }
+
+    public function testUnauthenticatedRequestDoesNotDispatchJob(): void
+    {
+        $this->get(route('data.reset'));
+
+        Bus::assertNothingDispatched();
     }
 
     // -------------------------------------------------------------------------
@@ -103,12 +81,13 @@ class AdminResetTest extends TestCase
         $this->makeRequest()->assertSessionMissing('message');
     }
 
-    public function testArtisanIsNotCalledWhenGateDenies(): void
+    public function testDoesNotDispatchJobWhenGateDenies(): void
     {
         Gate::shouldReceive('allows')->with('take-developer-actions')->andReturn(false);
-        Artisan::shouldReceive('call')->never();
 
         $this->makeRequest();
+
+        Bus::assertNothingDispatched();
     }
 
     // -------------------------------------------------------------------------
@@ -118,76 +97,30 @@ class AdminResetTest extends TestCase
     public function testRedirectsToDashboardWhenGateAllows(): void
     {
         Gate::shouldReceive('allows')->with('take-developer-actions')->andReturn(true);
-        $this->mockArtisan();
-        $this->mockOauthClientQuery();
 
         $this->makeRequest()->assertRedirect(route('admin.dashboard'));
     }
 
-    public function testFlashesSuccessMessageWhenGateAllows(): void
+    public function testFlashesQueuedMessageWhenGateAllows(): void
     {
         Gate::shouldReceive('allows')->with('take-developer-actions')->andReturn(true);
-        $this->mockArtisan();
-        $this->mockOauthClientQuery();
 
-        $this->makeRequest()->assertSessionHas('message');
+        $this->makeRequest()->assertSessionHas('message', 'Reset queued');
     }
 
-    public function testSuccessMessageContainsReseededText(): void
+    public function testDoesNotFlashErrorWhenGateAllows(): void
     {
         Gate::shouldReceive('allows')->with('take-developer-actions')->andReturn(true);
-        $this->mockArtisan();
-        $this->mockOauthClientQuery();
-
-        // assertSessionHas with a closure replaces the missing getSession() proxy
-        $this->makeRequest()->assertSessionHas(
-            'message',
-            function (string $value) {
-                return str_contains($value, 'Reseeded');
-            }
-        );
-    }
-
-    public function testDoesNotFlashErrorMessageWhenGateAllows(): void
-    {
-        Gate::shouldReceive('allows')->with('take-developer-actions')->andReturn(true);
-        $this->mockArtisan();
-        $this->mockOauthClientQuery();
 
         $this->makeRequest()->assertSessionMissing('error');
     }
 
-    public function testRunsMigrateRefreshWhenGateAllows(): void
+    public function testDispatchesResetJobWhenGateAllows(): void
     {
         Gate::shouldReceive('allows')->with('take-developer-actions')->andReturn(true);
-        // Fine-grained expectations — set up Artisan before DB
-        Artisan::shouldReceive('call')
-            ->once()
-            ->with('migrate:refresh', ['--seed' => true, '--force' => true]);
-        Artisan::shouldReceive('call')
-            ->once()
-            ->with('passport:client', Mockery::any());
-        $this->mockOauthClientQuery();
 
         $this->makeRequest();
-    }
 
-    public function testCreatesPassportClientWhenGateAllows(): void
-    {
-        Gate::shouldReceive('allows')->with('take-developer-actions')->andReturn(true);
-        // Fine-grained expectations — set up Artisan before DB
-        Artisan::shouldReceive('call')
-            ->once()
-            ->with('migrate:refresh', Mockery::any());
-        Artisan::shouldReceive('call')
-            ->once()
-            ->with('passport:client', [
-                '--password' => true,
-                '--name'     => 'Rose Vouchers Password Grant Client',
-                '--provider' => 'users',
-            ]);
-        $this->mockOauthClientQuery();
-
-        $this->makeRequest();
+        Bus::assertDispatched(ResetDemoEnvironment::class);
     }
 }
