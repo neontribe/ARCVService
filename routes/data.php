@@ -8,7 +8,6 @@ use App\Http\Controllers\Service\Data\VoucherController;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
-use Symfony\Component\Process\Process;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,20 +33,16 @@ Route::name('data.')
         // Temporary route for demo only.
         Route::get('reset', static function () {
             if (Gate::allows('take-developer-actions')) {
-                $process = new Process(['php', '../artisan', 'migrate:refresh', '--seed', '--force']);
-                $process->run();
+                Artisan::call('migrate:refresh', ['--seed' => true, '--force' => true]);
 
-                $process = new Process([
-                    'php',
-                    '../artisan',
-                    'passport:client',
-                    '--password',
-                    '--name="Rose Vouchers Password Grant Client"',
-                    '--provider=users',
+                Artisan::call('passport:client', [
+                    '--password' => true,
+                    '--name' => 'Rose Vouchers Password Grant Client',
+                    '--provider' => 'users',
                 ]);
-                $process->run();
 
                 $newSecret = DB::table('oauth_clients')->where('id', 1)->pluck('secret')[0];
+
                 $envFilePath = base_path('.env');
                 $oldSecret = env('PASSWORD_CLIENT_SECRET');
 
