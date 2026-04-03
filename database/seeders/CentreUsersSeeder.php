@@ -53,13 +53,13 @@ class CentreUsersSeeder extends Seeder
     private function seedNamedUsers(): void
     {
         $users = [
-            ['FMUser', 'ARC FM User', 'arc+fmuser@exmaple.com', 1],
-            ['FMUser', 'ARC fmuser2', 'arc+fmuser2@exmaple.com', 2],
-            ['', 'prescribing user', 'arc+spuser@exmaple.com', 'Prescribing Centre'],
-            ['', 'Scottish user', 'arc+scuser@exmaple.com', 8],
-            ['', 'Southwark user', 'arc+swuser@exmaple.com', 6],
-            ['', 'Tower Hamlet SP user', 'arc+thuser@exmaple.com', 10],
-            ['', 'Lambeth SP user', 'arc+lambethuser@exmaple.com', 11],
+            ['FMUser', 'ARC FM User', 'arc+fmuser@neontribe.co.uk', 1],
+            ['FMUser', 'ARC fmuser2', 'arc+fmuser2@neontribe.co.uk', 2],
+            ['', 'prescribing user', 'arc+spuser@neontribe.co.uk', 'Prescribing Centre'],
+            ['', 'Scottish user', 'arc+scuser@neontribe.co.uk', 8],
+            ['', 'Southwark user', 'arc+swuser@neontribe.co.uk', 6],
+            ['', 'Tower Hamlet SP user', 'arc+thuser@neontribe.co.uk', 10],
+            ['', 'Lambeth SP user', 'arc+lambethuser@neontribe.co.uk', 11],
         ];
 
         foreach ($users as [$state, $name, $email, $centre]) {
