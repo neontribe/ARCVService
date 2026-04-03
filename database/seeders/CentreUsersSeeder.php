@@ -1,117 +1,143 @@
 <?php
+
 namespace Database\Seeders;
 
 use App\Centre;
 use App\CentreUser;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class CentreUsersSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
-     *
-     * @return void
+     * Password shared by all named seed users.
      */
-    public function run()
+    private string $defaultPassword;
+
+    public function run(): void
     {
-        // 1 specific user in the first centre
-        $user1 = factory(CentreUser::class)->create([
-            "name"  => "ARC CC User",
-            "email" => "arc+ccuser@neontribe.co.uk",
-            "password" => bcrypt('store_pass'),
-            "role" => "centre_user",
+        $this->defaultPassword = Hash::make('store_pass');
+
+        $this->seedCcUser();
+        $this->seedNamedUsers();
+        $this->seedRandomUsers();
+        $this->seedDeletedUsers();
+        $this->seedRetiredUsers();
+    }
+
+    /**
+     * CC user requires additional centre setup so is handled separately.
+     */
+    private function seedCcUser(): void
+    {
+        $user = $this->createAndAttach(
+            attributes: ['name' => 'ARC CC User', 'email' => 'arc+ccuser@exmaple.com', 'role' => 'centre_user'],
+            centreId: 1,
+            isHome: true
+        );
+
+        // Two extra centres sharing the same sponsor, attached as non-home.
+        $sponsorId = $user->centres()->first()->sponsor->id;
+        $localCentres = factory(Centre::class, 2)->create(['sponsor_id' => $sponsorId]);
+
+        $user->centres()->attach([
+            $localCentres[0]->id => ['homeCentre' => false],
+            $localCentres[1]->id => ['homeCentre' => false],
         ]);
+    }
 
-        // Attach an initial centre
-        $user1->centres()->attach([
-            1 => ['homeCentre' => true]
-        ]);
+    /**
+     * Named users with fixed centre assignments.
+     * Each entry: [ state, name, email, centreId | centreName ]
+     */
+    private function seedNamedUsers(): void
+    {
+        $users = [
+            ['FMUser', 'ARC FM User', 'arc+fmuser@exmaple.com', 1],
+            ['FMUser', 'ARC fmuser2', 'arc+fmuser2@exmaple.com', 2],
+            ['', 'prescribing user', 'arc+spuser@exmaple.com', 'Prescribing Centre'],
+            ['', 'Scottish user', 'arc+scuser@exmaple.com', 8],
+            ['', 'Southwark user', 'arc+swuser@exmaple.com', 6],
+            ['', 'Tower Hamlet SP user', 'arc+thuser@exmaple.com', 10],
+            ['', 'Lambeth SP user', 'arc+lambethuser@exmaple.com', 11],
+        ];
 
-        // Get the first centre's sponsor and make two more centres with the same sponsor
-        $sponsor_id = $user1->centres()->first()->sponsor->id;
+        foreach ($users as [$state, $name, $email, $centre]) {
+            $centreId = is_int($centre)
+                ? $centre
+                : Centre::where('name', $centre)->first()->id;
 
-        $local_centres = factory(Centre::class, 2)->create(['sponsor_id' => $sponsor_id]);
+            $this->createAndAttach(
+                attributes: ['name' => $name, 'email' => $email],
+                centreId: $centreId,
+                state: $state
+            );
+        }
+    }
 
-        // Attach the extra centres
-        $user1->centres()->attach([
-            $local_centres[0]->id  => ['homeCentre' => false],
-            $local_centres[1]->id  => ['homeCentre' => false],
-        ]);
-
-        $user2 = factory(CentreUser::class)->state('FMUser')->create([
-            "name"  => "ARC FM User",
-            "email" => "arc+fmuser@neontribe.co.uk",
-            "password" => bcrypt('store_pass'),
-        ]);
-        $user2->centres()->attach(1, ['homeCentre' => true]);
-
-        // ARC admin is an fmuser in centre 2, which has individual forms on the dashboard.
-        $user3 = factory(CentreUser::class)->state('FMUser')->create([
-            "name"  => "ARC fmuser2",
-            "email" => "arc+fmuser2@neontribe.co.uk",
-            "password" => bcrypt('store_pass'),
-        ]);
-        $user3->centres()->attach(2, ['homeCentre' => true]);
-
-        // 4 faked users associated with random Centres
+    /**
+     * Four faked users each attached to a random existing centre.
+     */
+    private function seedRandomUsers(): void
+    {
         factory(CentreUser::class, 4)
             ->create()
-            ->each(function ($centreUser) {
-                $centres  = Centre::get();
-                if ($centres->count() > 0) {
-                    // Pick a random Centre
-                    $centre = $centres[random_int(0, $centres->count()-1)];
-                } else {
-                    // There should be at least one Centre
-                    $centre = factory(Centre::class)->create();
-                }
+            ->each(function (CentreUser $centreUser) {
+                $centre = Centre::inRandomOrder()->first()
+                    ?? factory(Centre::class)->create();
+
                 $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
             });
+    }
 
-        // 2 deleted users
-        $deletedUsers = factory(CentreUser::class, 2)->create([
-            "deleted_at"  => date("Y-m-d H:i:s"),
-        ]);
+    /**
+     * Two soft-deleted users.
+     */
+    private function seedDeletedUsers(): void
+    {
+        factory(CentreUser::class, 2)->create(['deleted_at' => now()]);
+    }
 
-        // an SP user for testing
-        $socialPrescriber = factory(CentreUser::class)->create([
-            'name' => 'prescribing user',
-            'email' => 'arc+spuser@neontribe.co.uk',
-            "password" => bcrypt('store_pass'),
-        ]);
-        $spcId = Centre::where('name', 'Prescribing Centre')->first()->id;
-        $socialPrescriber->centres()->attach($spcId, ["homeCentre" => true]);
+    /**
+     * Two retired users, each attached to a random centre before retirement.
+     *
+     * Centre relations are preserved on the underlying row after retirement.
+     * Retirement is called directly rather than via the factory state because
+     * the centre must be attached first — retire() must run last.
+     */
+    private function seedRetiredUsers(): void
+    {
+        factory(CentreUser::class, 2)
+            ->create()
+            ->each(function (CentreUser $centreUser) {
+                $centre = Centre::inRandomOrder()->first()
+                    ?? factory(Centre::class)->create();
 
-        // Scottish user for testing
-        $scottishUser = factory(CentreUser::class)->create([
-            'name' => 'Scottish user',
-            'email' => 'arc+scuser@neontribe.co.uk',
-            'password' => bcrypt('store_pass'),
-        ]);
-        $scottishUser->centres()->attach(8, ['homeCentre' => true]);
+                $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
+                $centreUser->retire();
+            });
+    }
 
-        // Southwark user for testing
-        $southwarkUser = factory(CentreUser::class)->create([
-            'name' => 'Southwark user',
-            'email' => 'arc+swuser@neontribe.co.uk',
-            'password' => bcrypt('store_pass'),
-        ]);
-        $southwarkUser->centres()->attach(6, ['homeCentre' => true]);
+    /**
+     * Create a CentreUser and attach them to a centre in one step.
+     */
+    private function createAndAttach(
+        array $attributes,
+        int $centreId,
+        bool $isHome = true,
+        string $state = ''
+    ): CentreUser {
+        $attributes['password'] ??= $this->defaultPassword;
 
-		// Tower Hamlet SP user for testing
-		$towerHamletUser = factory(CentreUser::class)->create([
-			'name' => 'Tower Hamlet SP user',
-			'email' => 'arc+thuser@neontribe.co.uk',
-			'password' => bcrypt('store_pass'),
-		]);
-		$towerHamletUser->centres()->attach(10, ['homeCentre' => true]);
+        $builder = factory(CentreUser::class);
 
-		// Lambeth SP user for testing
-		$lambethUser = factory(CentreUser::class)->create([
-			'name' => 'Lambeth SP user',
-			'email' => 'arc+lambethuser@neontribe.co.uk',
-			'password' => bcrypt('store_pass'),
-		]);
-		$lambethUser->centres()->attach(11, ['homeCentre' => true]);
+        if ($state !== '') {
+            $builder = $builder->state($state);
+        }
+
+        $user = $builder->create($attributes);
+        $user->centres()->attach($centreId, ['homeCentre' => $isHome]);
+
+        return $user;
     }
 }
