@@ -58,6 +58,7 @@ trait Retirable
             array_merge($this->retirableFields(), ['retired_at' => now()])
         )->save();
 
+        // if we're not already soft deleted, do that too.
         $this->delete();
     }
 

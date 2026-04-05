@@ -80,10 +80,10 @@
             <button type="submit" id="toggleWorker">@empty($worker->deleted_at)Disable worker @else Enable worker @endif</button>
         </form>
         @if($worker->deleted_at)
-        <form role="form" id="deleteForm" class="styled-form" method="GET"
-            action="{{ route('admin.centreusers.delete', ['id' => $worker->id]) }}">
+        <form role="form" id="retireForm" class="styled-form" method="GET"
+            action="{{ route('admin.centreusers.retire', ['id' => $worker->id]) }}">
             {!! csrf_field() !!}
-          <button type="submit" id="deleteWorker" class="remove">Delete worker</button>
+          <button type="submit" id="retireWorker" class="remove">Retire worker</button>
         </form>
         @endif
         <script>
@@ -175,12 +175,12 @@
                     // show the boxes when we load
                     buildCheckboxes();
                 });
-                $('#deleteWorker').on('click', function (evt) {
+                $('#retireWorker').on('click', function (evt) {
                   evt.preventDefault();
-                  var deleteForm = document.getElementById('deleteForm');
-                  var areYouSure = confirm('Are you sure you want to PERMANENTLY delete this worker account?');
+                  var retireForm = document.getElementById('retireForm');
+                  var areYouSure = confirm('Are you sure you want to PERMANENTLY retire this worker account?');
                   if (areYouSure === true) {
-                    deleteForm.submit();
+                    retireForm.submit();
                   };
                 });
         </script>
