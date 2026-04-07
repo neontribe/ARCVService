@@ -84,7 +84,7 @@ class Centre extends Model
      */
     public function neighbours(): HasMany
     {
-        return $this->hasMany(related: 'App\Centre', foreignKey: 'sponsor_id', localKey: 'sponsor_id');
+        return $this->hasMany(related: __CLASS__, foreignKey: 'sponsor_id', localKey: 'sponsor_id');
     }
 
     public function families(): HasMany
