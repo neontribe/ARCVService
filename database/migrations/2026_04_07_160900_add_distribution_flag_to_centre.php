@@ -11,7 +11,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('centres', static function (Blueprint $table) {
-            $table->boolean('can_collect')->after('print_pref')->nullable();
+            $table->boolean('can_collect')->after('print_pref')->default(false);
         });
     }
 

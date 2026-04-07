@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $name
  * @property string $prefix
  * @property string $print_pref
+ * @property boolean $can_collect
  * @property Sponsor $sponsor
  * @property Registration[] $registrations
  * @property CentreUser[] $centreUsers
@@ -36,6 +37,15 @@ class Centre extends Model
      * @var array
      */
     protected $hidden = [
+    ];
+
+    /**
+     * Casts
+     *
+     * @var array
+     */
+    protected $casts = [
+        'can_collect' => 'boolean'
     ];
 
     public function nextCentreSequence(): int
