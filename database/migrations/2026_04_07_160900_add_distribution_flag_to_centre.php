@@ -10,7 +10,7 @@ return new class () extends Migration {
      */
     public function up(): void
     {
-        Schema::table('carers', static function (Blueprint $table) {
+        Schema::table('centres', static function (Blueprint $table) {
             $table->boolean('can_collect')->after('print_pref')->nullable();
         });
     }
@@ -20,7 +20,7 @@ return new class () extends Migration {
      */
     public function down(): void
     {
-        Schema::table('carers', static function (Blueprint $table) {
+        Schema::table('centres', static function (Blueprint $table) {
             $table->dropColumn(['can_collect']);
         });
     }
