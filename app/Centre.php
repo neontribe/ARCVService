@@ -27,7 +27,7 @@ class Centre extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'prefix', 'print_pref', 'sponsor_id'
+        'name', 'prefix', 'print_pref', 'sponsor_id', 'can_collect'
     ];
 
     /**
