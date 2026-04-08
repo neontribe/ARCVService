@@ -68,16 +68,16 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="checkbox-group">
-                        <input type="checkbox"
-                               id="can-collect"
-                               name="can-collect"
-                               class="styled-checkbox @error('can-collect') error @enderror"
-                               @checked(old('can-collect', $centre?->can_collect))
-                        >
-                        <label for="can-collect">Can Collect Vouchers</label>
-                        @include('service.partials.validationMessages', ['inputName' => 'can-collect'])
-                    </div>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox"
+                           id="can-collect"
+                           name="can-collect"
+                           class="styled-checkbox @error('can-collect') error @enderror"
+                        @checked(old('can-collect') === true)
+                    >
+                    <label for="can-collect">Can Collect Vouchers</label>
+                    @include('service.partials.validationMessages', ['inputName' => 'can-collect'])
                 </div>
                 <button type="submit" id="createCentre">Save</button>
             </form>
