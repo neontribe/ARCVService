@@ -113,12 +113,17 @@ class RetirableTest extends TestCase
 
     public function testRetireSetsRetiredAtToCurrentTime(): void
     {
+        // Freeze Time!
+        $now = Carbon::now();
+        Carbon::setTestNow($now);
+
         $stub = $this->makeStub();
         $stub->delete();
-
         $stub->retire();
+        $this->assertSame($now->toDateTimeString(), $stub->fresh()->retired_at->toDateTimeString());
 
-        $this->assertNotNull($stub->fresh()->retired_at);
+        // reset time!
+        Carbon::setTestNow();
     }
 
 
