@@ -107,14 +107,12 @@ class CentreUsersSeeder extends Seeder
      */
     private function seedRetiredUsers(): void
     {
-        factory(CentreUser::class, 2)
+        factory(CentreUser::class, 2)->state('retired')
             ->create()
             ->each(function (CentreUser $centreUser) {
                 $centre = Centre::inRandomOrder()->first()
                     ?? factory(Centre::class)->create();
-
                 $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
-                $centreUser->retire();
             });
     }
 
