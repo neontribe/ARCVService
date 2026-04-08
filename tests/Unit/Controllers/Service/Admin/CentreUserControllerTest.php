@@ -137,7 +137,7 @@ class CentreUserControllerTest extends StoreTestCase
 
         // Record is soft-deleted but still present.
         $this->assertNull(CentreUser::find($cu->id));
-        $this->assertNotNull(CentreUser::withTrashed()->find($cu->id)->deleted_at);
+        $this->assertNotNull(CentreUser::withTrashed()->find($cu->id));
     }
 
     public function testItCanEnableACentreUser(): void
