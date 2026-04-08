@@ -70,9 +70,9 @@ class CentreUserModelTest extends TestCase
         $cu->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // There is one
-        $this->assertEquals(1, $cu->centres()->count());
+        $this->assertSame(1, $cu->centres()->count());
         // It is the homeCentre
-        $this->assertEquals($centre->id, $cu->homeCentre->id);
+        $this->assertSame($centre->id, $cu->homeCentre->id);
     }
 
 
@@ -87,7 +87,7 @@ class CentreUserModelTest extends TestCase
         $cu->centres()->attach($centres->pluck('id')->all());
 
         // There is 4
-        $this->assertEquals(4, $cu->centres()->count());
+        $this->assertSame(4, $cu->centres()->count());
 
         // But We have no homeCentre
         $this->assertEmpty($cu->homeCentre);
@@ -172,7 +172,7 @@ class CentreUserModelTest extends TestCase
         $this->centreUser->retire();
 
         $fresh = CentreUser::withTrashed()->find($this->centreUser->id);
-        $this->assertEquals(1, $fresh->centres()->count());
+        $this->assertSame(1, $fresh->centres()->count());
     }
 
     public function testRetiredCentreUserCannotBeRestored(): void
