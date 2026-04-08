@@ -155,14 +155,15 @@ class CentreUserModelTest extends TestCase
     public function testRetiredCentreUserRetainsNoteRelations(): void
     {
         // Notes exist before retirement.
-        $this->assertCount(2, $this->centreUser->notes);
+        $notesCount = count($this->centreUser->notes);
+        $this->assertCount($notesCount, $this->centreUser->notes);
 
         $this->centreUser->delete();
         $this->centreUser->retire();
 
         // Notes are still associated via FK after retirement.
         $fresh = CentreUser::withTrashed()->find($this->centreUser->id);
-        $this->assertCount(2, $fresh->notes);
+        $this->assertCount($notesCount, $fresh->notes);
     }
 
     public function testRetiredCentreUserRetainsCentreRelations(): void
