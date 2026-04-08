@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Rules\NotExistsRule;
 
 class AdminNewCentreRequest extends FormRequest
 {
@@ -13,49 +12,67 @@ class AdminNewCentreRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         // Covered by Admin user auth
         return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
+     * Normalise input before validation runs.
      */
-    public function rules()
+    public function prepareForValidation(): void
+    {
+        $this->merge([
+            'can_collect' => $this->boolean('can_collect'),
+            'prefix' => strtoupper((string)$this->input('prefix', '')),
+        ]);
+    }
+
+    /**
+     * Validation rules
+     */
+    public function rules(): array
     {
         return [
-            // MUST be present, string
-            'name' => 'required|string',
-            // MUST be present, integer, in table
-            'sponsor' => 'required|integer|exists:sponsors,id',
-            // MUST be present, string, 1-5 characters and not in use
-            'rvid_prefix' => [
+            'name' => ['required', 'string'],
+            'sponsor_id' => ['required', 'exists:sponsors,id'],
+            'prefix' => [
                 'required',
                 'string',
                 'between:1,5',
-                new NotExistsRule('centres', 'prefix'),
+                Rule::unique('centres', 'prefix'),
             ],
-            // MUST be present, in print_prefs
             'print_pref' => [
                 'required',
-                Rule::in(config('arc.print_preferences'))
-            ]
+                Rule::in(config('arc.print_preferences')),
+            ],
+            'can_collect' => ['nullable', 'boolean']
         ];
     }
 
     /**
-     * Prep input for validation
+     * Human-readable attribute names used in error messages.
      */
-    public function prepareForValidation()
+    public function attributes(): array
     {
-        if ($this->has('rvid_prefix')) {
-            $this->merge(
-                // In this system, we're want it uppercase
-                ['rvid_prefix' => strtoupper($this->input('rvid_prefix'))]
-            );
-        }
+        return [
+            'sponsor_id' => 'sponsor',
+            'prefix' => 'RVID prefix',
+            'print_pref' => 'print preference',
+            'can-collect' => 'collection',
+        ];
+    }
+
+    /**
+     * Custom error messages.
+     */
+    public function messages(): array
+    {
+        return [
+            'prefix.unique' => 'That RVID prefix is already in use.',
+            'prefix.between' => 'The RVID prefix must be between 1 and 5 characters.',
+            'print_pref.in' => 'The selected print preference is not valid.',
+        ];
     }
 }

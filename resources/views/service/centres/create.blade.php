@@ -27,31 +27,31 @@
                         @include('service.partials.validationMessages', ['inputName' => 'name'])
                     </div>
                     <div>
-                        <label for="rvid_prefix" class="required">RVID prefix</label>
+                        <label for="prefix" class="required">RVID prefix</label>
                         <input type="text"
-                               id="rvid_prefix"
-                               name="rvid_prefix"
-                               class="@error('rvid_prefix') error @enderror uppercase"
-                               value="{{ old('rvid_prefix') }}"
+                               id="prefix"
+                               name="prefix"
+                               class="@error('prefix') error @enderror uppercase"
+                               value="{{ old('prefix') }}"
                                required
                         >
-                        @include('service.partials.validationMessages', ['inputName' => 'rvid_prefix'])
+                        @include('service.partials.validationMessages', ['inputName' => 'prefix'])
                     </div>
                     <div class="select">
-                        <label for="sponsor">Area</label>
-                        <select name="sponsor"
-                                id="sponsor"
-                                class="@error('sponsor') error @enderror"
+                        <label for="sponsor_id">Area</label>
+                        <select name="sponsor_id"
+                                id="sponsor_id"
+                                class="@error('sponsor_id') error @enderror"
                                 required
                         >
                             <option value="">Choose one</option>
                             @foreach ($sponsors as $sponsor)
                                 <option value="{{ $sponsor->id }}"
-                                        @selected(old('sponsor') === $sponsor->id)
+                                        @selected(old('sponsor_id') === $sponsor->id)
                                 >{{ $sponsor->name }}</option>
                             @endforeach
                         </select>
-                        @include('service.partials.validationMessages', ['inputName' => 'sponsor'])
+                        @include('service.partials.validationMessages', ['inputName' => 'sponsor_id'])
                     </div>
                     <div class="select">
                         <label for="print_pref">Printed Form</label>
@@ -71,13 +71,13 @@
                 </div>
                 <div class="checkbox-group">
                     <input type="checkbox"
-                           id="can-collect"
-                           name="can-collect"
-                           class="styled-checkbox @error('can-collect') error @enderror"
-                        @checked(old('can-collect') === true)
+                           id="can_collect"
+                           name="can_collect"
+                           class="styled-checkbox @error('can_collect') error @enderror"
+                           @checked(old('can_collect') === true)
                     >
-                    <label for="can-collect">Can Collect Vouchers</label>
-                    @include('service.partials.validationMessages', ['inputName' => 'can-collect'])
+                    <label for="can_collect">Can Collect Vouchers</label>
+                    @include('service.partials.validationMessages', ['inputName' => 'can_collect'])
                 </div>
                 <button type="submit" id="createCentre">Save</button>
             </form>
