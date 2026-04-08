@@ -63,6 +63,8 @@ $factory->define(App\CentreUser::class, function (Faker\Generator $faker) {
  * Relations (notes, centres) are preserved on the underlying row.
  */
 $factory->afterCreatingState(App\CentreUser::class, 'retired', function ($centreUser) {
+    // retired centres must be soft deleted first
+    $centreUser->delete();
     $centreUser->retire();
 });
 
