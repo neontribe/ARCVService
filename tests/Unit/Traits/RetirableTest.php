@@ -101,9 +101,20 @@ class RetirableTest extends TestCase
     // -----------------------------------------------------------------------
 
 
+    public function testRetireThrowsDomainExceptionIfModelIsNotSoftDeleted(): void
+    {
+        $stub = $this->makeStub();
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('must be disabled before it can be retired');
+
+        $stub->retire();
+    }
+
     public function testRetireSetsRetiredAtToCurrentTime(): void
     {
         $stub = $this->makeStub();
+        $stub->delete();
 
         $stub->retire();
 
@@ -111,19 +122,10 @@ class RetirableTest extends TestCase
     }
 
 
-    public function testRetireSoftDeletesTheModel(): void
-    {
-        $stub = $this->makeStub();
-
-        $stub->retire();
-
-        $this->assertSoftDeleted('retirable_stubs', ['id' => $stub->id]);
-    }
-
-
     public function testRetireReplacesEachFieldDeclaredInRetirableFields(): void
     {
         $stub = $this->makeStub();
+        $stub->delete();
         $originalEmail = $stub->email;
         $originalPassword = $stub->password;
 
@@ -140,6 +142,7 @@ class RetirableTest extends TestCase
     public function testRetireStoresAValidEmailPlaceholder(): void
     {
         $stub = $this->makeStub();
+        $stub->delete();
 
         $stub->retire();
 
@@ -153,6 +156,7 @@ class RetirableTest extends TestCase
     public function testRetireStoresAHashedPasswordNotPlainText(): void
     {
         $stub = $this->makeStub();
+        $stub->delete();
 
         $stub->retire();
 
@@ -165,6 +169,7 @@ class RetirableTest extends TestCase
     public function testRetireIsIdempotentAndDoesNotChangeFieldsOnSecondCall(): void
     {
         $stub = $this->makeStub();
+        $stub->delete();
         $stub->retire();
 
         $afterFirst = TestRetirableModel::withTrashed()->find($stub->id);
@@ -185,7 +190,9 @@ class RetirableTest extends TestCase
         $first = $this->makeStub(['email' => 'first@example.com']);
         $second = $this->makeStub(['email' => 'second@example.com']);
 
+        $first->delete();
         $first->retire();
+        $second->delete();
         $second->retire();
 
         $emailFirst = TestRetirableModel::withTrashed()->find($first->id)->email;
@@ -210,6 +217,7 @@ class RetirableTest extends TestCase
     public function testIsRetiredReturnsTrueAfterRetirement(): void
     {
         $stub = $this->makeStub();
+        $stub->delete();
 
         $stub->retire();
 
@@ -224,6 +232,7 @@ class RetirableTest extends TestCase
     public function testRestoringARetiredModelThrowsADomainException(): void
     {
         $stub = $this->makeStub();
+        $stub->delete();
         $stub->retire();
 
         $this->expectException(DomainException::class);
@@ -255,6 +264,7 @@ class RetirableTest extends TestCase
         $retired = $this->makeStub(['email' => 'retired@example.com']);
 
         $deleted->delete();
+        $retired->delete();
         $retired->retire();
 
         $results = TestRetirableModel::retired()->get();
@@ -271,6 +281,7 @@ class RetirableTest extends TestCase
         $retired = $this->makeStub(['email' => 'retired@example.com']);
 
         $deleted->delete();
+        $retired->delete();
         $retired->retire();
 
         $results = TestRetirableModel::active()->get();

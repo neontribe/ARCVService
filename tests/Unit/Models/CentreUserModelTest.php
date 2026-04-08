@@ -70,9 +70,9 @@ class CentreUserModelTest extends TestCase
         $cu->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // There is one
-        $this->assertEquals(1, $cu->centres()->count());
+        $this->assertSame(1, $cu->centres()->count());
         // It is the homeCentre
-        $this->assertEquals($centre->id, $cu->homeCentre->id);
+        $this->assertSame($centre->id, $cu->homeCentre->id);
     }
 
 
@@ -87,7 +87,7 @@ class CentreUserModelTest extends TestCase
         $cu->centres()->attach($centres->pluck('id')->all());
 
         // There is 4
-        $this->assertEquals(4, $cu->centres()->count());
+        $this->assertSame(4, $cu->centres()->count());
 
         // But We have no homeCentre
         $this->assertEmpty($cu->homeCentre);
@@ -110,16 +110,16 @@ class CentreUserModelTest extends TestCase
 
     public function testRetiredCentreUserHasNameCleared(): void
     {
-        $this->centreUser->retire();
+        $cu = factory(CentreUser::class)->state('retired')->create()->fresh();
 
-        $fresh = CentreUser::withTrashed()->find($this->centreUser->id);
-        $this->assertSame('[User Retired]', $fresh->name);
+        $this->assertSame('[User Retired]', $cu->name);
     }
 
     public function testRetiredCentreUserHasEmailReplacedWithSafeRetiredPlaceholder(): void
     {
         $originalEmail = $this->centreUser->email; // capture before retire() mutates the instance
 
+        $this->centreUser->delete();
         $this->centreUser->retire();
 
         $email = CentreUser::withTrashed()->find($this->centreUser->id)->email;
@@ -136,6 +136,7 @@ class CentreUserModelTest extends TestCase
     {
         $originalPassword = $this->centreUser->password; // capture before retire() mutates the instance
 
+        $this->centreUser->delete();
         $this->centreUser->retire();
 
         $replacedPassword = CentreUser::withTrashed()->find($this->centreUser->id)->password;
@@ -146,10 +147,9 @@ class CentreUserModelTest extends TestCase
 
     public function testRetiredCentreUserHasRememberTokenCleared(): void
     {
-        $this->centreUser->retire();
+        $cu = factory(CentreUser::class)->state('retired')->create()->fresh();
 
-        $fresh = CentreUser::withTrashed()->find($this->centreUser->id);
-        $this->assertNull($fresh->remember_token);
+        $this->assertNull($cu->remember_token);
     }
 
     public function testRetiredCentreUserRetainsNoteRelations(): void
@@ -157,6 +157,7 @@ class CentreUserModelTest extends TestCase
         // Notes exist before retirement.
         $this->assertCount(2, $this->centreUser->notes);
 
+        $this->centreUser->delete();
         $this->centreUser->retire();
 
         // Notes are still associated via FK after retirement.
@@ -169,10 +170,11 @@ class CentreUserModelTest extends TestCase
         $centre = factory(Centre::class)->create();
         $this->centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
 
+        $this->centreUser->delete();
         $this->centreUser->retire();
 
         $fresh = CentreUser::withTrashed()->find($this->centreUser->id);
-        $this->assertEquals(1, $fresh->centres()->count());
+        $this->assertSame(1, $fresh->centres()->count());
     }
 
     public function testRetiredCentreUserCannotBeRestored(): void

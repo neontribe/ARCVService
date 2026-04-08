@@ -54,12 +54,15 @@ trait Retirable
             return;
         }
 
+        if (!$this->trashed()) {
+            throw new DomainException(
+                get_class($this) . " [$this->id] must be disabled before it can be retired."
+            );
+        }
+
         $this->forceFill(
             array_merge($this->retirableFields(), ['retired_at' => now()])
         )->save();
-
-        // if we're not already soft deleted, do that too.
-        $this->delete();
     }
 
     public function isRetired(): bool
