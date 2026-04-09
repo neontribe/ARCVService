@@ -398,7 +398,7 @@ button.remove {
     flex: 0 0 300px;
     font-weight: 600;
     background-color: $arc_white;
-    border-right: 1px solid #ededed;
+    border-right: 1px solid $arc_border;
 
     ul {
         padding-left: 0;
