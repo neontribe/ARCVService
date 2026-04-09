@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\Routes;
 
-use App\StateToken;
 use Auth;
 use App\Centre;
 use App\CentreUser;
@@ -105,7 +104,7 @@ class StoreRoutesTest extends StoreTestCase
      *
      * @return void
      */
-    public function testLoginGuestRoute(): void
+    public function testLogoutGuestRoute(): void
     {
         $this->actingAs($this->centreUser, 'store')
             ->post(URL::route('store.logout'))
@@ -133,11 +132,11 @@ class StoreRoutesTest extends StoreTestCase
             ->assertResponseStatus(200);
     }
 
-    public function testLogoutRouteGate(): void
+    public function testLoginRoute(): void
     {
         Auth::logout();
-        $this->visit($this->logoutRoute)
-            ->seePageIs(URL::route('store.logoin'))
+        $this->visit(route('store.login'))
+            ->seePageIs(URL::route('store.login'))
             ->assertResponseStatus(200);
     }
 
