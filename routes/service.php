@@ -143,10 +143,10 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.centres.store',
         'uses' => 'Admin\CentresController@store',
     ]);
-    Route::put('centres/{id}/update', [
+    Route::put('centres/{centre}/update', [
         'as' => 'admin.centres.update',
         'uses' => 'Admin\CentresController@update',
-    ])->where('id', '^[0-9]+$');
+    ])->where('centre', '^[0-9]+$');
     Route::get('centres/{id}/edit', [
         'as' => 'admin.centres.edit',
         'uses' => 'Admin\CentresController@edit',

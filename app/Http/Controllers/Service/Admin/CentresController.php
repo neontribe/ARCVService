@@ -105,7 +105,7 @@ class CentresController extends Controller
             Log::error($e->getTraceAsString());
 
             return redirect()
-                ->route('admin.centres.edit', $centre)
+                ->route('admin.centres.edit', $centre->id)
                 ->withErrors('Update failed - DB Error.');
         }
 
