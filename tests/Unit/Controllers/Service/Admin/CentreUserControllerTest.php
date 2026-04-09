@@ -46,8 +46,7 @@ class CentreUserControllerTest extends StoreTestCase
             ->assertResponseOk()
             ->seePageIs(route('admin.centreusers.index'))
             ->see($this->data["name"])
-            ->see($this->data["email"])
-        ;
+            ->see($this->data["email"]);
         // find the user
         $cu = CentreUser::where('email', $this->data['email'])->first();
         $this->assertNotNull($cu);
@@ -70,7 +69,7 @@ class CentreUserControllerTest extends StoreTestCase
         $this->seeInDatabase('centre_users', [
             'name' => $cu->name,
             'email' => $cu->email,
-            'downloader' => $cu->downloader
+            'downloader' => $cu->downloader,
         ]);
         // Check that worked.
         $this->assertCount(1, $cu->centres);
@@ -94,14 +93,12 @@ class CentreUserControllerTest extends StoreTestCase
             ->seeInDatabase('centre_users', [
                 'name' => $this->data['name'],
                 'email' => $this->data['email'],
-                'downloader' => $this->data['downloader']
+                'downloader' => $this->data['downloader'],
             ])
             ->dontSeeInDatabase('centre_users', [
                 'name' => $cu->name,
                 'email' => $cu->email,
-            ])
-        ;
-        ;
+            ]);
         // find the user
         $cu = CentreUser::where('email', $this->data['email'])->first();
         $this->assertNotNull($cu);
@@ -131,18 +128,16 @@ class CentreUserControllerTest extends StoreTestCase
             )
             ->followRedirects()
             ->assertResponseOk()
-            // returns to edit page
             ->seePageIs(route('admin.centreusers.edit', ['id' => $cu->id]))
-            // retains old information
+            // Centre pivot relations are preserved on disable.
             ->seeInDatabase('centre_centre_user', [
                 'centre_user_id' => $cu->id,
                 'centre_id' => $this->altCentres->last()->id,
-            ])
-            ->see('This worker is <i>disabled</i>')
-            ->seeInElement('#toggleWorker', ' Enable worker')
-            // There is a delete button
-            ->seeElement('#deleteWorker')
-        ;
+            ]);
+
+        // Record is soft-deleted but still present.
+        $this->assertNull(CentreUser::find($cu->id));
+        $this->assertNotNull(CentreUser::withTrashed()->find($cu->id));
     }
 
     public function testItCanEnableACentreUser(): void
@@ -150,7 +145,7 @@ class CentreUserControllerTest extends StoreTestCase
         $cu = factory(CentreUser::class)->create([
             'name' => "testman",
             'email' => "testman@test.co.uk",
-            'deleted_at' => date("Y-m-d H:i:s")
+            'deleted_at' => date("Y-m-d H:i:s"),
         ]);
         $cu->centres()->attach($this->altCentres->last()->id, ['homeCentre' => true]);
 
@@ -166,16 +161,16 @@ class CentreUserControllerTest extends StoreTestCase
             )
             ->followRedirects()
             ->assertResponseOk()
-            // returns to edit page
             ->seePageIs(route('admin.centreusers.edit', ['id' => $cu->id]))
-            // retains old information
+            // Centre pivot relations are preserved on enable.
             ->seeInDatabase('centre_centre_user', [
                 'centre_user_id' => $cu->id,
                 'centre_id' => $this->altCentres->last()->id,
-            ])
-            ->dontSee('This worker is <i>disabled</i>')
-            ->seeInElement('#toggleWorker', 'Disable worker')
-        ;
+            ]);
+
+        // Record is restored and findable without withTrashed().
+        $this->assertNotNull(CentreUser::find($cu->id));
+        $this->assertNull(CentreUser::find($cu->id)->deleted_at);
     }
 
     public function testICanSeeDisabledCentreUsers(): void
@@ -183,20 +178,19 @@ class CentreUserControllerTest extends StoreTestCase
         $cu = factory(CentreUser::class)->create([
             'name' => "testman",
             'email' => "testman@test.co.uk",
-            'deleted_at' => date("Y-m-d H:i:s")
+            'deleted_at' => date("Y-m-d H:i:s"),
         ]);
 
         $this->seeInDatabase('centre_users', [
             'name' => $cu->name,
             'email' => $cu->email,
-            'deleted_at' => date("Y-m-d H:i:s")
+            'deleted_at' => date("Y-m-d H:i:s"),
         ]);
 
         $this->actingAs($this->adminUser, 'admin')
             ->visit(route('admin.centreusers.index'))
             ->assertResponseOk()
-            ->see($cu->email)
-        ;
+            ->see($cu->email);
     }
 
     public function testICannotSeeDeletedCentreUsers(): void
@@ -204,13 +198,13 @@ class CentreUserControllerTest extends StoreTestCase
         $cu = factory(CentreUser::class)->create([
             'name' => "testman",
             'email' => "testman@test.co.uk",
-            'deleted_at' => date("Y-m-d H:i:s")
+            'deleted_at' => date("Y-m-d H:i:s"),
         ]);
 
         $this->seeInDatabase('centre_users', [
             'name' => $cu->name,
             'email' => $cu->email,
-            'deleted_at' => date("Y-m-d H:i:s")
+            'deleted_at' => date("Y-m-d H:i:s"),
         ]);
 
         // remove it!
@@ -219,7 +213,76 @@ class CentreUserControllerTest extends StoreTestCase
         $this->actingAs($this->adminUser, 'admin')
             ->visit(route('admin.centreusers.index'))
             ->assertResponseOk()
-            ->dontSee($cu->email)
-        ;
+            ->dontSee($cu->email);
+    }
+
+    // -----------------------------------------------------------------------
+    // Retire action
+    // -----------------------------------------------------------------------
+
+    public function testRetiringADisabledWorkerWipesTheirPiiAndRedirectsToIndex(): void
+    {
+        $cu = factory(CentreUser::class)->create();
+        $cu->centres()->attach($this->centre->id, ['homeCentre' => true]);
+        $cu->delete();
+
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centreusers.retire', ['id' => $cu->id]))
+            ->assertRedirectedToRoute('admin.centreusers.index')
+            ->assertSessionHas('message');
+
+        $retired = CentreUser::withTrashed()->find($cu->id);
+        $this->assertNotNull($retired->retired_at);
+        $this->assertSame('[User Retired]', $retired->name);
+        $this->assertStringStartsWith('retired_', $retired->email);
+        $this->assertStringEndsWith('@retired.invalid', $retired->email);
+    }
+
+    public function testRetiringADisabledWorkerRetainsTheirCentreRelations(): void
+    {
+        $cu = factory(CentreUser::class)->create();
+        $cu->centres()->attach($this->centre->id, ['homeCentre' => true]);
+        $cu->delete();
+
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centreusers.retire', ['id' => $cu->id]));
+
+        $this->seeInDatabase('centre_centre_user', [
+            'centre_user_id' => $cu->id,
+            'centre_id' => $this->centre->id,
+        ]);
+    }
+
+    public function testRetiringAnActiveNonTrashedWorkerReturns404(): void
+    {
+        $cu = factory(CentreUser::class)->create();
+
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centreusers.retire', ['id' => $cu->id]))
+            ->assertResponseStatus(404);
+    }
+
+    public function testRetiredWorkerCannotBeToggled(): void
+    {
+        $cu = factory(CentreUser::class)->create();
+        $cu->centres()->attach($this->centre->id, ['homeCentre' => true]);
+        $cu->delete();
+        $cu->retire();
+
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centreusers.toggle', $cu->id));
+
+        // retired_at must still be set — the restoring event blocked the restore.
+        $this->assertNotNull(CentreUser::withTrashed()->find($cu->id)->retired_at);
+    }
+
+    public function testRetiredWorkerDoesNotAppearOnIndex(): void
+    {
+        $cu = factory(CentreUser::class)->state('retired')->create();
+
+        $this->actingAs($this->adminUser, 'admin')
+            ->visit(route('admin.centreusers.index'))
+            ->assertResponseOk()
+            ->dontSee($cu->email);
     }
 }

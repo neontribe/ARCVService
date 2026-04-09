@@ -121,9 +121,9 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'uses' => 'Admin\CentreUsersController@toggle',
     ])->where('id', '^[0-9]+$');
 
-    Route::get('workers/{id}/delete', [
-        'as' => 'admin.centreusers.delete',
-        'uses' => 'Admin\CentreUsersController@delete',
+    Route::get('workers/{id}/retire', [
+        'as' => 'admin.centreusers.retire',
+        'uses' => 'Admin\CentreUsersController@retire',
     ])->where('id', '^[0-9]+$');
 
     // Centre Management
