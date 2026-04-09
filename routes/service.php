@@ -85,8 +85,8 @@ Route::group(['middleware' => 'auth:admin'], static function () {
     Route::get('workers/{id}/toggle', [CentreUsersController::class, 'toggle'])
         ->name('admin.centreusers.toggle')
         ->whereNumber('id');
-    Route::get('workers/{id}/delete', [CentreUsersController::class, 'delete'])
-        ->name('admin.centreusers.delete')
+    Route::get('workers/{id}/retire', [CentreUsersController::class, 'retire'])
+        ->name('admin.centreusers.retire')
         ->whereNumber('id');
 
     // Centre Management

@@ -4,13 +4,16 @@ namespace App;
 
 use Eloquent;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\belongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @mixin Eloquent
  * @property string $name
  * @property string $prefix
  * @property string $print_pref
+ * @property boolean $can_collect
  * @property Sponsor $sponsor
  * @property Registration[] $registrations
  * @property CentreUser[] $centreUsers
@@ -25,7 +28,7 @@ class Centre extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'prefix', 'print_pref', 'sponsor_id'
+        'name', 'prefix', 'print_pref', 'sponsor_id', 'can_collect'
     ];
 
     /**
@@ -36,7 +39,16 @@ class Centre extends Model
     protected $hidden = [
     ];
 
-    public function nextCentreSequence()
+    /**
+     * Casts
+     *
+     * @var array
+     */
+    protected $casts = [
+        'can_collect' => 'boolean'
+    ];
+
+    public function nextCentreSequence(): int
     {
         // Get the last family
         $last_family = $this->families()->orderByDesc('centre_sequence')->first();
@@ -46,7 +58,7 @@ class Centre extends Model
 
         // Override it if the family has a sequence.
         if ($last_family && $last_family->centre_sequence) {
-            $sequence = $last_family->centre_sequence +1;
+            $sequence = $last_family->centre_sequence + 1;
         }
 
         return $sequence;
@@ -54,48 +66,39 @@ class Centre extends Model
 
     /**
      * Get the Registrations for this Centre
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function registrations()
+    public function registrations(): HasMany
     {
-        return $this->hasMany('App\Registration');
+        return $this->hasMany(Registration::class);
     }
 
     /**
      * Get the CentreUsers who belong to this Centre
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
      */
-    public function centreUsers()
+    public function centreUsers(): BelongsToMany
     {
-        return $this->belongsToMany('App\CentreUser');
+        return $this->belongsToMany(CentreUser::class);
     }
 
     /**
      * Get the Sponsor for this Centre
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function sponsor()
+    public function sponsor(): BelongsTo
     {
-        return $this->belongsTo('App\Sponsor');
+        return $this->belongsTo(Sponsor::class);
     }
 
     /**
      * Gets all the siblings under the same parent (including this one).
      * Self join; possible a better way to do this.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function neighbours()
+    public function neighbours(): HasMany
     {
-        return $this->hasMany('App\Centre', 'sponsor_id', 'sponsor_id');
+        return $this->hasMany(related: __CLASS__, foreignKey: 'sponsor_id', localKey: 'sponsor_id');
     }
 
-    public function families()
+    public function families(): HasMany
     {
-        return $this->hasMany('App\Family', 'initial_centre_id');
+        return $this->hasMany(Family::class, 'initial_centre_id');
     }
-
 }

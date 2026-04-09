@@ -58,6 +58,17 @@ $factory->define(App\CentreUser::class, function (Faker\Generator $faker) {
 });
 
 /**
+ * CentreUser in the retired state.
+ * PII is wiped, retired_at is set, and the model is soft-deleted.
+ * Relations (notes, centres) are preserved on the underlying row.
+ */
+$factory->afterCreatingState(App\CentreUser::class, 'retired', function ($centreUser) {
+    // retired centres must be soft deleted first
+    $centreUser->delete();
+    $centreUser->retire();
+});
+
+/**
  * CentreUser who can Download.
  */
 $factory->state(App\CentreUser::class, 'withDownloader', function ($faker) use ($factory) {
@@ -308,8 +319,14 @@ $factory->define(App\Centre::class, function (Faker\Generator $faker) {
         // print_pref will be 'collection' by default.
         // To ensure we always have one 'individual', adding to seeder as well.
         'print_pref' => $faker->randomElement(['individual', 'collection']),
+        'can_collect' => false
     ];
 });
+
+$factory->state(App\Centre::class, 'collecting', function(Faker\Generator $faker) {
+    return ['can_collect' => true];
+});
+
 
 // Registration
 $factory->define(App\Registration::class, function (Faker\Generator $faker, $attributes) {

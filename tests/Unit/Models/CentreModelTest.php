@@ -99,4 +99,30 @@ class CentreModelTest extends TestCase
             $this->assertEquals($b_centres->pluck('id'), $bc->neighbours->pluck('id'));
         }
     }
+
+    public function testItCanNotCollectByDefault(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $this->assertFalse($centre->can_collect);
+    }
+
+    public function testItCanBeSetToCollect(): void
+    {
+        $centre = factory(Centre::class)->states('collecting')->create();
+        $this->assertTrue($centre->can_collect);
+    }
+
+    public function testCanCollectIsPersisted(): void
+    {
+        $centre = factory(Centre::class)->states('collecting')->create();
+        $this->assertTrue(Centre::find($centre->id)->can_collect);
+    }
+
+    public function testCanCollectCanBeToggledToFalse(): void
+    {
+        $centre = factory(Centre::class)->states('collecting')->create();
+        $centre->can_collect = false;
+        $centre->save();
+        $this->assertFalse(Centre::find($centre->id)->can_collect);
+    }
 }
