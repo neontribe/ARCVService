@@ -7,7 +7,7 @@
 
             <h1>Add a Children's Centre</h1>
 
-            <p>Use the form below to add a new children's centre. Add their name, RVID prefix, area and form.</p>
+            <p>Use the form below to add a new children's centre. Add their name, RVID prefix, area, form style and collecting state</p>
 
             <form class="styled-form"
                   method="POST"

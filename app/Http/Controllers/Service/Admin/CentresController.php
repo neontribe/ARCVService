@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminNewCentreRequest;
 use App\Http\Requests\AdminUpdateCentreRequest;
 use App\Sponsor;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -41,16 +40,12 @@ class CentresController extends Controller
     /**
      * Return a JSON list of neighbour names and IDs.
      */
-    public function getNeighboursAsJson(int $id): JsonResponse
+    public function getNeighboursAsJson(Centre $centre): JsonResponse
     {
-        try {
-            $neighbours = Centre::findOrFail($id)
-                ->neighbours()
-                ->whereKeyNot($id)
-                ->get(['name', 'id']);
-        } catch (ModelNotFoundException) {
-            $neighbours = collect();
-        }
+        $neighbours = $centre
+            ->neighbours()
+            ->whereKeyNot($centre->getKey())
+            ->get(['name', 'id']);
 
         return response()->json($neighbours);
     }
@@ -83,22 +78,18 @@ class CentresController extends Controller
      */
     public function edit(Centre $centre): View
     {
-        return view('service.centres.edit', compact('centre'));
+        $sponsors = Sponsor::all();
+        return view('service.centres.edit', compact('centre', 'sponsors'));
     }
 
     /**
-     * Update the specified Centre's name.
+     * Update the specified Centre's fields
      */
     public function update(AdminUpdateCentreRequest $request, Centre $centre): RedirectResponse
     {
         try {
-            $centre = DB::transaction(static function () use ($request, $centre): Centre {
-                $centre->fill([
-                    'name' => $request->input('name'),
-                ]);
-                $centre->save();
-
-                return $centre;
+            DB::transaction(static function () use ($request, $centre): bool {
+                return $centre->update($request->validated());
             });
         } catch (Throwable $e) {
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());

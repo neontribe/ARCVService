@@ -30,7 +30,7 @@
                         <td>{{ $centre->sponsor->name }}</td>
                         <td>{{ ucwords($centre->print_pref) }}</td>
                         <td>
-                            <a href="{{ route('admin.centres.edit', ['id' => $centre->id]) }}" style="padding:5px;" class="link-button">
+                            <a href="{{ route('admin.centres.edit', ['centre' => $centre->id]) }}" style="padding:5px;" class="link-button">
                               Edit
                             </a>
                         </td>

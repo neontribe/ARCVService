@@ -35,13 +35,13 @@ class AdminNewCentreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string'],
+            'name' => ['required', 'string', 'unique:centres,name'],
             'sponsor_id' => ['required', 'exists:sponsors,id'],
             'prefix' => [
                 'required',
                 'string',
                 'between:1,5',
-                Rule::unique('centres', 'prefix'),
+                'unique:centres,prefix',
             ],
             'print_pref' => [
                 'required',
@@ -70,6 +70,7 @@ class AdminNewCentreRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'name.unique' => 'That name is already in use.',
             'prefix.unique' => 'That RVID prefix is already in use.',
             'prefix.between' => 'The RVID prefix must be between 1 and 5 characters.',
             'print_pref.in' => 'The selected print preference is not valid.',

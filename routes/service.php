@@ -135,10 +135,10 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.centres.create',
         'uses' => 'Admin\CentresController@create',
     ]);
-    Route::get('centres/{id}/neighbours', [
+    Route::get('centres/{centre}/neighbours', [
         'as' => 'admin.centre_neighbours.index',
         'uses' => 'Admin\CentresController@getNeighboursAsJson'
-    ])->where('id', '^[0-9]+$');
+    ])->where('centre', '^[0-9]+$');
     Route::post('centres', [
         'as' => 'admin.centres.store',
         'uses' => 'Admin\CentresController@store',
@@ -147,10 +147,10 @@ Route::group(['middleware' => 'auth:admin'], function () {
         'as' => 'admin.centres.update',
         'uses' => 'Admin\CentresController@update',
     ])->where('centre', '^[0-9]+$');
-    Route::get('centres/{id}/edit', [
+    Route::get('centres/{centre}/edit', [
         'as' => 'admin.centres.edit',
         'uses' => 'Admin\CentresController@edit',
-    ])->where('id', '^[0-9]+$');
+    ])->where('centre', '^[0-9]+$');
 
     // Sponsor Management
     Route::get('sponsors', [

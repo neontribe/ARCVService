@@ -22,7 +22,7 @@ class AdminNewCentreRequestTest extends StoreTestCase
         parent::setUp();
 
         $this->rules = (new AdminNewCentreRequest())->rules();
-        factory(Centre::class)->create(['prefix' => 'EXISTS']);
+        factory(Centre::class)->create(['name' => 'EXIST', 'prefix' => 'EXIST']);
         factory(Sponsor::class)->create();
     }
 
@@ -56,6 +56,14 @@ class AdminNewCentreRequestTest extends StoreTestCase
 
         yield 'Name is not a string' => [false, [
             'name' => 1,
+            'sponsor_id' => 1,
+            'prefix' => 'TSTCT',
+            'print_pref' => 'individual',
+            'can_collect' => false,
+        ]];
+
+        yield 'Name already exists' => [false, [
+            'name' => 'EXIST',
             'sponsor_id' => 1,
             'prefix' => 'TSTCT',
             'print_pref' => 'individual',
@@ -118,8 +126,8 @@ class AdminNewCentreRequestTest extends StoreTestCase
         yield 'RVID already exists' => [false, [
             'name' => 'Test Centre',
             'sponsor_id' => 1,
-            'prefix' => 'EXISTS',
-            'print_pref' => 'not even slightly a print pref',
+            'prefix' => 'EXIST',
+            'print_pref' => 'individual',
             'can_collect' => false,
         ]];
 
