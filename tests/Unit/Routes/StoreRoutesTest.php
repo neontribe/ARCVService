@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\Routes;
 
-use App\StateToken;
 use Auth;
 use App\Centre;
 use App\CentreUser;
@@ -105,12 +104,19 @@ class StoreRoutesTest extends StoreTestCase
      *
      * @return void
      */
-    public function testLoginGuestRoute(): void
+    public function testLogoutGuestRoute(): void
     {
-        Auth::logout();
-        $this->get(URL::route('store.login'))
+        $this->actingAs($this->centreUser, 'store')
+            ->post(URL::route('store.logout'))
+            ->followRedirects()
             ->seePageIs(URL::route('store.login'))
-            ->assertResponseStatus(200);
+            ->dontSee('Sorry, there was a permission problem. Please Log in.');
+
+        Auth::logout();
+        $this->post(URL::route('store.logout'))
+            ->followRedirects()
+            ->seePageIs(URL::route('store.login'))
+            ->see('Sorry, there was a permission problem. Please Log in.');
     }
 
     /**
@@ -123,6 +129,14 @@ class StoreRoutesTest extends StoreTestCase
         Auth::logout();
         $this->get(URL::route('store.password.request'))
             ->seePageIs(URL::route('store.password.request'))
+            ->assertResponseStatus(200);
+    }
+
+    public function testLoginRoute(): void
+    {
+        Auth::logout();
+        $this->visit(route('store.login'))
+            ->seePageIs(URL::route('store.login'))
             ->assertResponseStatus(200);
     }
 

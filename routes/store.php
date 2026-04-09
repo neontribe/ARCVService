@@ -1,204 +1,151 @@
 <?php
 
-// Admin (Store) Authentication Routes...
-Route::get('login', [
-    'as' => 'store.login',
-    'uses' => 'Auth\LoginController@showLoginForm',
-]);
+use App\Http\Controllers\Store\Auth\LoginController;
+use App\Http\Controllers\Store\Auth\ForgotPasswordController;
+use App\Http\Controllers\Store\Auth\ResetPasswordController;
+use App\Http\Controllers\Store\DashboardController;
+use App\Http\Controllers\Store\SessionController;
+use App\Http\Controllers\Store\RegistrationController;
+use App\Http\Controllers\Store\FamilyController;
+use App\Http\Controllers\Store\BundleController;
+use App\Http\Controllers\Store\HistoryController;
+use App\Http\Controllers\Store\CentreController;
+use App\Http\Controllers\Store\VoucherController;
 
-Route::post('login', 'Auth\LoginController@login');
+/*
+|--------------------------------------------------------------------------
+| Store Routes
+|--------------------------------------------------------------------------
+*/
 
-Route::post('logout', [
-    'as' => 'store.logout',
-    'uses' => 'Auth\LoginController@logout',
-]);
+// Authentication
+Route::get('login', [LoginController::class, 'showLoginForm'])->name('store.login');
+Route::post('login', [LoginController::class, 'login']);
 
-// Admin (Store) Password Reset Routes...
-Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')
-    ->name('store.password.request')
-;
-Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')
-    ->name('store.password.email')
-;
-Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')
+// Password Reset
+Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])
+    ->name('store.password.request');
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])
+    ->name('store.password.email');
+Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])
     ->name('store.password.reset')
-    ->where('token', '[0-9a-f]{64}')
-;
-Route::post('password/reset', 'Auth\ResetPasswordController@reset');
+    ->where('token', '[0-9a-f]{64}');
+Route::post('password/reset', [ResetPasswordController::class, 'reset']);
 
-// Store Dashboard route
-// Default redirect to Service Dashboard
-
+// Base redirect
 Route::get('/', static function () {
-    $route = 'store.login';
-    return redirect()->route($route);
+    return redirect()->route('store.login');
 })->name('store.base');
 
+// Authenticated routes
+Route::middleware('auth:store')->group(function () {
 
-// Route groups for authorised routes
-Route::group(['middleware' => 'auth:store'], function () {
-    Route::get(
-        'dashboard',
-        'DashboardController@index'
-    )->name('store.dashboard');
+    Route::post('logout', [LoginController::class, 'logout'])
+        ->name('store.logout');
 
-    // Route to update the CentreUser's Session
-    Route::put('/session', [
-        'as' => 'store.session.put',
-        'uses' => 'SessionController@update'
-    ]);
+    Route::get('dashboard', [DashboardController::class, 'index'])
+        ->name('store.dashboard');
 
-    Route::get('/registrations', [
-        'as' => 'store.registration.index',
-        'uses' => 'RegistrationController@index',
-    ]);
+    Route::put('/session', [SessionController::class, 'update'])
+        ->name('store.session.put');
 
-    Route::post('/registrations', [
-        'as' => 'store.registration.store',
-        'uses' => 'RegistrationController@store',
-    ]);
+    // Registrations
+    Route::get('/registrations', [RegistrationController::class, 'index'])
+        ->name('store.registration.index');
+    Route::post('/registrations', [RegistrationController::class, 'store'])
+        ->name('store.registration.store');
+    Route::get('/registrations/create', [RegistrationController::class, 'create'])
+        ->name('store.registration.create');
+    Route::get('/registrations/print', [RegistrationController::class, 'printBatchIndividualFamilyForms'])
+        ->name('store.registrations.print');
 
-    Route::get('/registrations/create', [
-        'as' => 'store.registration.create',
-        'uses' => 'RegistrationController@create',
-    ]);
+    // Specific registration actions (requires readOrUpdate policy)
+    Route::middleware('can:readOrUpdate,registration')->group(function () {
 
-    // Batch print Family Forms for User Centre
-    Route::get('/registrations/print', [
-        'as' => 'store.registrations.print',
-        'uses' => 'RegistrationController@printBatchIndividualFamilyForms',
-    ]);
+        Route::get('/registrations/{registration}/edit', [RegistrationController::class, 'edit'])
+            ->name('store.registration.edit')
+            ->whereNumber('registration');
 
-    Route::group(
-        // Must be able to access this registration
-        ['middleware' => 'can:readOrUpdate,registration'],
-        function () {
+        Route::put('/registrations/{registration}', [RegistrationController::class, 'update'])
+            ->name('store.registration.update')
+            ->whereNumber('registration');
 
-            // Edit a specific thing
-            Route::get('/registrations/{registration}/edit', [
-                'as' => 'store.registration.edit',
-                'uses' => 'RegistrationController@edit',
-            ])->where('registration', '^[0-9]+$');
+        Route::get('/registrations/{registration}/view', [RegistrationController::class, 'view'])
+            ->name('store.registration.view')
+            ->whereNumber('registration');
 
-            // Update a specific registration
-            Route::put('/registrations/{registration}', [
-                'as' => 'store.registration.update',
-                'uses' => 'RegistrationController@update',
-            ])->where('registration', '^[0-9]+$');
+        Route::put('/registrations/{registration}/family', [FamilyController::class, 'update'])
+            ->name('store.registration.family')
+            ->whereNumber('registration');
 
-            // View a specific registration
-            Route::get('/registrations/{registration}/view', [
-                'as' => 'store.registration.view',
-                'uses' => 'RegistrationController@view',
-            ])->where('registration', '^[0-9]+$');
+        Route::put('/registrations/{registration}/rejoin', [FamilyController::class, 'rejoin'])
+            ->name('store.registration.rejoin')
+            ->whereNumber('registration');
 
-            // Update (deactivate) a specific Registration's Family
-            Route::put('/registrations/{registration}/family', [
-                'as' => 'store.registration.family',
-                'uses' => 'FamilyController@update',
-            ])->where('registration', '^[0-9]+$');
+        Route::get(
+            '/registrations/{registration}/print',
+            [RegistrationController::class, 'printOneIndividualFamilyForm']
+        )
+            ->name('store.registration.print')
+            ->whereNumber('registration');
 
-            // Rejoin a specific Registration's Family
-            Route::put('/registrations/{registration}/rejoin', [
-                'as' => 'store.registration.rejoin',
-                'uses' => 'FamilyController@rejoin',
-            ])->where('registration', '^[0-9]+$');
+        Route::put('/registrations/{registration}/vouchers', [BundleController::class, 'update'])
+            ->name('store.registration.vouchers.put')
+            ->whereNumber('registration');
 
-            // Print a specific registration
-            Route::get('/registrations/{registration}/print', [
-                'as' => 'store.registration.print',
-                'uses' => 'RegistrationController@printOneIndividualFamilyForm',
-            ])->where('registration', '^[0-9]+$');
+        Route::get('/registrations/{registration}/voucher-manager', [BundleController::class, 'create'])
+            ->name('store.registration.voucher-manager')
+            ->whereNumber('registration');
 
-            // PUTS (and replaces!) the currentBundle of vouchers!
-            Route::put('/registrations/{registration}/vouchers', [
-                'as' => 'store.registration.vouchers.put',
-                'uses' => 'BundleController@update',
-            ])->where('registration', '^[0-9]+$');
+        Route::get('/registrations/{registration}/collection-history', [HistoryController::class, 'show'])
+            ->name('store.registration.collection-history')
+            ->whereNumber('registration');
 
-            // View a registrations vouchers
-            Route::get('/registrations/{registration}/voucher-manager', [
-                'as' => 'store.registration.voucher-manager',
-                'uses' => 'BundleController@create'
-            ])->where('registration', '^[0-9]+$');
+        Route::delete(
+            '/registrations/{registration}/vouchers/{voucher}',
+            [BundleController::class, 'removeVoucherFromCurrentBundle']
+        )
+                ->name('store.registration.voucher.delete')
+                ->whereNumber(['registration', 'voucher']);
 
-            // Fetches a registration's collection history
-            Route::get(
-                '/registrations/{registration}/collection-history',
-                'HistoryController@show'
-            )->name('store.registration.collection-history')->where('registration', '^[0-9]+$');
+        Route::delete(
+            '/registrations/{registration}/vouchers',
+            [BundleController::class, 'removeAllVouchersFromCurrentBundle']
+        )
+                ->name('store.registration.vouchers.delete')
+                ->whereNumber('registration');
 
-            // Removes a voucher from the current bundle
-            Route::delete(
-                '/registrations/{registration}/vouchers/{voucher}',
-                'BundleController@removeVoucherFromCurrentBundle'
-            )->name('store.registration.voucher.delete'
-            )->where('registration', '^[0-9]+$'
-            )->where('voucher', '^[0-9]+$');
+        Route::post('/registrations/{registration}/vouchers', [BundleController::class, 'addVouchersToCurrentBundle'])
+            ->name('store.registration.vouchers.post')
+            ->whereNumber('registration');
+    });
 
-            // Removes all the vouchers in the current bundle
-            Route::delete(
-                '/registrations/{registration}/vouchers',
-                'BundleController@removeAllVouchersFromCurrentBundle'
-            )->name('store.registration.vouchers.delete')->where('registration', '^[0-9]+$');
+    // Export routes (requires export policy on CentreUser)
+    Route::middleware('can:export,App\CentreUser')->group(function (): void {
 
-            // Add vouchers to bundle
-            Route::post(
-                '/registrations/{registration}/vouchers',
-                'BundleController@addVouchersToCurrentBundle'
-            )->name('store.registration.vouchers.post')->where('registration', '^[0-9]+$');
-        }
-    );
+        Route::get('/centres/registrations/summary', [CentreController::class, 'exportRegistrationsSummary'])
+            ->name('store.centres.registrations.summary');
 
-    Route::group(
-        ['middleware' => 'can:export,App\CentreUser'],
-        function () {
+        Route::get('/vouchers/master-log', [VoucherController::class, 'exportMasterVoucherLog'])
+            ->name('store.vouchers.mvl.export');
 
-            // ALL centres registrations as a summary spreadsheet
-            Route::get('/centres/registrations/summary', [
-                'as' => 'store.centres.registrations.summary',
-                'uses' => 'CentreController@exportRegistrationsSummary',
-            ]);
+        Route::get('/vouchers/historical', [VoucherController::class, 'listVoucherLogs'])
+            ->name('store.vouchers.mvl.historical');
 
-            // ALL vouchers and extra details, in a format suitable for the MVL sheets.
-            // As this includes participant ID access, it has "can:export registrations".
-            Route::get('/vouchers/master-log', [
-                'as' => 'store.vouchers.mvl.export',
-                'uses' => 'VoucherController@exportMasterVoucherLog',
-            ]);
+        Route::get('/vouchers/download', [VoucherController::class, 'downloadAndDecryptVoucherLogs'])
+            ->name('store.vouchers.mvl.download');
+    });
 
-            // Table of all historical voucher logs stored in our system.
-            Route::get('/vouchers/historical', [
-                'as' => 'store.vouchers.mvl.historical',
-                'uses' => 'VoucherController@listVoucherLogs',
-            ]);
+    // Centre-scoped routes (requires viewRelevantCentre policy)
+    Route::middleware('can:viewRelevantCentre,centre')->group(function (): void {
 
-            // Downloads and decrypts voucher log file when the button at /vouchers/historical is pressed.
-            Route::get('/vouchers/download', [
-                'as' => 'store.vouchers.mvl.download',
-                'uses' => 'VoucherController@downloadAndDecryptVoucherLogs',
-            ]);
+        Route::get('/centres/{centre}/registrations/collection', [CentreController::class, 'printCentreCollectionForm'])
+            ->name('store.centre.registrations.collection')
+            ->whereNumber('centre');
 
-        }
-    );
-
-    Route::group(
-        ['middleware' => 'can:viewRelevantCentre,centre'],
-        function () {
-
-            // Print a Specific Centre's Registrations list
-            // Anyone who can view a centre can do this
-            Route::get('/centres/{centre}/registrations/collection', [
-                'as' => 'store.centre.registrations.collection',
-                'uses' => 'CentreController@printCentreCollectionForm',
-            ])->where('centre', '^[0-9]+$');
-
-            // Export A specific centres' registrations summary spreadsheet.
-            // anyone who can view a centre AND download can do this.
-            Route::get('/centres/{centre}/registrations/summary', [
-                'as' => 'store.centre.registrations.summary',
-                'uses' => 'CentreController@exportRegistrationsSummary',
-            ])->middleware(['can:download,App\CentreUser'])->where('centre', '^[0-9]+$');
-        }
-    );
+        Route::get('/centres/{centre}/registrations/summary', [CentreController::class, 'exportRegistrationsSummary'])
+            ->name('store.centre.registrations.summary')
+            ->middleware('can:download,App\CentreUser')
+            ->whereNumber('centre');
+    });
 });
