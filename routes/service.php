@@ -1,5 +1,19 @@
 <?php
 
+use App\Http\Controllers\Service\Admin\CentresController;
+use App\Http\Controllers\Service\Admin\CentreUsersController;
+use App\Http\Controllers\Service\Admin\DeliveriesController;
+use App\Http\Controllers\Service\Admin\MarketsController;
+use App\Http\Controllers\Service\Admin\PaymentsController;
+use App\Http\Controllers\Service\Admin\SponsorsController;
+use App\Http\Controllers\Service\Admin\TradersController;
+use App\Http\Controllers\Service\Admin\VouchersController;
+use App\Http\Controllers\Service\AdminController;
+use App\Http\Controllers\Service\Auth\ForgotPasswordController;
+use App\Http\Controllers\Service\Auth\LoginController;
+use App\Http\Controllers\Service\Auth\ResetPasswordController;
+use App\Http\Controllers\Service\VersionController;
+
 /*
 |--------------------------------------------------------------------------
 | Service Routes
@@ -7,237 +21,124 @@
 */
 
 // Admin (Service) Authentication Routes...
-Route::get('login', [
-    'as' => 'admin.login',
-    'uses' => 'Auth\LoginController@showLoginForm',
-]);
-Route::post('login', 'Auth\LoginController@login');
 
-Route::get('/', 'AdminController@index')->name('admin.dashboard');
+Route::get('login', [LoginController::class, 'showLoginForm'])->name('admin.login');
+Route::post('login', [LoginController::class, 'login']);
 
-Route::get('version', [
-    'as' => 'version',
-    'uses' => 'VersionController@version',
-]);
+Route::get('/', [AdminController::class, 'index'])->name('admin.dashboard');
 
-// Admin (Service) Password Reset Routes...
-Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')
-    ->name('admin.password.request')
-;
-Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')
-    ->name('admin.password.email')
-;
-Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')
+Route::get('version', [VersionController::class, 'version'])->name('version');
+
+// Password Reset
+Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])
+    ->name('admin.password.request');
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])
+    ->name('admin.password.email');
+Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])
     ->name('admin.password.reset')
     ->where('token', '[0-9a-f]{64}');
-;
-Route::post('password/reset', 'Auth\ResetPasswordController@reset');
+Route::post('password/reset', [ResetPasswordController::class, 'reset']);
 
-Route::group(['middleware' => 'auth:admin'], function () {
+//
+Route::group(['middleware' => 'auth:admin'], static function () {
+
+    // Must be logged in to log out.
+    Route::post('logout', [LoginController::class, 'logout'])->name('admin.logout');
+
     // Voucher Management
-    Route::get('vouchers', [
-        'as' => 'admin.vouchers.index',
-        'uses' => 'Admin\VouchersController@index',
-    ]);
+    Route::get('vouchers', [VouchersController::class, 'index'])->name('admin.vouchers.index');
     // ...create form
-    Route::get('vouchers/create', [
-        'as' => 'admin.vouchers.create',
-        'uses' => 'Admin\VouchersController@create',
-    ]);
+    Route::get('vouchers/create', [VouchersController::class, 'create'])->name('admin.vouchers.create');
     // ...void form
-    Route::get('vouchers/void', [
-        'as' => 'admin.vouchers.void',
-        'uses' => 'Admin\VouchersController@void',
-    ]);
-    // ...store batch of printed
-    Route::post('vouchers', [
-        'as' => 'admin.vouchers.storebatch',
-        'uses' => 'Admin\VouchersController@storeBatch',
-    ]);
-    // ...patch because changing state of a partial collection of vouchers.
-    Route::patch('vouchers', [
-        'as' => 'admin.vouchers.retirebatch',
-        'uses' => 'Admin\VouchersController@retireBatch',
-    ]);
-    Route::get('vouchers/{id}', [
-        'as' => 'service.vouchers.viewone',
-        'uses' => 'Admin\VouchersController@viewOne',
-    ])->where('id', '^[0-9]+$');
+    Route::get('vouchers/void', [VouchersController::class, 'void'])->name('admin.vouchers.void');
 
-    Route::get('vouchers/search', [
-        'as' => 'admin.vouchers.search',
-        'uses' => 'Admin\VouchersController@search',
-    ]);
+    Route::get('vouchers/search', [VouchersController::class, 'search'])->name('admin.vouchers.search');
+    // ...store batch of printed
+    Route::post('vouchers', [VouchersController::class, 'storeBatch'])->name('admin.vouchers.storebatch');
+    // ...patch because changing state of a partial collection of vouchers.
+    Route::patch('vouchers', [VouchersController::class, 'retireBatch'])->name('admin.vouchers.retirebatch');
+    Route::get('vouchers/{voucher}', [VouchersController::class, 'viewOne'])
+        ->name('service.vouchers.viewone')
+        ->whereNumber('voucher');
 
     //Payment Management
-    Route::get('payments',[
-        'as' =>'admin.payments.index',
-        'uses' =>'Admin\PaymentsController@index',
-    ]);
-
-    Route::get('payments/payment-request/{paymentUuid}', [
-        'as' => 'admin.payment-request.show',
-        'uses' => 'Admin\PaymentsController@show'
-    ]);
-
-    Route::put('payments/payment-request/{paymentUuid}', [
-        'as' => 'admin.payment-request.update',
-        'uses' => 'Admin\PaymentsController@update'
-    ]);
-
-        Route::get('payments/trader-payment-history/{trader}', [
-        'as' => 'admin.trader-payment-history.show',
-        'uses' => 'Admin\TradersController@traderHistory'
-    ]);
+    Route::get('payments', [PaymentsController::class, 'index'])->name('admin.payments.index');
+    Route::get('payments/payment-request/{paymentUuid}', [PaymentsController::class, 'show'])
+        ->name('admin.payment-request.show');
+    Route::put('payments/payment-request/{paymentUuid}', [PaymentsController::class, 'update'])
+        ->name('admin.payment-request.update');
+    Route::get('payments/trader-payment-history/{trader}', [TradersController::class, 'traderHistory'])
+        ->name('admin.trader-payment-history.show')
+        ->whereNumber('trader');
 
     // Worker Management
-    Route::get('workers', [
-        'as' => 'admin.centreusers.index',
-        'uses' => 'Admin\CentreUsersController@index',
-    ]);
-    Route::get('workers/create', [
-        'as' => 'admin.centreusers.create',
-        'uses' => 'Admin\CentreUsersController@create',
-    ]);
-    Route::post('workers', [
-        'as' => 'admin.centreusers.store',
-        'uses' => 'Admin\CentreUsersController@store',
-    ]);
-    Route::put('workers/{id}', [
-        'as' => 'admin.centreusers.update',
-        'uses' => 'Admin\CentreUsersController@update',
-    ])->where('id', '^[0-9]+$');
-    Route::get('workers/{id}/edit', [
-        'as' => 'admin.centreusers.edit',
-        'uses' => 'Admin\CentreUsersController@edit',
-    ])->where('id', '^[0-9]+$');
-    Route::get('workers/download', [
-        'as' => 'admin.centreusers.download',
-        'uses' => 'Admin\CentreUsersController@download',
-    ]);
-
-    Route::get('workers/{id}/toggle', [
-        'as' => 'admin.centreusers.toggle',
-        'uses' => 'Admin\CentreUsersController@toggle',
-    ])->where('id', '^[0-9]+$');
-
-    Route::get('workers/{id}/delete', [
-        'as' => 'admin.centreusers.delete',
-        'uses' => 'Admin\CentreUsersController@delete',
-    ])->where('id', '^[0-9]+$');
+    Route::get('workers', [CentreUsersController::class, 'index'])->name('admin.centreusers.index');
+    Route::get('workers/create', [CentreUsersController::class, 'create'])->name('admin.centreusers.create');
+    Route::get('workers/download', [CentreUsersController::class, 'download'])->name('admin.centreusers.download');
+    Route::post('workers', [CentreUsersController::class, 'store'])->name('admin.centreusers.store');
+    Route::put('workers/{id}', [CentreUsersController::class, 'update'])
+        ->name('admin.centreusers.update')
+        ->whereNumber('id');
+    Route::get('workers/{id}/edit', [CentreUsersController::class, 'edit'])
+        ->name('admin.centreusers.edit')
+        ->whereNumber('id');
+    Route::get('workers/{id}/toggle', [CentreUsersController::class, 'toggle'])
+        ->name('admin.centreusers.toggle')
+        ->whereNumber('id');
+    Route::get('workers/{id}/retire', [CentreUsersController::class, 'retire'])
+        ->name('admin.centreusers.retire')
+        ->whereNumber('id');
 
     // Centre Management
-    Route::get('centres', [
-        'as' => 'admin.centres.index',
-        'uses' => 'Admin\CentresController@index',
-    ]);
-    Route::get('centres/create', [
-        'as' => 'admin.centres.create',
-        'uses' => 'Admin\CentresController@create',
-    ]);
-    Route::get('centres/{centre}/neighbours', [
-        'as' => 'admin.centre_neighbours.index',
-        'uses' => 'Admin\CentresController@getNeighboursAsJson'
-    ])->where('centre', '^[0-9]+$');
-    Route::post('centres', [
-        'as' => 'admin.centres.store',
-        'uses' => 'Admin\CentresController@store',
-    ]);
-    Route::put('centres/{centre}/update', [
-        'as' => 'admin.centres.update',
-        'uses' => 'Admin\CentresController@update',
-    ])->where('centre', '^[0-9]+$');
-    Route::get('centres/{centre}/edit', [
-        'as' => 'admin.centres.edit',
-        'uses' => 'Admin\CentresController@edit',
-    ])->where('centre', '^[0-9]+$');
+    Route::get('centres', [CentresController::class, 'index'])->name('admin.centres.index');
+    Route::get('centres/create', [CentresController::class, 'create'])->name('admin.centres.create');
+    Route::post('centres', [CentresController::class, 'store'])->name('admin.centres.store');
+    Route::get('centres/{centre}/neighbours', [CentresController::class, 'getNeighboursAsJson'])
+        ->name('admin.centre_neighbours.index')
+        ->whereNumber('centre');
+    Route::put('centres/{centre}/update', [CentresController::class, 'update'])
+        ->name('admin.centres.update')
+        ->whereNumber('centre');
+    Route::get('centres/{centre}/edit', [CentresController::class, 'edit'])
+        ->name('admin.centres.edit')
+        ->whereNumber('centre');
 
     // Sponsor Management
-    Route::get('sponsors', [
-        'as' => 'admin.sponsors.index',
-        'uses' => 'Admin\SponsorsController@index',
-    ]);
-    Route::get('sponsors/create', [
-        'as' => 'admin.sponsors.create',
-        'uses' => 'Admin\SponsorsController@create',
-    ]);
-    Route::post('sponsors', [
-        'as' => 'admin.sponsors.store',
-        'uses' => 'Admin\SponsorsController@store',
-    ]);
-    Route::get('sponsors/{id}', [
-        'as' => 'admin.sponsors.edit',
-        'uses' => 'Admin\SponsorsController@edit',
-    ])->where('id', '^[0-9]+$');
-    Route::put('sponsors/{id}', [
-        'as' => 'admin.sponsors.update',
-        'uses' => 'Admin\SponsorsController@update',
-    ])->where('id', '^[0-9]+$');
-
-    Route::post('logout', [
-        'as' => 'admin.logout',
-        'uses' => 'Auth\LoginController@logout',
-    ]);
+    Route::get('sponsors', [SponsorsController::class, 'index'])->name('admin.sponsors.index');
+    Route::get('sponsors/create', [SponsorsController::class, 'create'])->name('admin.sponsors.create');
+    Route::post('sponsors', [SponsorsController::class, 'store'])->name('admin.sponsors.store');
+    Route::get('sponsors/{id}', [SponsorsController::class, 'edit'])
+        ->name('admin.sponsors.edit')
+        ->whereNumber('id');
+    Route::put('sponsors/{id}', [SponsorsController::class, 'update'])
+        ->name('admin.sponsors.update')
+        ->whereNumber('id');
 
     // Deliveries Management
-    Route::get('deliveries', [
-        'as' => 'admin.deliveries.index',
-        'uses' => 'Admin\DeliveriesController@index',
-    ]);
-    Route::get('deliveries/create', [
-        'as' => 'admin.deliveries.create',
-        'uses' => 'Admin\DeliveriesController@create',
-    ]);
-    Route::post('deliveries/store', [
-        'as' => 'admin.deliveries.store',
-        'uses' => 'Admin\DeliveriesController@store',
-    ]);
+    Route::get('deliveries', [DeliveriesController::class, 'index'])->name('admin.deliveries.index');
+    Route::get('deliveries/create', [DeliveriesController::class, 'create'])->name('admin.deliveries.create');
+    Route::post('deliveries/store', [DeliveriesController::class, 'store'])->name('admin.deliveries.store');
 
     // Market Management
-    Route::get('markets', [
-        'as' => 'admin.markets.index',
-        'uses' => 'Admin\MarketsController@index',
-    ]);
-    Route::get('markets/create', [
-        'as' => 'admin.markets.create',
-        'uses' => 'Admin\MarketsController@create',
-    ]);
-    Route::post('markets', [
-        'as' => 'admin.markets.store',
-        'uses' => 'Admin\MarketsController@store',
-    ]);
-    Route::get('markets/{id}/edit', [
-        'as' => 'admin.markets.edit',
-        'uses' => 'Admin\MarketsController@edit',
-    ])->where('id', '^[0-9]+$');
-    Route::put('markets/{id}', [
-        'as' => 'admin.markets.update',
-        'uses' => 'Admin\MarketsController@update',
-    ])->where('id', '^[0-9]+$');
+    Route::get('markets', [MarketsController::class, 'index'])->name('admin.markets.index');
+    Route::get('markets/create', [MarketsController::class, 'create'])->name('admin.markets.create');
+    Route::post('markets', [MarketsController::class, 'store'])->name('admin.markets.store');
+    Route::get('markets/{id}/edit', [MarketsController::class, 'edit'])
+        ->name('admin.markets.edit')
+        ->whereNumber('id');
+    Route::put('markets/{id}', [MarketsController::class, 'update'])
+        ->name('admin.markets.update')
+        ->whereNumber('id');
 
     // Trader Management
-    Route::get('traders', [
-        'as' => 'admin.traders.index',
-        'uses' => 'Admin\TradersController@index',
-    ]);
-    Route::get('traders/create', [
-        'as' => 'admin.traders.create',
-        'uses' => 'Admin\TradersController@create',
-    ]);
-    Route::post('traders', [
-        'as' => 'admin.traders.store',
-        'uses' => 'Admin\TradersController@store',
-    ]);
-    Route::get('traders/{id}/edit', [
-        'as' => 'admin.traders.edit',
-        'uses' => 'Admin\TradersController@edit',
-    ])->where('id', '^[0-9]+$');
-    Route::put('traders/{id}', [
-        'as' => 'admin.traders.update',
-        'uses' => 'Admin\TradersController@update',
-    ])->where('id', '^[0-9]+$');
-    Route::get('traders/download', [
-        'as' => 'admin.traders.download',
-        'uses' => 'Admin\TradersController@download',
-    ]);
+    Route::get('traders', [TradersController::class, 'index'])->name('admin.traders.index');
+    Route::get('traders/create', [TradersController::class, 'create'])->name('admin.traders.create');
+    Route::get('traders/download', [TradersController::class, 'download'])->name('admin.traders.download');
+    Route::post('traders', [TradersController::class, 'store'])->name('admin.traders.store');
+    Route::get('traders/{id}/edit', [TradersController::class, 'edit'])
+        ->name('admin.traders.edit')
+        ->whereNumber('id');
+    Route::put('traders/{id}', [TradersController::class, 'update'])
+        ->name('admin.traders.update')
+        ->whereNumber('id');
 });

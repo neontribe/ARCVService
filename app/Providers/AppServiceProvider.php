@@ -2,9 +2,10 @@
 
 namespace App\Providers;
 
+use App\Services\EnvWriter;
 use App\View\Composers\PaymentsComposer;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -32,6 +33,12 @@ class AppServiceProvider extends ServiceProvider
         Passport::withCookieSerialization();
 
         View::composer('*', PaymentsComposer::class);
+
+        // Gates
+        Gate::define('take-developer-actions', static function () {
+            // permit if the application is debugging
+            return config('app.debug') === true;
+        });
     }
 
     /**
@@ -41,6 +48,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // manual registration of non-auto-discovered packages
+        $this->app->bind(EnvWriter::class, function () {
+            return new EnvWriter(base_path('.env'));
+        });
     }
 }

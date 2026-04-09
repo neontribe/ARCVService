@@ -23,16 +23,13 @@ use League\Csv\CannotInsertRecord;
 use Log;
 use Ramsey\Uuid\Uuid;
 use Throwable;
-use function PHPUnit\Framework\isNan;
 
 class CentreUsersController extends Controller
 {
     /**
      * Display a listing of Workers.
-     * @param AdminIndexCentreUsersRequest $request
-     * @return Application|Factory|View
      */
-    public function index(AdminIndexCentreUsersRequest $request): View|Factory|Application
+    public function index(AdminIndexCentreUsersRequest $request): Factory|View
     {
         // fetch query params from request
         $field = $request->input('orderBy');
@@ -47,7 +44,7 @@ class CentreUsersController extends Controller
                 return $homeCentre?->sponsor?->name . '#' . $homeCentre?->name . '#' . $item->name;
             },
         };
-        $workers = CentreUser::withTrashed()->get()->sortBy($sorter, SORT_REGULAR, ($direction === 'desc'));
+        $workers = CentreUser::withTrashed()->active()->get()->sortBy($sorter, SORT_REGULAR, ($direction === 'desc'));
 
         return view('service.centreusers.index', compact('workers'));
     }
@@ -101,12 +98,9 @@ class CentreUsersController extends Controller
 
     /**
      * Update a CentreUser from a form
-     * @param AdminUpdateCentreUserRequest $request
-     * @param $id
-     * @return RedirectResponse
      * @throws Throwable
      */
-    public function update(AdminUpdateCentreUserRequest $request, $id)
+    public function update(AdminUpdateCentreUserRequest $request, $id): RedirectResponse
     {
         try {
             $centreUser = DB::transaction(function () use ($request, $id) {
@@ -140,11 +134,8 @@ class CentreUsersController extends Controller
 
     /**
      * Code deduplication;
-     * @param Request $request
-     * @param CentreUser $cu
-     * @return array
      */
-    private function syncCentres(Request $request, CentreUser $cu): array
+    private function syncCentres(Request $request, CentreUser $cu): void
     {
         // Set Home Centre
         $homeCentre_id = $request->input('worker_centre');
@@ -162,13 +153,11 @@ class CentreUsersController extends Controller
             }
         }
         // Sync them setting pivots.
-        return $cu->centres()->sync($centre_ids);
+        $cu->centres()->sync($centre_ids);
     }
 
     /**
      * Create a CentreUser from a form
-     * @param AdminNewCentreUserRequest $request
-     * @return RedirectResponse
      * @throws Throwable
      */
     public function store(AdminNewCentreUserRequest $request): RedirectResponse
@@ -196,12 +185,13 @@ class CentreUsersController extends Controller
             // Throw it back to the user
             return redirect()->route('admin.centreusers.create')->withErrors('Creation failed - DB Error.');
         }
-        return redirect()->route('admin.centreusers.index')->with('message',
-            'Worker ' . $centreUser->name . ' created');
+        return redirect()->route('admin.centreusers.index')->with(
+            'message',
+            'Worker ' . $centreUser->name . ' created'
+        );
     }
 
     /**
-     * @return void
      * @throws CannotInsertRecord
      */
     public function download(): void
@@ -253,20 +243,18 @@ class CentreUsersController extends Controller
 
     /**
      * Handle deleting a centre user
-     * @param int $id
-     * @return RedirectResponse
      */
-    public function delete(int $id): RedirectResponse
+    public function retire(int $id): RedirectResponse
     {
         // must be disabled to delete
         $centreUser = CentreUser::onlyTrashed()->findOrFail($id);
         $name = $centreUser->name;
-        // remove any connections
-        $centreUser->centre->centreUsers()->detach($id);
+
         // boot them
-        $centreUser->forceDelete();
+        $centreUser->retire();
+
         return redirect()->route('admin.centreusers.index')
-            ->with('message', 'Worker ' . $name . ' deleted');
+            ->with('message', 'Worker ' . $name . ' retired');
     }
 
     /**

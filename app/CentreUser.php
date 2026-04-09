@@ -2,15 +2,18 @@
 
 namespace App;
 
+use App\Notifications\StorePasswordResetNotification;
+use App\Traits\Retirable;
 use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\belongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
-use App\Notifications\StorePasswordResetNotification;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 /**
  * @mixin Eloquent
@@ -27,6 +30,7 @@ class CentreUser extends Authenticatable
 {
     use Notifiable;
     use SoftDeletes;
+    use Retirable;
 
     protected string $guard = 'store';
 
@@ -36,7 +40,11 @@ class CentreUser extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'role', 'downloader',
+        'name',
+        'email',
+        'password',
+        'role',
+        'downloader',
     ];
 
     /**
@@ -45,7 +53,7 @@ class CentreUser extends Authenticatable
      * @var array
      */
     protected $appends = [
-        'homeCentre'
+        'homeCentre',
     ];
 
     /**
@@ -54,7 +62,8 @@ class CentreUser extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
+        'remember_token',
     ];
 
     /**
@@ -67,6 +76,15 @@ class CentreUser extends Authenticatable
         'deleted_at' => 'datetime',
     ];
 
+    protected function retirableFields(): array
+    {
+        return [
+            'name' => '[User Retired]',
+            'email' => 'retired_' . Str::uuid() . '@retired.invalid',
+            'password' => Hash::make(Str::uuid()),
+            'remember_token' => null,
+        ];
+    }
     /**
      * Get the Notes that belong to this CentreUser
      */
@@ -152,7 +170,7 @@ class CentreUser extends Authenticatable
     /**
      * Send the password reset notification.
      *
-     * @param  string  $token
+     * @param string $token
      */
     public function sendPasswordResetNotification($token): void
     {

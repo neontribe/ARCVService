@@ -58,6 +58,17 @@ $factory->define(App\CentreUser::class, function (Faker\Generator $faker) {
 });
 
 /**
+ * CentreUser in the retired state.
+ * PII is wiped, retired_at is set, and the model is soft-deleted.
+ * Relations (notes, centres) are preserved on the underlying row.
+ */
+$factory->afterCreatingState(App\CentreUser::class, 'retired', function ($centreUser) {
+    // retired centres must be soft deleted first
+    $centreUser->delete();
+    $centreUser->retire();
+});
+
+/**
  * CentreUser who can Download.
  */
 $factory->state(App\CentreUser::class, 'withDownloader', function ($faker) use ($factory) {
