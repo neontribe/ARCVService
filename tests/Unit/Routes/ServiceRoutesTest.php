@@ -33,7 +33,7 @@ class ServiceRoutesTest extends StoreTestCase
             'admin.deliveries.index' => [],
             'admin.centres.index' => [],
             'admin.centres.create' => [],
-            'admin.centre_neighbours.index' => ['id' => 1],
+            'admin.centre_neighbours.index' => ['centre' => 1],
             'admin.sponsors.index' => [],
             'admin.sponsors.create' => [],
             'admin.markets.index' => [],
@@ -113,6 +113,7 @@ class ServiceRoutesTest extends StoreTestCase
                     ->makeRequest($method, route($route, $params))
                     ->followRedirects()
                     ->response;
+
                 // Expecting 403 or return to "/login"
                 $this->assertTrue(
                     $response->isForbidden()

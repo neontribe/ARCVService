@@ -71,7 +71,7 @@ class CentreControllerTest extends StoreTestCase
         ;
     }
 
-    public function testICanUpdateACentreName(): void
+    public function testICanUpdateACentre(): void
     {
         $centre = factory(Centre::class)->create();
         $this->seeInDatabase('centres', [
@@ -79,10 +79,7 @@ class CentreControllerTest extends StoreTestCase
             'name' => $centre->name
         ]);
 
-        $data = [
-            'id' => $centre->id,
-            'name' => 'New Centre Name',
-        ];
+        $data = array_merge($centre->getAttributes(), ['name' => 'New Centre Name']);
         $this->actingAs($this->adminUser, 'admin')
           ->put(
               route('admin.centres.update', ['centre' => $centre->id]),
