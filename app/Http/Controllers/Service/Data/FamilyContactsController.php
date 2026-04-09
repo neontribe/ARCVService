@@ -21,7 +21,7 @@ class FamilyContactsController extends Controller
 
             Carer::query()
                 ->whereNotNull('emailsecret')
-                ->whereNotNull('telnosecret')
+                ->orWhereNotNull('telnosecret')
                 ->with(['family.initialCentre.sponsor'])
                 ->lazyById(200)
                 ->chunk(200)

@@ -110,22 +110,22 @@ class FamilyContactsControllerTest extends TestCase
         $this->assertCount(1, $rows);
     }
 
-    public function testExcludesCarerWithNullEmailsecret(): void
+    public function testIncludesCarerWithNullEmailsecretButTelnoSecret(): void
     {
         $this->createQualifyingCarer(['emailsecret' => null]);
 
         $rows = $this->parseCsv($this->makeRequest()->streamedContent());
 
-        $this->assertCount(1, $rows, 'Expected header row only — carer should be excluded.');
+        $this->assertCount(2, $rows, 'Expected header row + 1 data row.');
     }
 
-    public function testExcludesCarerWithNullTelnosecret(): void
+    public function testIncludesCarerWithNullTelnosecretButEmailsecret(): void
     {
         $this->createQualifyingCarer(['telnosecret' => null]);
 
         $rows = $this->parseCsv($this->makeRequest()->streamedContent());
 
-        $this->assertCount(1, $rows, 'Expected header row only — carer should be excluded.');
+        $this->assertCount(2, $rows, 'Expected header row + 1 data row.');
     }
 
     public function testExcludesCarerWithBothSecretsNull(): void
@@ -179,13 +179,14 @@ class FamilyContactsControllerTest extends TestCase
     public function testQualifyingAndNonQualifyingCarersMixed(): void
     {
         $this->createQualifyingCarer(['name' => 'Included']);
-        $this->createQualifyingCarer(['name' => 'Excluded — no email', 'emailsecret' => null]);
-        $this->createQualifyingCarer(['name' => 'Excluded — no telno', 'telnosecret' => null]);
+        $this->createQualifyingCarer(['name' => 'Included — no email', 'emailsecret' => null]);
+        $this->createQualifyingCarer(['name' => 'Included — no telno', 'telnosecret' => null]);
+        $this->createQualifyingCarer(['name' => 'Excluded — neither', 'emailsecret' => null, 'telnosecret' => null]);
 
         $rows = $this->parseCsv($this->makeRequest()->streamedContent());
         $dataRows = array_slice($rows, 1);
 
-        $this->assertCount(1, $dataRows);
-        $this->assertSame('Included', $dataRows[0][1]);
+        $this->assertCount(3, $dataRows);
+        $this->assertNotContains('Excluded - neither', array_column($dataRows, 1));
     }
 }
