@@ -21,7 +21,6 @@ use App\Http\Controllers\Store\VoucherController;
 // Authentication
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('store.login');
 Route::post('login', [LoginController::class, 'login']);
-Route::post('logout', [LoginController::class, 'logout'])->name('store.logout');
 
 // Password Reset
 Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])
@@ -34,10 +33,15 @@ Route::get('password/reset/{token}', [ResetPasswordController::class, 'showReset
 Route::post('password/reset', [ResetPasswordController::class, 'reset']);
 
 // Base redirect
-Route::get('/', static fn () => redirect()->route('store.login'))->name('store.base');
+Route::get('/', static function () {
+    return redirect()->route('store.login');
+})->name('store.base');
 
 // Authenticated routes
 Route::middleware('auth:store')->group(function () {
+
+    Route::post('logout', [LoginController::class, 'logout'])
+        ->name('store.logout');
 
     Route::get('dashboard', [DashboardController::class, 'index'])
         ->name('store.dashboard');

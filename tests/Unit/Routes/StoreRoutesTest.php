@@ -107,10 +107,17 @@ class StoreRoutesTest extends StoreTestCase
      */
     public function testLoginGuestRoute(): void
     {
-        Auth::logout();
-        $this->get(URL::route('store.login'))
+        $this->actingAs($this->centreUser, 'store')
+            ->post(URL::route('store.logout'))
+            ->followRedirects()
             ->seePageIs(URL::route('store.login'))
-            ->assertResponseStatus(200);
+            ->dontSee('Sorry, there was a permission problem. Please Log in.');
+
+        Auth::logout();
+        $this->post(URL::route('store.logout'))
+            ->followRedirects()
+            ->seePageIs(URL::route('store.login'))
+            ->see('Sorry, there was a permission problem. Please Log in.');
     }
 
     /**
@@ -123,6 +130,14 @@ class StoreRoutesTest extends StoreTestCase
         Auth::logout();
         $this->get(URL::route('store.password.request'))
             ->seePageIs(URL::route('store.password.request'))
+            ->assertResponseStatus(200);
+    }
+
+    public function testLogoutRouteGate(): void
+    {
+        Auth::logout();
+        $this->visit($this->logoutRoute)
+            ->seePageIs(URL::route('store.logoin'))
             ->assertResponseStatus(200);
     }
 
