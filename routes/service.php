@@ -93,15 +93,15 @@ Route::group(['middleware' => 'auth:admin'], static function () {
     Route::get('centres', [CentresController::class, 'index'])->name('admin.centres.index');
     Route::get('centres/create', [CentresController::class, 'create'])->name('admin.centres.create');
     Route::post('centres', [CentresController::class, 'store'])->name('admin.centres.store');
-    Route::get('centres/{id}/neighbours', [CentresController::class, 'getNeighboursAsJson'])
+    Route::get('centres/{centre}/neighbours', [CentresController::class, 'getNeighboursAsJson'])
         ->name('admin.centre_neighbours.index')
-        ->whereNumber('id');
-    Route::put('centres/{id}/update', [CentresController::class, 'update'])
+        ->whereNumber('centre');
+    Route::put('centres/{centre}/update', [CentresController::class, 'update'])
         ->name('admin.centres.update')
-        ->whereNumber('id');
-    Route::get('centres/{id}/edit', [CentresController::class, 'edit'])
+        ->whereNumber('centre');
+    Route::get('centres/{centre}/edit', [CentresController::class, 'edit'])
         ->name('admin.centres.edit')
-        ->whereNumber('id');
+        ->whereNumber('centre');
 
     // Sponsor Management
     Route::get('sponsors', [SponsorsController::class, 'index'])->name('admin.sponsors.index');
