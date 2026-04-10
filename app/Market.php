@@ -3,6 +3,7 @@
 namespace App;
 
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -28,6 +29,7 @@ class Market extends Model
         'name',
         'location',
         'sponsor_id',
+        'centre_id',
         'payment_message',
     ];
 
@@ -51,43 +53,59 @@ class Market extends Model
     ];
 
     /**
-     * Get the sponsor this market belongs to.
-     *
-     * @return BelongsTo
+     * If this is an "internal market" it will have a centre
      */
-    public function sponsor()
+    public function centre(): BelongsTo
+    {
+        return $this->belongsTo(Centre::class);
+    }
+
+
+    /**
+     * Get the sponsor this market belongs to.
+     */
+    public function sponsor(): BelongsTo
     {
         return $this->belongsTo(Sponsor::class);
     }
 
     /**
      * Get the traders this market has.
-     *
-     * @return HasMany
      */
-    public function traders()
+    public function traders(): HasMany
     {
         return $this->hasMany(Trader::class);
     }
 
     /**
-     * Get the sponsor shortcode.
-     *
-     * @return string
+     * Scope to markets that have at least one trader — i.e. are open for business.
      */
-    public function getSponsorShortcodeAttribute()
+    public function scopeTrading(Builder $query): Builder
     {
-        return $this->sponsor->shortcode;
+        return $query->has('traders');
+    }
+
+    /**
+     * Get the sponsor shortcode.
+     */
+    public function getSponsorShortcodeAttribute(): ?string
+    {
+        return $this->sponsor?->shortcode;
     }
 
     /**
      * Prepare a date for array / JSON serialization.
-     *
-     * @param  \DateTimeInterface  $date
-     * @return string
      */
-    protected function serializeDate(DateTimeInterface $date)
+    protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format('Y-m-d H:i:s');
+    }
+
+    /**
+     * Is it internal?
+     */
+    public function isInternal(): bool
+    {
+        return $this->centre_id !== null;
     }
 }

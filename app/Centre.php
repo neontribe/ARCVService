@@ -2,7 +2,9 @@
 
 namespace App;
 
+use App\Observers\CentreObserver;
 use Eloquent;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\belongsToMany;
@@ -20,6 +22,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Centre[] $neighbours
  * @property Family[] $families
  */
+
+#[ObservedBy(CentreObserver::class)]
 class Centre extends Model
 {
     /**
@@ -28,7 +32,11 @@ class Centre extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'prefix', 'print_pref', 'sponsor_id', 'can_collect'
+        'name',
+        'prefix',
+        'print_pref',
+        'sponsor_id',
+        'can_collect',
     ];
 
     /**
@@ -45,7 +53,7 @@ class Centre extends Model
      * @var array
      */
     protected $casts = [
-        'can_collect' => 'boolean'
+        'can_collect' => 'boolean',
     ];
 
     public function nextCentreSequence(): int
@@ -62,6 +70,15 @@ class Centre extends Model
         }
 
         return $sequence;
+    }
+
+    /**
+     * All internal markets for this centre.
+     * Use the open() scope to restrict to those with at least one trader.
+     */
+    public function markets(): HasMany
+    {
+        return $this->hasMany(Market::class);
     }
 
     /**
