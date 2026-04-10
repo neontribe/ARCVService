@@ -18,7 +18,7 @@ readonly class CentreObserver
     public function created(Centre $centre): void
     {
         if ($centre->can_collect) {
-            $this->marketService->ensureMarket($centre);
+            $this->marketService->ensureTradingMarket($centre);
         }
     }
 
@@ -29,7 +29,7 @@ readonly class CentreObserver
         }
 
         if ($centre->can_collect) {
-            $this->marketService->ensureMarket($centre);
+            $this->marketService->ensureTradingMarket($centre);
         }
     }
 }

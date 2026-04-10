@@ -8,34 +8,29 @@ use App\Trader;
 
 class CentreCollectionMarketService
 {
-    public function ensureMarket(Centre $centre): Market
+    public function ensureTradingMarket(Centre $centre): void
     {
-        // withTrashed guards against the edge case where someone
-        // manually soft-deleted the market outside normal flows.
-        $market = Market::withTrashed()
-            ->where('centre_id', $centre->id)
-            ->first();
-
-        if ($market) {
-            // Restore if soft-deleted
-            if ($market->trashed()) {
-                $market->restore();
-            }
-        } else {
-            $market = Market::create([
-                'name' => $centre->name . ' Collection',
-                'location' => $centre->name,
-                'centre_id' => $centre->id,
-                'sponsor_id' => $centre->sponsor->id,
-                'payment_message' => '',
-            ]);
-
-            Trader::create([
-                'name' => $centre->name . ' Collection Trader',
-                'market_id' => $market->id,
-            ]);
+        // is there already one from a prior can_collect toggle?
+        if (Market::where('centre_id', $centre->id)->trading()->exists()) {
+            return;
         }
 
-        return $market;
+        // there are no active markets with traders that are assigned to this centre,
+        // better make one ...
+        $market = Market::create([
+            'name' => $centre->name . ' (Internal)',
+            'location' => $centre->name,
+            'centre_id' => $centre->id,
+            // assign it the centre's sponsor/area
+            'sponsor_id' => $centre->sponsor->id,
+            // don't need one of these, the payment recommendation will be automated
+            'payment_message' => '',
+        ]);
+
+        // ... and it's trader
+        Trader::create([
+            'name' => $centre->name . ' (Internal)',
+            'market_id' => $market->id,
+        ]);
     }
 }
