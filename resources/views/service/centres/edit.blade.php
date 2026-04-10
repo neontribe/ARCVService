@@ -80,7 +80,7 @@
                     <label for="can_collect">Can Collect Vouchers</label>
                     @include('service.partials.validationMessages', ['inputName' => 'can_collect'])
                 </div>
-                <button type="submit" id="createCentre">Save</button>
+                <button type="submit" id="updateCentre">Save</button>
             </form>
         </div>
     </div>
