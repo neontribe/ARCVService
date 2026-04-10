@@ -2,7 +2,9 @@
 
 namespace App;
 
+use App\Observers\CentreObserver;
 use Eloquent;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\belongsToMany;
@@ -20,6 +22,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Centre[] $neighbours
  * @property Family[] $families
  */
+
+#[ObservedBy(CentreObserver::class)]
 class Centre extends Model
 {
     /**
