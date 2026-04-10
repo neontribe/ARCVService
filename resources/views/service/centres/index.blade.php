@@ -42,8 +42,8 @@
         </table>
     </div>
 </div>
-<script src="https://cdn.datatables.net/1.13.10/js/jquery.dataTables.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.10/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.11/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.11/css/jquery.dataTables.min.css">
 <script>
   $(document).ready(function () {
     $('#centresTable').DataTable({
