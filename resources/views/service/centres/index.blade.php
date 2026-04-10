@@ -18,8 +18,9 @@
                     <th>Name</th>
                     <th>RVID Prefix</th>
                     <th>Area</th>
+                    <th>Can Collect</th>
                     <th>Form</th>
-                    <th>Edit</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -28,6 +29,7 @@
                         <td>{{ $centre->name }}</td>
                         <td>{{ $centre->prefix }}</td>
                         <td>{{ $centre->sponsor->name }}</td>
+                        <td>{{ $centre->can_collect ? 'Yes' : 'No' }}</td>
                         <td>{{ ucwords($centre->print_pref) }}</td>
                         <td>
                             <a href="{{ route('admin.centres.edit', ['centre' => $centre->id]) }}" style="padding:5px;" class="link-button">
@@ -40,11 +42,13 @@
         </table>
     </div>
 </div>
-<script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.10/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.10/css/jquery.dataTables.min.css">
 <script>
   $(document).ready(function () {
-    $('#centresTable').DataTable();
+    $('#centresTable').DataTable({
+        columnDefs: [{ orderable: false, targets: 4}]
+    });
   });
 </script>
 @endsection
