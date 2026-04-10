@@ -27,7 +27,7 @@ class CentreCollectionMarketService
             'payment_message' => '',
         ]);
 
-        // ... and it's trader
+        // ... and its trader
         Trader::create([
             'name' => $centre->name . ' (Internal)',
             'market_id' => $market->id,
