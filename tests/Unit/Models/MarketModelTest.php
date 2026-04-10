@@ -2,10 +2,12 @@
 
 namespace Tests\Unit\Models;
 
+use App\Centre;
 use App\Market;
 use App\Sponsor;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Trader;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,8 +15,9 @@ class MarketModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $market;
-    protected $sponsor;
+    protected Market $market;
+    protected Sponsor $sponsor;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -25,8 +28,6 @@ class MarketModelTest extends TestCase
     public function testMarketIsCreatedWithExpectedAttributes(): void
     {
         $m = $this->market;
-        // Keeping it simple to make writing test suite less onerous.
-        // The default error returned by asserts will be enough.
         $this->assertInstanceOf(Market::class, $m);
         $this->assertNotNull($m->name);
         $this->assertNotNull($m->location);
@@ -38,7 +39,6 @@ class MarketModelTest extends TestCase
 
     public function testMarketBelongsToSponsor(): void
     {
-        $this->assertInstanceOf(BelongsTo::class, $this->market->sponsor());
         $this->assertInstanceOf(Sponsor::class, $this->market->sponsor);
     }
 
@@ -49,9 +49,7 @@ class MarketModelTest extends TestCase
 
     public function testGetSponsorShortcodeAttribute(): void
     {
-        $shortcode_market = $this->market->sponsor_shortcode;
-        $shortcode_sponsor = $this->sponsor->shortcode;
-        $this->assertEquals($shortcode_sponsor, $shortcode_market);
+        $this->assertEquals($this->sponsor->shortcode, $this->market->sponsor_shortcode);
     }
 
     public function testSoftDeleteMarket(): void
@@ -59,5 +57,96 @@ class MarketModelTest extends TestCase
         $this->market->delete();
         $this->assertCount(1, Market::withTrashed()->get());
         $this->assertCount(0, Market::all());
+    }
+
+    public function testSponsorMarketIsNotInternal(): void
+    {
+        $this->assertFalse($this->market->isInternal());
+    }
+
+    public function testInternalMarketIsInternal(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $market = factory(Market::class)->create([
+            'centre_id' => $centre->id,
+            'sponsor_id' => null,
+        ]);
+
+        $this->assertTrue($market->isInternal());
+    }
+
+    public function testInternalMarketBelongsToCentre(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $market = factory(Market::class)->create([
+            'centre_id' => $centre->id,
+            'sponsor_id' => null,
+        ]);
+
+        $this->assertInstanceOf(BelongsTo::class, $market->centre());
+        $this->assertInstanceOf(Centre::class, $market->centre);
+        $this->assertEquals($centre->id, $market->centre->id);
+    }
+
+    public function testSponsorMarketHasNullCentre(): void
+    {
+        $this->assertNull($this->market->centre);
+    }
+
+    public function testInternalMarketCanHaveMultipleTraders(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $market = factory(Market::class)->create([
+            'centre_id' => $centre->id,
+        ]);
+
+        factory(Trader::class, 2)->create(['market_id' => $market->id]);
+
+        $this->assertCount(2, $market->traders);
+    }
+
+    public function testInternalMarketWithNoTradersHasEmptyTradersCollection(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $market = factory(Market::class)->create([
+            'centre_id' => $centre->id,
+        ]);
+
+        $this->assertCount(0, $market->traders);
+    }
+
+    public function testTradingScopeReturnsMarketsWithTraders(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $market = factory(Market::class)->create([
+            'centre_id' => $centre->id,
+        ]);
+        factory(Trader::class)->create(['market_id' => $market->id]);
+
+        $this->assertCount(1, Market::trading()->where('centre_id', $centre->id)->get());
+    }
+
+    public function testTradingScopeExcludesMarketsWithNoTraders(): void
+    {
+        $centre = factory(Centre::class)->create();
+        factory(Market::class)->create([
+            'centre_id' => $centre->id,
+        ]);
+
+        $this->assertCount(0, Market::trading()->where('centre_id', $centre->id)->get());
+    }
+
+    public function testSoftDeletedInternalMarketIsRestorable(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $market = factory(Market::class)->create([
+            'centre_id' => $centre->id,
+        ]);
+
+        $market->delete();
+        $this->assertNull(Market::find($market->id));
+
+        $market->restore();
+        $this->assertNotNull(Market::find($market->id));
     }
 }

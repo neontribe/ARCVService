@@ -3,9 +3,10 @@
 namespace Tests\Unit\Models;
 
 use App\Centre;
+use App\CentreUser;
 use App\Registration;
 use App\Sponsor;
-use App\CentreUser;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Tests\TestCase;
@@ -14,15 +15,14 @@ class CentreModelTest extends TestCase
 {
     use RefreshDatabase;
 
-
     public function testItHasExpectedAttributes(): void
     {
         $centre = factory(Centre::class)->make();
         $this->assertNotNull($centre->name);
         $this->assertNotNull($centre->sponsor_id);
         $this->assertContains($centre->print_pref, config('arc.print_preferences'));
+        $this->assertFalse($centre->can_collect);
     }
-
 
     public function testItHasASponsor(): void
     {
@@ -31,7 +31,6 @@ class CentreModelTest extends TestCase
         ]);
         $this->assertInstanceOf(Sponsor::class, $centre->sponsor);
     }
-
 
     public function testItCanHaveRegistrations(): void
     {
@@ -44,7 +43,6 @@ class CentreModelTest extends TestCase
         $this->assertInstanceOf(Registration::class, $registrations[0]);
     }
 
-
     public function testItCanHaveNoRegistrations(): void
     {
         $centre = factory(Centre::class)->create();
@@ -52,7 +50,6 @@ class CentreModelTest extends TestCase
         $this->assertInstanceOf(Collection::class, $registrations);
         $this->assertEquals(0, $registrations->count());
     }
-
 
     public function testItCanHaveUsers(): void
     {
@@ -72,7 +69,6 @@ class CentreModelTest extends TestCase
         $this->assertInstanceOf(Collection::class, $centreUsers);
         $this->assertInstanceOf(CentreUser::class, $centreUsers[0]);
     }
-
 
     public function testItCanHaveNeighbours(): void
     {
@@ -100,12 +96,6 @@ class CentreModelTest extends TestCase
         }
     }
 
-    public function testItCanNotCollectByDefault(): void
-    {
-        $centre = factory(Centre::class)->create();
-        $this->assertFalse($centre->can_collect);
-    }
-
     public function testItCanBeSetToCollect(): void
     {
         $centre = factory(Centre::class)->states('collecting')->create();
@@ -124,5 +114,17 @@ class CentreModelTest extends TestCase
         $centre->can_collect = false;
         $centre->save();
         $this->assertFalse(Centre::find($centre->id)->can_collect);
+    }
+
+    public function testMarketsIsAHasManyRelation(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $this->assertInstanceOf(HasMany::class, $centre->markets());
+    }
+
+    public function testMarketsOnNonCollectingCentreIsEmpty(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $this->assertCount(0, $centre->markets);
     }
 }
