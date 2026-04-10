@@ -107,7 +107,7 @@
             <li class="sidebar-item">
                 <a href="{{ route('data.families.contacts.download') }}">
                     <span class="glyphicon glyphicon-download-alt"></span>
-                    Downlaod Family Conntacts
+                    Download Family Contacts
                 </a>
             </li>
         </div>
