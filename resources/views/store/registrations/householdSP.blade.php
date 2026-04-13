@@ -10,7 +10,7 @@
     <div>
         <p>To add a household member, complete the box below with their age.</p>
     </div>
-    @include('store.partials.add_participant_form', ['sponsorsRequiresID' => $sponsorsRequiresID])
+    @include('store.registrations.add_participant_form', ['sponsorsRequiresID' => $sponsorsRequiresID])
     <div class="added">
         <label for="child_wrapper">You have added:</label>
         <table>
@@ -28,9 +28,10 @@
                     <tr>
                         <td class="age-col">{{ explode(',', $child->getAgeString())[0] }}</td>
                         <td class="dob-col"></td>
-                        <td class="is-pri-carer-col"><input type="hidden" name="children[{{ $child->id ?? $index }}][is_pri_carer]"
-                               value={{ $child->is_pri_carer }}
-                        ></td>
+                        <td class="is-pri-carer-col"><input type="hidden"
+                                                            name="children[{{ $child->id ?? $index }}][is_pri_carer]"
+                                                            value={{ $child->is_pri_carer }}
+                            ></td>
                         <td class="remove-col">
                             <input type="hidden" name="children[{{ $child->id ?? $index }}][dob]"
                                    value="{{ Carbon\Carbon::parse($child->dob)->format('Y-m') }}"
@@ -82,7 +83,7 @@
 
             var isPriCarer = buttonID === 'addCarerAgeInput' ? 1 : 0;
             if (isPriCarer === 1) {
-                $('.is-pri-carer-col').find("input").each(function() {
+                $('.is-pri-carer-col').find("input").each(function () {
                     if ($(this).val() == 1) {
                         $(this).closest('tr').remove();
                     }
@@ -99,6 +100,7 @@
             // emit event
             $(document).trigger('childRow:updated');
         }
+
         $(document).on('childInput:validated', addAgeRow);
 
     </script>

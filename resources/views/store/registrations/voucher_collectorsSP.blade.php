@@ -4,7 +4,7 @@
         <input type="hidden" name="registration" value="{{ $registration->id ?? '' }}">
         <h2>Voucher collectors</h2>
     </div>
-    @include('store.partials.pri-carer_fields', [
+    @include('store.registrations.pri-carer_fields', [
         'labelName'      => "Main Participant's full name",
         'labelTelno'     => "Main participant's telephone number",
         'labelEmail'     => "Main participant's email address",
@@ -13,7 +13,7 @@
     ])
 
     <div id="addCarerAgeInput" class="age-input-container">
-        @include('store.partials.ageInput')
+        @include('store.registrations.ageInput')
         <button id="add-carer-age" class="link-button link-button-large">
             <i class="fa fa-plus button-icon" aria-hidden="true"></i>
             @if (isset($pri_carer))
@@ -24,7 +24,7 @@
         </button>
     </div>
 
-    @include('store.partials.sec-carers_fields', [
+    @include('store.registrations.sec-carers_fields', [
         'newCarersErrorMessage' => 'Please check you have valid collector names',
     ])
 </div>

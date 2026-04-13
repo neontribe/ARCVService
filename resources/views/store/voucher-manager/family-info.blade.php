@@ -25,7 +25,7 @@
     </div>
 
     @if($programme === 0)
-        @includeWhen(!empty($noticeReasons), 'store.partials.notice_box', ['noticeReasons' => $noticeReasons])
+        @includeWhen(!empty($noticeReasons), 'store.registrations.notice_box', ['noticeReasons' => $noticeReasons])
     @endif
 
     <x-link-button
