@@ -31,7 +31,7 @@ class CentreUsersSeeder extends Seeder
     private function seedCcUser(): void
     {
         $user = $this->createAndAttach(
-            attributes: ['name' => 'ARC CC User', 'email' => 'arc+ccuser@exmaple.com', 'role' => 'centre_user'],
+            attributes: ['name' => 'ARC CC User', 'email' => 'arc+ccuser@neontribe.co.uk', 'role' => 'centre_user'],
             centreId: 1,
             isHome: true
         );
