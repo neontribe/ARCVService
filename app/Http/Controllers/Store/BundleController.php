@@ -93,12 +93,7 @@ class BundleController extends Controller
 
         // --- Sync voucher codes if supplied ---
         if ($request->exists('vouchers')) {
-            $rawCodes = array_filter(
-                $request->input('vouchers', []),
-                static function (mixed $v): bool {
-                    return !empty($v);
-                },
-            );
+            $rawCodes = array_filter($request->input('vouchers', []));
 
             $voucherCodes = $rawCodes !== []
                 ? Voucher::cleanCodes(array_values($rawCodes))
@@ -263,7 +258,7 @@ class BundleController extends Controller
 
         $messages = [];
 
-        if ($relevant !== []) {
+        if (!empty($relevant)) {
             $messages[] = new HtmlString(
                 "These vouchers are currently allocated to a different $familyAlias. "
                 . "Click on the voucher number to view the other $familyAlias's record: "
@@ -271,7 +266,7 @@ class BundleController extends Controller
             );
         }
 
-        if ($inaccessible !== []) {
+        if (!empty($inaccessible)) {
             $messages[] = "These vouchers are allocated to a different $familyAlias in a centre you can't access: "
                 . implode(', ', $inaccessible);
         }
