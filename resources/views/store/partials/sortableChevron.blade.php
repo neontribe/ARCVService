@@ -1,9 +1,12 @@
 <a
     href="{{
-        route($route, [
-            'orderBy' => $orderBy,
-            'direction' => $direction === 'desc' ? 'asc' : 'desc'
-        ])
+        route($route, array_merge(
+            request()->query(),
+            [
+                'orderBy'   => $orderBy,
+                'direction' => $direction === 'desc' ? 'asc' : 'desc',
+            ]
+        ))
     }}"
     title="Sort all families alphabetically."
     class="{{ request('orderBy') === $orderBy
