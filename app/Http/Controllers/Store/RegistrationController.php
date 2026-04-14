@@ -88,10 +88,9 @@ class RegistrationController extends Controller
         }
 
         // only for cc users with access to more than 1 centre
-        if ($user->centres->count() > 1) {
-            // get the centre_id from the masthead dropdown which is set by session (so we can filter reg selection)
+        if ($user->centres->count() > 1 && $request->boolean('filter_by_centre')) {
             $filtered_centre_id = session('CentreUserCurrentCentreId');
-            if ($filtered_centre_id && $filtered_centre_id !== "all") {
+            if ($filtered_centre_id) {
                 $q = $q->where('centre_id', '=', $filtered_centre_id);
             }
         }
