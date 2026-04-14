@@ -8,7 +8,6 @@ use App\Listeners\CentreUserAuthenticated;
 use App\Sponsor;
 use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
 
@@ -22,8 +21,6 @@ class CentreUserAuthenticatedTest extends TestCase
 
     private CentreUser $centreUser;
 
-    private Centre $centre;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -33,17 +30,15 @@ class CentreUserAuthenticatedTest extends TestCase
         Session::forget(self::KEY);
 
         $this->sponsor = factory(Sponsor::class)->create();
-        $this->centre = factory(Centre::class)->create(['sponsor_id' => $this->sponsor->id]);
+        factory(Centre::class, 2)->create(['sponsor_id' => $this->sponsor->id]);
 
         $this->centreUser = factory(CentreUser::class)->create();
-        $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
+        $this->centreUser->centres()->attach([1 => ['homeCentre' => false], 2 => ['homeCentre' => true]]);
     }
 
 
     public function testItDoesNothingForNonCentreUsers(): void
     {
-        Config::set('arc.default_to_home_centre', true);
-
         $listener = new CentreUserAuthenticated();
 
         $nonCentreUser = new class () {
@@ -56,38 +51,20 @@ class CentreUserAuthenticatedTest extends TestCase
     }
 
 
-    public function testItSetsSessionToAllWhenConfigIsFalseAndKeyIsMissing(): void
+    public function testItSetsSessionToHomeCentreWhenKeyIsMissing(): void
     {
-        Config::set('arc.default_to_home_centre', false);
-
         $listener = new CentreUserAuthenticated();
 
         $user = $this->centreUser;
 
         $listener->handle(new Authenticated('store', $user));
 
-        $this->assertSame('all', Session::get(self::KEY));
+        $this->assertSame($user->homeCentre->id, Session::get(self::KEY));
     }
 
 
-    public function testItSetsSessionToHomeCentreIdWhenConfigIsTrueAndKeyIsMissing(): void
+    public function testItSetsSessionToNullWhenHomeCentreIsNull(): void
     {
-        Config::set('arc.default_to_home_centre', true);
-
-        $listener = new CentreUserAuthenticated();
-
-        $user = $this->centreUser;
-
-        $listener->handle(new Authenticated('store', $user));
-
-        $this->assertSame($this->centre->id, Session::get(self::KEY));
-    }
-
-
-    public function testItSetsSessionToNullWhenConfigIsTrueAndHomeCentreIsNull(): void
-    {
-        Config::set('arc.default_to_home_centre', true);
-
         // make a centreUser, don't set up a homeCentre
         $user = factory(CentreUser::class)->create();
 
@@ -102,15 +79,11 @@ class CentreUserAuthenticatedTest extends TestCase
 
     public function testItDoesNotOverrideExistingSessionValue(): void
     {
-        Config::set('arc.default_to_home_centre', true);
-
         Session::put(self::KEY, 'existing');
 
         $listener = new CentreUserAuthenticated();
 
-        $user = $this->centreUser;
-
-        $listener->handle(new Authenticated('store', $user));
+        $listener->handle(new Authenticated('store', $this->centreUser));
 
         $this->assertSame('existing', Session::get(self::KEY));
     }
