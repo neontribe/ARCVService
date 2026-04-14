@@ -42,7 +42,7 @@
                                     @foreach (Auth::user()->centres as $centre)
                                         <option
                                             value="{{ $centre->id }}"
-                                            @selected(session('CentreUserCurrentCentreId') === $centre->id)
+                                            @selected($centre->id === (int)session('CentreUserCurrentCentreId'))
                                         >{{ $centre->name }}</option>
                                     @endforeach
                                 </select>

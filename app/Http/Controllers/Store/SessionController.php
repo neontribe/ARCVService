@@ -12,7 +12,7 @@ class SessionController extends Controller
     {
         // Set session
         session(['CentreUserCurrentCentreId' => $request->input('centre')]);
-        // redirect to a specific place
-        return redirect()->route('store.registration.index');
+        // redirect to the prior route
+        return redirect(url()->previous());
     }
 }
