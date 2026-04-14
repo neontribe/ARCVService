@@ -8,10 +8,13 @@ use App\Services\VoucherEvaluator\IEvaluee;
 use App\Traits\Evaluable;
 use Carbon\Carbon;
 use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Centre;
+use App\Family;
 
 /**
  * @mixin Eloquent
@@ -77,8 +80,6 @@ class Registration extends Model implements IEvaluee
 
     /**
      * Works out if a Registration can be counted as "Active"
-     *
-     * @return bool
      */
     public function isActive(): bool
     {
@@ -111,22 +112,18 @@ class Registration extends Model implements IEvaluee
 
     /**
      * Get the Registration's Family
-     *
-     * @return BelongsTo
      */
     public function family(): BelongsTo
     {
-        return $this->belongsTo('App\Family');
+        return $this->belongsTo(Family::class);
     }
 
     /**
      * Get the Registration's Centre
-     *
-     * @return BelongsTo
      */
     public function centre(): BelongsTo
     {
-        return $this->belongsTo('App\Centre');
+        return $this->belongsTo(Centre::class);
     }
 
     /**
@@ -135,7 +132,7 @@ class Registration extends Model implements IEvaluee
      *
      * @return Model
      */
-    public function currentBundle()
+    public function currentBundle(): Model
     {
         $bundle = $this->bundles()
             ->where('disbursed_at', null)
@@ -166,10 +163,8 @@ class Registration extends Model implements IEvaluee
 
     /**
      * Fetches the Registrations full Family and dependent models.
-     * @param $query
-     * @return mixed
      */
-    public function scopeWithFullFamily($query)
+    public function scopeWithFullFamily(Builder $query): Builder
     {
         return $query->with([
             // This may not be efficient, but it is convenient for ordering when required.
@@ -183,10 +178,8 @@ class Registration extends Model implements IEvaluee
 
     /**
      * Fetches only Registrations with an Active Family
-     * @param $query
-     * @return mixed
      */
-    public function scopeWhereActiveFamily($query)
+    public function scopeWhereActiveFamily(Builder $query): Builder
     {
         return $query->whereHas('family', function ($q) {
             $q->whereNull('leaving_on');
@@ -199,5 +192,44 @@ class Registration extends Model implements IEvaluee
         return $this->hasOne(Bundle::class)
             ->whereNotNull('disbursed_at')
             ->latest('disbursed_at');
+    }
+
+    /**
+     * Join the primary carer (MIN id per family) directly into the query,
+     *  so we can filter and sort by carer name in SQL rather than PHP.
+    */
+    public function scopeWithPrimaryCarer(Builder $query): Builder
+    {
+        return $query
+            ->select('registrations.*')
+            ->joinSub(
+                Carer::query()
+                    ->selectRaw('MIN(id) AS id, family_id')
+                    ->groupBy('family_id'),
+                'pri_carers',
+                'pri_carers.family_id', '=', 'registrations.family_id'
+            )
+            ->join('carers', 'carers.id', '=', 'pri_carers.id');
+    }
+
+    public function scopeOrderByCarerName(Builder $query, bool $descending = false): Builder
+    {
+        return $query->orderBy('carers.name', $descending ? 'desc' : 'asc');
+    }
+
+    public function scopeFilterByCarerName(Builder $query, string $term): Builder
+    {
+        return $query
+            ->where('carers.name', 'LIKE', "%{$term}%")
+            ->orderByRaw(
+                "CASE
+                WHEN LOWER(carers.name) = LOWER(?)         THEN 0
+                WHEN LOWER(carers.name) LIKE LOWER(?)      THEN 1
+                WHEN LOWER(carers.name) LIKE LOWER(?)
+                  OR LOWER(carers.name) LIKE LOWER(?)      THEN 2
+                ELSE 3
+            END",
+                [$term, "{$term} %", "% {$term} %", "% {$term}"]
+            );
     }
 }

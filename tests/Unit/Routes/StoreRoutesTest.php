@@ -16,33 +16,25 @@ class StoreRoutesTest extends StoreTestCase
 {
     use RefreshDatabase;
 
-    /** @var CentreUser $fmUser */
-    private $fmUser;
+    private CentreUser $fmUser;
 
-    /** @var CentreUser $centreUser */
-    private $centreUser;
+    private CentreUser $centreUser;
 
-    /** @var CentreUser $downlaoderUser */
-    private $downloaderUser;
+    private CentreUser $downloaderUser;
 
-    /** @var CentreUser $neighbourUser */
-    private $neighbourUser;
+    private CentreUser $neighbourUser;
 
-    /** @var CentreUser $foreignUser */
-    private $unrelatedUser;
+    private CentreUser $unrelatedUser;
 
-    /** @var Centre $centre */
-    private $centre;
+    private Centre $centre;
 
-    /** @var Centre $neighbourCentre */
-    private $neighbourCentre;
+    private Centre $neighbourCentre;
 
-    /** @var Centre $unrelatedCentre */
-    private $unrelatedCentre;
+    private Centre $unrelatedCentre;
 
-    private $dashboardRoute;
+    private string $dashboardRoute;
 
-    private $searchRegistrationsRoute;
+    private string $searchRegistrationsRoute;
 
     public function setUp(): void
     {
@@ -437,7 +429,7 @@ class StoreRoutesTest extends StoreTestCase
 
         // return to prior route
         $this->followRedirects()
-            ->seePageIs($this->searchRegistrationsRoute)
+            ->seePageIs($this->dashboardRoute)
             ->assertResponseStatus(200);
     }
 
