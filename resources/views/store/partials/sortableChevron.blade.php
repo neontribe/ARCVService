@@ -3,7 +3,7 @@
         route($route, array_merge(
             request()->query(),
             [
-                'orderBy'   => $orderBy,
+                'orderBy' => $orderBy,
                 'direction' => $direction === 'desc' ? 'asc' : 'desc',
             ]
         ))

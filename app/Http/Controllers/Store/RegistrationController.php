@@ -34,7 +34,7 @@ use Throwable;
 
 class RegistrationController extends Controller
 {
-    public function index(Request $request): View|Factory|Application
+    public function index(Request $request): Factory|View|RedirectResponse
     {
         /** @var User $user */
         $user = Auth::user();
@@ -42,10 +42,9 @@ class RegistrationController extends Controller
         $familyName = $request->string('family_name');
         $fuzzy = $request->boolean('fuzzy');
         $descending = $request->input('direction') === 'desc';
-
         $neighbourCentreIds = $user->relevantCentres()->pluck('id');
 
-        $query = Registration::query()
+        $baseQuery = Registration::query()
             ->withPrimaryCarer()
             ->whereIn('registrations.centre_id', $neighbourCentreIds);
 
@@ -54,55 +53,69 @@ class RegistrationController extends Controller
             $request->boolean('filter_by_centre') &&
             ($centreId = session('CentreUserCurrentCentreId'))
         ) {
-            $query->where('registrations.centre_id', $centreId);
+            $baseQuery->where('registrations.centre_id', $centreId);
         }
 
         if (!$request->boolean('families_left')) {
-            $query->WhereActiveFamily();
+            $baseQuery->WhereActiveFamily();
         }
 
-        // Fuzzy is MySQL-only and returns Searchy-ranked IDs whose order we must
-        // preserve — handle separately since that requires PHP-side pagination.
-        if  (config('database.connections.' . config('database.default') . '.driver') === 'mysql') {
-            if ($fuzzy && $familyName->isNotEmpty()) {
-                return $this->renderFuzzy($request, $user, $query, $familyName, $neighbourCentreIds);
-            }
+        $useFuzzy = $fuzzy
+            && $familyName->isNotEmpty()
+            && config('database.connections.' . config('database.default') . '.driver') === 'mysql';
+
+        [$registrations, $resolvedFuzzy] = $useFuzzy
+            ? [$this->fetchFuzzy($request, $baseQuery, $familyName, $neighbourCentreIds, $descending), true]
+            : [$this->fetchExact($baseQuery, $familyName, $descending), false];
+
+        if ($registrations->currentPage() > $registrations->lastPage()) {
+            return redirect()->to(
+                $registrations->url($registrations->lastPage())
+            );
         }
-
-        // Standard path: everything resolved in SQL.
-        if ($familyName->isNotEmpty()) {
-            $query->filterByCarerName((string) $familyName);
-        }
-
-        $query->orderByCarerName($descending);
-
-        $registrations = $query
-            ->WithFullFamily()
-            ->paginate(perPage: 10)
-            ->withQueryString();
 
         return view('store.index_registration', [
             'user_name' => $user->name,
             'centre_name' => $user->centre?->name,
             'programme' => $user->centre?->sponsor?->programme,
             'registrations' => $registrations,
-            'fuzzy' => false,
+            'fuzzy' => $resolvedFuzzy,
         ]);
     }
 
     /**
-     * Fuzzy (MySQL-only) path. Searchy returns family IDs in relevance order;
-     * we preserve that order via PHP-side pagination.
+     * Exact-match strategy: everything resolved in SQL.
+     * Returns a paginator ready for the view.
      */
-    private function renderFuzzy(
+    private function fetchExact(
+        Builder $query,
+        Stringable $familyName,
+        bool $descending,
+    ): LengthAwarePaginator {
+        if ($familyName->isNotEmpty()) {
+            $query->filterByCarerName((string)$familyName);
+        }
+
+        $query->orderByCarerName($descending);
+
+        return $query
+            ->WithFullFamily()
+            ->paginate(perPage: 10)
+            ->withQueryString();
+    }
+
+    /**
+     * Fuzzy strategy (MySQL-only): Searchy ranks IDs by relevance;
+     * ordering is preserved via PHP-side pagination.
+     * Returns a paginator ready for the view.
+     */
+    private function fetchFuzzy(
         Request $request,
-        User $user,
         Builder $query,
         Stringable $familyName,
         Collection $neighbourCentreIds,
-    ): View|Factory|Application {
-
-        // Searchy returns relevance-ranked results as an array of stdClass objects
+        bool $descending,
+    ): LengthAwarePaginator {
         $rankedFamilyIds = collect(
             Searchy::search('carers')
                 ->fields('name')
@@ -110,14 +123,12 @@ class RegistrationController extends Controller
                 ->get()
         )->pluck('family_id')->toArray();
 
-        // Scope down to only those family_ids visible in the permitted centres
         $permittedFamilyIds = Registration::query()
             ->whereIn('family_id', $rankedFamilyIds)
             ->whereIn('centre_id', $neighbourCentreIds)
             ->pluck('family_id')
             ->toArray();
 
-        // Re-sort by Searchy's original relevance ranking, dropping unpermitted ids
         $familyIds = collect($rankedFamilyIds)
             ->filter(function (int $id) use ($permittedFamilyIds) {
                 return in_array($id, $permittedFamilyIds, strict: true);
@@ -125,18 +136,24 @@ class RegistrationController extends Controller
             ->values()
             ->toArray();
 
+        $positionMap = array_flip($familyIds);
+
         $all = $query
             ->whereIn('registrations.family_id', $familyIds)
             ->WithFullFamily()
             ->get()
-            ->sortBy(function ($reg) use ($familyIds) {
-                return array_search($reg->family_id, $familyIds);
-            })
+            ->sortBy(
+                function ($reg) use ($positionMap) {
+                    return $positionMap[$reg->family_id] ?? PHP_INT_MAX;
+                },
+                SORT_REGULAR,
+                $descending,
+            )
             ->values();
 
         $page = LengthAwarePaginator::resolveCurrentPage();
 
-        $registrations = new LengthAwarePaginator(
+        return new LengthAwarePaginator(
             items: $all->forPage($page, 10),
             total: $all->count(),
             perPage: 10,
@@ -146,14 +163,6 @@ class RegistrationController extends Controller
                 'query' => $request->except('page'),
             ]
         );
-
-        return view('store.index_registration', [
-            'user_name' => $user->name,
-            'centre_name' => $user->centre?->name,
-            'programme' => $user->centre?->sponsor?->programme,
-            'registrations' => $registrations,
-            'fuzzy' => true,
-        ]);
     }
 
     /**
