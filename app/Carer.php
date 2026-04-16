@@ -36,7 +36,8 @@ class Carer extends LazySecureModel implements CipherSweetEncrypted
         'ethnicity',
         'language',
         'emailsecret',
-        'telnosecret'
+        'telnosecret',
+        'family_id',
     ];
 
     public static function configureCipherSweet(EncryptedRow $encryptedRow): void
