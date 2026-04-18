@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use Request;
 use Throwable;
 
 class BundleController extends Controller
@@ -59,20 +60,35 @@ class BundleController extends Controller
     }
 
     /**
-     * Append a single voucher or range of vouchers to the current bundle.
+     * Append a single voucher, range of vouchers, or a quantity drawn from the pool
+     * to the current bundle.
      */
     public function addVouchersToCurrentBundle(
         StoreAppendBundleRequest $request,
         Registration $registration,
     ): RedirectResponse {
-        $voucherCodes = Voucher::generateCodeRange(
-            $request->input('start'),
-            $request->input('end'),
-        );
-
         $managerRoute = $this->managerRoute($registration);
 
-        $errors = count($voucherCodes) <= config('arc.bundle_max_voucher_append')
+        if ($request->filled('quantity')) {
+            try {
+                $voucherCodes = Voucher::claimFromPool((int) $request->input('quantity'))
+                    ->pluck('code')
+                    ->all();
+            } catch (Throwable $e) {
+                return $this->redirectAfterRequest(
+                    ['pool' => $e->getMessage()],
+                    $managerRoute,
+                    $managerRoute,
+                );
+            }
+        } else {
+            $voucherCodes = Voucher::generateCodeRange(
+                $request->input('start'),
+                $request->input('end'),
+            );
+        }
+
+        $errors = (count($voucherCodes) <= config('arc.bundle_max_voucher_append'))
             ? $registration->currentBundle()->addVouchers($voucherCodes)
             : ['append' => count($voucherCodes)];
 
@@ -289,5 +305,12 @@ class BundleController extends Controller
             Str::plural('voucher', $count),
             $name,
         );
+    }
+
+    /**
+     *
+     */
+    public function requestPayment(Request $request) {
+        //
     }
 }
