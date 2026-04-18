@@ -94,10 +94,9 @@
     </div>
 </div>
 
-@pushonce('scripts')
+@pushonce('js')
     <script>
         $(document).ready(function () {
-
             $('#collection-button').click(function (e) {
                 e.preventDefault();
                 $('#collection').addClass('slide-in');
