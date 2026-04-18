@@ -6,8 +6,7 @@
     </div>
 
     <div>
-        <p>There are {{ $vouchers_amount }} vouchers waiting for
-            this {{ $programme === 0 ? 'family' : 'household' }}</p>
+        <p>There's <span class="number-circle">{{ $vouchers_amount }}</span> @choice('{1}voucher|[0,2,*]vouchers', $vouchers_amount) waiting for this {{ $programme === 0 ? 'family' : 'household' }}</p>
     </div>
 
     <form
@@ -51,7 +50,7 @@
                 </div>
             </div>
 
-            <button class="long-button submit" type="submit" @disabled($vouchers_amount === 0)>
+            <button id="collection-button" class="long-button submit" type="submit" @disabled($vouchers_amount === 0)>
                 Confirm pick up
             </button>
         </div>
