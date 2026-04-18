@@ -2,60 +2,54 @@
 
 namespace Tests\Unit\Controllers\Store;
 
-use App\Registration;
 use App\Bundle;
 use App\Centre;
 use App\CentreUser;
 use App\Family;
+use App\Registration;
 use App\Sponsor;
 use App\Voucher;
-use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Session;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\StoreTestCase;
 
 class BundleControllerTest extends StoreTestCase
 {
     use RefreshDatabase;
 
-    protected $centre;
-    protected $centreUser;
-    protected $testCodes;
+    protected Centre $centre;
+    protected CentreUser $centreUser;
     protected Registration $registration;
-    protected $bundle;
+    protected array $testCodes;
+    protected string $programme;
 
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->centre = factory(Centre::class)->create();
 
-        // Create a User
         $this->centreUser = factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
+            'name' => 'test user',
+            'email' => 'testuser@example.com',
+            'password' => bcrypt('test_user_pass'),
         ]);
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
 
-        //  A Registration on that centre
         $this->registration = factory(Registration::class)->create([
-            'centre_id' => $this->centre->id
+            'centre_id' => $this->centre->id,
         ]);
 
-        // Make some vouchers
-        $this->testCodes = [
-            'TST09999',
-            'TST10000',
-            'TST10001'
-        ];
+        $this->testCodes = ['TST09999', 'TST10000', 'TST10001'];
 
+        // Auth context is required by the voucher state-machine transition logger.
         Auth::login($this->centreUser);
 
-        foreach ($this->testCodes as $testCode) {
-            $voucher = factory(Voucher::class)->state('printed')->create([
-                'code' => $testCode
-            ]);
+        foreach ($this->testCodes as $code) {
+            $voucher = factory(Voucher::class)->state('printed')->create(['code' => $code]);
             $voucher->applyTransition('dispatch');
         }
 
@@ -64,658 +58,538 @@ class BundleControllerTest extends StoreTestCase
         Auth::logout();
     }
 
+    // -------------------------------------------------------------------------
+    // Append-vouchers validation — data provider
+    // -------------------------------------------------------------------------
 
-    public function testICannotSubmitInvalidValuesToAppendVouchers(): void
+    /**
+     * @return array<string, array{array<string,string>, string, string}>
+     *
+     * Config placeholders: config() is unavailable in static providers (they are constructed
+     * before the Laravel application boots). Two placeholders are used instead and resolved
+     * inside the test method once the container is live:
+     *   :max:          → config('arc.bundle_max_voucher_append')
+     *   :max_plus_one: → config('arc.bundle_max_voucher_append') + 1
+     */
+    public static function appendVoucherValidationCases(): array
     {
-        $dataSets = [
-            // no data
-            [
-                "data" => [],
-                "outcome" => ["start" => "The start field is required."]
+        return [
+            // --- start field (voucher-quantity absent branch) ---
+            'start: absent with no data submitted' => [
+                [],
+                'start',
+                'The start field is required when voucher-quantity is not present.',
             ],
-            // start is not present
-            [
-                "data" => ['end' => 'tst10001'],
-                "outcome" => ["start" => "The start field is required."]
+            'start: absent when only end supplied' => [
+                ['end' => 'tst10001'],
+                'start',
+                'The start field is required when voucher-quantity is not present.',
             ],
-            // start is present but null
-            [
-                "data" => ["start" => '', 'end' => 'tst10001'],
-                "outcome" => ["start" => "The start field is required."]
+            'start: empty string stripped by prepareForValidation' => [
+                ['start' => '', 'end' => 'tst10001'],
+                'start',
+                'The start field is required when voucher-quantity is not present.',
             ],
-            // start is not a valid voucher code
-            [
-                "data" => ["start" => 'invalidVoucher', 'end' => 'tst10001' ],
-                "outcome" => ["start" => "The selected start is invalid."]
+            'start: value not found in vouchers table' => [
+                ['start' => 'invalidVoucher', 'end' => 'tst10001'],
+                'start',
+                'The selected start is invalid.',
             ],
-            // end is not a valid voucher code
-            [
-                "data" => ["start" => 'tst09999', 'end' => 'invalidCode' ],
-                "outcome" => ["end" => "The selected end is invalid."]
+
+            // --- end field ---
+            'end: value not found in vouchers table' => [
+                ['start' => 'tst09999', 'end' => 'invalidCode'],
+                'end',
+                'The selected end is invalid.',
             ],
-            // end is not the same shortcode as start
-            [
-                "data" => ["start" => 'tst09999', 'end' => 'txt10000' ],
-                "outcome" => ["end" => "The end field must be the same sponsor as the start field."]
+            'end: different sponsor prefix to start' => [
+                ['start' => 'tst09999', 'end' => 'txt10000'],
+                'end',
+                'The end field must be the same sponsor as the start field.',
             ],
-            // end is not higher than start
-            [
-                "data" => ["start" => 'tst10001', 'end' => 'tst09999' ],
-                "outcome" => ["end" => "The end field must be greater than the start field."]
+            'end: lower sequence number than start' => [
+                ['start' => 'tst10001', 'end' => 'tst09999'],
+                'end',
+                'The end field must be greater than the start field.',
+            ],
+
+            // --- voucher-quantity field (early-return branch) ---
+            'voucher-quantity: zero is below the allowed minimum of 1' => [
+                ['voucher-quantity' => '0'],
+                'voucher-quantity',
+                'The voucher-quantity must be between 1 and :max:.',
+            ],
+            'voucher-quantity: negative value is below the allowed minimum of 1' => [
+                ['voucher-quantity' => '-1'],
+                'voucher-quantity',
+                'The voucher-quantity must be between 1 and :max:.',
+            ],
+            'voucher-quantity: exceeds the configured maximum' => [
+                ['voucher-quantity' => ':max_plus_one:'],
+                'voucher-quantity',
+                'The voucher-quantity must be between 1 and :max:.',
+            ],
+            'voucher-quantity: required when start also absent' => [
+                [],
+                'voucher-quantity',
+                'The voucher-quantity field is required when start is not present.',
             ],
         ];
-
-        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
-        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
-
-        foreach ($dataSets as $set) {
-            $response = $this->actingAs($this->centreUser, 'store')
-                ->visit($route)
-                ->post(
-                    $post_route,
-                    $set["data"]
-                )
-            ;
-            // work out which field we're testing.
-            $field = array_keys($set['outcome'])[0];
-
-            // Dig out errors from Session
-            $all = session()->all();
-            self::assertArrayHasKey("errors", $all);
-            $errors = session("errors")->get($field);
-
-            // Check our specific message is present
-            $this->assertContains($set['outcome'][$field], $errors);
-
-            // we follow that to the correct page;
-            $this->followRedirects()
-                ->seePageIs($route)
-                ->assertResponseStatus(200)
-            ;
-        }
     }
 
-
-    public function testIMustDisburseWithAllRelevantFields(): void
-    {
-        $dataSets = [
-            [
-                "data" => [
-                    "collected_at" => "1", "collected_on" => "2018-07-21"
-                ],
-                "outcome" => [ "collected_by" => "The collected by field is required when collected at / collected on is present."],
-            ],
-            [
-                "data" => [
-                    "collected_by" => "1", "collected_on" => "2018-07-21"
-                ],
-                "outcome" => [ "collected_at" => "The collected at field is required when collected on / collected by is present."],
-            ],
-            [
-                "data" => [
-                    "collected_at" => "1", "collected_by" => "1"
-                ],
-                "outcome" => [ "collected_on" => "The collected on field is required when collected at / collected by is present."],
-            ],
-            [
-                "data" => [
-                    "collected_at" => "1", "collected_on" => "invalid", "collected_by" => "1"
-                ],
-                "outcome" => [ "collected_on" => "The collected on does not match the format Y-m-d."],
-            ],
-            [
-                "data" => [
-                    "collected_at" => "9999", "collected_on" => "2018-07-21", "collected_by" => "1"
-                ],
-                "outcome" => [ "collected_at" => "The selected collected at is invalid."],
-            ],
-            [
-                "data" => [
-                    "collected_at" => "1", "collected_on" => "2018-07-21", "collected_by" => "9999"
-                ],
-                "outcome" => [ "collected_by" => "The selected collected by is invalid."],
-            ],
-        ];
-
-        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
-        $put_route = route('store.registration.vouchers.put', ['registration' => $this->registration->id]);
-
-        foreach ($dataSets as $set) {
-            $response = $this->actingAs($this->centreUser, 'store')
-                ->visit($route)
-                ->put(
-                    $put_route,
-                    $set["data"]
-                )
-            ;
-            // work out which field we're testing.
-            $field = array_keys($set['outcome'])[0];
-
-            // Dig out errors from Session
-            $response->seeInSession('errors');
-            $errors = Session::get("errors")->get($field);
-
-            // Check our specific message is present
-            $this->assertContains($set['outcome'][$field], $errors);
-
-            // we follow that to the correct page;
-            $this->followRedirects()
-                ->seePageIs($route)
-                ->assertResponseStatus(200)
-            ;
-        }
-    }
-
-
-    public function testICanAddManyVouchers(): void
-    {
-        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
-        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
-
-        // Add many vouchers;
-        $this->actingAs($this->centreUser, 'store')
-            ->post(
-                $post_route,
-                [
-                    'start' => $this->testCodes[0],
-                    'end' => $this->testCodes[count($this->testCodes) - 1]
-                ]
-            );
-
-        $this->followRedirects()
-            ->seePageIs($route)
-            ->assertResponseStatus(200)
-        ;
-        /** @var Bundle $currentBundle */
-        // Get our currentBundle
-        $currentBundle = $this->registration->currentBundle();
-
-        // See that it's got many vouchers.
-        $this->assertEquals(count($this->testCodes), $currentBundle->vouchers()->count());
-    }
-
-
-    public function testICannotAddTooManyVouchersToABundle(): void
-    {
-        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
-        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
-
-        // Get the maxAdd value currently 101;
-        $overMaxAdd = config('arc.bundle_max_voucher_append') + 1;
-
-        // Make the range 1-101,
-        $startCode = "BIG00001";
-        $endCode = "BIG" . str_pad($overMaxAdd, 5, "0", STR_PAD_LEFT);
-        $bigRange = Voucher::generateCodeRange($startCode, $endCode);
-        $this->assertCount($overMaxAdd, $bigRange);
-
-        // Create the vouchers for the range;
-        Auth::login($this->centreUser);
-        foreach ($bigRange as $testCode) {
-            $voucher = factory(Voucher::class)->state('printed')->create([
-                'code' => $testCode
-            ]);
-            $voucher->applyTransition('dispatch');
-        }
-        Auth::logout();
-
-        // Attempt to bind the vouchers to the bundle
-        $response = $this->actingAs($this->centreUser, 'store')
-            ->post(
-                $post_route,
-                [
-                    'start' => $startCode,
-                    'end' => $endCode,
-                ]
-            );
-
-        // Confirm that we have supplied the appropriate error message to the session
-        $response->seeInSession('error_messages');
-        $this->assertTrue($this->hasMatchingErrorMessage(
-            Session::get('error_messages'),
-            '/Failed adding more than ' . config('arc.bundle_max_voucher_append') . ' vouchers/'
-        ));
-
-        // see we're redirected back
-        $this->followRedirects()
-            ->seePageIs($route)
-            ->assertResponseStatus(200)
-        ;
-
-        // See we have no vouchers added.
-        /** @var Bundle $currentBundle */
-        // Get our currentBundle
-        $currentBundle = $this->registration->currentBundle();
-
-        // See that it's got no vouchers.
-        $this->assertEquals(0, $currentBundle->vouchers()->count());
-    }
-
-
-    public function testICanAddSingleVouchers(): void
-    {
-        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
-        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
-
-        // Add a voucher;
-        $this->actingAs($this->centreUser, 'store')
-            ->post($post_route, ['start' => $this->testCodes[0]]);
-
-        $this->followRedirects()
-            ->seePageIs($route)
-            ->assertResponseStatus(200)
-        ;
-
-        /** @var Bundle $currentBundle */
-        // Get our currentBundle
-        $currentBundle = $this->registration->currentBundle();
-
-        // See that it's got one voucher.
-        $this->assertEquals(1, $currentBundle->vouchers()->count());
-    }
-
-
-
-    public function testICanDeleteTheCurrentBundle(): void
-    {
-        /** @var Bundle $currentBundle */
-        $currentBundle = $this->registration->currentBundle();
-
-        Auth::login($this->centreUser);
-        // Make some vouchers to bundle.
-        $testCodes = [
-            'TST0123455',
-            'TST0123456',
-            'TST0123457'
-        ];
-        foreach ($testCodes as $testCode) {
-            $voucher = factory(Voucher::class)->state('printed')->create([
-                'code' => $testCode
-            ]);
-            $voucher->applyTransition('dispatch');
-            $voucher->bundle()->associate($currentBundle)->save();
-        }
-
-        // there should be 3 vouchers!
-        $this->assertEquals(count($testCodes), $currentBundle->vouchers()->count());
-
-        // Stash vouchers for test later
-        //$vouchers = $currentBundle->vouchers()->get();
-
-        $delete_route = route(
-            'store.registration.vouchers.delete',
-            [
-                'registration' => $this->registration->id,
-            ]
-        );
-
-        // Hit the route with a delete request;
-        $this->actingAs($this->centreUser, 'store')
-            ->delete($delete_route)
-        ;
-
-        // refresh bundle
-        $currentBundle->refresh();
-        // See less vouchers
-        $this->assertEquals(0, $currentBundle->vouchers()->count());
-
-        //Check all vouchers have NULL bundle_id
-
-        $vouchers = Voucher::whereIn('code', $testCodes)->get();
-        foreach ($vouchers as $v) {
-            $this->assertNull($v->bundle_id);
-        }
-    }
-
-
-    public function testICanDeleteANamedVoucher(): void
-    {
-        /** @var Bundle $currentBundle */
-        $currentBundle = $this->registration->currentBundle();
-
-        Auth::login($this->centreUser);
-        // Make some vouchers to bundle.
-        $testCodes = [
-            'TST0123455',
-            'TST0123456',
-            'TST0123457'
-        ];
-        foreach ($testCodes as $testCode) {
-            $voucher = factory(Voucher::class)->state('printed')->create([
-                'code' => $testCode
-            ]);
-            $voucher->applyTransition('dispatch');
-            $voucher->bundle()->associate($currentBundle)->save();
-        }
-
-        // there should be 3 vouchers!
-        $this->assertEquals(count($testCodes), $currentBundle->vouchers()->count());
-
-        // find the first voucher
-        $voucher = $currentBundle->vouchers()->first();
-
-        $delete_route = route(
-            'store.registration.voucher.delete',
-            [
-                'registration' => $this->registration->id,
-                'voucher' => $voucher->id
-            ]
-        );
-
-        // Hit the route with a delete request;
-        $this->actingAs($this->centreUser, 'store')
-            ->delete($delete_route)
-        ;
-
-        // refresh bundle
-        $currentBundle->refresh();
-        // See less vouchers
-        $this->assertEquals(count($testCodes) - 1, $currentBundle->vouchers()->count());
-
-        // Refresh the detached voucher
-        $voucher->refresh();
-        // Assert voucher is unbundled
-        $this->assertNull($voucher->bundle_id);
-
-        // Assert voucher is back to dispatched
-        $this->assertEquals('dispatched', $voucher->currentstate);
-    }
-
-
-    public function testICanSyncAnArrayOfVouchers(): void
-    {
-        $put_route = route('store.registration.vouchers.put', ['registration' => $this->registration->id]);
-
-        // sync a voucher;
-        $this->actingAs($this->centreUser, 'store')
-            ->put($put_route, ['vouchers' => [$this->testCodes[0]]]);
-
-        $currentBundle = $this->registration->currentBundle();
-        $this->assertEquals(1, $currentBundle->vouchers()->count());
-
-        // re-sync with 3 vouchers
-        $this->actingAs($this->centreUser, 'store')
-            ->put($put_route, ['vouchers' => $this->testCodes]);
-
-        $currentBundle->refresh();
-        $this->assertEquals(count($this->testCodes), $currentBundle->vouchers()->count());
-
-        // sync without a voucher array AT ALL - does nothing.
-        $this->actingAs($this->centreUser, 'store')
-            ->put($put_route, []);
-
-        $currentBundle->refresh();
-        $this->assertEquals(count($this->testCodes), $currentBundle->vouchers()->count());
-
-        // sync with only a single empty voucher string erases the vouchers.
-        $this->assertEquals(3, $currentBundle->vouchers()->count());
-
-        $this->actingAs($this->centreUser, 'store')
-            ->put($put_route, ['vouchers' => [''] ]);
-
-        $currentBundle->refresh();
-        $this->assertEquals(0, $currentBundle->vouchers()->count());
-    }
-
-
-    public function testICannotDisburseAnEmptyBundle(): void
-    {
-        // Setup bundle
-        $currentBundle = $this->registration->currentBundle();
-
-        Auth::login($this->centreUser);
-
-        // There should be one currentBundle with 3 vouchers
-        $this->assertCount(1, $this->registration->bundles);
-
-        // Create a sensible place to have collected it.
-        $disbursementCentre = Auth::user()->centre->id;
-
-        // Create a sensible date to have Collected on
-        $disbursementDate = Carbon::now()->startOfWeek()->format("Y-m-d");
-
-        // Find a carer for bundle
-        $collectingCarer = $this->registration->family->carers->first()->id;
-
-        // Array all that
-        $data = [
-            "collected_at" => $disbursementCentre,
-            "collected_on" => $disbursementDate,
-            "collected_by" => $collectingCarer
-        ];
+    #[DataProvider('appendVoucherValidationCases')]
+    public function testICannotSubmitInvalidValuesToAppendVouchers(
+        array $data,
+        string $field,
+        string $expectedMessage,
+    ): void {
+        $max = (string)config('arc.bundle_max_voucher_append');
+
+        // Resolve placeholders that cannot be evaluated inside a static data provider.
+        $data = array_map(static function (string $v) use ($max) {
+            return str_replace(':max_plus_one:', (string)((int)$max + 1), $v);
+        }, $data);
+        $expectedMessage = str_replace(':max:', $max, $expectedMessage);
 
         $route = route('store.registration.voucher-manager', ['registration' => $this->registration->id]);
-        $put_route = route('store.registration.vouchers.put', ['registration' => $this->registration->id]);
+        $postRoute = route('store.registration.vouchers.post', ['registration' => $this->registration->id]);
 
-        // Attempt to submit
-        $response = $this->actingAs($this->centreUser, 'store')
+        $this->actingAs($this->centreUser, 'store')
             ->visit($route)
-            ->put(
-                $put_route,
-                $data
-            );
+            ->post($postRoute, $data);
 
-        // Confirm that we have supplied the appropriate error message to the session
-        $response->seeInSession('error_messages');
-        $this->assertTrue($this->hasMatchingErrorMessage(
-            Session::get('error_messages'),
-            '/Action denied on empty bundle/'
-        ));
+        $errors = session('errors')->get($field);
 
-        // Check the submission was a success
+        $this->assertNotEmpty($errors, "Expected validation errors for field '$field'");
+        $this->assertContains($expectedMessage, $errors);
+
         $this->followRedirects()
             ->seePageIs($route)
             ->assertResponseStatus(200);
     }
 
+    // -------------------------------------------------------------------------
+    // Disbursement validation — data provider
+    // -------------------------------------------------------------------------
 
-    public function testICannotAddAVoucherAllocatedInACentreIHaveAccessTo(): void
+    /**
+     * @return array<string, array{array<string,string>, string, string}>
+     */
+    public static function disburseValidationCases(): array
     {
-        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
-        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
-
-        // Add a voucher to the registration's bundle
-        $this->actingAs($this->centreUser, 'store')
-        ->visit($route)
-        ->post(
-            $post_route,
-            ["start" => $this->testCodes[0]]
-        );
-
-        // Add a second registration in the same centre
-        $this->registrationTwo = factory(Registration::class)->create([
-            'centre_id' => $this->centre->id
-        ]);
-
-        $route_2 = route('store.registration.voucher-manager', [ 'registration' => $this->registrationTwo->id ]);
-        $post_route_2 = route('store.registration.vouchers.post', [ 'registration' => $this->registrationTwo->id ]);
-
-        // Attempt to post the same voucher code into the second registration's bundle
-        $response = $this->actingAs($this->centreUser, 'store')
-        ->visit($route_2)
-        ->post(
-            $post_route_2,
-            ["start" => $this->testCodes[0]]
-        );
-
-        // See we have no vouchers added.
-        /** @var Bundle $currentBundle */
-        // Get our currentBundle
-        $currentBundle = $this->registrationTwo->currentBundle();
-
-        // See that it's got no vouchers.
-        $this->assertEquals(0, $currentBundle->vouchers()->count());
-
-        // Check the expected error message is in the session
-        $response->seeInSession('error_messages');
-        $entity = Family::getAlias($this->programme);
-        $this->assertTrue($this->hasMatchingErrorMessage(
-            Session::get('error_messages'),
-            '~These vouchers are currently allocated to a different ' . $entity . '. Click on the voucher number to view the other ' . $entity . '\'s record: <a href="' . $route . '">' . $this->testCodes[0] . '</a>~'
-        ));
-
-        // Check the expected error message is in the view
-        $this->followRedirects()
-            ->seeInElement('div[class="alert-message error"]', 'Click on the voucher number to view the other ' . $entity . '\'s record: <a href="' . $route . '">' . $this->testCodes[0] . '</a>');
+        return [
+            'collected_by missing' => [
+                ['collected_at' => '1', 'collected_on' => '2018-07-21'],
+                'collected_by',
+                'The collected by field is required when collected at / collected on is present.',
+            ],
+            'collected_at missing' => [
+                ['collected_by' => '1', 'collected_on' => '2018-07-21'],
+                'collected_at',
+                'The collected at field is required when collected on / collected by is present.',
+            ],
+            'collected_on missing' => [
+                ['collected_at' => '1', 'collected_by' => '1'],
+                'collected_on',
+                'The collected on field is required when collected at / collected by is present.',
+            ],
+            'collected_on wrong date format' => [
+                ['collected_at' => '1', 'collected_on' => 'invalid', 'collected_by' => '1'],
+                'collected_on',
+                'The collected on does not match the format Y-m-d.',
+            ],
+            'collected_at centre does not exist' => [
+                ['collected_at' => '9999', 'collected_on' => '2018-07-21', 'collected_by' => '1'],
+                'collected_at',
+                'The selected collected at is invalid.',
+            ],
+            'collected_by carer does not exist' => [
+                ['collected_at' => '1', 'collected_on' => '2018-07-21', 'collected_by' => '9999'],
+                'collected_by',
+                'The selected collected by is invalid.',
+            ],
+        ];
     }
 
+    #[DataProvider('disburseValidationCases')]
+    public function testIMustDisburseWithAllRelevantFields(
+        array $data,
+        string $field,
+        string $expectedMessage,
+    ): void {
+        $route = route('store.registration.voucher-manager', ['registration' => $this->registration->id]);
+        $putRoute = route('store.registration.vouchers.put', ['registration' => $this->registration->id]);
 
-    public function testICannotAddAVoucherAllocatedInACentreIDoNotHaveAccessTo(): void
-    {
-        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
-        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
-
-        // Add a voucher to the registration's bundle
         $this->actingAs($this->centreUser, 'store')
-        ->visit($route)
-        ->post(
-            $post_route,
-            ["start" => $this->testCodes[1]]
-        );
+            ->visit($route)
+            ->put($putRoute, $data);
 
-        // Create a second sponsor, centre and user
-        $this->sponsor2 = factory(Sponsor::class)->create();
+        $errors = session('errors')->get($field);
 
-        $this->centre2 = factory(Centre::class)->create(["sponsor_id" => $this->sponsor2->id]);
-
-        $this->centreUser2 = factory(CentreUser::class)->create([
-            "name"  => "second test user",
-            "email" => "testuser2@example.com",
-            "password" => bcrypt('test_user_pass2'),
-            "role" => "centre_user"
-        ]);
-
-        $this->centreUser2->centres()->attach($this->centre2->id, ['homeCentre' => true]);
-
-        // Add a registration to the second centre
-        $this->registrationTwo = factory(Registration::class)->create([
-            'centre_id' => $this->centre2->id
-        ]);
-
-        $route_2 = route('store.registration.voucher-manager', [ 'registration' => $this->registrationTwo->id ]);
-        $post_route_2 = route('store.registration.vouchers.post', [ 'registration' => $this->registrationTwo->id ]);
-
-        // Attempt to post the same voucher code into the second registration's bundle
-        $response = $this->actingAs($this->centreUser2, 'store')
-        ->visit($route_2)
-        ->post(
-            $post_route_2,
-            ["start" => $this->testCodes[1]]
-        );
-
-        // See we have no vouchers added.
-        /** @var Bundle $currentBundle */
-        // Get our currentBundle
-        $currentBundle = $this->registrationTwo->currentBundle();
-
-        // See that it's got no vouchers.
-        $this->assertEquals(0, $currentBundle->vouchers()->count());
-        $entity = Family::getAlias($this->programme);
-        // Check the expected error message is in the session
-        $response->seeInSession('error_messages');
-        //dd(Session::get('error_messages'));
-        $this->assertTrue($this->hasMatchingErrorMessage(
-            Session::get('error_messages'),
-            '~These vouchers are allocated to a different ' . $entity . ' in a centre you can\'t access: ' . $this->testCodes[1] . '~'
-        ));
-
-
-        // Check the expected error message is in the view
-        $this->followRedirects()
-        ->seeInElement('div[class="alert-message error"]', 'These vouchers are allocated to a different ' . $entity . ' in a centre you can\'t access: ' . $this->testCodes[1]);
-    }
-
-
-    public function testItCanAcceptAndCleanVouchersWithSpacesIn(): void
-    {
-        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
-        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
-
-        // Create a voucherCode with a space in from the test list
-        $voucherCode = $this->testCodes[0];
-        $randPos = rand(0, strlen($voucherCode));
-        $voucherCode = substr_replace($voucherCode, " ", $randPos, 0);
-
-        // Add a voucher;
-        $this->actingAs($this->centreUser, 'store')
-            ->post($post_route, ['start' => $voucherCode]);
+        $this->assertNotEmpty($errors, "Expected validation errors for field '$field'");
+        $this->assertContains($expectedMessage, $errors);
 
         $this->followRedirects()
             ->seePageIs($route)
-            ->assertResponseStatus(200)
-        ;
-
-        /** @var Bundle $currentBundle */
-        // Get our currentBundle
-        $currentBundle = $this->registration->currentBundle();
-
-        // See that it's got one voucher.
-        $this->assertEquals(1, $currentBundle->vouchers()->count());
+            ->assertResponseStatus(200);
     }
 
+    // -------------------------------------------------------------------------
+    // Adding vouchers to a bundle
+    // -------------------------------------------------------------------------
+
+    public function testICanAddSingleVouchers(): void
+    {
+        $route = route('store.registration.voucher-manager', ['registration' => $this->registration->id]);
+        $postRoute = route('store.registration.vouchers.post', ['registration' => $this->registration->id]);
+
+        $this->actingAs($this->centreUser, 'store')
+            ->post($postRoute, ['start' => $this->testCodes[0]]);
+
+        $this->followRedirects()
+            ->seePageIs($route)
+            ->assertResponseStatus(200);
+
+        $this->assertSame(1, $this->registration->currentBundle()->vouchers()->count());
+    }
+
+    public function testICanAddManyVouchers(): void
+    {
+        $route = route('store.registration.voucher-manager', ['registration' => $this->registration->id]);
+        $postRoute = route('store.registration.vouchers.post', ['registration' => $this->registration->id]);
+
+        $this->actingAs($this->centreUser, 'store')
+            ->post($postRoute, [
+                'start' => $this->testCodes[0],
+                'end' => $this->testCodes[count($this->testCodes) - 1],
+            ]);
+
+        $this->followRedirects()
+            ->seePageIs($route)
+            ->assertResponseStatus(200);
+
+        $this->assertSame(count($this->testCodes), $this->registration->currentBundle()->vouchers()->count());
+    }
+
+    public function testICannotAddTooManyVouchersToABundle(): void
+    {
+        $route = route('store.registration.voucher-manager', ['registration' => $this->registration->id]);
+        $postRoute = route('store.registration.vouchers.post', ['registration' => $this->registration->id]);
+
+        $overMaxAdd = config('arc.bundle_max_voucher_append') + 1;
+        $startCode = 'BIG00001';
+        $endCode = 'BIG' . str_pad((string)$overMaxAdd, 5, '0', STR_PAD_LEFT);
+        $bigRange = Voucher::generateCodeRange($startCode, $endCode);
+
+        $this->assertCount($overMaxAdd, $bigRange);
+
+        Auth::login($this->centreUser);
+        foreach ($bigRange as $code) {
+            $voucher = factory(Voucher::class)->state('printed')->create(['code' => $code]);
+            $voucher->applyTransition('dispatch');
+        }
+        Auth::logout();
+
+        $response = $this->actingAs($this->centreUser, 'store')
+            ->post($postRoute, ['start' => $startCode, 'end' => $endCode]);
+
+        $response->seeInSession('error_messages');
+        $this->assertTrue($this->hasMatchingErrorMessage(
+            Session::get('error_messages'),
+            '/Failed adding more than ' . config('arc.bundle_max_voucher_append') . ' vouchers/',
+        ));
+
+        $this->followRedirects()
+            ->seePageIs($route)
+            ->assertResponseStatus(200);
+
+        $this->assertSame(0, $this->registration->currentBundle()->vouchers()->count());
+    }
+
+    public function testICannotAddAVoucherAllocatedInACentreIHaveAccessTo(): void
+    {
+        $route = route('store.registration.voucher-manager', ['registration' => $this->registration->id]);
+        $postRoute = route('store.registration.vouchers.post', ['registration' => $this->registration->id]);
+
+        // Allocate the first test voucher to the primary registration.
+        $this->actingAs($this->centreUser, 'store')
+            ->post($postRoute, ['start' => $this->testCodes[0]]);
+
+        // Create a second registration in the same centre.
+        $registrationTwo = factory(Registration::class)->create(['centre_id' => $this->centre->id]);
+
+        $route2 = route('store.registration.voucher-manager', ['registration' => $registrationTwo->id]);
+        $postRoute2 = route('store.registration.vouchers.post', ['registration' => $registrationTwo->id]);
+
+        // Attempt to add the already-allocated voucher to the second bundle.
+        $response = $this->actingAs($this->centreUser, 'store')
+            ->visit($route2)
+            ->post($postRoute2, ['start' => $this->testCodes[0]]);
+
+        $this->assertSame(0, $registrationTwo->currentBundle()->vouchers()->count());
+
+        $response->seeInSession('error_messages');
+
+        $entity = Family::getAlias($this->programme);
+        $expectedPattern = '~These vouchers are currently allocated to a different ' . $entity
+            . '. Click on the voucher number to view the other ' . $entity
+            . '\'s record: <a href="' . $route . '">' . $this->testCodes[0] . '</a>~';
+
+        $this->assertTrue($this->hasMatchingErrorMessage(Session::get('error_messages'), $expectedPattern));
+
+        $this->followRedirects()
+            ->seeInElement(
+                'div[class="alert-message error"]',
+                'Click on the voucher number to view the other ' . $entity
+                . '\'s record: <a href="' . $route . '">' . $this->testCodes[0] . '</a>',
+            );
+    }
+
+    public function testICannotAddAVoucherAllocatedInACentreIDoNotHaveAccessTo(): void
+    {
+        $postRoute = route('store.registration.vouchers.post', ['registration' => $this->registration->id]);
+
+        // Allocate the second test voucher to the primary registration.
+        $this->actingAs($this->centreUser, 'store')
+            ->post($postRoute, ['start' => $this->testCodes[1]]);
+
+        // Build a completely separate sponsor / centre / user / registration hierarchy.
+        $sponsor2 = factory(Sponsor::class)->create();
+        $centre2 = factory(Centre::class)->create(['sponsor_id' => $sponsor2->id]);
+        $centreUser2 = factory(CentreUser::class)->create([
+            'name' => 'second test user',
+            'email' => 'testuser2@example.com',
+            'password' => bcrypt('test_user_pass2'),
+            'role' => 'centre_user',
+        ]);
+        $centreUser2->centres()->attach($centre2->id, ['homeCentre' => true]);
+
+        $registrationTwo = factory(Registration::class)->create(['centre_id' => $centre2->id]);
+
+        $route2 = route('store.registration.voucher-manager', ['registration' => $registrationTwo->id]);
+        $postRoute2 = route('store.registration.vouchers.post', ['registration' => $registrationTwo->id]);
+
+        $response = $this->actingAs($centreUser2, 'store')
+            ->visit($route2)
+            ->post($postRoute2, ['start' => $this->testCodes[1]]);
+
+        $this->assertSame(0, $registrationTwo->currentBundle()->vouchers()->count());
+
+        $response->seeInSession('error_messages');
+
+        $entity = Family::getAlias($this->programme);
+        $expectedPattern = '~These vouchers are allocated to a different ' . $entity
+            . ' in a centre you can\'t access: ' . $this->testCodes[1] . '~';
+
+        $this->assertTrue($this->hasMatchingErrorMessage(Session::get('error_messages'), $expectedPattern));
+
+        $this->followRedirects()
+            ->seeInElement(
+                'div[class="alert-message error"]',
+                'These vouchers are allocated to a different ' . $entity
+                . ' in a centre you can\'t access: ' . $this->testCodes[1],
+            );
+    }
+
+    // -------------------------------------------------------------------------
+    // Input cleaning
+    // -------------------------------------------------------------------------
+
+    public function testItCanAcceptAndCleanVouchersWithSpacesIn(): void
+    {
+        $route = route('store.registration.voucher-manager', ['registration' => $this->registration->id]);
+        $postRoute = route('store.registration.vouchers.post', ['registration' => $this->registration->id]);
+
+        // Insert a space at a random position in the voucher code.
+        $voucherCode = $this->testCodes[0];
+        $voucherCode = substr_replace($voucherCode, ' ', random_int(0, strlen($voucherCode)), 0);
+
+        $this->actingAs($this->centreUser, 'store')
+            ->post($postRoute, ['start' => $voucherCode]);
+
+        $this->followRedirects()
+            ->seePageIs($route)
+            ->assertResponseStatus(200);
+
+        $this->assertSame(1, $this->registration->currentBundle()->vouchers()->count());
+    }
 
     public function testItHasSparseFormDataCleanedBeforeProcessing(): void
     {
-        $route = route('store.registration.voucher-manager', [ 'registration' => $this->registration->id ]);
-        $post_route = route('store.registration.vouchers.post', [ 'registration' => $this->registration->id ]);
+        $postRoute = route('store.registration.vouchers.post', ['registration' => $this->registration->id]);
 
-        $data_null_end = [
-            'start' => $this->testCodes[0],
-            'end' => null
-        ];
-
-        $data_blank_end = [
-            'start' => $this->testCodes[1],
-            'end' => ''
-        ];
-
-        // Add null end voucher;
+        // A null end should be treated as a single-code add.
         $this->actingAs($this->centreUser, 'store')
-            ->post(
-                $post_route,
-                $data_null_end
-            );
+            ->post($postRoute, ['start' => $this->testCodes[0], 'end' => null]);
 
-        // Expect to see last record is testCode[0]
-        $last_voucher = $this->registration
-            ->currentBundle()
-            ->vouchers()
-            ->orderByDesc('id')
-            ->first();
-        $this->assertEquals($this->testCodes[0], $last_voucher->code);
+        $lastVoucher = $this->registration->currentBundle()->vouchers()->orderByDesc('id')->first();
+        $this->assertSame($this->testCodes[0], $lastVoucher->code);
 
-        // Add empty string end vouchers;
+        // A blank-string end should also be treated as a single-code add.
         $this->actingAs($this->centreUser, 'store')
-            ->post(
-                $post_route,
-                $data_blank_end
-            );
+            ->post($postRoute, ['start' => $this->testCodes[1], 'end' => '']);
 
-        // Expect to see last record is testCode[1]
-        $last_voucher = $this->registration
-            ->currentBundle()
-            ->vouchers()
-            ->orderByDesc('id')
-            ->first();
-        $this->assertEquals($this->testCodes[1], $last_voucher->code);
+        $lastVoucher = $this->registration->currentBundle()->vouchers()->orderByDesc('id')->first();
+        $this->assertSame($this->testCodes[1], $lastVoucher->code);
     }
 
+    // -------------------------------------------------------------------------
+    // Sync (PUT)
+    // -------------------------------------------------------------------------
+
+    public function testICanSyncAnArrayOfVouchers(): void
+    {
+        $putRoute = route('store.registration.vouchers.put', ['registration' => $this->registration->id]);
+
+        // Sync a single voucher.
+        $this->actingAs($this->centreUser, 'store')
+            ->put($putRoute, ['vouchers' => [$this->testCodes[0]]]);
+
+        $currentBundle = $this->registration->currentBundle();
+        $this->assertSame(1, $currentBundle->vouchers()->count());
+
+        // Re-sync with all three vouchers.
+        $this->actingAs($this->centreUser, 'store')
+            ->put($putRoute, ['vouchers' => $this->testCodes]);
+
+        $currentBundle->refresh();
+        $this->assertSame(count($this->testCodes), $currentBundle->vouchers()->count());
+
+        // Sending no vouchers key at all leaves the bundle unchanged.
+        $this->actingAs($this->centreUser, 'store')
+            ->put($putRoute);
+
+        $currentBundle->refresh();
+        $this->assertSame(count($this->testCodes), $currentBundle->vouchers()->count());
+
+        // A single empty string in the vouchers array clears the bundle.
+        $this->actingAs($this->centreUser, 'store')
+            ->put($putRoute, ['vouchers' => ['']]);
+
+        $currentBundle->refresh();
+        $this->assertSame(0, $currentBundle->vouchers()->count());
+    }
+
+    // -------------------------------------------------------------------------
+    // Delete operations
+    // -------------------------------------------------------------------------
+
+    public function testICanDeleteTheCurrentBundle(): void
+    {
+        $currentBundle = $this->registration->currentBundle();
+        $deleteCodes = ['TST0123455', 'TST0123456', 'TST0123457'];
+
+        Auth::login($this->centreUser);
+        foreach ($deleteCodes as $code) {
+            $voucher = factory(Voucher::class)->state('printed')->create(['code' => $code]);
+            $voucher->applyTransition('dispatch');
+            $voucher->bundle()->associate($currentBundle)->save();
+        }
+        Auth::logout();
+
+        $this->assertSame(count($deleteCodes), $currentBundle->vouchers()->count());
+
+        $deleteRoute = route('store.registration.vouchers.delete', ['registration' => $this->registration->id]);
+
+        $this->actingAs($this->centreUser, 'store')
+            ->delete($deleteRoute);
+
+        $currentBundle->refresh();
+        $this->assertSame(0, $currentBundle->vouchers()->count());
+
+        // Every previously-bundled voucher should have a null bundle_id.
+        Voucher::whereIn('code', $deleteCodes)
+            ->each(function (Voucher $v) {
+                return $this->assertNull($v->bundle_id);
+            });
+    }
+
+    public function testICanDeleteANamedVoucher(): void
+    {
+        /** @var Bundle $currentBundle */
+        $currentBundle = $this->registration->currentBundle();
+        $bundledCodes = ['TST0123455', 'TST0123456', 'TST0123457'];
+
+        Auth::login($this->centreUser);
+        foreach ($bundledCodes as $code) {
+            $voucher = factory(Voucher::class)->state('printed')->create(['code' => $code]);
+            $voucher->applyTransition('dispatch');
+            $voucher->bundle()->associate($currentBundle)->save();
+        }
+        Auth::logout();
+
+        $this->assertSame(count($bundledCodes), $currentBundle->vouchers()->count());
+
+        /** @var Voucher $target */
+        $target = $currentBundle->vouchers()->first();
+        $deleteRoute = route('store.registration.voucher.delete', [
+            'registration' => $this->registration->id,
+            'voucher' => $target->id,
+        ]);
+
+        $this->actingAs($this->centreUser, 'store')
+            ->delete($deleteRoute);
+
+        $currentBundle->refresh();
+        $this->assertSame(count($bundledCodes) - 1, $currentBundle->vouchers()->count());
+
+        $target->refresh();
+        $this->assertNull($target->bundle_id);
+        $this->assertSame('dispatched', $target->currentstate);
+    }
+
+    // -------------------------------------------------------------------------
+    // Disbursement
+    // -------------------------------------------------------------------------
+
+    public function testICannotDisburseAnEmptyBundle(): void
+    {
+        $route = route('store.registration.voucher-manager', ['registration' => $this->registration->id]);
+        $putRoute = route('store.registration.vouchers.put', ['registration' => $this->registration->id]);
+
+        $data = [
+            'collected_at' => $this->centre->id,
+            'collected_on' => Carbon::now()->startOfWeek()->format('Y-m-d'),
+            'collected_by' => $this->registration->family->carers->first()->id,
+        ];
+
+        $response = $this->actingAs($this->centreUser, 'store')
+            ->visit($route)
+            ->put($putRoute, $data);
+
+        $response->seeInSession('error_messages');
+        $this->assertTrue($this->hasMatchingErrorMessage(
+            Session::get('error_messages'),
+            '/Action denied on empty bundle/',
+        ));
+
+        $this->followRedirects()
+            ->seePageIs($route)
+            ->assertResponseStatus(200);
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
     /**
-     * Search the session's array of error messages for one that matches our regular expression.
+     * Search an array of session error messages for one matching the given regular expression.
+     * Handles both plain strings and HtmlString-derived arrays with a 'html' key.
      *
-     * @param (string|array)[] $errorMessages array
-     * @param string $regex
-     * @return bool whether a matching message was found or not
+     * @param array<int, string|array<string, string>> $errorMessages
      */
     private function hasMatchingErrorMessage(array $errorMessages, string $regex): bool
     {
         foreach ($errorMessages as $error) {
-            // If the error message is an array describing some HTML, extract the text, otherwise use as a string directly.
-            $string = is_array($error) && array_key_exists('html', $error) ? $error['html'] : $error;
+            $string = is_array($error) && array_key_exists('html', $error)
+                ? $error['html']
+                : (string)$error;
+
             if (preg_match($regex, $string)) {
                 return true;
             }
         }
+
         return false;
     }
 }
