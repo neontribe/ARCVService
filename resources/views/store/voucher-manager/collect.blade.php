@@ -1,0 +1,92 @@
+{{-- Requires: $programme, $registration, $vouchers_amount, $carers, $centre --}}
+<div id="collection" class="col collection-section">
+    <div>
+        <i class="fa fa-shopping-basket fa-3x" style="margin: 0 0.5rem;" ></i>
+        <h2>Request Payment</h2>
+    </div>
+
+    <div>
+        <p>There's <span class="number-circle">{{ $vouchers_amount }}</span> @choice('{1}voucher|[0,2,*]vouchers', $vouchers_amount) waiting for this {{ $programme === 0 ? 'family' : 'household' }}</p>
+    </div>
+
+    <form
+        method="POST"
+        action="{{ route('store.registration.vouchers.payment-requests.post', ['registration' => $registration->id]) }}"
+    >
+        @method('PUT')
+        @csrf
+        <div class="pick-up">
+            <div>
+                <i class="fa fa-user"></i>
+                <div>
+                    <label for="requested-by">Request for:</label>
+                    <select id="requested-by" name="requested_by">
+                        @foreach($carers as $carer)
+                            <option value="{{ $carer->id }}">{{ $carer->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <i class="fa fa-calendar"></i>
+                <div>
+                    <label for="requested-on">Request on:</label>
+                    <div id="dateError" style="display:none;"></div>
+                    <input
+                        id="requested-on"
+                        name="requested_on"
+                        value="{{ now()->format('Y-m-d') }}"
+                        type="date"
+                    >
+                </div>
+            </div>
+
+            <div>
+                <i class="fa fa-home"></i>
+                <div>
+                    <label for="requested-at">Request at: {{ $centre->name }}</label>
+                    <input type="hidden" id="requested-at" name="requested_at" value="{{ $centre->id }}">
+                </div>
+            </div>
+
+            <button id="collection-button" class="long-button submit" type="submit" @disabled($vouchers_amount === 0)>
+                Request Payment
+            </button>
+        </div>
+    </form>
+
+    <x-link-button
+        href="{{ route('store.registration.voucher-manager', ['registration' => $registration->id]) }}"
+        icon="ticket"
+    >
+        Change allocated vouchers
+    </x-link-button>
+</div>
+
+@pushonce('scripts')
+    <script>
+        $(document).ready(function () {
+            var requestedOn = $('#requested-on');
+            if (requestedOn[0].type !== 'date') {
+                requestedOn.datepicker({dateFormat: 'yy-mm-dd'}).val();
+            }
+            requestedOn.valueAsDate = new Date();
+
+            requestedOn.change(function () {
+                var chosen = new Date($(this).val());
+                var cutoff = new Date();
+                cutoff.setDate(cutoff.getDate() + 42); // six weeks
+
+                if (chosen > cutoff) {
+                    $('#dateError')
+                        .text('Please choose a date within six weeks of today')
+                        .css({fontSize: '12px', color: 'red'})
+                        .show();
+                } else {
+                    $('#dateError').hide();
+                }
+            });
+        });
+    </script>
+@endpushonce
