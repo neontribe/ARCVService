@@ -129,10 +129,8 @@ class Registration extends Model implements IEvaluee
     /**
      * Get the first un-disbursed bundle on a Registration for any Centre.
      * There should only be one... else make one if there are none.
-     *
-     * @return Model
      */
-    public function currentBundle(): Model
+    public function currentBundle(): Bundle
     {
         $bundle = $this->bundles()
             ->where('disbursed_at', null)

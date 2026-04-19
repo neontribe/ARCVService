@@ -119,7 +119,8 @@ Route::middleware('auth:store')->group(function (): void {
             ->name('store.registration.vouchers.post')
             ->whereNumber('registration');
 
-        Route::post('/registrations/{registration}/vouchers/payment-requests',
+        Route::post(
+            '/registrations/{registration}/vouchers/payment-requests',
             [BundleController::class, 'requestPayment']
         )
             ->name('store.registration.vouchers.payment-requests.post')

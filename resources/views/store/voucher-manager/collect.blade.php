@@ -19,8 +19,8 @@
             <div>
                 <i class="fa fa-user"></i>
                 <div>
-                    <label for="requested-by">Request for:</label>
-                    <select id="requested-by" name="requested_by">
+                    <label for="collected-by">Request for:</label>
+                    <select id="collected-by" name="collected_by">
                         @foreach($carers as $carer)
                             <option value="{{ $carer->id }}">{{ $carer->name }}</option>
                         @endforeach
@@ -31,11 +31,11 @@
             <div>
                 <i class="fa fa-calendar"></i>
                 <div>
-                    <label for="requested-on">Request on:</label>
+                    <label for="collected-on">Request on:</label>
                     <div id="dateError" style="display:none;"></div>
                     <input
-                        id="requested-on"
-                        name="requested_on"
+                        id="collected-on"
+                        name="collected_on"
                         value="{{ now()->format('Y-m-d') }}"
                         type="date"
                     >
@@ -45,8 +45,8 @@
             <div>
                 <i class="fa fa-home"></i>
                 <div>
-                    <label for="requested-at">Request at: {{ $centre->name }}</label>
-                    <input type="hidden" id="requested-at" name="requested_at" value="{{ $centre->id }}">
+                    <label for="collected-at">Request at: {{ $centre->name }}</label>
+                    <input type="hidden" id="collected-at" name="collected_at" value="{{ $centre->id }}">
                 </div>
             </div>
 
@@ -67,13 +67,13 @@
 @pushonce('scripts')
     <script>
         $(document).ready(function () {
-            var requestedOn = $('#requested-on');
-            if (requestedOn[0].type !== 'date') {
-                requestedOn.datepicker({dateFormat: 'yy-mm-dd'}).val();
+            var collectedOn = $('#collected-on');
+            if (collectedOn[0].type !== 'date') {
+                collectedOn.datepicker({dateFormat: 'yy-mm-dd'}).val();
             }
-            requestedOn.valueAsDate = new Date();
+            collectedOn.valueAsDate = new Date();
 
-            requestedOn.change(function () {
+            collectedOn.change(function () {
                 var chosen = new Date($(this).val());
                 var cutoff = new Date();
                 cutoff.setDate(cutoff.getDate() + 42); // six weeks

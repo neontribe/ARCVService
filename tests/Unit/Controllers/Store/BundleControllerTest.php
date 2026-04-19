@@ -256,43 +256,6 @@ class BundleControllerTest extends StoreTestCase
     }
 
     // -------------------------------------------------------------------------
-    // Sync (PUT)
-    // -------------------------------------------------------------------------
-
-    public function testICanSyncAnArrayOfVouchers(): void
-    {
-        $putRoute = route('store.registration.vouchers.put', ['registration' => $this->registration->id]);
-
-        // Sync a single voucher.
-        $this->actingAs($this->centreUser, 'store')
-            ->put($putRoute, ['vouchers' => [$this->testCodes[0]]]);
-
-        $currentBundle = $this->registration->currentBundle();
-        $this->assertSame(1, $currentBundle->vouchers()->count());
-
-        // Re-sync with all three vouchers.
-        $this->actingAs($this->centreUser, 'store')
-            ->put($putRoute, ['vouchers' => $this->testCodes]);
-
-        $currentBundle->refresh();
-        $this->assertSame(count($this->testCodes), $currentBundle->vouchers()->count());
-
-        // Sending no vouchers key at all leaves the bundle unchanged.
-        $this->actingAs($this->centreUser, 'store')
-            ->put($putRoute);
-
-        $currentBundle->refresh();
-        $this->assertSame(count($this->testCodes), $currentBundle->vouchers()->count());
-
-        // A single empty string in the vouchers array clears the bundle.
-        $this->actingAs($this->centreUser, 'store')
-            ->put($putRoute, ['vouchers' => ['']]);
-
-        $currentBundle->refresh();
-        $this->assertSame(0, $currentBundle->vouchers()->count());
-    }
-
-    // -------------------------------------------------------------------------
     // Delete operations
     // -------------------------------------------------------------------------
 
