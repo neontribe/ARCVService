@@ -120,10 +120,10 @@ Route::middleware('auth:store')->group(function (): void {
             ->whereNumber('registration');
 
         Route::post(
-            '/registrations/{registration}/vouchers/payment-requests',
-            [BundleController::class, 'requestPayment']
+            '/registrations/{registration}/vouchers/transitions/collection',
+            [BundleController::class, 'collectBundle']
         )
-            ->name('store.registration.vouchers.payment-requests.post')
+            ->name('store.registration.vouchers.transitions.collect')
             ->whereNumber('registration');
     });
 

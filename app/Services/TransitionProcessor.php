@@ -9,6 +9,7 @@ use App\Trader;
 use App\Voucher;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -327,5 +328,25 @@ class TransitionProcessor
                 'invalid_amount' => count($responses['invalid']) + count($responses['undelivered']),
             ]),
         ];
+    }
+
+    /**
+     * Works out if we had any type of voucher transition failure
+     */
+    public function hasFailures(): bool
+    {
+        return (bool) Arr::first(
+            Arr::except($this->responses, 'success_add'),
+            static function (array $failureType) {
+                return !empty($failureType);
+            }
+        );
+    }
+
+    public function getFailureCodes(): array
+    {
+        return ($this->hasFailures())
+            ? Arr::flatten(Arr::except($this->responses, 'success_add'))
+            : [];
     }
 }

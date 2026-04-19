@@ -11,7 +11,7 @@
 
     <form
         method="POST"
-        action="{{ route('store.registration.vouchers.payment-requests.post', ['registration' => $registration->id]) }}"
+        action="{{ route('store.registration.vouchers.transitions.collect', ['registration' => $registration->id]) }}"
     >
         @method('PUT')
         @csrf

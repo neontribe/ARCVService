@@ -11,15 +11,19 @@ use App\Http\Requests\StoreAppendBundleRequest;
 use App\Http\Requests\StoreRequestPaymentRequest;
 use App\Http\Requests\StoreUpdateBundleRequest;
 use App\Registration;
+use App\Services\TransitionProcessor;
+use App\Trader;
 use App\Voucher;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Throwable;
 
 class BundleController extends Controller
@@ -111,28 +115,50 @@ class BundleController extends Controller
             );
         }
 
-        $successRoute = empty($errors) ? route('store.registration.index') : $managerRoute;
-
-        return $this->redirectAfterRequest($errors, $successRoute, $managerRoute, $bundle);
+        return $this->redirectAfterRequest($errors, route('store.registration.index'), $managerRoute, $bundle);
     }
 
     /**
-     * Disburse the current bundle and trigger a payment request transition.
+     * Disburse the current bundle and trigger a collection transition.
      */
-    public function requestPayment(StoreRequestPaymentRequest $request, Registration $registration): RedirectResponse
+    public function collectBundle(StoreRequestPaymentRequest $request, Registration $registration): RedirectResponse
     {
         $managerRoute = $this->managerRoute($registration);
         $bundle = $registration->currentBundle();
+        $errors = [];
 
-        $errors = $this->attemptDisbursal($bundle, $request->only(['collected_at', 'collected_by', 'collected_on']));
+        try {
+            // As this is an important change, we need to rollback, rather than plough on.
+            DB::transaction(function () use ($request, $bundle, &$errors) {
+                $errors = $this->attemptDisbursal(
+                    $bundle,
+                    $request->only(['collected_at', 'collected_by', 'collected_on'])
+                );
 
-        if (empty($errors)) {
-            // TODO: trigger payment transition on $bundle
+                if (!empty($errors)) {
+                    throw new RuntimeException('disbursal errors');
+                }
+
+                $trader = Trader::findorFail($request->input('trader'));
+                $processor = new TransitionProcessor($trader, 'collect');
+                $processor->handle($bundle->vouchers);
+
+                if ($processor->hasFailures()) {
+                    $errors['transition'] = $processor->getFailureCodes();
+                    throw new RuntimeException('transition errors');
+                }
+            });
+        } catch (Throwable $e) {
+            Log::error(sprintf(
+                'Rollback Bad transaction for %s@%s by user %s because of: %e',
+                self::class,
+                __FUNCTION__,
+                Auth::id() ?? 'unauthenticated',
+                $e->getMessage()
+            ));
         }
 
-        $successRoute = empty($errors) ? route('store.registration.index') : $managerRoute;
-
-        return $this->redirectAfterRequest($errors, $successRoute, $managerRoute, $bundle);
+        return $this->redirectAfterRequest($errors, route('store.registration.index'), $managerRoute, $bundle);
     }
 
     /**
@@ -174,9 +200,7 @@ class BundleController extends Controller
             return ['empty' => true];
         }
 
-        return ($this->disburseBundle($bundle, $inputs))
-            ? ['transaction' => true]
-            : [];
+        return $this->disburseBundle($bundle, $inputs) ? [] : ['transaction' => true];
     }
 
     /**
