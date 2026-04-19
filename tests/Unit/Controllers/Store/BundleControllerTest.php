@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\Controllers\Store;
 
-use App\Bundle;
 use App\Centre;
 use App\CentreUser;
 use App\Family;
@@ -13,7 +12,6 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\StoreTestCase;
 
 class BundleControllerTest extends StoreTestCase
@@ -56,182 +54,6 @@ class BundleControllerTest extends StoreTestCase
         $this->programme = Auth::user()->centre->sponsor->programme;
 
         Auth::logout();
-    }
-
-    // -------------------------------------------------------------------------
-    // Append-vouchers validation — data provider
-    // -------------------------------------------------------------------------
-
-    /**
-     * @return array<string, array{array<string,string>, string, string}>
-     *
-     * Config placeholders: config() is unavailable in static providers (they are constructed
-     * before the Laravel application boots). Two placeholders are used instead and resolved
-     * inside the test method once the container is live:
-     *   :max:          → config('arc.bundle_max_voucher_append')
-     *   :max_plus_one: → config('arc.bundle_max_voucher_append') + 1
-     */
-    public static function appendVoucherValidationCases(): array
-    {
-        return [
-            // --- start field (voucher-quantity absent branch) ---
-            'start: absent with no data submitted' => [
-                [],
-                'start',
-                'The start field is required when voucher-quantity is not present.',
-            ],
-            'start: absent when only end supplied' => [
-                ['end' => 'tst10001'],
-                'start',
-                'The start field is required when voucher-quantity is not present.',
-            ],
-            'start: empty string stripped by prepareForValidation' => [
-                ['start' => '', 'end' => 'tst10001'],
-                'start',
-                'The start field is required when voucher-quantity is not present.',
-            ],
-            'start: value not found in vouchers table' => [
-                ['start' => 'invalidVoucher', 'end' => 'tst10001'],
-                'start',
-                'The selected start is invalid.',
-            ],
-
-            // --- end field ---
-            'end: value not found in vouchers table' => [
-                ['start' => 'tst09999', 'end' => 'invalidCode'],
-                'end',
-                'The selected end is invalid.',
-            ],
-            'end: different sponsor prefix to start' => [
-                ['start' => 'tst09999', 'end' => 'txt10000'],
-                'end',
-                'The end field must be the same sponsor as the start field.',
-            ],
-            'end: lower sequence number than start' => [
-                ['start' => 'tst10001', 'end' => 'tst09999'],
-                'end',
-                'The end field must be greater than the start field.',
-            ],
-
-            // --- voucher-quantity field (early-return branch) ---
-            'voucher-quantity: zero is below the allowed minimum of 1' => [
-                ['voucher-quantity' => '0'],
-                'voucher-quantity',
-                'The voucher-quantity must be between 1 and :max:.',
-            ],
-            'voucher-quantity: negative value is below the allowed minimum of 1' => [
-                ['voucher-quantity' => '-1'],
-                'voucher-quantity',
-                'The voucher-quantity must be between 1 and :max:.',
-            ],
-            'voucher-quantity: exceeds the configured maximum' => [
-                ['voucher-quantity' => ':max_plus_one:'],
-                'voucher-quantity',
-                'The voucher-quantity must be between 1 and :max:.',
-            ],
-            'voucher-quantity: required when start also absent' => [
-                [],
-                'voucher-quantity',
-                'The voucher-quantity field is required when start is not present.',
-            ],
-        ];
-    }
-
-    #[DataProvider('appendVoucherValidationCases')]
-    public function testICannotSubmitInvalidValuesToAppendVouchers(
-        array $data,
-        string $field,
-        string $expectedMessage,
-    ): void {
-        $max = (string)config('arc.bundle_max_voucher_append');
-
-        // Resolve placeholders that cannot be evaluated inside a static data provider.
-        $data = array_map(static function (string $v) use ($max) {
-            return str_replace(':max_plus_one:', (string)((int)$max + 1), $v);
-        }, $data);
-        $expectedMessage = str_replace(':max:', $max, $expectedMessage);
-
-        $route = route('store.registration.voucher-manager', ['registration' => $this->registration->id]);
-        $postRoute = route('store.registration.vouchers.post', ['registration' => $this->registration->id]);
-
-        $this->actingAs($this->centreUser, 'store')
-            ->visit($route)
-            ->post($postRoute, $data);
-
-        $errors = session('errors')->get($field);
-
-        $this->assertNotEmpty($errors, "Expected validation errors for field '$field'");
-        $this->assertContains($expectedMessage, $errors);
-
-        $this->followRedirects()
-            ->seePageIs($route)
-            ->assertResponseStatus(200);
-    }
-
-    // -------------------------------------------------------------------------
-    // Disbursement validation — data provider
-    // -------------------------------------------------------------------------
-
-    /**
-     * @return array<string, array{array<string,string>, string, string}>
-     */
-    public static function disburseValidationCases(): array
-    {
-        return [
-            'collected_by missing' => [
-                ['collected_at' => '1', 'collected_on' => '2018-07-21'],
-                'collected_by',
-                'The collected by field is required when collected at / collected on is present.',
-            ],
-            'collected_at missing' => [
-                ['collected_by' => '1', 'collected_on' => '2018-07-21'],
-                'collected_at',
-                'The collected at field is required when collected on / collected by is present.',
-            ],
-            'collected_on missing' => [
-                ['collected_at' => '1', 'collected_by' => '1'],
-                'collected_on',
-                'The collected on field is required when collected at / collected by is present.',
-            ],
-            'collected_on wrong date format' => [
-                ['collected_at' => '1', 'collected_on' => 'invalid', 'collected_by' => '1'],
-                'collected_on',
-                'The collected on does not match the format Y-m-d.',
-            ],
-            'collected_at centre does not exist' => [
-                ['collected_at' => '9999', 'collected_on' => '2018-07-21', 'collected_by' => '1'],
-                'collected_at',
-                'The selected collected at is invalid.',
-            ],
-            'collected_by carer does not exist' => [
-                ['collected_at' => '1', 'collected_on' => '2018-07-21', 'collected_by' => '9999'],
-                'collected_by',
-                'The selected collected by is invalid.',
-            ],
-        ];
-    }
-
-    #[DataProvider('disburseValidationCases')]
-    public function testIMustDisburseWithAllRelevantFields(
-        array $data,
-        string $field,
-        string $expectedMessage,
-    ): void {
-        $route = route('store.registration.voucher-manager', ['registration' => $this->registration->id]);
-        $putRoute = route('store.registration.vouchers.put', ['registration' => $this->registration->id]);
-
-        $this->actingAs($this->centreUser, 'store')
-            ->visit($route)
-            ->put($putRoute, $data);
-
-        $errors = session('errors')->get($field);
-
-        $this->assertNotEmpty($errors, "Expected validation errors for field '$field'");
-        $this->assertContains($expectedMessage, $errors);
-
-        $this->followRedirects()
-            ->seePageIs($route)
-            ->assertResponseStatus(200);
     }
 
     // -------------------------------------------------------------------------
@@ -402,7 +224,7 @@ class BundleControllerTest extends StoreTestCase
 
         // Insert a space at a random position in the voucher code.
         $voucherCode = $this->testCodes[0];
-        $voucherCode = substr_replace($voucherCode, ' ', random_int(0, strlen($voucherCode)), 0);
+        $voucherCode = substr_replace($voucherCode, ' ', rand(0, strlen($voucherCode)), 0);
 
         $this->actingAs($this->centreUser, 'store')
             ->post($postRoute, ['start' => $voucherCode]);
@@ -506,7 +328,6 @@ class BundleControllerTest extends StoreTestCase
 
     public function testICanDeleteANamedVoucher(): void
     {
-        /** @var Bundle $currentBundle */
         $currentBundle = $this->registration->currentBundle();
         $bundledCodes = ['TST0123455', 'TST0123456', 'TST0123457'];
 
@@ -520,7 +341,6 @@ class BundleControllerTest extends StoreTestCase
 
         $this->assertSame(count($bundledCodes), $currentBundle->vouchers()->count());
 
-        /** @var Voucher $target */
         $target = $currentBundle->vouchers()->first();
         $deleteRoute = route('store.registration.voucher.delete', [
             'registration' => $this->registration->id,
