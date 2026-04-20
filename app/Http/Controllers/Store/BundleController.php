@@ -102,7 +102,7 @@ class BundleController extends Controller
     /**
      * Disburse the current bundle if collection details are present.
      */
-    public function update(StorePickupBundleRequest $request, Registration $registration): RedirectResponse
+    public function pickup(StorePickupBundleRequest $request, Registration $registration): RedirectResponse
     {
         $managerRoute = $this->managerRoute($registration);
         $bundle = $registration->currentBundle();

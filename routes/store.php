@@ -89,7 +89,7 @@ Route::middleware('auth:store')->group(function (): void {
             ->name('store.registration.print')
             ->whereNumber('registration');
 
-        Route::put('/registrations/{registration}/vouchers', [BundleController::class, 'update'])
+        Route::put('/registrations/{registration}/vouchers', [BundleController::class, 'pickup'])
             ->name('store.registration.vouchers.put')
             ->whereNumber('registration');
 
