@@ -34,8 +34,10 @@
     </button>
 
     <div class="center" id="vouchers-added">
-        <span class="emphasised-section">Vouchers added</span>
-        <span class="number-circle">{{ $vouchers_amount }}</span>
+        <div id="vouchers-total">
+            <span class="emphasised-section">Vouchers added</span>
+            <span class="number-circle">{{ $vouchers_amount }}</span>
+        </div>
 
         <div @class(['collapsed' => $vouchers_amount === 0])>
             <form
@@ -94,7 +96,7 @@
             });
 
             if ($('#vouchers tr').length > 1) { // first tr is the header
-                $('#vouchers-added').addClass('pulse');
+                $('#vouchers-total').addClass('pulse');
             }
 
             $('#voucher-quantity').keypress(function (e) {
