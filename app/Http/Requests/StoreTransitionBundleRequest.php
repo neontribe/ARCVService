@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreRequestPaymentRequest extends FormRequest
+class StoreTransitionBundleRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,10 +26,10 @@ class StoreRequestPaymentRequest extends FormRequest
          * It is NOT responsible for the context validation of that data.
          */
         return [
-            // Mutually dependent
-            'collected_on' => 'required_with_all:collected_at,collected_by|date_format:Y-m-d',
-            'collected_at' => 'integer|required_with_all:collected_on,collected_by|exists:centres,id',
-            'collected_by' => 'integer|required_with_all:collected_at,collected_on|exists:carers,id'
+            'collected_on' => 'required|date_format:Y-m-d',
+            'collected_at' => 'required|integer|exists:centres,id',
+            'collected_by' => 'required|exists:carers,id',
+            'trader_id' => 'required|integer|exists:traders,id'
         ];
     }
 }

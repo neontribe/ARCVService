@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\FormRequests;
 
+use App\Carer;
 use App\Centre;
 use App\CentreUser;
 use App\Registration;
@@ -9,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\StoreTestCase;
 
-class StoreUpdateBundleRequestTest extends StoreTestCase
+class StorePickupBundleRequestTest extends StoreTestCase
 {
     use RefreshDatabase;
 
@@ -33,6 +34,8 @@ class StoreUpdateBundleRequestTest extends StoreTestCase
         $this->registration = factory(Registration::class)->create([
             'centre_id' => $this->centre->id,
         ]);
+
+        $this->carer = Carer::first();
     }
 
     // -------------------------------------------------------------------------
@@ -45,21 +48,24 @@ class StoreUpdateBundleRequestTest extends StoreTestCase
     public static function validationCases(): array
     {
         return [
-            'collected_by missing' => [
-                ['collected_at' => '1', 'collected_on' => '2018-07-21'],
-                'collected_by',
-                'The collected by field is required when collected at / collected on is present.',
-            ],
+            // --- required fields ---
             'collected_at missing' => [
-                ['collected_by' => '1', 'collected_on' => '2018-07-21'],
+                ['collected_on' => '2018-07-21', 'collected_by' => '1'],
                 'collected_at',
-                'The collected at field is required when collected on / collected by is present.',
+                'The collected at field is required.',
             ],
             'collected_on missing' => [
                 ['collected_at' => '1', 'collected_by' => '1'],
                 'collected_on',
-                'The collected on field is required when collected at / collected by is present.',
+                'The collected on field is required.',
             ],
+            'collected_by missing' => [
+                ['collected_at' => '1', 'collected_on' => '2018-07-21'],
+                'collected_by',
+                'The collected by field is required.',
+            ],
+
+            // --- format/existence ---
             'collected_on wrong date format' => [
                 ['collected_at' => '1', 'collected_on' => 'invalid', 'collected_by' => '1'],
                 'collected_on',
@@ -103,5 +109,22 @@ class StoreUpdateBundleRequestTest extends StoreTestCase
         $this->followRedirects()
             ->seePageIs($route)
             ->assertResponseStatus(200);
+    }
+
+    public function testValidInputIsAccepted(): void
+    {
+
+        $route = route('store.registration.voucher-manager', ['registration' => $this->registration->id]);
+        $putRoute = route('store.registration.vouchers.put', ['registration' => $this->registration->id]);
+
+        $this->actingAs($this->centreUser, 'store')
+            ->visit($route)
+            ->put($putRoute, [
+                'collected_at' => (string)$this->centre->id,
+                'collected_on' => '2018-07-21',
+                'collected_by' => (string)$this->carer->id,
+            ]);
+
+        $this->assertSessionMissing('errors');
     }
 }

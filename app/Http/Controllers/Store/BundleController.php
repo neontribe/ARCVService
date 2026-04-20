@@ -8,8 +8,8 @@ use App\Centre;
 use App\Family;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAppendBundleRequest;
-use App\Http\Requests\StoreRequestPaymentRequest;
-use App\Http\Requests\StoreUpdateBundleRequest;
+use App\Http\Requests\StoreTransitionBundleRequest;
+use App\Http\Requests\StorePickupBundleRequest;
 use App\Registration;
 use App\Services\TransitionProcessor;
 use App\Trader;
@@ -102,7 +102,7 @@ class BundleController extends Controller
     /**
      * Disburse the current bundle if collection details are present.
      */
-    public function update(StoreUpdateBundleRequest $request, Registration $registration): RedirectResponse
+    public function update(StorePickupBundleRequest $request, Registration $registration): RedirectResponse
     {
         $managerRoute = $this->managerRoute($registration);
         $bundle = $registration->currentBundle();
@@ -121,7 +121,7 @@ class BundleController extends Controller
     /**
      * Disburse the current bundle and trigger a collection transition.
      */
-    public function collectBundle(StoreRequestPaymentRequest $request, Registration $registration): RedirectResponse
+    public function collectBundle(StoreTransitionBundleRequest $request, Registration $registration): RedirectResponse
     {
         $managerRoute = $this->managerRoute($registration);
         $bundle = $registration->currentBundle();
