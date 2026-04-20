@@ -106,14 +106,12 @@ class BundleController extends Controller
     {
         $managerRoute = $this->managerRoute($registration);
         $bundle = $registration->currentBundle();
-        $errors = [];
 
-        if ($request->filled(['collected_at', 'collected_by', 'collected_on'])) {
-            $errors = $this->attemptDisbursal(
-                $bundle,
-                $request->only(['collected_at', 'collected_by', 'collected_on'])
-            );
-        }
+        $errors = $this->attemptDisbursal(
+            $bundle,
+            // Should be here, due to form request validation
+            $request->only(['collected_at', 'collected_by', 'collected_on'])
+        );
 
         return $this->redirectAfterRequest($errors, route('store.registration.index'), $managerRoute, $bundle);
     }
@@ -132,6 +130,7 @@ class BundleController extends Controller
             DB::transaction(function () use ($request, $bundle, &$errors) {
                 $errors = $this->attemptDisbursal(
                     $bundle,
+                    // Should be here, due to form request validation
                     $request->only(['collected_at', 'collected_by', 'collected_on'])
                 );
 
@@ -139,7 +138,7 @@ class BundleController extends Controller
                     throw new RuntimeException('disbursal errors');
                 }
 
-                $trader = Trader::findorFail($request->input('trader'));
+                $trader = Trader::findorFail($request->input('trader_id'));
                 $processor = new TransitionProcessor($trader, 'collect');
                 $processor->handle($bundle->vouchers);
 
