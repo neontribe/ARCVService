@@ -220,7 +220,7 @@ class Registration extends Model implements IEvaluee
     public function scopeFilterByCarerName(Builder $query, string $term): Builder
     {
         return $query
-            ->where('carers.name', 'LIKE', "%{$term}%")
+            ->whereLike('carers.name', "%{$term}%")
             ->orderByRaw(
                 "CASE
                 WHEN LOWER(carers.name) = LOWER(?)         THEN 0
