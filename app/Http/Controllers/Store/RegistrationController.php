@@ -48,10 +48,11 @@ class RegistrationController extends Controller
             ->withPrimaryCarer()
             ->whereIn('registrations.centre_id', $neighbourCentreIds);
 
+        $centreId = session('CentreUserCurrentCentreId');
         if (
             $user->centres->count() > 1 &&
             $request->boolean('filter_by_centre') &&
-            ($centreId = session('CentreUserCurrentCentreId'))
+            $centreId
         ) {
             $baseQuery->where('registrations.centre_id', $centreId);
         }
