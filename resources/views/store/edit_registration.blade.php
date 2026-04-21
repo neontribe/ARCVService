@@ -8,10 +8,10 @@
 
     @if ($programme !== 0)
         <div class="content flex">
-            <form action="{{ URL::route("store.registration.update",['registration' => $registration]) }}" method="post"
+            <form action="{{ route("store.registration.update",['registration' => $registration]) }}" method="post"
                   class="full-height">
-                {{ method_field('PUT') }}
-                {!! csrf_field() !!}
+                @method('PUT')
+                @csrf
 
                 @include('store.registrations.voucher_collectorsSP')
                 @include('store.registrations.householdSP')
@@ -20,10 +20,10 @@
         </div>
     @else
         <div class="content flex">
-            <form action="{{ URL::route("store.registration.update",['registration' => $registration]) }}" method="post"
+            <form action="{{ route("store.registration.update",['registration' => $registration]) }}" method="post"
                   class="full-height">
-                {{ method_field('PUT') }}
-                {!! csrf_field() !!}
+                @method('PUT')
+                @csrf
                 <input type="hidden" name="registration" value="{{ $registration->id }}">
                 @include('store.registrations.voucher_collectors')
                 @include('store.registrations.family')
