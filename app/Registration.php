@@ -196,7 +196,7 @@ class Registration extends Model implements IEvaluee
 
     /**
      * Join the primary carer (MIN id per family) directly into the query,
-     *  so we can filter and sort by carer name in SQL rather than PHP.
+     * so we can filter and sort by carer name in SQL rather than PHP.
     */
     public function scopeWithPrimaryCarer(Builder $query): Builder
     {
