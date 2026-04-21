@@ -1,4 +1,4 @@
-<div class="header">
+`<div class="header">
     @auth
         <div class="header-section">
             <form id="logout-form" action="{{ route('store.logout') }}" method="POST">
@@ -17,9 +17,9 @@
             <ul>
                 <li>User: {{ Auth::user()->name }}</li>
 
-                @if (app()->environment() !== 'production')
+                @can('take-developer-actions')
                     <li>Programme: {{ Auth::user()->centre->sponsor->programme_name }}</li>
-                @endif
+                @endcan
 
                 <li>Centre:
                     @switch(Auth::user()->centres->count())
@@ -53,3 +53,4 @@
         </div>
     @endauth
 </div>
+`
