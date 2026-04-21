@@ -12,7 +12,13 @@ class SessionController extends Controller
     {
         // Set session
         session(['CentreUserCurrentCentreId' => $request->input('centre')]);
-        // redirect to the prior route
-        return redirect(url()->previous());
+
+        $previous = url()->previous();
+        // if previous is outside the site, route somewhere safe
+        if (! str_starts_with($previous, url('/'))) {
+            $previous = route('dashboard');
+        }
+
+        return redirect()->to($previous);
     }
 }
