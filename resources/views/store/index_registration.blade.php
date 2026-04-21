@@ -6,11 +6,8 @@
 
     @include('store.partials.navbar', [
         'headerTitle' => 'Search for a ' . ($programme ? 'household' : 'family')
-    ])
-
-    @if (session('message'))
-        @include('store.partials.success')
-    @endif
+    ])`
+    @includeWhen(Session::has('message'), 'store.partials.success')
 
     <div class="content search">
         <div class="control-container">
@@ -149,9 +146,9 @@
         <div>
             {{ $registrations->links() }}
             Showing
-            {{ ($registrations->currentPage() - 1) * $registrations->perPage() + ($registrations->total() ? 1 : 0) }}
+            {{ $registrations->firstItem()}}
             to
-            {{ ($registrations->currentPage() - 1) * $registrations->perPage() + count($registrations) }}
+            {{ $registrations->lastItem() }}
             of
             {{ $registrations->total() }}
             Results
