@@ -2,7 +2,7 @@
     <span>Add Household Member:</span>
 </div>
 <div id="addChildAgeInput" class="age-input-container">
-    @include('store.partials.ageInput')
+    @include('store.registrations.ageInput')
     <button id="add-age" class="link-button link-button-large">
         <i class="fa fa-plus button-icon" aria-hidden="true"></i>
         Add Household Member
@@ -10,7 +10,7 @@
 </div>
 
 <div>
-<p><span id="age-error" class="invalid-error"></span></p>
+    <p><span id="age-error" class="invalid-error"></span></p>
 </div>
 
 <script>
@@ -24,13 +24,13 @@
     });
 
     // Error message
-    $(document).on('childInput:error', function(e, errorMsg) {
+    $(document).on('childInput:error', function (e, errorMsg) {
         console.log(errorMsg);
         $('#age-error').text(errorMsg);
     });
 
     // Clear error message
-    $(document).on('childInput:validated', function(e) {
+    $(document).on('childInput:validated', function (e) {
         $('#age-error').text('');
     })
 </script>

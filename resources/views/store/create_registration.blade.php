@@ -14,18 +14,18 @@
         <div class="content">
             <form action="{{ URL::route("store.registration.store") }}" method="post" class="full-height">
                 {!! csrf_field() !!}
-                @include('store.partials.voucher_collectorsSP')
-                @include('store.partials.householdSP')
-                @include('store.partials.other_infoSP')
+                @include('store.registrations.voucher_collectorsSP')
+                @include('store.registrations.householdSP')
+                @include('store.registrations.other_infoSP')
             </form>
         </div>
     @else
         <div class="content">
             <form action="{{ URL::route("store.registration.store") }}" method="post" class="full-height">
                 {!! csrf_field() !!}
-                @include('store.partials.voucher_collectors')
-                @include('store.partials.family')
-                @include('store.partials.other_info')
+                @include('store.registrations.voucher_collectors')
+                @include('store.registrations.family')
+                @include('store.registrations.other_info')
             </form>
         </div>
     @endif

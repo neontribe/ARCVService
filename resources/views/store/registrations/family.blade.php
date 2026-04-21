@@ -12,7 +12,7 @@
             numbers, e.g. '06 2017' for June 2017.
         </p>
     </div>
-    @include('store.partials.add_child_form', ['sponsorsRequiresID' => $sponsorsRequiresID])
+    @include('store.registrations.add_child_form', ['sponsorsRequiresID' => $sponsorsRequiresID])
 
     <div class="added">
         <table>
@@ -49,15 +49,15 @@
                         @endif
                         @if ( !empty($deferrable) )
                             <td class="can-defer-col relative">
-                                    <input type="checkbox"
-                                           class="styled-checkbox inline-dob"
-                                           name="children[{{ $child->id ?? $index }}][deferred]"
-                                           id="children[{{ $child->id ?? $index }}][deferred]"
-                                           {{ $child->deferred ? "checked" : null }} value="1"
-                                    >
-                                    <label for="children[{{ $child->id ?? $index }}][deferred]">
-                                        <span class="visually-hidden">Toggle canDefer checked</span>
-                                    </label>
+                                <input type="checkbox"
+                                       class="styled-checkbox inline-dob"
+                                       name="children[{{ $child->id ?? $index }}][deferred]"
+                                       id="children[{{ $child->id ?? $index }}][deferred]"
+                                       {{ $child->deferred ? "checked" : null }} value="1"
+                                >
+                                <label for="children[{{ $child->id ?? $index }}][deferred]">
+                                    <span class="visually-hidden">Toggle canDefer checked</span>
+                                </label>
                             </td>
                         @endif
                         <td class="remove-col">

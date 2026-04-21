@@ -1,5 +1,5 @@
 {{--
-    partial: store.partials.sec-carers_fields
+    partial: store.registrations.sec-carers_fields
     ════════════════════════════════════════════════════════════════════════
     Renders the voucher-collector adder widget and the secondary carers
     table, including both the persisted ($sec_carers) and the old()-repopulated

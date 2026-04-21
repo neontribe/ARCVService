@@ -1,5 +1,5 @@
 {{--
-    partial: store.partials.primary-carer-fields
+    partial: store.registrations.primary-carer-fields
     ════════════════════════════════════════════════════════════════════════
     Renders the primary carer / participant input group:
       • name (text, required)

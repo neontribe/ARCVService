@@ -3,8 +3,8 @@
 </div>
 
 <div id="addChildDobInput" class="dob-input-container">
-    @include('store.partials.dobInput')
-    <br /><br /><br />
+    @include('store.registrations.dobInput')
+    <br/><br/><br/>
     <button id="add-dob" class="link-button link-button-large">
         <i class="fa fa-plus button-icon" aria-hidden="true"></i>
         Add Child or Pregnancy
@@ -26,13 +26,13 @@
     });
 
     // Error message
-    $(document).on('childInput:error', function(e, errorMsg) {
+    $(document).on('childInput:error', function (e, errorMsg) {
         console.log(errorMsg);
         $('#dob-error').text(errorMsg);
     });
 
     // Clear error message
-    $('document').on('childInput:validated', function(e) {
+    $('document').on('childInput:validated', function (e) {
         $('#dob-error').text('');
     })
 </script>
