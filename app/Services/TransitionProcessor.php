@@ -23,6 +23,7 @@ class TransitionProcessor
         'success_reject' => [],
         'own_duplicate' => [],
         'other_duplicate' => [],
+        'invalid' => [],
         'failed_reject' => [],
         'undelivered' => [],
     ];
@@ -117,9 +118,7 @@ class TransitionProcessor
         Voucher $voucher,
         ?int $againstTraderId = null,
         ?string $transition = null
-    ): bool
-    {
-        $transition = $transition ?? $this->transition;
+    ): bool {
         try {
             if ($voucher->transitionAllowed($transition)) {
                 $voucher->trader_id = $againstTraderId;
@@ -177,7 +176,7 @@ class TransitionProcessor
             return;
         }
 
-        if ($this->doTransition($voucher, $this->trader->id)) {
+        if ($this->doTransition($voucher, $this->transition, $this->trader->id)) {
             $this->responses['success_add'][] = $voucher->code;
         }
     }
@@ -205,7 +204,6 @@ class TransitionProcessor
             return;
         }
 
-        // revert down the correct state machine path
         $transition = 'reject-to-' . $last_state->from;
 
         if ($this->doTransition($voucher, null, $transition)) {
@@ -293,9 +291,10 @@ class TransitionProcessor
             'message' => trans('api.messages.batch_voucher_submit', [
                 'success_amount' => count($responses['success_add']),
                 'duplicate_amount' => count($responses['own_duplicate']) + count($responses['other_duplicate']),
-                // 'invalid' no longer exists at this layer — callers detect missing
-                // codes cheaply via a query builder pluck() before calling handle().
-                'invalid_amount' => count($responses['undelivered']),
+                // invalid is populated by callers that have submitted code strings
+                // (e.g. VoucherController) via a pluck() diff before calling handle().
+                // Callers that build their own query (CLI, jobs) leave it empty.
+                'invalid_amount' => count($responses['invalid']) + count($responses['undelivered']),
             ]),
         ];
     }

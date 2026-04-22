@@ -5,22 +5,27 @@ namespace App\Jobs;
 use App\Services\TransitionProcessor;
 use App\Trader;
 use App\User;
+use App\Voucher;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Imtigger\LaravelJobStatus\JobStatus;
 use Imtigger\LaravelJobStatus\Trackable;
-use Illuminate\Support\Facades\Auth;
 use Log;
 
 class ProcessTransitionJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Trackable;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    use Trackable;
 
     private Trader $trader;
     private array $voucherCodes;
@@ -151,27 +156,37 @@ class ProcessTransitionJob implements ShouldQueue
         Auth::logout();
 
         // Login if we're not
-        if (!Auth::check()) {
-	        Auth::login(User::find($this->runAsId));
-	        Log::info("This session logged in [" . Auth::user()->id . "]");
+        if (Auth::check()) {
+            $loginMessage = "This session already has a user [%s]";
         } else {
-	        Log::info("This session already has a user [" . Auth::user()->id . "]");
-	    }
+            Auth::login(User::find($this->runAsId));
+            $loginMessage = "This session logged in [%s]";
+        }
+        $id = Auth::user()->id;
+        Log::info(sprintf($loginMessage, $id));
 
-        if (Auth::user()->id === $this->runAsId) {
+        if ($id === $this->runAsId) {
+            $query = Voucher::whereIn('code', $this->voucherCodes);
+            $foundCodes = $query->pluck('code')->all();
+            $invalidCodes = array_values(array_diff($this->voucherCodes, $foundCodes));
 
             $processor = new TransitionProcessor($this->trader, $this->transition);
 
-            $processor->handle($this->voucherCodes);
+            $processor->handle($query);
+
+            // Inject codes that matched no DB row so constructResponseMessage()
+            // counts them correctly, matching original processor output.
+            $processor->responses['invalid'] = $invalidCodes;
 
             $responseData = $processor->constructResponseMessage();
 
             $key = Str::uuid();
             Cache::put($key, $responseData);
             $this->setOutput(['key' => $key]);
+
             Auth::logout();
-	    } else {
-            Log::error("Incorrect user [" . Auth::user()->id . "] for transition job expecting [" . $this->runAsId . "]");
+        } else {
+            Log::error(sprintf("Incorrect user [%s] for transition job expecting [%d]", $id, $this->runAsId));
         }
     }
 }

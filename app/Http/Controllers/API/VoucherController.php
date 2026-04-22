@@ -23,12 +23,21 @@ class VoucherController extends Controller
         // get our trader
         $trader = Trader::findOrFail($request->input('trader_id'));
 
-        //create unique, cleaned vouchers
-        $voucherCodes = array_unique(Voucher::cleanCodes($request->input('vouchers')));
+        // create unique, cleaned voucher codes from the request
+        $submittedCodes = array_unique(Voucher::cleanCodes($request->input('vouchers')));
+
+        $query = Voucher::whereIn('code', $submittedCodes);
+        $foundCodes = $query->pluck('code')->all();
+        $invalidCodes = array_values(array_diff($submittedCodes, $foundCodes));
 
         $processor = new TransitionProcessor($trader, $request->input('transition'));
 
-        $processor->handle($voucherCodes);
+        $processor->handle($query);
+
+        // Inject the invalid codes detected above into the processor's public
+        // responses array so constructResponseMessage() counts them correctly,
+        // matching the output the original code would have produced.
+        $processor->responses['invalid'] = $invalidCodes;
 
         return response()->json($processor->constructResponseMessage());
     }
