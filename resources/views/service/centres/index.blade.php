@@ -18,7 +18,7 @@
                     <th>Name</th>
                     <th>RVID Prefix</th>
                     <th>Area</th>
-                    <th>Can Collect</th>
+                    <th>Can Redeem</th>
                     <th>Form</th>
                     <th></th>
                 </tr>
