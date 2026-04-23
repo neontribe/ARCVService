@@ -10,11 +10,11 @@ use App\Voucher;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\SemaphoreStore;
-use function Symfony\Component\Translation\t;
 
 class TransitionProcessor
 {
@@ -48,7 +48,7 @@ class TransitionProcessor
      * should call $response->addInvalid($invalidCodes) before reading the
      * response message.
      */
-    public function handle(Builder $query): TransitionResponse
+    public function handle(Builder|Relation $query): TransitionResponse
     {
         $lock = (new LockFactory(new SemaphoreStore()))->createLock('transition');
 
@@ -127,10 +127,9 @@ class TransitionProcessor
      */
     private function doTransition(
         Voucher $voucher,
-        ?int $againstTraderId = null,
-        ?string $transition = null
+        string $transition,
+        ?int $againstTraderId
     ): bool {
-        $transition = $transition ?: $this->transition;
         try {
             if ($voucher->transitionAllowed($transition)) {
                 $voucher->trader_id = $againstTraderId;
@@ -188,7 +187,7 @@ class TransitionProcessor
             return;
         }
 
-        if ($this->doTransition($voucher, $this->trader->id)) {
+        if ($this->doTransition($voucher, $this->transition, $this->trader->id)) {
             $this->response->addCode('success_add', $voucher->code);
         }
     }
@@ -198,7 +197,7 @@ class TransitionProcessor
      */
     private function handleConfirm(Voucher $voucher, StateToken $stateToken): void
     {
-        if ($this->doTransition($voucher, $this->trader->id)) {
+        if ($this->doTransition($voucher, $this->transition, $this->trader->id)) {
             // Accumulate IDs only — full models are loaded after the loop for the email.
             $this->response->recordPayment($voucher->id);
             $voucher->getPriorState()->stateToken()->associate($stateToken)->save();
@@ -217,9 +216,7 @@ class TransitionProcessor
             return;
         }
 
-        $transition = 'reject-to-' . $last_state->from;
-
-        if ($this->doTransition($voucher, null, $transition)) {
+        if ($this->doTransition($voucher, 'reject-to-' . $last_state->from, null)) {
             $this->response->addCode('success_reject', $voucher->code);
         }
     }
@@ -229,7 +226,7 @@ class TransitionProcessor
      */
     private function handleDefault(Voucher $voucher): void
     {
-        $this->doTransition($voucher, $this->trader->id);
+        $this->doTransition($voucher, $this->transition, $this->trader->id);
     }
 
     /**
