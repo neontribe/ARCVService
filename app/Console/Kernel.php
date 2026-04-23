@@ -19,6 +19,12 @@ class Kernel extends ConsoleKernel
             ->dailyAt('02:00')
             ->withoutOverlapping()
         ;
+
+        $schedule->command('arc:sweep')
+            ->tuesdays()
+            ->at('01:00')
+            ->withoutOverlapping()
+        ;
     }
 
     /**
