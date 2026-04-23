@@ -2,10 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Services\TransitionProcessor;
+use App\Services\TransitionProcessor\TransitionProcessor;
 use App\Trader;
 use Illuminate\Console\Command;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 class SweepAndSubmitCollectingCentres extends Command
@@ -22,18 +21,13 @@ class SweepAndSubmitCollectingCentres extends Command
 
         Log::info(sprintf('SweepAndSubmit command Found %d traders in internal markets', $count));
 
-        // get all the traders in markets with centres
         Trader::whereHas('market', static function ($q) {
             return $q->whereNotNull('centre_id');
         })->chunk(
-        // 50 traders at once
             50,
-            function (Collection $traders): void {
+            function ($traders): void {
                 foreach ($traders as $trader) {
-                    // restrict to vouchers that are recorded only
                     $query = $trader->vouchers()->where('currentstate', 'recorded');
-
-                    // some have no vouchers to confirm for payment
                     $count = $query->count();
                     if ($count === 0) {
                         Log::debug(sprintf(
@@ -51,16 +45,20 @@ class SweepAndSubmitCollectingCentres extends Command
                         $count
                     ));
 
-                    // instantiate the TransitionProcess in confirm mode.
-                    $processor = new TransitionProcessor($trader, 'confirm', sendPaymentEmail: false);
-
-                    $responses = $processor->handle($query);
+                    // Builder passed directly — handle() opens the lazy cursor internally.
+                    // No invalid detection needed: the query is scoped, not user-submitted.
+                    $processor = new TransitionProcessor(
+                        trader: $trader,
+                        transition: 'confirm',
+                        sendPaymentEmail: false
+                    );
+                    $response = $processor->handle($query);
 
                     Log::info(sprintf(
                         '[SweepAndSubmit] Trader %d (%s): results %s',
                         $trader->id,
                         $trader->name,
-                        json_encode($responses, JSON_THROW_ON_ERROR)
+                        json_encode($response->toArray(), JSON_THROW_ON_ERROR)
                     ));
                 }
             }

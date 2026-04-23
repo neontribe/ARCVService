@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\TransitionProcessor;
 
 use App\Events\VoucherPaymentRequested;
 use App\Http\Controllers\API\TraderController;
@@ -10,26 +10,20 @@ use App\Voucher;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\SemaphoreStore;
+use function Symfony\Component\Translation\t;
 
 class TransitionProcessor
 {
-    public array $responses = [
-        'success_add' => [],
-        'success_reject' => [],
-        'own_duplicate' => [],
-        'other_duplicate' => [],
-        'invalid' => [],
-        'failed_reject' => [],
-        'undelivered' => [],
-    ];
+    private TransitionResponse $response;
 
-    public array $vouchersForPayment = [];
-
+    /**
+     * Parsed once at construction — avoids reparsing the config value
+     * on every voucher inside handleCollect().
+     */
     private Carbon $collectDeliveryDate;
 
     public function __construct(
@@ -38,13 +32,23 @@ class TransitionProcessor
         private readonly int $chunkSize = 500,
         private readonly bool $sendPaymentEmail = true
     ) {
+        $this->response = new TransitionResponse();
         $this->collectDeliveryDate = Carbon::parse(config('arc.first_delivery_date'));
     }
 
     /**
      * Accepts a query builder describing the vouchers to transition.
+     *
+     * The caller is responsible for scoping the query (e.g. by trader, state).
+     * This method opens the cursor itself via ->lazy(), so no models are
+     * instantiated outside the processor.
+     *
+     * Returns a TransitionResponse whose message and failure state can be
+     * inspected by the caller. Callers that hold user-submitted code strings
+     * should call $response->addInvalid($invalidCodes) before reading the
+     * response message.
      */
-    public function handle(Builder $query): array
+    public function handle(Builder $query): TransitionResponse
     {
         $lock = (new LockFactory(new SemaphoreStore()))->createLock('transition');
 
@@ -61,8 +65,8 @@ class TransitionProcessor
                 $this->trader->id,
                 $this->transition
             ));
-            $this->responses['own_duplicate'][] = '000000';
-            return $this->responses;
+            $this->response->addCode('own_duplicate', '000000');
+            return $this->response;
         }
 
         try {
@@ -71,17 +75,24 @@ class TransitionProcessor
             $lock->release();
         }
 
-        if (!empty($this->vouchersForPayment) && $this->sendPaymentEmail) {
-            $vouchersForEmail = Voucher::findMany($this->vouchersForPayment)->all();
+        if ($this->sendPaymentEmail && $this->response->hasPayments()) {
+            $vouchersForEmail = Voucher::findMany($this->response->getVouchersForPayment())->all();
             Log::info('SENDING MAIL ' . count($vouchersForEmail));
             self::emailVoucherPaymentRequest($this->trader, $vouchersForEmail);
         }
 
-        return $this->responses;
+        return $this->response;
     }
 
     /**
      * Opens a database cursor over the query and processes one voucher at a time.
+     *
+     * lazy($chunkSize) issues SELECT queries in pages of $chunkSize behind the
+     * scenes, but only one model is held in memory at a time from PHP's perspective.
+     *
+     * The StateToken for confirm transitions is created once here so it spans
+     * the entire batch — creating it inside the loop would associate each page
+     * of vouchers with a different token and break the payment audit trail.
      */
     private function processInChunks(Builder $query): void
     {
@@ -119,6 +130,7 @@ class TransitionProcessor
         ?int $againstTraderId = null,
         ?string $transition = null
     ): bool {
+        $transition = $transition ?: $this->transition;
         try {
             if ($voucher->transitionAllowed($transition)) {
                 $voucher->trader_id = $againstTraderId;
@@ -132,7 +144,7 @@ class TransitionProcessor
             } else {
                 if ($voucher->trader_id === $againstTraderId) {
                     // This trader has already submitted this voucher.
-                    $this->responses['own_duplicate'][] = $voucher->code;
+                    $this->response->addCode('own_duplicate', $voucher->code);
                     Log::debug(sprintf(
                         'Transition denied %s on %s for trader %d: own_duplicate',
                         $transition,
@@ -141,7 +153,7 @@ class TransitionProcessor
                     ));
                 } else {
                     // Another trader submitted this voucher, or the state is invalid.
-                    $this->responses['other_duplicate'][] = $voucher->code;
+                    $this->response->addCode('other_duplicate', $voucher->code);
                     Log::debug(sprintf(
                         'Transition denied %s on %s for trader %d: other_duplicate',
                         $transition,
@@ -163,7 +175,7 @@ class TransitionProcessor
      * Collects a voucher, skipping undelivered ones introduced after the
      * first delivery date.
      */
-    public function handleCollect(Voucher $voucher): void
+    private function handleCollect(Voucher $voucher): void
     {
         Log::debug('handleCollect on voucher ' . $voucher->code);
 
@@ -171,23 +183,24 @@ class TransitionProcessor
             $voucher->delivery_id === null &&
             $this->collectDeliveryDate->lessThanOrEqualTo($voucher->created_at)
         ) {
-            $this->responses['undelivered'][] = $voucher->code;
+            $this->response->addCode('undelivered', $voucher->code);
             Log::debug('Undelivered voucher ' . $voucher->code);
             return;
         }
 
-        if ($this->doTransition($voucher, $this->transition, $this->trader->id)) {
-            $this->responses['success_add'][] = $voucher->code;
+        if ($this->doTransition($voucher, $this->trader->id)) {
+            $this->response->addCode('success_add', $voucher->code);
         }
     }
 
     /**
      * Confirms a voucher for payment and associates it with the batch StateToken.
      */
-    public function handleConfirm(Voucher $voucher, StateToken $stateToken): void
+    private function handleConfirm(Voucher $voucher, StateToken $stateToken): void
     {
         if ($this->doTransition($voucher, $this->trader->id)) {
-            $this->vouchersForPayment[] = $voucher->id;
+            // Accumulate IDs only — full models are loaded after the loop for the email.
+            $this->response->recordPayment($voucher->id);
             $voucher->getPriorState()->stateToken()->associate($stateToken)->save();
         }
     }
@@ -196,25 +209,25 @@ class TransitionProcessor
      * Rejects a voucher back to the free pool, resolving the correct rollback
      * transition from the voucher's prior state.
      */
-    public function handleReject(Voucher $voucher): void
+    private function handleReject(Voucher $voucher): void
     {
         $last_state = $voucher->getPriorState();
         if ($last_state === null) {
-            $this->responses['failed_reject'][] = $voucher->code;
+            $this->response->addCode('failed_reject', $voucher->code);
             return;
         }
 
         $transition = 'reject-to-' . $last_state->from;
 
         if ($this->doTransition($voucher, null, $transition)) {
-            $this->responses['success_reject'][] = $voucher->code;
+            $this->response->addCode('success_reject', $voucher->code);
         }
     }
 
     /**
      * Catchall for any transition string not explicitly handled above.
      */
-    public function handleDefault(Voucher $voucher): void
+    private function handleDefault(Voucher $voucher): void
     {
         $this->doTransition($voucher, $this->trader->id);
     }
@@ -231,91 +244,5 @@ class TransitionProcessor
         $programme_amounts = TraderController::getProgrammeAmounts($vouchers);
 
         event(new VoucherPaymentRequested(Auth::user(), $trader, $vouchers, $file, $programme_amounts));
-    }
-
-    /**
-     * Constructs a human-readable response message for the batch result.
-     */
-    public function constructResponseMessage(): array
-    {
-        if (!empty($this->vouchersForPayment)) {
-            return ['message' => trans('api.messages.voucher_payment_requested')];
-        }
-
-        $total_submitted = 0;
-        $error_type = '';
-        $responses = $this->responses;
-
-        foreach ($responses as $key => $codes) {
-            $total_submitted += count($codes);
-            if (count($codes) === 1) {
-                $error_type = $key;
-            }
-        }
-
-        if ($total_submitted === 1) {
-            return match ($error_type) {
-                'success_add' => [
-                    'message' => trans('api.messages.voucher_success_add'),
-                ],
-                'success_reject' => [
-                    'message' => trans('api.messages.voucher_success_reject'),
-                ],
-                'own_duplicate' => [
-                    'warning' => trans('api.errors.voucher_own_dupe', [
-                        'code' => $responses['own_duplicate'][0],
-                    ]),
-                ],
-                'other_duplicate' => [
-                    'warning' => trans('api.errors.voucher_other_dupe', [
-                        'code' => $responses['other_duplicate'][0],
-                    ]),
-                ],
-                'failed_reject' => [
-                    'warning' => trans('api.errors.voucher_failed_reject', [
-                        'code' => $responses['failed_reject'][0],
-                    ]),
-                ],
-                'undelivered' => [
-                    'warning' => trans('api.errors.voucher_unavailable', [
-                        'code' => $responses['undelivered'][0],
-                    ]),
-                ],
-                default => [
-                    'error' => trans('api.errors.voucher_unavailable'),
-                ],
-            };
-        }
-
-        return [
-            'message' => trans('api.messages.batch_voucher_submit', [
-                'success_amount' => count($responses['success_add']),
-                'duplicate_amount' => count($responses['own_duplicate']) + count($responses['other_duplicate']),
-                // invalid is populated by callers that have submitted code strings
-                // (e.g. VoucherController) via a pluck() diff before calling handle().
-                // Callers that build their own query (CLI, jobs) leave it empty.
-                'invalid_amount' => count($responses['invalid']) + count($responses['undelivered']),
-            ]),
-        ];
-    }
-
-    /**
-     * Works out if we had any type of voucher transition failure
-     */
-    public function hasFailures(): bool
-    {
-        return (bool)Arr::first(
-            Arr::except($this->responses, 'success_add'),
-            static function (array $failureType) {
-                return !empty($failureType);
-            }
-        );
-    }
-
-    public function getFailureCodes(): array
-    {
-        return ($this->hasFailures())
-            ? Arr::flatten(Arr::except($this->responses, 'success_add'))
-            : [];
     }
 }
