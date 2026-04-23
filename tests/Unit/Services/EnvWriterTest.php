@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Services;
+namespace Tests\Unit\Services;
 
 use App\Services\EnvWriter;
 use PHPUnit\Framework\TestCase;

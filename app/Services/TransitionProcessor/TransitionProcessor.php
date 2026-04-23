@@ -94,7 +94,7 @@ class TransitionProcessor
      * the entire batch — creating it inside the loop would associate each page
      * of vouchers with a different token and break the payment audit trail.
      */
-    private function processInChunks(Builder $query): void
+    private function processInChunks(Builder|Relation $query): void
     {
         $stateToken = $this->transition === 'confirm' ? $this->initStateToken() : null;
 
