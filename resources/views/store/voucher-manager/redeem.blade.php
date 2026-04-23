@@ -2,7 +2,7 @@
 <div id="collection" class="col collection-section">
     <div>
         <i class="fa fa-shopping-basket fa-3x" style="margin: 0 0.5rem;" ></i>
-        <h2>Request Payment</h2>
+        <h2>Redeem Vouchers</h2>
     </div>
 
     <div>
