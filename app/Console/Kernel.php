@@ -20,7 +20,7 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
         ;
 
-        $schedule->command('arc:sweep')
+        $schedule->command('arc:sweep-and-submit')
             ->tuesdays()
             ->at('01:00')
             ->withoutOverlapping()
