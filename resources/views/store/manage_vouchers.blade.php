@@ -12,7 +12,7 @@
 
             @can('collect-vouchers')
                 @include('store.voucher-manager.allocate-vouchers-numeric')
-                @include('store.voucher-manager.collect')
+                @include('store.voucher-manager.redeem')
             @else
                 @include('store.voucher-manager.allocate-vouchers')
                 @include('store.voucher-manager.pickup')
