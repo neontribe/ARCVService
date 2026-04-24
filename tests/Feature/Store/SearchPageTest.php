@@ -7,349 +7,322 @@ use App\CentreUser;
 use App\Registration;
 use App\Sponsor;
 use Carbon\Carbon;
-use Tests\StoreTestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\StoreTestCase;
 use URL;
 
 class SearchPageTest extends StoreTestCase
 {
     use RefreshDatabase;
 
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private function userInCentre(Centre $centre): CentreUser
+    {
+        $user = factory(CentreUser::class)->create();
+        $user->centres()->attach($centre->id, ['homeCentre' => true]);
+        return $user;
+    }
+
+    /** Force a known name onto the primary (lowest-id) carer of a registration. */
+    private function setCarerName(Registration $reg, string $name): void
+    {
+        $reg->family->carers()->orderBy('id')->first()->update(['name' => $name]);
+    }
+
+    // ── Rendering & content ───────────────────────────────────────────────────
 
     public function testItShowsTheLoggedInUser(): void
     {
-        // Create some centres
-        factory(Centre::class, 4)->create();
-
-        // Create a CentreUser
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach(1, ['homeCentre' => true]);
+        $centre = factory(Centre::class)->create();
+        $centreUser = $this->userInCentre($centre);
 
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
-            ->see($centreUser->name)
-        ;
+            ->see($centreUser->name);
     }
-
-
-    public function testItShowsRegistrationsFromNeighbourCentres(): void
-    {
-        // Create a single Sponsor
-        $sponsor = factory(Sponsor::class)->create();
-
-        // Create centres
-        $centres = factory(Centre::class, 2)->create([
-            "sponsor_id" => $sponsor->id,
-        ]);
-
-        $centre1 = $centres->first();
-        $centre2 = $centres->last();
-
-        // Create a CentreUser in Centre 1
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre1->id, ['homeCentre' => true]);
-
-        // Make centre1 some registrations
-        $registrations1 = factory(Registration::class, 4)->create([
-            "centre_id" => $centre1->id,
-        ]);
-
-        // Make centre2 some registrations
-        $registrations2 = factory(Registration::class, 4)->create([
-            "centre_id" => $centre2->id,
-        ]);
-
-        // Visit the page
-        $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.index'));
-
-        $registrations = $registrations1->concat($registrations2);
-
-        // Check we can see the edit link with the registration ID in it.
-        foreach ($registrations as $registration) {
-            $edit_url_string = URL::route('store.registration.edit', [ 'registration' => $registration->id]);
-            $this->see($edit_url_string);
-        }
-    }
-
-
-
-    public function testItShowsRegistrationsFromMyCentre(): void
-    {
-        // Create a single Sponsor
-        $sponsor = factory(Sponsor::class)->create();
-
-        // Create centre
-        $centre = factory(Centre::class)->create([
-            "sponsor_id" => $sponsor->id,
-        ]);
-
-        // Create a CentreUser in Centre
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
-
-        // Make centre some registrations
-        $registrations = factory(Registration::class, 4)->create([
-            "centre_id" => $centre->id,
-        ]);
-
-        $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.index'));
-
-        // Check we can see the edit link with the registration ID in it.
-        foreach ($registrations as $registration) {
-            $edit_url_string = URL::route('store.registration.edit', [ 'registration' => $registration->id]);
-            $this->see($edit_url_string);
-        }
-    }
-
-    public function testItDoesNotShowRegistrationsFromUnrelatedCentres(): void
-    {
-        // Create a single Sponsor
-        $sponsor = factory(Sponsor::class)->create();
-
-        // Create centres
-        $neighbour_centres = factory(Centre::class, 2)->create([
-            "sponsor_id" => $sponsor->id,
-        ]);
-
-        $alien_centre = factory(Centre::class)->create([
-            "sponsor_id" => factory(Sponsor::class)->create()->id,
-        ]);
-
-        $centre1 = $neighbour_centres->first();
-        $centre2 = $neighbour_centres->last();
-
-        // Create a CentreUser in Centre 1
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre1->id, ['homeCentre' => true]);
-
-        // make centre1 some registrations
-        factory(Registration::class, 4)->create([
-            "centre_id" => $centre1->id,
-        ]);
-
-        // Make centre2 some registrations
-        factory(Registration::class, 4)->create([
-            "centre_id" => $centre2->id,
-        ]);
-
-        // Make alien_centre some registrations
-        $registrations3 = factory(Registration::class, 4)->create([
-            "centre_id" => $alien_centre->id,
-        ]);
-
-        $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.index'));
-
-        // Check we can see the edit link with the registration ID in it.
-        foreach ($registrations3 as $registration) {
-            $edit_url_string = URL::route('store.registration.edit', [ 'registration' => $registration->id]);
-            $this->dontSee($edit_url_string);
-        }
-    }
-
 
     public function testItShowsThePrimaryCarerName(): void
     {
-
-        // Create a Centre (and, implicitly a random Sponsor)
         $centre = factory(Centre::class)->create();
-
-        // Create a CentreUser
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
-
-        // Create a random registration.
-        $registration = factory(Registration::class)->create([
-            "centre_id" => $centre->id,
-        ]);
-
-        // Get the primary carer
+        $centreUser = $this->userInCentre($centre);
+        $registration = factory(Registration::class)->create(['centre_id' => $centre->id]);
         $pri_carer = $registration->family->carers->first();
 
-        // Spot the Registration Family's primary carer name
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
             ->see($pri_carer->name);
     }
 
-
     public function testItShowsTheRVID(): void
     {
-        // Create a Centre
         $centre = factory(Centre::class)->create();
+        $centreUser = $this->userInCentre($centre);
+        $registration = factory(Registration::class)->create(['centre_id' => $centre->id]);
 
-        // Create a CentreUser
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
-
-        // Create a random registration with our centre.
-        $registration = factory(Registration::class)->create([
-            "centre_id" => $centre->id,
-        ]);
-
-        // Spot the Registration family's RVID
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
             ->see($registration->family->rvid);
     }
 
-
-
-    public function testItShowsFamilyPrimaryCarersAlphabetically(): void
-    {
-        // Create a Centre (and, implicitly a random Sponsor)
-        $centre = factory(Centre::class)->create();
-
-        // Create a centreUser
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
-
-        // Create a random registration or 5, which should be well under the limit.
-        $registrations = factory(Registration::class, 5)->create([
-            "centre_id" => $centre->id,
-        ]);
-
-        //get the primary carers as an array
-        $pri_carers = $registrations->map(function ($registration) {
-            return $registration->family->carers->first()->name;
-        })->toArray();
-
-        sort($pri_carers, SORT_NATURAL);
-
-        // Spot the Registration Family's primary carer name
-        $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.index'));
-
-        $selector = 'td.pri_carer';
-
-        $content = $this->crawler->filter($selector);
-
-        foreach ($pri_carers as $index => $pri_carer) {
-            $this->seeInElementAtPos($selector, $pri_carer, $index);
-        }
-    }
-
-
-    public function testItHasTheExpectedResultsPerPage(): void
-    {
-        $centre = factory(Centre::class)->create();
-
-        // Create a CentreUser
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
-
-        // Create 10 random registrations.
-        factory(Registration::class, 10)->create([
-            "centre_id" => $centre->id,
-        ]);
-
-        $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.index'))
-        ;
-
-
-        // Spot  and count the Registrations Family's primary carer names
-        $selector = 'td.pri_carer';
-        $this->assertCount(10, $this->crawler->filter($selector));
-    }
-
-
     public function testItShowsCentreLabelsForUsersByDefault(): void
     {
-        // Create some centres
-        $centre1 = factory(Centre::class)->create([
-            "name" => "Tatooine"
-        ]);
-        $centre2 = factory(Centre::class)->create([
-            "name" => "Dagobah"
-        ]);
-        $centre3 = factory(Centre::class)->create([
-            "name" => "Coruscant"
-        ]);
+        $centre1 = factory(Centre::class)->create(['name' => 'Tatooine']);
+        $centre2 = factory(Centre::class)->create(['name' => 'Dagobah']);
+        $centre3 = factory(Centre::class)->create(['name' => 'Coruscant']);
 
-        // Create a Centre User
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre1->id, ['homeCentre' => true]);
+        $centreUser = $this->userInCentre($centre1);
 
-        // Create some registrations in different centres
-        factory(Registration::class, 4)->create([
-            "centre_id" => $centre1->id,
-        ]);
-        factory(Registration::class, 3)->create([
-            "centre_id" => $centre2->id,
-        ]);
-        factory(Registration::class, 2)->create([
-            "centre_id" => $centre3->id,
-        ]);
+        factory(Registration::class, 4)->create(['centre_id' => $centre1->id]);
+        factory(Registration::class, 3)->create(['centre_id' => $centre2->id]);
+        factory(Registration::class, 2)->create(['centre_id' => $centre3->id]);
 
-        // Check that we can see the centre labels in the page
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
             ->see('Tatooine')
             ->see('Dagobah')
             ->see('Coruscant');
 
-        // Check that each user we have added has a secondary info field
         $this->assertCount(9, $this->crawler->filter('div.secondary_info'));
     }
 
+    public function testAVouchersButtonIsPresent(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $centreUser = $this->userInCentre($centre);
+        factory(Registration::class)->create(['centre_id' => $centre->id]);
+
+        $this->actingAs($centreUser, 'store')
+            ->visit(URL::route('store.registration.index'))
+            ->see('Vouchers');
+    }
+
+    // ── Centre scoping ────────────────────────────────────────────────────────
+
+    public function testItShowsRegistrationsFromNeighbourCentres(): void
+    {
+        $sponsor = factory(Sponsor::class)->create();
+        $centres = factory(Centre::class, 2)->create(['sponsor_id' => $sponsor->id]);
+        $centre1 = $centres->first();
+        $centre2 = $centres->last();
+
+        $centreUser = $this->userInCentre($centre1);
+        $registrations = factory(Registration::class, 4)->create(['centre_id' => $centre1->id])
+            ->concat(factory(Registration::class, 4)->create(['centre_id' => $centre2->id]));
+
+        $this->actingAs($centreUser, 'store')
+            ->visit(URL::route('store.registration.index'));
+
+        foreach ($registrations as $registration) {
+            $this->see(URL::route('store.registration.edit', ['registration' => $registration->id]));
+        }
+    }
+
+    public function testItShowsRegistrationsFromMyCentre(): void
+    {
+        $sponsor = factory(Sponsor::class)->create();
+        $centre = factory(Centre::class)->create(['sponsor_id' => $sponsor->id]);
+        $centreUser = $this->userInCentre($centre);
+
+        $registrations = factory(Registration::class, 4)->create(['centre_id' => $centre->id]);
+
+        $this->actingAs($centreUser, 'store')
+            ->visit(URL::route('store.registration.index'));
+
+        foreach ($registrations as $registration) {
+            $this->see(URL::route('store.registration.edit', ['registration' => $registration->id]));
+        }
+    }
+
+    public function testItDoesNotShowRegistrationsFromUnrelatedCentres(): void
+    {
+        $sponsor = factory(Sponsor::class)->create();
+        $neighbourCentres = factory(Centre::class, 2)->create(['sponsor_id' => $sponsor->id]);
+        $alienCentre = factory(Centre::class)->create([
+            'sponsor_id' => factory(Sponsor::class)->create()->id,
+        ]);
+
+        $centreUser = $this->userInCentre($neighbourCentres->first());
+
+        factory(Registration::class, 4)->create(['centre_id' => $neighbourCentres->first()->id]);
+        factory(Registration::class, 4)->create(['centre_id' => $neighbourCentres->last()->id]);
+        $alienRegistrations = factory(Registration::class, 4)->create(['centre_id' => $alienCentre->id]);
+
+        $this->actingAs($centreUser, 'store')
+            ->visit(URL::route('store.registration.index'));
+
+        foreach ($alienRegistrations as $registration) {
+            $this->dontSee(URL::route('store.registration.edit', ['registration' => $registration->id]));
+        }
+    }
+
+    public function testItScopesToSessionCentreWhenFilterByCentreIsSet(): void
+    {
+        $sponsor = factory(Sponsor::class)->create();
+        $centre1 = factory(Centre::class)->create(['sponsor_id' => $sponsor->id]);
+        $centre2 = factory(Centre::class)->create(['sponsor_id' => $sponsor->id]);
+
+        // User must belong to both centres for the filter_by_centre guard to trigger
+        $user = factory(CentreUser::class)->create();
+        $user->centres()->attach($centre1->id, ['homeCentre' => true]);
+        $user->centres()->attach($centre2->id, ['homeCentre' => false]);
+
+        $reg1 = factory(Registration::class)->create(['centre_id' => $centre1->id]);
+        $reg2 = factory(Registration::class)->create(['centre_id' => $centre2->id]);
+
+        $this->actingAs($user, 'store')
+            ->withSession(['CentreUserCurrentCentreId' => $centre1->id])
+            ->visit(URL::route('store.registration.index', ['filter_by_centre' => '1']));
+
+        $this->see(URL::route('store.registration.edit', $reg1));
+        $this->dontSee(URL::route('store.registration.edit', $reg2));
+    }
+
+    public function testItIgnoresCentreFilterForSingleCentreUser(): void
+    {
+        // The filter_by_centre guard requires centres->count() > 1; single-centre
+        // users are unaffected and continue to see their full neighbour set.
+        $sponsor = factory(Sponsor::class)->create();
+        $centre1 = factory(Centre::class)->create(['sponsor_id' => $sponsor->id]);
+        $centre2 = factory(Centre::class)->create(['sponsor_id' => $sponsor->id]);
+
+        $user = $this->userInCentre($centre1);
+
+        $reg1 = factory(Registration::class)->create(['centre_id' => $centre1->id]);
+        $reg2 = factory(Registration::class)->create(['centre_id' => $centre2->id]);
+
+        $this->actingAs($user, 'store')
+            ->withSession(['CentreUserCurrentCentreId' => $centre1->id])
+            ->visit(URL::route('store.registration.index', ['filter_by_centre' => '1']));
+
+        $this->see(URL::route('store.registration.edit', $reg1));
+        $this->see(URL::route('store.registration.edit', $reg2));
+    }
+
+    // ── Strategy selection ────────────────────────────────────────────────────
+
+    public function testItUsesExactPathWhenFamilyNameIsAbsent(): void
+    {
+        // fuzzy=1 with no name → $familyName->isEmpty() → $useFuzzy is false
+        $centre = factory(Centre::class)->create();
+        $user = $this->userInCentre($centre);
+        $reg = factory(Registration::class)->create(['centre_id' => $centre->id]);
+
+        $this->actingAs($user, 'store')
+            ->visit(URL::route('store.registration.index', ['fuzzy' => '1']));
+
+        // Registration visible confirms the exact path ran without Searchy
+        $this->see(URL::route('store.registration.edit', $reg));
+    }
+
+    public function testItUsesExactPathWhenDriverIsNotMysql(): void
+    {
+        // Default test driver is SQLite; even with fuzzy=1 + name the exact path runs
+        $centre = factory(Centre::class)->create();
+        $user = $this->userInCentre($centre);
+        $reg = factory(Registration::class)->create(['centre_id' => $centre->id]);
+        $name = $reg->family->carers()->orderBy('id')->first()->name;
+
+        $this->actingAs($user, 'store')
+            ->visit(URL::route('store.registration.index', [
+                'family_name' => $name,
+                'fuzzy' => '1',
+            ]));
+
+        $this->see(URL::route('store.registration.edit', $reg));
+    }
+
+    // ── Filtering ─────────────────────────────────────────────────────────────
+
+    public function testItFiltersResultsByCarerNameSubstring(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $user = $this->userInCentre($centre);
+        $matching = factory(Registration::class)->create(['centre_id' => $centre->id]);
+        $other = factory(Registration::class)->create(['centre_id' => $centre->id]);
+
+        $this->setCarerName($matching, 'Zelda Unique');
+        $this->setCarerName($other, 'Other Person');
+
+        $this->actingAs($user, 'store')
+            ->visit(URL::route('store.registration.index', ['family_name' => 'Zelda']));
+
+        $this->see(URL::route('store.registration.edit', $matching));
+        $this->dontSee(URL::route('store.registration.edit', $other));
+    }
+
+    // ── Ordering ──────────────────────────────────────────────────────────────
+
+    public function testItShowsFamilyPrimaryCarersAlphabetically(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $centreUser = $this->userInCentre($centre);
+
+        $regs = factory(Registration::class, 3)->create(['centre_id' => $centre->id]);
+        $this->setCarerName($regs[0], 'Charlie');
+        $this->setCarerName($regs[1], 'Alice');
+        $this->setCarerName($regs[2], 'Bob');
+
+        $this->actingAs($centreUser, 'store')
+            ->visit(URL::route('store.registration.index'));
+
+        $this->seeInElementAtPos('td.pri_carer', 'Alice', 0);
+        $this->seeInElementAtPos('td.pri_carer', 'Bob', 1);
+        $this->seeInElementAtPos('td.pri_carer', 'Charlie', 2);
+    }
+
+    public function testItOrdersCarerNamesDescending(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $centreUser = $this->userInCentre($centre);
+
+        $regs = factory(Registration::class, 3)->create(['centre_id' => $centre->id]);
+        $this->setCarerName($regs[0], 'Charlie');
+        $this->setCarerName($regs[1], 'Alice');
+        $this->setCarerName($regs[2], 'Bob');
+
+        $this->actingAs($centreUser, 'store')
+            ->visit(URL::route('store.registration.index', ['direction' => 'desc']));
+
+        $this->seeInElementAtPos('td.pri_carer', 'Charlie', 0);
+        $this->seeInElementAtPos('td.pri_carer', 'Bob', 1);
+        $this->seeInElementAtPos('td.pri_carer', 'Alice', 2);
+    }
+
+    // ── Pagination ────────────────────────────────────────────────────────────
+
+    public function testItHasTheExpectedResultsPerPage(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $centreUser = $this->userInCentre($centre);
+        factory(Registration::class, 15)->create(['centre_id' => $centre->id]);
+
+        $this->actingAs($centreUser, 'store')
+            ->visit(URL::route('store.registration.index'));
+
+        $this->assertCount(10, $this->crawler->filter('td.pri_carer'));
+    }
+
+    public function testItRedirectsToLastPageWhenRequestedPageExceedsLastPage(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $user = $this->userInCentre($centre);
+        factory(Registration::class, 35)->create(['centre_id' => $centre->id]);
+
+        $this->actingAs($user, 'store')
+            ->visit(URL::route('store.registration.index', ['page' => '99']));
+
+        $this->seePageIs(URL::route('store.registration.index', ['page' => '4']));
+    }
+
+    // ── Left families ─────────────────────────────────────────────────────────
 
     public function testItDoesNotShowLeftFamiliesByDefault(): void
     {
         $centre = factory(Centre::class)->create();
+        $centreUser = $this->userInCentre($centre);
 
-        // Create a Centre User
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
-
-        // Create 10 random registrations, which should be the per-page pagination limit.
-        $registrations = factory(Registration::class, 10)->create([
-            "centre_id" => $centre->id,
-        ]);
-
-        // Find and "leave" the first registrations Family
+        $registrations = factory(Registration::class, 10)->create(['centre_id' => $centre->id]);
         $leavingFamily = $registrations->first()->family;
         $leavingFamily->leaving_on = Carbon::now();
         $leavingFamily->leaving_reason = config('arc.leaving_reasons')[0];
@@ -357,29 +330,33 @@ class SearchPageTest extends StoreTestCase
 
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'))
-            ->dontSee($leavingFamily->carers->first());
+            ->dontSee($leavingFamily->carers->first()->name);
     }
 
+    public function testItIncludesLeftFamiliesWhenFamiliesLeftIsRequested(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $centreUser = $this->userInCentre($centre);
+        $regs = factory(Registration::class, 2)->create(['centre_id' => $centre->id]);
+
+        $regs->first()->family->update(['leaving_on' => Carbon::now()]);
+
+        $this->actingAs($centreUser, 'store')
+            ->visit(URL::route('store.registration.index', ['families_left' => '1']));
+
+        $this->see(URL::route('store.registration.view', $regs->first()));
+        $this->see(URL::route('store.registration.edit', $regs->last()));
+    }
+
+    // ── Awaiting Dusk ────────────────────────────────────────────────────────
 
     public function testItShowsLeftFamilyRegistrationsAsDistinct(): void
     {
         $this->markTestSkipped('Waiting for Dusk');
         $centre = factory(Centre::class)->create();
+        $centreUser = $this->userInCentre($centre);
 
-        // Create a Centre User
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
-
-        // Create 10 random registrations, which should be the per-page pagination limit.
-        $registrations = factory(Registration::class, 10)->create([
-            "centre_id" => $centre->id,
-        ]);
-
-        // Find and "leave" the first registrations Family
+        $registrations = factory(Registration::class, 10)->create(['centre_id' => $centre->id]);
         $leavingFamily = $registrations->first()->family;
         $leavingFamily->leaving_on = Carbon::now();
         $leavingFamily->leaving_reason = config('arc.leaving_reasons')[0];
@@ -393,26 +370,13 @@ class SearchPageTest extends StoreTestCase
         $this->assertCount(9, $this->crawler->filter('tr.active'));
     }
 
-
     public function testItPreventsAccessToLeftFamilyRegistrations(): void
     {
         $this->markTestSkipped('Waiting for Dusk');
         $centre = factory(Centre::class)->create();
+        $centreUser = $this->userInCentre($centre);
 
-        // Create a CentreUser
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
-
-        // Create 10 random registrations, which should be the per-page pagination limit.
-        $registrations = factory(Registration::class, 10)->create([
-            "centre_id" => $centre->id,
-        ]);
-
-        // Find and "leave" the first registrations Family
+        $registrations = factory(Registration::class, 10)->create(['centre_id' => $centre->id]);
         $leavingFamily = $registrations->first()->family;
         $leavingFamily->leaving_on = Carbon::now();
         $leavingFamily->leaving_reason = config('arc.leaving_reasons')[0];
@@ -422,35 +386,9 @@ class SearchPageTest extends StoreTestCase
             ->visit(URL::route('store.registration.index'))
             ->check('#families_left');
 
-        // Check the number of enabled and disabled buttons.
         $this->assertCount(2, $this->crawler->filter('tr.inactive td.right.no-wrap div.disabled'));
         $this->assertCount(0, $this->crawler->filter('tr.inactive td.right.no-wrap div:not(.disabled)'));
         $this->assertCount(0, $this->crawler->filter('tr.active td.right.no-wrap div.disabled'));
         $this->assertCount(18, $this->crawler->filter('tr.active td.right.no-wrap div:not(.disabled)'));
-    }
-
-
-    public function testAVouchersButtonIsPresent(): void
-    {
-        // Create a Centre
-        $centre = factory(Centre::class)->create();
-
-        // Create a CentreUser
-        $centreUser =  factory(CentreUser::class)->create([
-            "name"  => "test user",
-            "email" => "testuser@example.com",
-            "password" => bcrypt('test_user_pass'),
-        ]);
-        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
-
-        // Create a random registration with our centre.
-        factory(Registration::class)->create([
-            "centre_id" => $centre->id,
-        ]);
-
-        // Find a vouchers button
-        $this->actingAs($centreUser, 'store')
-            ->visit(URL::route('store.registration.index'))
-            ->see('Vouchers');
     }
 }

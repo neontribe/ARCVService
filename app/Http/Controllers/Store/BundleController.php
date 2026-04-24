@@ -8,17 +8,22 @@ use App\Centre;
 use App\Family;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAppendBundleRequest;
-use App\Http\Requests\StoreUpdateBundleRequest;
+use App\Http\Requests\StoreTransitionBundleRequest;
+use App\Http\Requests\StorePickupBundleRequest;
 use App\Registration;
+use App\Services\TransitionProcessor;
+use App\Trader;
 use App\Voucher;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Throwable;
 
 class BundleController extends Controller
@@ -59,20 +64,35 @@ class BundleController extends Controller
     }
 
     /**
-     * Append a single voucher or range of vouchers to the current bundle.
+     * Append a single voucher, range of vouchers, or a quantity drawn from the pool
+     * to the current bundle.
      */
     public function addVouchersToCurrentBundle(
         StoreAppendBundleRequest $request,
         Registration $registration,
     ): RedirectResponse {
-        $voucherCodes = Voucher::generateCodeRange(
-            $request->input('start'),
-            $request->input('end'),
-        );
-
         $managerRoute = $this->managerRoute($registration);
 
-        $errors = count($voucherCodes) <= config('arc.bundle_max_voucher_append')
+        if ($request->filled('voucher-quantity')) {
+            try {
+                $voucherCodes = Voucher::claimFromPool((int)$request->input('voucher-quantity'))
+                    ->pluck('code')
+                    ->all();
+            } catch (Throwable $e) {
+                return $this->redirectAfterRequest(
+                    ['pool' => $e->getMessage()],
+                    $managerRoute,
+                    $managerRoute,
+                );
+            }
+        } else {
+            $voucherCodes = Voucher::generateCodeRange(
+                $request->input('start'),
+                $request->input('end'),
+            );
+        }
+
+        $errors = (count($voucherCodes) <= config('arc.bundle_max_voucher_append'))
             ? $registration->currentBundle()->addVouchers($voucherCodes)
             : ['append' => count($voucherCodes)];
 
@@ -80,45 +100,64 @@ class BundleController extends Controller
     }
 
     /**
-     * Update (sync) vouchers on the current bundle, and optionally disburse it.
+     * Disburse the current bundle if collection details are present.
      */
-    public function update(StoreUpdateBundleRequest $request, Registration $registration): RedirectResponse
+    public function pickup(StorePickupBundleRequest $request, Registration $registration): RedirectResponse
     {
         $managerRoute = $this->managerRoute($registration);
-        $successRoute = $managerRoute;
-        $errors = [];
-
-        /** @var Bundle $bundle */
         $bundle = $registration->currentBundle();
 
-        // --- Sync voucher codes if supplied ---
-        if ($request->exists('vouchers')) {
-            $rawCodes = array_filter($request->input('vouchers', []));
+        $errors = $this->attemptDisbursal(
+            $bundle,
+            // Should be here, due to form request validation
+            $request->only(['collected_at', 'collected_by', 'collected_on'])
+        );
 
-            $voucherCodes = $rawCodes !== []
-                ? Voucher::cleanCodes(array_values($rawCodes))
-                : [];
+        return $this->redirectAfterRequest($errors, route('store.registration.index'), $managerRoute, $bundle);
+    }
 
-            $errors = array_merge_recursive($errors, $bundle->syncVouchers($voucherCodes));
-        }
+    /**
+     * Disburse the current bundle and trigger a collection transition.
+     */
+    public function collectBundle(StoreTransitionBundleRequest $request, Registration $registration): RedirectResponse
+    {
+        $managerRoute = $this->managerRoute($registration);
+        $bundle = $registration->currentBundle();
+        $errors = [];
 
-        // --- Disburse if collection details are present ---
-        if ($request->filled(['collected_at', 'collected_by', 'collected_on'])) {
-            if ($bundle->vouchers->isEmpty()) {
-                $errors['empty'] = true;
-            } else {
-                $errors = array_merge_recursive(
-                    $errors,
-                    $this->disburseBundle($bundle, $request->only(['collected_at', 'collected_by', 'collected_on'])),
+        try {
+            // As this is an important change, we need to rollback, rather than plough on.
+            DB::transaction(function () use ($request, $bundle, &$errors) {
+                $errors = $this->attemptDisbursal(
+                    $bundle,
+                    // Should be here, due to form request validation
+                    $request->only(['collected_at', 'collected_by', 'collected_on'])
                 );
 
-                if (empty($errors)) {
-                    $successRoute = route('store.registration.index');
+                if (!empty($errors)) {
+                    throw new RuntimeException('disbursal errors');
                 }
-            }
+
+                $trader = Trader::findorFail($request->input('trader_id'));
+                $processor = new TransitionProcessor($trader, 'collect');
+                $processor->handle($bundle->vouchers);
+
+                if ($processor->hasFailures()) {
+                    $errors['transition'] = $processor->getFailureCodes();
+                    throw new RuntimeException('transition errors');
+                }
+            });
+        } catch (Throwable $e) {
+            Log::error(sprintf(
+                'Rollback Bad transaction for %s@%s by user %s because of: %e',
+                self::class,
+                __FUNCTION__,
+                Auth::id() ?? 'unauthenticated',
+                $e->getMessage()
+            ));
         }
 
-        return $this->redirectAfterRequest($errors, $successRoute, $managerRoute, $bundle);
+        return $this->redirectAfterRequest($errors, route('store.registration.index'), $managerRoute, $bundle);
     }
 
     /**
@@ -151,9 +190,22 @@ class BundleController extends Controller
     }
 
     /**
+     * Guard against an empty bundle then delegate to disburseBundle.
+     * Returns an error map on failure, or an empty array on success.
+     */
+    private function attemptDisbursal(Bundle $bundle, array $inputs): array
+    {
+        if ($bundle->vouchers->isEmpty()) {
+            return ['empty' => true];
+        }
+
+        return $this->disburseBundle($bundle, $inputs) ? [] : ['transaction' => true];
+    }
+
+    /**
      * Attempt to mark a bundle as disbursed.
      */
-    private function disburseBundle(Bundle $bundle, array $inputs): array
+    private function disburseBundle(Bundle $bundle, array $inputs): bool
     {
         try {
             $bundle->disbursed_at = Carbon::createFromFormat('Y-m-d', $inputs['collected_on'])
@@ -163,8 +215,6 @@ class BundleController extends Controller
             $bundle->disbursingCentre()->associate(Centre::findOrFail($inputs['collected_at']));
             $bundle->disbursingUser()->associate(Auth::user());
             $bundle->save();
-
-            return [];
         } catch (Throwable $e) {
             Log::error(sprintf(
                 'Bad transaction for %s@%s by service user %s',
@@ -173,9 +223,9 @@ class BundleController extends Controller
                 Auth::id() ?? 'unauthenticated',
             ));
             Log::error($e->getTraceAsString());
-
-            return ['transaction' => true];
+            return false;
         }
+        return true;
     }
 
     /**

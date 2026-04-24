@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\CentreUser;
 use App\Services\EnvWriter;
 use App\View\Composers\PaymentsComposer;
 use Illuminate\Pagination\Paginator;
@@ -38,6 +39,21 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('take-developer-actions', static function () {
             // permit if the application is debugging
             return config('app.debug') === true;
+        });
+
+        Gate::define('collect-vouchers', static function (CentreUser $centreUser) {
+            $centreId = session('CentreUserCurrentCentreId');
+
+            if (! $centreId) {
+                return false;
+            }
+
+            // is this user permitted to work on this can_collect centre?
+            return $centreUser
+                ->centres()
+                ->where('centres.id', $centreId)
+                ->where('centres.can_collect', true)
+                ->exists();
         });
     }
 

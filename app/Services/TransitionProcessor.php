@@ -9,6 +9,7 @@ use App\Trader;
 use App\Voucher;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -35,67 +36,86 @@ class TransitionProcessor
 
     private string $transition;
 
-    /**
-     * @param Trader $trader
-     * @param string $transition
-     */
-    public function __construct(trader $trader, string $transition)
+    public function __construct(Trader $trader, string $transition)
     {
         $this->transition = $transition;
         $this->trader = $trader;
     }
 
     /**
-     * Preps and picks a strategy for transitioning vouchers
-     * @param array $voucherCodes
-     * @return array|array[]
+     * Preps and picks a strategy for transitioning vouchers.
+     *
+     * Accepts either an array of voucher code strings, or a pre-resolved
+     * Collection of Voucher models (e.g. when called from an HTTP controller
+     * that has already fetched the models).
      */
-    public function handle(array $voucherCodes): array
+    public function handle(array|Collection $input): array
     {
-        // set a lock, to prevent double submits
         $store = new SemaphoreStore();
         $factory = new LockFactory($store);
         $lock = $factory->createLock('transition');
 
-        \Log::debug("Acquiring lock for vouchers " . join(", ", $voucherCodes));
+        Log::debug("Acquiring lock for vouchers " . $this->describeInput($input));
+
         if ($lock->acquire()) {
-            // get and the available vouchers
-            $this->vouchers = Voucher::findByCodes($voucherCodes);
+            $this->resolveVouchers($input);
 
-            // Get the ones not in that list - they are bad codes.
-            // We need to re-key the array here because otherwise the json response will return object for non 0 starting.
-            $this->responses['invalid'] = array_values(
-                array_diff(
-                    $voucherCodes,
-                    $this->vouchers->pluck('code')->toArray()
-                )
-            );
-
-            switch ($this->transition) {
-                case 'collect' :
-                    $this->handleCollect();
-                    break;
-                case 'confirm':
-                    $this->handleConfirm();
-                    break;
-                case 'reject':
-                    $this->handleReject();
-                    break;
-                default:
-                    $this->handleDefault();
-            }
+            match ($this->transition) {
+                'collect' => $this->handleCollect(),
+                'confirm' => $this->handleConfirm(),
+                'reject' => $this->handleReject(),
+                default => $this->handleDefault()
+            };
 
             $lock->release();
         } else {
-            Log::info("Unable to achieve lock in transition processor for { $this->trader->id } doing $this->transition");
+            Log::info(sprintf(
+                "Unable to achieve lock in transition processor for %s doing %s",
+                $this->trader->id,
+                $this->transition
+            ));
             $this->responses['own_duplicate'][] = '000000';
         }
+
         return $this->responses;
     }
 
     /**
+     * Resolves the input into $this->vouchers, handling two cases:
+     */
+    private function resolveVouchers(array|Collection $input): void
+    {
+        if ($input instanceof Collection) {
+            $this->vouchers = $input;
+            return;
+        }
+
+        // Code array path: resolve models and detect any unrecognised codes.
+        $this->vouchers = Voucher::findByCodes($input);
+
+        // Re-keyed so the JSON response always returns an array, not an object.
+        $this->responses['invalid'] = array_values(
+            array_diff(
+                $input,
+                $this->vouchers->pluck('code')->toArray()
+            )
+        );
+    }
+
+    /**
+     * Returns a loggable summary of whichever input form was supplied.
+     */
+    private function describeInput(array|Collection $input): string
+    {
+        if ($input instanceof Collection) {
+            return $input->pluck('code')->implode(', ');
+        }
+
+        return implode(', ', $input);
+    }
+
+    /**
      * handles collection vouchers
-     * @return void
      */
     public function handleCollect(): void
     {
@@ -104,7 +124,7 @@ class TransitionProcessor
         $transition = $this->transition;
 
         foreach ($this->vouchers as $voucher) {
-            \Log::debug("handleCollect on voucher " . $voucher->code);
+            Log::debug("handleCollect on voucher " . $voucher->code);
             // Don't transition newer, undelivered vouchers
             if (// delivery_id is null
                 $voucher->delivery_id === null &&
@@ -113,7 +133,7 @@ class TransitionProcessor
             ) {
                 // Don't proceed, just file this voucher for a message
                 $this->responses['undelivered'][] = $voucher->code;
-                \Log::debug("Undelivered voucher " . $voucher->code);
+                Log::debug("Undelivered voucher " . $voucher->code);
                 continue;
             }
 
@@ -125,10 +145,6 @@ class TransitionProcessor
 
     /**
      * Actually does the transition - will save a voucher on the way through
-     * @param Voucher $voucher
-     * @param string $transition
-     * @param int|null $againstTraderId
-     * @return bool
      */
     private function doTransition(Voucher $voucher, string $transition, ?int $againstTraderId = null): bool
     {
@@ -136,18 +152,28 @@ class TransitionProcessor
             if ($voucher->transitionAllowed($transition)) {
                 $voucher->trader_id = $againstTraderId;
                 $voucher->applyTransition($transition);
-                \Log::debug(sprintf("Transition %s on %s for %d", $transition, $voucher, $againstTraderId));
+                Log::debug(sprintf("Transition %s on %s for %d", $transition, $voucher, $againstTraderId));
             } else {
                 // No? drop vouchers into a relevant bin
                 if ($voucher->trader_id === $againstTraderId) {
                     // Trader has already submitted this voucher
                     $this->responses['own_duplicate'][] = $voucher->code;
-                    \Log::debug(sprintf("Transition denied %s on %s for %d, own_duplicate", $transition, $voucher, $againstTraderId));
+                    Log::debug(sprintf(
+                        "Transition denied %s on %s for %d, own_duplicate",
+                        $transition,
+                        $voucher,
+                        $againstTraderId
+                    ));
                 } else {
                     // Another trader has mistakenly submitted this voucher,
                     // Or the transition isn't valid (i.e. expired state)
                     $this->responses['other_duplicate'][] = $voucher->code;
-                    \Log::debug(sprintf("Transition denied %s on %s for %d, other_duplicate", $transition, $voucher, $againstTraderId));
+                    Log::debug(sprintf(
+                        "Transition denied %s on %s for %d, other_duplicate",
+                        $transition,
+                        $voucher,
+                        $againstTraderId
+                    ));
                 }
                 return false;
             }
@@ -161,7 +187,6 @@ class TransitionProcessor
 
     /**
      * confirms a voucher set for payment
-     * @return void
      */
     public function handleConfirm(): void
     {
@@ -172,7 +197,6 @@ class TransitionProcessor
         $transition = $this->transition;
 
         foreach ($this->vouchers as $voucher) {
-
             // Can we do a transition already?
             if ($this->doTransition($voucher, $transition, $this->trader->id)) {
                 // add to a list for sending to ARC admin. This is a request for payment.
@@ -191,9 +215,6 @@ class TransitionProcessor
 
     /**
      * Email a Trader's Voucher Payment Request.
-     * @param Trader $trader
-     * @param array $vouchers
-     * @return void
      */
     public static function emailVoucherPaymentRequest(Trader $trader, array $vouchers): void
     {
@@ -209,7 +230,6 @@ class TransitionProcessor
 
     /**
      * This handles rejections back to the free voucher pool
-     * @return void
      */
     public function handleReject(): void
     {
@@ -233,7 +253,6 @@ class TransitionProcessor
 
     /**
      * This is for undefined transitions, as a catchall.
-     * @return void
      */
     public function handleDefault(): void
     {
@@ -246,7 +265,6 @@ class TransitionProcessor
 
     /**
      * Helper to construct voucher validation response messages.
-     * @return array
      */
     public function constructResponseMessage(): array
     {
@@ -310,5 +328,25 @@ class TransitionProcessor
                 'invalid_amount' => count($responses['invalid']) + count($responses['undelivered']),
             ]),
         ];
+    }
+
+    /**
+     * Works out if we had any type of voucher transition failure
+     */
+    public function hasFailures(): bool
+    {
+        return (bool) Arr::first(
+            Arr::except($this->responses, 'success_add'),
+            static function (array $failureType) {
+                return !empty($failureType);
+            }
+        );
+    }
+
+    public function getFailureCodes(): array
+    {
+        return ($this->hasFailures())
+            ? Arr::flatten(Arr::except($this->responses, 'success_add'))
+            : [];
     }
 }

@@ -13,185 +13,157 @@ use App\Registration;
 use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\Valuation;
 use App\User;
-use Auth;
 use Carbon\Carbon;
-use DB;
 use HighSolutions\LaravelSearchy\Facades\Searchy;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
-use Log;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Stringable;
 use PDF;
 use Throwable;
 
 class RegistrationController extends Controller
 {
-    /**
-     * List all the Registrations (search-ably)
-     *
-     * This is a con. It only lists the registrations available to a User's CC's Sponsor
-     * This means a User can see the Registrations in his 'neighbour' CCs under a Sponsor
-     *
-     * Also, the view contains the search functionality.
-     *
-     */
-    public function index(Request $request): View|Factory|Application
+    public function index(Request $request): Factory|View|RedirectResponse
     {
-        // Masthead bit
         /** @var User $user */
         $user = Auth::user();
-        $data = [
+
+        $familyName = $request->string('family_name');
+        $fuzzy = $request->boolean('fuzzy');
+        $descending = $request->input('direction') === 'desc';
+        $neighbourCentreIds = $user->relevantCentres()->pluck('id');
+
+        $baseQuery = Registration::query()
+            ->withPrimaryCarer()
+            ->whereIn('registrations.centre_id', $neighbourCentreIds);
+
+        $centreId = session('CentreUserCurrentCentreId');
+        if (
+            $user->centres->count() > 1 &&
+            $request->boolean('filter_by_centre') &&
+            $centreId
+        ) {
+            $baseQuery->where('registrations.centre_id', $centreId);
+        }
+
+        if (!$request->boolean('families_left')) {
+            $baseQuery->WhereActiveFamily();
+        }
+
+        $useFuzzy = $fuzzy
+            && $familyName->isNotEmpty()
+            && config('database.connections.' . config('database.default') . '.driver') === 'mysql';
+
+        [$registrations, $resolvedFuzzy] = $useFuzzy
+            ? [$this->fetchFuzzy($request, $baseQuery, $familyName, $neighbourCentreIds, $descending), true]
+            : [$this->fetchExact($baseQuery, $familyName, $descending), false];
+
+        if ($registrations->currentPage() > $registrations->lastPage()) {
+            return redirect()->to(
+                $registrations->url($registrations->lastPage())
+            );
+        }
+
+        return view('store.index_registration', [
             'user_name' => $user->name,
             'centre_name' => $user->centre?->name,
             'programme' => $user->centre?->sponsor?->programme,
-        ];
-
-        // get the inputs
-        $family_name = $request->get('family_name');
-        $fuzzy = $request->get('fuzzy');
-
-        // Slightly roundabout method of getting the permitted centres to poll
-        $neighbour_centre_ids = $user
-            ->relevantCentres()
-            ->pluck('id')
-            ->toArray();
-
-        // get primary carers
-        $pri_carers = Carer::query()
-            ->selectRaw('MIN(carers.id) AS min_id')
-            ->whereIn('carers.family_id', function ($q) use ($neighbour_centre_ids) {
-                // limited to families that have registration in our centres
-                $q->select('registrations.family_id')
-                    ->from('registrations')
-                    ->whereIn('registrations.centre_id', $neighbour_centre_ids)
-                    ->distinct();
-            })
-            ->groupBy('carers.family_id')
-            ->pluck('min_id')
-            ->toArray();
-
-        // pick a search type
-        $filtered_family_ids = $fuzzy
-            ? $this->fuzzySearch($family_name, $pri_carers)
-            : $this->exactSearch($family_name, $pri_carers);
-
-        //find the registrations
-        $q = Registration::query();
-
-        if (!empty($neighbour_centre_ids)) {
-            $q = $q->whereIn('centre_id', $neighbour_centre_ids);
-        }
-
-        // only for cc users with access to more than 1 centre
-        if ($user->centres->count() > 1) {
-            // get the centre_id from the masthead dropdown which is set by session (so we can filter reg selection)
-            $filtered_centre_id = session('CentreUserCurrentCentreId');
-            if ($filtered_centre_id && $filtered_centre_id !== "all") {
-                $q = $q->where('centre_id', '=', $filtered_centre_id);
-            }
-        }
-
-        if (!empty($filtered_family_ids)) {
-            $q = $q->whereIn('family_id', $filtered_family_ids)
-                //  Somehow, whereIn re-orders the filtered array into numeric order.
-                //  this would be the "cheap" solution, IF sqlite supported FIELD so we could test that.
-                //  ->orderByRaw(DB::raw("FIELD(family_id, " .implode(',', $filtered_family_ids). ")"));
-            ;
-        }
-
-        // Check if the request asks us to display inactive families
-        $q = $request->get('families_left') ? $q : $q->WhereActiveFamily();
-
-        // Check if the request should filter by centre
-        $q = $request->get('centre') ? $q->where('centre_id', $request->get('centre')) : $q;
-
-        // This isn't ideal as it relies on getting all the families, then sorting them.
-        // However, the whereIn statements above destroy any sorted order on family_ids.
-        $reg_models = $q->WithFullFamily()
-            ->get()
-            ->values()
-            ->sortBy('family.pri_carer', SORT_NATURAL, $request->get('direction') === 'desc');
-
-        // throw it into a paginator.
-        $page = LengthAwarePaginator::resolveCurrentPage();
-        $perPage = 10;
-        $offset = ($page * $perPage) - $perPage;
-        $registrations = new LengthAwarePaginator(
-            $reg_models->slice($offset, $perPage),
-            $reg_models->count(),
-            $perPage,
-            $page,
-            [
-                'path' => LengthAwarePaginator::resolveCurrentPath(),
-                'query' => array_except($request->query(), 'page'),
-            ]
-        );
-
-        $data = array_merge(
-            $data,
-            [
-                'registrations' => $registrations,
-                'fuzzy' => (bool)$fuzzy,
-            ]
-        );
-        return view('store.index_registration', $data);
+            'registrations' => $registrations,
+            'fuzzy' => $resolvedFuzzy,
+        ]);
     }
 
-    private function fuzzySearch($family_name, $pri_carers): array
-    {
-        // Get the current database driver
-        $connection = config('database.default');
-        $driver = config("database.connections.$connection.driver");
+    /**
+     * Exact-match strategy: everything resolved in SQL.
+     * Returns a paginator ready for the view.
+     */
+    private function fetchExact(
+        Builder $query,
+        Stringable $familyName,
+        bool $descending,
+    ): LengthAwarePaginator {
+        if ($familyName->isNotEmpty()) {
+            $query->filterByCarerName((string)$familyName);
+        }
 
-        if ($driver === 'mysql') {
-            // We can use Searchy for mysql; defaults to "fuzzy" search;
-            // results are a collection of basic objects, but we can still "pluck()"
-            $filtered_family_ids = Searchy::search('carers')
+        $query->orderByCarerName($descending);
+
+        return $query
+            ->WithFullFamily()
+            ->paginate(perPage: 10)
+            ->withQueryString();
+    }
+
+    /**
+     * Fuzzy strategy (MySQL-only): Searchy ranks IDs by relevance;
+     * ordering is preserved via PHP-side pagination.
+     * Returns a paginator ready for the view.
+     */
+    private function fetchFuzzy(
+        Request $request,
+        Builder $query,
+        Stringable $familyName,
+        Collection $neighbourCentreIds,
+        bool $descending,
+    ): LengthAwarePaginator {
+        $rankedFamilyIds = collect(
+            Searchy::search('carers')
                 ->fields('name')
-                ->query($family_name)
-                ->getQuery()
-                ->whereIn('id', $pri_carers)
-                ->pluck('family_id')
-                ->toArray();
-        } else {
-            // We may not be able to use Searchy, so we default to unfuzzy.
-            $filtered_family_ids = $this->exactSearch($family_name, $pri_carers);
-        }
+                ->query((string)$familyName)
+                ->get()
+        )->pluck('family_id')->toArray();
 
-        return $filtered_family_ids;
-    }
+        $permittedFamilyIds = Registration::query()
+            ->whereIn('family_id', $rankedFamilyIds)
+            ->whereIn('centre_id', $neighbourCentreIds)
+            ->pluck('family_id')
+            ->toArray();
 
-    private function exactSearch($family_name, $pri_carers): array
-    {
-        $carers = Carer::query()
-            ->where('name', 'LIKE', "%$family_name%")
-            ->whereIn('id', $pri_carers)
-            ->get();
+        $familyIds = collect($rankedFamilyIds)
+            ->filter(function (int $id) use ($permittedFamilyIds) {
+                return in_array($id, $permittedFamilyIds, strict: true);
+            })
+            ->values()
+            ->toArray();
 
-        $startsWithExact = [];
-        $wholeWord = [];
-        $theRest = [];
+        $positionMap = array_flip($familyIds);
 
-        foreach ($carers as $carer) {
-            $names = array_map('strtolower', explode(" ", $carer->name));
+        $all = $query
+            ->whereIn('registrations.family_id', $familyIds)
+            ->WithFullFamily()
+            ->get()
+            ->sortBy(
+                function ($reg) use ($positionMap) {
+                    return $positionMap[$reg->family_id] ?? PHP_INT_MAX;
+                },
+                SORT_REGULAR,
+                $descending,
+            )
+            ->values();
 
-            if (count($names) !== 0) {
-                if (strtolower($names[0]) === strtolower($family_name)) {
-                    $startsWithExact[] = $carer->family_id;
-                } elseif (in_array($family_name, $names)) {
-                    $wholeWord[] = $carer->family_id;
-                } else {
-                    $theRest[] = $carer->family_id;
-                }
-            }
-        }
+        $page = LengthAwarePaginator::resolveCurrentPage();
 
-        return array_merge($startsWithExact, $wholeWord, $theRest);
+        return new LengthAwarePaginator(
+            items: $all->forPage($page, 10),
+            total: $all->count(),
+            perPage: 10,
+            currentPage: $page,
+            options: [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'query' => $request->except('page'),
+            ]
+        );
     }
 
     /**
@@ -524,7 +496,6 @@ class RegistrationController extends Controller
                 $family->carers()->saveMany($carers);
                 $family->children()->saveMany($children);
                 $registration->family()->associate($family);
-                // TODO - BUGWATCH! this will default to users, default centre if the selector is set to "all"
                 $registration->centre()->associate(Auth::user()->centre);
                 $registration->save();
             });
