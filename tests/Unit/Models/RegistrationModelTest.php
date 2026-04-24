@@ -69,7 +69,7 @@ class RegistrationModelTest extends TestCase
         ]);
 
         // Check that we have 4.
-        $this->assertEquals(4, Registration::whereActiveFamily()->count());
+        $this->assertSame(4, Registration::whereActiveFamily()->count());
 
         // A family has left.
         $family = $registrations->first()->family;
@@ -77,7 +77,7 @@ class RegistrationModelTest extends TestCase
         $family->save();
 
         // check there are only 3.
-        $this->assertEquals(3, Registration::whereActiveFamily()->count());
+        $this->assertSame(3, Registration::whereActiveFamily()->count());
     }
 
     // ── scopeWithPrimaryCarer ─────────────────────────────────────────────────
@@ -96,7 +96,7 @@ class RegistrationModelTest extends TestCase
             ->where('registrations.id', $reg->id)
             ->first();
 
-        $this->assertEquals('Primary Carer', $result->carer_name);
+        $this->assertSame('Primary Carer', $result->carer_name);
     }
 
     public function testWithPrimaryCarerReturnsOneRowPerRegistrationRegardlessOfCarerCount(): void
@@ -110,7 +110,7 @@ class RegistrationModelTest extends TestCase
             Carer::create(['name' => 'Extra Carer', 'family_id' => $reg->family_id]);
         }
 
-        $this->assertEquals(3, $this->baseQuery($centre)->count());
+        $this->assertSame(3, $this->baseQuery($centre)->count());
     }
 
     public function testWithPrimaryCarerMakesCarerNameAvailableForFiltering(): void
@@ -125,7 +125,7 @@ class RegistrationModelTest extends TestCase
             ->get();
 
         $this->assertCount(1, $results);
-        $this->assertEquals($reg->id, $results->first()->id);
+        $this->assertSame($reg->id, $results->first()->id);
     }
 
     // ── scopeOrderByCarerName ─────────────────────────────────────────────────
@@ -142,7 +142,7 @@ class RegistrationModelTest extends TestCase
             ->pluck('registrations.id')
             ->toArray();
 
-        $this->assertEquals([$alice->id, $bob->id, $charlie->id], $ids);
+        $this->assertSame([$alice->id, $bob->id, $charlie->id], $ids);
     }
 
     public function testOrderByCarerNameSortsDescendingWhenPassedTrue(): void
@@ -157,7 +157,7 @@ class RegistrationModelTest extends TestCase
             ->pluck('registrations.id')
             ->toArray();
 
-        $this->assertEquals([$charlie->id, $bob->id, $alice->id], $ids);
+        $this->assertSame([$charlie->id, $bob->id, $alice->id], $ids);
     }
 
     public function testOrderByCarerNameIsCaseInsensitive(): void
@@ -171,7 +171,7 @@ class RegistrationModelTest extends TestCase
             ->pluck('registrations.id')
             ->toArray();
 
-        $this->assertEquals([$upper->id, $lower->id], $ids);
+        $this->assertSame([$upper->id, $lower->id], $ids);
     }
 
     // ── scopeFilterByCarerName ────────────────────────────────────────────────
@@ -201,7 +201,7 @@ class RegistrationModelTest extends TestCase
             ->get();
 
         $this->assertCount(1, $results);
-        $this->assertEquals($reg->id, $results->first()->id);
+        $this->assertSame($reg->id, $results->first()->id);
     }
 
     public function testFilterByCarerNameRanksExactMatchFirst(): void
@@ -216,7 +216,7 @@ class RegistrationModelTest extends TestCase
             ->pluck('registrations.id')
             ->toArray();
 
-        $this->assertEquals($exact->id, $ids[0]);
+        $this->assertSame($exact->id, $ids[0]);
     }
 
     public function testFilterByCarerNameRanksPrefixMatchBeforeWordBoundaryMatch(): void
@@ -230,8 +230,8 @@ class RegistrationModelTest extends TestCase
             ->pluck('registrations.id')
             ->toArray();
 
-        $this->assertEquals($prefix->id, $ids[0]);
-        $this->assertEquals($boundary->id, $ids[1]);
+        $this->assertSame($prefix->id, $ids[0]);
+        $this->assertSame($boundary->id, $ids[1]);
     }
 
     public function testFilterByCarerNameRanksWordBoundaryMatchBeforeInternalMatch(): void
@@ -245,8 +245,8 @@ class RegistrationModelTest extends TestCase
             ->pluck('registrations.id')
             ->toArray();
 
-        $this->assertEquals($boundary->id, $ids[0]);
-        $this->assertEquals($internal->id, $ids[1]);
+        $this->assertSame($boundary->id, $ids[0]);
+        $this->assertSame($internal->id, $ids[1]);
     }
 
     public function testFilterByCarerNameReturnsNoResultsWhenNothingMatches(): void
