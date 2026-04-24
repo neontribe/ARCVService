@@ -77,7 +77,7 @@
                            class="styled-checkbox @error('can_collect') error @enderror"
                         @checked(old('can_collect', $centre->can_collect))
                     >
-                    <label for="can_collect">Can Collect Vouchers</label>
+                    <label for="can_collect">Can Redeem Vouchers</label>
                     @include('service.partials.validationMessages', ['inputName' => 'can_collect'])
                 </div>
                 <button type="submit" id="updateCentre">Save</button>

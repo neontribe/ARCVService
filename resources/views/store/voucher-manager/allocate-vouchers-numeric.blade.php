@@ -30,7 +30,7 @@
     @includeWhen(Session::get('error_messages'), 'store.partials.errors', ['error_array' => Session::get('error_messages')])
 
     <button id="collection-button" class="long-button" @disabled($vouchers_amount == 0)>
-        <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher collection
+        <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher redemption
     </button>
 
     <div class="center" id="vouchers-added">

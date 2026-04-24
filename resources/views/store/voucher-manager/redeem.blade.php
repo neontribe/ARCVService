@@ -2,7 +2,7 @@
 <div id="collection" class="col collection-section">
     <div>
         <i class="fa fa-shopping-basket fa-3x" style="margin: 0 0.5rem;" ></i>
-        <h2>Request Payment</h2>
+        <h2>Redeem Vouchers</h2>
     </div>
 
     <div>
@@ -19,7 +19,7 @@
             <div>
                 <i class="fa fa-user"></i>
                 <div>
-                    <label for="collected-by">Transact with:</label>
+                    <label for="collected-by">Redeem for:</label>
                     <select id="collected-by" name="collected_by">
                         @foreach($carers as $carer)
                             <option value="{{ $carer->id }}">{{ $carer->name }}</option>
@@ -31,7 +31,7 @@
             <div>
                 <i class="fa fa-calendar"></i>
                 <div>
-                    <label for="collected-on">Transact on:</label>
+                    <label for="collected-on">Redeem on:</label>
                     <div id="dateError" style="display:none;"></div>
                     <input
                         id="collected-on"
@@ -45,7 +45,7 @@
             <div>
                 <i class="fa fa-home"></i>
                 <div>
-                    <label for="collected-at">Transact at: {{ $centre->name }}</label>
+                    <label for="collected-at">Redeem at: {{ $centre->name }}</label>
                     <input type="hidden" id="collected-at" name="collected_at" value="{{ $centre->id }}">
                 </div>
             </div>
@@ -53,7 +53,7 @@
             <div>
                 <i class="fa fa-shopping-cart"></i>
                 <div>
-                    <label for="collected-as">Transact as:</label>
+                    <label for="collected-as">Redeem as:</label>
                     <select id="collected-as" name="trader_id">
                         @foreach($centre->markets as $market)
                             <optgroup label="{{ $market->name }}">
@@ -67,7 +67,7 @@
             </div>
 
             <button id="collection-button" class="long-button submit" type="submit" @disabled($vouchers_amount === 0)>
-                Confirm Transaction
+                Confirm Redemption
             </button>
         </div>
     </form>
