@@ -19,6 +19,8 @@ class StoreAppendBundleRequestTest extends StoreTestCase
     protected CentreUser $centreUser;
     protected Registration $registration;
 
+    private const CODES = ['TST09999', 'TST10000', 'TST10001'];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -39,7 +41,7 @@ class StoreAppendBundleRequestTest extends StoreTestCase
         // Auth context is required by the voucher state-machine transition logger.
         Auth::login($this->centreUser);
 
-        foreach (['TST09999', 'TST10000', 'TST10001'] as $code) {
+        foreach (self::CODES as $code) {
             $voucher = factory(Voucher::class)->state('printed')->create(['code' => $code]);
             $voucher->applyTransition('dispatch');
         }
@@ -125,6 +127,21 @@ class StoreAppendBundleRequestTest extends StoreTestCase
         ];
     }
 
+    public static function validInputCases(): array
+    {
+        return [
+            'voucher-quantity: maximum allowed value is accepted' => [
+                ['voucher-quantity' => ':max:'],
+            ],
+            'start: valid code without end is accepted' => [
+                ['start' => self::CODES[0]],
+            ],
+            'start and end: valid range is accepted' => [
+                ['start' => self::CODES[0], 'end' => self::CODES[2]],
+            ],
+        ];
+    }
+
     // -------------------------------------------------------------------------
     // Tests
     // -------------------------------------------------------------------------
@@ -158,5 +175,24 @@ class StoreAppendBundleRequestTest extends StoreTestCase
         $this->followRedirects()
             ->seePageIs($route)
             ->assertResponseStatus(200);
+    }
+
+    #[DataProvider('validInputCases')]
+    public function testValidInputIsAccepted(array $data): void
+    {
+        $max = (string)config('arc.bundle_max_voucher_append');
+
+        $data = array_map(static function (string $v) use ($max): string {
+            return str_replace(':max:', $max, $v);
+        }, $data);
+
+        $route = route('store.registration.voucher-manager', ['registration' => $this->registration->id]);
+        $postRoute = route('store.registration.vouchers.post', ['registration' => $this->registration->id]);
+
+        $this->actingAs($this->centreUser, 'store')
+            ->visit($route)
+            ->post($postRoute, $data);
+
+        $this->assertSessionMissing('errors');
     }
 }
