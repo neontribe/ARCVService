@@ -295,7 +295,7 @@ class SearchPageTest extends StoreTestCase
     {
         $centre = factory(Centre::class)->create();
         $centreUser = $this->userInCentre($centre);
-        factory(Registration::class, 10)->create(['centre_id' => $centre->id]);
+        factory(Registration::class, 15)->create(['centre_id' => $centre->id]);
 
         $this->actingAs($centreUser, 'store')
             ->visit(URL::route('store.registration.index'));
