@@ -119,7 +119,7 @@ Route::middleware('auth:store')->group(function (): void {
             ->name('store.registration.vouchers.post')
             ->whereNumber('registration');
 
-        Route::post(
+        Route::put(
             '/registrations/{registration}/vouchers/transitions/collection',
             [BundleController::class, 'collectBundle']
         )
