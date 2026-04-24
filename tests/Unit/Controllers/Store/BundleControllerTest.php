@@ -99,18 +99,13 @@ class BundleControllerTest extends StoreTestCase
 
     /**
      * Search session error messages for one matching the given regular expression.
-     * Handles both plain strings and HtmlString instances (serialised with an 'html' key).
      *
-     * @param array<int, string|array<string, string>> $errorMessages
+     * @param array<int, string|HtmlString> $errorMessages
      */
     private function hasMatchingErrorMessage(array $errorMessages, string $regex): bool
     {
         foreach ($errorMessages as $error) {
-            $string = is_array($error) && array_key_exists('html', $error)
-                ? $error['html']
-                : (string)$error;
-
-            if (preg_match($regex, $string)) {
+            if (preg_match($regex, (string) $error)) {
                 return true;
             }
         }
@@ -690,7 +685,7 @@ class BundleControllerTest extends StoreTestCase
         );
 
         $this->actingAs($this->centreUser, 'store')
-            ->post($collectRoute, array_merge(
+            ->put($collectRoute, array_merge(
                 $this->defaultDisbursalData(),
                 ['trader_id' => $trader->id],
             ));
@@ -724,7 +719,7 @@ class BundleControllerTest extends StoreTestCase
         );
 
         $this->actingAs($this->centreUser, 'store')
-            ->post($collectRoute, array_merge(
+            ->put($collectRoute, array_merge(
                 $this->defaultDisbursalData(),
                 ['trader_id' => $trader->id],
             ));
@@ -743,7 +738,7 @@ class BundleControllerTest extends StoreTestCase
         $trader = factory(Trader::class)->create();
 
         $response = $this->actingAs($this->centreUser, 'store')
-            ->post($collectRoute, array_merge(
+            ->put($collectRoute, array_merge(
                 $this->defaultDisbursalData(),
                 ['trader_id' => $trader->id],
             ));
@@ -815,7 +810,7 @@ class BundleControllerTest extends StoreTestCase
         );
 
         $response = $this->actingAs($this->centreUser, 'store')
-            ->post($collectRoute, array_merge(
+            ->put($collectRoute, array_merge(
                 $this->defaultDisbursalData(),
                 ['trader_id' => $trader->id],
             ));
