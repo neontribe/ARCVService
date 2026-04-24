@@ -107,7 +107,10 @@ class RegistrationModelTest extends TestCase
         // a naive join would double the row count.
         $regs = factory(Registration::class, 3)->create(['centre_id' => $centre->id]);
         foreach ($regs as $reg) {
-            Carer::create(['name' => 'Extra Carer', 'family_id' => $reg->family_id]);
+            Carer::create(
+                ['name' => 'Extra Carer', 'family_id' => $reg->family_id],
+                ['name' => 'Another Carer', 'family_id' => $reg->family_id],
+            );
         }
 
         $this->assertSame(3, $this->baseQuery($centre)->count());
