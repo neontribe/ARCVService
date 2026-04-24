@@ -307,12 +307,12 @@ class SearchPageTest extends StoreTestCase
     {
         $centre = factory(Centre::class)->create();
         $user = $this->userInCentre($centre);
-        factory(Registration::class, 5)->create(['centre_id' => $centre->id]);
+        factory(Registration::class, 35)->create(['centre_id' => $centre->id]);
 
         $this->actingAs($user, 'store')
             ->visit(URL::route('store.registration.index', ['page' => '99']));
 
-        $this->seePageIs(URL::route('store.registration.index', ['page' => '1']));
+        $this->seePageIs(URL::route('store.registration.index', ['page' => '4']));
     }
 
     // ── Left families ─────────────────────────────────────────────────────────
