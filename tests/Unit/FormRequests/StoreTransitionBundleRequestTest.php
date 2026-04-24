@@ -113,7 +113,7 @@ class StoreTransitionBundleRequestTest extends StoreTestCase
 
         $this->actingAs($this->centreUser, 'store')
             ->visit($route)
-            ->post($postRoute, $data);
+            ->put($postRoute, $data);
 
         $errors = session('errors')->get($field);
 
@@ -137,13 +137,12 @@ class StoreTransitionBundleRequestTest extends StoreTestCase
 
         $this->actingAs($this->centreUser, 'store')
             ->visit($route)
-            ->post($postRoute, [
+            ->put($postRoute, [
                 'trader_id' => (string)$trader->id,
                 'collected_at' => (string)$this->centre->id,
                 'collected_on' => '2018-07-21',
                 'collected_by' => (string)$this->carer->id,
             ]);
-
         $this->assertSessionMissing('errors');
     }
 }
