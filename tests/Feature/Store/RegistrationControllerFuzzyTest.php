@@ -56,8 +56,8 @@ class RegistrationControllerFuzzyTest extends MysqlStoreTestCase
     public function testIndexUsesFuzzyPathWhenFuzzySetAndDriverIsMysql(): void
     {
         $centre = factory(Centre::class)->create();
-        $user   = $this->userInCentre($centre);
-        $reg    = factory(Registration::class)->create(['centre_id' => $centre->id]);
+        $user = $this->userInCentre($centre);
+        $reg = factory(Registration::class)->create(['centre_id' => $centre->id]);
 
         $this->mockSearchy([(object)['family_id' => $reg->family_id]]);
 
@@ -66,7 +66,7 @@ class RegistrationControllerFuzzyTest extends MysqlStoreTestCase
         $this->actingAs($user, 'store')
             ->visit(URL::route('store.registration.index', [
                 'family_name' => $name,
-                'fuzzy'       => '1',
+                'fuzzy' => '1',
             ]));
 
         // Searchy mock enforces it was called (once assertions in mockSearchy).
@@ -79,7 +79,7 @@ class RegistrationControllerFuzzyTest extends MysqlStoreTestCase
     public function testFuzzyResultsReturnedInSearchyRelevanceOrder(): void
     {
         $centre = factory(Centre::class)->create();
-        $user   = $this->userInCentre($centre);
+        $user = $this->userInCentre($centre);
 
         $regs = factory(Registration::class, 3)->create(['centre_id' => $centre->id]);
         $this->setCarerName($regs[0], 'Smith Charlie');
@@ -96,18 +96,18 @@ class RegistrationControllerFuzzyTest extends MysqlStoreTestCase
         $this->actingAs($user, 'store')
             ->visit(URL::route('store.registration.index', [
                 'family_name' => 'Smith',
-                'fuzzy'       => '1',
+                'fuzzy' => '1',
             ]));
 
-        $this->seeInElementAtPos('td.pri_carer', 'Smith Bob',     0);
+        $this->seeInElementAtPos('td.pri_carer', 'Smith Bob', 0);
         $this->seeInElementAtPos('td.pri_carer', 'Smith Charlie', 1);
-        $this->seeInElementAtPos('td.pri_carer', 'Smith Alice',   2);
+        $this->seeInElementAtPos('td.pri_carer', 'Smith Alice', 2);
     }
 
     public function testFuzzyResultsReversedWhenDirectionIsDesc(): void
     {
         $centre = factory(Centre::class)->create();
-        $user   = $this->userInCentre($centre);
+        $user = $this->userInCentre($centre);
 
         $regs = factory(Registration::class, 3)->create(['centre_id' => $centre->id]);
         $this->setCarerName($regs[0], 'Smith Charlie');
@@ -124,28 +124,28 @@ class RegistrationControllerFuzzyTest extends MysqlStoreTestCase
         $this->actingAs($user, 'store')
             ->visit(URL::route('store.registration.index', [
                 'family_name' => 'Smith',
-                'fuzzy'       => '1',
-                'direction'   => 'desc',
+                'fuzzy' => '1',
+                'direction' => 'desc',
             ]));
 
         // Descending inverts Searchy rank: reg[1] (rank 2), reg[0] (rank 1), reg[2] (rank 0)
-        $this->seeInElementAtPos('td.pri_carer', 'Smith Alice',   0);
+        $this->seeInElementAtPos('td.pri_carer', 'Smith Alice', 0);
         $this->seeInElementAtPos('td.pri_carer', 'Smith Charlie', 1);
-        $this->seeInElementAtPos('td.pri_carer', 'Smith Bob',     2);
+        $this->seeInElementAtPos('td.pri_carer', 'Smith Bob', 2);
     }
 
     // ── Centre permission scoping ─────────────────────────────────────────────
 
     public function testFuzzyExcludesFamiliesOutsidePermittedCentres(): void
     {
-        $sponsor     = factory(Sponsor::class)->create();
-        $myCentre    = factory(Centre::class)->create(['sponsor_id' => $sponsor->id]);
+        $sponsor = factory(Sponsor::class)->create();
+        $myCentre = factory(Centre::class)->create(['sponsor_id' => $sponsor->id]);
         $otherCentre = factory(Centre::class)->create([
             'sponsor_id' => factory(Sponsor::class)->create()->id,
         ]);
 
-        $user     = $this->userInCentre($myCentre);
-        $myReg    = factory(Registration::class)->create(['centre_id' => $myCentre->id]);
+        $user = $this->userInCentre($myCentre);
+        $myReg = factory(Registration::class)->create(['centre_id' => $myCentre->id]);
         $otherReg = factory(Registration::class)->create(['centre_id' => $otherCentre->id]);
 
         // Searchy returns both; only myReg is within permitted centres
@@ -157,7 +157,7 @@ class RegistrationControllerFuzzyTest extends MysqlStoreTestCase
         $this->actingAs($user, 'store')
             ->visit(URL::route('store.registration.index', [
                 'family_name' => 'test',
-                'fuzzy'       => '1',
+                'fuzzy' => '1',
             ]));
 
         $this->see(URL::route('store.registration.edit', $myReg));
@@ -166,15 +166,15 @@ class RegistrationControllerFuzzyTest extends MysqlStoreTestCase
 
     public function testFuzzyPreservesRelevanceOrderAfterPermissionFiltering(): void
     {
-        $sponsor     = factory(Sponsor::class)->create();
-        $myCentre    = factory(Centre::class)->create(['sponsor_id' => $sponsor->id]);
+        $sponsor = factory(Sponsor::class)->create();
+        $myCentre = factory(Centre::class)->create(['sponsor_id' => $sponsor->id]);
         $otherCentre = factory(Centre::class)->create([
             'sponsor_id' => factory(Sponsor::class)->create()->id,
         ]);
 
         $user = $this->userInCentre($myCentre);
 
-        $regs  = factory(Registration::class, 2)->create(['centre_id' => $myCentre->id]);
+        $regs = factory(Registration::class, 2)->create(['centre_id' => $myCentre->id]);
         $alien = factory(Registration::class)->create(['centre_id' => $otherCentre->id]);
 
         $this->setCarerName($regs[0], 'Smith Alice');
@@ -191,10 +191,10 @@ class RegistrationControllerFuzzyTest extends MysqlStoreTestCase
         $this->actingAs($user, 'store')
             ->visit(URL::route('store.registration.index', [
                 'family_name' => 'Smith',
-                'fuzzy'       => '1',
+                'fuzzy' => '1',
             ]));
 
-        $this->seeInElementAtPos('td.pri_carer', 'Smith Bob',   0);
+        $this->seeInElementAtPos('td.pri_carer', 'Smith Bob', 0);
         $this->seeInElementAtPos('td.pri_carer', 'Smith Alice', 1);
     }
 
@@ -203,24 +203,26 @@ class RegistrationControllerFuzzyTest extends MysqlStoreTestCase
     public function testFuzzyRedirectsToLastPageWhenRequestedPageExceedsLastPage(): void
     {
         $centre = factory(Centre::class)->create();
-        $user   = $this->userInCentre($centre);
-        $regs   = factory(Registration::class, 3)->create(['centre_id' => $centre->id]);
+        $user = $this->userInCentre($centre);
+        $regs = factory(Registration::class, 35)->create(['centre_id' => $centre->id]);
 
         $this->mockSearchy(
-            $regs->map(fn($r) => (object)['family_id' => $r->family_id])->all()
+            $regs->map(function ($r) {
+                return (object)['family_id' => $r->family_id];
+            })->all()
         );
 
         $this->actingAs($user, 'store')
             ->visit(URL::route('store.registration.index', [
                 'family_name' => 'test',
-                'fuzzy'       => '1',
-                'page'        => '99',
+                'fuzzy' => '1',
+                'page' => '99',
             ]));
 
         $this->seePageIs(URL::route('store.registration.index', [
             'family_name' => 'test',
-            'fuzzy'       => '1',
-            'page'        => '1',
+            'fuzzy' => '1',
+            'page' => '4',
         ]));
     }
 }
