@@ -1,36 +1,26 @@
-{{-- Requires: $registration, $vouchers, $vouchers_amount, $errors --}}
+{{-- Requires: $registration, $vouchers, $vouchers_amount, $entitlement, $errors --}}
 <div class="col allocation">
     <div>
         <img src="{{ asset('store/assets/allocation-light.svg') }}">
         <h2 id="allocate-vouchers">Allocate Vouchers</h2>
     </div>
 
-    {{-- Range entry --}}
-    <form method="POST" action="{{ route('store.registration.vouchers.post', ['registration' => $registration->id]) }}">
-        @csrf
-        <div class="alongside-container">
-            <label>First voucher
-                <input id="first-voucher" name="start" type="text" autofocus class="uppercase" autocomplete="off">
-            </label>
-            <label>Last voucher
-                <input id="last-voucher" name="end" type="text" class="uppercase" autocomplete="off">
-            </label>
-            <button id="range-add" class="add-button" type="submit" name="range-add">
-                <i class="fa fa-plus" aria-hidden="true"></i>
-            </button>
-        </div>
-    </form>
-
-    <p class="center no-margin">OR</p>
-
-    {{-- Single entry --}}
+    {{-- Quantity entry --}}
     <form method="POST" action="{{ route('store.registration.vouchers.post', ['registration' => $registration->id]) }}">
         @csrf
         <div class="single-container">
-            <label for="single-voucher">Add individual vouchers
-                <input id="single-voucher" name="start" type="text" class="uppercase" autocomplete="off">
+            <label for="voucher-quantity">Number of vouchers
+                <input
+                    id="voucher-quantity"
+                    name="voucher-quantity"
+                    type="number"
+                    min="1"
+                    max="{{ config('arc.bundle_max_voucher_append') }}"
+                    value="{{ $entitlement }}"
+                    autocomplete="off"
+                >
             </label>
-            <button id="single-add" class="add-button" type="submit" name="add-button">
+            <button id="quantity-add" class="add-button" type="submit" name="quantity-add">
                 <i class="fa fa-plus" aria-hidden="true"></i>
             </button>
         </div>
@@ -48,6 +38,7 @@
             <span class="emphasised-section">Vouchers added</span>
             <span class="number-circle">{{ $vouchers_amount }}</span>
         </div>
+
         <div @class(['collapsed' => $vouchers_amount === 0])>
             <form
                 id="unbundle-all"
@@ -108,40 +99,14 @@
                 $('#vouchers-total').addClass('pulse');
             }
 
-            var delay = 200;
-            var firstVoucher = $('#first-voucher');
-            var lastVoucher = $('#last-voucher');
-            var singleVoucher = $('#single-voucher');
-
-            firstVoucher.keypress(function (e) {
+            $('#voucher-quantity').keypress(function (e) {
                 if (e.keyCode !== 13) return;
                 e.preventDefault();
                 window.setTimeout(function () {
-                    if (firstVoucher.val() !== '') lastVoucher.focus();
-                }, delay);
-            });
-
-            lastVoucher.keypress(function (e) {
-                if (e.keyCode !== 13) return;
-                e.preventDefault();
-                window.setTimeout(function () {
-                    if (firstVoucher.val() === '') {
-                        firstVoucher.focus();
-                        return;
-                    }
-                    if (lastVoucher.val() !== '') {
-                        $('#range-add').trigger('click');
-                    }
-                }, delay);
-            });
-
-            singleVoucher.keypress(function (e) {
-                if (e.keyCode !== 13) return;
-                e.preventDefault();
-                window.setTimeout(function () {
-                    $('#single-add').trigger('click');
-                }, delay);
+                    $('#quantity-add').trigger('click');
+                }, 200);
             });
         });
     </script>
 @endpushonce
+

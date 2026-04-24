@@ -38,7 +38,7 @@ Route::get('/', static function () {
 })->name('store.base');
 
 // Authenticated routes
-Route::middleware('auth:store')->group(function () {
+Route::middleware('auth:store')->group(function (): void {
 
     Route::post('logout', [LoginController::class, 'logout'])
         ->name('store.logout');
@@ -89,7 +89,7 @@ Route::middleware('auth:store')->group(function () {
             ->name('store.registration.print')
             ->whereNumber('registration');
 
-        Route::put('/registrations/{registration}/vouchers', [BundleController::class, 'update'])
+        Route::put('/registrations/{registration}/vouchers', [BundleController::class, 'pickup'])
             ->name('store.registration.vouchers.put')
             ->whereNumber('registration');
 
@@ -117,6 +117,13 @@ Route::middleware('auth:store')->group(function () {
 
         Route::post('/registrations/{registration}/vouchers', [BundleController::class, 'addVouchersToCurrentBundle'])
             ->name('store.registration.vouchers.post')
+            ->whereNumber('registration');
+
+        Route::put(
+            '/registrations/{registration}/vouchers/transitions/collection',
+            [BundleController::class, 'collectBundle']
+        )
+            ->name('store.registration.vouchers.transitions.collect')
             ->whereNumber('registration');
     });
 

@@ -15,12 +15,12 @@ use RuntimeException;
 use Throwable;
 
 /**
- * @property int            $entitlement
- * @property Registration   $registration
- * @property Carer          $collectingCarer
- * @property Centre         $disbursingCentre
- * @property User           $disbursingUser
- * @property Carbon|null    $disbursed_at
+ * @property int $entitlement
+ * @property Registration $registration
+ * @property Carer $collectingCarer
+ * @property Centre $disbursingCentre
+ * @property User $disbursingUser
+ * @property Carbon|null $disbursed_at
  */
 class Bundle extends Model
 {
@@ -34,8 +34,8 @@ class Bundle extends Model
     ];
 
     protected $casts = [
-        'created_at'   => 'datetime',
-        'updated_at'   => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
         'disbursed_at' => 'datetime',
     ];
 
@@ -75,7 +75,7 @@ class Bundle extends Model
                 $voucher->bundle !== null && $bundle !== null => $errors['bundled'][] = $voucher,
 
                 // State machine forbids collecting (expired, void, recorded, payment_pending, paid).
-                !$voucher->transitionAllowed('collect')  => $errors['used'][] = $voucher->code,
+                !$voucher->transitionAllowed('collect') => $errors['used'][] = $voucher->code,
 
                 // All clear — reassign.
                 default => $voucher->bundle()->associate($bundle)->save(),

@@ -1,8 +1,8 @@
 {{-- Requires: $programme, $registration, $vouchers_amount, $carers, $centre --}}
 <div id="collection" class="col collection-section">
     <div>
-        <img src="{{ asset('store/assets/collection-light.svg') }}">
-        <h2>Voucher Pick Up</h2>
+        <i class="fa fa-shopping-basket fa-3x" style="margin: 0 0.5rem;" ></i>
+        <h2>Request Payment</h2>
     </div>
 
     <div>
@@ -11,7 +11,7 @@
 
     <form
         method="POST"
-        action="{{ route('store.registration.vouchers.put', ['registration' => $registration->id]) }}"
+        action="{{ route('store.registration.vouchers.transitions.collect', ['registration' => $registration->id]) }}"
     >
         @method('PUT')
         @csrf
@@ -19,7 +19,7 @@
             <div>
                 <i class="fa fa-user"></i>
                 <div>
-                    <label for="collected-by">Collected by:</label>
+                    <label for="collected-by">Transact with:</label>
                     <select id="collected-by" name="collected_by">
                         @foreach($carers as $carer)
                             <option value="{{ $carer->id }}">{{ $carer->name }}</option>
@@ -31,7 +31,7 @@
             <div>
                 <i class="fa fa-calendar"></i>
                 <div>
-                    <label for="collected-on">Collected on:</label>
+                    <label for="collected-on">Transact on:</label>
                     <div id="dateError" style="display:none;"></div>
                     <input
                         id="collected-on"
@@ -45,13 +45,29 @@
             <div>
                 <i class="fa fa-home"></i>
                 <div>
-                    <label for="collected-at">Collected at: {{ $centre->name }}</label>
+                    <label for="collected-at">Transact at: {{ $centre->name }}</label>
                     <input type="hidden" id="collected-at" name="collected_at" value="{{ $centre->id }}">
                 </div>
             </div>
 
+            <div>
+                <i class="fa fa-shopping-cart"></i>
+                <div>
+                    <label for="collected-as">Transact as:</label>
+                    <select id="collected-as" name="trader_id">
+                        @foreach($centre->markets as $market)
+                            <optgroup label="{{ $market->name }}">
+                                @foreach($market->traders as $trader)
+                                    <option value="{{ $trader->id }}">{{ $trader->name }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
             <button id="collection-button" class="long-button submit" type="submit" @disabled($vouchers_amount === 0)>
-                Confirm pick up
+                Confirm Transaction
             </button>
         </div>
     </form>
