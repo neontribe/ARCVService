@@ -19,7 +19,7 @@ class SweepAndSubmitCollectingCentres extends Command
             return $q->whereNotNull('centre_id');
         })->count();
 
-        Log::info(sprintf('SweepAndSubmit command Found %d traders in internal markets', $count));
+        Log::info(sprintf('[SweepAndSubmit] Found %d traders in internal markets', $count));
 
         Trader::whereHas('market', static function ($q) {
             return $q->whereNotNull('centre_id');
