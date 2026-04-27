@@ -70,7 +70,7 @@ Do the steps below:
 ## Resources
 1. [Laravel Homestead official documentation](https://laravel.com/docs/6.x/homestead)
 
-## QUEUES and Supervisor
+## Queues and Supervisor
 
 This application relies on a queue to run a number of tasks.
 The queue workers are kep alive by supervisor

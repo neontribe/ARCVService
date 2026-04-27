@@ -11,7 +11,7 @@ The service, market and store can be deployed, run locally for training/testing 
 
 1. Clone the repo
 2. Create a database and user (homestead, sqlite or mysql)
-3. If not using [Homestead](https://laravel.com/docs/11.x/homestead) or Valet - you will need to configure permissions on `storage` and `bootstrap/cache`. See [Laravel 11.x Installation](https://laravel.com/docs/11.x) for more info.
+3. If not using [Homestead](https://laravel.com/docs/11.x/homestead) or Valet - you will need to configure permissions on `storage` and `bootstrap/cache`. See [Laravel 12.x Installation](https://laravel.com/docs/12.x) for more info.
 4. Copy `.env.example` to `.env` and edit to local settings
 5. `composer install`
 6. `php artisan key:generate`
