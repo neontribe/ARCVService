@@ -1362,9 +1362,8 @@ VOUCHER PAGES
 }
 
 .pick-up input {
-    margin-top: 0.5rem;
     border: 1px solid #a6a6a6;
-    padding: 0.5rem;
+    padding: 0.8rem 0.5rem;
     font-family: Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 

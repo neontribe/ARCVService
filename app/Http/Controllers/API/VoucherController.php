@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ApiTransitionVoucherRequest;
-use App\Services\TransitionProcessor;
+use App\Services\TransitionProcessor\TransitionProcessor;
 use App\Trader;
 use App\Voucher;
 use Illuminate\Http\JsonResponse;
@@ -12,32 +12,29 @@ use Illuminate\Http\JsonResponse;
 class VoucherController extends Controller
 {
     /**
-     * Legacy transition route for older clients
+     * Legacy transition route for older clients.
      * route POST api/vouchers
-     *
-     * @param ApiTransitionVoucherRequest $request
-     * @return JsonResponse
      */
     public function legacyTransition(ApiTransitionVoucherRequest $request): JsonResponse
     {
-        // get our trader
         $trader = Trader::findOrFail($request->input('trader_id'));
 
-        //create unique, cleaned vouchers
-        $voucherCodes = array_unique(Voucher::cleanCodes($request->input('vouchers')));
+        $submittedCodes = array_unique(Voucher::cleanCodes($request->input('vouchers')));
+
+        $query = Voucher::whereIn('code', $submittedCodes);
+        $foundCodes = $query->pluck('code')->all();
+        $invalidCodes = array_values(array_diff($submittedCodes, $foundCodes));
 
         $processor = new TransitionProcessor($trader, $request->input('transition'));
 
-        $processor->handle($voucherCodes);
+        $response = $processor->handle($query);
+        $response->addInvalid($invalidCodes);
 
-        return response()->json($processor->constructResponseMessage());
+        return response()->json($response->constructResponseMessage());
     }
 
     /**
      * Display the specified resource.
-     *
-     * @param string $code
-     * @return JsonResponse
      */
     public function show(string $code): JsonResponse
     {

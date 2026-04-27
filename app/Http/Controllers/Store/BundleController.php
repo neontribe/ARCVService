@@ -8,10 +8,10 @@ use App\Centre;
 use App\Family;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAppendBundleRequest;
-use App\Http\Requests\StoreTransitionBundleRequest;
 use App\Http\Requests\StorePickupBundleRequest;
+use App\Http\Requests\StoreTransitionBundleRequest;
 use App\Registration;
-use App\Services\TransitionProcessor;
+use App\Services\TransitionProcessor\TransitionProcessor;
 use App\Trader;
 use App\Voucher;
 use Illuminate\Contracts\View\View;
@@ -138,12 +138,12 @@ class BundleController extends Controller
                     throw new RuntimeException('disbursal errors');
                 }
 
-                $trader = Trader::findorFail($request->input('trader_id'));
+                $trader = Trader::findOrFail($request->input('trader_id'));
                 $processor = new TransitionProcessor($trader, 'collect');
-                $processor->handle($bundle->vouchers);
+                $response = $processor->handle($bundle->vouchers());
 
-                if ($processor->hasFailures()) {
-                    $errors['transition'] = $processor->getFailureCodes();
+                if ($response->hasFailures()) {
+                    $errors['transition'] = $response->getFailureCodes();
                     throw new RuntimeException('transition errors');
                 }
             });
