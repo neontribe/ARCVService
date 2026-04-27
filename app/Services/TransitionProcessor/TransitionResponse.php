@@ -15,6 +15,16 @@ class TransitionResponse
      */
     private array $vouchersForPayment = [];
 
+    public const BUCKETS = [
+        'success_add',
+        'success_reject',
+        'own_duplicate',
+        'other_duplicate',
+        'invalid',
+        'failed_reject',
+        'undelivered',
+    ];
+
     public function __construct()
     {
         $this->buckets = new MessageBag();
@@ -41,16 +51,6 @@ class TransitionResponse
     {
         $this->buckets->merge(['invalid' => $codes]);
     }
-
-    public const BUCKETS = [
-        'success_add',
-        'success_reject',
-        'own_duplicate',
-        'other_duplicate',
-        'invalid',
-        'failed_reject',
-        'undelivered',
-    ];
 
     public function recordPayment(int $voucherId): void
     {
