@@ -20,7 +20,7 @@ npm run prod
 # reduce the size of the vendor directory to things we need.
 rm -rf ./vendor
 
-composer install --no-dev --optimize-autoloader --prefer-dist
+composer install --optimize-autoloader --prefer-dist
 
 php artisan config:clear
 php artisan route:clear
@@ -29,8 +29,8 @@ php artisan view:clear
 SRCNAME=${PWD##*/}
 cd ..
 # pack it up without most of the dev extras
-rm -f ${SRCNAME}_${RELVER}.tgz
-tar -cvzf ${SRCNAME}_${RELVER}.tgz  \
+rm -f ${SRCNAME}_${RELVER}_staging.tgz
+tar -cvzf ${SRCNAME}_${RELVER}_staging.tgz  \
     --exclude="${SRCNAME}/.editorconfig" \
     --exclude="${SRCNAME}/.env" \
     --exclude="${SRCNAME}/.env.example" \
@@ -47,14 +47,12 @@ tar -cvzf ${SRCNAME}_${RELVER}.tgz  \
     --exclude="${SRCNAME}/docs" \
     --exclude="${SRCNAME}/node_modules" \
     --exclude="${SRCNAME}/storage" \
-    --exclude="${SRCNAME}/tests" \
     --exclude="${SRCNAME}/.phpstorm.meta.php" \
     --exclude="${SRCNAME}/_ide_helper.php" \
     --exclude="${SRCNAME}/_ide_helper_models.php" \
     --exclude="${SRCNAME}/composer.lock" \
     --exclude="${SRCNAME}/Dockerfile" \
     --exclude="${SRCNAME}/phpstan.neon" \
-    --exclude="${SRCNAME}/phpunit.xml" \
     --exclude="${SRCNAME}/README.md" \
     --exclude="${SRCNAME}/staging_rsa.enc" \
     --exclude="${SRCNAME}/package-lock.json" \
