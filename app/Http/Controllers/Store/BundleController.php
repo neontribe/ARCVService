@@ -60,6 +60,7 @@ class BundleController extends Controller
             'entitlement' => $valuation->getEntitlement(),
             'noticeReasons' => $valuation->getNoticeReasons(),
             'programme' => $user->centre->sponsor->programme,
+            'pool_size' => $registration->centre?->getPoolSize() ?? 0,
         ]);
     }
 
