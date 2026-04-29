@@ -1410,6 +1410,7 @@ ADD CHILD FORM PARTIAL
     display: flex;
     flex-wrap: wrap;
     margin: 1rem;
+    gap: 1rem;
 }
 
 .dob-input {
