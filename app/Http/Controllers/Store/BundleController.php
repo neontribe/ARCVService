@@ -75,7 +75,9 @@ class BundleController extends Controller
 
         if ($request->filled('voucher-quantity')) {
             try {
-                $voucherCodes = Voucher::claimFromPool((int)$request->input('voucher-quantity'))
+                $voucherCodes = $registration->centre->claimFromPool(
+                    (int)$request->input('voucher-quantity'),
+                )
                     ->pluck('code')
                     ->all();
             } catch (Throwable $e) {
