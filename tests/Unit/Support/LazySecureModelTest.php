@@ -11,7 +11,8 @@ use InvalidArgumentException;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use ParagonIE\CipherSweet\EncryptedRow;
-use PHPUnit\Framework\Attributes\Test;
+use ReflectionMethod;
+use ReflectionProperty;
 use Tests\Stubs\CachingTestSecureModel;
 use Tests\Stubs\TestSecureModel;
 use Tests\TestCase;
@@ -28,6 +29,8 @@ use Tests\TestCase;
  *   - Cache invalidation via flushSecretCache(), setRawAttributes(), refresh()
  *   - withoutSecrets() clone semantics
  *   - encryptedFields() result caching (via CachingTestSecureModel)
+ *   - save() dispatches hydrateUnmodifiedEncryptedFieldsBeforeSave()
+ *   - hydrateUnmodifiedEncryptedFieldsBeforeSave() prevents double-encryption
  */
 class LazySecureModelTest extends TestCase
 {
@@ -50,8 +53,7 @@ class LazySecureModelTest extends TestCase
 
     // ── getAttribute ─────────────────────────────────────────────────────────
 
-    #[Test]
-    public function get_attribute_wraps_an_encrypted_field_in_lazy_secure_value(): void
+    public function testGetAttributeWrapsAnEncryptedFieldInLazySecureValue(): void
     {
         $model = $this->modelWithAttributes(['secret_field' => 'ciphertext_123']);
 
@@ -60,8 +62,7 @@ class LazySecureModelTest extends TestCase
         $this->assertInstanceOf(LazySecureValue::class, $value);
     }
 
-    #[Test]
-    public function get_attribute_via_magic_property_also_returns_lazy_secure_value(): void
+    public function testGetAttributeViaMagicPropertyAlsoReturnsLazySecureValue(): void
     {
         $model = $this->modelWithAttributes(['secret_field' => 'ciphertext_123']);
 
@@ -69,16 +70,14 @@ class LazySecureModelTest extends TestCase
         $this->assertInstanceOf(LazySecureValue::class, $model->secret_field);
     }
 
-    #[Test]
-    public function get_attribute_returns_plain_value_for_a_non_encrypted_field(): void
+    public function testGetAttributeReturnsPlainValueForANonEncryptedField(): void
     {
         $model = $this->modelWithAttributes(['name' => 'Alice', 'secret_field' => 'enc']);
 
         $this->assertSame('Alice', $model->getAttribute('name'));
     }
 
-    #[Test]
-    public function get_attribute_returns_null_for_an_absent_non_encrypted_field(): void
+    public function testGetAttributeReturnsNullForAnAbsentNonEncryptedField(): void
     {
         $model = $this->modelWithAttributes([]);
 
@@ -87,13 +86,12 @@ class LazySecureModelTest extends TestCase
 
     // ── toArray ──────────────────────────────────────────────────────────────
 
-    #[Test]
-    public function to_array_excludes_all_encrypted_fields(): void
+    public function testToArrayExcludesAllEncryptedFields(): void
     {
         $model = $this->modelWithAttributes([
-            'id'             => 1,
-            'name'           => 'Bob',
-            'secret_field'   => 'enc_a',
+            'id' => 1,
+            'name' => 'Bob',
+            'secret_field' => 'enc_a',
             'another_secret' => 'enc_b',
         ]);
 
@@ -103,11 +101,10 @@ class LazySecureModelTest extends TestCase
         $this->assertArrayNotHasKey('another_secret', $array);
     }
 
-    #[Test]
-    public function to_array_retains_non_encrypted_fields(): void
+    public function testToArrayRetainsNonEncryptedFields(): void
     {
         $model = $this->modelWithAttributes([
-            'id'   => 42,
+            'id' => 42,
             'name' => 'Bob',
         ]);
 
@@ -117,8 +114,7 @@ class LazySecureModelTest extends TestCase
         $this->assertSame('Bob', $array['name']);
     }
 
-    #[Test]
-    public function to_array_does_not_expose_ciphertext_as_a_plain_string(): void
+    public function testToArrayDoesNotExposeCiphertextAsAPlainString(): void
     {
         $model = $this->modelWithAttributes([
             'secret_field' => 'super_sensitive_ciphertext',
@@ -129,12 +125,11 @@ class LazySecureModelTest extends TestCase
 
     // ── __debugInfo ──────────────────────────────────────────────────────────
 
-    #[Test]
-    public function debug_info_omits_encrypted_field_values(): void
+    public function testDebugInfoOmitsEncryptedFieldValues(): void
     {
         $model = $this->modelWithAttributes([
-            'id'           => 5,
-            'name'         => 'Carol',
+            'id' => 5,
+            'name' => 'Carol',
             'secret_field' => 'ciphertext_do_not_leak',
         ]);
 
@@ -144,8 +139,7 @@ class LazySecureModelTest extends TestCase
         $this->assertStringNotContainsString('ciphertext_do_not_leak', serialize($info));
     }
 
-    #[Test]
-    public function debug_info_lists_encrypted_field_names_as_metadata(): void
+    public function testDebugInfoListsEncryptedFieldNamesAsMetadata(): void
     {
         $model = $this->modelWithAttributes(['id' => 5]);
 
@@ -155,8 +149,7 @@ class LazySecureModelTest extends TestCase
         $this->assertContains('another_secret', $info['hidden_encrypted_fields']);
     }
 
-    #[Test]
-    public function debug_info_exposes_the_model_class_and_primary_key(): void
+    public function testDebugInfoExposesTheModelClassAndPrimaryKey(): void
     {
         $model = $this->modelWithAttributes(['id' => 99]);
 
@@ -168,8 +161,7 @@ class LazySecureModelTest extends TestCase
 
     // ── isEncryptedField ─────────────────────────────────────────────────────
 
-    #[Test]
-    public function is_encrypted_field_returns_true_for_a_configured_encrypted_field(): void
+    public function testIsEncryptedFieldReturnsTrueForAConfiguredEncryptedField(): void
     {
         $model = new TestSecureModel();
 
@@ -177,8 +169,7 @@ class LazySecureModelTest extends TestCase
         $this->assertTrue($model->isEncryptedField('another_secret'));
     }
 
-    #[Test]
-    public function is_encrypted_field_returns_false_for_a_plain_field(): void
+    public function testIsEncryptedFieldReturnsFalseForAPlainField(): void
     {
         $model = new TestSecureModel();
 
@@ -189,8 +180,7 @@ class LazySecureModelTest extends TestCase
 
     // ── secret() ─────────────────────────────────────────────────────────────
 
-    #[Test]
-    public function secret_returns_a_lazy_secure_value_for_an_encrypted_field(): void
+    public function testSecretReturnsALazySecureValueForAnEncryptedField(): void
     {
         $model = $this->modelWithAttributes(['secret_field' => 'enc']);
 
@@ -199,8 +189,7 @@ class LazySecureModelTest extends TestCase
         $this->assertInstanceOf(LazySecureValue::class, $wrapper);
     }
 
-    #[Test]
-    public function secret_throws_invalid_argument_exception_for_a_non_encrypted_field(): void
+    public function testSecretThrowsInvalidArgumentExceptionForANonEncryptedField(): void
     {
         $model = new TestSecureModel();
 
@@ -212,8 +201,7 @@ class LazySecureModelTest extends TestCase
 
     // ── hideEncryptedAttributes ───────────────────────────────────────────────
 
-    #[Test]
-    public function hide_encrypted_attributes_adds_encrypted_fields_to_the_hidden_list(): void
+    public function testHideEncryptedAttributesAddsEncryptedFieldsToTheHiddenList(): void
     {
         $model = new TestSecureModel();
         $model->hideEncryptedAttributes();
@@ -224,13 +212,12 @@ class LazySecureModelTest extends TestCase
         $this->assertContains('another_secret', $hidden);
     }
 
-    #[Test]
-    public function encrypted_fields_are_hidden_automatically_after_model_retrieval(): void
+    public function testEncryptedFieldsAreHiddenAutomaticallyAfterModelRetrieval(): void
     {
         // newFromBuilder simulates Eloquent loading a model from the DB.
         $model = (new TestSecureModel())->newFromBuilder([
-            'id'             => 10,
-            'secret_field'   => 'enc_a',
+            'id' => 10,
+            'secret_field' => 'enc_a',
             'another_secret' => 'enc_b',
         ]);
 
@@ -240,16 +227,15 @@ class LazySecureModelTest extends TestCase
 
     // ── decryptEncryptedRowForLazyAccess ─────────────────────────────────────
 
-    #[Test]
-    public function decrypt_encrypted_row_returns_all_decrypted_field_values(): void
+    public function testDecryptEncryptedRowReturnsAllDecryptedFieldValues(): void
     {
         TestSecureModel::stubEncryptedRow($this->makeEncryptedRowMock([
-            'secret_field'   => 'plain_secret',
+            'secret_field' => 'plain_secret',
             'another_secret' => 'plain_other',
         ]));
 
         $model = $this->modelWithAttributes([
-            'secret_field'   => 'enc_a',
+            'secret_field' => 'enc_a',
             'another_secret' => 'enc_b',
         ]);
 
@@ -259,8 +245,7 @@ class LazySecureModelTest extends TestCase
         $this->assertSame('plain_other', $decrypted['another_secret']);
     }
 
-    #[Test]
-    public function decrypt_encrypted_row_uses_raw_original_attribute_values_not_accessors(): void
+    public function testDecryptEncryptedRowUsesRawOriginalAttributeValuesNotAccessors(): void
     {
         // The model uses getRawOriginal() so that encrypted field accessors
         // (which return LazySecureValue) do not interfere with the payload
@@ -279,7 +264,7 @@ class LazySecureModelTest extends TestCase
         TestSecureModel::stubEncryptedRow($encryptedRow);
 
         $model = $this->modelWithAttributes([
-            'secret_field'   => 'raw_ciphertext_a',
+            'secret_field' => 'raw_ciphertext_a',
             'another_secret' => 'raw_ciphertext_b',
         ]);
 
@@ -293,8 +278,7 @@ class LazySecureModelTest extends TestCase
         $this->assertSame('raw_ciphertext_b', $capturedPayload['another_secret']);
     }
 
-    #[Test]
-    public function decrypt_encrypted_row_caches_result_on_the_model_instance(): void
+    public function testDecryptEncryptedRowCachesResultOnTheModelInstance(): void
     {
         $encryptedRow = Mockery::mock(EncryptedRow::class);
         $encryptedRow->shouldReceive('setPermitEmpty')->andReturnSelf();
@@ -305,19 +289,18 @@ class LazySecureModelTest extends TestCase
         TestSecureModel::stubEncryptedRow($encryptedRow);
 
         $model = $this->modelWithAttributes([
-            'secret_field'   => 'enc_a',
+            'secret_field' => 'enc_a',
             'another_secret' => 'enc_b',
         ]);
 
-        $first  = $model->decryptEncryptedRowForLazyAccess();
+        $first = $model->decryptEncryptedRowForLazyAccess();
         $second = $model->decryptEncryptedRowForLazyAccess();
 
         $this->assertSame($first, $second, 'Subsequent calls must return the cached result.');
         // Mockery verifies decryptRow was called exactly once in tearDown.
     }
 
-    #[Test]
-    public function decrypt_encrypted_row_falls_back_to_attributes_when_original_is_unpopulated(): void
+    public function testDecryptEncryptedRowFallsBackToAttributesWhenOriginalIsUnpopulated(): void
     {
         // When a model is constructed without sync:true on setRawAttributes,
         // getOriginal() may be empty.  The implementation falls back to getAttributes().
@@ -337,7 +320,7 @@ class LazySecureModelTest extends TestCase
         // sync:false — original is NOT populated, only attributes.
         $model = new TestSecureModel();
         $model->setRawAttributes([
-            'secret_field'   => 'attr_only_ciphertext',
+            'secret_field' => 'attr_only_ciphertext',
             'another_secret' => 'attr_only_other',
         ], sync: false);
 
@@ -352,8 +335,7 @@ class LazySecureModelTest extends TestCase
 
     // ── flushSecretCache ──────────────────────────────────────────────────────
 
-    #[Test]
-    public function flush_secret_cache_forces_re_decryption_on_next_access(): void
+    public function testFlushSecretCacheForcesReDecryptionOnNextAccess(): void
     {
         $encryptedRow = Mockery::mock(EncryptedRow::class);
         $encryptedRow->shouldReceive('setPermitEmpty')->andReturnSelf();
@@ -364,7 +346,7 @@ class LazySecureModelTest extends TestCase
         TestSecureModel::stubEncryptedRow($encryptedRow);
 
         $model = $this->modelWithAttributes([
-            'secret_field'   => 'enc_a',
+            'secret_field' => 'enc_a',
             'another_secret' => 'enc_b',
         ]);
 
@@ -375,11 +357,11 @@ class LazySecureModelTest extends TestCase
         // Mockery verifies decryptRow was called exactly twice.
     }
 
-    #[Test]
-    public function flush_secret_cache_sets_the_internal_cache_to_null(): void
+    public function testFlushSecretCacheSetsTheInternalCacheToNull(): void
     {
         TestSecureModel::stubEncryptedRow($this->makeEncryptedRowMock([
-            'secret_field' => 'plain', 'another_secret' => 'other',
+            'secret_field' => 'plain',
+            'another_secret' => 'other',
         ]));
 
         $model = $this->modelWithAttributes(['secret_field' => 'enc', 'another_secret' => 'enc2']);
@@ -387,7 +369,7 @@ class LazySecureModelTest extends TestCase
 
         $model->flushSecretCache();
 
-        $cache = (new \ReflectionProperty(LazySecureModel::class, 'lazyDecryptedRowCache'))
+        $cache = (new ReflectionProperty(LazySecureModel::class, 'lazyDecryptedRowCache'))
             ->getValue($model);
 
         $this->assertNull($cache);
@@ -395,15 +377,14 @@ class LazySecureModelTest extends TestCase
 
     // ── setRawAttributes ─────────────────────────────────────────────────────
 
-    #[Test]
-    public function set_raw_attributes_flushes_the_secret_cache(): void
+    public function testSetRawAttributesFlushesTheSecretCache(): void
     {
         $encryptedRow = Mockery::mock(EncryptedRow::class);
         $encryptedRow->shouldReceive('setPermitEmpty')->andReturnSelf();
         $encryptedRow->shouldReceive('decryptRow')
             ->twice()
             ->andReturn(
-                ['secret_field' => 'first_plain',  'another_secret' => 'first_other'],
+                ['secret_field' => 'first_plain', 'another_secret' => 'first_other'],
                 ['secret_field' => 'second_plain', 'another_secret' => 'second_other'],
             );
 
@@ -429,8 +410,7 @@ class LazySecureModelTest extends TestCase
 
     // ── refresh ───────────────────────────────────────────────────────────────
 
-    #[Test]
-    public function refresh_flushes_the_secret_cache_before_reloading_from_db(): void
+    public function testRefreshFlushesTheSecretCacheBeforeReloadingFromDb(): void
     {
         // Strategy: use an anonymous subclass that tracks whether
         // flushSecretCache() was called via a public flag, while overriding
@@ -465,7 +445,7 @@ class LazySecureModelTest extends TestCase
         };
 
         TestSecureModel::stubEncryptedRow($this->makeEncryptedRowMock([
-            'secret_field'   => 'plain',
+            'secret_field' => 'plain',
             'another_secret' => 'other',
         ]));
 
@@ -487,7 +467,7 @@ class LazySecureModelTest extends TestCase
             . 'before the model reloads its attributes from the database.'
         );
 
-        $cache = (new \ReflectionProperty(LazySecureModel::class, 'lazyDecryptedRowCache'))
+        $cache = (new ReflectionProperty(LazySecureModel::class, 'lazyDecryptedRowCache'))
             ->getValue($model);
 
         $this->assertNull(
@@ -499,8 +479,7 @@ class LazySecureModelTest extends TestCase
 
     // ── withoutSecrets ────────────────────────────────────────────────────────
 
-    #[Test]
-    public function without_secrets_returns_a_different_object_instance(): void
+    public function testWithoutSecretsReturnsADifferentObjectInstance(): void
     {
         $model = $this->modelWithAttributes(['secret_field' => 'enc', 'another_secret' => 'enc2']);
 
@@ -509,11 +488,11 @@ class LazySecureModelTest extends TestCase
         $this->assertNotSame($model, $clone);
     }
 
-    #[Test]
-    public function without_secrets_returns_a_clone_with_the_decrypt_cache_flushed(): void
+    public function testWithoutSecretsReturnsACloneWithTheDecryptCacheFlushed(): void
     {
         TestSecureModel::stubEncryptedRow($this->makeEncryptedRowMock([
-            'secret_field' => 'plain', 'another_secret' => 'other',
+            'secret_field' => 'plain',
+            'another_secret' => 'other',
         ]));
 
         $model = $this->modelWithAttributes(['secret_field' => 'enc', 'another_secret' => 'enc2']);
@@ -521,7 +500,7 @@ class LazySecureModelTest extends TestCase
 
         $clone = $model->withoutSecrets();
 
-        $cloneCache = (new \ReflectionProperty(LazySecureModel::class, 'lazyDecryptedRowCache'))
+        $cloneCache = (new ReflectionProperty(LazySecureModel::class, 'lazyDecryptedRowCache'))
             ->getValue($clone);
 
         $this->assertNull(
@@ -531,11 +510,11 @@ class LazySecureModelTest extends TestCase
         );
     }
 
-    #[Test]
-    public function without_secrets_does_not_flush_the_original_model_cache(): void
+    public function testWithoutSecretsDoesNotFlushTheOriginalModelCache(): void
     {
         TestSecureModel::stubEncryptedRow($this->makeEncryptedRowMock([
-            'secret_field' => 'plain', 'another_secret' => 'other',
+            'secret_field' => 'plain',
+            'another_secret' => 'other',
         ]));
 
         $model = $this->modelWithAttributes(['secret_field' => 'enc', 'another_secret' => 'enc2']);
@@ -543,14 +522,13 @@ class LazySecureModelTest extends TestCase
 
         $model->withoutSecrets(); // must not affect original
 
-        $originalCache = (new \ReflectionProperty(LazySecureModel::class, 'lazyDecryptedRowCache'))
+        $originalCache = (new ReflectionProperty(LazySecureModel::class, 'lazyDecryptedRowCache'))
             ->getValue($model);
 
         $this->assertNotNull($originalCache, 'Original model cache must be unaffected by cloning.');
     }
 
-    #[Test]
-    public function without_secrets_makes_encrypted_fields_hidden_on_the_clone(): void
+    public function testWithoutSecretsMakesEncryptedFieldsHiddenOnTheClone(): void
     {
         $model = $this->modelWithAttributes(['secret_field' => 'enc', 'another_secret' => 'enc2']);
 
@@ -562,17 +540,18 @@ class LazySecureModelTest extends TestCase
 
     // ── authorizeReveal (default no-op) ───────────────────────────────────────
 
-    #[Test]
-    public function default_authorize_reveal_is_a_no_op_that_does_not_throw(): void
+    public function testDefaultAuthorizeRevealIsANoOpThatDoesNotThrow(): void
     {
         // The base LazySecureModel provides a no-op so subclasses can opt-in to
         // authorization rather than being forced to implement it immediately.
         $model = new class () extends LazySecureModel {
             protected $table = 'irrelevant';
+
             public function encryptedFields(): array
             {
                 return [];
             }
+
             public static function getCipherSweetEncryptedRow(): EncryptedRow
             {
                 return Mockery::mock(EncryptedRow::class);
@@ -580,7 +559,6 @@ class LazySecureModelTest extends TestCase
 
             public static function configureCipherSweet(EncryptedRow $encryptedRow): void
             {
-                // TODO: Implement configureCipherSweet() method.
             }
         };
 
@@ -592,8 +570,7 @@ class LazySecureModelTest extends TestCase
 
     // ── encryptedFields caching (via CachingTestSecureModel) ─────────────────
 
-    #[Test]
-    public function encrypted_fields_list_is_derived_from_the_encrypted_row_only_once(): void
+    public function testEncryptedFieldsListIsDerivedFromTheEncryptedRowOnlyOnce(): void
     {
         $encryptedRow = Mockery::mock(EncryptedRow::class);
         $encryptedRow->shouldReceive('listEncryptedFields')
@@ -604,15 +581,14 @@ class LazySecureModelTest extends TestCase
 
         $model = new CachingTestSecureModel();
 
-        $firstCall  = $model->encryptedFields();
+        $firstCall = $model->encryptedFields();
         $secondCall = $model->encryptedFields();
 
         $this->assertSame($firstCall, $secondCall);
         // Mockery verifies listEncryptedFields was called exactly once.
     }
 
-    #[Test]
-    public function encrypted_fields_cache_is_shared_across_model_instances_of_the_same_class(): void
+    public function testEncryptedFieldsCacheIsSharedAcrossModelInstancesOfTheSameClass(): void
     {
         $encryptedRow = Mockery::mock(EncryptedRow::class);
         $encryptedRow->shouldReceive('listEncryptedFields')
@@ -626,6 +602,225 @@ class LazySecureModelTest extends TestCase
 
         $modelA->encryptedFields();
         $modelB->encryptedFields(); // Must hit the class-level cache, not call listEncryptedFields again.
+    }
+
+    // ── save / hydrateUnmodifiedEncryptedFieldsBeforeSave ────────────────────
+    //
+    // These tests cover the fix for the "partial-update double-encrypt" bug:
+    // when only one CipherSweet-protected field is updated before save(), the
+    // other field's attribute still holds raw DB ciphertext.  Without the fix,
+    // CipherSweet's saving observer would receive that ciphertext as if it were
+    // plaintext and encrypt it a second time, corrupting the value permanently.
+    //
+    // hydrateUnmodifiedEncryptedFieldsBeforeSave() resolves this by decrypting
+    // any encrypted field that has NOT been dirtied, and writing its plaintext
+    // back into $this->attributes before the saving event fires.
+
+    public function testSaveCallsHydrateUnmodifiedFieldsBeforePassingControlToParent(): void
+    {
+        // Uses an anonymous spy to confirm the protected hydration method is
+        // invoked by save() before any Eloquent/DB work begins.
+        //
+        // The real LazySecureModel::save() body is reproduced here unchanged:
+        //   $this->hydrateUnmodifiedEncryptedFieldsBeforeSave(); return parent::save($options);
+        // We only intercept parent::save() itself to avoid requiring a live DB connection.
+        // This mirrors the strategy used in the refresh() spy test above.
+        $model = new class () extends TestSecureModel {
+            public bool $hydrateWasCalled = false;
+
+            protected function hydrateUnmodifiedEncryptedFieldsBeforeSave(): void
+            {
+                $this->hydrateWasCalled = true;
+            }
+
+            /** Skip Eloquent's DB-touching parent so the test needs no connection. */
+            public function save(array $options = []): bool
+            {
+                $this->hydrateUnmodifiedEncryptedFieldsBeforeSave();
+                return true;
+            }
+        };
+
+        $model->save();
+
+        $this->assertTrue(
+            $model->hydrateWasCalled,
+            'save() must call hydrateUnmodifiedEncryptedFieldsBeforeSave() so that '
+            . 'CipherSweet always receives plaintext for every configured encrypted field, '
+            . 'not raw DB ciphertext that would be double-encrypted.'
+        );
+    }
+
+    public function testHydrateIsANoOpForANewModel(): void
+    {
+        // A new, not-yet-persisted model ($this->exists === false) has no DB
+        // ciphertext in its attributes — there is nothing stale to replace.
+        // decryptRow() must not be called.
+        $encryptedRow = Mockery::mock(EncryptedRow::class);
+        $encryptedRow->shouldReceive('listEncryptedFields')
+            ->andReturn(['secret_field', 'another_secret']);
+        $encryptedRow->shouldNotReceive('decryptRow');
+
+        TestSecureModel::stubEncryptedRow($encryptedRow);
+
+        // new TestSecureModel() has exists === false by default.
+        $model = new TestSecureModel();
+
+        $this->callHydrate($model);
+
+        $this->addToAssertionCount(1); // Mockery asserts decryptRow was never called in tearDown.
+    }
+
+    public function testHydrateIsANoOpWhenAllEncryptedFieldsAreDirty(): void
+    {
+        // When every encrypted field has already been updated to new plaintext,
+        // there is no stale ciphertext to replace — decryption is unnecessary.
+        $encryptedRow = Mockery::mock(EncryptedRow::class);
+        $encryptedRow->shouldReceive('listEncryptedFields')
+            ->andReturn(['secret_field', 'another_secret']);
+        $encryptedRow->shouldNotReceive('decryptRow');
+
+        TestSecureModel::stubEncryptedRow($encryptedRow);
+
+        // Simulate a persisted model: attributes synced to original so isDirty() is false.
+        $model = $this->modelWithAttributes([
+            'secret_field' => 'nacl:enc_a',
+            'another_secret' => 'nacl:enc_b',
+        ]);
+        $model->exists = true;
+
+        // Mark both encrypted fields dirty with new plaintext values.
+        $model->secret_field = 'new_plain_a';
+        $model->another_secret = 'new_plain_b';
+
+        $this->callHydrate($model);
+
+        $this->addToAssertionCount(1); // Mockery asserts decryptRow was never called in tearDown.
+    }
+
+    public function testHydrateWritesDecryptedPlaintextForTheUnmodifiedFieldWhenOneFieldIsUpdated(): void
+    {
+        // Core regression test for the double-encrypt bug.
+        //
+        // Given: a persisted model with both encrypted fields intact in the DB.
+        // When:  only one field (secret_field) is updated before save().
+        // Then:  the unmodified field (another_secret) must be hydrated with its
+        //        decrypted plaintext so CipherSweet's saving observer encrypts
+        //        plaintext → ciphertext, not ciphertext → double-ciphertext.
+        TestSecureModel::stubEncryptedRow($this->makeEncryptedRowMock([
+            'secret_field' => 'plain_a',
+            'another_secret' => 'plain_b',
+        ]));
+
+        $model = $this->modelWithAttributes([
+            'secret_field' => 'nacl:enc_a',
+            'another_secret' => 'nacl:enc_b',
+        ]);
+        $model->exists = true;
+
+        // Update only secret_field; another_secret intentionally left as raw ciphertext.
+        $model->secret_field = 'new_plain_a';
+
+        $this->callHydrate($model);
+
+        $this->assertSame(
+            'plain_b',
+            $model->getAttributes()['another_secret'],
+            'The unmodified encrypted field must be overwritten with its decrypted plaintext '
+            . 'before CipherSweet runs, otherwise it will be double-encrypted and permanently corrupted.'
+        );
+    }
+
+    public function testHydrateDoesNotOverwriteTheExplicitlyUpdatedField(): void
+    {
+        // Hydration must only touch fields that were NOT explicitly updated.
+        // The field the caller dirtied must retain the new value they set.
+        TestSecureModel::stubEncryptedRow($this->makeEncryptedRowMock([
+            'secret_field' => 'old_plain_a',
+            'another_secret' => 'plain_b',
+        ]));
+
+        $model = $this->modelWithAttributes([
+            'secret_field' => 'nacl:enc_a',
+            'another_secret' => 'nacl:enc_b',
+        ]);
+        $model->exists = true;
+
+        $model->secret_field = 'new_plain_a';
+
+        $this->callHydrate($model);
+
+        $this->assertSame(
+            'new_plain_a',
+            $model->getAttributes()['secret_field'],
+            'The explicitly updated field must retain its new plaintext value; '
+            . 'hydration must not overwrite it with the previously-decrypted old value.'
+        );
+    }
+
+    public function testHydrateWritesDecryptedPlaintextForAllFieldsWhenNoneAreDirty(): void
+    {
+        // Edge case: the model is saved for a reason unrelated to encrypted fields
+        // (e.g., only a plain column changed).  Every encrypted field is still
+        // holding raw DB ciphertext and must be hydrated before CipherSweet runs.
+        TestSecureModel::stubEncryptedRow($this->makeEncryptedRowMock([
+            'secret_field' => 'plain_a',
+            'another_secret' => 'plain_b',
+        ]));
+
+        $model = $this->modelWithAttributes([
+            'secret_field' => 'nacl:enc_a',
+            'another_secret' => 'nacl:enc_b',
+        ]);
+        $model->exists = true;
+
+        // No encrypted field updated — both still hold raw DB ciphertext.
+        $this->callHydrate($model);
+
+        $attrs = $model->getAttributes();
+        $this->assertSame(
+            'plain_a',
+            $attrs['secret_field'],
+            'secret_field must be replaced with its decrypted plaintext.'
+        );
+        $this->assertSame(
+            'plain_b',
+            $attrs['another_secret'],
+            'another_secret must be replaced with its decrypted plaintext.'
+        );
+    }
+
+    public function testHydrateLeveragesTheExistingDecryptCacheAndDoesNotDecryptTwice(): void
+    {
+        // If a reveal() has already warmed the decrypt cache (e.g., the controller
+        // called ->reveal() to compare the current value before deciding to update),
+        // the subsequent hydrateUnmodifiedEncryptedFieldsBeforeSave() call must
+        // reuse that cache rather than triggering a second CipherSweet round-trip.
+        $encryptedRow = Mockery::mock(EncryptedRow::class);
+        $encryptedRow->shouldReceive('setPermitEmpty')->andReturnSelf();
+        $encryptedRow->shouldReceive('listEncryptedFields')
+            ->andReturn(['secret_field', 'another_secret']);
+        $encryptedRow->shouldReceive('decryptRow')
+            ->once() // Must be called exactly once across the reveal + save path.
+            ->andReturn(['secret_field' => 'plain_a', 'another_secret' => 'plain_b']);
+
+        TestSecureModel::stubEncryptedRow($encryptedRow);
+
+        $model = $this->modelWithAttributes([
+            'secret_field' => 'nacl:enc_a',
+            'another_secret' => 'nacl:enc_b',
+        ]);
+        $model->exists = true;
+
+        // Simulate a prior reveal() (e.g., the isDirty comparison in the controller).
+        $model->decryptEncryptedRowForLazyAccess();
+
+        $model->secret_field = 'new_plain_a';
+
+        $this->callHydrate($model);
+
+        // Mockery verifies decryptRow was called exactly once in tearDown.
+        $this->addToAssertionCount(1);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
@@ -657,5 +852,16 @@ class LazySecureModelTest extends TestCase
             ->andReturn($decryptedData);
 
         return $mock;
+    }
+
+    /**
+     * Invoke the protected hydrateUnmodifiedEncryptedFieldsBeforeSave() method
+     * via reflection so tests can exercise it directly without calling save()
+     * (which would require a live database connection).
+     */
+    private function callHydrate(LazySecureModel $model): void
+    {
+        (new ReflectionMethod(LazySecureModel::class, 'hydrateUnmodifiedEncryptedFieldsBeforeSave'))
+            ->invoke($model);
     }
 }

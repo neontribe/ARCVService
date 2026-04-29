@@ -181,4 +181,43 @@ abstract class LazySecureModel extends Model
         $this->flushSecretCache();
         return parent::refresh();
     }
+
+    public function save(array $options = []): bool
+    {
+        $this->hydrateUnmodifiedEncryptedFieldsBeforeSave();
+        return parent::save($options);
+    }
+
+    protected function hydrateUnmodifiedEncryptedFieldsBeforeSave(): void
+    {
+        // New (not-yet-persisted) models have no ciphertext to guard against.
+        if (!$this->exists) {
+            return;
+        }
+
+        $encryptedFields = $this->encryptedFields();
+
+        // If every encrypted field is dirty, the developer has already set plaintext
+        // on all of them — CipherSweet will receive plaintext for each. Nothing to do.
+        $unmodifiedFields = array_filter(
+            $encryptedFields,
+            function (string $field) {
+                return !$this->isDirty($field);
+            }
+        );
+
+        if (empty($unmodifiedFields)) {
+            return;
+        }
+
+        // Decrypt the full row once (result is cached on the instance).
+        $decrypted = $this->decryptEncryptedRowForLazyAccess();
+
+        foreach ($unmodifiedFields as $field) {
+            // Write plaintext directly into attributes, bypassing getAttribute()
+            // so CipherSweet's observer sees plaintext, not ciphertext.
+            $this->attributes[$field] = $decrypted[$field] ?? null;
+        }
+    }
+
 }
