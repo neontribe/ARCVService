@@ -78,4 +78,15 @@ class StoreUpdateRegistrationRequest extends FormRequest
             ],
         ];
     }
+
+    /**
+     * Get custom attribute names for validator error messages.
+     */
+    public function attributes(): array
+    {
+        return [
+            'pri_carer_email' => 'email',
+            'pri_carer_telno' => 'telephone number',
+        ];
+    }
 }
