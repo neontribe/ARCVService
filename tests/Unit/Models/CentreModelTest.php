@@ -147,14 +147,14 @@ class CentreModelTest extends TestCase
         $this->assertCount(0, $centre->availableVouchers()->get());
     }
 
-    public function testAvailableVouchersOnlyIncludesPrintedVouchers(): void
+    public function testAvailableVouchersOnlyIncludesDispatchedVouchers(): void
     {
         $centre = factory(Centre::class)->create();
         $delivery = factory(Delivery::class)->create(['centre_id' => $centre->id]);
 
-        factory(Voucher::class, 3)->state('printed')->create(['delivery_id' => $delivery->id]);
-        // A dispatched voucher is no longer 'printed' — should be excluded.
-        factory(Voucher::class)->state('dispatched')->create(['delivery_id' => $delivery->id]);
+        factory(Voucher::class, 3)->state('dispatched')->create(['delivery_id' => $delivery->id]);
+        // A recorded voucher has moved past dispatched — should be excluded.
+        factory(Voucher::class)->state('recorded')->create(['delivery_id' => $delivery->id]);
 
         $this->assertCount(3, $centre->availableVouchers()->get());
     }
@@ -164,9 +164,9 @@ class CentreModelTest extends TestCase
         $centre = factory(Centre::class)->create();
         $delivery = factory(Delivery::class)->create(['centre_id' => $centre->id]);
 
-        factory(Voucher::class, 2)->state('printed')->create(['delivery_id' => $delivery->id]);
-        // A printed voucher already assigned to a bundle should be excluded.
-        factory(Voucher::class)->state('printed')->create([
+        factory(Voucher::class, 2)->state('dispatched')->create(['delivery_id' => $delivery->id]);
+        // A dispatched voucher already assigned to a bundle should be excluded.
+        factory(Voucher::class)->state('dispatched')->create([
             'delivery_id' => $delivery->id,
             'bundle_id' => factory(Bundle::class)->create()->id,
         ]);
@@ -179,10 +179,10 @@ class CentreModelTest extends TestCase
         $centreA = factory(Centre::class)->create();
         $centreB = factory(Centre::class)->create();
 
-        factory(Voucher::class, 3)->state('printed')->create([
+        factory(Voucher::class, 3)->state('dispatched')->create([
             'delivery_id' => factory(Delivery::class)->create(['centre_id' => $centreA->id])->id,
         ]);
-        factory(Voucher::class, 2)->state('printed')->create([
+        factory(Voucher::class, 2)->state('dispatched')->create([
             'delivery_id' => factory(Delivery::class)->create(['centre_id' => $centreB->id])->id,
         ]);
 
@@ -203,7 +203,7 @@ class CentreModelTest extends TestCase
         $centre = factory(Centre::class)->create();
         $delivery = factory(Delivery::class)->create(['centre_id' => $centre->id]);
 
-        factory(Voucher::class, 4)->state('printed')->create(['delivery_id' => $delivery->id]);
+        factory(Voucher::class, 4)->state('dispatched')->create(['delivery_id' => $delivery->id]);
 
         $this->assertEquals(4, $centre->getPoolSize());
     }
@@ -213,8 +213,9 @@ class CentreModelTest extends TestCase
         $centre = factory(Centre::class)->create();
         $delivery = factory(Delivery::class)->create(['centre_id' => $centre->id]);
 
-        factory(Voucher::class, 2)->state('printed')->create(['delivery_id' => $delivery->id]);
-        factory(Voucher::class)->state('dispatched')->create(['delivery_id' => $delivery->id]);
+        factory(Voucher::class, 2)->state('dispatched')->create(['delivery_id' => $delivery->id]);
+        // A recorded voucher has moved past dispatched — should not count toward the pool.
+        factory(Voucher::class)->state('recorded')->create(['delivery_id' => $delivery->id]);
 
         $this->assertEquals(2, $centre->getPoolSize());
     }
@@ -225,7 +226,7 @@ class CentreModelTest extends TestCase
     {
         $centre = factory(Centre::class)->create();
         $delivery = factory(Delivery::class)->create(['centre_id' => $centre->id]);
-        factory(Voucher::class, 5)->state('printed')->create(['delivery_id' => $delivery->id]);
+        factory(Voucher::class, 5)->state('dispatched')->create(['delivery_id' => $delivery->id]);
 
         $claimed = $centre->claimFromPool(3);
 
@@ -238,7 +239,7 @@ class CentreModelTest extends TestCase
     {
         $centre = factory(Centre::class)->create();
         $delivery = factory(Delivery::class)->create(['centre_id' => $centre->id]);
-        factory(Voucher::class, 2)->state('printed')->create(['delivery_id' => $delivery->id]);
+        factory(Voucher::class, 2)->state('dispatched')->create(['delivery_id' => $delivery->id]);
 
         $this->expectException(RuntimeException::class);
         $centre->claimFromPool(5);
@@ -265,10 +266,10 @@ class CentreModelTest extends TestCase
             'dispatched_at' => now(),
         ]);
 
-        $olderVouchers = factory(Voucher::class, 2)->state('printed')->create([
+        $olderVouchers = factory(Voucher::class, 2)->state('dispatched')->create([
             'delivery_id' => $olderDelivery->id,
         ]);
-        factory(Voucher::class, 2)->state('printed')->create([
+        factory(Voucher::class, 2)->state('dispatched')->create([
             'delivery_id' => $newerDelivery->id,
         ]);
 
@@ -284,10 +285,10 @@ class CentreModelTest extends TestCase
         $centreA = factory(Centre::class)->create();
         $centreB = factory(Centre::class)->create();
 
-        factory(Voucher::class, 3)->state('printed')->create([
+        factory(Voucher::class, 3)->state('dispatched')->create([
             'delivery_id' => factory(Delivery::class)->create(['centre_id' => $centreA->id])->id,
         ]);
-        $centreB_vouchers = factory(Voucher::class, 3)->state('printed')->create([
+        $centreB_vouchers = factory(Voucher::class, 3)->state('dispatched')->create([
             'delivery_id' => factory(Delivery::class)->create(['centre_id' => $centreB->id])->id,
         ]);
 

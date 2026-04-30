@@ -60,6 +60,7 @@ class CentreUsersSeeder extends Seeder
             ['', 'Southwark user', 'arc+swuser@neontribe.co.uk', 6],
             ['', 'Tower Hamlet SP user', 'arc+thuser@neontribe.co.uk', 10],
             ['', 'Lambeth SP user', 'arc+lambethuser@neontribe.co.uk', 11],
+            ['', 'Collecting user', 'arc+collectinguser@neontribe.co.uk', 'Collecting Centre'],
         ];
 
         foreach ($users as [$state, $name, $email, $centre]) {

@@ -130,7 +130,7 @@ class Centre extends Model
     public function availableVouchers(): HasManyThrough
     {
         return $this->hasManyThrough(Voucher::class, Delivery::class)
-            ->where('vouchers.currentstate', 'printed')
+            ->where('vouchers.currentstate', 'dispatched')
             ->whereNull('vouchers.bundle_id');
     }
 
