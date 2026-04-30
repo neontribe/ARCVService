@@ -2,13 +2,18 @@
 
 namespace Tests\Unit\Models;
 
+use App\Bundle;
 use App\Centre;
 use App\CentreUser;
+use App\Delivery;
 use App\Registration;
 use App\Sponsor;
+use App\Voucher;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
+use RuntimeException;
 use Tests\TestCase;
 
 class CentreModelTest extends TestCase
@@ -126,5 +131,171 @@ class CentreModelTest extends TestCase
     {
         $centre = factory(Centre::class)->create();
         $this->assertCount(0, $centre->markets);
+    }
+
+    // --- availableVouchers ---
+
+    public function testAvailableVouchersIsAHasManyThroughRelation(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $this->assertInstanceOf(HasManyThrough::class, $centre->availableVouchers());
+    }
+
+    public function testAvailableVouchersIsEmptyWithNoDeliveries(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $this->assertCount(0, $centre->availableVouchers()->get());
+    }
+
+    public function testAvailableVouchersOnlyIncludesPrintedVouchers(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $delivery = factory(Delivery::class)->create(['centre_id' => $centre->id]);
+
+        factory(Voucher::class, 3)->state('printed')->create(['delivery_id' => $delivery->id]);
+        // A dispatched voucher is no longer 'printed' — should be excluded.
+        factory(Voucher::class)->state('dispatched')->create(['delivery_id' => $delivery->id]);
+
+        $this->assertCount(3, $centre->availableVouchers()->get());
+    }
+
+    public function testAvailableVouchersExcludesBundledVouchers(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $delivery = factory(Delivery::class)->create(['centre_id' => $centre->id]);
+
+        factory(Voucher::class, 2)->state('printed')->create(['delivery_id' => $delivery->id]);
+        // A printed voucher already assigned to a bundle should be excluded.
+        factory(Voucher::class)->state('printed')->create([
+            'delivery_id' => $delivery->id,
+            'bundle_id' => factory(Bundle::class)->create()->id,
+        ]);
+
+        $this->assertCount(2, $centre->availableVouchers()->get());
+    }
+
+    public function testAvailableVouchersDoesNotLeakAcrossCentres(): void
+    {
+        $centreA = factory(Centre::class)->create();
+        $centreB = factory(Centre::class)->create();
+
+        factory(Voucher::class, 3)->state('printed')->create([
+            'delivery_id' => factory(Delivery::class)->create(['centre_id' => $centreA->id])->id,
+        ]);
+        factory(Voucher::class, 2)->state('printed')->create([
+            'delivery_id' => factory(Delivery::class)->create(['centre_id' => $centreB->id])->id,
+        ]);
+
+        $this->assertCount(3, $centreA->availableVouchers()->get());
+        $this->assertCount(2, $centreB->availableVouchers()->get());
+    }
+
+    // --- getPoolSize ---
+
+    public function testGetPoolSizeIsZeroWithNoDeliveries(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $this->assertEquals(0, $centre->getPoolSize());
+    }
+
+    public function testGetPoolSizeReflectsAvailableVoucherCount(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $delivery = factory(Delivery::class)->create(['centre_id' => $centre->id]);
+
+        factory(Voucher::class, 4)->state('printed')->create(['delivery_id' => $delivery->id]);
+
+        $this->assertEquals(4, $centre->getPoolSize());
+    }
+
+    public function testGetPoolSizeDoesNotCountIneligibleVouchers(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $delivery = factory(Delivery::class)->create(['centre_id' => $centre->id]);
+
+        factory(Voucher::class, 2)->state('printed')->create(['delivery_id' => $delivery->id]);
+        factory(Voucher::class)->state('dispatched')->create(['delivery_id' => $delivery->id]);
+
+        $this->assertEquals(2, $centre->getPoolSize());
+    }
+
+    // --- claimFromPool ---
+
+    public function testClaimFromPoolReturnsTheRequestedNumberOfVouchers(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $delivery = factory(Delivery::class)->create(['centre_id' => $centre->id]);
+        factory(Voucher::class, 5)->state('printed')->create(['delivery_id' => $delivery->id]);
+
+        $claimed = $centre->claimFromPool(3);
+
+        $this->assertInstanceOf(Collection::class, $claimed);
+        $this->assertCount(3, $claimed);
+        $this->assertInstanceOf(Voucher::class, $claimed->first());
+    }
+
+    public function testClaimFromPoolThrowsWhenPoolHasInsufficientVouchers(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $delivery = factory(Delivery::class)->create(['centre_id' => $centre->id]);
+        factory(Voucher::class, 2)->state('printed')->create(['delivery_id' => $delivery->id]);
+
+        $this->expectException(RuntimeException::class);
+        $centre->claimFromPool(5);
+    }
+
+    public function testClaimFromPoolThrowsWhenPoolIsEmpty(): void
+    {
+        $centre = factory(Centre::class)->create();
+
+        $this->expectException(RuntimeException::class);
+        $centre->claimFromPool(1);
+    }
+
+    public function testClaimFromPoolDrawsFromOldestDeliveryFirst(): void
+    {
+        $centre = factory(Centre::class)->create();
+
+        $olderDelivery = factory(Delivery::class)->create([
+            'centre_id' => $centre->id,
+            'dispatched_at' => now()->subMonth(),
+        ]);
+        $newerDelivery = factory(Delivery::class)->create([
+            'centre_id' => $centre->id,
+            'dispatched_at' => now(),
+        ]);
+
+        $olderVouchers = factory(Voucher::class, 2)->state('printed')->create([
+            'delivery_id' => $olderDelivery->id,
+        ]);
+        factory(Voucher::class, 2)->state('printed')->create([
+            'delivery_id' => $newerDelivery->id,
+        ]);
+
+        $claimed = $centre->claimFromPool(2);
+        $claimedIds = $claimed->pluck('id');
+
+        $this->assertTrue($claimedIds->contains($olderVouchers[0]->id));
+        $this->assertTrue($claimedIds->contains($olderVouchers[1]->id));
+    }
+
+    public function testClaimFromPoolDoesNotReturnVouchersFromOtherCentres(): void
+    {
+        $centreA = factory(Centre::class)->create();
+        $centreB = factory(Centre::class)->create();
+
+        factory(Voucher::class, 3)->state('printed')->create([
+            'delivery_id' => factory(Delivery::class)->create(['centre_id' => $centreA->id])->id,
+        ]);
+        $centreB_vouchers = factory(Voucher::class, 3)->state('printed')->create([
+            'delivery_id' => factory(Delivery::class)->create(['centre_id' => $centreB->id])->id,
+        ]);
+
+        $claimed = $centreA->claimFromPool(3);
+
+        $centreB_ids = $centreB_vouchers->pluck('id');
+        $claimed->each(function ($v) use ($centreB_ids) {
+            return $this->assertFalse($centreB_ids->contains($v->id));
+        });
     }
 }

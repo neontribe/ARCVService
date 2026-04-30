@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Log;
+use Ramsey\Collection\Exception\CollectionException;
 use RuntimeException;
 use Throwable;
 
@@ -587,30 +588,5 @@ class Voucher extends Model
             $v["vouchere_states"] = $this->getVoucherStateHistory();
         }
         return $v;
-    }
-
-    /**
-     * Claim the first $quantity available (printed, unallocated) vouchers from the pool.
-     * Uses a pessimistic lock to prevent concurrent allocation of the same vouchers.
-     * @throws Throwable
-     */
-    public static function claimFromPool(int $quantity): Collection
-    {
-        return DB::transaction(static function () use ($quantity) {
-            $vouchers = self::where('currentstate', 'printed')
-                ->whereNull('bundle_id')
-                ->orderBy('id')
-                ->limit($quantity)
-                ->lockForUpdate()
-                ->get();
-
-            if ($vouchers->count() < $quantity) {
-                throw new RuntimeException(
-                    "Pool has {$vouchers->count()} vouchers available, {$quantity} requested."
-                );
-            }
-
-            return $vouchers;
-        });
     }
 }

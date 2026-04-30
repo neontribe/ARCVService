@@ -5,10 +5,15 @@ namespace App;
 use App\Observers\CentreObserver;
 use Eloquent;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\belongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Support\Facades\DB;
+use RuntimeException;
+use Throwable;
 
 /**
  * @mixin Eloquent
@@ -117,5 +122,47 @@ class Centre extends Model
     public function families(): HasMany
     {
         return $this->hasMany(Family::class, 'initial_centre_id');
+    }
+
+    /**
+     * Relationship for addressing vouchers that are assigned to this centre via deliveries.
+     */
+    public function availableVouchers(): HasManyThrough
+    {
+        return $this->hasManyThrough(Voucher::class, Delivery::class)
+            ->where('vouchers.currentstate', 'printed')
+            ->whereNull('vouchers.bundle_id');
+    }
+
+    /**
+     * How many vouchers do we have access to?
+     */
+    public function getPoolSize(): int
+    {
+        return $this->availableVouchers()->count();
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function claimFromPool(int $quantity): Collection
+    {
+        return DB::transaction(function () use ($quantity) {
+            $vouchers = $this->availableVouchers()
+                ->orderBy('deliveries.dispatched_at')
+                ->orderBy('vouchers.id')
+                ->select('vouchers.*')
+                ->limit($quantity)
+                ->lockForUpdate()
+                ->get();
+
+            if ($vouchers->count() < $quantity) {
+                throw new RuntimeException(
+                    "Pool has {$vouchers->count()} vouchers available, {$quantity} requested."
+                );
+            }
+
+            return $vouchers;
+        });
     }
 }
