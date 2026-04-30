@@ -20,7 +20,7 @@
                     autocomplete="off"
                 >
             </label>
-            <button id="quantity-add" class="add-button" type="submit" name="quantity-add" @disabled($pool_size ===0)>
+            <button id="quantity-add" class="add-button" type="submit" name="quantity-add" @disabled($pool_size === 0)>
                 <i class="fa fa-plus" aria-hidden="true"></i>
             </button>
         </div>
@@ -33,13 +33,13 @@
             <span >{{ $pool_size }}</span>
         </div>
     @else
-        @include('store.partials.errors', ['error_array' => ['There are no available vouchers, please contact Admin.']])
+        @include('store.partials.errors', ['error_array' => ['There are no more available vouchers; please contact Admin to get some more.']])
     @endif
 
     @includeWhen($errors->count() > 0, 'store.partials.errors', ['error_array' => $errors->all()])
     @includeWhen(Session::get('error_messages'), 'store.partials.errors', ['error_array' => Session::get('error_messages')])
 
-    <button id="collection-button" class="long-button" @disabled($vouchers_amount == 0)>
+    <button id="collection-button" class="long-button" @disabled($vouchers_amount === 0)>
         <i class="fa fa-ticket button-icon" aria-hidden="true"></i>Go to voucher redemption
     </button>
 
