@@ -38,7 +38,7 @@ class StoreNewRegistrationRequest extends FormRequest
                 Rule::in(array_merge(
                     [0, '0'],
                     array_keys(config('arc.ethnicity_desc'))
-                ))
+                )),
             ],
             'pri_carer_language' => [
                 'nullable',
@@ -74,6 +74,17 @@ class StoreNewRegistrationRequest extends FormRequest
                 'required',
                 Rule::in(config('arc.reg_eligibilities_nrpf')),
             ],
+        ];
+    }
+
+    /**
+     * Get custom attribute names for validator error messages.
+     */
+    public function attributes(): array
+    {
+        return [
+            'pri_carer_email' => 'email',
+            'pri_carer_telno' => 'telephone number',
         ];
     }
 }
