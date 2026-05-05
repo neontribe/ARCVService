@@ -4,16 +4,12 @@ namespace Tests\Unit\Controllers\Service\Admin;
 
 use App\AdminUser;
 use App\Http\Controllers\Service\Admin\PaymentsController;
+use App\Sponsor;
 use App\StateToken;
 use App\Trader;
-use App\VoucherState;
 use App\User;
 use App\Voucher;
-use App\Sponsor;
-use Carbon\Carbon;
-use Illuminate\Support\Collection;
-use Illuminate\View\View;
-use Auth;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\StoreTestCase;
 
@@ -25,33 +21,77 @@ class PaymentControllerTest extends StoreTestCase
     protected $trader;
     protected $vouchers;
 
-
     public function setUp(): void
     {
         parent::setUp();
-        // Create Admin
+
         $this->admin_user = factory(AdminUser::class)->create();
 
-        // Create a Trader
+        // Default trader for HTTP tests (show, update). Has no market intentionally —
+        // those tests don't call makePaymentDataStructure and don't need one.
         $this->trader = factory(Trader::class)->create();
     }
 
+    // =========================================================================
+    // Private helpers
+    // =========================================================================
+
+    /**
+     * Creates a StateToken with a known user, creates $count payment_pending
+     * vouchers via the factory state, associates them with the token, and
+     * returns the token loaded with all payment relations.
+     *
+     * Uses the 'withnullable' Trader state so that market and market.sponsor
+     * are populated — makePaymentDataStructure accesses both when building
+     * the marketName and area fields.
+     *
+     * Uses the 'payment_pending' Voucher factory state rather than manually
+     * chaining applyTransition() calls — the factory inserts VoucherState rows
+     * directly which is sufficient for data-structure tests that are not
+     * exercising the state machine itself.
+     */
+    private function createStateTokenWithPaymentPendingVouchers(int $count = 3): StateToken
+    {
+        $token = factory(StateToken::class)->create([
+            'user_id' => factory(User::class)->create()->id,
+        ]);
+
+        // withnullable creates a Market and picks/creates a Sponsor, giving us
+        // the full trader → market → sponsor chain that makePaymentDataStructure needs.
+        $trader = factory(Trader::class)->state('withnullable')->create();
+        $sponsor = factory(Sponsor::class)->create();
+
+        $vouchers = factory(Voucher::class, $count)->state('payment_pending')->create([
+            'sponsor_id' => $sponsor->id,
+            'trader_id' => $trader->id,
+        ]);
+
+        foreach ($vouchers as $k => $voucher) {
+            $voucher->code = 'DST' . str_pad($k, 4, '0', STR_PAD_LEFT);
+            $voucher->save();
+
+            $voucherState = $voucher->paymentPendedOn()->first();
+            $voucherState->state_token_id = $token->id;
+            $voucherState->save();
+        }
+
+        return StateToken::withPaymentRelations()->find($token->id);
+    }
+
+    // =========================================================================
+    // show — existing tests
+    // =========================================================================
 
     public function testItReturnsASpecificPaymentRequest(): void
     {
-        //Create a token to pass to the route
-        //Create some vouchers, give them a sponsor (as otherwise it might error)
-        // and progress them to payment_pending to get a UUID
-
         $token = factory(StateToken::class)->create();
         $s = factory(Sponsor::class)->create();
-        // Make a pile of vouchers that are payment_pending
+
         $this->vouchers = factory(Voucher::class, 5)->state('printed')->create();
         foreach ($this->vouchers as $k => $voucher) {
             $voucher->code = 'RVNT' . str_pad($k, 4, '0', STR_PAD_LEFT);
             $voucher->sponsor_id = $s->id;
             $voucher->trader_id = $this->trader->id;
-            // Progress to dispatched.
             $voucher->applyTransition('dispatch');
             $voucher->applyTransition('collect');
             $voucher->applyTransition('confirm');
@@ -62,10 +102,8 @@ class PaymentControllerTest extends StoreTestCase
             $voucherState->save();
             $voucher->save();
         }
-        $data = $token->uuid;
 
-        //pass the UUID to the route
-        $route = route('admin.payment-request.show', ['paymentUuid' => $data]);
+        $route = route('admin.payment-request.show', ['paymentUuid' => $token->uuid]);
 
         $this->actingAs($this->admin_user, 'admin')
             ->get($route)
@@ -74,25 +112,34 @@ class PaymentControllerTest extends StoreTestCase
         foreach ($this->vouchers as $voucher) {
             $this->see($voucher->code);
         }
-        //TODO also test that I cannot see a different UUID in here
     }
+
+    // =========================================================================
+    // show — new tests
+    // =========================================================================
+
+    public function testShowReturns404ForAnUnknownUuid(): void
+    {
+        $this->actingAs($this->admin_user, 'admin')
+            ->get(route('admin.payment-request.show', ['paymentUuid' => 'does-not-exist']))
+            ->assertResponseStatus(404);
+    }
+
+    // =========================================================================
+    // update — existing tests
+    // =========================================================================
 
     public function testItUpdatesASpecificPaymentRequest(): void
     {
-        //Create a token to pass to the route
-        //Create some vouchers, give them a sponsor (as otherwise it might error)
-        // and progress them to payment_pending to get a UUID
-
         $token = factory(StateToken::class)->create();
         $s = factory(Sponsor::class)->create();
         $u = factory(User::class)->create();
-        // Make a pile of vouchers that are payment_pending
+
         $this->vouchers = factory(Voucher::class, 5)->state('printed')->create();
         foreach ($this->vouchers as $k => $voucher) {
             $voucher->code = 'RVNT' . str_pad($k, 4, '0', STR_PAD_LEFT);
             $voucher->sponsor_id = $s->id;
             $voucher->trader_id = $this->trader->id;
-            // Progress to dispatched.
             $voucher->applyTransition('dispatch');
             $voucher->applyTransition('collect');
             $voucher->applyTransition('confirm');
@@ -105,10 +152,7 @@ class PaymentControllerTest extends StoreTestCase
             $voucher->save();
         }
 
-        $data = $token->uuid;
-
-        //pass the UUID to the route
-        $route = route('admin.payment-request.update', ['paymentUuid' => $data]);
+        $route = route('admin.payment-request.update', ['paymentUuid' => $token->uuid]);
 
         $this->actingAs($this->admin_user, 'admin')
             ->put($route)
@@ -116,5 +160,148 @@ class PaymentControllerTest extends StoreTestCase
             ->assertResponseStatus(200)
             ->seePageIs(route('admin.payments.index'))
             ->see('Vouchers Paid!');
+    }
+
+    // =========================================================================
+    // update — new tests
+    // =========================================================================
+
+    public function testUpdateReturns404ForAnUnknownUuid(): void
+    {
+        $this->actingAs($this->admin_user, 'admin')
+            ->put(route('admin.payment-request.update', ['paymentUuid' => 'does-not-exist']))
+            ->assertResponseStatus(404);
+    }
+
+    /**
+     * When the payout transition is denied (vouchers already reimbursed),
+     * the controller must NOT stamp admin_user_id on the StateToken and must
+     * redirect with errors rather than the success notification.
+     *
+     * Uses the 'reimbursed' Voucher factory state to avoid manually chaining
+     * all transitions — the factory inserts the required VoucherState history
+     * directly, including the confirm row that paymentPendedOn() finds.
+     */
+    public function testUpdateRedirectsWithErrorsAndDoesNotStampAdminUserIdWhenTransitionFails(): void
+    {
+        $token = factory(StateToken::class)->create();
+        $s = factory(Sponsor::class)->create();
+
+        // Vouchers already in 'reimbursed' state — payout will be denied.
+        $this->vouchers = factory(Voucher::class, 2)->state('reimbursed')->create([
+            'sponsor_id' => $s->id,
+            'trader_id' => $this->trader->id,
+        ]);
+
+        foreach ($this->vouchers as $k => $voucher) {
+            $voucher->code = 'FAIL' . str_pad($k, 4, '0', STR_PAD_LEFT);
+            $voucher->save();
+
+            // Associate the confirm VoucherState with the token so the
+            // whereHas query in update() can locate these vouchers.
+            $voucherState = $voucher->paymentPendedOn()->first();
+            $voucherState->state_token_id = $token->id;
+            $voucherState->save();
+        }
+
+        $route = route('admin.payment-request.update', ['paymentUuid' => $token->uuid]);
+
+        $this->actingAs($this->admin_user, 'admin')
+            ->put($route)
+            ->followRedirects()
+            ->assertResponseStatus(200)
+            ->seePageIs(route('admin.payments.index'));
+
+        $this->dontSee('Vouchers Paid!');
+
+        $this->assertDatabaseMissing('state_tokens', [
+            'id' => $token->id,
+            'admin_user_id' => $this->admin_user->id,
+        ]);
+    }
+
+    // =========================================================================
+    // makePaymentDataStructure — unit tests (direct static calls, no HTTP)
+    //
+    // These tests call the method directly to isolate its logic from the HTTP
+    // layer. They live here because the method is static on PaymentsController.
+    // If it is ever extracted to a dedicated presenter class, move them with it.
+    // =========================================================================
+
+    public function testMakePaymentDataStructureReturnsEmptyArrayForEmptyCollection(): void
+    {
+        $result = PaymentsController::makePaymentDataStructure(new Collection());
+
+        $this->assertSame([], $result);
+    }
+
+    public function testMakePaymentDataStructureKeysResultByTokenUuidWithCorrectShape(): void
+    {
+        $stateToken = $this->createStateTokenWithPaymentPendingVouchers(2);
+
+        $result = PaymentsController::makePaymentDataStructure(new Collection([$stateToken]));
+
+        $this->assertArrayHasKey($stateToken->uuid, $result);
+
+        $entry = $result[$stateToken->uuid];
+        $this->assertSame($stateToken->user->name, $entry['requestedBy']);
+        $this->assertSame(2, $entry['vouchersTotal']);
+        $this->assertNotEmpty($entry['traderName']);
+        $this->assertNotEmpty($entry['marketName']);
+        $this->assertNotEmpty($entry['area']);
+        $this->assertIsArray($entry['voucherAreas']);
+        $this->assertNotEmpty($entry['voucherAreas']);
+    }
+
+    public function testMakePaymentDataStructureVoucherAreasCountsVouchersBySponsorName(): void
+    {
+        $stateToken = $this->createStateTokenWithPaymentPendingVouchers(3);
+
+        $result = PaymentsController::makePaymentDataStructure(new Collection([$stateToken]));
+
+        $voucherAreas = $result[$stateToken->uuid]['voucherAreas'];
+
+        // All three vouchers share the same sponsor created in the helper,
+        // so there should be exactly one area key with a count of 3.
+        $this->assertCount(1, $voucherAreas);
+        $this->assertSame(3, array_values($voucherAreas)[0]);
+    }
+
+    public function testMakePaymentDataStructureSkipsTokenWhoseFirstVoucherHasNoTrader(): void
+    {
+        // A token with no linked voucher states has no trader on first() → null.
+        $token = factory(StateToken::class)->create([
+            'user_id' => factory(User::class)->create()->id,
+        ]);
+
+        $tokenWithNoStates = StateToken::withPaymentRelations()->find($token->id);
+
+        $result = PaymentsController::makePaymentDataStructure(new Collection([$tokenWithNoStates]));
+
+        $this->assertArrayNotHasKey($token->uuid, $result);
+    }
+
+    public function testMakePaymentDataStructureUsesSystemFallbackWhenUserIsNull(): void
+    {
+        // Token with null user_id — user relationship resolves to null.
+        // withnullable trader provides the market → sponsor chain the method needs.
+        $token = factory(StateToken::class)->create(['user_id' => null]);
+        $trader = factory(Trader::class)->state('withnullable')->create();
+        $sponsor = factory(Sponsor::class)->create();
+
+        $voucher = factory(Voucher::class)->state('payment_pending')->create([
+            'sponsor_id' => $sponsor->id,
+            'trader_id' => $trader->id,
+        ]);
+
+        $voucherState = $voucher->paymentPendedOn()->first();
+        $voucherState->state_token_id = $token->id;
+        $voucherState->save();
+
+        $loaded = StateToken::withPaymentRelations()->find($token->id);
+        $result = PaymentsController::makePaymentDataStructure(new Collection([$loaded]));
+
+        $this->assertArrayHasKey($token->uuid, $result);
+        $this->assertSame('System', $result[$token->uuid]['requestedBy']);
     }
 }

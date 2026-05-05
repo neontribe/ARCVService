@@ -26,8 +26,19 @@ class TransitionProcessor
      */
     private Carbon $collectDeliveryDate;
 
+    /**
+     * $trader is nullable because payout and reject are admin-driven operations
+     * that do not need a trader context:
+     *
+     *   - handlePayout preserves the voucher's existing trader_id unchanged.
+     *   - handleReject clears trader_id explicitly after the rollback transition.
+     *
+     * Transitions that DO require a trader (collect, confirm, and the default
+     * catchall) will throw if $trader is null — that is a programmer error and
+     * should surface immediately.
+     */
     public function __construct(
-        private readonly Trader $trader,
+        private readonly ?Trader $trader,
         private readonly string $transition,
         private readonly int $chunkSize = 500,
         private readonly bool $sendPaymentEmail = true
@@ -53,16 +64,16 @@ class TransitionProcessor
         $lock = (new LockFactory(new SemaphoreStore()))->createLock('transition');
 
         Log::debug(sprintf(
-            'Acquiring lock for transition [%s] on trader %d, %d vouchers',
+            'Acquiring lock for transition [%s] on trader %s, %d vouchers',
             $this->transition,
-            $this->trader->id,
+            $this->trader?->id ?? 'none',
             $query->count()
         ));
 
         if (!$lock->acquire()) {
             Log::info(sprintf(
-                'Unable to acquire lock in TransitionProcessor for trader %d doing %s',
-                $this->trader->id,
+                'Unable to acquire lock in TransitionProcessor for trader %s doing %s',
+                $this->trader?->id ?? 'none',
                 $this->transition
             ));
             $this->response->addCode('own_duplicate', '000000');
@@ -75,7 +86,7 @@ class TransitionProcessor
             $lock->release();
         }
 
-        if ($this->sendPaymentEmail && $this->response->hasPayments()) {
+        if ($this->sendPaymentEmail && $this->trader !== null && $this->response->hasPayments()) {
             $vouchersForEmail = Voucher::findMany($this->response->getVouchersForPayment())->all();
             Log::info('SENDING MAIL ' . count($vouchersForEmail));
             self::emailVoucherPaymentRequest($this->trader, $vouchersForEmail);
@@ -103,6 +114,7 @@ class TransitionProcessor
                 'collect' => $this->handleCollect($voucher),
                 'confirm' => $this->handleConfirm($voucher, $stateToken),
                 'reject' => $this->handleReject($voucher),
+                'payout' => $this->handlePayout($voucher),
                 default => $this->handleDefault($voucher),
             };
         }
@@ -113,7 +125,9 @@ class TransitionProcessor
      */
     private function initStateToken(): StateToken
     {
-        $stateToken = factory(StateToken::class)->create();
+        $stateToken = StateToken::create([
+            'uuid' => StateToken::generateUnusedToken(),
+        ]);
         if (Auth::check()) {
             $stateToken->user_id = Auth::id();
             $stateToken->save();
@@ -124,6 +138,11 @@ class TransitionProcessor
     /**
      * Attempts to apply a transition to a voucher, routing failures into the
      * appropriate response bucket. Returns true only when the transition was applied.
+     *
+     * trader_id is only written when $againstTraderId is explicitly provided.
+     * Callers that do not need to change the trader (payout) omit it by passing
+     * null. Callers that need to clear it (reject) do so explicitly after this
+     * method returns rather than relying on null as a dual-purpose signal.
      */
     private function doTransition(
         Voucher $voucher,
@@ -132,32 +151,36 @@ class TransitionProcessor
     ): bool {
         try {
             if ($voucher->transitionAllowed($transition)) {
-                $voucher->trader_id = $againstTraderId;
+                // trader_id is set before the transition so that postTransition's $model->save()
+                // persists it in the same write as the state change. No explicit save is needed here.
+                if ($againstTraderId !== null) {
+                    $voucher->trader_id = $againstTraderId;
+                }
                 $voucher->applyTransition($transition);
                 Log::debug(sprintf(
-                    'Transition %s on %s for trader %d',
+                    'Transition %s on %s for trader %s',
                     $transition,
                     $voucher,
-                    $againstTraderId
+                    $againstTraderId ?? 'none'
                 ));
             } else {
                 if ($voucher->trader_id === $againstTraderId) {
                     // This trader has already submitted this voucher.
                     $this->response->addCode('own_duplicate', $voucher->code);
                     Log::debug(sprintf(
-                        'Transition denied %s on %s for trader %d: own_duplicate',
+                        'Transition denied %s on %s for trader %s: own_duplicate',
                         $transition,
                         $voucher,
-                        $againstTraderId
+                        $againstTraderId ?? 'none'
                     ));
                 } else {
                     // Another trader submitted this voucher, or the state is invalid.
                     $this->response->addCode('other_duplicate', $voucher->code);
                     Log::debug(sprintf(
-                        'Transition denied %s on %s for trader %d: other_duplicate',
+                        'Transition denied %s on %s for trader %s: other_duplicate',
                         $transition,
                         $voucher,
-                        $againstTraderId
+                        $againstTraderId ?? 'none'
                     ));
                 }
                 return false;
@@ -207,6 +230,10 @@ class TransitionProcessor
     /**
      * Rejects a voucher back to the free pool, resolving the correct rollback
      * transition from the voucher's prior state.
+     *
+     * trader_id is cleared explicitly here after the transition rather than
+     * relying on null being passed into doTransition — null means "do not
+     * touch trader_id", so the clearance must be an intentional separate step.
      */
     private function handleReject(Voucher $voucher): void
     {
@@ -216,8 +243,27 @@ class TransitionProcessor
             return;
         }
 
+        // doTransition passes null so postTransition does not clear trader_id —
+        // the listener only saves whatever is dirty at transition time.
+        // An explicit save is required here to persist the clearance afterwards.
         if ($this->doTransition($voucher, 'reject-to-' . $last_state->from, null)) {
+            $voucher->trader_id = null;
+            $voucher->save();
             $this->response->addCode('success_reject', $voucher->code);
+        }
+    }
+
+    /**
+     * Pays a voucher.
+     *
+     * Passes $voucher->trader_id rather than $this->trader->id because payout
+     * is admin-driven — the trader that originally collected the voucher must
+     * not be overwritten. Trader is not required on the processor for this transition.
+     */
+    private function handlePayout(Voucher $voucher): void
+    {
+        if ($this->doTransition($voucher, 'payout', $voucher->trader_id)) {
+            $this->response->addCode('success_add', $voucher->code);
         }
     }
 
@@ -226,7 +272,9 @@ class TransitionProcessor
      */
     private function handleDefault(Voucher $voucher): void
     {
-        $this->doTransition($voucher, $this->transition, $this->trader->id);
+        if ($this->doTransition($voucher, $this->transition, $this->trader->id)) {
+            $this->response->addCode('success_add', $voucher->code);
+        }
     }
 
     /**
