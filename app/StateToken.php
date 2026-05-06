@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -52,6 +54,58 @@ class StateToken extends Model
     public static function isUsedToken(string $candidate): bool
     {
         return static::where('uuid', $candidate)->exists();
+    }
+
+    /**
+     * Lightweight check for outstanding payments to highlight in dashboard
+     */
+    public static function checkIfOutstandingPayments(): bool
+    {
+        return self::pending()
+            ->withinPaymentWindow()
+            ->exists();
+    }
+
+    /**
+     * Constrains results to the payment window.
+     */
+    public function scopeWithinPaymentWindow(Builder $query, ?Carbon $date = null): void
+    {
+        $from = $date ?? Carbon::now()
+            ->startOfDay()
+            ->subDays(config('arc.payment_window_days'))
+        ;
+
+        $query->where('created_at', '>=', $from);
+    }
+
+    /**
+     * Constrains to payment requests not yet actioned by an admin.
+     */
+    public function scopePending(Builder $query): void
+    {
+        $query->whereNull('admin_user_id');
+    }
+
+    /**
+     * Constrains to payment requests already actioned by an admin.
+     */
+    public function scopeReimbursed(Builder $query): void
+    {
+        $query->whereNotNull('admin_user_id');
+    }
+
+    /**
+     * Eager-loads all relationships required to render the payments view.
+     * Kept as a scope so callers don't have to know or repeat the tree.
+     */
+    public function scopeWithPaymentRelations(Builder $query): void
+    {
+        $query->with([
+            'user',
+            'voucherStates.voucher.trader.market.sponsor',
+            'voucherStates.voucher.sponsor',
+        ]);
     }
 
     /**

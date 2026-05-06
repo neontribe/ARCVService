@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
+use LogicException;
 use Tests\TestCase;
 
 /**
@@ -102,9 +103,9 @@ class TransitionProcessorTest extends TestCase
         // at midnight, around DST transitions, or at week/month boundaries.
         Carbon::setTestNow(Carbon::parse('2024-06-12 12:00:00'));
 
-        $this->trader     = factory(Trader::class)->create();
+        $this->trader = factory(Trader::class)->create();
         $this->centreUser = factory(CentreUser::class)->create();
-        $this->user       = factory(User::class)->create();
+        $this->user = factory(User::class)->create();
 
         // No Auth::login here. Every test starts with the default guard empty
         // and sets up whatever auth context it needs.
@@ -168,6 +169,22 @@ class TransitionProcessorTest extends TestCase
     }
 
     /**
+     * Create a voucher already in payment_pending via the factory state.
+     *
+     * The factory inserts VoucherState rows directly (bypassing applyTransition),
+     * which is sufficient for payout tests that only need the voucher to be
+     * in the right state — they are not testing the confirm path. trader_id
+     * is set explicitly because the factory does not set it.
+     */
+    private function makePaymentPendingVoucher(string $code, ?Trader $trader = null): Voucher
+    {
+        return factory(Voucher::class)->state('payment_pending')->create([
+            'code' => $code,
+            'trader_id' => ($trader ?? $this->trader)->id,
+        ]);
+    }
+
+    /**
      * Build an Eloquent Builder scoped to exactly one voucher.
      * Most tests use this to stay independent of the Builder-vs-Relation fix.
      */
@@ -177,8 +194,11 @@ class TransitionProcessorTest extends TestCase
     }
 
     /**
-     * Instantiate a TransitionProcessor.
+     * Instantiate a TransitionProcessor for trader-scoped transitions.
      * sendPaymentEmail defaults to false to suppress TraderController side-effects.
+     *
+     * Cannot be used for payout tests that require trader: null — use
+     * makePayoutProcessor() for those.
      */
     private function makeProcessor(
         string $transition,
@@ -191,6 +211,22 @@ class TransitionProcessorTest extends TestCase
             transition: $transition,
             chunkSize: $chunkSize,
             sendPaymentEmail: $sendPaymentEmail,
+        );
+    }
+
+    /**
+     * Instantiate a payout processor with trader: null.
+     *
+     * A separate helper is needed because makeProcessor() falls back to
+     * $this->trader when null is passed, making it impossible to exercise
+     * the null-trader path through that helper.
+     */
+    private function makePayoutProcessor(): TransitionProcessor
+    {
+        return new TransitionProcessor(
+            trader: null,
+            transition: 'payout',
+            sendPaymentEmail: false,
         );
     }
 
@@ -278,7 +314,7 @@ class TransitionProcessorTest extends TestCase
 
         Auth::login($this->centreUser);
         $voucher = factory(Voucher::class)->state('printed')->create([
-            'code'       => 'UDL00003',
+            'code' => 'UDL00003',
             'created_at' => Carbon::yesterday(),
         ]);
         $voucher->applyTransition('dispatch');
@@ -306,7 +342,7 @@ class TransitionProcessorTest extends TestCase
     public function testCollectAddsOtherDuplicateWhenADifferentTraderOwnsTheVoucher(): void
     {
         $otherTrader = factory(Trader::class)->create();
-        $voucher     = $this->makeCollectedVoucher('DUP00002', $otherTrader);
+        $voucher = $this->makeCollectedVoucher('DUP00002', $otherTrader);
 
         // Processor uses $this->trader, which differs from $otherTrader.
         $response = $this->makeProcessor('collect')->handle($this->queryFor($voucher));
@@ -482,6 +518,93 @@ class TransitionProcessorTest extends TestCase
     }
 
     // =========================================================================
+    // payout — success path
+    // =========================================================================
+
+    public function testPayoutMovesAPaymentPendingVoucherToReimbursed(): void
+    {
+        $voucher = $this->makePaymentPendingVoucher('PAY00001');
+
+        $this->makePayoutProcessor()->handle($this->queryFor($voucher));
+
+        $this->assertSame('reimbursed', $voucher->fresh()->currentstate);
+    }
+
+    public function testPayoutAddsSuccessAddCodeToResponse(): void
+    {
+        $voucher = $this->makePaymentPendingVoucher('PAY00002');
+
+        $response = $this->makePayoutProcessor()->handle($this->queryFor($voucher));
+
+        $this->assertContains('PAY00002', $response->toArray()['success_add']);
+        $this->assertFalse($response->hasFailures());
+    }
+
+    /**
+     * handlePayout passes $voucher->trader_id back into doTransition rather
+     * than $this->trader->id. This test verifies that a non-null trader passed
+     * to the processor constructor cannot overwrite the trader that originally
+     * collected the voucher.
+     *
+     * makeProcessor() is used here (not makePayoutProcessor) so that a
+     * different trader is injected — making the assertion meaningful. If
+     * handlePayout used $this->trader->id the assertSame below would fail.
+     */
+    public function testPayoutDoesNotOverwriteTraderIdWithTheProcessorTrader(): void
+    {
+        $voucher = $this->makePaymentPendingVoucher('PAY00003');
+        $originalTraderId = $voucher->trader_id;
+
+        $otherTrader = factory(Trader::class)->create();
+        $this->assertNotSame($originalTraderId, $otherTrader->id);
+
+        $this->makeProcessor('payout', $otherTrader)->handle($this->queryFor($voucher));
+
+        $this->assertSame($originalTraderId, $voucher->fresh()->trader_id);
+    }
+
+    // =========================================================================
+    // payout — failure / duplicate detection
+    // =========================================================================
+
+    /**
+     * A voucher not in payment_pending cannot be paid out.
+     * The denial is recorded as failed_payout — own_duplicate and
+     * other_duplicate are collect-specific concepts and do not apply here.
+     */
+    public function testPayoutAddsFailedPayoutWhenVoucherIsNotInPaymentPendingState(): void
+    {
+        $voucher = $this->makeCollectedVoucher('PAY00004');
+
+        $response = $this->makePayoutProcessor()->handle($this->queryFor($voucher));
+
+        $this->assertContains('PAY00004', $response->toArray()['failed_payout']);
+        $this->assertTrue($response->hasFailures());
+        $this->assertSame('recorded', $voucher->fresh()->currentstate);
+    }
+
+    // =========================================================================
+    // handleDefault — success recording
+    // =========================================================================
+
+    /**
+     * 'dispatch' is not in the match arms so routes to handleDefault.
+     * handleDefault previously discarded the doTransition result silently;
+     * it now records success_add when the transition succeeds.
+     */
+    public function testDefaultTransitionAddsSuccessAddCodeOnSuccess(): void
+    {
+        Auth::login($this->centreUser);
+        $voucher = factory(Voucher::class)->state('printed')->create(['code' => 'DEF00001']);
+        Auth::logout();
+
+        $response = $this->makeProcessor('dispatch')->handle($this->queryFor($voucher));
+
+        $this->assertContains('DEF00001', $response->toArray()['success_add']);
+        $this->assertSame('dispatched', $voucher->fresh()->currentstate);
+    }
+
+    // =========================================================================
     // handle() — Builder vs Relation (regression for the type-hint bug)
     // =========================================================================
 
@@ -498,7 +621,7 @@ class TransitionProcessorTest extends TestCase
     public function testHandleAcceptsAnEloquentHasManyRelationNotJustAQueryBuilder(): void
     {
         $registration = factory(Registration::class)->create();
-        $bundle       = $registration->currentBundle();
+        $bundle = $registration->currentBundle();
 
         $voucher = $this->makeDispatchedVoucher('REL00001');
         $voucher->delivery_id = 1;
@@ -567,5 +690,79 @@ class TransitionProcessorTest extends TestCase
             ->handle($this->queryFor($voucher));
 
         Event::assertNotDispatched(VoucherPaymentRequested::class);
+    }
+
+    // =========================================================================
+    // NEW TESTS
+    // =========================================================================
+
+    // =========================================================================
+    // handleDefault — null-trader guard
+    // =========================================================================
+
+    /**
+     * handleDefault throws a LogicException when trader is null, so that
+     * any future transition routed there without a trader context fails loudly
+     * rather than silently skipping vouchers or corrupting data.
+     *
+     * The exception propagates through the try/finally in handle() — the
+     * finally block releases the lock but does not suppress the exception.
+     *
+     * Auth context: none — the guard fires before any auth check.
+     */
+    public function testHandleDefaultThrowsLogicExceptionWhenTraderIsNull(): void
+    {
+        Auth::login($this->centreUser);
+        $voucher = factory(Voucher::class)->state('printed')->create(['code' => 'DEF00002']);
+        Auth::logout();
+
+        $this->expectException(LogicException::class);
+
+        // 'dispatch' routes to handleDefault; trader: null triggers the guard.
+        (new TransitionProcessor(
+            trader: null,
+            transition: 'dispatch',
+            sendPaymentEmail: false,
+        ))->handle($this->queryFor($voucher));
+    }
+
+    // =========================================================================
+    // confirm — denied transition (silent-skip behaviour)
+    // =========================================================================
+
+    /**
+     * handleConfirm delegates to doTransition. When the transition is denied
+     * (the voucher is not in 'recorded' state) doTransition returns false and
+     * the voucher is silently skipped — no bucket is populated and no payment
+     * is recorded.
+     *
+     * This documents the current behaviour as a deliberate contract so that
+     * any future change (e.g. populating a failed_confirm bucket) is a
+     * conscious decision rather than an accidental regression. If the spec
+     * changes, update this test alongside the production code.
+     *
+     * A StateToken IS still created by initStateToken() before the loop runs —
+     * that is a separate concern and is not asserted here.
+     *
+     * Auth context: none — mirrors the SweepAndSubmit command path.
+     */
+    public function testConfirmSilentlySkipsVoucherWhenTransitionIsDenied(): void
+    {
+        // A printed voucher has never been collected, so 'confirm' is invalid.
+        Auth::login($this->centreUser);
+        $voucher = factory(Voucher::class)->state('printed')->create(['code' => 'CFM00011']);
+        Auth::logout();
+
+        $this->assertFalse(Auth::check(), 'Pre-condition: no user on default guard');
+
+        $response = $this->makeProcessor('confirm')->handle($this->queryFor($voucher));
+
+        // No payment recorded, no failure code emitted — silent skip.
+        $this->assertFalse($response->hasPayments());
+        $this->assertFalse($response->hasFailures());
+        $this->assertSame([], $response->toArray());
+
+        // The voucher must not have moved.
+        $this->assertSame('printed', $voucher->fresh()->currentstate);
     }
 }

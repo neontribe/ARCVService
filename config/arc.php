@@ -95,6 +95,14 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Number of days of payments to display when searching for payments
+    |--------------------------------------------------------------------------
+    */
+
+    'payment_window_days' => 21,
+
+    /*
+    |--------------------------------------------------------------------------
     | the programme names we are running
     | eg. "standard", "social prescribing"
     |--------------------------------------------------------------------------
@@ -104,7 +112,7 @@ return [
         1 => 'Social Prescribing',
     ],
 
-	/*
+    /*
     |--------------------------------------------------------------------------
     | Demographic fields for primary carer - ethnic background
     |

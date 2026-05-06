@@ -47,7 +47,7 @@ class DeliveriesControllerTest extends TestCase
             ->assertSessionHasErrors([
                 'centre' => 'The centre field is required.',
                 'voucher-start' => 'The voucher-start field is required.',
-                'voucher-end' => 'The voucher-end field is required.'
+                'voucher-end' => 'The voucher-end field is required.',
             ]);
     }
 
@@ -67,7 +67,7 @@ class DeliveriesControllerTest extends TestCase
             ->assertStatus(302)
             ->assertSessionMissing('message')
             ->assertSessionHasErrors([
-                'voucher-end' => 'The voucher-end field must be greater than the voucher-start field.'
+                'voucher-end' => 'The voucher-end field must be greater than the voucher-start field.',
             ]);
     }
 
@@ -84,9 +84,8 @@ class DeliveriesControllerTest extends TestCase
             ->assertStatus(302)
             ->assertSessionMissing('message')
             ->assertSessionHasErrors([
-                'centre' => 'The centre must be a number.'
+                'centre' => 'The centre must be a number.',
             ]);
-        ;
     }
 
     /**
@@ -105,7 +104,62 @@ class DeliveriesControllerTest extends TestCase
             ->assertStatus(302)
             ->assertSessionMissing('message')
             ->assertSessionHasErrors([
-                'voucher-end' => 'The voucher-end field must be the same sponsor as the voucher-start field.'
+                'voucher-end' => 'The voucher-end field must be the same sponsor as the voucher-start field.',
             ]);
+    }
+
+    // =========================================================================
+    // NEW TESTS
+    // =========================================================================
+
+    // =========================================================================
+    // index / create — smoke tests
+    // =========================================================================
+
+    /**
+     * The index page lists deliveries and must return 200 for an authenticated
+     * admin regardless of whether any deliveries exist.
+     */
+    public function testIndexReturns200(): void
+    {
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.deliveries.index'))
+            ->assertStatus(200);
+    }
+
+    /**
+     * The create form must render for an authenticated admin without error.
+     */
+    public function testCreateReturns200(): void
+    {
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.deliveries.create'))
+            ->assertStatus(200);
+    }
+
+    // =========================================================================
+    // store — date-sent validation
+    // =========================================================================
+
+    /**
+     * Omitting date-sent must trigger a validation error rather than reaching
+     * Carbon::createFromFormat() with a null value, which would throw or return
+     * false depending on the Carbon version.
+     *
+     * If this test fails it means date-sent is not yet in the AdminNewDeliveryRequest
+     * rules and a 'required|date_format:Y-m-d' rule should be added.
+     */
+    public function testStoreMissingDateSentReturnsValidationError(): void
+    {
+        $this->actingAs($this->adminUser, 'admin')
+            ->post($this->vouchersDeliveryroute, [
+                'centre' => $this->centre->id,
+                'voucher-start' => 'DLVT0001',
+                'voucher-end' => 'DLVT0003',
+                'date-sent' => '',
+            ])
+            ->assertStatus(302)
+            ->assertSessionMissing('message')
+            ->assertSessionHasErrors(['date-sent']);
     }
 }

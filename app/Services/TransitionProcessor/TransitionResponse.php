@@ -22,8 +22,11 @@ class TransitionResponse
         'other_duplicate',
         'invalid',
         'failed_reject',
+        'failed_payout',
         'undelivered',
     ];
+
+    public const SUCCESS_BUCKETS = ['success_add', 'success_reject'];
 
     public function __construct()
     {
@@ -73,7 +76,7 @@ class TransitionResponse
     public function hasFailures(): bool
     {
         return (bool) Arr::first(
-            Arr::except($this->buckets->toArray(), 'success_add'),
+            Arr::except($this->buckets->toArray(), self::SUCCESS_BUCKETS),
             static function ($codes): bool {
                 return !empty($codes);
             }
@@ -87,7 +90,7 @@ class TransitionResponse
     public function getFailureCodes(): array
     {
         return Arr::flatten(
-            Arr::except($this->buckets->toArray(), 'success_add')
+            Arr::except($this->buckets->toArray(), self::SUCCESS_BUCKETS)
         );
     }
 

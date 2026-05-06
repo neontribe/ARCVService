@@ -2,7 +2,7 @@
 
 namespace App\View\Composers;
 
-use App\Http\Controllers\Service\Admin\PaymentsController;
+use App\StateToken;
 use Illuminate\View\View;
 
 class PaymentsComposer
@@ -15,7 +15,7 @@ class PaymentsComposer
      */
     public function compose(View $view): void
     {
-        $checkPayments = PaymentsController::checkIfOutstandingPayments();
+        $checkPayments = StateToken::checkIfOutstandingPayments();
         $view->with('hasPayments', $checkPayments);
     }
 }
