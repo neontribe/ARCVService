@@ -225,6 +225,100 @@ class PaymentControllerTest extends StoreTestCase
         );
     }
 
+    /**
+     * On a successful payout the controller must stamp the authenticated admin's
+     * id onto the StateToken. testItUpdatesASpecificPaymentRequest verifies the
+     * redirect and flash message but does not assert the database write — this
+     * test fills that gap.
+     */
+    public function testUpdateStampsAdminUserIdOnStateTokenAfterSuccessfulPayout(): void
+    {
+        $token = factory(StateToken::class)->create();
+        $s = factory(Sponsor::class)->create();
+        $u = factory(User::class)->create();
+
+        $this->vouchers = factory(Voucher::class, 2)->state('printed')->create();
+        foreach ($this->vouchers as $k => $voucher) {
+            $voucher->code = 'STMP' . str_pad($k, 4, '0', STR_PAD_LEFT);
+            $voucher->sponsor_id = $s->id;
+            $voucher->trader_id = $this->trader->id;
+            $voucher->applyTransition('dispatch');
+            $voucher->applyTransition('collect');
+            $voucher->applyTransition('confirm');
+
+            $voucherState = $voucher->paymentPendedOn()->first();
+            $voucherState->state_token_id = $token->id;
+            $voucherState->voucher_id = $voucher->id;
+            $voucherState->user_id = $u->id;
+            $voucherState->save();
+            $voucher->save();
+        }
+
+        $route = route('admin.payment-request.update', ['paymentUuid' => $token->uuid]);
+
+        $this->actingAs($this->admin_user, 'admin')
+            ->put($route)
+            ->followRedirects()
+            ->assertResponseStatus(200)
+            ->seePageIs(route('admin.payments.index'))
+            ->see('Vouchers Paid!');
+
+        $this->assertSame(
+            $this->admin_user->id,
+            StateToken::find($token->id)->admin_user_id
+        );
+    }
+
+    public function testUpdateRollsBackVoucherTransitionsWhenAnyFails(): void
+    {
+        $token = factory(StateToken::class)->create();
+        $s = factory(Sponsor::class)->create();
+
+        $payable = factory(Voucher::class)->state('payment_pending')->create([
+            'sponsor_id' => $s->id,
+            'trader_id' => $this->trader->id,
+        ]);
+        $alreadyPaid = factory(Voucher::class)->state('reimbursed')->create([
+            'sponsor_id' => $s->id,
+            'trader_id' => $this->trader->id,
+        ]);
+
+        foreach ([$payable, $alreadyPaid] as $voucher) {
+            $vs = $voucher->paymentPendedOn()->first();
+            $vs->state_token_id = $token->id;
+            $vs->save();
+        }
+
+        $this->actingAs($this->admin_user, 'admin')
+            ->put(route('admin.payment-request.update', ['paymentUuid' => $token->uuid]))
+            ->followRedirects()
+            ->assertResponseStatus(200)
+            ->seePageIs(route('admin.payments.index'));
+
+        $this->dontSee('Vouchers Paid!');
+
+        // The payable voucher must not have moved — the transaction was rolled back.
+        $this->assertSame('payment_pending', $payable->fresh()->currentstate);
+        $this->assertNull(StateToken::find($token->id)->admin_user_id);
+    }
+
+    // =========================================================================
+    // index — smoke test
+    // =========================================================================
+
+    /**
+     * The index page queries both pending and reimbursed tokens and renders
+     * the payment list. With an empty database both collections are empty and
+     * makePaymentDataStructure returns [] for both — the view must still
+     * render without error.
+     */
+    public function testIndexReturns200(): void
+    {
+        $this->actingAs($this->admin_user, 'admin')
+            ->get(route('admin.payments.index'))
+            ->assertResponseStatus(200);
+    }
+
     // =========================================================================
     // makePaymentDataStructure — unit tests (direct static calls, no HTTP)
     //
@@ -334,36 +428,86 @@ class PaymentControllerTest extends StoreTestCase
         $this->assertSame('System', $result[$token->uuid]['requestedBy']);
     }
 
-    public function testUpdateRollsBackVoucherTransitionsWhenAnyFails(): void
+    // =========================================================================
+    // makePaymentDataStructure — new tests
+    // =========================================================================
+
+    /**
+     * When vouchers in a single token span multiple sponsors, voucherAreas must
+     * contain one key per sponsor with the correct per-sponsor count. The
+     * existing single-sponsor test only confirms the count; this test confirms
+     * the grouping logic when there are two distinct sponsor names.
+     */
+    public function testMakePaymentDataStructureVoucherAreasCountsVouchersAcrossMultipleSponsors(): void
     {
-        $token = factory(StateToken::class)->create();
-        $s = factory(Sponsor::class)->create();
-
-        $payable = factory(Voucher::class)->state('payment_pending')->create([
-            'sponsor_id' => $s->id,
-            'trader_id' => $this->trader->id,
-        ]);
-        $alreadyPaid = factory(Voucher::class)->state('reimbursed')->create([
-            'sponsor_id' => $s->id,
-            'trader_id' => $this->trader->id,
+        $token = factory(StateToken::class)->create([
+            'user_id' => factory(User::class)->create()->id,
         ]);
 
-        foreach ([$payable, $alreadyPaid] as $voucher) {
+        // withnullable gives us the market → sponsor chain required for the
+        // marketName/area fields — independent of the per-voucher sponsor below.
+        $trader = factory(Trader::class)->state('withnullable')->create();
+        $sponsorA = factory(Sponsor::class)->create();
+        $sponsorB = factory(Sponsor::class)->create();
+
+        // 2 vouchers from sponsorA, 1 from sponsorB.
+        $vouchersA = factory(Voucher::class, 2)->state('payment_pending')->create([
+            'sponsor_id' => $sponsorA->id,
+            'trader_id' => $trader->id,
+        ]);
+        $voucherB = factory(Voucher::class)->state('payment_pending')->create([
+            'sponsor_id' => $sponsorB->id,
+            'trader_id' => $trader->id,
+        ]);
+
+        foreach (array_merge($vouchersA->all(), [$voucherB]) as $k => $voucher) {
+            $voucher->code = 'MARE' . str_pad($k, 4, '0', STR_PAD_LEFT);
+            $voucher->save();
+
             $vs = $voucher->paymentPendedOn()->first();
             $vs->state_token_id = $token->id;
             $vs->save();
         }
 
-        $this->actingAs($this->admin_user, 'admin')
-            ->put(route('admin.payment-request.update', ['paymentUuid' => $token->uuid]))
-            ->followRedirects()
-            ->assertResponseStatus(200)
-            ->seePageIs(route('admin.payments.index'));
+        $loaded = StateToken::withPaymentRelations()->find($token->id);
+        $result = PaymentsController::makePaymentDataStructure(new Collection([$loaded]));
 
-        $this->dontSee('Vouchers Paid!');
+        $this->assertArrayHasKey($token->uuid, $result);
 
-        // The payable voucher must not have moved — the transaction was rolled back.
-        $this->assertSame('payment_pending', $payable->fresh()->currentstate);
-        $this->assertNull(StateToken::find($token->id)->admin_user_id);
+        $voucherAreas = $result[$token->uuid]['voucherAreas'];
+
+        $this->assertCount(2, $voucherAreas);
+        $this->assertSame(2, $voucherAreas[$sponsorA->name]);
+        $this->assertSame(1, $voucherAreas[$sponsorB->name]);
+    }
+
+    /**
+     * A trader whose name is an empty string satisfies `empty($firstTrader->name)`
+     * and must cause the token to be skipped — the same guard that catches a
+     * null trader also covers a blank name.
+     */
+    public function testMakePaymentDataStructureSkipsTokenWhoseFirstTraderHasEmptyName(): void
+    {
+        $token = factory(StateToken::class)->create([
+            'user_id' => factory(User::class)->create()->id,
+        ]);
+
+        // Force the trader name to empty — the guard checks empty(), so '' is caught.
+        $trader = factory(Trader::class)->create(['name' => '']);
+        $sponsor = factory(Sponsor::class)->create();
+
+        $voucher = factory(Voucher::class)->state('payment_pending')->create([
+            'sponsor_id' => $sponsor->id,
+            'trader_id' => $trader->id,
+        ]);
+
+        $vs = $voucher->paymentPendedOn()->first();
+        $vs->state_token_id = $token->id;
+        $vs->save();
+
+        $loaded = StateToken::withPaymentRelations()->find($token->id);
+        $result = PaymentsController::makePaymentDataStructure(new Collection([$loaded]));
+
+        $this->assertArrayNotHasKey($token->uuid, $result);
     }
 }

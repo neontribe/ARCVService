@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
+use LogicException;
 use Tests\TestCase;
 
 /**
@@ -689,5 +690,79 @@ class TransitionProcessorTest extends TestCase
             ->handle($this->queryFor($voucher));
 
         Event::assertNotDispatched(VoucherPaymentRequested::class);
+    }
+
+    // =========================================================================
+    // NEW TESTS
+    // =========================================================================
+
+    // =========================================================================
+    // handleDefault — null-trader guard
+    // =========================================================================
+
+    /**
+     * handleDefault throws a LogicException when trader is null, so that
+     * any future transition routed there without a trader context fails loudly
+     * rather than silently skipping vouchers or corrupting data.
+     *
+     * The exception propagates through the try/finally in handle() — the
+     * finally block releases the lock but does not suppress the exception.
+     *
+     * Auth context: none — the guard fires before any auth check.
+     */
+    public function testHandleDefaultThrowsLogicExceptionWhenTraderIsNull(): void
+    {
+        Auth::login($this->centreUser);
+        $voucher = factory(Voucher::class)->state('printed')->create(['code' => 'DEF00002']);
+        Auth::logout();
+
+        $this->expectException(LogicException::class);
+
+        // 'dispatch' routes to handleDefault; trader: null triggers the guard.
+        (new TransitionProcessor(
+            trader: null,
+            transition: 'dispatch',
+            sendPaymentEmail: false,
+        ))->handle($this->queryFor($voucher));
+    }
+
+    // =========================================================================
+    // confirm — denied transition (silent-skip behaviour)
+    // =========================================================================
+
+    /**
+     * handleConfirm delegates to doTransition. When the transition is denied
+     * (the voucher is not in 'recorded' state) doTransition returns false and
+     * the voucher is silently skipped — no bucket is populated and no payment
+     * is recorded.
+     *
+     * This documents the current behaviour as a deliberate contract so that
+     * any future change (e.g. populating a failed_confirm bucket) is a
+     * conscious decision rather than an accidental regression. If the spec
+     * changes, update this test alongside the production code.
+     *
+     * A StateToken IS still created by initStateToken() before the loop runs —
+     * that is a separate concern and is not asserted here.
+     *
+     * Auth context: none — mirrors the SweepAndSubmit command path.
+     */
+    public function testConfirmSilentlySkipsVoucherWhenTransitionIsDenied(): void
+    {
+        // A printed voucher has never been collected, so 'confirm' is invalid.
+        Auth::login($this->centreUser);
+        $voucher = factory(Voucher::class)->state('printed')->create(['code' => 'CFM00011']);
+        Auth::logout();
+
+        $this->assertFalse(Auth::check(), 'Pre-condition: no user on default guard');
+
+        $response = $this->makeProcessor('confirm')->handle($this->queryFor($voucher));
+
+        // No payment recorded, no failure code emitted — silent skip.
+        $this->assertFalse($response->hasPayments());
+        $this->assertFalse($response->hasFailures());
+        $this->assertSame([], $response->toArray());
+
+        // The voucher must not have moved.
+        $this->assertSame('printed', $voucher->fresh()->currentstate);
     }
 }

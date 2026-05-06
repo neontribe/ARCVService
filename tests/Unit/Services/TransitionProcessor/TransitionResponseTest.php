@@ -345,4 +345,22 @@ class TransitionResponseTest extends TestCase
         $this->assertArrayHasKey('message', $result);
         $this->assertArrayNotHasKey('warning', $result);
     }
+
+    /**
+     * failed_payout has no explicit arm in the single-voucher match expression
+     * so it falls through to the default branch, which produces the generic
+     * 'error' key. This mirrors the already-tested behaviour for 'invalid' and
+     * pins it explicitly for the failed_payout bucket so any future addition of
+     * a specific arm is noticed.
+     */
+    public function testSingleFailedPayoutFallsThroughToErrorKey(): void
+    {
+        $this->response->addCode('failed_payout', 'TST00001');
+
+        $result = $this->response->constructResponseMessage();
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertArrayNotHasKey('warning', $result);
+        $this->assertArrayNotHasKey('message', $result);
+    }
 }
