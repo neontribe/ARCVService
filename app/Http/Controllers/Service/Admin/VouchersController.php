@@ -125,7 +125,7 @@ class VouchersController extends Controller
                 $nowTime = now();
                 $user = auth()->user();
                 $userId = $user->id;
-                $userType = class_basename($user);
+                $userType = $user ? get_class($user) : null;
 
                 foreach ($transitions as $transitionDef) {
                     Voucher::inDefinedRange($rangeDef)

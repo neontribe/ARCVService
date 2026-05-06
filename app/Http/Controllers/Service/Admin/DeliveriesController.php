@@ -87,10 +87,10 @@ class DeliveriesController extends Controller
                     'dispatched_at' => Carbon::createFromFormat('Y-m-d', $request->input('date-sent')),
                 ]);
 
-                $nowTime  = $delivery->created_at;
-                $user     = auth()->user();
-                $userId   = $user->id;
-                $userType = class_basename($user);
+                $nowTime = $delivery->created_at;
+                $user = auth()->user();
+                $userId = $user->id;
+                $userType = $user ? get_class($user) : null;
 
                 foreach ($transitions as $transitionDef) {
                     Voucher::whereNull('delivery_id')
@@ -116,7 +116,7 @@ class DeliveriesController extends Controller
                             // Update vouchers atomically
                             Voucher::whereIn('id', $vouchers->pluck('id'))
                                 ->update([
-                                    'delivery_id'  => $delivery->id,
+                                    'delivery_id' => $delivery->id,
                                     'currentState' => $transitionDef->to,
                                 ]);
                         });

@@ -272,7 +272,7 @@ class TransitionProcessor
      */
     private function handleDefault(Voucher $voucher): void
     {
-        if ($this->doTransition($voucher, $this->transition, $this->trader->id)) {
+        if ($this->doTransition($voucher, $this->transition, $voucher->trader_id)) {
             $this->response->addCode('success_add', $voucher->code);
         }
     }
