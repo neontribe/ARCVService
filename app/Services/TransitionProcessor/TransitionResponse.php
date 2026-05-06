@@ -22,6 +22,7 @@ class TransitionResponse
         'other_duplicate',
         'invalid',
         'failed_reject',
+        'failed_payout',
         'undelivered',
     ];
 
@@ -89,7 +90,7 @@ class TransitionResponse
     public function getFailureCodes(): array
     {
         return Arr::flatten(
-            Arr::except($this->buckets->toArray(), 'success_add')
+            Arr::except($this->buckets->toArray(), self::SUCCESS_BUCKETS)
         );
     }
 

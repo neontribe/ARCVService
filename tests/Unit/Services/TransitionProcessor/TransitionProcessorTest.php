@@ -567,17 +567,17 @@ class TransitionProcessorTest extends TestCase
     // =========================================================================
 
     /**
-     * A voucher not in payment_pending cannot be paid out. Because handlePayout
-     * passes $voucher->trader_id as $againstTraderId and those match, doTransition
-     * classifies the denied transition as own_duplicate.
+     * A voucher not in payment_pending cannot be paid out.
+     * The denial is recorded as failed_payout — own_duplicate and
+     * other_duplicate are collect-specific concepts and do not apply here.
      */
-    public function testPayoutAddsOwnDuplicateWhenVoucherIsNotInPaymentPendingState(): void
+    public function testPayoutAddsFailedPayoutWhenVoucherIsNotInPaymentPendingState(): void
     {
         $voucher = $this->makeCollectedVoucher('PAY00004');
 
         $response = $this->makePayoutProcessor()->handle($this->queryFor($voucher));
 
-        $this->assertContains('PAY00004', $response->toArray()['own_duplicate']);
+        $this->assertContains('PAY00004', $response->toArray()['failed_payout']);
         $this->assertTrue($response->hasFailures());
         $this->assertSame('recorded', $voucher->fresh()->currentstate);
     }
