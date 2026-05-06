@@ -147,7 +147,7 @@ class TransitionProcessor
     private function doTransition(
         Voucher $voucher,
         string $transition,
-        ?int $againstTraderId
+        ?int $againstTraderId = null
     ): bool {
         try {
             if ($voucher->transitionAllowed($transition)) {
@@ -161,7 +161,7 @@ class TransitionProcessor
                     'Transition %s on %s for trader %s',
                     $transition,
                     $voucher,
-                    $againstTraderId ?? 'none'
+                    $againstTraderId ?? $voucher->trader_id ?? 'none'
                 ));
             } else {
                 if ($voucher->trader_id === $againstTraderId) {
@@ -171,7 +171,7 @@ class TransitionProcessor
                         'Transition denied %s on %s for trader %s: own_duplicate',
                         $transition,
                         $voucher,
-                        $againstTraderId ?? 'none'
+                        $againstTraderId ?? $voucher->trader_id ?? 'none'
                     ));
                 } else {
                     // Another trader submitted this voucher, or the state is invalid.
@@ -180,7 +180,7 @@ class TransitionProcessor
                         'Transition denied %s on %s for trader %s: other_duplicate',
                         $transition,
                         $voucher,
-                        $againstTraderId ?? 'none'
+                        $againstTraderId ?? $voucher->trader_id ?? 'none'
                     ));
                 }
                 return false;
@@ -262,7 +262,7 @@ class TransitionProcessor
      */
     private function handlePayout(Voucher $voucher): void
     {
-        if ($this->doTransition($voucher, 'payout', $voucher->trader_id)) {
+        if ($this->doTransition($voucher, 'payout')) {
             $this->response->addCode('success_add', $voucher->code);
         }
     }
@@ -272,7 +272,7 @@ class TransitionProcessor
      */
     private function handleDefault(Voucher $voucher): void
     {
-        if ($this->doTransition($voucher, $this->transition, $voucher->trader_id)) {
+        if ($this->doTransition($voucher, $this->transition)) {
             $this->response->addCode('success_add', $voucher->code);
         }
     }

@@ -33,11 +33,11 @@ return new class () extends Migration {
     public function down(): void
     {
         // Reverse the user_type repairs; if it rolls back it will replace the '' with User, which is fine.
-        foreach (array_reverse($this->typeMap) as $to => $from) {
+        foreach (array_reverse($this->typeMap) as $from => $to) {
             DB::table('voucher_states')
-                ->where('user_type', $from)
-                ->update(['user_type' => $to]);
+                ->where('user_type', $to)
+                ->update(['user_type' => $from]);
         }
-        // we can't replace the foreign key, there may be non user id's in the user_id field.
+        // we can't replace the foreign key, there may be non-user id's in the user_id field.
     }
 };
