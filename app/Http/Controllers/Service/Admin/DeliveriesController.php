@@ -89,7 +89,7 @@ class DeliveriesController extends Controller
 
                 $nowTime = $delivery->created_at;
                 $user = auth()->user();
-                $userId = $user->id;
+                $userId = $user?->id;
                 $userType = $user ? get_class($user) : null;
 
                 foreach ($transitions as $transitionDef) {

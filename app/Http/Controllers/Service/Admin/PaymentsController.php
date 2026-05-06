@@ -162,24 +162,36 @@ class PaymentsController extends Controller
             sendPaymentEmail: false
         );
 
-        DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
-        $response = $processor->handle($query);
+            $response = $processor->handle($query);
 
-        if ($response->hasFailures()) {
-            DB::rollBack();
+            if ($response->hasFailures()) {
+                DB::rollBack();
+                return redirect()
+                    ->route('admin.payments.index')
+                    ->withErrors($response->toArray());
+            }
+
+            $stateToken->admin_user_id = Auth::id();
+            $stateToken->save();
+
+            DB::commit();
+
             return redirect()
                 ->route('admin.payments.index')
-                ->withErrors($response->toArray());
+                ->with('notification', 'Vouchers Paid!');
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Payout failed unexpectedly', [
+                'uuid' => $paymentUuid,
+                'error' => $e->getMessage(),
+            ]);
+            return redirect()
+                ->route('admin.payments.index')
+                ->withErrors(['error' => 'Payment processing failed. Please try again.']);
         }
-
-        $stateToken->admin_user_id = Auth::id();
-        $stateToken->save();
-
-        DB::commit();
-
-        return redirect()
-            ->route('admin.payments.index')
-            ->with('notification', 'Vouchers Paid!');
     }
 }
