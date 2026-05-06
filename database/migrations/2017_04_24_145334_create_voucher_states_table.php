@@ -46,12 +46,6 @@ class CreateVoucherStatesTable extends Migration
      */
     public function down(): void
     {
-        Schema::withoutForeignKeyConstraints(static function () {
-            Schema::table('voucher_states', static function (Blueprint $table) {
-                $table->dropForeign(['user_id']);
-                $table->dropForeign(['voucher_id']);
-            });
-        });
         Schema::dropIfExists('voucher_states');
     }
 }
