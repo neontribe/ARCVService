@@ -7,6 +7,7 @@ use App\Centre;
 use App\CentreUser;
 use App\Market;
 use App\Sponsor;
+use App\StateToken;
 use App\Trader;
 use Auth;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,6 +17,15 @@ class ServiceRoutesTest extends StoreTestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Routes that require an integer id (model id) use id = 1 because setUp
+     * always creates those models first, making id = 1 deterministic.
+     *
+     * Payment-request routes use a UUID rather than an integer — the UUID is
+     * not known until setUp runs, so those entries are overridden in setUp
+     * after the StateToken is created. The placeholder value here is never
+     * used at runtime.
+     */
     private $authAdminRoutes = [
         'GET' => [
             'admin.dashboard' => [],
@@ -43,7 +53,7 @@ class ServiceRoutesTest extends StoreTestCase
             'admin.traders.create' => [],
             'admin.traders.edit' => ['id' => 1],
             'admin.payments.index' => [],
-            'admin.payment-request.show' => ['paymentUuid' => 1 ],
+            'admin.payment-request.show' => ['paymentUuid' => null],  // overridden in setUp
             'admin.trader-payment-history.show' => ['trader' => 1],
         ],
         'POST' => [
@@ -58,7 +68,7 @@ class ServiceRoutesTest extends StoreTestCase
             'admin.centreusers.update' => ['id' => 1],
             'admin.markets.update' => ['id' => 1],
             'admin.traders.update' => ['id' => 1],
-            'admin.payment-request.update' => ['paymentUuid' => 1],
+            'admin.payment-request.update' => ['paymentUuid' => null],  // overridden in setUp
         ],
     ];
 
@@ -67,6 +77,7 @@ class ServiceRoutesTest extends StoreTestCase
     private $sponsor;
     private $market;
     private $trader;
+    private StateToken $stateToken;
 
     public function setUp(): void
     {
@@ -82,6 +93,13 @@ class ServiceRoutesTest extends StoreTestCase
         $this->sponsor = factory(Sponsor::class)->create();
         $this->market = factory(Market::class)->create(['sponsor_id' => $this->sponsor->id]);
         $this->trader = factory(Trader::class)->create(['market_id' => $this->market->id]);
+
+        // Payment-request routes require a real StateToken UUID. show() and
+        // update() both call firstOrFail(), so passing a non-existent value
+        // would return 404 and fail the gate assertion.
+        $this->stateToken = factory(StateToken::class)->create();
+        $this->authAdminRoutes['GET']['admin.payment-request.show'] = ['paymentUuid' => $this->stateToken->uuid];
+        $this->authAdminRoutes['PUT']['admin.payment-request.update'] = ['paymentUuid' => $this->stateToken->uuid];
     }
 
 

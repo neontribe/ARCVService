@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
     private array $typeMap = [
-        ''           => User::class,
-        'User'       => User::class,
-        'AdminUser'  => AdminUser::class,
+        '' => User::class,
+        'User' => User::class,
+        'AdminUser' => AdminUser::class,
         'CentreUser' => CentreUser::class,
     ];
 
@@ -38,11 +38,6 @@ return new class () extends Migration {
                 ->where('user_type', $from)
                 ->update(['user_type' => $to]);
         }
-
-        Schema::table('voucher_states', static function (Blueprint $table) {
-            $table->foreign('user_id')
-                ->references('id')
-                ->on('users');
-        });
+        // we can't replace the foreign key, there may be non user id's in the user_id field.
     }
 };

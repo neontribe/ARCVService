@@ -118,11 +118,17 @@ class PaymentControllerTest extends StoreTestCase
     // show — new tests
     // =========================================================================
 
-    public function testShowReturns404ForAnUnknownUuid(): void
+    /**
+     * An unknown UUID renders the paymentRequest view with an inline error —
+     * it does not 404 or redirect. The view displays the error message when
+     * state_token is null, allowing the admin to see they followed a stale link.
+     */
+    public function testShowRendersInlineErrorForAnUnknownUuid(): void
     {
         $this->actingAs($this->admin_user, 'admin')
             ->get(route('admin.payment-request.show', ['paymentUuid' => 'does-not-exist']))
-            ->assertResponseStatus(404);
+            ->assertResponseStatus(200)
+            ->see('This payment request is invalid, or has expired.');
     }
 
     // =========================================================================
@@ -214,10 +220,9 @@ class PaymentControllerTest extends StoreTestCase
 
         $this->dontSee('Vouchers Paid!');
 
-        $this->assertDatabaseMissing('state_tokens', [
-            'id' => $token->id,
-            'admin_user_id' => $this->admin_user->id,
-        ]);
+        $this->assertNull(
+            StateToken::find($token->id)->admin_user_id
+        );
     }
 
     // =========================================================================
@@ -278,6 +283,30 @@ class PaymentControllerTest extends StoreTestCase
 
         $result = PaymentsController::makePaymentDataStructure(new Collection([$tokenWithNoStates]));
 
+        $this->assertArrayNotHasKey($token->uuid, $result);
+    }
+
+    public function testMakePaymentDataStructureSkipsTokenWhoseTraderHasNoMarket(): void
+    {
+        // Default Trader factory has market_id = null. Without the null market
+        // guard in makePaymentDataStructure this would throw a null pointer.
+        $token = factory(StateToken::class)->create(['user_id' => factory(User::class)->create()->id]);
+        $trader = factory(Trader::class)->create();   // no market
+        $sponsor = factory(Sponsor::class)->create();
+
+        $voucher = factory(Voucher::class)->state('payment_pending')->create([
+            'sponsor_id' => $sponsor->id,
+            'trader_id' => $trader->id,
+        ]);
+
+        $voucherState = $voucher->paymentPendedOn()->first();
+        $voucherState->state_token_id = $token->id;
+        $voucherState->save();
+
+        $loaded = StateToken::withPaymentRelations()->find($token->id);
+        $result = PaymentsController::makePaymentDataStructure(new Collection([$loaded]));
+
+        // Token is skipped — no exception thrown.
         $this->assertArrayNotHasKey($token->uuid, $result);
     }
 

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Service\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\TransitionProcessor\TransitionProcessor;
 use App\StateToken;
-use App\Trader;
 use App\Voucher;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -62,12 +61,23 @@ class PaymentsController extends Controller
                 continue;
             }
 
+            // A trader without a market is a data integrity issue.
+            // Skip rather than throw — the admin should still see other tokens.
+            if ($firstTrader->market === null) {
+                Log::error(sprintf(
+                    'Skipping token %s — trader %d has no associated market',
+                    $stateToken->uuid,
+                    $firstTrader->id
+                ));
+                continue;
+            }
+
             $currentTokenResults = [
                 'requestedBy' => $stateToken->user?->name ?? 'System',
                 'vouchersTotal' => $voucherStates->count(),
                 'traderName' => $firstTrader->name,
                 'marketName' => $firstTrader->market->name,
-                'area' => $firstTrader->market->sponsor->name,
+                'area' => $firstTrader->market->sponsor?->name ?? '',
                 'voucherAreas' => $voucherStates
                     ->countBy(function ($vs) {
                         return $vs->voucher->sponsor->name;
@@ -96,7 +106,13 @@ class PaymentsController extends Controller
     }
 
     /**
-     * Get a specific payment request by link
+     * Get a specific payment request by link.
+     *
+     * Passes state_token = null to the view when the UUID is not found so the
+     * view can render an inline error message. A redirect was previously
+     * considered but PaymentsPageTest establishes that the correct UX is to
+     * stay on the paymentRequest page with an explanatory message — not to
+     * bounce the admin to the index.
      */
     public function show(string $paymentUuid): Factory|View
     {
@@ -105,13 +121,14 @@ class PaymentsController extends Controller
             'voucherStates.voucher.sponsor',
         ])
             ->where('uuid', $paymentUuid)
-            ->firstOrFail();
+            ->first();
 
-        $vouchers = $stateToken->voucherStates
+        $vouchers = $stateToken?->voucherStates
             ->map(function ($vs) {
                 return $vs->voucher;
             })
-            ->filter();
+            ->filter()
+            ?? collect();
 
         return view('service.payments.paymentRequest', [
             'state_token' => $stateToken,
@@ -122,22 +139,24 @@ class PaymentsController extends Controller
     }
 
     /**
-     * Pay a specific payment request by link
+     * Pay a specific payment request by link.
+     *
+     * trader: null is intentional — payout is admin-driven and handlePayout
+     * preserves the voucher's existing trader_id unchanged. See TransitionProcessor.
      */
     public function update(Request $request, string $paymentUuid): RedirectResponse
     {
         $stateToken = StateToken::where('uuid', $paymentUuid)->firstOrFail();
 
         $query = Voucher::whereHas(
-            'voucherStates',
+            'history',
             static function ($q) use ($stateToken) {
                 return $q->where('state_token_id', $stateToken->id);
             }
         );
 
         $processor = new TransitionProcessor(
-            // not entirely relevant, we'll not be changing the trader.
-            trader: Trader::find($query->first()->trader_id),
+            trader: null,
             transition: 'payout',
             sendPaymentEmail: false
         );
