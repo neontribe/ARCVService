@@ -333,4 +333,37 @@ class PaymentControllerTest extends StoreTestCase
         $this->assertArrayHasKey($token->uuid, $result);
         $this->assertSame('System', $result[$token->uuid]['requestedBy']);
     }
+
+    public function testUpdateRollsBackVoucherTransitionsWhenAnyFails(): void
+    {
+        $token = factory(StateToken::class)->create();
+        $s = factory(Sponsor::class)->create();
+
+        $payable = factory(Voucher::class)->state('payment_pending')->create([
+            'sponsor_id' => $s->id,
+            'trader_id' => $this->trader->id,
+        ]);
+        $alreadyPaid = factory(Voucher::class)->state('reimbursed')->create([
+            'sponsor_id' => $s->id,
+            'trader_id' => $this->trader->id,
+        ]);
+
+        foreach ([$payable, $alreadyPaid] as $voucher) {
+            $vs = $voucher->paymentPendedOn()->first();
+            $vs->state_token_id = $token->id;
+            $vs->save();
+        }
+
+        $this->actingAs($this->admin_user, 'admin')
+            ->put(route('admin.payment-request.update', ['paymentUuid' => $token->uuid]))
+            ->followRedirects()
+            ->assertResponseStatus(200)
+            ->seePageIs(route('admin.payments.index'));
+
+        $this->dontSee('Vouchers Paid!');
+
+        // The payable voucher must not have moved — the transaction was rolled back.
+        $this->assertSame('payment_pending', $payable->fresh()->currentstate);
+        $this->assertNull(StateToken::find($token->id)->admin_user_id);
+    }
 }

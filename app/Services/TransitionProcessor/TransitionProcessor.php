@@ -32,10 +32,13 @@ class TransitionProcessor
      *
      *   - handlePayout preserves the voucher's existing trader_id unchanged.
      *   - handleReject clears trader_id explicitly after the rollback transition.
+     *   - handleDefault omits trader_id entirely — it does not write trader
+     *     context to the voucher. Callers that need trader association must
+     *     use an explicit match arm (collect, confirm) rather than relying
+     *     on the catchall.
      *
-     * Transitions that DO require a trader (collect, confirm, and the default
-     * catchall) will throw if $trader is null — that is a programmer error and
-     * should surface immediately.
+     * There is no longer a null-trader guard in handleDefault. If a new
+     * transition requires trader context, add an explicit handler for it.
      */
     public function __construct(
         private readonly ?Trader $trader,
@@ -269,9 +272,28 @@ class TransitionProcessor
 
     /**
      * Catchall for any transition string not explicitly handled above.
+     *
+     * trader_id is intentionally not written here. The only transition that
+     * should set trader_id is collect (via handleCollect), and the only one
+     * that should clear it is reject (via handleReject). All other transitions
+     * leave trader_id untouched.
+     *
+     * $trader is still required on the processor when reaching this path —
+     * not to write to the voucher, but because any transition routed here
+     * is assumed to be trader-context-scoped. If a genuinely
+     * trader-free transition is added in future, give it its own match arm.
      */
     private function handleDefault(Voucher $voucher): void
     {
+        if ($this->trader === null) {
+            throw new \LogicException(sprintf(
+                'Transition "%s" reached handleDefault with no trader on the processor. ' .
+                'Add an explicit match arm in processInChunks() if this transition ' .
+                'is intentionally trader-free.',
+                $this->transition
+            ));
+        }
+
         if ($this->doTransition($voucher, $this->transition)) {
             $this->response->addCode('success_add', $voucher->code);
         }

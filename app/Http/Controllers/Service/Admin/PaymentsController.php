@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use JsonException;
 
@@ -161,14 +162,24 @@ class PaymentsController extends Controller
             sendPaymentEmail: false
         );
 
+        DB::beginTransaction();
+
         $response = $processor->handle($query);
 
-        if (!$response->hasFailures()) {
-            $stateToken->admin_user_id = Auth::id();
-            $stateToken->save();
-            return redirect()->route('admin.payments.index')->with('notification', 'Vouchers Paid!');
+        if ($response->hasFailures()) {
+            DB::rollBack();
+            return redirect()
+                ->route('admin.payments.index')
+                ->withErrors($response->toArray());
         }
 
-        return redirect()->route('admin.payments.index')->withErrors($response->toArray());
+        $stateToken->admin_user_id = Auth::id();
+        $stateToken->save();
+
+        DB::commit();
+
+        return redirect()
+            ->route('admin.payments.index')
+            ->with('notification', 'Vouchers Paid!');
     }
 }

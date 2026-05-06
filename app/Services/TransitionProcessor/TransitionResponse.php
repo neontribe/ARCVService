@@ -25,6 +25,8 @@ class TransitionResponse
         'undelivered',
     ];
 
+    public const SUCCESS_BUCKETS = ['success_add', 'success_reject'];
+
     public function __construct()
     {
         $this->buckets = new MessageBag();
@@ -73,7 +75,7 @@ class TransitionResponse
     public function hasFailures(): bool
     {
         return (bool) Arr::first(
-            Arr::except($this->buckets->toArray(), 'success_add'),
+            Arr::except($this->buckets->toArray(), self::SUCCESS_BUCKETS),
             static function ($codes): bool {
                 return !empty($codes);
             }

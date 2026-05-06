@@ -131,7 +131,7 @@ class TransitionResponseTest extends TestCase
             array_values(array_filter(
                 TransitionResponse::BUCKETS,
                 static function (string $b) {
-                    return $b !== 'success_add';
+                    return !in_array($b, TransitionResponse::SUCCESS_BUCKETS);
                 }
             ))
         );
