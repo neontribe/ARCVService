@@ -1,6 +1,6 @@
 <?php
 
-namespace Feature\Service;
+namespace Tests\Feature\Service;
 
 use App\AdminUser;
 use App\Jobs\ResetDemoEnvironment;
