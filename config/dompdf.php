@@ -250,7 +250,7 @@ return [
          *
          * @var bool
          */
-        'enable_php' => false,
+        'enable_php' => true,
 
         /**
          * Enable inline JavaScript
@@ -284,7 +284,7 @@ return [
          *
          * @var bool
          */
-        'enable_remote' => false,
+        'enable_remote' => true,
 
         /**
          * List of allowed remote hosts
