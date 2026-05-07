@@ -17,11 +17,9 @@ use Tests\TestCase;
 
 class BundleModelTest extends TestCase
 {
-
     use RefreshDatabase;
 
-    /** @var Bundle bundle */
-    protected $bundle;
+    protected Bundle $bundle;
     protected function setUp(): void
     {
         parent::setUp();
@@ -29,7 +27,7 @@ class BundleModelTest extends TestCase
         $this->bundle = factory(Bundle::class)->create();
     }
 
-    public function testBundleIsCreatedWithExpectedAttributes()
+    public function testBundleIsCreatedWithExpectedAttributes(): void
     {
         $b = $this->bundle;
         $this->assertInstanceOf(Bundle::class, $b);
@@ -44,16 +42,16 @@ class BundleModelTest extends TestCase
         $this->assertEmpty($b->vouchers);
     }
 
-    public function testPopulatedBundleIsCreatedWithExpectedAttributes()
+    public function testPopulatedBundleIsCreatedWithExpectedAttributes(): void
     {
         $centre = factory(Centre::class)->create();
-        $user = factory(CentreUser::class)->create(['centre_id'=>$centre->id]);
+        $user = factory(CentreUser::class)->create(['centre_id' => $centre->id]);
         Auth::login($user);
 
         // family and carer needed to collect the bundle
 
-        $family = factory(Family::class)->create(['initial_centre_id'=>$user->centre_id]);
-        $carer = factory(Carer::class)->create(['name'=>'Bob','family_id'=>$family->id]);
+        $family = factory(Family::class)->create(['initial_centre_id' => $user->centre_id]);
+        $carer = factory(Carer::class)->create(['name' => 'Bob','family_id' => $family->id]);
 
         //create three vouchers and transition to collected.
         $vs = factory(Voucher::class, 3)->state('printed')
@@ -81,7 +79,7 @@ class BundleModelTest extends TestCase
         $this->assertNotEmpty($disbursedBundle->vouchers);
     }
 
-    public function testBundleCanHaveManyVouchers()
+    public function testBundleCanHaveManyVouchers(): void
     {
         $user = factory(CentreUser::class)->create();
         Auth::login($user);
@@ -96,8 +94,8 @@ class BundleModelTest extends TestCase
         $this->assertEquals($vs->count(), $this->bundle->vouchers()->count());
     }
 
-    /** @test */
-    public function testItCanGetOnlyDisbursedBundles()
+
+    public function testItCanGetOnlyDisbursedBundles(): void
     {
         // Make a registration
         $registration = factory(Registration::class)->create();
@@ -124,8 +122,8 @@ class BundleModelTest extends TestCase
         $this->assertEquals($disbursedBundles->count(), $registration->bundles()->disbursed()->count());
     }
 
-    /** @test */
-    public function testItCannotAlterTheBundleToIncludeADisbursedVoucher()
+
+    public function testItCannotAlterTheBundleToIncludeADisbursedVoucher(): void
     {
         $user = factory(CentreUser::class)->create();
         Auth::login($user);

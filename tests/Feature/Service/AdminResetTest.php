@@ -3,72 +3,124 @@
 namespace Tests\Feature\Service;
 
 use App\AdminUser;
+use App\Jobs\ResetDemoEnvironment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
-use Laravel\BrowserKitTesting\TestCase;
-use Mockery;
-use Symfony\Component\Process\Process;
-use Tests\CreatesApplication;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Testing\TestResponse;
+use Tests\TestCase;
 
 class AdminResetTest extends TestCase
 {
     use RefreshDatabase;
-    use CreatesApplication;
 
-    /** @var AdminUser $adminUser */
-    private AdminUser $adminUser;
+    private AdminUser $admin;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
-        $this->adminUser = factory(AdminUser::class)->create();
+        Bus::fake();
+        $this->admin = factory(AdminUser::class)->create();
     }
 
-    public function testResetRoute()
-    {
-        // Mock the Process command
-        $mockProcess = Mockery::mock(Process::class);
-        $this->app->instance(Process::class, $mockProcess);
-        DB::table('oauth_clients')->insert(
-            array(
-                'id' => 2,
-                'user_id' => 555,
-                'name' => "0",
-                'secret' => "0",
-                'provider' => "0",
-                'redirect' => "0",
-                'personal_access_client' => 3,
-                'password_client' => 4,
-                'revoked' => 5,
-                'created_at' => "0",
-                'updated_at' => "0",
-            )
-        );
-        // Mock DB - DOES NOT WORK. I think the Process call spawns a new thread
-//        $mockDb = Mockery::mock(DatabaseManager::class, );
-//        $mockDb->shouldReceive('table->where->pluck')
-//        ->once()
-//        ->with("secret")
-//        ->andReturn([
-//            [
-//                'id' => 1,
-//                'userId' => 555,
-//                'name' => "0",
-//                'secret' => "0",
-//                'provider' => "0",
-//                'redirect' => "0",
-//                'personal_access_client' => 3,
-//                'password_client' => 4,
-//                'revoked' => 5,
-//                'created_at' => "0",
-//                'updated_at' => "0",
-//            ]
-//        ]);
-//        $cls = get_class(DB::getFacadeRoot());
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
 
-        // Run the test
-        $this->actingAs($this->adminUser, 'admin')
-            ->get(route('data.reset'))
-            ->assertResponseStatus(302);
+    private function makeRequest(): TestResponse
+    {
+        return $this->actingAs($this->admin, 'admin')
+            ->get(route('data.reset'));
+    }
+
+    // -------------------------------------------------------------------------
+    // Authentication
+    // -------------------------------------------------------------------------
+
+    public function testRedirectsUnauthenticatedUser(): void
+    {
+        $this->get(route('data.reset'))->assertRedirect();
+    }
+
+    public function testUnauthenticatedRequestDoesNotReachGateCheck(): void
+    {
+        Gate::shouldReceive('allows')->never();
+
+        $this->get(route('data.reset'));
+    }
+
+    public function testUnauthenticatedRequestDoesNotDispatchJob(): void
+    {
+        $this->get(route('data.reset'));
+
+        Bus::assertNothingDispatched();
+    }
+
+    // -------------------------------------------------------------------------
+    // Gate denied
+    // -------------------------------------------------------------------------
+
+    public function testRedirectsToDashboardWhenGateDenies(): void
+    {
+        Gate::shouldReceive('allows')->with('take-developer-actions')->andReturn(false);
+
+        $this->makeRequest()->assertRedirect(route('admin.dashboard'));
+    }
+
+    public function testFlashesErrorWhenGateDenies(): void
+    {
+        Gate::shouldReceive('allows')->with('take-developer-actions')->andReturn(false);
+
+        $this->makeRequest()->assertSessionHas('error', 'Action Denied');
+    }
+
+    public function testDoesNotFlashSuccessMessageWhenGateDenies(): void
+    {
+        Gate::shouldReceive('allows')->with('take-developer-actions')->andReturn(false);
+
+        $this->makeRequest()->assertSessionMissing('message');
+    }
+
+    public function testDoesNotDispatchJobWhenGateDenies(): void
+    {
+        Gate::shouldReceive('allows')->with('take-developer-actions')->andReturn(false);
+
+        $this->makeRequest();
+
+        Bus::assertNothingDispatched();
+    }
+
+    // -------------------------------------------------------------------------
+    // Gate allowed
+    // -------------------------------------------------------------------------
+
+    public function testRedirectsToDashboardWhenGateAllows(): void
+    {
+        Gate::shouldReceive('allows')->with('take-developer-actions')->andReturn(true);
+
+        $this->makeRequest()->assertRedirect(route('admin.dashboard'));
+    }
+
+    public function testFlashesQueuedMessageWhenGateAllows(): void
+    {
+        Gate::shouldReceive('allows')->with('take-developer-actions')->andReturn(true);
+
+        $this->makeRequest()->assertSessionHas('message', 'Reset queued');
+    }
+
+    public function testDoesNotFlashErrorWhenGateAllows(): void
+    {
+        Gate::shouldReceive('allows')->with('take-developer-actions')->andReturn(true);
+
+        $this->makeRequest()->assertSessionMissing('error');
+    }
+
+    public function testDispatchesResetJobWhenGateAllows(): void
+    {
+        Gate::shouldReceive('allows')->with('take-developer-actions')->andReturn(true);
+
+        $this->makeRequest();
+
+        Bus::assertDispatched(ResetDemoEnvironment::class);
     }
 }

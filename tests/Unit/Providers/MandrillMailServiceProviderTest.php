@@ -14,14 +14,16 @@ use Symfony\Component\Mailer\Exception\HttpTransportException;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Tests\TestCase;
 use Exception;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
 
 /**
  * required to keep overloaded mocks out of other tests
  * Note, this screws with xdebug, which loses track of processes
  * Disable these to debug individual tests in this file
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
+#[RunTestsInSeparateProcesses]
+#[PreserveGlobalState(false)]
 class MandrillMailServiceProviderTest extends TestCase
 {
     protected function setUp(): void
@@ -33,15 +35,15 @@ class MandrillMailServiceProviderTest extends TestCase
         Config::set('services.mandrill.key', 'SomeRandomString');
     }
 
-    /** @test */
-    public function it_extends_the_mail_manager_with_mandrill_driver(): void
+
+    public function testItExtendsTheMailManagerWithMandrillDriver(): void
     {
         $driver = Mail::driver('mandrill');
         $this->assertInstanceOf(Mailer::class, $driver);
     }
 
-    /** @test */
-    public function it_might_try_to_hand_off_to_mandrill(): void
+
+    public function testItMightTryToHandOffToMandrill(): void
     {
         // mock the CurlHttpClient the symfony uses to _avoid_ actually contacting mandrill
         $mockHttpClient = Mockery::mock(

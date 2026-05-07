@@ -13,14 +13,13 @@ class EditWorkerPageTest extends StoreTestCase
 {
     use RefreshDatabase;
 
-    /** @var AdminUser $adminUser */
-    private $adminUser;
+    private AdminUser $adminUser;
 
-    /** @var Centre $centre */
-    private $centre;
+    private Centre $centre;
 
-    /** @var Collection $altCentres */
-    private $altCentres;
+    private Collection $altCentres;
+
+    private CentreUser $worker;
 
     public function setUp(): void
     {
@@ -28,22 +27,21 @@ class EditWorkerPageTest extends StoreTestCase
         $this->adminUser = factory(AdminUser::class)->create();
         $this->centre = factory(Centre::class)->create([]);
         $this->altCentres = factory(Centre::class, 2)->create([]);
-    }
 
-    /**
-     * @test
-     *
-     * @return void
-     */
-    public function itShowsAWorkerEditPage()
-    {
-        // Make a CentreUser from the data with 1 homeCentre.
-        $cu = factory(CentreUser::class)->create([
-            'name' => 'testman',
+        $this->worker = factory(CentreUser::class)->create([
+            'name'  => 'testman',
             'email' => 'testman@test.co.uk',
         ]);
-        $cu->centres()->attach($this->altCentres->last()->id, ['homeCentre' => true]);
-        $workerEditRoute = route('admin.centreusers.edit', ['id' => $cu->id,]);
+        $this->worker->centres()->attach($this->centre->id, ['homeCentre' => true]);
+    }
+
+    // -----------------------------------------------------------------------
+    // Page structure — active worker
+    // -----------------------------------------------------------------------
+
+    public function testItShowsAWorkerEditPage(): void
+    {
+        $workerEditRoute = route('admin.centreusers.edit', ['id' => $this->worker->id]);
 
         $this->actingAs($this->adminUser, 'admin')
             ->get($workerEditRoute)
@@ -59,6 +57,143 @@ class EditWorkerPageTest extends StoreTestCase
             ->seeElement('label[for="downloader"]')
             ->seeInElement('label[for="downloader"]', 'Downloader Status')
             ->seeElement('select[name="downloader"]')
+        ;
+    }
+
+    public function testActiveWorkerShowsUpdateButton(): void
+    {
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centreusers.edit', ['id' => $this->worker->id]))
+            ->assertResponseOk()
+            ->seeElement('#updateWorker')
+        ;
+    }
+
+    public function testActiveWorkerShowsDisableButtonNotEnableButton(): void
+    {
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centreusers.edit', ['id' => $this->worker->id]))
+            ->assertResponseOk()
+            ->seeInElement('#toggleWorker', 'Disable worker')
+            ->dontSeeInElement('#toggleWorker', 'Enable worker')
+        ;
+    }
+
+    public function testActiveWorkerDoesNotShowRetireForm(): void
+    {
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centreusers.edit', ['id' => $this->worker->id]))
+            ->assertResponseOk()
+            ->dontSeeElement('#retireForm')
+            ->dontSeeElement('#retireWorker')
+        ;
+    }
+
+    public function testActiveWorkerDoesNotShowDisabledMessage(): void
+    {
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centreusers.edit', ['id' => $this->worker->id]))
+            ->assertResponseOk()
+            ->dontSee('This worker is')
+        ;
+    }
+
+    public function testWorkerHomeCentreIsPreselectedInDropdown(): void
+    {
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centreusers.edit', ['id' => $this->worker->id]))
+            ->assertResponseOk()
+            ->seeElement('option[value="' . $this->centre->id . '"][selected]')
+        ;
+    }
+
+    public function testWorkerAlternativeCentresAreRenderedAsOptions(): void
+    {
+        $this->worker->centres()->attach([
+            $this->altCentres[0]->id => ['homeCentre' => false],
+            $this->altCentres[1]->id => ['homeCentre' => false],
+        ]);
+
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centreusers.edit', ['id' => $this->worker->id]))
+            ->assertResponseOk()
+            ->seeElement('option[value="' . $this->altCentres[0]->id . '"]')
+            ->seeElement('option[value="' . $this->altCentres[1]->id . '"]')
+        ;
+    }
+
+    // -----------------------------------------------------------------------
+    // Page structure — disabled (soft-deleted) worker
+    // -----------------------------------------------------------------------
+
+    public function testDisabledWorkerShowsDisabledMessage(): void
+    {
+        $this->worker->delete();
+
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centreusers.edit', ['id' => $this->worker->id]))
+            ->assertResponseOk()
+            ->seeInElement('h2', 'This worker is')
+            ->seeInElement('h2 i', 'disabled')
+        ;
+    }
+
+    public function testDisabledWorkerDoesNotShowUpdateButton(): void
+    {
+        $this->worker->delete();
+
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centreusers.edit', ['id' => $this->worker->id]))
+            ->assertResponseOk()
+            ->dontSeeElement('#updateWorker')
+        ;
+    }
+
+    public function testDisabledWorkerShowsEnableButtonNotDisableButton(): void
+    {
+        $this->worker->delete();
+
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centreusers.edit', ['id' => $this->worker->id]))
+            ->assertResponseOk()
+            ->seeInElement('#toggleWorker', 'Enable worker')
+            ->dontSeeInElement('#toggleWorker', 'Disable worker')
+        ;
+    }
+
+    public function testDisabledWorkerShowsRetireForm(): void
+    {
+        $this->worker->delete();
+
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centreusers.edit', ['id' => $this->worker->id]))
+            ->assertResponseOk()
+            ->seeElement('#retireForm')
+            ->seeElement('#retireWorker')
+        ;
+    }
+
+    public function testDisabledWorkerRetireFormPostsToCorrectRoute(): void
+    {
+        $this->worker->delete();
+
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centreusers.edit', ['id' => $this->worker->id]))
+            ->assertResponseOk()
+            ->seeElement(
+                '#retireForm[action="' . route('admin.centreusers.retire', ['id' => $this->worker->id]) . '"]'
+            )
+        ;
+    }
+
+    // -----------------------------------------------------------------------
+    // Access control
+    // -----------------------------------------------------------------------
+
+    public function testUnauthenticatedUserCannotAccessEditPage(): void
+    {
+        $this->get(route('admin.centreusers.edit', ['id' => $this->worker->id]))
+            ->assertResponseStatus(302)
         ;
     }
 }

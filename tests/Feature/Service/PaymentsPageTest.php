@@ -49,8 +49,8 @@ class PaymentsPageTest extends StoreTestCase
         $vs->user_id = $user->id;
         $vs->save();
     }
-    /** @test */
-    public function itShowsATableWithHeaders()
+
+    public function testItShowsATableWithHeaders(): void
     {
         $this->actingAs($this->admin_user, 'admin')
             ->visit($this->paymentsRoute)
@@ -65,19 +65,18 @@ class PaymentsPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itShowsOutstandingPaymentsInSidebar()
+
+    public function testItShowsOutstandingPaymentsInSidebar(): void
     {
         $this->actingAs($this->admin_user, 'admin')
             ->visit($this->paymentsRoute)
             ->assertResponseOk()
-            ->seeInElement('a.payments','Payment Requests')
+            ->seeInElement('a.payments', 'Payment Requests')
         ;
-
     }
 
-    /** @test */
-    public function itShowsAnErrorWhenPaymentLinkBad()
+
+    public function testItShowsAnErrorWhenPaymentLinkBad(): void
     {
         $this->actingAs($this->admin_user, 'admin')
         // A poorly formed uuid should show the page, but with an error message in place of the voucher table
@@ -87,8 +86,8 @@ class PaymentsPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itShowsPaymentRequestDetailsOnlyForValidPaymentUUIDs()
+
+    public function testItShowsPaymentRequestDetailsOnlyForValidPaymentUUIDs(): void
     {
         // A real uuid will display the data table
         $this->actingAs($this->admin_user, 'admin')
@@ -110,8 +109,8 @@ class PaymentsPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itShowsPayButtonWhenOnlyPaymentIsUnpaid()
+
+    public function testItShowsPayButtonWhenOnlyPaymentIsUnpaid(): void
     {
         // A real unpaid uuid will display the pay button
         $this->actingAs($this->admin_user, 'admin')
@@ -129,8 +128,8 @@ class PaymentsPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itShowsTheCorrectVoucherStatus()
+
+    public function testItShowsTheCorrectVoucherStatus(): void
     {
         // A made up uuid will display no statuses
         $this->actingAs($this->admin_user, 'admin')
@@ -154,6 +153,4 @@ class PaymentsPageTest extends StoreTestCase
             ->seeInElement('span[class="status paid"]', 'Paid')
         ;
     }
-
 }
-

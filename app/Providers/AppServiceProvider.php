@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
-use App\Views\Composers\PaymentsComposer;
+use App\CentreUser;
+use App\Services\EnvWriter;
+use App\View\Composers\PaymentsComposer;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
@@ -31,20 +33,28 @@ class AppServiceProvider extends ServiceProvider
         // Needed because we're still serialising cookies!
         Passport::withCookieSerialization();
 
-
-        // adds "push once"
-        Blade::directive('pushonce', static function ($expression) {
-            [$pushName, $pushSub] = explode(':', trim(substr($expression, 1, -1)));
-
-            $key = '__pushonce_' . str_replace('-', '_', $pushName) . '_' . str_replace('-', '_', $pushSub);
-
-            return "<?php if(! isset(\$__env->{$key})): \$__env->{$key} = 1; \$__env->startPush('{$pushName}'); ?>";
-        });
-        Blade::directive('endpushonce', static function ($expression) {
-            return '<?php $__env->stopPush(); endif; ?>';
-        });
-
         View::composer('*', PaymentsComposer::class);
+
+        // Gates
+        Gate::define('take-developer-actions', static function () {
+            // permit if the application is debugging
+            return config('app.debug') === true;
+        });
+
+        Gate::define('collect-vouchers', static function (CentreUser $centreUser) {
+            $centreId = session('CentreUserCurrentCentreId');
+
+            if (! $centreId) {
+                return false;
+            }
+
+            // is this user permitted to work on this can_collect centre?
+            return $centreUser
+                ->centres()
+                ->where('centres.id', $centreId)
+                ->where('centres.can_collect', true)
+                ->exists();
+        });
     }
 
     /**
@@ -54,6 +64,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // manual registration of non-auto-discovered packages
+        $this->app->bind(EnvWriter::class, function () {
+            return new EnvWriter(base_path('.env'));
+        });
     }
 }

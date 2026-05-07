@@ -96,7 +96,7 @@ h1 {
 
   .checkbox-group {
     position: relative;
-    padding-left: 55px;
+    padding-left: 2.5rem;
     margin: 0.5rem 0 2rem 0;
     min-height: 10px;
 
@@ -107,20 +107,20 @@ h1 {
       &:checked + label:after {
         content: '✔';
         position: absolute;
-        top: 6px;
-        left: 12px;
+        left: 0.75rem;
+        top: 0;
         border: 0;
       }
     }
     > label {
       cursor: pointer;
-      margin-left: -20px;
+      line-height: 2.5rem;
 
       &:before {
         content: '';
         background: #ffffff;
-        width: 34px;
-        height: 34px;
+        width: 2.5rem;
+        height: 2.5rem;
         border: 1px solid #ececec;
         position: absolute;
         left: 0;
@@ -343,29 +343,6 @@ span.user-array {
   min-height: 100%;
 }
 
-#sidebar {
-  flex: 0 0 300px;
-  font-weight: 600;
-  background-color: $arc_white;
-  border-right: 1px solid #ededed;
-  ul {
-    padding-left: 0;
-    margin-top: 1em;
-    li {
-      color: #656565;
-      display: block;
-      padding: 1em 2em;
-      &:hover,
-      &:active {
-        background-color: #f5f5f5;
-      }
-    }
-    span {
-      padding-right: 10px;
-    }
-  }
-}
-
 #main-content {
   background-color: $arc_bg;
   flex: 1;
@@ -415,4 +392,95 @@ tr.disabled {
 
 button.remove {
   background-color: #d2232a;
+}
+
+#sidebar {
+    flex: 0 0 300px;
+    font-weight: 600;
+    background-color: $arc_white;
+    border-right: 1px solid $arc_border;
+
+    ul {
+        padding-left: 0;
+        margin-top: 1em;
+
+        li {
+            color: #656565;
+            display: block;
+            padding: 1em 2em;
+            &:hover,
+            &:active {
+                background-color: $arc_gray;
+            }
+        }
+
+        span {
+            padding-right: 0px;
+        }
+    }
+}
+
+.sidebar-heading {
+    cursor: pointer;
+    user-select: none;
+    // Override the li padding so we control spacing ourselves
+    padding: 0.75em 1.5em !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75em;
+    letter-spacing: 0.08em;
+    color: #999;
+
+    // Flex layout so icon | label | caret sit cleanly in one row
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+
+    .glyphicon:first-child {
+        padding-right: 0; // gap handles spacing instead
+        flex-shrink: 0;
+    }
+
+    .sidebar-heading-label {
+        flex: 1; // pushes caret to the far right
+    }
+
+    .caret {
+        flex-shrink: 0;
+        transition: transform 0.2s ease;
+    }
+
+    // Rotate caret when section is collapsed
+    &.collapsed .caret {
+        transform: rotate(-90deg);
+    }
+}
+
+.sidebar-section--dev .sidebar-heading {
+    color: #d9534f;
+}
+
+.sidebar-subheading {
+    padding: 4px 1.5em 4px 2.5em !important;
+    font-size: 0.7em;
+    opacity: 0.55;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    &:hover {
+        background-color: transparent !important; // subheading isn't a link
+    }
+}
+
+.sidebar-item--danger a {
+    color: #d9534f;
+}
+
+.sidebar-message {
+    padding: 0.5em 1.5em !important;
+    font-size: 0.85em;
+    font-style: italic;
+    color: #999;
+    &:hover {
+        background-color: transparent !important;
+    }
 }

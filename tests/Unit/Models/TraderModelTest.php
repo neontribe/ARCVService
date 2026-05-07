@@ -23,7 +23,7 @@ class TraderModelTest extends TestCase
         $this->trader = factory(Trader::class)->state('withnullable')->create();
     }
 
-    public function testTraderIsCreatedWithExpectedAttributes()
+    public function testTraderIsCreatedWithExpectedAttributes(): void
     {
         $t = $this->trader;
         // Keeping it simple to make writing test suite less onerous.
@@ -36,14 +36,14 @@ class TraderModelTest extends TestCase
         $this->assertNull($t->disabled_at);
     }
 
-    public function testSoftDeleteTrader()
+    public function testSoftDeleteTrader(): void
     {
         $this->trader->delete();
         $this->assertCount(1, Trader::withTrashed()->get());
         $this->assertCount(0, Trader::all());
     }
 
-    public function testItCanBeDisabledAndEnabled()
+    public function testItCanBeDisabledAndEnabled(): void
     {
         $this->trader->disable();
         $this->trader->refresh();
@@ -54,12 +54,12 @@ class TraderModelTest extends TestCase
         $this->assertNull($this->trader->disabled_at);
     }
 
-    public function testTraderBelongsToMarket()
+    public function testTraderBelongsToMarket(): void
     {
         $this->assertInstanceOf(Market::class, $this->trader->market);
     }
 
-    public function testTraderHasManyVouchers()
+    public function testTraderHasManyVouchers(): void
     {
         factory(Voucher::class, 10)->create([
             'trader_id' => $this->trader->id,
@@ -71,7 +71,7 @@ class TraderModelTest extends TestCase
         $this->assertNotEquals($this->trader->vouchers, Voucher::all());
     }
 
-    public function testTraderHasConfirmedVouchers()
+    public function testTraderHasConfirmedVouchers(): void
     {
         $vouchers = factory(Voucher::class, 3)->state('printed')->create([
             'trader_id' => $this->trader->id,
@@ -102,7 +102,7 @@ class TraderModelTest extends TestCase
         $this->assertEquals($confirmed_codes, $vc_code_states);
     }
 
-    public function testTraderHasVouchersWithStatus()
+    public function testTraderHasVouchersWithStatus(): void
     {
         $vouchers = factory(Voucher::class, 6)->state('printed')->create([
             'trader_id' => $this->trader->id,

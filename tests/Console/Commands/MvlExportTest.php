@@ -31,5 +31,4 @@ class MvlExportTest extends TestCase
         $this->assertStringContainsString("2023/03/31", $result);
         $this->assertStringContainsString("54321", $result);
     }
-
 }

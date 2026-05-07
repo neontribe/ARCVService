@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use App\Centre;
@@ -36,10 +37,13 @@ class CentresSeeder extends Seeder
         // Social prescribing centre
         factory(Centre::class)->create(['name' => 'Prescribing Centre', 'sponsor_id' => 9]);
 
-		// Tower Hamlet SP centre
-		factory(Centre::class)->create(['name' => 'Tower Hamlet SP', 'sponsor_id' => 10]);
+        // Tower Hamlet SP centre
+        factory(Centre::class)->create(['name' => 'Tower Hamlet SP', 'sponsor_id' => 10]);
 
-		// Lambeth SP centre
-		factory(Centre::class)->create(['name' => 'Lambeth SP', 'sponsor_id' => 11]);
+        // Lambeth SP centre
+        factory(Centre::class)->create(['name' => 'Lambeth SP', 'sponsor_id' => 11]);
+
+        // Collecting centre for collection testing - sponsor 12
+        factory(Centre::class)->create(['name' => 'Collecting Centre', 'sponsor_id' => 12, 'can_collect' => 1]);
     }
 }

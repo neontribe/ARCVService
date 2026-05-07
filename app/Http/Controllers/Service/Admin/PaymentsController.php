@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Service\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\TransitionProcessor\TransitionProcessor;
 use App\StateToken;
-use App\Trader;
-use Carbon\Carbon;
+use App\Voucher;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -14,234 +14,184 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Log;
+use Illuminate\Support\Facades\Log;
+use JsonException;
 
 class PaymentsController extends Controller
 {
-    private const HISTORY_CUTOFF = 21;
-
-    /** Lightweight check for outstanding payments to highlight in dashboard
-     * @return bool
-     */
-    public static function checkIfOutstandingPayments(): bool
-    {
-        $date = Carbon::now()->subDays(self::HISTORY_CUTOFF)->startOfDay();
-
-        $payments = DB::table('state_tokens')
-            ->where('created_at', '>', $date)
-            ->whereNull('admin_user_id')
-            ->count();
-
-        return $payments > 0;
-    }
-
     /**
      * Lists the payments paid and pending
-     * @return Factory|View|Application
      */
     public function index(): Factory|View|Application
     {
-        $pendingPaymentData = self::getStateTokensFromDate();
-        $reimbursedPaymentData = self::getStateTokensFromDate(true);
+        $pending = StateToken::pending()
+            ->withinPaymentWindow()
+            ->withPaymentRelations()
+            ->orderByDesc('created_at')
+            ->get();
+
+        $reimbursed = StateToken::reimbursed()
+            ->withinPaymentWindow()
+            ->withPaymentRelations()
+            ->orderByDesc('created_at')
+            ->get();
+
         return view('service.payments.index', [
-            'pending' => $pendingPaymentData,
-            'reimbursed' => $reimbursedPaymentData,
+            'pending' => self::makePaymentDataStructure($pending),
+            'reimbursed' => self::makePaymentDataStructure($reimbursed),
         ]);
     }
 
     /**
-     * List Payments
-     * @param bool $paid
-     * @param Carbon|null $date
-     * @return array
-     */
-    public static function getStateTokensFromDate(bool $paid = false, Carbon $date = null): array
-    {
-
-        //set the period we want scoped
-        $fromDate = $date ?? Carbon::now()->subDays(self::HISTORY_CUTOFF)->startOfDay();
-        //get all the StateTokens for unpaid (pending) payment requests in the past 7 days
-        // (in theory nothing is ever unpaid for that long anyway)
-        $tokens = StateToken::with([
-            'user',
-            'voucherStates',
-            'voucherStates.voucher',
-            'voucherStates.voucher.trader',
-            'voucherStates.voucher.trader.market.sponsor',
-            'voucherStates.voucher.sponsor',
-        ])
-            ->where('created_at', '>', $fromDate->format('Y-m-d'))
-            ->whereNotNull('user_id')
-            // if $paid = true will make this a NotNull, thereby getting paid things
-            ->whereNull('admin_user_id', 'and', $paid)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return self::makePaymentDataStructure($tokens);
-    }
-
-    /**
-     * Constructs the Payment structure for our blade
-     * @param Collection $tokens
-     * @return array
+     * Constructs the payment data structure for the payments blade.
+     * @throws JsonException
      */
     public static function makePaymentDataStructure(Collection $tokens): array
     {
-        $pendingResults = [];
+        $results = [];
+
         foreach ($tokens as $stateToken) {
-            // start tracking this set of results
-            $currentTokenResults = [];
-            $currentTokenResults['requestedBy'] = $stateToken->user->name ?? 'unknown';
+            $voucherStates = $stateToken->voucherStates;
 
-            // get the states for this token
-            $voucherStates = $stateToken->voucherStates->all();
-            // count 'em while we're here
-            $currentTokenResults['vouchersTotal'] = count($voucherStates);
-
-            //Get all the attributes we need via each voucherState
-            foreach ($voucherStates as $voucherState) {
-                $trader = $voucherState->voucher->trader;
-                //These are the main headers; check once and then take that going forward
-                $currentTokenResults['traderName'] ??= $trader->name;
-                if (empty($currentTokenResults['traderName'])) {
-                    \Log::warning("Bad voucher trader name: ", json_encode($voucherStates));
-                    continue;
-                }
-                $currentTokenResults['marketName'] ??= $trader->market->name;
-                $currentTokenResults['area'] ??= $trader->market->sponsor->name;
-
-                $areaList = $currentTokenResults['voucherAreas'] ?? [];
-                $areaName = $voucherState->voucher->sponsor->name;
-                $areaList[$areaName] = isset($areaList[$areaName])
-                    ? $areaList[$areaName] +=1
-                    : 1;
-                $currentTokenResults['voucherAreas'] = $areaList;
-            }
-            foreach ($pendingResults as $index => $result) {
-                if (
-                    empty($result['requestedBy']) ||
-                    empty($result['vouchersTotal']) ||
-                    empty($result['traderName']) ||
-                    empty($result['marketName']) ||
-                    empty($result['area']) ||
-                    empty($result['voucherAreas'])
-                ) {
-                    \Log::error("Bad pending results at index " . $index . " - " . json_encode($result));
-                    unset($pendingResults[$index]);
-                }
+            $firstTrader = $voucherStates->first()?->voucher?->trader;
+            if ($firstTrader === null || empty($firstTrader->name)) {
+                Log::warning(sprintf(
+                    'Skipping token %s — missing trader on first voucher state',
+                    $stateToken->uuid
+                ));
+                continue;
             }
 
-            // chuck that in the results array.
-            $pendingResults[$stateToken->uuid] = $currentTokenResults;
+            // A trader without a market is a data integrity issue.
+            // Skip rather than throw — the admin should still see other tokens.
+            if ($firstTrader->market === null) {
+                Log::error(sprintf(
+                    'Skipping token %s — trader %d has no associated market',
+                    $stateToken->uuid,
+                    $firstTrader->id
+                ));
+                continue;
+            }
+
+            $currentTokenResults = [
+                'requestedBy' => $stateToken->user?->name ?? 'System',
+                'vouchersTotal' => $voucherStates->count(),
+                'traderName' => $firstTrader->name,
+                'marketName' => $firstTrader->market->name,
+                'area' => $firstTrader->market->sponsor?->name ?? '',
+                'voucherAreas' => $voucherStates
+                    ->countBy(function ($vs) {
+                        return $vs->voucher->sponsor->name;
+                    })
+                    ->all(),
+            ];
+
+            $requiredKeys = ['requestedBy', 'vouchersTotal', 'traderName', 'marketName', 'area', 'voucherAreas'];
+            if (
+                collect($requiredKeys)->contains(function ($k) use ($currentTokenResults) {
+                    return empty($currentTokenResults[$k]);
+                })
+            ) {
+                Log::error(sprintf(
+                    'Incomplete payment data for token %s — %s',
+                    $stateToken->uuid,
+                    json_encode($currentTokenResults, JSON_THROW_ON_ERROR)
+                ));
+                continue;
+            }
+
+            $results[$stateToken->uuid] = $currentTokenResults;
         }
-        return $pendingResults;
+
+        return $results;
     }
 
-    /** Get a specific payment request by link
-     * @param $paymentUuid
-     * @return mixed
+    /**
+     * Get a specific payment request by link.
+     *
+     * Passes state_token = null to the view when the UUID is not found so the
+     * view can render an inline error message. A redirect was previously
+     * considered but PaymentsPageTest establishes that the correct UX is to
+     * stay on the paymentRequest page with an explanatory message — not to
+     * bounce the admin to the index.
      */
-    public function show($paymentUuid)
+    public function show(string $paymentUuid): Factory|View
     {
-        // Initialise
-        $vouchers = [];
-        $trader = "trader";
-        $number_to_pay = 0;
+        $stateToken = StateToken::with([
+            'voucherStates.voucher.trader',
+            'voucherStates.voucher.sponsor',
+        ])
+            ->where('uuid', $paymentUuid)
+            ->first();
 
-        // Find the StateToken of a given uuid
-        $state_token = StateToken::where('uuid', $paymentUuid)->first();
-        if ($state_token !== null) {
-
-            // Get the VoucherStates with this StateToken
-            $voucher_states = $state_token
-                ->voucherStates()
-                ->get();
-
-            // Get the voucher codes of states TODO - better
-            foreach ($voucher_states as $voucher_state) {
-                $vouchers[] = $voucher_state
-                    ->voucher()
-                    ->first();
-            }
-
-            // Count the payable vouchers
-            $number_to_pay = collect($vouchers)
-                ->where('currentstate', 'payment_pending')
-                ->count();
-
-            // Get the trader's name
-            if (!empty($vouchers)) {
-                $trader = Trader::find($vouchers[0]->trader_id)->name;
-            }
-        }
+        $vouchers = $stateToken?->voucherStates
+            ->map(function ($vs) {
+                return $vs->voucher;
+            })
+            ->filter()
+            ?? collect();
 
         return view('service.payments.paymentRequest', [
-            'state_token' => $state_token,
+            'state_token' => $stateToken,
             'vouchers' => $vouchers,
-            'trader' => $trader,
-            'number_to_pay' => $number_to_pay,
+            'trader' => $vouchers->first()?->trader?->name ?? 'Unknown trader',
+            'number_to_pay' => $vouchers->where('currentstate', 'payment_pending')->count(),
         ]);
     }
 
     /**
-     * Pay a specific payment request by link
-     * @param Request $request
-     * @param $paymentUuid
-     * @return RedirectResponse
+     * Pay a specific payment request by link.
+     *
+     * trader: null is intentional — payout is admin-driven and handlePayout
+     * preserves the voucher's existing trader_id unchanged. See TransitionProcessor.
      */
-    public function update(Request $request, $paymentUuid): RedirectResponse
+    public function update(Request $request, string $paymentUuid): RedirectResponse
     {
-        // Initialise
-        $vouchers = [];
+        $stateToken = StateToken::where('uuid', $paymentUuid)->firstOrFail();
 
-        // Find the StateToken of a given uuid
-        $state_token = StateToken::where('uuid', $paymentUuid)->first();
-        if ($state_token !== null) {
+        $query = Voucher::whereHas(
+            'history',
+            static function ($q) use ($stateToken) {
+                return $q->where('state_token_id', $stateToken->id);
+            }
+        );
 
-            // Get the VoucherStates with this StateToken
-            $voucher_states = $state_token
-                ->voucherStates()
-                ->get();
+        $processor = new TransitionProcessor(
+            trader: null,
+            transition: 'payout',
+            sendPaymentEmail: false
+        );
 
-            // Get the voucher codes of states TODO - better
-            foreach ($voucher_states as $voucher_state) {
-                $voucher = $voucher_state
-                    ->voucher()
-                    ->first();
+        try {
+            DB::beginTransaction();
 
-                $vouchers[] = $voucher;
+            $response = $processor->handle($query);
+
+            if ($response->hasFailures()) {
+                DB::rollBack();
+                return redirect()
+                    ->route('admin.payments.index')
+                    ->withErrors($response->toArray());
             }
 
-            // Transition the vouchers
-            $success = true;
-            Log::info(sprintf(
-                "%s: Processing %d vouchers, uuid=%s, user=%s(%d), admin user=%s(%d), ip=%s",
-                __CLASS__,
-                count($vouchers),
-                $state_token->uuid,
-                $state_token->user?->name,
-                $state_token->user?->id,
-                Auth::user()->name,
-                Auth::user()->id,
-                $request->ip(),
-            ));
-            foreach ($vouchers as $v) {
-                if ($v->transitionAllowed('payout')) {
-                    $v->applyTransition('payout');
-                } else {
-                    Log::info('Failure Processing Payout Transition');
-                    $success = false;
-                    break;
-                }
-            }
-            if ($success) {
-                \Log::debug("Transition successful");
-                $state_token->admin_user_id = Auth::user()->id;
-                $state_token->save();
-            } else {
-                \Log::debug("Transition failed");
-            }
+            $stateToken->admin_user_id = Auth::id();
+            $stateToken->save();
+
+            DB::commit();
+
+            return redirect()
+                ->route('admin.payments.index')
+                ->with('notification', 'Vouchers Paid!');
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Payout failed unexpectedly', [
+                'uuid' => $paymentUuid,
+                'error' => $e->getMessage(),
+            ]);
+            return redirect()
+                ->route('admin.payments.index')
+                ->withErrors(['error' => 'Payment processing failed. Please try again.']);
         }
-        return redirect()->route('admin.payments.index')->with('notification', 'Vouchers Paid!');
     }
 }

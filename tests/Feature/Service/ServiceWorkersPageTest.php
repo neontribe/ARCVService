@@ -2,37 +2,29 @@
 
 namespace Tests\Feature\Service;
 
-use Tests\StoreTestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\AdminUser;
 use App\Centre;
 use App\CentreUser;
-use Illuminate\Support\Collection;
 use App\Sponsor;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
+use Tests\StoreTestCase;
 
 class ServiceWorkersPageTest extends StoreTestCase
 {
     use RefreshDatabase;
 
-    /** @var AdminUser $adminUser */
-    private $adminUser;
+    private AdminUser $adminUser;
 
-    /** @var CentreUser $userHomeCentreNoAlt */
-    private $userHomeCentreNoAlt;
+    private CentreUser $userHomeCentreNoAlt;
 
-    /** @var CentreUser $userHomeCentreTwoAlt */
-    private $userHomeCentreTwoAlt;
+    private CentreUser $userHomeCentreTwoAlt;
 
-    /** @var CentreUser $downlaoderUser */
-    private $downloaderUser;
+    private CentreUser $downloaderUser;
 
-    /** @var Centre $centre */
-    private $centre;
+    private Collection $centres;
 
-    /** @var Collection $altCentres */
-    private $altCentres;
-
-    private $workersRoute;
+    private string $workersRoute;
 
     public function setUp(): void
     {
@@ -43,7 +35,7 @@ class ServiceWorkersPageTest extends StoreTestCase
         $sponsor = factory(Sponsor::class)->create();
 
         // Create 3 centres in an area
-        $this->centre = factory(Centre::class, 3)->create()->each(
+        $this->centres = factory(Centre::class, 3)->create()->each(
             function ($c) use ($sponsor) {
                 $c->sponsor_id = $sponsor->id;
                 $c->save();
@@ -51,7 +43,7 @@ class ServiceWorkersPageTest extends StoreTestCase
         );
 
         // Create 2 alt centres
-        $this->altCentres = factory(Centre::class, 2)->create([]);
+        $altCentres = factory(Centre::class, 2)->create([]);
         $this->workersRoute = route('admin.centreusers.index');
 
         // Create 1 user with a home centre and no alternatives
@@ -68,7 +60,7 @@ class ServiceWorkersPageTest extends StoreTestCase
         ]);
 
         $this->userHomeCentreTwoAlt->centres()->attach(1, ['homeCentre' => true]);
-        $this->userHomeCentreTwoAlt->centres()->attach($this->altCentres->all());
+        $this->userHomeCentreTwoAlt->centres()->attach($altCentres->all());
 
         // Create 1 user with a homeCentre who can Download
         $this->downloaderUser = factory(CentreUser::class)->state('withDownloader')->create([
@@ -78,12 +70,7 @@ class ServiceWorkersPageTest extends StoreTestCase
         $this->downloaderUser->centres()->attach(1, ['homeCentre' => true]);
     }
 
-    /**
-     * @test
-     *
-     * @return void
-     */
-    public function itShowsATableWithHeaders()
+    public function testItShowsATableWithHeaders(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->workersRoute)
@@ -94,18 +81,11 @@ class ServiceWorkersPageTest extends StoreTestCase
             ->seeInElement('th', 'Home Centre Area')
             ->seeInElement('th', 'Home Centre')
             ->seeInElement('th', 'Alternative Centres')
-            ->seeInElement('th', 'Edit')
             ->seeInElement('th', 'Downloader')
-            ->see('Downloader')
-        ;
+            ->see('Downloader');
     }
 
-    /**
-     * @test
-     *
-     * @return void
-     */
-    public function itShowsAListWithUsers()
+    public function testItShowsAListWithUsers(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->workersRoute)
@@ -114,21 +94,14 @@ class ServiceWorkersPageTest extends StoreTestCase
             ->seeInElementAtPos('tbody tr', $this->userHomeCentreNoAlt['name'], 1)
             ->seeInElementAtPos('tbody tr td', $this->userHomeCentreNoAlt['email'], 8)
             ->seeInElementAtPos('tbody tr', $this->userHomeCentreTwoAlt['name'], 2)
-            ->seeInElementAtPos('tbody tr td', $this->userHomeCentreTwoAlt['email'], 15)
-        ;
+            ->seeInElementAtPos('tbody tr td', $this->userHomeCentreTwoAlt['email'], 15);
     }
 
-    /**
-    * @test
-    *
-    * @return void
-    */
-    public function itShowsADownloadWorkersListButton()
+    public function testItShowsADownloadWorkersListButton(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->workersRoute)
             ->assertResponseOk()
-            ->seeInElement('a', 'Download Worker List')
-        ;
+            ->seeInElement('a', 'Download Worker List');
     }
 }

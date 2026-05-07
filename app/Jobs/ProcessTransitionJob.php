@@ -2,25 +2,30 @@
 
 namespace App\Jobs;
 
-use App\Services\TransitionProcessor;
+use App\Services\TransitionProcessor\TransitionProcessor;
 use App\Trader;
 use App\User;
+use App\Voucher;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Imtigger\LaravelJobStatus\JobStatus;
 use Imtigger\LaravelJobStatus\Trackable;
-use Illuminate\Support\Facades\Auth;
 use Log;
 
 class ProcessTransitionJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Trackable;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    use Trackable;
 
     private Trader $trader;
     private array $voucherCodes;
@@ -35,8 +40,6 @@ class ProcessTransitionJob implements ShouldQueue
 
     /**
      * Create a new job instance.
-     *
-     * @return void
      */
     public function __construct(Trader $trader, array $voucherCodes, string $transition, int $runAsId)
     {
@@ -48,13 +51,10 @@ class ProcessTransitionJob implements ShouldQueue
     }
 
     /**
-     * Sends the user to an url where they can monitor the job
-     * @param JobStatus $jobStatus
-     * @return JsonResponse
+     * Sends the user to a URL where they can monitor the job.
      */
     public static function monitor(JobStatus $jobStatus): JsonResponse
     {
-        // this is the body data; needs to tell the client what to do
         $data = array_merge(
             [
                 'location' => route('api.queued-task.show', ['jobStatus' => $jobStatus->id]),
@@ -67,13 +67,8 @@ class ProcessTransitionJob implements ShouldQueue
         return response()->json($data, 202);
     }
 
-    /**
-     * @param JobStatus $jobStatus
-     * @return JsonResponse
-     */
     private static function pollingResponse(JobStatus $jobStatus): JsonResponse
     {
-        // tell the client where to look.
         $data = array_merge(
             [
                 'location' => route('api.queued-task.show', ['jobStatus' => $jobStatus->id]),
@@ -85,38 +80,22 @@ class ProcessTransitionJob implements ShouldQueue
         return response()->json($data);
     }
 
-    /**
-     * @param JobStatus $jobStatus
-     * @return JsonResponse
-     */
     public static function queuedHandler(JobStatus $jobStatus): JsonResponse
     {
         return self::pollingResponse($jobStatus);
     }
 
-    /**
-     * @param JobStatus $jobStatus
-     * @return JsonResponse
-     */
     public static function executingHandler(JobStatus $jobStatus): JsonResponse
     {
         return self::pollingResponse($jobStatus);
     }
 
-    /**
-     * @param JobStatus $jobStatus
-     * @return JsonResponse
-     */
     public static function retryingHandler(JobStatus $jobStatus): JsonResponse
     {
         // this probably won't happen, but for safety's sake we'll catch it.
         return self::pollingResponse($jobStatus);
     }
 
-    /**
-     * @param JobStatus $jobStatus
-     * @return JsonResponse
-     */
     public static function finishedHandler(JobStatus $jobStatus): JsonResponse
     {
         // we're done! should be `303 Other` the user to somewhere they can pick up their data.
@@ -131,10 +110,6 @@ class ProcessTransitionJob implements ShouldQueue
         ]);
     }
 
-    /**
-     * @param JobStatus $jobStatus
-     * @return JsonResponse
-     */
     public static function failedHandler(JobStatus $jobStatus): JsonResponse
     {
         // TODO think of a better failed handler
@@ -144,34 +119,40 @@ class ProcessTransitionJob implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
+     * $voucherCodes is kept as an array on the job property because a Builder
+     * cannot be serialised to the queue. The Builder is constructed here inside
+     * handle(), matching the controller pattern exactly.
      */
     public function handle(): void
     {
         Auth::logout();
 
         // Login if we're not
-        if (!Auth::check()) {
-	        Auth::login(User::find($this->runAsId));
-	        Log::info("This session logged in [" . Auth::user()->id . "]");
+        if (Auth::check()) {
+            $loginMessage = "This session already has a user [%s]";
         } else {
-	        Log::info("This session already has a user [" . Auth::user()->id . "]");
-	    }
+            Auth::login(User::find($this->runAsId));
+            $loginMessage = "This session logged in [%s]";
+        }
+        $id = Auth::user()->id;
+        Log::info(sprintf($loginMessage, $id));
 
-        if (Auth::user()->id === $this->runAsId) {
+        if ($id === $this->runAsId) {
+            $query = Voucher::whereIn('code', $this->voucherCodes);
+            $foundCodes = $query->pluck('code')->all();
+            $invalidCodes = array_values(array_diff($this->voucherCodes, $foundCodes));
 
             $processor = new TransitionProcessor($this->trader, $this->transition);
 
-            $processor->handle($this->voucherCodes);
-
-            $responseData = $processor->constructResponseMessage();
+            $response = $processor->handle($query);
+            $response->addInvalid($invalidCodes);
 
             $key = Str::uuid();
-            Cache::put($key, $responseData);
+            Cache::put($key, $response->constructResponseMessage());
             $this->setOutput(['key' => $key]);
             Auth::logout();
-	    } else {
-            Log::error("Incorrect user [" . Auth::user()->id . "] for transition job expecting [" . $this->runAsId . "]");
+        } else {
+            Log::error(sprintf("Incorrect user [%s] for transition job expecting [%d]", $id, $this->runAsId));
         }
     }
 }

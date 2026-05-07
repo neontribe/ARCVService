@@ -50,7 +50,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'links' => [
-        'privacy_policy' => 'https://www.alexandrarose.org.uk/arc-childrens-centre-information-sharing-policy',
+        'privacy_policy' => 'https://www.alexandrarose.org.uk/wp-content/uploads/2025/02/Privacy-Policy-Rose-Voucher-Recipient-Feb-25.pdf',
     ],
 
     /*
@@ -95,6 +95,14 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Number of days of payments to display when searching for payments
+    |--------------------------------------------------------------------------
+    */
+
+    'payment_window_days' => 21,
+
+    /*
+    |--------------------------------------------------------------------------
     | the programme names we are running
     | eg. "standard", "social prescribing"
     |--------------------------------------------------------------------------
@@ -104,7 +112,7 @@ return [
         1 => 'Social Prescribing',
     ],
 
-	/*
+    /*
     |--------------------------------------------------------------------------
     | Demographic fields for primary carer - ethnic background
     |
@@ -136,15 +144,4 @@ return [
         'WOTH' => 'White - Any other White background',
         'NOBT' => 'Not answered',
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Default home centre for store dropdown
-    | - `true` for home centre or
-    | - `false` for "all" centres a user can see
-    |--------------------------------------------------------------------------
-     */
-
-    'default_to_home_centre' => env('ARC_DEFAULT_TO_HOME_CENTRE', false),
-
 ];

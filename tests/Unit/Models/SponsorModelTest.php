@@ -20,7 +20,7 @@ class SponsorModelTest extends TestCase
         $this->sponsor = factory(Sponsor::class)->create()->fresh();
     }
 
-    public function testSponsorIsCreatedWithExpectedAttributes()
+    public function testSponsorIsCreatedWithExpectedAttributes(): void
     {
         $s = $this->sponsor;
         // Keeping it simple to make writing test suite less onerous.
@@ -32,33 +32,33 @@ class SponsorModelTest extends TestCase
         $this->assertIsInt($s->programme);
     }
 
-    public function testItCanGetItsProgramName()
+    public function testItCanGetItsProgramName(): void
     {
         $s = $this->sponsor;
         $this->assertEquals($s->programme_name, config('arc.programmes')[$s->programme]);
     }
 
-    public function testSoftDeleteSponsor()
+    public function testSoftDeleteSponsor(): void
     {
         $this->sponsor->delete();
         $this->assertCount(1, Sponsor::withTrashed()->get());
         $this->assertCount(0, Sponsor::all());
     }
 
-    public function testSponsorHasManyVouchers()
+    public function testSponsorHasManyVouchers(): void
     {
         factory(Voucher::class, 10)->create([
             'sponsor_id' => $this->sponsor->id,
         ]);
         factory(Voucher::class, 2)->create([
-            'sponsor_id' => $this->sponsor->id +1,
+            'sponsor_id' => $this->sponsor->id + 1,
         ]);
         $this->assertCount(10, $this->sponsor->vouchers);
         $this->assertNotEquals($this->sponsor->vouchers, Voucher::all());
     }
 
-    /** @test */
-    public function itCanHaveCentres()
+
+    public function testItCanHaveCentres(): void
     {
         // Make a sponsor
         $s = $this->sponsor;
@@ -78,8 +78,8 @@ class SponsorModelTest extends TestCase
         }
     }
 
-    /** @test */
-    public function itCanHaveEvaluations()
+
+    public function testItCanHaveEvaluations(): void
     {
         // Make a sponsor
         $s = $this->sponsor;

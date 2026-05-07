@@ -10,11 +10,10 @@ use Tests\TestCase;
 
 class ChildModelTest extends TestCase
 {
-
     use RefreshDatabase;
 
-    /** @test */
-    public function itHasExpectedAttributes()
+
+    public function testItHasExpectedAttributes(): void
     {
         $child = factory(Child::class)->make();
         $this->assertNotNull($child->dob);
@@ -22,8 +21,8 @@ class ChildModelTest extends TestCase
         $this->assertNull($child->verfied);
     }
 
-    /** @test */
-    public function itCanBeVerified()
+
+    public function testItCanBeVerified(): void
     {
         $child1 = factory(Child::class)->states('verified')->make();
         $this->assertNotNull($child1->verified);
@@ -34,8 +33,8 @@ class ChildModelTest extends TestCase
         $this->assertFalse($child2->verified);
     }
 
-    /** @test */
-    public function itCanHaveAFamily()
+
+    public function testItCanHaveAFamily(): void
     {
         // Make a Family with a Child.
         $family = factory(Family::class)->create();
@@ -47,8 +46,8 @@ class ChildModelTest extends TestCase
         $this->assertEquals($family->id, $child->family->id);
     }
 
-    /** @test */
-    public function itHasAMethodThatCalculatesSchoolAge()
+
+    public function testItHasAMethodThatCalculatesSchoolAge(): void
     {
         // Use app.school_month to set the expected "start month".
         $school_month = config('arc.school_month');
@@ -56,7 +55,7 @@ class ChildModelTest extends TestCase
         // Create a child born before 1st of app.school_month
         $child = new Child([
             "born" => 'true',
-            "dob" => Carbon::createFromDate('2017', ($school_month -1), '1')->toDateTimeString(),
+            "dob" => Carbon::createFromDate('2017', ($school_month - 1), '1')->toDateTimeString(),
         ]);
 
         // Check his school month is app.school_month 2021

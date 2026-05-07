@@ -53,8 +53,19 @@ $factory->define(App\CentreUser::class, function (Faker\Generator $faker) {
         'email' => $faker->unique()->safeEmail,
         'password' => $password ?: $password = bcrypt('secret'),
         'remember_token' => str_random(10),
-        'role' =>'centre_user',
+        'role' => 'centre_user',
     ];
+});
+
+/**
+ * CentreUser in the retired state.
+ * PII is wiped, retired_at is set, and the model is soft-deleted.
+ * Relations (notes, centres) are preserved on the underlying row.
+ */
+$factory->afterCreatingState(App\CentreUser::class, 'retired', function ($centreUser) {
+    // retired centres must be soft deleted first
+    $centreUser->delete();
+    $centreUser->retire();
 });
 
 /**
@@ -71,7 +82,7 @@ $factory->state(App\CentreUser::class, 'withDownloader', function ($faker) use (
 /**
  * Specifically an Admin Centre User [foodmatters_user]
  */
-$factory->state(App\CentreUser::class, 'FMUser',function (Faker\Generator $faker) use ($factory){
+$factory->state(App\CentreUser::class, 'FMUser', function (Faker\Generator $faker) use ($factory) {
     static $password;
 
     return [
@@ -80,7 +91,7 @@ $factory->state(App\CentreUser::class, 'FMUser',function (Faker\Generator $faker
         'password' => $password ?: $password = bcrypt('secret'),
         'remember_token' => str_random(10),
         'role' => 'foodmatters_user',
-        'downloader' => true
+        'downloader' => true,
     ];
 });
 
@@ -197,18 +208,16 @@ $factory->define(App\Bundle::class, function (Faker\Generator $faker, $attribute
     // get/make  registration for a family
     $registration = isset($attributes['registration_id'])
         ? App\Registration::find($attributes['registration_id'])
-        : factory(App\Registration::class)->create()
-    ;
+        : factory(App\Registration::class)->create();
 
     // get/calculate and stash the entitlement
     $entitlement = isset($attributes['entitlement'])
         ? $attributes['entitlement']
-        : $registration->getValuation()->getEntitlement()
-    ;
+        : $registration->getValuation()->getEntitlement();
 
     return [
         'registration_id' => $registration->id,
-        'entitlement' => $entitlement
+        'entitlement' => $entitlement,
     ];
 });
 
@@ -221,16 +230,12 @@ $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
     } else {
         // there are no sponsors. odd. make a null one
         $sponsor = factory(App\Sponsor::class)->create([
-            'name' => 'Null Sponsors Inc.'
+            'name' => 'Null Sponsors Inc.',
         ]);
         $sponsor_id = $sponsor->id;
     }
     $states = config('state-machine.Voucher.states');
     $currentstate = $faker->randomElement($states);
-
-    // Todo Create the voucher_states that got us here.
-    $transitions = config('state-machine.Voucher.transitions');
-    // Todo find $currentstate in the $transitions[$key]['from']
 
     $shortcode = App\Sponsor::find($sponsor_id)->shortcode;
     return [
@@ -243,43 +248,135 @@ $factory->define(App\Voucher::class, function (Faker\Generator $faker) {
 });
 
 /**
- * Voucher with currentstate printed.
+ * Helper: insert one VoucherState row for the given transition.
+ *
+ * The 'from' value is read from the state-machine config so this stays in
+ * sync with the real transition definitions.  Pass $fromOverride when the
+ * transition allows multiple 'from' states and you need a specific one
+ * (e.g. 'retire' can come from either 'voided' or 'expired').
  */
-$factory->state(App\Voucher::class, 'printed', function ($faker) use ($factory) {
-
-    // As our starting state, we do not require a `voucher_state` to be generated.
-    $voucher = $factory->raw(App\Voucher::class);
-
-    return array_merge($voucher, [
-        'currentstate' => 'printed',
+$makeVoucherState = static function (App\Voucher $voucher, string $transition, string $fromOverride = null) {
+    $def = config("state-machine.Voucher.transitions.{$transition}");
+    factory(App\VoucherState::class)->create([
+        'voucher_id' => $voucher->id,
+        'transition' => $transition,
+        'from' => $fromOverride ?? (is_array($def['from']) ? $def['from'][0] : $def['from']),
+        'to' => $def['to'],
     ]);
+};
+
+/**
+ * printed — the initial state; no transition history is needed.
+ */
+$factory->state(App\Voucher::class, 'printed', function ($faker) {
+    return ['currentstate' => 'printed'];
 });
 
 /**
- * Voucher with currentstate dispatched.
+ * dispatched — printed → dispatched
  */
-$factory->state(App\Voucher::class, 'dispatched', function ($faker) use ($factory) {
-    $voucher = $factory->raw(App\Voucher::class);
-
-    // Dispatched is the first state, so we can go with default values here.
-    factory(App\VoucherState::class)->create();
-
-    return array_merge($voucher, [
-        'currentstate' => 'dispatched',
-    ]);
+$factory->state(App\Voucher::class, 'dispatched', function ($faker) {
+    return ['currentstate' => 'dispatched'];
+});
+$factory->afterCreatingState(App\Voucher::class, 'dispatched', function ($voucher) use ($makeVoucherState) {
+    $makeVoucherState($voucher, 'dispatch');
 });
 
-$factory->define(App\VoucherState::class, function (Faker\Generator $faker) {
+/**
+ * recorded — printed → dispatched → recorded
+ */
+$factory->state(App\Voucher::class, 'recorded', function ($faker) {
+    return ['currentstate' => 'recorded'];
+});
+$factory->afterCreatingState(App\Voucher::class, 'recorded', function ($voucher) use ($makeVoucherState) {
+    $makeVoucherState($voucher, 'dispatch');
+    $makeVoucherState($voucher, 'collect', 'dispatched');
+});
 
-    // Factory adds initial values for first possible state (dispatched)
-    // Overwrite when we create - other states.
+/**
+ * payment_pending — printed → dispatched → recorded → payment_pending
+ */
+$factory->state(App\Voucher::class, 'payment_pending', function ($faker) {
+    return ['currentstate' => 'payment_pending'];
+});
+$factory->afterCreatingState(App\Voucher::class, 'payment_pending', function ($voucher) use ($makeVoucherState) {
+    $makeVoucherState($voucher, 'dispatch');
+    $makeVoucherState($voucher, 'collect', 'dispatched');
+    $makeVoucherState($voucher, 'confirm');
+});
+
+/**
+ * reimbursed — printed → dispatched → recorded → payment_pending → reimbursed
+ */
+$factory->state(App\Voucher::class, 'reimbursed', function ($faker) {
+    return ['currentstate' => 'reimbursed'];
+});
+$factory->afterCreatingState(App\Voucher::class, 'reimbursed', function ($voucher) use ($makeVoucherState) {
+    $makeVoucherState($voucher, 'dispatch');
+    $makeVoucherState($voucher, 'collect', 'dispatched');
+    $makeVoucherState($voucher, 'confirm');
+    $makeVoucherState($voucher, 'payout');
+});
+
+/**
+ * voided — printed → dispatched → voided
+ */
+$factory->state(App\Voucher::class, 'voided', function ($faker) {
+    return ['currentstate' => 'voided'];
+});
+$factory->afterCreatingState(App\Voucher::class, 'voided', function ($voucher) use ($makeVoucherState) {
+    $makeVoucherState($voucher, 'dispatch');
+    $makeVoucherState($voucher, 'void');
+});
+
+/**
+ * expired — printed → dispatched → expired
+ */
+$factory->state(App\Voucher::class, 'expired', function ($faker) {
+    return ['currentstate' => 'expired'];
+});
+$factory->afterCreatingState(App\Voucher::class, 'expired', function ($voucher) use ($makeVoucherState) {
+    $makeVoucherState($voucher, 'dispatch');
+    $makeVoucherState($voucher, 'expire');
+});
+
+/**
+ * retired-from-voided — printed → dispatched → voided → retired
+ */
+$factory->state(App\Voucher::class, 'retired-from-voided', function ($faker) {
+    return ['currentstate' => 'retired'];
+});
+$factory->afterCreatingState(App\Voucher::class, 'retired-from-voided', function ($voucher) use ($makeVoucherState) {
+    $makeVoucherState($voucher, 'dispatch');
+    $makeVoucherState($voucher, 'void');
+    $makeVoucherState($voucher, 'retire', 'voided');
+});
+
+/**
+ * retired-from-expired — printed → dispatched → expired → retired
+ */
+$factory->state(App\Voucher::class, 'retired-from-expired', function ($faker) {
+    return ['currentstate' => 'retired'];
+});
+$factory->afterCreatingState(App\Voucher::class, 'retired-from-expired', function ($voucher) use ($makeVoucherState) {
+    $makeVoucherState($voucher, 'dispatch');
+    $makeVoucherState($voucher, 'expire');
+    $makeVoucherState($voucher, 'retire', 'expired');
+});
+
+/**
+ * VoucherState — base defaults model the first possible transition (dispatch).
+ * Individual rows are normally created via the $makeVoucherState helper above,
+ * which overrides transition/from/to for each step in a voucher's history.
+ */
+$factory->define(App\VoucherState::class, function (Faker\Generator $faker) {
     return [
         'transition' => 'dispatch',
         'from' => 'printed',
+        'to' => 'dispatched',
         'user_id' => 1,
         'voucher_id' => 1,
-        'to' => 'dispatched',
-        // Required by the state package we are using, but we don't use this field
+        // Required by the state package; not used by the application.
         'source' => 'factory',
     ];
 });
@@ -308,19 +405,25 @@ $factory->define(App\Centre::class, function (Faker\Generator $faker) {
         // print_pref will be 'collection' by default.
         // To ensure we always have one 'individual', adding to seeder as well.
         'print_pref' => $faker->randomElement(['individual', 'collection']),
+        'can_collect' => false,
     ];
 });
+
+$factory->state(App\Centre::class, 'collecting', function (Faker\Generator $faker) {
+    return ['can_collect' => true];
+});
+
 
 // Registration
 $factory->define(App\Registration::class, function (Faker\Generator $faker, $attributes) {
 
-  $eligibilities_hsbs = config('arc.reg_eligibilities_hsbs');
-  $eligibilities_nrpf = config('arc.reg_eligibilities_nrpf');
-  $eligibility_hsbs = $eligibilities_hsbs[mt_rand(0, count($eligibilities_hsbs) - 1)];
-  $eligible_from = null;
-  if ($eligibility_hsbs === 'healthy-start-receiving') {
-    $eligible_from = Carbon::now();
-  }
+    $eligibilities_hsbs = config('arc.reg_eligibilities_hsbs');
+    $eligibilities_nrpf = config('arc.reg_eligibilities_nrpf');
+    $eligibility_hsbs = $eligibilities_hsbs[mt_rand(0, count($eligibilities_hsbs) - 1)];
+    $eligible_from = null;
+    if ($eligibility_hsbs === 'healthy-start-receiving') {
+        $eligible_from = Carbon::now();
+    }
 
     if (!empty($attributes['centre_id'])) {
         // Use the passed centre id.
@@ -338,8 +441,7 @@ $factory->define(App\Registration::class, function (Faker\Generator $faker, $att
     // if we weren't given a family, make one.
     $family = (empty($attributes['family_id']))
         ? factory(App\Family::class)->make()
-        : App\Family::find($attributes['family_id'])
-    ;
+        : App\Family::find($attributes['family_id']);
 
     // Set initial centre (and thus, rvid)
     $family->lockToCentre($centre);
@@ -360,7 +462,7 @@ $factory->define(App\Registration::class, function (Faker\Generator $faker, $att
         'eligibility_hsbs' => $eligibility_hsbs,
         'eligibility_nrpf' => $eligibilities_nrpf[mt_rand(0, count($eligibilities_nrpf) - 1)],
         'consented_on' => Carbon::now(),
-        'eligible_from' => $eligible_from
+        'eligible_from' => $eligible_from,
     ];
 });
 
@@ -373,7 +475,7 @@ $factory->define(App\Family::class, function () {
 // Carer
 $factory->define(App\Carer::class, function (Faker\Generator $faker) {
     return [
-        'name' => $faker->firstName ." ". $faker->lastName,
+        'name' => $faker->firstName . " " . $faker->lastName,
     ];
 });
 
@@ -388,11 +490,11 @@ $factory->define(App\Child::class, function (Faker\Generator $faker) {
     ];
 });
 
-$factory->state(App\Child::class, 'verified', function(Faker\Generator $faker) {
+$factory->state(App\Child::class, 'verified', function (Faker\Generator $faker) {
     return ['verified' => true];
 });
 
-$factory->state(App\Child::class, 'unverified', function(Faker\Generator $faker) {
+$factory->state(App\Child::class, 'unverified', function (Faker\Generator $faker) {
     return ['verified' => false];
 });
 
@@ -560,15 +662,15 @@ $factory->define(App\Note::class, function (Faker\Generator $faker) {
 
 // StateToken - pretty empty, it generates it's own UUID
 $factory->define(App\StateToken::class, function (Faker\Generator $faker, $attributes) {
-        // Create a default UUID if you havn't got one.
-        $uuid = (empty($attributes['uuid']))
-            ? App\StateToken::generateUnusedToken()
-            : $attributes['uuid'];
+    // Create a default UUID if you havn't got one.
+    $uuid = (empty($attributes['uuid']))
+        ? App\StateToken::generateUnusedToken()
+        : $attributes['uuid'];
 
-        return
-            [
-              'uuid' => $uuid
-            ];
+    return
+        [
+            'uuid' => $uuid,
+        ];
 });
 
 // Delivery - a schedule of vouchers sent somewhere
@@ -576,17 +678,15 @@ $factory->define(App\Delivery::class, function (Faker\Generator $faker, $attribu
 
     $centre_id = (empty($attributes['centre_id']))
         ? factory(App\Centre::class)->create()
-        : $attributes['centre_id']
-    ;
+        : $attributes['centre_id'];
 
     $dispatched_at = (empty($attributes['dispatched_at']))
         ? Carbon::today()
-        : $attributes['dispatched_at']
-    ;
+        : $attributes['dispatched_at'];
 
     return [
         'range' => '',
         'dispatched_at' => $dispatched_at,
-        'centre_id' => $centre_id
+        'centre_id' => $centre_id,
     ];
 });

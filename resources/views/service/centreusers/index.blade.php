@@ -21,7 +21,7 @@
                     <th>Home Centre</th>
                     <th>Alternative Centres</th>
                     <th>Downloader</th>
-                    <th>Edit</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -60,11 +60,13 @@
     </div>
 
 </div>
-<script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.11/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.11/css/jquery.dataTables.min.css">
 <script>
   $(document).ready( function () {
-    $('#workersTable').DataTable();
+    $('#workersTable').DataTable({
+        columnDefs: [{ orderable: false, targets: 6}]
+    });
   } );
 </script>
 @endsection

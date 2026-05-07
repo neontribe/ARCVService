@@ -69,33 +69,4 @@ class FamilyController extends Controller
         return redirect()
             ->route('store.registration.edit', ['registration'=> $registration->id ]);
     }
-
-    /**
-     *
-     * Check status of family (active or not active)
-     *
-     * *
-     * @param Registration $registration
-     * @return bool
-     */
-    public static function status(Registration $registration)
-    {
-        // get Family
-        /** @var  $family Family */
-        $family = $registration->family;
-        // Family is active and has never left
-        if ($family->leaving_on === null && $family->rejoin_on === null) {
-            $family->status = true;
-        // Family is not active and has not rejoined
-        } elseif ($family->leaving_on !== null && $family->rejoin_on === null) {
-            $family->status = false;
-        // They left then rejoined
-        } elseif ($family->leaving_on < $family->rejoin_on) {
-            $family->status = true;
-        // They left then rejoined then left again
-        } elseif ($family->leaving_on > $family->rejoin_on) {
-            $family->status = false;
-        }
-        return $family->status;
-    }
 }

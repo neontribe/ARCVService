@@ -5,8 +5,10 @@ namespace Tests\Unit\Models;
 use App\Centre;
 use App\CentreUser;
 use App\Note;
-use Tests\TestCase;
+use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 class CentreUserModelTest extends TestCase
 {
@@ -14,6 +16,7 @@ class CentreUserModelTest extends TestCase
 
     protected $centreUser;
     protected $notes;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -21,8 +24,8 @@ class CentreUserModelTest extends TestCase
         $this->notes = factory(Note::class, 2)->create(['user_id' => $this->centreUser->id]);
     }
 
-    /** @test */
-    public function testCentreUserHasExpectedAttributes()
+
+    public function testCentreUserHasExpectedAttributes(): void
     {
         $cu = $this->centreUser;
         $this->assertNotNull($cu->name);
@@ -32,14 +35,14 @@ class CentreUserModelTest extends TestCase
         $this->assertFalse($cu->downloader);
     }
 
-    /** @test */
-    public function testCentreUserCanHaveNotes()
+
+    public function testCentreUserCanHaveNotes(): void
     {
         $this->assertCount(2, $this->centreUser->notes);
     }
 
-    /**@test */
-    public function testCentreUserCanHaveDownloadTrue()
+    /** */
+    public function testCentreUserCanHaveDownloadTrue(): void
     {
         // Standard CU
         $cu = $this->centreUser;
@@ -54,8 +57,8 @@ class CentreUserModelTest extends TestCase
         $this->assertTrue($cu->downloader);
     }
 
-    /** @test */
-    public function testCentreUserCanHaveAHomeCentre()
+
+    public function testCentreUserCanHaveAHomeCentre(): void
     {
         $cu = $this->centreUser;
         // Has no centres;
@@ -67,13 +70,13 @@ class CentreUserModelTest extends TestCase
         $cu->centres()->attach($centre->id, ['homeCentre' => true]);
 
         // There is one
-        $this->assertEquals(1, $cu->centres()->count());
+        $this->assertSame(1, $cu->centres()->count());
         // It is the homeCentre
-        $this->assertEquals($centre->id, $cu->homeCentre->id);
+        $this->assertSame($centre->id, $cu->homeCentre->id);
     }
 
-    /** @test */
-    public function testCentreUserCanHaveAlternativeCentres()
+
+    public function testCentreUserCanHaveAlternativeCentres(): void
     {
         $cu = $this->centreUser;
         // Has no centres;
@@ -84,9 +87,103 @@ class CentreUserModelTest extends TestCase
         $cu->centres()->attach($centres->pluck('id')->all());
 
         // There is 4
-        $this->assertEquals(4, $cu->centres()->count());
+        $this->assertSame(4, $cu->centres()->count());
 
         // But We have no homeCentre
         $this->assertEmpty($cu->homeCentre);
+    }
+
+    // -----------------------------------------------------------------------
+    // Retirable — CentreUser-specific tests
+    //
+    // These tests cover the concrete PII replacement values declared in
+    // CentreUser::retirableFields() and the survival of CentreUser's own
+    // relations after retirement. Generic trait behaviour (idempotency,
+    // soft-delete, scopes, boot guard) is covered in RetirableTest.
+    // -----------------------------------------------------------------------
+
+    public function testCentreUserIsNotRetiredByDefault(): void
+    {
+        $this->assertFalse($this->centreUser->isRetired());
+        $this->assertNull($this->centreUser->retired_at);
+    }
+
+    public function testRetiredCentreUserHasNameCleared(): void
+    {
+        $cu = factory(CentreUser::class)->state('retired')->create()->fresh();
+
+        $this->assertSame('[User Retired]', $cu->name);
+    }
+
+    public function testRetiredCentreUserHasEmailReplacedWithSafeRetiredPlaceholder(): void
+    {
+        $originalEmail = $this->centreUser->email; // capture before retire() mutates the instance
+
+        $this->centreUser->delete();
+        $this->centreUser->retire();
+
+        $email = CentreUser::withTrashed()->find($this->centreUser->id)->email;
+
+        // Confirm format matches CentreUser::retirableFields() convention.
+        $this->assertStringStartsWith('retired_', $email);
+        $this->assertStringEndsWith('@retired.invalid', $email);
+
+        // Confirm the original email is gone.
+        $this->assertNotSame($originalEmail, $email);
+    }
+
+    public function testRetiredCentreUserHasPasswordReplacedWithANewHash(): void
+    {
+        $originalPassword = $this->centreUser->password; // capture before retire() mutates the instance
+
+        $this->centreUser->delete();
+        $this->centreUser->retire();
+
+        $replacedPassword = CentreUser::withTrashed()->find($this->centreUser->id)->password;
+
+        $this->assertTrue(Hash::isHashed($replacedPassword));
+        $this->assertNotSame($originalPassword, $replacedPassword);
+    }
+
+    public function testRetiredCentreUserHasRememberTokenCleared(): void
+    {
+        $cu = factory(CentreUser::class)->state('retired')->create()->fresh();
+
+        $this->assertNull($cu->remember_token);
+    }
+
+    public function testRetiredCentreUserRetainsNoteRelations(): void
+    {
+        // Notes exist before retirement.
+        $notesCount = count($this->centreUser->notes);
+        $this->assertCount($notesCount, $this->centreUser->notes);
+
+        $this->centreUser->delete();
+        $this->centreUser->retire();
+
+        // Notes are still associated via FK after retirement.
+        $fresh = CentreUser::withTrashed()->find($this->centreUser->id);
+        $this->assertCount($notesCount, $fresh->notes);
+    }
+
+    public function testRetiredCentreUserRetainsCentreRelations(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $this->centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
+
+        $this->centreUser->delete();
+        $this->centreUser->retire();
+
+        $fresh = CentreUser::withTrashed()->find($this->centreUser->id);
+        $this->assertSame(1, $fresh->centres()->count());
+    }
+
+    public function testRetiredCentreUserCannotBeRestored(): void
+    {
+        $cu = factory(CentreUser::class)->state('retired')->create()->fresh();
+
+        $this->expectException(DomainException::class);
+
+        CentreUser::withTrashed()->find($cu->id)->restore();
     }
 }

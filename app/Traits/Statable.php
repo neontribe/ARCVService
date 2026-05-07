@@ -1,14 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: charles
- * Date: 25/04/17
- * Time: 12:42
- */
 
 namespace App\Traits;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use SM\Factory\FactoryInterface;
 use SM\SMException;
 use SM\StateMachine\StateMachine;
@@ -29,6 +25,9 @@ trait Statable
      * gets the FSM associated with the Stateable model.
      *
      * @return StateMachine|StateMachineInterface
+     * @throws SMException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function getStateMachine()
     {
@@ -50,58 +49,43 @@ trait Statable
 
     /**
      * Getter/Setter for the new state by transition
-     *
-     * @param string $transition
-     * @return string State
      */
-    public function state($transition = null)
+    public function state(string $transition = null): bool|string
     {
-        if ($transition) {
-            return $this->applyTransition($transition);
-        } else {
-            return $this->getStateMachine()->getState();
-        }
+        return (is_null($transition))
+            ? $this->getStateMachine()->getState()
+            : $this->applyTransition($transition);
     }
 
     /**
-     * @param string $transition
-     * @return bool
+     * Do the transition
      */
-    public function applyTransition($transition)
+    public function applyTransition(string $transition): bool
     {
         return $this->getStateMachine()->apply($transition);
     }
 
     /**
      * Checks if a transition is "allowed" by the FSM graph
-     *
-     * @param string $transition
-     * @return bool
      * @throws SMException
      */
-    public function transitionAllowed(string $transition) : bool
+    public function transitionAllowed(string $transition): bool
     {
         return $this->getStateMachine()->can($transition);
     }
 
     /**
      * Gets a collection of Models representing the history.
-     *
-     * @return HasMany
      */
-    public function history()
+    public function history(): HasMany
     {
         return $this->hasMany(self::HISTORY_MODEL);
     }
 
     /**
      * Creates a transitionDef object
-     *
-     * @param $fromState
-     * @param $transitionName
-     * @return object
      */
-    public static function createTransitionDef($fromState, $transitionName)
+    public static function createTransitionDef(string $fromState, string $transitionName): ?object
     {
         // Set a transition details, because we can't pull the protected StateMachine config.
         $transition = config('state-machine.' . self::SM_CONFIG . '.transitions.' . $transitionName) ?? null;

@@ -57,9 +57,9 @@ Do the steps below:
 - [install nvm](https://github.com/nvm-sh/nvm#installing-and-updating) and then exit the vm (`exit` or `ctrl+D`) and re-enter it (`vagrant ssh` command) and navigate back to your ARCVService directory
 - `nvm install lts/carbon`
 - `nvm use`
-- Install npm packages for webpack (JS and Sass) builds: `yarn install`
-- Run `yarn dev` to make sure packages Store shares with Service have been included
-- Compile Service from Sass with `yarn prod`
+- Install npm packages for webpack (JS and Sass) builds: `npm run install`
+- Run `npm run dev` to make sure packages Store shares with Service have been included
+- Compile Service from Sass with `npm run prod`
 
 ***
 
@@ -70,7 +70,7 @@ Do the steps below:
 ## Resources
 1. [Laravel Homestead official documentation](https://laravel.com/docs/6.x/homestead)
 
-## QUEUES and Supervisor
+## Queues and Supervisor
 
 This application relies on a queue to run a number of tasks.
 The queue workers are kep alive by supervisor

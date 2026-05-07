@@ -16,7 +16,7 @@ abstract class StoreTestCase extends BaseTestCase
      * @param $pos int Position in the returned element array you think the text will be.
      * @return $this
      */
-    public function seeInElementAtPos($selector, $text, $pos)
+    public function seeInElementAtPos(string $selector, string $text, int $pos): static
     {
         $element_text = trim($this->crawler->filter($selector)->eq($pos)->text());
         $this->assertStringContainsString($text, $element_text);

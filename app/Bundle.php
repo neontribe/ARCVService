@@ -2,15 +2,16 @@
 
 namespace App;
 
-use Auth;
-use DB;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -19,15 +20,10 @@ use Throwable;
  * @property Carer $collectingCarer
  * @property Centre $disbursingCentre
  * @property User $disbursingUser
- * @property Carbon $disbursed_at
+ * @property Carbon|null $disbursed_at
  */
 class Bundle extends Model
 {
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'entitlement',
         'registration_id',
@@ -37,224 +33,131 @@ class Bundle extends Model
         'disbursing_user_id',
     ];
 
-    protected $rules = [
-    ];
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
     protected $casts = [
         'created_at' => 'datetime',
-        'updated_at'  => 'datetime',
-        'disbursed_at'  => 'datetime',  // When it was handed out.
+        'updated_at' => 'datetime',
+        'disbursed_at' => 'datetime',
     ];
 
     /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
+     * Add vouchers to this bundle by code, skipping any already attached.
      */
-    protected $hidden = [
-    ];
-
-    /**
-     * The attributes to append to the model's array form.
-     *
-     * @var array
-     */
-    protected $appends = [
-    ];
-
-    /**
-     * Adds voucher codes to a bundle
-     * @param $voucherCodes
-     * @return array
-     */
-    public function addVouchers($voucherCodes)
+    public function addVouchers(array $voucherCodes): array
     {
-        $self = $this;
-        $errors = [];
+        $currentCodes = $this->vouchers->pluck('code')->all();
 
-        // Get current Codes for vouchers on the bundle (if any)
-        $currentCodes = $this->vouchers
-            ->pluck('code')
-            ->toArray();
+        // Only attempt codes not already on this bundle.
+        $newCodes = array_values(array_diff($voucherCodes, $currentCodes));
+        $vouchers = Voucher::whereIn('code', $newCodes)->get();
 
-        // Calculate vouchers to add, so we don't try to add already bundled vouchers.
-        $addBundleCodes = array_diff($voucherCodes, $currentCodes);
-
-        // Find vouchers models that match codes to add.
-        $addVouchers = Voucher::whereIn('code', $addBundleCodes)->get();
-
-        // Add the voucher models to a specific bundle (this one)
-        $addErrors = $this->alterVouchers($addVouchers, $addBundleCodes, $self);
-
-        // if it threw any errors, merge those with the array.
-        if (!empty($addErrors)) {
-            $errors = array_merge_recursive($addErrors, $errors);
-        }
-
-        // an empty errors array means all good.
-        return $errors;
+        return $this->alterVouchers($vouchers, $newCodes, $this);
     }
 
-
     /**
-     * Refactored function that works out if we broke anything then adds vouchers.
-     *
-     * @param Collection $vouchers
-     * @param array $codes
-     * @param Bundle|null $bundle
-     * @return array
+     * Validate and reassign a collection of vouchers to the given bundle (or null to unbundle).
      */
-    public function alterVouchers(Collection $vouchers, array $codes = [], Bundle $bundle = null)
+    public function alterVouchers(Collection $vouchers, array $codes = [], ?self $bundle = null): array
     {
         $errors = [];
 
-        // codes may reference vouchers we can't find in the database
-        // TODO: move this check further out?
-
-        $missingCodes = array_diff($codes, $vouchers->pluck("code")->toArray());
-        if ($missingCodes) {
-            $errors["codes"] = $missingCodes;
+        // Detect codes that have no corresponding DB row.
+        $missingCodes = array_values(array_diff($codes, $vouchers->pluck('code')->all()));
+        if ($missingCodes !== []) {
+            $errors['codes'] = $missingCodes;
         }
 
-        // Try to run the vouchers we know are in the DB
-        $vouchers->each(
-            // Passing a pointer to $errors using "&", so we can change it, inside the loop.
-            // Otherwise the variable is immutable.
-            function (Voucher $voucher) use ($bundle, &$errors) {
-                // Ensure this voucher's bundle can be reassigned.
-                if ($voucher->bundle && $voucher->bundle->disbursed_at !== null) {
-                    // This voucher has already been given out.
-                    $errors["disbursed"][] = $voucher->code;
-                } else if ($voucher->bundle && $bundle !== null) {
-                    // Vouchers should not jump from another bundle without being manually removed first.
-                    $errors["bundled"][] = $voucher;
-                }
-                else if (!$voucher->transitionAllowed('collect')){
-                    // Vouchers cannot be bundled if they are expired, void, recorded, payment_pending or paid
-                    $errors["used"][] = $voucher->code;
-                }
-                else {
-                    // Change its bundle
-                    $voucher->bundle()->associate($bundle)->save();
-                }
-            }
-        );
+        foreach ($vouchers as $voucher) {
+            match (true) {
+                // Already disbursed — cannot be reassigned.
+                $voucher->bundle?->disbursed_at !== null => $errors['disbursed'][] = $voucher->code,
+
+                // Belongs to a *different* bundle — must be manually removed first.
+                $voucher->bundle !== null && $bundle !== null => $errors['bundled'][] = $voucher,
+
+                // State machine forbids collecting (expired, void, recorded, payment_pending, paid).
+                !$voucher->transitionAllowed('collect') => $errors['used'][] = $voucher->code,
+
+                // All clear — reassign.
+                default => $voucher->bundle()->associate($bundle)->save(),
+            };
+        }
 
         return $errors;
     }
 
     /**
-     * Syncs an array of voucher codes with vouchers();
-     *
-     * @param array $voucherCodes array of cleaned Voucher codes
-     * @return array $errors Errors
+     * Sync this bundle's vouchers to exactly the supplied set of codes.
+     * Runs inside a transaction; rolls back and returns a 'transaction' error key on failure.
      */
-    public function syncVouchers(array $voucherCodes)
+    public function syncVouchers(array $voucherCodes): array
     {
         $errors = [];
 
-        // If we get an unhandled exception, we should halt and rollback.
         try {
-            DB::transaction(function () use ($voucherCodes, $errors) {
+            DB::transaction(function () use ($voucherCodes, &$errors): void {
+                $currentCodes = $this->vouchers->pluck('code')->all();
 
-                $currentCodes = $this->vouchers
-                    ->pluck('code')
-                    ->toArray();
+                // Codes to remove from the bundle.
+                $removeCodes = array_values(array_diff($currentCodes, $voucherCodes));
+                $removeVouchers = $this->vouchers()->whereIn('code', $removeCodes)->get();
 
-                // Calculate vouchers to remove.
-                $unBundleCodes = array_diff($currentCodes, $voucherCodes);
+                $errors = array_merge_recursive(
+                    $this->alterVouchers($removeVouchers, $removeCodes, null),
+                    $errors,
+                );
 
-                // Find the vouchers to remove.
-                $removeVouchers = $this->vouchers()->whereIn('code', $unBundleCodes)->get();
+                // Codes to add.
+                $errors = array_merge_recursive(
+                    $this->addVouchers($voucherCodes),
+                    $errors,
+                );
 
-                // Sync them to a null bundle
-                $removeErrors = $this->alterVouchers($removeVouchers, $unBundleCodes, null);
-
-                if (!empty($removeErrors)) {
-                    $errors = array_merge_recursive($removeErrors, $errors);
+                if ($errors !== []) {
+                    throw new RuntimeException('Errors during voucher sync transaction.');
                 }
-
-                // use addVouchers to Add any vouchers.
-                $errors = array_merge_recursive($this->addVouchers($voucherCodes), $errors);
-
-                // Whoops! errors happened.
-                if (!empty($errors)) {
-                    throw new Exception("Errors during transaction");
-                };
             });
         } catch (Throwable $e) {
-            // Log it
-            Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+            Log::error(sprintf(
+                'Bad transaction for %s@%s by service user %s',
+                self::class,
+                __FUNCTION__,
+                Auth::id() ?? 'unauthenticated',
+            ));
             Log::error($e->getTraceAsString());
-            // Add an error notification for the caller to deal with
-            $errors["transaction"] = true;
+
+            $errors['transaction'] = true;
         }
+
         return $errors;
     }
 
-    /**
-     * Get the Registration this bundle is for
-     *
-     * @return BelongsTo
-     */
-    public function registration()
+    public function registration(): BelongsTo
     {
         return $this->belongsTo(Registration::class);
     }
 
-    /**
-     * The vouchers in this Bundle
-     *
-     * @return HasMany
-     */
-    public function vouchers()
+    public function vouchers(): HasMany
     {
         return $this->hasMany(Voucher::class);
     }
-    /**
-     * Return the Carer it was disbursed to
-     *
-     * @return BelongsTo
-     */
-    public function collectingCarer()
+
+    public function collectingCarer(): BelongsTo
     {
         return $this->belongsTo(Carer::class);
     }
 
-    /**
-     * Return the Centre it was disbursed to
-     *
-     * @return BelongsTo
-     */
-    public function disbursingCentre()
+    public function disbursingCentre(): BelongsTo
     {
         return $this->belongsTo(Centre::class);
     }
 
-    /**
-     * Return the CentreUser it was disbursed by
-     *
-     * @return BelongsTo
-     */
-    public function disbursingUser()
+    public function disbursingUser(): BelongsTo
     {
         return $this->belongsTo(CentreUser::class);
     }
 
-    /**
-     * Scope to pull only disbursed bundles
-     *
-     * @param Builder $query
-     * @return Builder
-     */
-    public function scopeDisbursed($query)
+    public function scopeDisbursed(Builder $query): Builder
     {
-        return $query->where('disbursed_at', '!=', null);
+        return $query->whereNotNull('disbursed_at');
     }
 }
-

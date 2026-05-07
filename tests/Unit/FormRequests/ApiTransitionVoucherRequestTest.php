@@ -1,12 +1,12 @@
 <?php
 
-
 namespace Tests\Unit\FormRequests;
 
 use App\Http\Requests\ApiTransitionVoucherRequest;
 use App\Trader;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\Validator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\StoreTestCase;
 
 class ApiTransitionVoucherRequestTest extends StoreTestCase
@@ -33,18 +33,17 @@ class ApiTransitionVoucherRequestTest extends StoreTestCase
      * @param array $rules
      * @return bool
      */
-    protected function validate(array $mockedRequestData, array $rules)
+    protected function validate(array $mockedRequestData, array $rules): bool
     {
         return $this->validator->make($mockedRequestData, $rules)->passes();
     }
 
     /**
-     * @test
-     * @dataProvider storeValidationProvider
      * @param bool $shouldPass
      * @param array $mockedRequestData
      * @return void
      */
+    #[DataProvider('storeValidationProvider')]
     public function testICannotSubmitInvalidValues(bool $shouldPass, array $mockedRequestData): void
     {
         // Copy the rules out of the FormRequest.

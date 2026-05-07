@@ -1,41 +1,67 @@
+# Cache files
+*.swp
+.DS_STORE
+.php-cs-fixer.cache
+.php_cs.cache
 .phpstorm.meta.php
 .phpunit.result.cache
-.php_cs.cache
+/.phpunit.cache
+/_ide_helper_models.php
+Thumbs.db
 _ide_helper.php
-/node_modules
-/public/hot
-/public/storage
-/storage
-/vendor
+
+# Logs
+*.log
+
+# IDEs
+/.fleet
 /.idea
-/.vagrant
-Homestead.json
-Homestead.yaml
+/.nova
+/.vscode
+/.zed
+
+# Dependencies
+/node_modules
+/vendor
+
+# Build
+/public/build
+/public/css
+/public/fonts
+/public/hot
+/public/images/
+/public/js
+/public/store/css/datepicker.css
+build
 npm-debug.log
-.env
-.env*
-.prettierignore
-.vscode
-.DS_STORE
-.env.dusk.local
+
+# Testing & Dusk
+arc_test_file_*
+coverage
 tests/Browser/console/
 tests/Browser/screenshots/
 
-# webpack results
-/public/css
-/public/fonts
-/public/js
-/resources/fonts/*
-/_ide_helper_models.php
-/yarn-error.log
-/public/store/css/datepicker.css
-/public/images/
-.docker-installed
-passport.install
-coverage
-.php-cs-fixer.cache
-*.swp
+# Storage
 app/local
+/public/storage
+/storage
+
+# Homestead
+/.vagrant
+Homestead.json
+Homestead.yaml
+
+# Configs
+.env
+.env.backup
+.env.dusk.local
 .env.local
-arc_test_file_*
-build
+.env.production
+.phpactor.json
+.prettierignore
+/auth.json
+passport.install
+
+# Docker
+.docker-installed
+

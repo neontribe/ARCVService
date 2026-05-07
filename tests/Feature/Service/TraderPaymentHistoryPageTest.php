@@ -22,7 +22,7 @@ class TraderPaymentHistoryPageTest extends StoreTestCase
 
         $this->adminUser = factory(AdminUser::class)->create();
 
-//        $this->traderHistoryRoute = route('admin.trader-payment-history.show');
+        //        $this->traderHistoryRoute = route('admin.trader-payment-history.show');
 
         // Create a voucher and a trader with some info
         // And a user otherwise transition rightly breaks integrity constraints
@@ -46,13 +46,9 @@ class TraderPaymentHistoryPageTest extends StoreTestCase
         $vs->stateToken()->associate($stateToken);
         $vs->user_id = $user->id;
         $vs->save();
-
     }
 
-    /**
-     * @test
-     */
-    public function itShowsATableWithHeaders()
+    public function testItShowsATableWithHeaders(): void
     {
         $route = route('admin.trader-payment-history.show', ['trader' => $this->trader->id]);
 
@@ -66,4 +62,3 @@ class TraderPaymentHistoryPageTest extends StoreTestCase
         ;
     }
 }
-

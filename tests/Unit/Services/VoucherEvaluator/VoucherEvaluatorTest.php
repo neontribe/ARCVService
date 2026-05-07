@@ -126,8 +126,8 @@ class VoucherEvaluatorTest extends TestCase
         $this->readyForSecondarySchool = factory(Child::class)->state('readyForSecondarySchool')->make();
     }
 
-    /** @test */
-    public function itNoticesWhenAFamilyStillRequiresIDForChildren(): void
+
+    public function testItNoticesWhenAFamilyStillRequiresIDForChildren(): void
     {
         $unverifiedKids = factory(Child::class, 3)->states('unverified')->make();
         $this->family->children()->saveMany($unverifiedKids);
@@ -159,8 +159,8 @@ class VoucherEvaluatorTest extends TestCase
         $this->assertNotContains(self::NOTICE_TYPES['FamilyHasUnverifiedChildren'], $notices);
     }
 
-    /** @test */
-    public function itCreditsWhenAFamilyIsPregnant(): void
+
+    public function testItCreditsWhenAFamilyIsPregnant(): void
     {
         $this->family->children()->save($this->pregnancy);
 
@@ -174,8 +174,8 @@ class VoucherEvaluatorTest extends TestCase
         $this->assertContains(self::CREDIT_TYPES['FamilyIsPregnant'], $credits);
     }
 
-    /** @test */
-    public function itCreditsUnrestrictedPrimarySchoolChildren(): void
+
+    public function testItCreditsUnrestrictedPrimarySchoolChildren(): void
     {
         // get rules mods
         $rulesMods = collect($this->rulesMods["credit-primary"]);
@@ -195,8 +195,8 @@ class VoucherEvaluatorTest extends TestCase
         $this->assertEquals('4', $evaluation->getEntitlement());
     }
 
-    /** @test */
-    public function itCreditsQualifiedPrimarySchoolChildrenButNotUnqualifiedOnes(): void
+
+    public function testItCreditsQualifiedPrimarySchoolChildrenButNotUnqualifiedOnes(): void
     {
         // get rules mods
         $rulesMods = collect($this->rulesMods["credit-primary-qualified"]);
@@ -235,8 +235,8 @@ class VoucherEvaluatorTest extends TestCase
         $this->assertEquals('8', $evaluation->getEntitlement());
     }
 
-    /** @test */
-    public function itCreditsWhenAChildIsUnderOne(): void
+
+    public function testItCreditsWhenAChildIsUnderOne(): void
     {
         // Make standard evaluator for a child under one
         $evaluator = EvaluatorFactory::make();
@@ -250,8 +250,8 @@ class VoucherEvaluatorTest extends TestCase
         $this->assertEquals(6, $evaluation->getEntitlement());
     }
 
-    /** @test */
-    public function itCreditsWhenAChildIsBetweenOneAndPrimarySchoolAge(): void
+
+    public function testItCreditsWhenAChildIsBetweenOneAndPrimarySchoolAge(): void
     {
         // Make standard evaluator for a child under school age
         $evaluator = EvaluatorFactory::make();
@@ -266,8 +266,8 @@ class VoucherEvaluatorTest extends TestCase
         $this->assertEquals(4, $evaluation->getEntitlement());
     }
 
-    /** @test */
-    public function itDoesNotCreditWhenAChildisSecondarySchoolAge(): void
+
+    public function testItDoesNotCreditWhenAChildisSecondarySchoolAge(): void
     {
         $rulesMod = collect($this->rulesMods["credit-primary"]);
 
@@ -281,8 +281,8 @@ class VoucherEvaluatorTest extends TestCase
         $this->assertEquals(0, $evaluation->getEntitlement());
     }
 
-    /** @test */
-    public function itNoticesWhenAChildIsAlmostOne(): void
+
+    public function testItNoticesWhenAChildIsAlmostOne(): void
     {
         // Make standard evaluator
         $evaluator = EvaluatorFactory::make();
@@ -297,8 +297,8 @@ class VoucherEvaluatorTest extends TestCase
         $this->assertNotContains(self::NOTICE_TYPES['ChildIsAlmostPrimarySchoolAge'], $notices);
     }
 
-    /** @test */
-    public function itNoticesWhenAChildIsAlmostPrimarySchoolAge(): void
+
+    public function testItNoticesWhenAChildIsAlmostPrimarySchoolAge(): void
     {
         // Need to change the values we use for school start to next month's integer
         Config::set('arc.school_month', Carbon::now()->addMonthsNoOverflow(1)->month);
@@ -316,8 +316,8 @@ class VoucherEvaluatorTest extends TestCase
         $this->assertContains(self::NOTICE_TYPES['ChildIsAlmostPrimarySchoolAge'], $notices);
     }
 
-    /** @test */
-    public function itNoticesWhenAChildIsAlmostSecondarySchoolAge(): void
+
+    public function testItNoticesWhenAChildIsAlmostSecondarySchoolAge(): void
     {
         // Need to change the values we use for school start to next month's integer
         Config::set('arc.school_month', Carbon::now()->addMonthsNoOverflow(1)->month);
@@ -338,8 +338,8 @@ class VoucherEvaluatorTest extends TestCase
         $this->assertContains(self::NOTICE_TYPES['ChildIsAlmostSecondarySchoolAge'], $notices);
     }
 
-    /** @test */
-    public function roundingUpAgeToEndOfMonth(): void
+
+    public function testRoundingUpAgeToEndOfMonth(): void
     {
         // Create a child with a DOB of 12th April 2000
         $dob = Carbon::create(2000, 4, 12, 0, 0, 0, 'Europe/London');
@@ -368,8 +368,8 @@ class VoucherEvaluatorTest extends TestCase
         }
     }
 
-    /** @test */
-    public function itHasADefaultSetOfRulesAndCanAcceptVariableValuesForEvaluations(): void
+
+    public function testItHasADefaultSetOfRulesAndCanAcceptVariableValuesForEvaluations(): void
     {
         // We make a registration in a non-SK area
         $centre = factory(Centre::class)->create();

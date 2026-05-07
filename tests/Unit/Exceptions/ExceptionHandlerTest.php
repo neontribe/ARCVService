@@ -12,7 +12,6 @@ use Tests\StoreTestCase;
 
 class ExceptionHandlerTest extends StoreTestCase
 {
-
     private $exceptions = [];
 
     protected function setUp(): void
@@ -24,8 +23,8 @@ class ExceptionHandlerTest extends StoreTestCase
         ];
     }
 
-    /** @test */
-    public function itShouldNotStackTraceInProduction()
+
+    public function testItShouldNotStackTraceInProduction(): void
     {
         $handler = Container::getInstance()->make(Handler::class);
         try {
@@ -40,8 +39,8 @@ class ExceptionHandlerTest extends StoreTestCase
         }
     }
 
-    /** @test */
-    public function itShouldStackTraceNotInProduction()
+
+    public function testItShouldStackTraceNotInProduction(): void
     {
         $handler = Container::getInstance()->make(Handler::class);
         try {
@@ -63,10 +62,10 @@ class ExceptionHandlerTest extends StoreTestCase
      * @param object &$object    Instantiated object that we will run method on.
      * @param string $methodName Method name to call
      * @param array  $parameters Array of parameters to pass into method.
-     * @throws ReflectionException
      * @return mixed Method return.
+     * @throws ReflectionException
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(object &$object, string $methodName, array $parameters = array()): mixed
     {
         $reflection = new ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);

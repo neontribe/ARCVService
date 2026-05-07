@@ -9,7 +9,6 @@ use App\Http\Requests\VoucherSearchRequest;
 use App\Sponsor;
 use App\Voucher;
 use App\VoucherState;
-use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Contracts\Foundation\Application;
@@ -123,10 +122,10 @@ class VouchersController extends Controller
         try {
             DB::transaction(static function () use ($rangeDef, $transitions) {
 
-                $nowTime  = now();
-                $user     = auth()->user();
-                $userId   = $user->id;
-                $userType = class_basename($user);
+                $nowTime = now();
+                $user = auth()->user();
+                $userId = $user?->id;
+                $userType = $user ? get_class($user) : null;
 
                 foreach ($transitions as $transitionDef) {
                     Voucher::inDefinedRange($rangeDef)
@@ -156,7 +155,7 @@ class VouchersController extends Controller
         } catch (Throwable $e) {
             Log::error('Bad transaction for ' . __METHOD__, [
                 'user_id' => auth()->id(),
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
 
             return redirect()
@@ -166,7 +165,7 @@ class VouchersController extends Controller
         }
 
         $successCodes = implode(' ', $voidableCodes->all());
-        $failedCodes  = implode(
+        $failedCodes = implode(
             ' ',
             array_diff($allCodes->all(), $voidableCodes->all())
         );
@@ -174,9 +173,9 @@ class VouchersController extends Controller
         $notificationMsg = trans(
             'service.messages.vouchers_batchretiretransition.success',
             [
-                'transition_to'    => end($transitions)->to,
-                'success_codes'    => $successCodes,
-                'fail_code_details'=> $failedCodes
+                'transition_to' => end($transitions)->to,
+                'success_codes' => $successCodes,
+                'fail_code_details' => $failedCodes
                     ? "{$failedCodes} could not be retired."
                     : '',
             ]

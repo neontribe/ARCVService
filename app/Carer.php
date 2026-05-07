@@ -2,18 +2,21 @@
 
 namespace App;
 
+use App\Support\LazySecureModel;
 use App\Traits\Aliasable;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
+use ParagonIE\CipherSweet\EncryptedRow;
+use ParagonIE\CipherSweet\BlindIndex;
+
 /**
- * @mixin Eloquent
  * @property string $name
  * @property string $ethnicity
  * @property string $language
  * @property Family $family
  */
-class Carer extends Model
+class Carer extends LazySecureModel implements CipherSweetEncrypted
 {
     use Aliasable;
     use SoftDeletes;
@@ -30,23 +33,28 @@ class Carer extends Model
      */
     protected $fillable = [
         'name',
-		'ethnicity',
-		'language',
+        'ethnicity',
+        'language',
+        'emailsecret',
+        'telnosecret',
+        'family_id',
     ];
 
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
-    protected $hidden = [];
+    public static function configureCipherSweet(EncryptedRow $encryptedRow): void
+    {
+        $encryptedRow
+            ->addOptionalTextField('emailsecret')
+            ->addBlindIndex('emailsecret', new BlindIndex('emailsecret_index'))
+            ->addOptionalTextField('telnosecret')
+            ->addBlindIndex('telnosecret', new BlindIndex('telnosecret_index'));
+    }
 
     /**
      * Get the Family this Carer picks up for.
      *
      * @return BelongsTo
      */
-    public function family() : BelongsTo
+    public function family(): BelongsTo
     {
         return $this->belongsTo(Family::class);
     }
@@ -56,8 +64,8 @@ class Carer extends Model
      */
     public function delete()
     {
-         $this->name = 'Deleted';
-         $this->save();
-         return parent::delete();
+        $this->name = 'Deleted';
+        $this->save();
+        return parent::delete();
     }
 }

@@ -6,96 +6,68 @@ use App\Centre;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminNewCentreRequest;
 use App\Http\Requests\AdminUpdateCentreRequest;
-use Auth;
-use DB;
-use Exception;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Sponsor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-use App\Sponsor;
-use Log;
+use Throwable;
 
 class CentresController extends Controller
 {
-
     /**
      * Display a listing of Centres.
-     *
-     * @return Factory|View
      */
-    public function index()
+    public function index(): View
     {
-        $centres = Centre::get();
+        $centres = Centre::all();
 
         return view('service.centres.index', compact('centres'));
     }
 
     /**
      * Show the form for creating new Centres.
-     *
-     * @return Factory|View
      */
-    public function create()
+    public function create(): View
     {
-        $sponsors = Sponsor::get();
+        $sponsors = Sponsor::all();
 
         return view('service.centres.create', compact('sponsors'));
     }
 
     /**
-     * Return a json list of neighbour names and IDs
-     *
-     * @param $id
-     * @return JsonResponse
+     * Return a JSON list of neighbour names and IDs.
      */
-    public function getNeighboursAsJson($id)
+    public function getNeighboursAsJson(Centre $centre): JsonResponse
     {
-        try {
-            /** @var Centre $centre */
-            $centre = Centre::findOrFail($id);
-            $neighbours = $centre
-                ->neighbours()
-                ->whereKeyNot($id)
-                ->get(['name', 'id'])
-            ;
-        } catch (ModelNotFoundException $e) {
-            $neighbours = collect([]);
-        }
+        $neighbours = $centre
+            ->neighbours()
+            ->whereKeyNot($centre->getKey())
+            ->get(['name', 'id']);
+
         return response()->json($neighbours);
     }
 
     /**
-     * @param AdminNewCentreRequest $request
-     * @return RedirectResponse
-     * @throws \Throwable
+     * Store a newly created Centre.
      */
-    public function store(AdminNewCentreRequest $request)
+    public function store(AdminNewCentreRequest $request): RedirectResponse
     {
         try {
-            $centre = DB::transaction(function () use ($request) {
-
-                // Create a Centre
-                $c = new Centre([
-                    'name' => $request->input('name'),
-                    'prefix' => $request->input('rvid_prefix'),
-                    'print_pref' => $request->input('print_pref'),
-                    'sponsor_id' => $request->input('sponsor')
-                ]);
-                $c->save();
-
-                return $c;
+            $centre = DB::transaction(static function () use ($request): Centre {
+                return Centre::create($request->validated());
             });
-        } catch (Exception $e) {
-            // Oops! Log that
+        } catch (Throwable $e) {
             Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
             Log::error($e->getTraceAsString());
-            // Throw it back to the user
+
             return redirect()
                 ->route('admin.centres.create')
                 ->withErrors('Creation failed - DB Error.');
         }
+
         return redirect()
             ->route('admin.centres.index')
             ->with('message', 'Centre ' . $centre->name . ' created');
@@ -103,43 +75,33 @@ class CentresController extends Controller
 
     /**
      * Show the form for editing a Centre.
-     *
-     * @return Factory|View
      */
-    public function edit($id)
+    public function edit(Centre $centre): View
     {
-        $centre = Centre::find($id);
-        return view('service.centres.edit', compact('centre'));
+        $sponsors = Sponsor::all();
+        return view('service.centres.edit', compact('centre', 'sponsors'));
     }
 
     /**
-     * Show the form for editing a Centre's name.
-     *
-     * @return Factory|View
+     * Update the specified Centre's fields
      */
-    public function update(AdminUpdateCentreRequest $request, Centre $id)
+    public function update(AdminUpdateCentreRequest $request, Centre $centre): RedirectResponse
     {
-      try {
-          $centre = DB::transaction(function () use ($request, $id) {
-            // Update the system
-            $id->fill([
-                'name' => $request->input('name'),
-            ]);
-              $id->save();
+        try {
+            DB::transaction(static function () use ($request, $centre): bool {
+                return $centre->update($request->validated());
+            });
+        } catch (Throwable $e) {
+            Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
+            Log::error($e->getTraceAsString());
 
-              return $id;
-          });
-      } catch (Exception $e) {
-          // Oops! Log that
-          Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
-          Log::error($e->getTraceAsString());
-          // Throw it back to the user
-          return redirect()
-              ->route('admin.centres.create')
-              ->withErrors('Creation failed - DB Error.');
-      }
-      return redirect()
-          ->route('admin.centres.index')
-          ->with('message', 'Centre ' . $centre->name . ' edited');
+            return redirect()
+                ->route('admin.centres.edit', $centre->id)
+                ->withErrors('Update failed - DB Error.');
+        }
+
+        return redirect()
+            ->route('admin.centres.index')
+            ->with('message', 'Centre ' . $centre->name . ' edited');
     }
 }

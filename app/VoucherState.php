@@ -4,9 +4,9 @@ namespace App;
 
 use Eloquent;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
-
-// hard deletes on these; if only because we'll data-warehouse them at some point.
 
 /**
  * @mixin Eloquent
@@ -15,12 +15,9 @@ use Illuminate\Support\Carbon;
  * @property string $from;
  * @property string $to;
  * @property Voucher $voucher;
- * @property User $user;
  * @property StateToken $stateToken;
  * @property Carbon $created_at;
  * @property Carbon $updated_at;
- *
- * Notre sure what these are?  'user_type', 'source',
  */
 class VoucherState extends Model
 {
@@ -43,23 +40,16 @@ class VoucherState extends Model
     /**
      * Inserts a bunch of raw voucher states into the system
      * For speed, we don't check it, we just try it!
-     *
-     * @param $vouchers
-     * @param $time
-     * @param $user_id
-     * @param $user_type
-     * @param $transitionDef
      */
-    public static function batchInsert($vouchers, $time, $user_id, $user_type, $transitionDef)
+    public static function batchInsert($vouchers, $time, $user_id, $user_type, $transitionDef): void
     {
         $states = [];
         foreach ($vouchers as $voucher) {
-            // TODO: should we need to, turn this into a VoucherState
             $states[] = [
                 'transition' => $transitionDef->name,
                 'from' => $voucher->currentState,
-                'user_id' => $user_id, // the user ID
-                'user_type' => $user_type, // the type of user
+                'user_id' => $user_id, // morphTo id
+                'user_type' => $user_type, // morphTo type
                 'voucher_id' => $voucher->id,
                 'to' => $transitionDef->to,
                 'source' => "",
@@ -71,25 +61,17 @@ class VoucherState extends Model
         self::insert($states);
     }
 
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
-    protected $hidden = [
-    ];
-
-    public function voucher()
+    public function voucher(): BelongsTo
     {
         return $this->belongsTo(Voucher::class);
     }
 
-    public function user()
+    public function user(): MorphTo
     {
-        return $this->belongsTo(User::class);
+        return $this->morphTo();
     }
 
-    public function stateToken()
+    public function stateToken(): BelongsTo
     {
         return $this->belongsTo(StateToken::class);
     }

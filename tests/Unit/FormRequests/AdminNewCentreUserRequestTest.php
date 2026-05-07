@@ -6,6 +6,7 @@ use App\Centre;
 use App\Http\Requests\AdminNewCentreUserRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\StoreTestCase;
 
 class AdminNewCentreUserRequestTest extends StoreTestCase
@@ -30,10 +31,10 @@ class AdminNewCentreUserRequestTest extends StoreTestCase
     }
 
     /**
-     * @dataProvider storeValidationProvider
      * @param bool $shouldPass
      * @param array $mockedRequestData
      */
+    #[DataProvider('storeValidationProvider')]
     public function testICannotSubmitInvalidValues(bool $shouldPass, array $mockedRequestData): void
     {
         $alternatives = $mockedRequestData['alternative_centres'] ?? null;

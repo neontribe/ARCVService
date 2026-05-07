@@ -14,17 +14,13 @@ class CentreControllerTest extends StoreTestCase
 {
     use RefreshDatabase;
 
-    /** @var AdminUser $adminUser */
-    private $adminUser;
+    private AdminUser $adminUser;
 
-    /** @var Sponsor $sponsor */
-    private $sponsor;
+    private Sponsor $sponsor;
 
-    /** @var array $data */
-    private $data;
+    private array $data;
 
-    /** @var Generator $faker */
-    private $faker;
+    private Generator $faker;
 
     public function setUp(): void
     {
@@ -34,14 +30,15 @@ class CentreControllerTest extends StoreTestCase
         $this->sponsor = factory(Sponsor::class)->create();
         $this->data = [
             'name' => $this->faker->city,
-            'sponsor' => $this->sponsor->id,
-            'rvid_prefix' => strtoupper($this->faker->lexify(str_repeat('?', rand(1, 5)))),
-            'print_pref' => array_random(config('arc.print_preferences'))
+            'sponsor_id' => $this->sponsor->id,
+            'prefix' => strtoupper($this->faker->lexify(str_repeat('?', random_int(1, 5)))),
+            'print_pref' => array_random(config('arc.print_preferences')),
+            'can_collect' => random_int(0, 1)
         ];
     }
 
-    /** @test */
-    public function testItCanStoreACentre()
+
+    public function testItCanStoreACentre(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->post(
@@ -53,52 +50,48 @@ class CentreControllerTest extends StoreTestCase
             ->seePageIs(route('admin.centres.index'))
             ->see($this->data["name"])
             ->see($this->sponsor->name)
-            ->see($this->data["rvid_prefix"])
+            ->see($this->data["prefix"])
             ->see($this->data["print_pref"])
         ;
         // find the centre by prefix
-        $c = Centre::where('prefix', $this->data['rvid_prefix'])->first();
+        $c = Centre::where('prefix', $this->data['prefix'])->first();
         $this->assertNotNull($c);
     }
 
-    /** @test */
-    public function testICanSeeAnEditButtonOnTheListOfCentres()
+
+    public function testICanSeeAnEditButtonOnTheListOfCentres(): void
     {
-      $centre = factory(Centre::class)->create([]);
-      $this->actingAs($this->adminUser, 'admin')
-          ->get(route('admin.centres.index'))
-          ->assertResponseOk()
-          ->seeInElement('h1', 'Children\'s Centres')
-          ->seeInElement('td', $centre->name)
-          ->seeInElement('a', 'Edit')
-          ;
+        $centre = factory(Centre::class)->create();
+        $this->actingAs($this->adminUser, 'admin')
+            ->get(route('admin.centres.index'))
+            ->assertResponseOk()
+            ->seeInElement('h1', 'Children\'s Centres')
+            ->seeInElement('td', $centre->name)
+            ->seeInElement('a', 'Edit')
+        ;
     }
 
-    /** @test */
-    public function testICanUpdateACentreName()
+    public function testICanUpdateACentre(): void
     {
-      $centre = factory(Centre::class)->create([]);
-      $data = [
-        'id' => $centre->id,
-        'name' => 'New Centre Name'
-      ];
-      $this->seeInDatabase('centres', [
-          'id' => $centre->id,
-          'name' => $centre->name
-      ]);
-      $this->actingAs($this->adminUser, 'admin')
-        ->put(
-            route('admin.centres.update', ['id' => $centre->id]),
-            $data
-        );
-      $this->seeInDatabase('centres', [
-          'id' => $centre->id,
-          'name' => 'New Centre Name'
-      ]);
-      $this->dontSeeInDatabase('centres', [
-          'id' => $centre->id,
-          'name' => $centre->name
-      ]);
+        $centre = factory(Centre::class)->create();
+        $this->seeInDatabase('centres', [
+            'id' => $centre->id,
+            'name' => $centre->name
+        ]);
 
+        $data = array_merge($centre->getAttributes(), ['name' => 'New Centre Name']);
+        $this->actingAs($this->adminUser, 'admin')
+          ->put(
+              route('admin.centres.update', ['centre' => $centre->id]),
+              $data
+          );
+        $this->seeInDatabase('centres', [
+            'id' => $centre->id,
+            'name' => 'New Centre Name'
+        ]);
+        $this->dontSeeInDatabase('centres', [
+            'id' => $centre->id,
+            'name' => $centre->name
+        ]);
     }
 }

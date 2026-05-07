@@ -2,9 +2,8 @@
 
 namespace App\Listeners;
 
-use App\CentreUser;
-use Config;
 use Illuminate\Auth\Events\Authenticated;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 class CentreUserAuthenticated
@@ -20,12 +19,14 @@ class CentreUserAuthenticated
         }
         // a fresh login won't have this key
         if (Session::missing('CentreUserCurrentCentreId')) {
-            // set the session to the centre default or all the centres they're allowed
-            $default = Config::get('arc.default_to_home_centre')
-                ? $event->user->homeCentre?->id
-                : 'all';
+            $id = $event->user->homeCentre?->id
+                ?? $event->user->centres()->first()?->id;
 
-            Session::put('CentreUserCurrentCentreId', $default);
+            if (!$event->user->homeCentre?->id) {
+                Log::warning("Centre User {$event->user->id} does not have a home centre");
+            }
+
+            Session::put('CentreUserCurrentCentreId', $id);
         }
     }
 }

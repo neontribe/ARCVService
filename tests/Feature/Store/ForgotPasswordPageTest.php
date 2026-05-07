@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Feature\Store;
 
 use App\Centre;
@@ -35,16 +36,16 @@ class ForgotPasswordPageTest extends StoreTestCase
         $this->centreUser->centres()->attach($this->centre->id, ['homeCentre' => true]);
     }
 
-    /** @test */
-    public function itHasAnEmailInput()
+
+    public function testItHasAnEmailInput(): void
     {
         $this->visit(route('store.password.request'))
             ->seeElement('input[type=email][name=email]')
         ;
     }
 
-    /** @test */
-    public function itHasASubmitButton()
+
+    public function testItHasASubmitButton(): void
     {
         $this->visit(route('store.password.request'))
             ->seeElement('button[type=submit]')
@@ -52,8 +53,8 @@ class ForgotPasswordPageTest extends StoreTestCase
         ;
     }
 
-    /** @test */
-    public function itResetsPasswordForUserByEmailResetLink()
+
+    public function testItResetsPasswordForUserByEmailResetLink(): void
     {
         Notification::fake();
 
@@ -74,8 +75,8 @@ class ForgotPasswordPageTest extends StoreTestCase
         );
     }
 
-    /** @test */
-    public function itCannotEffectRedirectWithAManipulatedRefererHeader()
+
+    public function testItCannotEffectRedirectWithAManipulatedRefererHeader(): void
     {
         Mail::fake();
 

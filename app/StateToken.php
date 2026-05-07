@@ -2,13 +2,17 @@
 
 namespace App;
 
-use DB;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Ramsey\Uuid\Uuid;
-use Log;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
+
 /**
+ * @property string $uuid
+ * @property int|null $user_id
+ * @property int|null $admin_user_id
  * @property VoucherState $voucherStates
  * @property User $user
  * @property AdminUser $adminUser
@@ -17,8 +21,6 @@ class StateToken extends Model
 {
     /**
      * The attributes that are mass assignable.
-     *
-     * @var array
      */
     protected $fillable = [
         'uuid',
@@ -27,63 +29,95 @@ class StateToken extends Model
     ];
 
     /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
+     * The attributes that should be cast.
      */
-    protected $hidden = [
+    protected $casts = [
+        'user_id' => 'integer',
+        'admin_user_id' => 'integer',
     ];
 
     /**
-     * Makes and checks for an unused token
-     *
-     * @return string
-    */
-    public static function generateUnusedToken()
+     * Generate a unique, unused UUID token.
+     */
+    public static function generateUnusedToken(): string
     {
         do {
-            // TODO: Deal with possibility uuid4() may throw an exception of it's own?
-            try {
-                $candidate = Uuid::uuid4()->toString();
-            } catch (\Exception $e) {
-                // Uuid4() throws exceptions, apparently! Log that and die, I guess?
-                Log::warning($e->getMessage());
-                abort(500, $e->getMessage());
-            }
-            // Check if it's in use.
-            $usedToken = self::isUsedToken($candidate);
-        } while ($usedToken === true);
+            $candidate = Str::uuid()->toString();
+        } while (static::isUsedToken($candidate));
 
         return $candidate;
     }
 
     /**
-     * Checks a UUID has been used
-     * @param $candidate
-     * @return bool
+     * Check whether a UUID token is already in use.
      */
-    public static function isUsedToken($candidate)
+    public static function isUsedToken(string $candidate): bool
     {
-        $tableName = 'state_tokens';
-        return DB::table($tableName)
-            ->where('uuid', $candidate)
+        return static::where('uuid', $candidate)->exists();
+    }
+
+    /**
+     * Lightweight check for outstanding payments to highlight in dashboard
+     */
+    public static function checkIfOutstandingPayments(): bool
+    {
+        return self::pending()
+            ->withinPaymentWindow()
             ->exists();
     }
 
     /**
-     * The vouchers that share this StateToken
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * Constrains results to the payment window.
      */
-    public function voucherStates()
+    public function scopeWithinPaymentWindow(Builder $query, ?Carbon $date = null): void
+    {
+        $from = $date ?? Carbon::now()
+            ->startOfDay()
+            ->subDays(config('arc.payment_window_days'))
+        ;
+
+        $query->where('created_at', '>=', $from);
+    }
+
+    /**
+     * Constrains to payment requests not yet actioned by an admin.
+     */
+    public function scopePending(Builder $query): void
+    {
+        $query->whereNull('admin_user_id');
+    }
+
+    /**
+     * Constrains to payment requests already actioned by an admin.
+     */
+    public function scopeReimbursed(Builder $query): void
+    {
+        $query->whereNotNull('admin_user_id');
+    }
+
+    /**
+     * Eager-loads all relationships required to render the payments view.
+     * Kept as a scope so callers don't have to know or repeat the tree.
+     */
+    public function scopeWithPaymentRelations(Builder $query): void
+    {
+        $query->with([
+            'user',
+            'voucherStates.voucher.trader.market.sponsor',
+            'voucherStates.voucher.sponsor',
+        ]);
+    }
+
+    /**
+     * The voucher states that share this StateToken.
+     */
+    public function voucherStates(): HasMany
     {
         return $this->hasMany(VoucherState::class);
     }
 
     /**
-     * The user that created this StateToken
-     *
-     * @return BelongsTo
+     * The user that created this StateToken.
      */
     public function user(): BelongsTo
     {
@@ -91,9 +125,7 @@ class StateToken extends Model
     }
 
     /**
-     * The admin user that updated this StateToken
-     *
-     * @return BelongsTo
+     * The admin user associated with this StateToken.
      */
     public function adminUser(): BelongsTo
     {

@@ -14,8 +14,7 @@ class FamilyModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function itCanHaveRegistrations()
+    public function testItCanHaveRegistrations(): void
     {
         // Create Family
         $family = factory(Family::class)->create();
@@ -47,8 +46,8 @@ class FamilyModelTest extends TestCase
         }
     }
 
-        /** @test */
-    public function itCanHaveCarers()
+
+    public function testItCanHaveCarers(): void
     {
         // Create Family
         $family = factory(Family::class)->create();
@@ -67,8 +66,8 @@ class FamilyModelTest extends TestCase
         }
     }
 
-    /** @test */
-    public function itCanHaveChildren()
+
+    public function testItCanHaveChildren(): void
     {
         // Create Family
         $family = factory(Family::class)->create();
@@ -88,8 +87,8 @@ class FamilyModelTest extends TestCase
         }
     }
 
-    /** @test */
-    public function itCanAppendItsPrimaryCarerName()
+
+    public function testItCanAppendItsPrimaryCarerName(): void
     {
         // Make a family with carers
         $family = factory(Family::class)->create();
@@ -117,8 +116,8 @@ class FamilyModelTest extends TestCase
         $this->assertEquals($pri_carer->name, $pri_carer_family->pri_carer);
     }
 
-    /** @test */
-    public function itHasAnAttributeThatReturnsNearestDueDateOrNull()
+
+    public function testItHasAnAttributeThatReturnsNearestDueDateOrNull(): void
     {
         // Create Family
         $family = factory(Family::class)->create([]);
@@ -130,7 +129,7 @@ class FamilyModelTest extends TestCase
         $family->children()
             ->saveMany(
                 collect([
-                    factory(Child::class,2 )->state('underOne')->make(),
+                    factory(Child::class, 2)->state('underOne')->make(),
                     factory(Child::class)->state('betweenOneAndPrimarySchoolAge')->make(),
                     factory(Child::class)->state('isSecondarySchoolAge')->make(),
                 ])->flatten()
@@ -154,8 +153,8 @@ class FamilyModelTest extends TestCase
         $this->assertEquals($pregnancy->dob, $pregnant_family->expecting);
     }
 
-    /** @test */
-    public function itCanGenreateAndSetAnRvidCorrectly()
+
+    public function testItCanGenreateAndSetAnRvidCorrectly(): void
     {
         // Set up some families and centres.
         $centre1 = factory(Centre::class)->create();
@@ -238,8 +237,8 @@ class FamilyModelTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function itCanGetsARvidCorrectlyForGivenCentre()
+
+    public function testItCanGetsARvidCorrectlyForGivenCentre(): void
     {
         $centre = factory(Centre::class)->create();
         $family = factory(Family::class)->create();
@@ -256,5 +255,39 @@ class FamilyModelTest extends TestCase
         $candidate = $centre->prefix . str_pad((string)$family->centre_sequence, 4, 0, STR_PAD_LEFT);
 
         $this->assertEquals($candidate, $family->rvid);
+    }
+
+    public function testFindByRvidReturnsNullForBlankOrInvalidValues(): void
+    {
+        $this->assertNull(Family::findByRvid(''));
+        $this->assertNull(Family::findByRvid('   '));
+        $this->assertNull(Family::findByRvid('NOT-AN-RVID'));
+    }
+
+    public function testItResolvesLongestPrefixFirstWhenFindingFamilyByRvid(): void
+    {
+        $short = factory(Centre::class)->create([
+            'prefix' => 'AB',
+        ]);
+
+        $long = factory(Centre::class)->create([
+            'prefix' => 'AB1',
+        ]);
+
+        $wrongFamily = factory(Family::class)->create([
+            'initial_centre_id' => $short->id,
+            'centre_sequence' => 23,
+        ]);
+
+        $expectedFamily = factory(Family::class)->create([
+            'initial_centre_id' => $long->id,
+            'centre_sequence' => 23,
+        ]);
+
+        $resolved = Family::findByRvid('ab123');
+
+        $this->assertNotNull($resolved);
+        $this->assertSame($expectedFamily->id, $resolved->id);
+        $this->assertNotSame($wrongFamily->id, $resolved->id);
     }
 }

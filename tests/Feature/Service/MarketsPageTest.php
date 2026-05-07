@@ -44,8 +44,8 @@ class MarketsPageTest extends StoreTestCase
         $this->marketsRoute = route('admin.markets.index');
     }
 
-    /** @test */
-    public function itShowsATableWithHeaders()
+
+    public function testItShowsATableWithHeaders(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->marketsRoute)
@@ -56,8 +56,8 @@ class MarketsPageTest extends StoreTestCase
             ->seeInElement('thead tr th:nth-child(4)', '');
     }
 
-    /** @test */
-    public function itShowsAListWithMarkets()
+
+    public function testItShowsAListWithMarkets(): void
     {
         $sortedMarkets = $this->markets->sortBy(function ($market) {
             return $market->sponsor->name . '#' .
@@ -71,8 +71,8 @@ class MarketsPageTest extends StoreTestCase
             ->seeInElement('tbody tr:nth-child(3) td:nth-child(1)', $sortedMarkets[2]->name);
     }
 
-    /** @test */
-    public function eachMarketHasAnAddTraderButton()
+
+    public function testEachMarketHasAnAddTraderButton(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->marketsRoute);
@@ -92,8 +92,8 @@ class MarketsPageTest extends StoreTestCase
         }
     }
 
-    /** @test */
-    public function itShowsCorrectTradersForEachMarket()
+
+    public function testItShowsCorrectTradersForEachMarket(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->marketsRoute);
@@ -118,8 +118,8 @@ class MarketsPageTest extends StoreTestCase
         }
     }
 
-    /** @test */
-    public function itShowsAnEditButtonForEachMarket()
+
+    public function testItShowsAnEditButtonForEachMarket(): void
     {
         $this->actingAs($this->adminUser, 'admin')
             ->visit($this->marketsRoute);

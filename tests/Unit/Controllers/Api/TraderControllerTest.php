@@ -82,7 +82,7 @@ class TraderControllerTest extends TestCase
      *
      * Asserts that the correct JSON structure is returned along with the correct market data.
      */
-    public function testTradersControllerIndex()
+    public function testTradersControllerIndex(): void
     {
         $trader = factory(Trader::class)->create(
             [
@@ -117,9 +117,9 @@ class TraderControllerTest extends TestCase
         ]);
     }
 
-    public function testShowVoucherHistoryCompilesListOfPaymentHistory()
+    public function testShowVoucherHistoryCompilesListOfPaymentHistory(): void
     {
-        $traderController = new TraderController;
+        $traderController = new TraderController();
         $data = json_decode(
             $traderController->showVoucherHistory($this->traders[0])->getContent(),
             false
@@ -139,7 +139,7 @@ class TraderControllerTest extends TestCase
         $this->assertEquals($data[0]->vouchers[2]->reimbursed_on, $today);
     }
 
-    public function testItLimitsTheVoucherHistoryTo15()
+    public function testItLimitsTheVoucherHistoryTo15(): void
     {
         $date = Carbon::now()->subMonths(3);
 
@@ -163,7 +163,7 @@ class TraderControllerTest extends TestCase
         });
 
         // fire up the controller and ask for some things.
-        $traderController = new TraderController;
+        $traderController = new TraderController();
         $response = $traderController->showVoucherHistory($this->traders[0]);
         $data = json_decode(
             $response->getContent(),
@@ -173,7 +173,7 @@ class TraderControllerTest extends TestCase
         $this->assertCount(15, $data);
     }
 
-    public function testItPutsPaginationInTheVoucherHistory()
+    public function testItPutsPaginationInTheVoucherHistory(): void
     {
         $date = Carbon::now()->subMonths(3);
 
@@ -197,7 +197,7 @@ class TraderControllerTest extends TestCase
         });
 
         // fire up the controller and ask for some things.
-        $traderController = new TraderController;
+        $traderController = new TraderController();
 
         $response = $traderController->showVoucherHistory($this->traders[0]);
 
@@ -230,7 +230,7 @@ class TraderControllerTest extends TestCase
     /**
      * Tests the email all voucher history API response.
      */
-    public function testEmailVoucherHistoryAllDates()
+    public function testEmailVoucherHistoryAllDates(): void
     {
         Mail::fake();
 
@@ -252,7 +252,7 @@ class TraderControllerTest extends TestCase
     /**
      * Tests the email specific date voucher history API response.
      */
-    public function testEmailVoucherHistorySpecificDate()
+    public function testEmailVoucherHistorySpecificDate(): void
     {
         Mail::fake();
 
@@ -281,7 +281,7 @@ class TraderControllerTest extends TestCase
     /**
      * Tests the voucher history not emailed to user not auth'd for trader.
      */
-    public function testEmailVoucherHistoryToNonAuthdUser()
+    public function testEmailVoucherHistoryToNonAuthdUser(): void
     {
         $this->actingAs($this->user, 'api')
             ->json('POST', route('api.trader.voucher-history-email', 1), [
@@ -295,11 +295,10 @@ class TraderControllerTest extends TestCase
      * @param string $header
      * @return array
      */
-    private function linkHeaderToArray(string $header)
+    private function linkHeaderToArray(string $header): array
     {
         $values = [];
-        foreach (explode(',', $header) as $link)
-        {
+        foreach (explode(',', $header) as $link) {
             $values = array_merge($values, $this->extractLinkData($link));
         }
         return $values;
@@ -309,7 +308,7 @@ class TraderControllerTest extends TestCase
      * @param string $linkHeader
      * @return array[]
      */
-    private function extractLinkData(string $linkHeader)
+    private function extractLinkData(string $linkHeader): array
     {
         preg_match('/<(.*?(?:(?:\?|\&)page=(\d+).*)?)>.*rel="(.*)"/', $linkHeader, $matches, PREG_UNMATCHED_AS_NULL);
         return [
@@ -320,8 +319,8 @@ class TraderControllerTest extends TestCase
         ];
     }
 
-    /** @test */
-    public function testCalculateProgrammeVoucherAmounts()
+
+    public function testCalculateProgrammeVoucherAmounts(): void
     {
         $standardSponsor = factory(Sponsor::class)->create([
             'programme' => 0
@@ -337,14 +336,14 @@ class TraderControllerTest extends TestCase
         ]);
         $vouchers = $standardVouchers->concat($spVouchers);
         $programme_amounts = TraderController::calculateProgrammeVoucherAmounts($vouchers);
-        $this->assertEquals($programme_amounts, array (
+        $this->assertEquals(array(
           'standard' => 12,
           'social_prescription' => 18,
-        ));
+        ), $programme_amounts);
     }
 
-    /** @test */
-    public function testCalculateProgrammeVoucherAreaAmounts()
+
+    public function testCalculateProgrammeVoucherAreaAmounts(): void
     {
         $standardSponsors = factory(Sponsor::class, 3)->create([
             'programme' => 0

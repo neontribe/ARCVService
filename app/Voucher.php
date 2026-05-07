@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Log;
+use Ramsey\Collection\Exception\CollectionException;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -313,7 +315,7 @@ class Voucher extends Model
 
                     LEFT JOIN vouchers as v2
                         ON final_id = v2.id
-                        
+
                     ORDER BY t1.start
                     "
                 );

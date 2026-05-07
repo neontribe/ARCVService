@@ -11,10 +11,10 @@ class AdminEditWorkersJSTest extends DuskTestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function edit_workers_javascript_is_working()
+
+    public function testEditWorkersJavascriptIsWorking(): void
     {
-        $adminLogin = new AdminLogin;
+        $adminLogin = new AdminLogin();
 
         $this->browse(function ($browser) use ($adminLogin) {
             $browser->visit($adminLogin)
@@ -31,7 +31,7 @@ class AdminEditWorkersJSTest extends DuskTestCase
                     ->assertPresent('#neighbour-' . $adminLogin->other_centres[2]->id)
                     ->press('Delete worker')
                     ->assertDialogOpened('Are you sure you want to delete this worker account?')
-                    ;
+            ;
         });
     }
 }

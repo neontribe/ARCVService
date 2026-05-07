@@ -6,362 +6,341 @@ use App\Bundle;
 use App\Carer;
 use App\Centre;
 use App\Family;
-use App\Voucher;
-use App\Registration;
-use App\Http\Requests\StoreAppendBundleRequest;
-use App\Http\Requests\StoreUpdateBundleRequest;
 use App\Http\Controllers\Controller;
-use Auth;
-use Carbon\Carbon;
-use Exception;
+use App\Http\Requests\StoreAppendBundleRequest;
+use App\Http\Requests\StorePickupBundleRequest;
+use App\Http\Requests\StoreTransitionBundleRequest;
+use App\Registration;
+use App\Services\TransitionProcessor\TransitionProcessor;
+use App\Trader;
+use App\Voucher;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
-use Log;
+use Illuminate\Support\Str;
+use RuntimeException;
+use Throwable;
 
 class BundleController extends Controller
 {
     /**
-     * Returns the voucher-manager page for a given registration
-     *
-     * @param Registration $registration
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * Return the voucher-manager page for a given registration.
      */
-    public function create(Registration $registration)
+    public function create(Registration $registration): View
     {
         $user = Auth::user();
-        $data = [
-            "user_name" => $user->name,
-            "centre_name" => ($user->centre) ? $user->centre->name : null,
-        ];
-
-        // Grabs a copy of all carers
-        $carers = $registration->family->carers->all();
         $bundle = $registration->currentBundle()->vouchers;
+        $valuation = $registration->getValuation();
+        $carers = $registration->family->carers->all();
 
-        $sorted_bundle = $bundle->sortBy('code');
-
-        // Find the last collected bundle.
         $lastCollectedBundle = $registration->bundles()
             ->whereNotNull('disbursed_at')
             ->whereDate('disbursed_at', '<=', Carbon::today()->toDateString())
-            ->orderBy('disbursed_at', 'desc')
-            ->limit(1)
+            ->orderByDesc('disbursed_at')
             ->first();
-        ;
 
-        // Turn it's disbursement date into a human date.
-        $lastCollection = ($lastCollectedBundle && (!empty($lastCollectedBundle->disbursed_at)))
-            // 'disbursed_at' is auto-carbon'd by the Bundle model
-            ? $lastCollectedBundle->disbursed_at->format('l jS \of F Y')
-            : null;
+        $lastCollection = $lastCollectedBundle?->disbursed_at?->format('l jS \of F Y');
 
-        $valuation = $registration->getValuation();
-        $programme = Auth::user()->centre->sponsor->programme;
-
-        return view('store.manage_vouchers', array_merge(
-            $data,
-            [
-                "registration" => $registration,
-                "lastCollection" => $lastCollection,
-                "children" => $registration->family->children,
-                "centre" => Auth::user()->centre,
-                "carers" => $carers,
-                "pri_carer" => array_shift($carers),
-                "vouchers" => $sorted_bundle,
-                "vouchers_amount" => count($bundle),
-                "entitlement" => $valuation->getEntitlement(),
-                "noticeReasons" => $valuation->getNoticeReasons(),
-                "programme" => $programme
-            ]
-        ));
-    }
-
-    /**
-     * Does a single or multiple voucher.
-     *
-     * @param StoreAppendBundleRequest $request
-     * @param Registration $registration
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function addVouchersToCurrentBundle(StoreAppendBundleRequest $request, Registration $registration)
-    {
-        // Generate code range from given values (may be only 1)
-        $voucherCodes = Voucher::generateCodeRange($request->get("start"), $request->get("end"));
-
-        // Count vouchers and check them
-        $numVouchers = count($voucherCodes);
-
-        if ($numVouchers <= config('arc.bundle_max_voucher_append')) {
-            // Get current Bundle
-            /** @var Bundle $bundle */
-            $bundle = $registration->currentBundle();
-            // try to add the vouchers.
-            $errors = $bundle->addVouchers($voucherCodes);
-        } else {
-            $errors = ['append' => $numVouchers];
-        }
-
-        //Check the voucher isn't already recorded, payment_pending, paid or retired
-
-
-        // Return to manager in all cases
-        $successRoute = $failRoute = route(
-            'store.registration.voucher-manager',
-            ['registration' => $registration->id]
-        );
-
-        return $this->redirectAfterRequest($errors, $successRoute, $failRoute);
-    }
-
-    /**
-     * Create OR replace a registrations current active bundle
-     *
-     * @param StoreUpdateBundleRequest $request
-     * @param Registration $registration
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function update(StoreUpdateBundleRequest $request, Registration $registration)
-    {
-        // Init for later
-        $errors = [];
-
-        // Default return to manager
-        $successRoute = $failRoute = route(
-            'store.registration.voucher-manager',
-            ['registration' => $registration->id]
-        );
-
-        // Filter inputs for only our interests
-        $inputs = $request->all([
-            'collected_at',
-            'collected_by',
-            'collected_on'
+        return view('store.manage_vouchers', [
+            'user_name' => $user->name,
+            'centre_name' => $user->centre?->name,
+            'registration' => $registration,
+            'lastCollection' => $lastCollection,
+            'children' => $registration->family->children,
+            'centre' => $user->centre,
+            'carers' => $carers,
+            'pri_carer' => array_shift($carers),
+            'vouchers' => $bundle->sortBy('code'),
+            'vouchers_amount' => $bundle->count(),
+            'entitlement' => $valuation->getEntitlement(),
+            'noticeReasons' => $valuation->getNoticeReasons(),
+            'programme' => $user->centre->sponsor->programme,
+            'pool_size' => $user->centre->getPoolSize() ?? 0,
         ]);
+    }
 
-        // If we don't mention them in form input because we are updating status of existing bundle vouchers
-        if ($request->exists('vouchers')) {
-            $inputs['vouchers'] = $request->input('vouchers');
-        }
+    /**
+     * Append a single voucher, range of vouchers, or a quantity drawn from the pool
+     * to the current bundle.
+     */
+    public function addVouchersToCurrentBundle(
+        StoreAppendBundleRequest $request,
+        Registration $registration,
+    ): RedirectResponse {
+        $managerRoute = $this->managerRoute($registration);
 
-        /** @var \App\Bundle $bundle */
-        $bundle = $registration->currentBundle();
-
-        // Are we updating vouchers?
-        if (array_key_exists('vouchers', $inputs)) {
-            // remove empty values
-
-            $voucherCodes = array_filter(
-                $inputs['vouchers'],
-                function ($value) {
-                    return !empty($value);
-                }
-            );
-
-            $voucherCodes = (!empty($voucherCodes))
-                ? Voucher::cleanCodes(($voucherCodes))
-                : []; // Will result in the removal of the vouchers from the bundle.
-
-            // sync vouchers.
-            $errors[] = $bundle->syncVouchers($voucherCodes);
-        }
-
-        // Check we have values on our inputs; This should have been covered in validation...
-        if (isset($inputs['collected_at']) &&
-            isset($inputs['collected_by']) &&
-            isset($inputs['collected_on'])
-        ) {
-            // Check there are actual vouchers to disburse, or this is a bit.
-            if ($bundle->vouchers->count() === 0) {
-                $errors["empty"] = true;
-            } else {
-                // Add the date;
-                $bundle->disbursed_at = Carbon::createFromFormat(
-                    'Y-m-d',
-                    $inputs['collected_on']
-                )->startOfDay()->toDateTimeString();
-
-                try {
-                    // Find and add the carer
-                    $carer = Carer::findOrFail($inputs['collected_by']);
-                    $bundle->collectingCarer()->associate($carer);
-
-                    // Find and add the centre
-                    $centre = Centre::findOrFail($inputs['collected_at']);
-                    $bundle->disbursingCentre()->associate($centre);
-
-                    // Add the current user as disbursingUser.
-                    $bundle->disbursingUser()->associate(Auth::user());
-
-                    // Store it.
-                    $bundle->save();
-                } catch (Exception $e) {
-                    // Fires if finOrFail() or save() breaks
-                    // Log that error by hand
-                    Log::error('Bad transaction for ' . __CLASS__ . '@' . __METHOD__ . ' by service user ' . Auth::id());
-                    Log::error($e->getTraceAsString());
-                    $errors['transaction'] = true;
-                }
-
-                // Return to Index as we've disbursed, and user may want to search
-                $successRoute = route(
-                    'store.registration.index'
+        if ($request->filled('voucher-quantity')) {
+            try {
+                $voucherCodes = $registration->centre->claimFromPool(
+                    (int)$request->input('voucher-quantity'),
+                )
+                    ->pluck('code')
+                    ->all();
+            } catch (Throwable $e) {
+                return $this->redirectAfterRequest(
+                    ['pool' => $e->getMessage()],
+                    $managerRoute,
+                    $managerRoute,
                 );
             }
-        }
-
-        return $this->redirectAfterRequest($errors, $successRoute, $failRoute, $bundle);
-    }
-
-    /**
-     * Function to remove all vouchers from a bundle
-     *
-     * @param Registration $registration
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function removeAllVouchersFromCurrentBundle(Registration $registration)
-    {
-        /** @var Bundle $bundle */
-        $bundle = $registration->currentBundle();
-
-        // Get all the voucjhers for this bundle
-        $vouchers = $bundle->vouchers()->get();
-
-        // Call alterVouchers with no codes to check, and no bundle to detransiton and remove it.
-        $errors = $bundle->alterVouchers($vouchers, [], null);
-
-        // Back to manager in all cases
-        $successRoute = $failRoute = route(
-            'store.registration.voucher-manager',
-            ['registration' => $registration->id]
-        );
-
-        return $this->redirectAfterRequest($errors, $successRoute, $failRoute);
-    }
-
-    /**
-     * Removes a single voucher from a bundle
-     * @param Registration $registration
-     * @param Voucher $voucher
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function removeVoucherFromCurrentBundle(Registration $registration, Voucher $voucher)
-    {
-        /** @var Bundle $bundle */
-        $bundle = $registration->currentBundle();
-
-        // It is attached to our bundle, right?
-        if ($voucher->bundle_id == $bundle->id) {
-            // Call alterVouchers with no codes to check, and no bundle to detransiton and remove it.
-            $errors = $bundle->alterVouchers(collect([$voucher]), [], null);
         } else {
-            // Error it out (how did you get here?
-            $errors["foreign"] = [$voucher->code];
+            $voucherCodes = Voucher::generateCodeRange(
+                $request->input('start'),
+                $request->input('end'),
+            );
         }
 
-        // Back to manager in all cases
-        $successRoute = $failRoute = route(
-            'store.registration.voucher-manager',
-            ['registration' => $registration->id]
-        );
+        $errors = (count($voucherCodes) <= config('arc.bundle_max_voucher_append'))
+            ? $registration->currentBundle()->addVouchers($voucherCodes)
+            : ['append' => count($voucherCodes)];
 
-        return $this->redirectAfterRequest($errors, $successRoute, $failRoute);
+        return $this->redirectAfterRequest($errors, $managerRoute, $managerRoute);
     }
 
     /**
-     * Filters and prepares errors before returning to the voucher-manager
-     *
-     * @param $errors
-     * @param $successRoute
-     * @param $failRoute
-     * @param $bundle
-     * @return \Illuminate\Http\RedirectResponse
+     * Disburse the current bundle if collection details are present.
      */
-    public function redirectAfterRequest($errors, $successRoute, $failRoute, $bundle = null)
+    public function pickup(StorePickupBundleRequest $request, Registration $registration): RedirectResponse
     {
-        $programme = Auth::user()->centre->sponsor->programme;
-        if (!empty($errors)) {
-            // Assemble messages
-            $messages = [];
-            foreach ($errors as $type => $values) {
-                switch ($type) {
-                    case "transaction":
-                        if ($values) {
-                            $messages[] = 'Database transaction problem';
-                        }
-                        break;
-                    case "transition":
-                        $messages[] = "Voucher state change problem with: " . join(', ', $values);
-                        break;
-                    case "codes":
-                        $messages[] = "These codes are invalid: " . join(', ', $values);
-                        break;
-                    case "disbursed":
-                        $messages[] = "These vouchers have been given out: " . join(', ', $values);
-                        break;
-                    case "used":
-                        $messages[] = "These vouchers have already been used: " . join(', ', $values);
-                        break;
-                    case "bundled":
-                        // Some vouchers were allocated to a family already. Partition these based on whether the user
-                        // has permission to remove them from the current family, so we can make a nice interactive
-                        // error message.
+        $managerRoute = $this->managerRoute($registration);
+        $bundle = $registration->currentBundle();
 
-                        $relevant = [];
-                        $inaccessible = [];
+        $errors = $this->attemptDisbursal(
+            $bundle,
+            // Should be here, due to form request validation
+            $request->only(['collected_at', 'collected_by', 'collected_on'])
+        );
 
-                        foreach ($values as $voucher) {
-                            $registration = $voucher->bundle->registration;
+        return $this->redirectAfterRequest($errors, route('store.registration.index'), $managerRoute, $bundle);
+    }
 
-                            if (Auth::user()->isRelevantCentre($registration->centre)) {
-                                // The user can deallocate the voucher from its current family at this route.
-                                $route = route(
-                                    'store.registration.voucher-manager',
-                                    ['registration' => $registration->id]
-                                );
+    /**
+     * Disburse the current bundle and trigger a collection transition.
+     */
+    public function collectBundle(StoreTransitionBundleRequest $request, Registration $registration): RedirectResponse
+    {
+        $managerRoute = $this->managerRoute($registration);
+        $bundle = $registration->currentBundle();
+        $errors = [];
 
-                                $relevant[] = "<a href=\"$route\">" . e($voucher->code) . '</a>';
-                            } else {
-                                // The user does not have permission to remove the voucher's current allocation.
-                                $inaccessible[] = $voucher->code;
-                            }
-                        }
+        try {
+            // As this is an important change, we need to rollback, rather than plough on.
+            DB::transaction(function () use ($request, $bundle, &$errors) {
+                $errors = $this->attemptDisbursal(
+                    $bundle,
+                    // Should be here, due to form request validation
+                    $request->only(['collected_at', 'collected_by', 'collected_on'])
+                );
 
-                        // Generate error messages where vouchers of the sort existed, using unescaped HTML where necessary.
-                        $relevant && $messages[] = new HtmlString(
-                            "These vouchers are currently allocated to a different " . Family::getAlias($programme) . ". Click on the voucher number to view the other " . Family::getAlias($programme) . "'s record: " . join(', ', $relevant)
-                        );
-                        $inaccessible && $messages[] = "These vouchers are allocated to a different " . Family::getAlias($programme) . " in a centre you can't access: " . join(', ', $inaccessible);
-
-                        break;
-                    case "empty":
-                        if ($values) {
-                            $messages[] = "Action denied on empty bundle";
-                        }
-                        break;
-                    case "append":
-                        if ($values) {
-                            $messages[] = "Failed adding more than " . config('arc.bundle_max_voucher_append') . " vouchers";
-                        }
-                        break;
-                    default:
-                        $messages[] = 'There was an unknown error';
-                        break;
+                if (!empty($errors)) {
+                    throw new RuntimeException('disbursal errors');
                 }
-            }
-            // Spit the basic error messages back
+
+                $trader = Trader::findOrFail($request->input('trader_id'));
+                $processor = new TransitionProcessor($trader, 'collect');
+                $response = $processor->handle($bundle->vouchers());
+
+                if ($response->hasFailures()) {
+                    $errors['transition'] = $response->getFailureCodes();
+                    throw new RuntimeException('transition errors');
+                }
+            });
+        } catch (Throwable $e) {
+            Log::error(sprintf(
+                'Rollback Bad transaction for %s@%s by user %s because of: %e',
+                self::class,
+                __FUNCTION__,
+                Auth::id() ?? 'unauthenticated',
+                $e->getMessage()
+            ));
+        }
+
+        return $this->redirectAfterRequest($errors, route('store.registration.index'), $managerRoute, $bundle);
+    }
+
+    /**
+     * Remove all vouchers from the current bundle.
+     */
+    public function removeAllVouchersFromCurrentBundle(Registration $registration): RedirectResponse
+    {
+        $bundle = $registration->currentBundle();
+        $errors = $bundle->alterVouchers($bundle->vouchers()->get());
+        $route = $this->managerRoute($registration);
+
+        return $this->redirectAfterRequest($errors, $route, $route);
+    }
+
+    /**
+     * Remove a single voucher from the current bundle.
+     */
+    public function removeVoucherFromCurrentBundle(
+        Registration $registration,
+        Voucher $voucher,
+    ): RedirectResponse {
+        $bundle = $registration->currentBundle();
+        $route = $this->managerRoute($registration);
+
+        $errors = $voucher->bundle_id === $bundle->id
+            ? $bundle->alterVouchers(collect([$voucher]))
+            : ['foreign' => [$voucher->code]];
+
+        return $this->redirectAfterRequest($errors, $route, $route);
+    }
+
+    /**
+     * Guard against an empty bundle then delegate to disburseBundle.
+     * Returns an error map on failure, or an empty array on success.
+     */
+    private function attemptDisbursal(Bundle $bundle, array $inputs): array
+    {
+        if ($bundle->vouchers->isEmpty()) {
+            return ['empty' => true];
+        }
+
+        return $this->disburseBundle($bundle, $inputs) ? [] : ['transaction' => true];
+    }
+
+    /**
+     * Attempt to mark a bundle as disbursed.
+     */
+    private function disburseBundle(Bundle $bundle, array $inputs): bool
+    {
+        try {
+            $bundle->disbursed_at = Carbon::createFromFormat('Y-m-d', $inputs['collected_on'])
+                ->startOfDay();
+
+            $bundle->collectingCarer()->associate(Carer::findOrFail($inputs['collected_by']));
+            $bundle->disbursingCentre()->associate(Centre::findOrFail($inputs['collected_at']));
+            $bundle->disbursingUser()->associate(Auth::user());
+            $bundle->save();
+        } catch (Throwable $e) {
+            Log::error(sprintf(
+                'Bad transaction for %s@%s by service user %s',
+                self::class,
+                __FUNCTION__,
+                Auth::id() ?? 'unauthenticated',
+            ));
+            Log::error($e->getTraceAsString());
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Named route to the voucher-manager for a registration.
+     */
+    private function managerRoute(Registration $registration): string
+    {
+        return route('store.registration.voucher-manager', ['registration' => $registration->id]);
+    }
+
+    /**
+     * Build flash messages from an error map and redirect accordingly.
+     */
+    public function redirectAfterRequest(
+        array $errors,
+        string $successRoute,
+        string $failRoute,
+        ?Bundle $bundle = null,
+    ): RedirectResponse {
+        if (!empty($errors)) {
             return redirect($failRoute)
                 ->withInput()
-                ->with('error_messages', $messages);
-        } else {
-            $message = "Vouchers updated";
-            if ($bundle instanceof Bundle) {
-                $numberOfVouchers = $bundle->vouchers->count();
-                $fullFamily = $bundle->registration()->withFullFamily()->first();
-                $familyName = $fullFamily->family->pri_carer;
-                $message = 'You have just marked ' . $numberOfVouchers . ' ' . str_plural('voucher', $numberOfVouchers) . ' as collected by ' . $familyName;
-            }
-            // Otherwise, sure, return to the new view.
-            return redirect($successRoute)
-                ->with('message', $message);
+                ->with('error_messages', $this->buildErrorMessages($errors));
         }
+
+        $message = $bundle instanceof Bundle
+            ? $this->buildSuccessMessage($bundle)
+            : 'Vouchers updated';
+
+        return redirect($successRoute)->with('message', $message);
+    }
+
+    /**
+     * Map the error array to human-readable message strings / HtmlString objects.
+     */
+    private function buildErrorMessages(array $errors): array
+    {
+        $messages = [];
+
+        foreach ($errors as $type => $values) {
+            $codeStrings = implode(', ', (array)$values);
+            $messages[] = match ($type) {
+                'transaction' => 'Database transaction problem',
+                'empty' => 'Action denied on empty bundle',
+                'append' => 'Failed adding more than ' . config('arc.bundle_max_voucher_append') . ' vouchers',
+                'transition' => 'Voucher state change problem with: ' . $codeStrings,
+                'codes' => 'These codes are invalid: ' . $codeStrings,
+                'disbursed' => 'These vouchers have been given out: ' . $codeStrings,
+                'used' => 'These vouchers have already been used: ' . $codeStrings,
+                'foreign' => 'These vouchers do not belong to this bundle: ' . $codeStrings,
+                'bundled' => $this->buildBundledMessages((array)$values),
+                default => 'There was an unknown error',
+            };
+        }
+
+        return Arr::flatten($messages);
+    }
+
+    /**
+     * Build one or two messages for vouchers already bundled elsewhere,
+     * partitioned by whether the current user can access the other registration.
+     */
+    private function buildBundledMessages(array $vouchers): array
+    {
+        $user = Auth::user();
+        $programme = $user->centre->sponsor->programme;
+        $familyAlias = Family::getAlias($programme);
+        $relevant = [];
+        $inaccessible = [];
+
+        foreach ($vouchers as $voucher) {
+            $registration = $voucher->bundle->registration;
+
+            if ($user->isRelevantCentre($registration->centre)) {
+                $relevant[] = '<a href="' . e($this->managerRoute($registration)) . '">' . e($voucher->code) . '</a>';
+            } else {
+                $inaccessible[] = $voucher->code;
+            }
+        }
+
+        $messages = [];
+
+        if (!empty($relevant)) {
+            $messages[] = new HtmlString(
+                "These vouchers are currently allocated to a different $familyAlias. "
+                . "Click on the voucher number to view the other $familyAlias's record: "
+                . implode(', ', $relevant),
+            );
+        }
+
+        if (!empty($inaccessible)) {
+            $messages[] = "These vouchers are allocated to a different $familyAlias in a centre you can't access: "
+                . implode(', ', $inaccessible);
+        }
+
+        return $messages;
+    }
+
+    /**
+     * Build the success message shown after a bundle is disbursed.
+     */
+    private function buildSuccessMessage(Bundle $bundle): string
+    {
+        $count = $bundle->vouchers->count();
+        $fullFamily = $bundle->registration()->withFullFamily()->first();
+        $name = $fullFamily->family->pri_carer;
+
+        return sprintf(
+            'You have just marked %d %s as collected by %s',
+            $count,
+            Str::plural('voucher', $count),
+            $name,
+        );
     }
 }

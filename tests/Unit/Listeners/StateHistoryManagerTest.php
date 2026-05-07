@@ -33,13 +33,15 @@ class StateHistoryManagerTest extends TestCase
 
         // create a voucher as printed
         $v = factory(Voucher::class)->state('printed')->create();
+        Auth::logout();
 
         Auth::login($this->centreUser);
         $v->applyTransition('dispatch');
 
         $state = $v->history()->get("*")->last();
         $this->assertEquals(Auth::user()->id, $state->user_id);
-        $this->assertEquals(class_basename(Auth::user()), $state->user_type);
+        $this->assertEquals(get_class(Auth::user()), $state->user_type);
+        Auth::logout();
 
         // transition voucher from dispatched to collected
         Auth::login($this->user);
@@ -47,6 +49,6 @@ class StateHistoryManagerTest extends TestCase
 
         $state = $v->history()->get("*")->last();
         $this->assertEquals(Auth::user()->id, $state->user_id);
-        $this->assertEquals(class_basename(Auth::user()), $state->user_type);
+        $this->assertEquals(get_class(Auth::user()), $state->user_type);
     }
 }

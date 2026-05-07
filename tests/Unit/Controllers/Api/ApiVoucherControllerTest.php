@@ -43,10 +43,10 @@ class ApiVoucherControllerTest extends TestCase
      * Transition to delivery
      *
      * @param $vouchers
-     * @param Centre|null $centre
+     * @param Centre $centre
      * @param Carbon|null $deliveryDate
      */
-    private function dispatchVouchers($vouchers, Centre $centre, Carbon $deliveryDate = null)
+    private function dispatchVouchers($vouchers, Centre $centre, Carbon $deliveryDate = null): void
     {
         $deliveryDate = $deliveryDate ?? Carbon::today();
 
@@ -64,8 +64,8 @@ class ApiVoucherControllerTest extends TestCase
         });
     }
 
-    /** @test */
-    public function testItNeverTidiesOldTokensOnConfirmTransitions()
+
+    public function testItNeverTidiesOldTokensOnConfirmTransitions(): void
     {
         Mail::fake();
 
@@ -145,8 +145,8 @@ class ApiVoucherControllerTest extends TestCase
         $this->assertEquals(2, StateToken::all()->count());
     }
 
-    /** @test */
-    public function testItAttachesTokensToPaymentPendingStates()
+
+    public function testItAttachesTokensToPaymentPendingStates(): void
     {
         Mail::fake();
 
@@ -193,13 +193,13 @@ class ApiVoucherControllerTest extends TestCase
         $this->vouchers
             ->each(function ($voucher) use ($stateToken) {
                 $voucherState = $voucher->getPriorState();
-                $this->assertEquals($voucherState->to, 'payment_pending');
+                $this->assertEquals('payment_pending', $voucherState->to);
                 $this->assertEquals($voucherState->stateToken->id, $stateToken->id);
             });
     }
 
-    /** @test */
-    public function testItReturnsArrayOfUndeliveredVouchers()
+
+    public function testItReturnsArrayOfUndeliveredVouchers(): void
     {
         // Create a Centre
         $centre = factory(Centre::class)->create();
@@ -221,7 +221,7 @@ class ApiVoucherControllerTest extends TestCase
 
         $expectedCounts = [
             // The last one is undelivered.
-            'success_amount' => $this->vouchers->count()-1,
+            'success_amount' => $this->vouchers->count() - 1,
             'duplicate_amount' => 0,
             // The invalid one is the one hat was undelivered.
             'invalid_amount' => 1,

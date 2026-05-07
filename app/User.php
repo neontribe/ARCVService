@@ -20,7 +20,9 @@ use Laravel\Passport\HasApiTokens;
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable, SoftDeletes;
+    use HasApiTokens;
+    use Notifiable;
+    use SoftDeletes;
 
     protected $casts = [
         'deleted_at' => 'datetime',

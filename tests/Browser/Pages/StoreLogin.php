@@ -67,7 +67,7 @@ class StoreLogin extends Page
      *
      * @return string
      */
-    public function url()
+    public function url(): string
     {
         return 'http://arcv-store.test/login';
     }
@@ -78,7 +78,7 @@ class StoreLogin extends Page
      * @param  Browser  $browser
      * @return void
      */
-    public function assert(Browser $browser)
+    public function assert(Browser $browser): void
     {
         $browser->assertPathIs('/login')
                 ->assertSee('Email Address')
@@ -88,7 +88,7 @@ class StoreLogin extends Page
                 ->press('Log In')
                 ->assertPathIs('/dashboard')
                 ->assertSee('Main menu')
-                ;
+        ;
     }
 
     /**
@@ -96,7 +96,7 @@ class StoreLogin extends Page
      *
      * @return array
      */
-    public function elements()
+    public function elements(): array
     {
         return [
             '@element' => '#selector',

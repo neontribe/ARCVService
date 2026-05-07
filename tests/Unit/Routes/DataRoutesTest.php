@@ -32,14 +32,14 @@ class DataRoutesTest extends TestCase
     }
 
     // These routes are not public.
-    public function testVouchersIndexRouteNotAuthd()
+    public function testVouchersIndexRouteNotAuthd(): void
     {
         $this->get(route('data.vouchers.index'))
             ->assertStatus(302);
     }
 
     // Admin Users can see the data.
-    public function testVouchersIndexRouteAuthdAdmin()
+    public function testVouchersIndexRouteAuthdAdmin(): void
     {
         // Check we don't have timezone info in the dates
         $this->assertStringNotContainsString('T', $this->vouchers[0]->created_at);
@@ -53,7 +53,7 @@ class DataRoutesTest extends TestCase
     }
 
     // API Users do not have permission.
-    public function testVouchersIndexRouteAuthdApi()
+    public function testVouchersIndexRouteAuthdApi(): void
     {
         $this->actingAs($this->users[0], 'api')
             ->get(route('data.vouchers.index'))
@@ -61,7 +61,7 @@ class DataRoutesTest extends TestCase
     }
 
     // For the rest - we will just be auth'd as admin for sake of time.
-    public function testVouchersShowRoute()
+    public function testVouchersShowRoute(): void
     {
         $this->actingAs($this->admin, 'admin')
             ->get(route('data.vouchers.show', $this->vouchers[0]))
@@ -71,7 +71,7 @@ class DataRoutesTest extends TestCase
             ]);
     }
 
-    public function testUsersIndexRoute()
+    public function testUsersIndexRoute(): void
     {
         // Check we don't have timezone info in the dates
         $this->assertStringNotContainsString('T', $this->users[0]->created_at);
@@ -84,7 +84,7 @@ class DataRoutesTest extends TestCase
             ]]);
     }
 
-    public function testMarketsIndexRoute()
+    public function testMarketsIndexRoute(): void
     {
         // Check we don't have timezone info in the dates
         $this->assertStringNotContainsString('T', $this->markets[0]->created_at);
@@ -97,7 +97,7 @@ class DataRoutesTest extends TestCase
             ]]);
     }
 
-    public function testTradersIndexRoute()
+    public function testTradersIndexRoute(): void
     {
         // Check we don't have timezone info in the dates
         $this->assertStringNotContainsString('T', $this->traders[0]->created_at);
@@ -111,7 +111,7 @@ class DataRoutesTest extends TestCase
     }
 
     // Need to be auth'd for these too.
-    public function testProductionRoutes()
+    public function testProductionRoutes(): void
     {
         Config::set('app.url', 'https://voucher-admin.alexandrarose.org.uk');
         $models = ['vouchers', 'users', 'markets', 'traders'];

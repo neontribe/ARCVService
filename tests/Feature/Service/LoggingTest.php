@@ -16,9 +16,10 @@ class LoggingTest extends StoreTestCase
     /** @var array $postData */
     private array $postData;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
+        Storage::fake('log');
 
         $this->faker = Factory::create();
         $this->faker->seed(1234);
@@ -30,26 +31,25 @@ class LoggingTest extends StoreTestCase
         ];
     }
 
+    protected function tearDown(): void
+    {
+        // tidy up last test
+        Storage::disk('log')->deleteDirectory('/');
+        parent::tearDown();
+    }
+
     /**
-     * @test
-     *
      * @return void
      */
-    public function itLogsData()
+    public function testItLogsData(): void
     {
-        $storage = Storage::fake('log');
-
-        Storage::shouldReceive('disk')
-            ->with('log')
-            ->andReturn($storage);
-
         $request = new MockRequest($this->postData);
         $loggingController = new LoggingController();
         $response = $loggingController->log($request);
 
         $json = json_decode($response->content());
         foreach (array_keys($this->postData) as $key) {
-            $this->assertTrue(in_array($key, $json));
+            $this->assertContains($key, $json);
         }
     }
 }

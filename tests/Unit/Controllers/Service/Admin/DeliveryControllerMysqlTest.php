@@ -76,6 +76,10 @@ class DeliveryControllerMysqlTest extends MysqlStoreTestCase
         Auth::logout();
     }
 
+    // =========================================================================
+    // Existing tests
+    // =========================================================================
+
     public function testItCanMakeADelivery(): void
     {
         // Set some routes
@@ -164,5 +168,126 @@ class DeliveryControllerMysqlTest extends MysqlStoreTestCase
             ->seePageIs($formRoute)
             ->see($msg)
         ;
+    }
+
+    // =========================================================================
+    // index — smoke test
+    // =========================================================================
+
+    /**
+     * The index page must render for an authenticated admin regardless of
+     * whether any deliveries exist.
+     */
+    public function testIndexReturns200(): void
+    {
+        $this->actingAs($this->user, 'admin')
+            ->visit(route('admin.deliveries.index'))
+            ->assertResponseStatus(200);
+    }
+
+    // =========================================================================
+    // store — validation failures
+    // =========================================================================
+
+    public function testStoreWithoutRequiredFieldsErrors(): void
+    {
+        $formRoute = route('admin.deliveries.create');
+        $requestRoute = route('admin.deliveries.store');
+
+        $this->actingAs($this->user, 'admin')
+            ->post($requestRoute, [
+                'centre' => '',
+                'voucher-start' => '',
+                'voucher-end' => '',
+                'date-sent' => $this->now,
+            ])
+            ->assertResponseStatus(302);
+
+        $this->assertSessionMissing('message');
+        $this->assertSessionHasErrors([
+            'centre' => 'The centre field is required.',
+            'voucher-start' => 'The voucher-start field is required.',
+            'voucher-end' => 'The voucher-end field is required.',
+        ]);
+    }
+
+    public function testStoreStartEndSwappedErrors(): void
+    {
+        $requestRoute = route('admin.deliveries.store');
+
+        $this->actingAs($this->user, 'admin')
+            ->post($requestRoute, [
+                'centre' => $this->centre->id,
+                'voucher-start' => 'TST0104',
+                'voucher-end' => 'TST0102',
+                'date-sent' => $this->now,
+            ])
+            ->assertResponseStatus(302);
+
+        $this->assertSessionMissing('message');
+        $this->assertSessionHasErrors([
+            'voucher-end' => 'The voucher-end field must be greater than the voucher-start field.',
+        ]);
+    }
+
+    public function testStoreCentreIsNotNumberErrors(): void
+    {
+        $requestRoute = route('admin.deliveries.store');
+
+        $this->actingAs($this->user, 'admin')
+            ->post($requestRoute, [
+                'centre' => 'not a number but a wombat',
+            ])
+            ->assertResponseStatus(302);
+
+        $this->assertSessionMissing('message');
+        $this->assertSessionHasErrors([
+            'centre' => 'The centre must be a number.',
+        ]);
+    }
+
+    public function testStoreStartIsNotTheSameSponsorAsEndErrors(): void
+    {
+        $requestRoute = route('admin.deliveries.store');
+
+        // EMRTP and KNTLN are different shortcodes — the form request rejects
+        // mixed-sponsor ranges before any database query is issued.
+        $this->actingAs($this->user, 'admin')
+            ->post($requestRoute, [
+                'centre' => $this->centre->id,
+                'voucher-start' => 'EMRTP0007',
+                'voucher-end' => 'KNTLN0009',
+                'date-sent' => $this->now,
+            ])
+            ->assertResponseStatus(302);
+
+        $this->assertSessionMissing('message');
+        $this->assertSessionHasErrors([
+            'voucher-end' => 'The voucher-end field must be the same sponsor as the voucher-start field.',
+        ]);
+    }
+
+    /**
+     * Omitting date-sent must trigger a validation error rather than reaching
+     * Carbon::createFromFormat() with a null value.
+     *
+     * If this test fails, date-sent is not yet in AdminNewDeliveryRequest rules
+     * and a 'required|date_format:Y-m-d' rule should be added.
+     */
+    public function testStoreMissingDateSentReturnsValidationError(): void
+    {
+        $requestRoute = route('admin.deliveries.store');
+
+        $this->actingAs($this->user, 'admin')
+            ->post($requestRoute, [
+                'centre' => $this->centre->id,
+                'voucher-start' => 'TST0102',
+                'voucher-end' => 'TST0104',
+                'date-sent' => '',
+            ])
+            ->assertResponseStatus(302);
+
+        $this->assertSessionMissing('message');
+        $this->assertSessionHasErrors(['date-sent']);
     }
 }
