@@ -5,6 +5,7 @@ use App\Http\Controllers\Service\Data\MarketController;
 use App\Http\Controllers\Service\Data\TraderController;
 use App\Http\Controllers\Service\Data\UserController;
 use App\Http\Controllers\Service\Data\VoucherController;
+use App\Http\Middleware\IsNotProduction;
 use App\Jobs\ResetDemoEnvironment;
 use Illuminate\Support\Facades\Redirect;
 
@@ -27,7 +28,9 @@ Route::name('data.')
         Route::get('markets', [MarketController::class, 'index'])->name('markets.index');
         Route::get('traders', [TraderController::class, 'index'])->name('traders.index');
         // Invokable
-        Route::get('families/contacts', FamilyContactsController::class)->name('families.contacts.download');
+        Route::get('families/contacts', FamilyContactsController::class)
+            ->withoutMiddleware(IsNotProduction::class)
+            ->name('families.contacts.download');
 
         // Temporary route for demo only.
         Route::get('reset', static function () {
