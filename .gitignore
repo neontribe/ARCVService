@@ -32,7 +32,6 @@ _ide_helper.php
 /public/images/
 /public/js
 /public/store/css/datepicker.css
-/resources/fonts/*
 build
 npm-debug.log
 
