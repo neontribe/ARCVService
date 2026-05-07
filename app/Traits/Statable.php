@@ -44,7 +44,7 @@ trait Statable
      */
     public function getPriorState()
     {
-        return $this->history()->get("*")->last();
+        return $this->history()->latest('id')->first();
     }
 
     /**
