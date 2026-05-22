@@ -45,6 +45,7 @@ class DatabaseSeeder extends Seeder
         $this->call(BundleSeeder::class);
         $this->call(DeliverySeeder::class);
         $this->call(TestActiveUsersSeeder::class);
+        $this->call(DeletedCentreSeeder::class);
         if (getenv("LARGE_SEED")) {
             $this->call(LargeVouchersSeeder::class);
         }

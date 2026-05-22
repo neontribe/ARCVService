@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\belongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Throwable;
@@ -31,6 +32,8 @@ use Throwable;
 #[ObservedBy(CentreObserver::class)]
 class Centre extends Model
 {
+    use SoftDeletes;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -59,6 +62,7 @@ class Centre extends Model
      */
     protected $casts = [
         'can_collect' => 'boolean',
+        'deleted_at' => 'datetime',
     ];
 
     public function nextCentreSequence(): int
