@@ -427,14 +427,11 @@ $factory->state(App\Centre::class, 'collecting', function (Faker\Generator $fake
  *  - Centre itself soft-deleted
  */
 /**
- * Deleted centre state — no attributes to set upfront.
- * afterCreatingState below owns the full lifecycle, ending with the soft delete.
+ * Shared setup for centre retirement states.
+ * Creates a centre user, registration, bundle and marks the family as left.
+ * Returns the created models so each state can apply its own teardown.
  */
-$factory->state(App\Centre::class, 'deleted', function () {
-    return [];
-});
-
-$factory->afterCreatingState(App\Centre::class, 'deleted', function (App\Centre $centre) {
+$createRetiredCentreDependencies = static function (App\Centre $centre): array {
     // 1. Create a centre user homed only at this centre
     $centreUser = factory(App\CentreUser::class)->create(['centre_id' => $centre->id]);
     $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
@@ -448,24 +445,67 @@ $factory->afterCreatingState(App\Centre::class, 'deleted', function (App\Centre 
 
     // 4. Mark the family as left
     $family->leaving_on = Carbon::now();
-    $family->leaving_reason = 'centre_deleted';
+    $family->leaving_reason = 'centre_retired';
     $family->save();
 
-    // 5. Nullify bundle_id on any vouchers to preserve voucher/state history
-    //    before the bundle is removed
-    App\Voucher::where('bundle_id', $bundle->id)->update(['bundle_id' => null]);
+    return compact('centreUser', 'registration', 'bundle', 'family');
+};
 
-    // 6. Remove bundle then registration (order matters for FK constraints).
-    //    Registration has no SoftDeletes — this is a hard delete.
-    $bundle->delete();
-    $registration->delete();
-
-    // 7. Soft-delete the centre user — they have no other centre association
-    $centreUser->delete();
-
-    // 8. Soft-delete the centre — natural final step of the deactivation sequence
-    $centre->delete();
+/**
+ * min-deleted state — models a minimal retirement:
+ * families marked as left, centre users dissociated/soft-deleted,
+ * centre soft-deleted. Registrations, bundles and families are preserved.
+ */
+$factory->state(App\Centre::class, 'min-deleted', function () {
+    return [];
 });
+
+$factory->afterCreatingState(
+    App\Centre::class,
+    'min-deleted',
+    function (App\Centre $centre) use ($createRetiredCentreDependencies) {
+        $createRetiredCentreDependencies($centre);
+
+        // Soft-delete the centre user — no other centre associations
+        App\CentreUser::where('centre_id', $centre->id)->get()->each->delete();
+
+        // Soft-delete the centre — registrations, bundles and families are intentionally left intact
+        $centre->delete();
+    }
+);
+
+/**
+ * deleted state — models a full retirement:
+ * families marked as left, vouchers freed, bundles and registrations removed,
+ * centre users soft-deleted, centre soft-deleted.
+ */
+$factory->state(App\Centre::class, 'deleted', function () {
+    return [];
+});
+
+$factory->afterCreatingState(
+    App\Centre::class,
+    'deleted',
+    function (App\Centre $centre) use ($createRetiredCentreDependencies) {
+        ['centreUser' => $centreUser, 'bundle' => $bundle, 'registration' => $registration]
+            = $createRetiredCentreDependencies($centre);
+
+        // Nullify bundle_id on any vouchers to preserve voucher/state history
+        //    before the bundle is removed
+        App\Voucher::where('bundle_id', $bundle->id)->update(['bundle_id' => null]);
+
+        // Remove bundle then registration (order matters for FK constraints).
+        //    Registration has no SoftDeletes — this is a hard delete.
+        $bundle->delete();
+        $registration->delete();
+
+        // Soft-delete the centre user — no other centre associations
+        $centreUser->delete();
+
+        // Soft-delete the centre — natural final step of the deactivation sequence
+        $centre->delete();
+    }
+);
 
 
 // Registration
