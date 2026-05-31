@@ -445,7 +445,7 @@ $createRetiredCentreDependencies = static function (App\Centre $centre): array {
 
     // 4. Mark the family as left
     $family->leaving_on = Carbon::now();
-    $family->leaving_reason = 'centre_retired';
+    $family->leaving_reason = 'centre retired';
     $family->save();
 
     return compact('centreUser', 'registration', 'bundle', 'family');

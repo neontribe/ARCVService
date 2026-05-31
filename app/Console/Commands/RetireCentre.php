@@ -47,16 +47,16 @@ class RetireCentre extends Command
 
         // Summarise what will happen before asking for confirmation
         $this->warn("Retiring centre: [{$centre->id}] {$centre->name}");
-        $this->line(' ● Dissociate centre users; soft-delete those with no remaining centre');
-        $this->line(' ● Mark families as left');
-        $this->line(' ● Release vouchers from undisbursed bundles');
+        $this->line(' - Dissociate centre users; soft-delete those with no remaining centre');
+        $this->line(' - Mark families as left');
+        $this->line(' - Release vouchers from undisbursed bundles');
         if ($removeRegistrations) {
-            $this->line(' ● Delete bundles and registrations');
+            $this->line(' - Delete bundles and registrations');
         }
         if ($removeFamilies) {
-            $this->line(' ● Delete families, carers, children and notes');
+            $this->line(' - Delete families, carers, children and notes');
         }
-        $this->line(' ● Soft-delete the centre');
+        $this->line(' - Soft-delete the centre');
 
         if (!$this->option('force') && !$this->confirm('Proceed?')) {
             $this->info('Aborted.');
@@ -137,9 +137,10 @@ class RetireCentre extends Command
     protected function markFamiliesAsLeft(Centre $centre, Collection $familyIds): void
     {
         $affected = Family::whereIn('id', $familyIds)
+            ->whereNull('leaving_on')
             ->update([
                 'leaving_on' => Carbon::now(),
-                'leaving_reason' => 'centre_retired',
+                'leaving_reason' => 'centre retired',
             ]);
 
         $this->line("  Marked {$affected} family/families as left.");
@@ -151,7 +152,7 @@ class RetireCentre extends Command
      */
     protected function freeVouchersFromUndisbursedBundles(Centre $centre): void
     {
-        $undisbursedBundleIds = Bundle::whereHas('registration', function ($q) use ($centre) {
+        $undisbursedBundleIds = Bundle::whereHas('registration', static function ($q) use ($centre) {
             $q->where('centre_id', $centre->id);
         })
             ->whereNull('disbursed_at')

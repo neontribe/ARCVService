@@ -366,7 +366,7 @@ class CentreModelTest extends TestCase
         $this->assertNotEmpty($families);
         $families->each(function ($family) {
             $this->assertNotNull($family->leaving_on);
-            $this->assertEquals('centre_retired', $family->leaving_reason);
+            $this->assertEquals('centre retired', $family->leaving_reason);
         });
     }
 
@@ -444,7 +444,7 @@ class CentreModelTest extends TestCase
         $this->assertNotEmpty($families);
         $families->each(function ($family) {
             $this->assertNotNull($family->leaving_on);
-            $this->assertEquals('centre_retired', $family->leaving_reason);
+            $this->assertEquals('centre retired', $family->leaving_reason);
         });
     }
 
