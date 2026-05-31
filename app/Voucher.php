@@ -423,7 +423,8 @@ class Voucher extends Model
      */
     public function voucherHasBeenResurrected(): bool
     {
-        $vs = $this->history()->get()->last();
+        // from trait
+        $vs = $this->getPriorState();
         if ($vs) {
             return $vs->to != "reimbursed";
         }
