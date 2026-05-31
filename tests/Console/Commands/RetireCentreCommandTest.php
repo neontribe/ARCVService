@@ -357,6 +357,29 @@ class RetireCentreCommandTest extends TestCase
         $this->assertNotNull(Registration::find($otherRegistration->id));
     }
 
+    public function testRemoveRegistrationsDeletesRetiringCentreRegistrationButPreservesFamilyWithActiveRegistrationElsewhere(
+    ): void
+    {
+        $retiringCentre = factory(Centre::class)->create();
+        $activeCentre = factory(Centre::class)->create();
+
+        $family = factory(Registration::class)->create(['centre_id' => $retiringCentre->id])->family;
+        $retiringRegistration = $family->registrations()->where('centre_id', $retiringCentre->id)->first();
+        $activeRegistration = factory(Registration::class)->create([
+            'centre_id' => $activeCentre->id,
+            'family_id' => $family->id,
+        ]);
+
+        $this->retireCentre($retiringCentre->id, ['--remove-registrations' => true]);
+
+        // The registration at the retiring centre is removed
+        $this->assertNull(Registration::find($retiringRegistration->id));
+
+        // The family and their active-centre registration are untouched
+        $this->assertNotNull(Family::find($family->id));
+        $this->assertNotNull(Registration::find($activeRegistration->id));
+    }
+
     // --- --remove-families ---
 
     public function testRemoveFamiliesImpliesRemoveRegistrations(): void
@@ -428,7 +451,7 @@ class RetireCentreCommandTest extends TestCase
 
         // Seed a blind index row for the carer as the encryption layer would
         DB::table('blind_indexes')->insert([
-            'indexable_type' => (new Carer())->getMorphClass(),
+            'indexable_type' => (new Carer)->getMorphClass(),
             'indexable_id' => $carer->id,
             'name' => 'email',
             'value' => hash('sha256', 'test@example.com'),
@@ -437,7 +460,7 @@ class RetireCentreCommandTest extends TestCase
         $this->retireCentre($centre->id, ['--remove-families' => true]);
 
         $this->assertDatabaseMissing('blind_indexes', [
-            'indexable_type' => (new Carer())->getMorphClass(),
+            'indexable_type' => (new Carer)->getMorphClass(),
             'indexable_id' => $carer->id,
         ]);
     }
