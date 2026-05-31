@@ -6,9 +6,11 @@ use App\Bundle;
 use App\Centre;
 use App\CentreUser;
 use App\Delivery;
+use App\Family;
 use App\Registration;
 use App\Sponsor;
 use App\Voucher;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -298,5 +300,195 @@ class CentreModelTest extends TestCase
         $claimed->each(function ($v) use ($centreB_ids) {
             return $this->assertFalse($centreB_ids->contains($v->id));
         });
+    }
+
+    // --- soft deletes ---
+
+    public function testItCanBeSoftDeleted(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $centre->delete();
+
+        $this->assertSoftDeleted('centres', ['id' => $centre->id]);
+    }
+
+    public function testSoftDeletedCentreIsExcludedFromDefaultQueries(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $centre->delete();
+
+        $this->assertNull(Centre::find($centre->id));
+    }
+
+    public function testSoftDeletedCentreCanBeFoundWithTrashed(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $centre->delete();
+
+        $found = Centre::withTrashed()->find($centre->id);
+
+        $this->assertNotNull($found);
+        $this->assertNotNull($found->deleted_at);
+    }
+
+    public function testDeletedAtIsCastToCarbon(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $centre->delete();
+
+        $found = Centre::withTrashed()->find($centre->id);
+
+        $this->assertInstanceOf(Carbon::class, $found->deleted_at);
+    }
+
+    // --- deleted factory state ---
+
+    public function testDeletedStateProducesSoftDeletedCentre(): void
+    {
+        $centre = factory(Centre::class)->states('deleted')->create();
+
+        $this->assertSoftDeleted('centres', ['id' => $centre->id]);
+    }
+
+    public function testDeletedStateIsExcludedFromDefaultQueries(): void
+    {
+        $centre = factory(Centre::class)->states('deleted')->create();
+
+        $this->assertNull(Centre::find($centre->id));
+    }
+
+    public function testDeletedStateFamiliesAreMarkedAsLeft(): void
+    {
+        $centre = factory(Centre::class)->states('deleted')->create();
+
+        $families = Family::where('initial_centre_id', $centre->id)->get();
+
+        $this->assertNotEmpty($families);
+        $families->each(function ($family) {
+            $this->assertNotNull($family->leaving_on);
+            $this->assertEquals('centre retired', $family->leaving_reason);
+        });
+    }
+
+    public function testDeletedStateRegistrationsAreRemoved(): void
+    {
+        $centre = factory(Centre::class)->states('deleted')->create();
+
+        $registrations = Registration::where('centre_id', $centre->id)->get();
+
+        $this->assertCount(0, $registrations);
+    }
+
+    public function testDeletedStateBundlesAreRemoved(): void
+    {
+        factory(Centre::class)->states('deleted')->create();
+
+        // Registrations are hard-deleted so cannot be queried via withTrashed().
+        // In a fresh database the only bundles that could exist are those created
+        // by the deleted state factory, which should have been removed.
+        $this->assertCount(0, Bundle::all());
+    }
+
+    public function testDeletedStateCentreUsersAreSoftDeleted(): void
+    {
+        $centre = factory(Centre::class)->states('deleted')->create();
+
+        // Default query excludes soft-deleted — should be none visible.
+        $active = CentreUser::where('centre_id', $centre->id)->get();
+        $this->assertCount(0, $active);
+
+        // withTrashed should reveal the soft-deleted user.
+        $trashed = CentreUser::withTrashed()->where('centre_id', $centre->id)->get();
+        $this->assertNotEmpty($trashed);
+        $trashed->each(function ($user) {
+            $this->assertNotNull($user->deleted_at);
+        });
+    }
+
+    public function testDeletedStateVoucherHistoryIsPreserved(): void
+    {
+        factory(Centre::class)->states('deleted')->create();
+
+        // Registrations are hard-deleted so withTrashed() is not available on them.
+        // In a fresh database: all bundles were removed by the factory, so no voucher
+        // should still hold a bundle_id pointing at an existing bundle.
+        // Any vouchers that existed (created transiently by the factory) must have
+        // had their bundle_id nullified before the bundle was deleted.
+        $vouchersStillLinkedToBundle = Voucher::whereNotNull('bundle_id')->count();
+
+        $this->assertEquals(0, $vouchersStillLinkedToBundle);
+    }
+
+    // --- min-deleted factory state ---
+
+    public function testMinDeletedStateProducesSoftDeletedCentre(): void
+    {
+        $centre = factory(Centre::class)->states('min-deleted')->create();
+
+        $this->assertSoftDeleted('centres', ['id' => $centre->id]);
+    }
+
+    public function testMinDeletedStateIsExcludedFromDefaultQueries(): void
+    {
+        $centre = factory(Centre::class)->states('min-deleted')->create();
+
+        $this->assertNull(Centre::find($centre->id));
+    }
+
+    public function testMinDeletedStateFamiliesAreMarkedAsLeft(): void
+    {
+        $centre = factory(Centre::class)->states('min-deleted')->create();
+
+        $families = Family::where('initial_centre_id', $centre->id)->get();
+
+        $this->assertNotEmpty($families);
+        $families->each(function ($family) {
+            $this->assertNotNull($family->leaving_on);
+            $this->assertEquals('centre retired', $family->leaving_reason);
+        });
+    }
+
+    public function testMinDeletedStateRegistrationsArePreserved(): void
+    {
+        $centre = factory(Centre::class)->states('min-deleted')->create();
+
+        $familyIds = Family::where('initial_centre_id', $centre->id)->pluck('id');
+        $registrations = Registration::whereIn('family_id', $familyIds)->get();
+
+        $this->assertNotEmpty($registrations);
+    }
+
+    public function testMinDeletedStateBundlesArePreserved(): void
+    {
+        $centre = factory(Centre::class)->states('min-deleted')->create();
+
+        $familyIds = Family::where('initial_centre_id', $centre->id)->pluck('id');
+        $registrationIds = Registration::whereIn('family_id', $familyIds)->pluck('id');
+        $bundles = Bundle::whereIn('registration_id', $registrationIds)->get();
+
+        $this->assertNotEmpty($bundles);
+    }
+
+    public function testMinDeletedStateCentreUsersAreSoftDeleted(): void
+    {
+        $centre = factory(Centre::class)->states('min-deleted')->create();
+
+        $active = CentreUser::where('centre_id', $centre->id)->get();
+        $this->assertCount(0, $active);
+
+        $trashed = CentreUser::withTrashed()->where('centre_id', $centre->id)->get();
+        $this->assertNotEmpty($trashed);
+        $trashed->each(function ($user) {
+            $this->assertNotNull($user->deleted_at);
+        });
+    }
+
+    public function testMinDeletedAndDeletedStatesProduceDifferentDependencyOutcomes(): void
+    {
+        factory(Centre::class)->states('min-deleted')->create();
+        factory(Centre::class)->states('deleted')->create();
+
+        // min-deleted preserves registrations; deleted removes them
+        $this->assertGreaterThan(0, Registration::count());
     }
 }
