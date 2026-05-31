@@ -358,8 +358,7 @@ class RetireCentreCommandTest extends TestCase
     }
 
     public function testRemoveRegistrationsDeletesRetiringCentreRegistrationButPreservesFamilyWithActiveRegistrationElsewhere(
-    ): void
-    {
+    ): void {
         $retiringCentre = factory(Centre::class)->create();
         $activeCentre = factory(Centre::class)->create();
 
@@ -451,7 +450,7 @@ class RetireCentreCommandTest extends TestCase
 
         // Seed a blind index row for the carer as the encryption layer would
         DB::table('blind_indexes')->insert([
-            'indexable_type' => (new Carer)->getMorphClass(),
+            'indexable_type' => (new Carer())->getMorphClass(),
             'indexable_id' => $carer->id,
             'name' => 'email',
             'value' => hash('sha256', 'test@example.com'),
@@ -460,7 +459,7 @@ class RetireCentreCommandTest extends TestCase
         $this->retireCentre($centre->id, ['--remove-families' => true]);
 
         $this->assertDatabaseMissing('blind_indexes', [
-            'indexable_type' => (new Carer)->getMorphClass(),
+            'indexable_type' => (new Carer())->getMorphClass(),
             'indexable_id' => $carer->id,
         ]);
     }
@@ -512,11 +511,20 @@ class RetireCentreCommandTest extends TestCase
     public function testNothingIsChangedIfTheCommandFails(): void
     {
         $centre = factory(Centre::class)->create();
-        factory(Registration::class)->create(['centre_id' => $centre->id]);
+        $registration = factory(Registration::class)->create(['centre_id' => $centre->id]);
+        $family = $registration->family;
 
-        // partialMock() uses a proxy that bypasses the Symfony Command constructor,
-        // causing a "not correctly initialized" exception. The Class[method] syntax
-        // calls the real constructor and intercepts only the listed method.
+        // Create a centre user homed at this centre
+        $centreUser = factory(CentreUser::class)->create(['centre_id' => $centre->id]);
+        $centreUser->centres()->attach($centre->id, ['homeCentre' => true]);
+
+        // Create an undisbursed bundle with a voucher so we can assert bundle_id is unchanged
+        $bundle = factory(Bundle::class)->create(['registration_id' => $registration->id, 'disbursed_at' => null]);
+        $voucher = factory(Voucher::class)->create(['bundle_id' => $bundle->id]);
+
+        // Mock markFamiliesAsLeft to throw after retireCentreUsers has already run,
+        // giving the transaction real earlier work to roll back.
+        // Class[method] syntax calls the real constructor (required by Symfony Command).
         $mock = Mockery::mock(RetireCentre::class . '[markFamiliesAsLeft]')
             ->shouldAllowMockingProtectedMethods()
             ->shouldReceive('markFamiliesAsLeft')
@@ -527,7 +535,23 @@ class RetireCentreCommandTest extends TestCase
 
         $this->retireCentre($centre->id)->assertExitCode(1);
 
-        // Centre should not have been soft-deleted
+        // Centre was not soft-deleted
         $this->assertDatabaseHas('centres', ['id' => $centre->id, 'deleted_at' => null]);
+
+        // Centre user was not soft-deleted
+        $this->assertNotNull(CentreUser::find($centreUser->id));
+
+        // Centre user pivot was not detached
+        $this->assertDatabaseHas('centre_centre_user', [
+            'centre_user_id' => $centreUser->id,
+            'centre_id' => $centre->id,
+        ]);
+
+        // Family leaving fields were not changed
+        $this->assertNull($family->fresh()->leaving_on);
+        $this->assertNull($family->fresh()->leaving_reason);
+
+        // Voucher bundle_id was not nullified
+        $this->assertEquals($bundle->id, $voucher->fresh()->bundle_id);
     }
 }
