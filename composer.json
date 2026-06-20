@@ -27,7 +27,7 @@
     "fakerphp/faker": "1.24.1",
     "highsolutions/laravel-searchy": "12.0",
     "imtigger/laravel-job-status": "1.2.0",
-    "laravel/framework": "v12.55.1",
+    "laravel/framework": "v12.61.1",
     "laravel/helpers": "v1.8.3",
     "laravel/legacy-factories": "v1.4.2",
     "laravel/passport": "v12.4.3",
