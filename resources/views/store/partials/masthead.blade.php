@@ -1,4 +1,4 @@
-`<div class="header">
+<div class="header">
     @auth
         <div class="header-section">
             <form id="logout-form" action="{{ route('store.logout') }}" method="POST">
@@ -39,7 +39,7 @@
                                 @csrf
                                 @method('PUT')
                                 <select name="centre" onchange="document.centreUserForm.submit()">
-                                    @foreach (Auth::user()->centres as $centre)
+                                    @foreach (Auth::user()->centres->sortBy('name') as $centre)
                                         <option
                                             value="{{ $centre->id }}"
                                             @selected($centre->id === (int)session('CentreUserCurrentCentreId'))
@@ -53,4 +53,4 @@
         </div>
     @endauth
 </div>
-`
+
