@@ -22,7 +22,7 @@ use Throwable;
 class DeliveriesController extends Controller
 {
     /**
-     * Display a listing of Sponsors.
+     * Display a listing of Sponsors.`
      *
      * @param AdminIndexDeliveriesRequest $request
      * @return Factory|View
@@ -30,7 +30,9 @@ class DeliveriesController extends Controller
     public function index(AdminIndexDeliveriesRequest $request)
     {
         // load the deliveries.
-        $deliveries = Delivery::with('centre')
+        $deliveries = Delivery::with(['centre' => function ($q) {
+            return $q->withTrashed();
+        }])
             ->orderByField($request->all(['orderBy', 'direction']))
             ->get();
 

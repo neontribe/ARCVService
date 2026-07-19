@@ -26,7 +26,7 @@ return new class () extends Migration {
 
         // drop the foreign key constraint.
         Schema::table('voucher_states', static function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
+//            $table->dropForeign(['user_id']);
         });
     }
 
