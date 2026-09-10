@@ -1,0 +1,55 @@
+#!/bin/bash
+# script/test: Run test suite
+
+set -e
+
+# shellcheck source=/dev/null
+source "$(dirname "$0")/bootstrap"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOCAL_DIR="$(cd "$SCRIPT_DIR/../local" && pwd)"
+
+echo "===> Running shellcheck..."
+./.shellcheck.sh
+
+echo "===> Running phpstan linter...:"
+./vendor/bin/phpstan analyse app routes bootstrap --error-format=github --memory-limit=1G
+
+echo "===> Running PEST test suite..."
+
+docker compose -f "$LOCAL_DIR/docker-compose.yml" exec app php artisan test "$@"
+
+echo "===> Checking migrations..."
+
+"$SCRIPT_DIR"/check_migrations
+
+echo "====> Checking blades for syntax errors..."
+php artisan view:clear
+php artisan view:cache || true
+
+# Map hashed filenames to real blade filename using tinker.
+MAP_FILE=$(mktemp)
+php artisan tinker --execute="
+\$compiler = app('blade.compiler');
+\$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(resource_path('views')));
+foreach (\$files as \$file) {
+    if (\$file->isFile() && str_ends_with(\$file->getFilename(), '.blade.php')) {
+        \$compiled = \$compiler->getCompiledPath(\$file->getRealPath());
+        echo basename(\$compiled, '.php') . ' ' . \$file->getRealPath() . PHP_EOL;
+    }
+}
+" 2>/dev/null > "$MAP_FILE"
+
+# Check compiled files
+ERRORS=$(find storage/framework/views -name '*.php' | while read -r compiled; do
+    hash=$(basename "$compiled" .php)
+    original=$(grep "^$hash " "$MAP_FILE" | cut -d' ' -f2-)
+    php -l "$compiled" 2>&1 | grep -v "No syntax errors" | sed "s|$compiled|${original:-$compiled}|g"
+done)
+
+rm "$MAP_FILE"
+
+if [ -n "$ERRORS" ]; then
+    echo "$ERRORS"
+    exit 1
+fi

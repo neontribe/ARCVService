@@ -20,7 +20,7 @@ The service, market and store can be deployed, run locally for training/testing 
 9. `chmod 600 ./storage/*.key` to set permissions correctly
 10. `php artisan passport:client --password --name="Rose Vouchers Password Grant Client" --provider=users` to set the client in the DB
 11. Add the "password grant" client id and secret to your `.env`
-12. Install packages for builds: `npm run install`
+12. Install packages for builds: `npm install`
 13. Run `npm run watch` in the background during development to automatically compile assets when modifying code or changing commit
 
 We suggest that you use the TLD `.test` as others, like `.app` may now be in the public domain and you will experience difficulty with respect to browser behavior over HTTP/HTTPS.

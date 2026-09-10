@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -e
+
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+cd "$PROJECT_ROOT"
+
+PROJECT_NAME="$(basename "$PROJECT_ROOT")"
+export PROJECT_NAME
+export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-$(echo -n "$PROJECT_NAME" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9_-' '_')}"
+
+if [ -f Brewfile ] && [ "$(uname -s)" = "Darwin" ]; then
+  if ! brew bundle check >/dev/null 2>&1; then
+    echo "==> Installing Homebrew dependencies..."
+    brew bundle install --verbose
+  fi
+fi

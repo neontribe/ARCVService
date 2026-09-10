@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -e
+
+# shellcheck source=/dev/null
+source "$(dirname "$0")/bootstrap"
+
+SHARED_NETWORK="${PROJECT_NAME}_shared"
+if ! docker network inspect "$SHARED_NETWORK" >/dev/null 2>&1; then
+  echo "==> Creating shared Docker network: $SHARED_NETWORK"
+  docker network create "$SHARED_NETWORK" >/dev/null
+fi
+
+echo "===> Starting containers..."
+docker compose -f local/docker-compose.yml up -d --build
+
+echo "===> Installing Composer dependencies..."
+docker compose -f local/docker-compose.yml exec app git config --global --add safe.directory /var/www
+docker compose -f local/docker-compose.yml exec app composer install
+
+if [ ! -f .env ]; then
+  echo "===> .env file does not exist, copying .env.local..."
+  cp .env.local .env
+fi
+
+echo "===> Generating app keys..."
+docker compose -f local/docker-compose.yml exec app php artisan key:generate --force
+docker compose -f local/docker-compose.yml exec app php artisan ciphersweet:generate-key
+
+
+echo "===> Waiting for database..."
+sleep 5
+
+echo "===> Resetting DB and Running migrations..."
+docker compose -f local/docker-compose.yml exec app php artisan migrate:fresh --force
+
+echo "===> Seeding database..."
+docker compose -f local/docker-compose.yml exec app php artisan db:seed --force
+
+echo "===> Setup complete. Run ./script/server to start web app"
