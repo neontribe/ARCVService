@@ -18,8 +18,13 @@ docker compose -f local/docker-compose.yml exec app git config --global --add sa
 docker compose -f local/docker-compose.yml exec app composer install
 
 if [ ! -f .env ]; then
-  echo "===> .env file does not exist, copying .env.local..."
-  cp .env.local .env
+  if [ -f .env.local ]; then
+    echo "===> .env file does not exist, copying .env.local..."
+    cp .env.local .env
+  else
+    echo "===> .env file does not exist, copying .env.example..."
+    cp .env.example .env
+  fi
 fi
 
 echo "===> Generating app keys..."
@@ -35,5 +40,24 @@ docker compose -f local/docker-compose.yml exec app php artisan migrate:fresh --
 
 echo "===> Seeding database..."
 docker compose -f local/docker-compose.yml exec app php artisan db:seed --force
+
+echo "===> Generating Passport keys..."
+docker compose -f local/docker-compose.yml exec app php artisan passport:keys --force
+
+echo "===> Setting permissions on Passport keys..."
+chmod 600 ./storage/*.key 2>/dev/null || true
+docker compose -f local/docker-compose.yml exec app sh -c 'chmod 600 ./storage/*.key 2>/dev/null || true'
+
+echo "===> Creating Passport password grant client..."
+PASSPORT_OUTPUT=$(docker compose -f local/docker-compose.yml exec -T app php artisan passport:client --password --name="Rose Vouchers Password Grant Client" --provider=users --no-interaction)
+
+CLIENT_ID=$(echo "$PASSPORT_OUTPUT" | grep -i "Client ID" | awk '{print $NF}' | tr -d '\r')
+CLIENT_SECRET=$(echo "$PASSPORT_OUTPUT" | grep -i "Client secret" | awk '{print $NF}' | tr -d '\r')
+
+if [ -n "$CLIENT_ID" ] && [ -n "$CLIENT_SECRET" ]; then
+  echo "===> Adding Passport client credentials to .env..."
+  KEY="PASSWORD_CLIENT" VAL="$CLIENT_ID" awk 'index($0, ENVIRON["KEY"] "=") == 1 { print ENVIRON["KEY"] "=" ENVIRON["VAL"]; next } { print }' .env > .env.tmp && mv .env.tmp .env
+  KEY="PASSWORD_CLIENT_SECRET" VAL="$CLIENT_SECRET" awk 'index($0, ENVIRON["KEY"] "=") == 1 { print ENVIRON["KEY"] "=" ENVIRON["VAL"]; next } { print }' .env > .env.tmp && mv .env.tmp .env
+fi
 
 echo "===> Setup complete. Run ./script/server to start web app"
