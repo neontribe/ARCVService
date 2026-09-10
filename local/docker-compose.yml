@@ -24,6 +24,11 @@ services:
       DB_DATABASE: laravel
       DB_USERNAME: laravel
       DB_PASSWORD: secret
+      DB_TESTING_MYSQL_HOST: db
+      DB_TESTING_MYSQL_PORT: 3306
+      DB_TESTING_MYSQL_DATABASE: laravel_testing
+      DB_TESTING_MYSQL_USERNAME: laravel
+      DB_TESTING_MYSQL_PASSWORD: secret
     networks:
       - laravel
 
@@ -54,6 +59,7 @@ services:
       - "[::1]:33060:3306"
     volumes:
       - db_data:/var/lib/mysql
+      - ./init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
     networks:
       - laravel
 
