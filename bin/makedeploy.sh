@@ -2,8 +2,11 @@
 RELVER=$1
 
 # get the right version of npm using nvm
+# shellcheck source=/dev/null
 source ~/.nvm/nvm.sh
+# shellcheck source=/dev/null
 source ~/.profile
+# shellcheck source=/dev/null
 source ~/.bashrc
 
 cd ..
@@ -29,8 +32,8 @@ php artisan view:clear
 SRCNAME=${PWD##*/}
 cd ..
 # pack it up without most of the dev extras
-rm -f ${SRCNAME}_${RELVER}.tgz
-tar -cvzf ${SRCNAME}_${RELVER}.tgz  \
+rm -f "${SRCNAME}"_"${RELVER}".tgz
+tar -cvzf "${SRCNAME}"_"${RELVER}".tgz  \
     --exclude="${SRCNAME}/.editorconfig" \
     --exclude="${SRCNAME}/.env" \
     --exclude="${SRCNAME}/.env.example" \
@@ -43,16 +46,19 @@ tar -cvzf ${SRCNAME}_${RELVER}.tgz  \
     --exclude="${SRCNAME}/.husky" \
     --exclude="${SRCNAME}/.idea" \
     --exclude="${SRCNAME}/.nvmrc" \
+    --exclude="${SRCNAME}/.shellcheck.sh" \
     --exclude="${SRCNAME}/build" \
     --exclude="${SRCNAME}/docs" \
     --exclude="${SRCNAME}/node_modules" \
+    --exclude="${SRCNAME}/script" \
+    --exclude="${SRCNAME}/local" \
     --exclude="${SRCNAME}/storage" \
     --exclude="${SRCNAME}/tests" \
     --exclude="${SRCNAME}/.phpstorm.meta.php" \
     --exclude="${SRCNAME}/_ide_helper.php" \
     --exclude="${SRCNAME}/_ide_helper_models.php" \
     --exclude="${SRCNAME}/composer.lock" \
-    --exclude="${SRCNAME}/Dockerfile" \
+    --exclude="${SRCNAME}/Brewfile" \
     --exclude="${SRCNAME}/phpstan.neon" \
     --exclude="${SRCNAME}/phpunit.xml" \
     --exclude="${SRCNAME}/README.md" \
@@ -60,6 +66,6 @@ tar -cvzf ${SRCNAME}_${RELVER}.tgz  \
     --exclude="${SRCNAME}/package-lock.json" \
     "${SRCNAME}"
 
-cd ${SRCNAME}
+cd "${SRCNAME}" || exit
 # put it back
 composer install

@@ -2,8 +2,11 @@
 RELVER=$1
 
 # get the right version of npm using nvm
+# shellcheck source=/dev/null
 source ~/.nvm/nvm.sh
+# shellcheck source=/dev/null
 source ~/.profile
+# shellcheck source=/dev/null
 source ~/.bashrc
 
 cd ..
@@ -29,8 +32,8 @@ php artisan view:clear
 SRCNAME=${PWD##*/}
 cd ..
 # pack it up without most of the dev extras
-rm -f ${SRCNAME}_${RELVER}_staging.tgz
-tar -cvzf ${SRCNAME}_${RELVER}_staging.tgz  \
+rm -f "${SRCNAME}"_"${RELVER}"_staging.tgz
+tar -cvzf "${SRCNAME}"_"${RELVER}"_staging.tgz  \
     --exclude="${SRCNAME}/.editorconfig" \
     --exclude="${SRCNAME}/.env" \
     --exclude="${SRCNAME}/.env.example" \
@@ -51,13 +54,16 @@ tar -cvzf ${SRCNAME}_${RELVER}_staging.tgz  \
     --exclude="${SRCNAME}/_ide_helper.php" \
     --exclude="${SRCNAME}/_ide_helper_models.php" \
     --exclude="${SRCNAME}/composer.lock" \
-    --exclude="${SRCNAME}/Dockerfile" \
+    --exclude="${SRCNAME}/Brewfile" \
+    --exclude="${SRCNAME}/script" \
+    --exclude="${SRCNAME}/local" \
+    --exclude="${SRCNAME}/shellcheck.sh" \
     --exclude="${SRCNAME}/phpstan.neon" \
     --exclude="${SRCNAME}/README.md" \
     --exclude="${SRCNAME}/staging_rsa.enc" \
     --exclude="${SRCNAME}/package-lock.json" \
     "${SRCNAME}"
 
-cd ${SRCNAME}
+cd "${SRCNAME}" || exit
 # put it back
 composer install
