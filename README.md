@@ -1,12 +1,12 @@
 # Alexandra Rose Charity Vouchers Service
 
 ## Table of contents
-
- * [Deployment set up](./DEPLOYMENT.md); some notes on how the system's components hang together
- * [MVL Export](./MVL-EXPORT.md); reference for commands used to export reports required by ARC
- * [Setting up testing vouchers](./TEST_VOUCHERS.md); reference for populating the dataset for substantial numbers of vouchers
- * [Voucher state transition](./VOUCHER_STATE_TRANSITIONS.md); reference for the voucher state machine that are enforces valid voucher state flow
- * [Database schema](./DATABASE_SCHEMA.md); reference diagram of the current database schema
+ * [Dev setup](./docs/README.md); notes on how to set up the development environment
+ * [Deployment set up](./docs/DEPLOYMENT.md); some notes on how the system's components hang together
+ * [MVL Export](./docs/MVL-EXPORT.md); reference for commands used to export reports required by ARC
+ * [Setting up testing vouchers](./docs/TEST_VOUCHERS.md); reference for populating the dataset for substantial numbers of vouchers
+ * [Voucher state transition](./docs/VOUCHER_STATE_TRANSITIONS.md); reference for the voucher state machine that are enforces valid voucher state flow
+ * [Database schema](./docs/DATABASE_SCHEMA.md); reference diagram of the current database schema
 
 
 # Copyright
