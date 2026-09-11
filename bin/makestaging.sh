@@ -54,7 +54,10 @@ tar -cvzf "${SRCNAME}"_"${RELVER}"_staging.tgz  \
     --exclude="${SRCNAME}/_ide_helper.php" \
     --exclude="${SRCNAME}/_ide_helper_models.php" \
     --exclude="${SRCNAME}/composer.lock" \
-    --exclude="${SRCNAME}/Dockerfile" \
+    --exclude="${SRCNAME}/Brewfile" \
+    --exclude="${SRCNAME}/script" \
+    --exclude="${SRCNAME}/local" \
+    --exclude="${SRCNAME}/shellcheck.sh" \
     --exclude="${SRCNAME}/phpstan.neon" \
     --exclude="${SRCNAME}/README.md" \
     --exclude="${SRCNAME}/staging_rsa.enc" \
