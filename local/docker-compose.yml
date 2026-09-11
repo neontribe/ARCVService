@@ -13,7 +13,6 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    container_name: laravel_app
     volumes:
       - ..:/var/www
     depends_on:
@@ -34,7 +33,6 @@ services:
 
   web:
     image: nginx:alpine
-    container_name: laravel_web
     ports:
       - "127.0.0.1:8080:80"
       - "[::1]:8080:80"
@@ -48,7 +46,6 @@ services:
 
   db:
     image: mariadb:12.1.2-noble
-    container_name: laravel_db
     environment:
       MYSQL_DATABASE: laravel
       MYSQL_USER: laravel

@@ -35,15 +35,17 @@ You'll need to append your hosts 127.0.0.1 entry with
 ### Provided services
 Once the server has started, the following containers will be running:
 
-* Laravel: http://localhost:8080
-* MailCatcher: http://localhost:1081
-* SMTP: localhost:1026
-* MySQL: http://localhost:33060 (username/password: `laravel`/`secret`)
+* `web` (Nginx): http://localhost:8080
+* `app` (PHP): application backend
+* `mailcatcher` (MailCatcher):
+  * Web interface: http://localhost:1081
+  * SMTP server: localhost:1026
+* `db` (MariaDB): localhost:33060 (username/password: `laravel`/`secret`)
   * a main seeded staging DB ("laravel")
-  * a test DB ("laravel_test") for phpunit to use for complex queries
+  * a test DB ("laravel_testing") for phpunit to use for complex queries
 
 Now you should be able to view 
-- the admin portal at at: http://arcv-service.test:8080/
+- the admin portal at: http://arcv-service.test:8080/
 - the voucher distribution store at: http://arcv-store.test:8080/
 
 ### Testing in containers
