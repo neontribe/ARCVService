@@ -79,7 +79,7 @@ class CreateMasterVoucherLogReport extends Command
      * The date that we care about for last year's data.
      * @var string $cutOffDate
      */
-    private string $cutOffDate = '2023-09-01';
+    private string $cutOffDate = '2014-09-01';
 
     /**
      * @var ZipStream $za;
