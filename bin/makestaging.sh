@@ -18,7 +18,7 @@ nvm use
 npm ci
 
 # build production css
-npm run prod
+npm run build
 
 # reduce the size of the vendor directory to things we need.
 rm -rf ./vendor
