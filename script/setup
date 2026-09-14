@@ -48,6 +48,11 @@ echo "===> Setting permissions on Passport keys..."
 chmod 600 ./storage/*.key 2>/dev/null || true
 docker compose -f local/docker-compose.yml exec app sh -c 'chmod 600 ./storage/*.key 2>/dev/null || true'
 
+echo "===> Creating storage directories and setting permissions..."
+mkdir -p ./storage/app/enc
+chmod -R 775 ./storage/app 2>/dev/null || true
+docker compose -f local/docker-compose.yml exec app sh -c 'mkdir -p ./storage/app/enc && chmod -R 775 ./storage/app 2>/dev/null || true'
+
 echo "===> Creating Passport password grant client..."
 PASSPORT_OUTPUT=$(docker compose -f local/docker-compose.yml exec -T app php artisan passport:client --password --name="Rose Vouchers Password Grant Client" --provider=users --no-interaction)
 
