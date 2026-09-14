@@ -60,4 +60,7 @@ if [ -n "$CLIENT_ID" ] && [ -n "$CLIENT_SECRET" ]; then
   KEY="PASSWORD_CLIENT_SECRET" VAL="$CLIENT_SECRET" awk 'index($0, ENVIRON["KEY"] "=") == 1 { print ENVIRON["KEY"] "=" ENVIRON["VAL"]; next } { print }' .env > .env.tmp && mv .env.tmp .env
 fi
 
+echo "===> Compiling frontend assets..."
+npm run build
+
 echo "===> Setup complete. Run ./script/server to start web app"

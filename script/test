@@ -15,7 +15,7 @@ echo "===> Running shellcheck..."
 echo "===> Running phpstan linter...:"
 ./vendor/bin/phpstan analyse app routes bootstrap --error-format=github --memory-limit=1G
 
-echo "===> Running PEST test suite..."
+echo "===> Running test suite..."
 
 docker compose -f "$LOCAL_DIR/docker-compose.yml" exec app php artisan test "$@"
 

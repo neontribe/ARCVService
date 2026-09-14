@@ -9,3 +9,6 @@ composer upgrade
 
 echo "===> Updating npm dependencies..."
 npm update
+
+echo "===> Compiling frontend assets..."
+npm run build

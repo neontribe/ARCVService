@@ -2,6 +2,7 @@
     "name": "neontribe-arcvservice",
     "private": true,
     "scripts": {
+        "build": "npm run production",
         "dev": "npm run development",
         "development": "mix",
         "watch": "mix watch",
