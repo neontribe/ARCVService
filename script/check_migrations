@@ -1,0 +1,15 @@
+#!/bin/bash
+# script/check_migrations: Check existing migrations were not changed
+
+if [ -n "$CI" ]; then
+    git fetch origin develop
+fi
+
+MODIFIED=$(git diff --name-only --diff-filter=M origin/develop -- database/migrations)
+if [ -n "$MODIFIED" ]; then
+    echo "❌ Migration check failed! Existing migration files were modified:"
+    echo "$MODIFIED"
+    exit 1
+fi
+
+echo "✅ Migration check passed. No modifications detected."

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+
+# shellcheck source=/dev/null
+source "$(dirname "$0")/bootstrap"
+
+docker compose -f local/docker-compose.yml down

@@ -20,6 +20,7 @@
     </testsuite>
   </testsuites>
   <php>
+    <ini name="memory_limit" value="512M"/>
     <env name="APP_ENV" value="testing"/>
     <env name="APP_LOG" value="single"/>
     <env name="CACHE_STORE" value="array"/>
