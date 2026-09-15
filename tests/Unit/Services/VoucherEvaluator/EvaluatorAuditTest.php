@@ -16,9 +16,12 @@ use Tests\TestCase;
  * Reproduction tests for the findings in docs/VOUCHER_EVALUATOR_AUDIT.md.
  *
  * Each test asserts the CURRENT, BUGGY behaviour, and is skipped so CI stays
- * green (matching the existing 'Waiting for hotfix' convention in
+ * green (matching the former 'Waiting for hotfix' convention in
  * ScottishVoucherEvaluatorTest). When a finding is fixed, remove the
  * markTestSkipped() line and invert the buggy assertions to get a regression test.
+ *
+ * F8 and F10 were fixed by the Scottish specification refactor (commits
+ * 49ed1f98 and 2882057f); their tests below are now live regression tests.
  */
 class EvaluatorAuditTest extends TestCase
 {
@@ -317,22 +320,25 @@ class EvaluatorAuditTest extends TestCase
     }
 
     /**
-     * F8: the Scottish rules read Carbon::now() (directly and via
-     * Child::getAgeString()) instead of the injected offsetDate, so evaluating
-     * four years in the future returns exactly today's answer.
+     * F8 (FIXED — regression test): the Scottish rules used to read
+     * Carbon::now() instead of the injected offsetDate, so evaluating four
+     * years in the future returned exactly today's answer. Since the
+     * specification refactor (IsScottishUnderSchoolAge et al.) the offsetDate
+     * is honoured: a toddler credited today loses the credit when evaluated
+     * six years on, by which time they are at school.
      */
-    public function testAuditF8ScottishRulesIgnoreOffsetDate(): void
+    public function testAuditF8ScottishRulesRespectOffsetDate(): void
     {
-        $this->markTestSkipped('AUDIT F8 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
         // A toddler: credited by ScottishChildIsBetweenOneAndPrimarySchoolAge today.
         $child = factory(Child::class)->make([
             'born' => true,
             'dob' => Carbon::now()->startOfMonth()->subMonths(24)->toDateTimeString(),
+            'deferred' => false,
         ]);
 
         $evaluationNow = EvaluatorFactory::make($this->scottishChildMods())
             ->evaluate($child);
-        $evaluationFuture = EvaluatorFactory::make($this->scottishChildMods(), Carbon::now()->addYears(4))
+        $evaluationFuture = EvaluatorFactory::make($this->scottishChildMods(), Carbon::now()->addYears(6))
             ->evaluate($child);
 
         // Sanity: the credit applies today.
@@ -341,24 +347,24 @@ class EvaluatorAuditTest extends TestCase
             $evaluationNow["credits"]
         );
 
-        // BUG: four years on, the child would be ~6 and at school — yet the
-        // evaluation is identical because the offsetDate is never consulted.
-        $this->assertContains(
+        // FIXED: six years on the child is ~8 and at school — the offsetDate is
+        // consulted and the credit no longer applies.
+        $this->assertNotContains(
             self::CREDIT_TYPES['ScottishChildIsBetweenOneAndPrimarySchoolAge'],
             $evaluationFuture["credits"]
         );
-        $this->assertEquals($evaluationNow["credits"], $evaluationFuture["credits"]);
-        $this->assertEquals($evaluationNow->getEntitlement(), $evaluationFuture->getEntitlement());
+        $this->assertNotEquals($evaluationNow->getEntitlement(), $evaluationFuture->getEntitlement());
     }
 
     /**
-     * F10: ScottishFamilyHasNoEligibleChildren's specification is
-     * OrSpec(AndSpec(IsBorn), NotSpec(IsBorn)) — "born or not born" — which is
-     * satisfied by every child; the IsUnderStartDate clause has been dropped.
+     * F10 (FIXED — regression test): ScottishFamilyHasNoEligibleChildren's
+     * specification used to be OrSpec(AndSpec(IsBorn), NotSpec(IsBorn)) —
+     * "born or not born" — satisfied by every child. It is now
+     * OrSpec(AndSpec(IsBorn, IsScottishUnderSchoolAge), NotSpec(IsBorn)), so a
+     * school-age child no longer qualifies the household.
      */
-    public function testAuditF10ScottishEligibilitySpecIsTautological(): void
+    public function testAuditF10ScottishEligibilitySpecExcludesSchoolAgeChildren(): void
     {
-        $this->markTestSkipped('AUDIT F10 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
         $rule = new ScottishFamilyHasNoEligibleChildren();
 
         $property = new ReflectionProperty($rule, 'specification');
@@ -378,9 +384,10 @@ class EvaluatorAuditTest extends TestCase
             'dob' => Carbon::now()->startOfMonth()->addMonths(3)->toDateTimeString(),
         ]);
 
-        // BUG: the "under school age" specification is satisfied by everyone.
+        // FIXED: babies and pregnancies satisfy the specification, but a
+        // school-age teenager no longer does.
         $this->assertTrue($specification->isSatisfiedBy($baby));
-        $this->assertTrue($specification->isSatisfiedBy($teenager));
+        $this->assertFalse($specification->isSatisfiedBy($teenager));
         $this->assertTrue($specification->isSatisfiedBy($unborn));
     }
 

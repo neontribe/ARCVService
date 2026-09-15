@@ -5,12 +5,22 @@ machinery that decides how many vouchers a household is entitled to, and which n
 disqualification reasons a Store worker sees.
 
 * **Audited at:** `nesbot/carbon 3.11.4`, `laravel/framework v12.55.1`, PHP `^8.2` (`composer.lock`).
-* **Baseline test state:** `./vendor/bin/phpunit tests/Unit/Services/VoucherEvaluator` →
-  `23 tests, 63 assertions, 2 skipped`, green. Both pre-existing skips are Scottish notice tests
+* **Baseline test state (original audit):** `./vendor/bin/phpunit tests/Unit/Services/VoucherEvaluator` →
+  `23 tests, 63 assertions, 2 skipped`, green. Both pre-existing skips were Scottish notice tests
   annotated `markTestSkipped('Waiting for hotfix')`
   (`tests/Unit/Services/VoucherEvaluator/ScottishVoucherEvaluatorTest.php:254` and `:277`).
-* **Status of this document:** report only. **No production logic was changed.** Remediation is a
-  separate, separately-approved piece of work — see [4. Remediation order](#4-remediation-order).
+* **Status of this document:** report only. **No production logic was changed by the audit.**
+  Remediation is a separate, separately-approved piece of work — see
+  [4. Remediation order](#4-remediation-order).
+* **Revision (2026-09-15):** the `Scottish*` evaluations were rewritten after this audit was first
+  published (commits `49ed1f98` “refactor scottish child evaluations for school age” and `2882057f`
+  “refactor scottish deferrals and 'childisAlmost' rule”). [Section D](#d-scotland) has been
+  re-audited against the new code: **F8, F9, F10, F11 and F12 are resolved** — the school-age logic
+  now lives in three date-driven specifications (`IsScottishUnderSchoolAge`,
+  `IsScottishAlmostStartDate`, `IsScottishDeferralEligible`, each with its own unit tests under
+  `tests/Unit/Specifications/`), and the two `Waiting for hotfix` skips have been removed and pass.
+  The original findings are retained below, marked **RESOLVED**, with notes on residual
+  observations in the new code.
 
 Every finding records **how it was verified**. *Confirmed* means it was proven by running code or by
 inspecting the schema/migrations; *inferred* means it was established by reading only.
@@ -25,23 +35,25 @@ inspecting the schema/migrations; *inferred* means it was established by reading
 | [F2](#f2--almost-notice-windows-are-two-months-not-one) | Carbon 3 `diffInMonths()` is a signed float, not an absolute int | Specifications | **High** | confirmed | no (warnings only) |
 | [F3](#f3--stale-pregnancy-credits-and-twins-credited-once) | Stale / duplicate pregnancy credit | Family | **High** | confirmed | **yes** |
 | [F5](#f5--the-household-has-left-guard-is-a-no-op-on-children) | `HouseholdMember` tests `leaving_on` on a `Child` | Social prescribing | **High** | confirmed | **yes** |
-| [F8](#f8--the-injected-evaluation-date-is-ignored-entirely) | Scottish rules use `Carbon::now()`, not the injected `offsetDate` | Scotland | **High** | confirmed | no (blocks testing) |
-| [F9](#f9--school-month-comparison-does-not-wrap-the-year) | School-month arithmetic does not wrap the year | Scotland | **High** | confirmed | **yes** |
-| [F10](#f10--scottishfamilyhasnoeligiblechildrens-specification-is-a-tautology) | `ScottishFamilyHasNoEligibleChildren` specification is always true | Scotland | **High** | confirmed | no |
+| [F8](#f8--the-injected-evaluation-date-is-ignored-entirely) | Scottish rules use `Carbon::now()`, not the injected `offsetDate` | Scotland | ~~High~~ **RESOLVED** (2026-09-15) | confirmed | no (blocked testing) |
+| [F9](#f9--school-month-comparison-does-not-wrap-the-year) | School-month arithmetic does not wrap the year | Scotland | ~~High~~ **RESOLVED** (2026-09-15) | confirmed | **yes** — totals changed when fixed |
+| [F10](#f10--scottishfamilyhasnoeligiblechildrens-specification-is-a-tautology) | `ScottishFamilyHasNoEligibleChildren` specification is always true | Scotland | ~~High~~ **RESOLVED** (2026-09-15) | confirmed | no |
 | [F4](#f4--unborn-children-cause-a-permanent-needs-id-warning) | Unborn child counts as unverified | Family | Medium | confirmed | no |
 | [F6](#f6--negative-entitlement-is-reachable) | Entitlement has no floor and can go negative | Social prescribing | Medium | confirmed | no (corrects a wrong total) |
 | [F7](#f7--deductfromcarer-never-actually-tests-for-a-carer) | `$candidate->has('children')` is always truthy | Social prescribing | Medium | confirmed | no |
-| [F11](#f11--deferral-is-ignored-the-moment-a-child-turns-5) | Deferral lost at the fifth birthday | Scotland | Medium | inferred | **yes** |
-| [F12](#f12--duplicated-divergent-at-school-logic) | `isScottishChildAtSchool()` triplicated and divergent | Scotland | Medium | inferred | no |
+| [F11](#f11--deferral-is-ignored-the-moment-a-child-turns-5) | Deferral lost at the fifth birthday | Scotland | ~~Medium~~ **RESOLVED** (2026-09-15) | inferred | **yes** — totals changed when fixed |
+| [F12](#f12--duplicated-divergent-at-school-logic) | `isScottishChildAtSchool()` triplicated and divergent | Scotland | ~~Medium~~ **RESOLVED** (2026-09-15) | inferred | no |
 | [F13](#f13--asymmetric-upper-age-bound-design-question) | Asymmetric upper age bound | Child rules | Medium (*design question*) | inferred | depends on decision |
 | [F14](#f14--a-family-level-disqualifier-silently-deletes-every-child-credit-by-design) | A family disqualifier zeroes the whole household | Valuation | Medium (*by design*) | confirmed | n/a |
 | [F15](#f15--two-conflicting-definitions-of-pregnant-design-question) | Two conflicting definitions of "pregnant" | Family | Medium (*design question*) | inferred | depends on decision |
 | [F16](#f16--basechildevaluationtoreason-drops-negative-values) | Negative Child values silently dropped | Evaluations | Low | confirmed | no (latent) |
 | [F17](#f17--getpurposefilteredevaluations-collapses-same-named-rules) | `array_merge` collapses same-named rules | Evaluator | Low | inferred | no |
 
-Four of these **will change how many vouchers some households receive** if corrected: **F3, F5, F9**
-and, in a narrower sense, **F11**. **F2** changes which warnings are shown but not the totals. These
-are called out again in [4.2](#42-entitlement-affecting--needs-a-sponsor-decision).
+Of the findings still open, **F3 and F5 will change how many vouchers some households receive** if
+corrected, and **F2** changes which warnings are shown but not the totals. These are called out
+again in [4.2](#42-entitlement-affecting--needs-a-sponsor-decision). (**F9** and **F11** were also
+entitlement-affecting; their correction shipped with the Scottish refactor — see
+[Section D](#d-scotland) for who was affected and in which direction.)
 
 ---
 
@@ -69,8 +81,8 @@ Two patterns, layered:
   are seeded by `database/seeders/SponsorsSeeder.php`.
 * **`offsetDate`** — `EvaluatorFactory::make($mods, $offsetDate)` injects the date the evaluation is
   notionally happening on, and passes it down into every date-sensitive specification. This is what
-  makes back-dated and forward-dated evaluation testable. (See [F8](#f8--the-injected-evaluation-date-is-ignored-entirely):
-  it is ignored throughout Scotland.)
+  makes back-dated and forward-dated evaluation testable. (It used to be ignored throughout
+  Scotland — [F8](#f8--the-injected-evaluation-date-is-ignored-entirely), resolved 2026-09-15.)
 
 ```mermaid
 graph TD
@@ -470,10 +482,11 @@ So the disqualifier means "at primary school age" — *not under 5* **and** *und
 satisfies neither clause and is therefore **not** disqualified. Their valuation reports
 `eligible === true` with zero credits and an empty `disqualifiers` bucket.
 
-The Scottish counterpart has no upper bound at all (`ScottishChildIsPrimarySchoolAge` succeeds on
-`$year >= 5`), so identical households are classified differently between programmes. Sponsors who
-want secondary-age children excluded must remember to enable `ChildIsSecondarySchoolAge` separately,
-as Scotland does at `config/evaluations.php:82-87`.
+The Scottish counterpart has no upper bound at all (`ScottishChildIsPrimarySchoolAge` is now
+`AndSpec(IsBorn, NotSpec(IsScottishUnderSchoolAge))` — it succeeds for any born child at or past
+school start, with no ceiling), so identical households are classified differently between
+programmes. Sponsors who want secondary-age children excluded must remember to enable
+`ChildIsSecondarySchoolAge` separately, as Scotland does at `config/evaluations.php:82-87`.
 
 **Effect.** With the England/Wales defaults a household of only teenagers is "eligible" with an
 entitlement of zero and no explanation — indistinguishable, in the UI, from a data-entry error.
@@ -513,18 +526,64 @@ docs whether a pregnancy is expected to be a qualifier when it is not a credit.
 
 ### D. Scotland
 
+> **Re-audited 2026-09-15.** All five findings in this section (F8–F12) were **resolved** by the
+> Scottish specification refactor (commits `49ed1f98`, `2882057f`), which landed after the original
+> audit. The at-school decision was moved out of the evaluations into three date-driven
+> specifications:
+>
+> * `app/Specifications/IsScottishUnderSchoolAge.php` — computes the child's actual school start
+>   **date** (`startYear = birthMonth <= 2 ? birthYear + 4 : birthYear + 5`, `+1` when `deferred`,
+>   day 1 of `arc.scottish_school_month`) and compares `offsetDate->lessThan($schoolStartDate)`.
+> * `app/Specifications/IsScottishAlmostStartDate.php` — same start date;
+>   `diffInMonths($schoolStartDate, false)` between `0` and `1` (a correct, signed use of Carbon 3,
+>   unlike [F2](#f2--almost-notice-windows-are-two-months-not-one)).
+> * `app/Specifications/IsScottishDeferralEligible.php` — eligible when the fifth birthday falls
+>   after the natural start date, and never for a child already `deferred`.
+>
+> The five evaluations are now thin specification compositions in the England/Wales style (e.g.
+> `ScottishChildIsPrimarySchoolAge` = `AndSpec(IsBorn, NotSpec(IsScottishUnderSchoolAge))`;
+> `ScottishFamilyHasNoEligibleChildren` = `OrSpec(AndSpec(IsBorn, IsScottishUnderSchoolAge),
+> NotSpec(IsBorn))`). `Child::getAgeString()` and its string-parsing are gone from the evaluator
+> path. The new specifications carry their own unit tests
+> (`tests/Unit/Specifications/IsScottishUnderSchoolAgeTest.php`, `IsScottishAlmostStartDateTest.php`
+> — including explicit Dec→Jan year-wrap cases — and `IsScottishDeferralEligibleTest.php`), and the
+> two `Waiting for hotfix` skips in `ScottishVoucherEvaluatorTest` (`:254`, `:272`) have been
+> removed and pass.
+>
+> **Residual observations (minor, non-blocking):**
+>
+> * The start-year formula (`birthMonth <= 2 ? +4 : +5`, `deferred ? +1`) is duplicated across all
+>   three specifications — a much smaller echo of F12; a shared helper would keep them in lock-step.
+>   The Jan/Feb cut-off also assumes the August intake cycle even when a custom `$schoolMonth` is
+>   injected (test-only today).
+> * `IsScottishDeferralEligible` stores an `$offsetDate` it never reads — harmless (deferral
+>   eligibility genuinely depends only on the dob), but dead code.
+> * `ScottishChildIsPrimarySchoolAge` still has **no upper age bound** — see
+>   [F13](#f13--asymmetric-upper-age-bound-design-question), which remains open.
+> * The 2026-09-15 evaluator-suite state: `tests/Unit/Services/VoucherEvaluator` +
+>   `tests/Unit/Specifications` → `44 tests, 102 assertions, 8 skipped`, green; the only skips are
+>   this audit's own reproduction tests for still-open findings.
+
 The Scottish programme replaces the England/Wales age rules with its own set
 (`config/evaluations.php:8-91`): `ScottishChildIsBetweenOneAndPrimarySchoolAge` as a credit,
 `ScottishChildIsPrimarySchoolAge` and `ChildIsSecondarySchoolAge` as disqualifiers,
 `ScottishChildIsAlmostPrimarySchoolAge` / `ScottishChildCanDefer` as notices, and
-`ScottishFamilyHasNoEligibleChildren` as the family disqualifier. Two of the programme's own unit
-tests are already parked with `markTestSkipped('Waiting for hotfix')`
-(`ScottishVoucherEvaluatorTest.php:254` and `:277`) — the findings below are the reasons why.
+`ScottishFamilyHasNoEligibleChildren` as the family disqualifier. At the time of the original
+audit, two of the programme's own unit tests were parked with
+`markTestSkipped('Waiting for hotfix')` (`ScottishVoucherEvaluatorTest.php:254` and `:277`) — the
+findings below, **kept as originally written** for the historical record, are the reasons why.
+All file/line references in F8–F12 describe the **pre-refactor** code.
 
 #### F8 — The injected evaluation date is ignored entirely
 
-**Severity:** High. **Verified:** confirmed (test suite behaviour + code reading). **Reproduction
-test:** `EvaluatorAuditTest::testAuditF8ScottishRulesIgnoreOffsetDate`.
+**Status: ✅ RESOLVED (2026-09-15).** All three new specifications accept the offset date
+(`$offsetDate ?? Carbon::today()->startOfDay()`) and every Scottish evaluation now passes
+`$this->offsetDate` into them; `Child::getAgeString()` is no longer on the evaluator path (it
+remains `Carbon::now()`-bound, but is only used for display). Verified by the un-skipped regression
+test `EvaluatorAuditTest::testAuditF8ScottishRulesRespectOffsetDate`: a toddler credited today loses
+the credit when evaluated six years ahead.
+
+**Severity (original):** High. **Verified:** confirmed (test suite behaviour + code reading).
 
 **What.** Every Scottish evaluation answers "how old is this child *today*", not "how old on the
 date the evaluator was told to evaluate at". `EvaluatorFactory::make($mods, $offsetDate)` is
@@ -556,16 +615,23 @@ rules are untestable for any other date, back-dated evaluation silently returns 
 the two skipped tests cannot be revived until this is fixed. It also masks F9: the year-wrap
 defect below cannot be pinned by a unit test without either this fix or config contortions.
 
-**Recommendation.** Part of the agreed minimal patch (see
+**Recommendation (original).** Part of the agreed minimal patch (see
 [4.3](#43-scotland--minimal-in-place-patch-chosen-approach)): replace `Carbon::now()` with
-`$this->offsetDate` in the five call sites, and give `getAgeString()` an optional
-`?Carbon $at = null` argument defaulting to `Carbon::now()` so the Scottish rules can pass the
-offset date through without disturbing the display call sites.
+`$this->offsetDate` in the five call sites. *The refactor went further — it removed the
+`getAgeString()` dependency entirely instead of threading a date through it.*
 
 #### F9 — School-month comparison does not wrap the year
 
-**Severity:** High. **Verified:** confirmed (arithmetic + in-repo comment). **⚠️
-Entitlement-affecting — correcting this will change voucher totals.**
+**Status: ✅ RESOLVED (2026-09-15).** The raw month subtraction is gone: `IsScottishUnderSchoolAge`
+compares full **dates** (`offsetDate < schoolStartDate`), and `IsScottishAlmostStartDate` uses a
+signed `diffInMonths` window that wraps the year correctly —
+`IsScottishAlmostStartDateTest::it_handles_year_wrapping_for_custom_january_start_month` pins the
+Dec→Jan case explicitly. The two `Waiting for hotfix` tests were revived by the same change and
+pass. **The entitlement warning below took effect**: Scottish 4-year-olds already at school are no
+longer credited between January and July.
+
+**Severity (original):** High. **Verified:** confirmed (arithmetic + in-repo comment). **⚠️
+Entitlement-affecting — correcting this changed voucher totals.**
 
 **What.** Whether a 4-year-old is "at school" and whether the almost/defer notices may fire is
 decided by raw month subtraction that never wraps at December → January.
@@ -613,15 +679,22 @@ if (($schoolStartMonth - $monthNow > 1) || ($schoolStartMonth - $monthNow < 0)) 
 escape the primary-school disqualifier; fixing this **reduces voucher totals** for those households
 for seven months of the year. Deferral/almost notices are also suppressed for most configurations.
 
-**Recommendation.** Part of the agreed minimal patch (see 4.3): compare year-aware dates rather than
-bare month numbers — e.g. build "the school start date this school year" from `offsetDate` and
-`scottish_school_month` and compare full dates, or normalise the difference modulo 12. The two
-skipped tests are the ready-made regression tests for this change.
+**Recommendation (original).** Compare year-aware dates rather than bare month numbers — e.g. build
+"the school start date this school year" from `offsetDate` and `scottish_school_month` and compare
+full dates. *This is what the refactor did, computing the start date from the child's dob instead of
+the evaluation month; the two formerly-skipped tests are its regression tests.*
 
 #### F10 — `ScottishFamilyHasNoEligibleChildren`'s specification is a tautology
 
-**Severity:** High. **Verified:** confirmed. **Reproduction test:**
-`EvaluatorAuditTest::testAuditF10ScottishEligibilitySpecIsTautological`.
+**Status: ✅ RESOLVED (2026-09-15).** The specification is now
+`OrSpec(AndSpec(IsBorn, IsScottishUnderSchoolAge($offsetDate)), NotSpec(IsBorn))` — the missing
+"under school age" clause is restored (via the new Scottish specification rather than the
+England/Wales `IsUnderStartDate`), and the dead `isScottishChildAtSchool()` second pass inside
+`test()` is gone. Verified by the un-skipped regression test
+`EvaluatorAuditTest::testAuditF10ScottishEligibilitySpecExcludesSchoolAgeChildren`: a baby and a
+pregnancy satisfy the specification, a 13-year-old no longer does.
+
+**Severity (original):** High. **Verified:** confirmed.
 
 **What.** The rule's specification is satisfied by **every** child, so the "under school age"
 requirement it was meant to encode has no effect.
@@ -659,15 +732,26 @@ Jan–Jul (F9) a household whose only child is a 4-year-old already at school is
 No entitlement changes from fixing the tautology itself if the at-school helper is fixed at the same
 time, but as written the rule does not implement its own `$reason` text.
 
-**Recommendation.** Restore the missing clause so the specification matches the England/Wales shape:
-`new AndSpec(new IsBorn(), new IsUnderStartDate($this->offsetDate, 5, config('arc.scottish_school_month')))`
-— or, if at-school status must remain the criterion, delete the dead specification and let
-`isScottishChildAtSchool()` (fixed per F9/F8) be the single test.
+**Recommendation (original).** Restore the missing clause so the specification matches the
+England/Wales shape. *Done — the refactor restored it with `IsScottishUnderSchoolAge` and made the
+specification the single test, deleting the helper.*
 
 #### F11 — Deferral is ignored the moment a child turns 5
 
-**Severity:** Medium. **Verified:** inferred (code reading). **⚠️ Entitlement-affecting for deferred
-children.**
+**Status: ✅ RESOLVED (2026-09-15).** There is no age-5 short-circuit any more: `deferred` now adds
+a year to the computed start year **before** any comparison
+(`IsScottishUnderSchoolAge.php:45-47`), so a deferred child keeps their credit until the first
+school start date after their fifth birthday, exactly as recommended. The dead
+`(($year === '4' …) || $year >= 5)` condition went with the helper.
+`IsScottishUnderSchoolAgeTest::it_respects_deferral_for_eligible_children`,
+`IsScottishAlmostStartDateTest::it_accounts_for_deferred_children_start_date` and
+`IsScottishDeferralEligibleTest::it_disallows_deferral_for_already_deferred_children` pin the
+behaviour.
+**Entitlement effect took place**: deferring households are now credited up to their actual start
+date.
+
+**Severity (original):** Medium. **Verified:** inferred (code reading). **⚠️ Entitlement-affecting
+for deferred children.**
 
 **What.** A child who legitimately deferred school entry at 4 loses their credit on their fifth
 birthday, months before they actually start school, because the age-5 short-circuit runs before the
@@ -707,13 +791,21 @@ mid-school-year and is immediately reclassified as at school: the
 `ScottishChildIsBetweenOneAndPrimarySchoolAge` credit stops even though the child will not start
 school until the following August. This **under-credits** deferring households.
 
-**Recommendation.** Check `deferred` before the age short-circuit — a deferred child should count as
-not-at-school until the first school start date after their fifth birthday (which needs F9's
-year-aware date to express correctly). Simplify the dead condition while there.
+**Recommendation (original).** Check `deferred` before the age short-circuit — a deferred child
+should count as not-at-school until the first school start date after their fifth birthday. *Done,
+via the `startYear += 1` adjustment in the new specifications.*
 
 #### F12 — Duplicated, divergent at-school logic
 
-**Severity:** Medium. **Verified:** inferred (code reading, diffed by eye).
+**Status: ✅ RESOLVED (2026-09-15).** `isScottishChildAtSchool()` and its inline variant were
+deleted; all five evaluations now compose the same three specifications, and the
+`getAgeString('%y,%m')` string-parsing (with its `'4' === $year` / `$year >= 5` mixed comparisons)
+is gone from the evaluator entirely. The 4.3 decision to *accept* this duplication was overtaken by
+events — the refactor took the "new Scottish specifications" option instead. One small residue: the
+start-year formula itself is repeated in the three new specification classes (see the Section D
+preamble); consolidating it into a shared method is cheap follow-up, not a defect.
+
+**Severity (original):** Medium. **Verified:** inferred (code reading, diffed by eye).
 
 **What.** The at-school decision exists in **three** copies that can disagree about the same child.
 
@@ -738,9 +830,8 @@ three places, and the string/numeric mix invites subtle bugs (`'11' >= '2'` is `
 comparison — the almost-primary rule at `:46` gets away with `$month >= '1'` only because PHP
 numerically coerces when one operand is a numeric string, a rule that changed in PHP 8).
 
-**Recommendation.** **Accepted for now** — see 4.3. The agreed remediation deliberately patches all
-three copies in place rather than extracting a shared specification or trait; consolidation is
-recorded as follow-up work, not part of the hotfix.
+**Recommendation (original).** **Accepted for now** — see 4.3. *Superseded: the refactor extracted
+shared specifications after all, resolving the duplication at its root.*
 
 ### E. Social prescribing
 
@@ -883,8 +974,9 @@ with no `is_pri_carer` child — check the data before choosing.
 
 Fixes are grouped by blast radius. Everything in 4.1 can be shipped without changing anyone's
 voucher totals; everything in 4.2 will move totals and needs sponsor sign-off first; 4.3 records the
-agreed direction for Scotland. Findings labelled *by design* (F14) or *design question* (F13, F15)
-need a product decision, not a fix, and are deliberately absent from these lists.
+agreed direction for Scotland *(since executed — see the update in that section)*. Findings
+labelled *by design* (F14) or *design question* (F13, F15) need a product decision, not a fix, and
+are deliberately absent from these lists.
 
 ### 4.1 Safe — cannot change totals
 
@@ -895,7 +987,7 @@ In suggested order (cheapest, most user-visible first):
 | 1 | [F1](#f1--disqualification-reasons-never-reach-the-ui) | `'disqualifications'` → `'disqualifiers'` in `Valuation.php:47` | One-word fix; previously-silent warnings will start appearing — tell users |
 | 2 | [F7](#f7--deductfromcarer-never-actually-tests-for-a-carer) | Real collection check + non-empty `$reason` | Choose the intent first: `isNotEmpty()` keeps today's totals; `contains('is_pri_carer', true)` does not |
 | 3 | [F6](#f6--negative-entitlement-is-reachable) | `max(0, …)` clamp in `getEntitlement()` | Only ever moves a nonsensical negative to 0; log when the raw sum is negative |
-| 4 | [F10](#f10--scottishfamilyhasnoeligiblechildrens-specification-is-a-tautology) | Restore the dropped `IsUnderStartDate` clause | Ride along with the 4.3 patch |
+| 4 | [F10](#f10--scottishfamilyhasnoeligiblechildrens-specification-is-a-tautology) | ~~Restore the dropped `IsUnderStartDate` clause~~ | ✅ **Done** (2026-09-15) via `IsScottishUnderSchoolAge` in the Scottish refactor |
 | 5 | [F16](#f16--basechildevaluationtoreason-drops-negative-values) | Align `BaseChildEvaluation::toReason()` with the family version | Latent; no live rule affected |
 | 6 | [F17](#f17--getpurposefilteredevaluations-collapses-same-named-rules) | `+=` with `?? []` instead of `array_merge` | Latent; display-only |
 | 7 | [Carbon mutability](#latent-risk--carbon-3-dates-are-still-mutable) | `->copy()` before mutating calls | Behaviour-preserving; pairs naturally with F2 |
@@ -906,7 +998,7 @@ regression test: remove the `markTestSkipped()` line and invert the buggy assert
 
 ### 4.2 Entitlement-affecting — needs a sponsor decision
 
-The four defects below **will change how many vouchers some households receive** (or which warnings
+The defects below **will change how many vouchers some households receive** (or which warnings
 they see) when corrected. Each needs a decision on timing and communication, and ideally a data
 report beforehand to size the affected population.
 
@@ -914,15 +1006,27 @@ report beforehand to size the affected population.
 |---|---|---|
 | [F3](#f3--stale-pregnancy-credits-and-twins-credited-once) stale pregnancy credit | Any household with an unborn-child record whose dob has passed | **Down** — removes 4/week from overdue records; twins decision could move totals **up** |
 | [F5](#f5--the-household-has-left-guard-is-a-no-op-on-children) left-household child credits | Social-prescribing households with `leaving_on` set and children | **Down** — departed households stop earning 7/child |
-| [F9](#f9--school-month-comparison-does-not-wrap-the-year) Scottish year-wrap | Scottish households with a 4-year-old already at school, evaluated Jan–Jul | **Down** — removes 4/week for those months; deferral notices start appearing |
 | [F2](#f2--almost-notice-windows-are-two-months-not-one) two-month "almost" windows | All programmes using `ChildIsAlmostOne` / almost-school notices | **No totals move** — but households stop seeing a warning up to a month earlier than they do today |
+| ~~[F9](#f9--school-month-comparison-does-not-wrap-the-year) Scottish year-wrap~~ | Scottish households with a 4-year-old already at school, evaluated Jan–Jul | ✅ **Shipped** (2026-09-15) with the Scottish refactor — totals went **down** for those households and deferral/almost notices now appear; F11's deferred-child under-crediting was corrected **up** at the same time |
 
 Recommended sequence: run the data reports (overdue pregnancies; SP families with `leaving_on` and
-children; Scottish 4-year-olds at school), agree the numbers with sponsors, then land F3/F5
-together and F9 as part of the 4.3 patch. F2 can ship with the safe batch if the notice-window
-change is announced.
+children), agree the numbers with sponsors, then land F3/F5 together. F2 can ship with the safe
+batch if the notice-window change is announced.
 
 ### 4.3 Scotland — minimal in-place patch (chosen approach)
+
+> **Update (2026-09-15): executed — and superseded in shape.** The remediation has landed as
+> commits `49ed1f98` and `2882057f`. In substance it delivers everything this section asked for
+> (F8: the offset date is honoured; F9: year-aware date comparisons; F10: the missing clause
+> restored; F11: deferral respected), but in **form** it took the previously-rejected
+> “new Scottish specifications” route rather than the minimal in-place patch: the duplicated
+> `isScottishChildAtSchool()` helper was deleted and replaced by `IsScottishUnderSchoolAge`,
+> `IsScottishAlmostStartDate` and `IsScottishDeferralEligible`, which also resolves F12 instead of
+> accepting it. The two `Waiting for hotfix` tests were un-skipped and pass, and this audit's F8/F10
+> reproduction tests have been converted into live regression tests
+> (`testAuditF8ScottishRulesRespectOffsetDate`,
+> `testAuditF10ScottishEligibilitySpecExcludesSchoolAgeChildren`). The entitlement warning below
+> **took effect** with the change. The original decision record is kept for context.
 
 **Decision (recorded 2026-09-15):** the Scottish rules will be remediated with a **minimal in-place
 patch**, *not* a specification/trait refactor. Two alternatives were considered and rejected for
@@ -954,22 +1058,18 @@ move totals on their own once F9 is fixed:
 * [F11](#f11--deferral-is-ignored-the-moment-a-child-turns-5) — move the `deferred` check ahead of
   the `$year >= 5` short-circuit and simplify the dead condition.
 
-**Tests unblocked.** Fixing F8 + F9 allows the two pre-existing
-`markTestSkipped('Waiting for hotfix')` tests to be revived:
+**Tests unblocked** *(all since revived)*:
 
 | Skipped test | Unblocked by |
 |---|---|
-| `ScottishVoucherEvaluatorTest::testItNoticesWhenAChildIsAlmostPrimarySchoolAge` (`:252`) | F8 (offsetDate) + F9 (window guard) |
-| `ScottishVoucherEvaluatorTest::testItNoticesWhenAChildCanDefer` (`:275`) | F8 (offsetDate) + F9 (Dec→Jan wrap) |
-
-plus the new `EvaluatorAuditTest::testAuditF8ScottishRulesIgnoreOffsetDate` and
-`::testAuditF10ScottishEligibilitySpecIsTautological`, whose skip markers should be removed by the
-same change.
+| `ScottishVoucherEvaluatorTest::testItNoticesWhenAChildIsAlmostPrimarySchoolAge` | F8 (offsetDate) + F9 (window guard) |
+| `ScottishVoucherEvaluatorTest::testItNoticesWhenAChildCanDefer` | F8 (offsetDate) + F9 (Dec→Jan wrap) |
 
 **Entitlement warning.** The F9 part of this patch **reduces voucher totals** for Scottish
 households containing a 4-year-old who is already at school, for evaluations performed January–July
-(see the F9 table). The F8/F10/F11 parts do not move totals by themselves. Schedule the patch
-against a sponsor-communication window.
+(see the F9 table). The F8/F10 parts do not move totals by themselves; F11 moves them **up** for
+deferring households. Schedule the patch against a sponsor-communication window. *(As executed, the
+change shipped without a staged sponsor-communication step — flagging for follow-up with sponsors.)*
 
 ---
 
@@ -1023,8 +1123,18 @@ which returns an `Illuminate\Database\Eloquent\Builder` — an object, therefore
 OK, but some tests were skipped! Tests: 23, Assertions: 63, Skipped: 2.
 ```
 
-Both skips are `markTestSkipped('Waiting for hotfix')` in `ScottishVoucherEvaluatorTest` (`:254`,
-`:277`).
+Both skips were `markTestSkipped('Waiting for hotfix')` in `ScottishVoucherEvaluatorTest` (`:254`,
+`:277`); the Scottish refactor removed them and both tests now pass.
+
+**Test state after the Scottish refactor (2026-09-15):**
+
+```
+./vendor/bin/phpunit tests/Unit/Services/VoucherEvaluator tests/Unit/Specifications
+OK, but some tests were skipped! Tests: 44, Assertions: 102, Skipped: 8.
+```
+
+All eight remaining skips are this audit's own reproduction tests for still-open findings; the
+F8/F10 audit tests now run un-skipped as regression tests.
 
 **Reproduction tests:** every test in
 `tests/Unit/Services/VoucherEvaluator/EvaluatorAuditTest.php` was run **un-skipped once** during
@@ -1043,11 +1153,12 @@ OK — Tests: 10, Assertions: 23.
 | F4 | `testAuditF4UnbornChildTriggersUnverifiedNotice` |
 | F5 | `testAuditF5DepartedHouseholdStillCreditsMembers` |
 | F6 | `testAuditF6EntitlementCanGoNegative` |
-| F8 | `testAuditF8ScottishRulesIgnoreOffsetDate` |
-| F10 | `testAuditF10ScottishEligibilitySpecIsTautological` |
+| F8 | `testAuditF8ScottishRulesRespectOffsetDate` *(now a live regression test — finding resolved)* |
+| F10 | `testAuditF10ScottishEligibilitySpecExcludesSchoolAgeChildren` *(now a live regression test — finding resolved)* |
 | F16 | `testAuditF16NegativeChildCreditValueIsDropped` |
 
 F7 is confirmed by framework behaviour (above) rather than a dedicated test; F9's regression tests
-already exist in skipped form (`ScottishVoucherEvaluatorTest.php:252`, `:275`); F11, F12, F13, F15
-and F17 are *inferred* from code reading; F14 is asserted by the existing
-`VoucherEvaluatorTest.php:215`.
+are the formerly-skipped `ScottishVoucherEvaluatorTest` notice tests (now passing) plus
+`IsScottishAlmostStartDateTest`'s explicit year-wrap cases; F11 is pinned by the deferral cases in
+`tests/Unit/Specifications/`; F12, F13, F15 and F17 were *inferred* from code reading; F14 is
+asserted by the existing `VoucherEvaluatorTest.php:215`.
