@@ -1,0 +1,37 @@
+#!/bin/bash
+
+#
+# Test that the DEPLOYED container can run.
+# Note that the container will contain redirects to https, so will not always
+# work in the browser.
+#
+# Target URL: localhost:8888
+#
+
+set -euo pipefail
+
+# shellcheck source=/dev/null
+source "$(dirname "$0")/bootstrap"
+
+CONTAINER_NAME="${PROJECT_NAME}-test"
+IMAGE_NAME="laravel-${COMPOSE_PROJECT_NAME}:latest"
+PORT=8888
+
+echo "===> (Re)-installing Composer dependencies..."
+composer install
+
+docker build -t "$IMAGE_NAME" -f deployment/Dockerfile .
+docker run -d -p 127.0.0.1:"$PORT":80 -e "LARAVEL_CONFIG_APP_KEY=$(php artisan key:generate --show)" -e LARAVEL_CONFIG_APP_DEBUG=false --name "$CONTAINER_NAME" "$IMAGE_NAME"
+docker exec -i "$CONTAINER_NAME" chmod -R 777 /var/www/html/database
+
+echo "===> Site now running on http://localhost:$PORT"
+echo "===> Note that some URLs will redirect to https and may not work in a browser"
+echo
+
+echo "===> Starting a shell so you can check files..."
+docker exec -it "$CONTAINER_NAME" /bin/bash
+
+echo "==> Stopping the container"
+docker kill "$CONTAINER_NAME"
+echo "==> Removing the container"
+docker rm "$CONTAINER_NAME"

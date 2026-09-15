@@ -59,7 +59,7 @@ Do the steps below:
 - `nvm use`
 - Install npm packages for webpack (JS and Sass) builds: `npm run install`
 - Run `npm run dev` to make sure packages Store shares with Service have been included
-- Compile Service from Sass with `npm run prod`
+- Compile Service from Sass with `npm run build`
 
 ***
 

@@ -1,0 +1,59 @@
+#!/bin/bash
+# script/test-migrations: Test migrations can run up and down consistently
+
+set -e
+
+# shellcheck source=/dev/null
+source "$(dirname "$0")/bootstrap"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOCAL_DIR="$(cd "$SCRIPT_DIR/../local" && pwd)"
+
+echo "===> Testing database migrations..."
+
+echo "!!!!! WARNING: THIS SCRIPT WILL DESTROY YOUR LOCAL DATABASE !!!!!"
+
+IFS= read -rp "Continue? (Y/N): " confirm && [[ $confirm == [yY] ]] || exit 1
+
+
+TEMP_DIR=$(mktemp -d)  # Used to hold schemas.
+trap 'rm -rf $TEMP_DIR' EXIT
+
+echo "===> Running migrations (first up)..."
+docker compose -f "$LOCAL_DIR/docker-compose.yml" exec app php artisan migrate --force
+
+echo "===> Exporting schema after first migration..."
+docker compose -f "$LOCAL_DIR/docker-compose.yml" exec db mariadb-dump -u laravel -psecret --no-data --skip-comments laravel > "$TEMP_DIR/schema_first.sql"
+sed -i.bak 's/AUTO_INCREMENT=[0-9]*//g' "$TEMP_DIR/schema_first.sql"
+
+echo "===> Rolling back all migrations..."
+docker compose -f "$LOCAL_DIR/docker-compose.yml" exec app php artisan migrate:rollback --step=999 --force
+
+echo "===> Verifying database is empty..."
+TABLES=$(docker compose -f "$LOCAL_DIR/docker-compose.yml" exec db mariadb -u laravel -psecret -N -B laravel -e "SHOW TABLES;")
+if [[ "$TABLES" != "migrations" ]]; then
+  echo "ERROR: Database still has tables after rollback:"
+  echo "$TABLES"
+  exit 1
+fi
+
+echo "===> Running migrations again (second up)..."
+docker compose -f "$LOCAL_DIR/docker-compose.yml" exec app php artisan migrate --force
+
+echo "===> Exporting schema after second migration..."
+docker compose -f "$LOCAL_DIR/docker-compose.yml" exec db mariadb-dump -u laravel -psecret --no-data --skip-comments laravel > "$TEMP_DIR/schema_second.sql"
+sed -i.bak 's/AUTO_INCREMENT=[0-9]*//g' "$TEMP_DIR/schema_second.sql"
+
+echo "===> Comparing schemas..."
+if ! diff -u "$TEMP_DIR/schema_first.sql" "$TEMP_DIR/schema_second.sql"; then
+  echo "ERROR: Schemas differ after migrate up -> down -> up cycle"
+  exit 1
+fi
+
+echo "===> Testing migrate:fresh..."
+docker compose -f "$LOCAL_DIR/docker-compose.yml" exec app php artisan migrate:fresh --force
+
+echo "===> Testing migrate:refresh..."
+docker compose -f "$LOCAL_DIR/docker-compose.yml" exec app php artisan migrate:refresh --force
+
+echo "===> All migration tests passed."
