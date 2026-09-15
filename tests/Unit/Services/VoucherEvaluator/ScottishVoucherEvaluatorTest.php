@@ -251,7 +251,6 @@ class ScottishVoucherEvaluatorTest extends TestCase
 
     public function testItNoticesWhenAChildIsAlmostPrimarySchoolAge(): void
     {
-        $this->markTestSkipped('Waiting for hotfix');
         // Need to change the values we use for school start to next month's integer
         Config::set('arc.scottish_school_month', Carbon::now()->addMonthsNoOverflow(1)->month);
 
@@ -269,12 +268,8 @@ class ScottishVoucherEvaluatorTest extends TestCase
     }
 
 
-    // the scottish deferral code doesn't like december dates.
-    // this is probably a bug in the Evaluator specification
-    // not dealing with a year-wrapping check
     public function testItNoticesWhenAChildCanDefer(): void
     {
-        $this->markTestSkipped('Waiting for hotfix');
         // Need to change the values we use for school start to next month's integer
         Config::set('arc.scottish_school_month', Carbon::now()->addMonthsNoOverflow(1)->month);
 
