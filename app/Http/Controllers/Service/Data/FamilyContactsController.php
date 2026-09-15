@@ -19,25 +19,32 @@ class FamilyContactsController extends Controller
 
             fputcsv($output, ['Rvid', 'Name', 'Email', 'Telno', 'Centre', 'Area']);
 
+            $chunkSize = 200;
+            $counter = 0;
             Carer::query()
-                ->whereNotNull('emailsecret')
-                ->orWhereNotNull('telnosecret')
+                ->where(function ($query) {
+                    $query->whereNotNull('emailsecret')
+                        ->orWhereNotNull('telnosecret');
+                })
                 ->with(['family.initialCentre.sponsor'])
-                ->lazyById(200)
-                ->chunk(200)
-                ->each(function ($chunk) use ($output) {
-                    $chunk->each(function (Carer $carer) use ($output) {
-                        fputcsv($output, [
-                            $carer->family?->Rvid,
-                            $carer->name,
-                            $carer->emailsecret->reveal(),
-                            $carer->telnosecret->reveal(),
-                            $carer->family?->initialCentre?->name,
-                            $carer->family?->initialCentre?->sponsor?->name,
-                        ]);
-                    });
-                    ob_flush();
-                    flush();
+                ->lazyById($chunkSize)
+                ->each(function (Carer $carer) use ($chunkSize, $output, &$counter) {
+                    fputcsv($output, [
+                        $carer->family?->Rvid,
+                        $carer->name,
+                        $carer->emailsecret->reveal(),
+                        $carer->telnosecret->reveal(),
+                        $carer->family?->initialCentre?->name,
+                        $carer->family?->initialCentre?->sponsor?->name,
+                    ]);
+
+                    // stream a few to the user, keep-alive
+                    if (++$counter % $chunkSize === 0) {
+                        if (ob_get_level() > 0) {
+                            ob_flush();
+                        }
+                        flush();
+                    }
                 });
 
             fclose($output);

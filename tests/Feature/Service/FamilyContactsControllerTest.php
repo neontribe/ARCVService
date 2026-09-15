@@ -189,4 +189,37 @@ class FamilyContactsControllerTest extends TestCase
         $this->assertCount(3, $dataRows);
         $this->assertNotContains('Excluded - neither', array_column($dataRows, 1));
     }
+
+    public function testPaginationAcrossChunkThresholdDoesNotDuplicateRecords(): void
+    {
+        $sponsor = factory(Sponsor::class)->create(['name' => 'Test Area']);
+        $centre = factory(Centre::class)->create([
+            'name' => 'Test Centre',
+            'sponsor_id' => $sponsor->id,
+        ]);
+        $family = factory(Family::class)->create(['initial_centre_id' => $centre->id]);
+
+        // Create 205 carers to exceed the lazyById(200) chunk size
+        $totalCarers = 205;
+        for ($i = 1; $i <= $totalCarers; $i++) {
+            factory(Carer::class)->create([
+                'family_id' => $family->id,
+                'name' => "Carer $i",
+                'emailsecret' => "carer{$i}@example.com",
+                'telnosecret' => $i % 2 === 0 ? "0770090000{$i}" : null,
+            ]);
+        }
+
+        $response = $this->makeRequest();
+        $response->assertOk();
+
+        $rows = $this->parseCsv($response->streamedContent());
+
+        // Header row + 205 data rows
+        $this->assertCount($totalCarers + 1, $rows, 'Expected header row plus exactly 205 unique carer rows.');
+
+        // Verify all 205 names are present without duplicates
+        $names = array_column(array_slice($rows, 1), 1);
+        $this->assertCount($totalCarers, array_unique($names), 'Export contained duplicate carer rows.');
+    }
 }
