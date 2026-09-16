@@ -39,9 +39,10 @@ class IsAlmostStartDate extends AbstractSpecification
         // Generate the date of the event in question
         $targetDate = $candidate->calcFutureMonthYear($this->yearsAhead, $this->offsetMonth);
 
-        // Return (bool) if it's not happened yet AND If that date will happen this OR next month
-        return $targetDate->isFuture() &&
-            // If it's *this* month or *next* month, not *last* month
-            (int) $this->offsetDate->diffInMonths($targetDate) <= 1;
+        // Month difference between offset date month and target start date month.
+        // Diff is 0 if evaluated during event month, or 1 if evaluated the month before.
+        $diffInMonths = $this->offsetDate->copy()->startOfMonth()->diffInMonths($targetDate->copy()->startOfMonth(), false);
+
+        return $diffInMonths >= 0 && $diffInMonths <= 1;
     }
 }

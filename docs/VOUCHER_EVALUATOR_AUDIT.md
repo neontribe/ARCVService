@@ -26,6 +26,14 @@ disqualification reasons a Store worker sees.
   (`Valuation.php:47`). Disqualification reasons now reach notice consumers and the regression
   test `EvaluatorAuditTest::testAuditF1DisqualifierReasonsAreLostFromNoticeReasons` is un-skipped
   and passing.
+* **Revision (2026-09-16):** **F2 is resolved** — `IsAlmostYears` (`IsAlmostYears.php:34`) and
+  `IsAlmostStartDate` (`IsAlmostStartDate.php:44`) now use explicit month-boundary differences
+  (`$this->offsetDate->copy()->startOfMonth()->diffInMonths($targetDate->copy()->startOfMonth(), false)`
+  between 0 and 1) rather than truncating Carbon 3 signed floats with `(int)`. The "almost" notice
+  window is strictly the current month and the month before. Mutable Carbon calls in `Child` and
+  `IsUnderYears` were guarded with `->copy()`. Specification tests (`IsAlmostYearsTest`,
+  `IsAlmostStartDateTest`) were added and `EvaluatorAuditTest::testAuditF2AlmostNoticeFiresAlmostTwoMonthsEarly`
+  runs un-skipped as a regression test.
 
 Every finding records **how it was verified**. *Confirmed* means it was proven by running code or by
 inspecting the schema/migrations; *inferred* means it was established by reading only.
@@ -37,7 +45,7 @@ inspecting the schema/migrations; *inferred* means it was established by reading
 | # | Flaw | Area | Severity | Verified | Moves voucher totals? |
 |---|------|------|----------|----------|-----------------------|
 | [F1](#f1--disqualification-reasons-never-reach-the-ui) | `getNoticeReasons()` merges a non-existent `disqualifications` key | Valuation | ~~High~~ **RESOLVED** (2026-09-16) | confirmed | no |
-| [F2](#f2--almost-notice-windows-are-two-months-not-one) | Carbon 3 `diffInMonths()` is a signed float, not an absolute int | Specifications | **High** | confirmed | no (warnings only) |
+| [F2](#f2--almost-notice-windows-are-two-months-not-one) | Carbon 3 `diffInMonths()` is a signed float, not an absolute int | Specifications | ~~High~~ **RESOLVED** (2026-09-16) | confirmed | no (warnings only) |
 | [F3](#f3--stale-pregnancy-credits-and-twins-credited-once) | Stale / duplicate pregnancy credit | Family | **High** | confirmed | **yes** |
 | [F5](#f5--the-household-has-left-guard-is-a-no-op-on-children) | `HouseholdMember` tests `leaving_on` on a `Child` | Social prescribing | **High** | confirmed | **yes** |
 | [F8](#f8--the-injected-evaluation-date-is-ignored-entirely) | Scottish rules use `Carbon::now()`, not the injected `offsetDate` | Scotland | ~~High~~ **RESOLVED** (2026-09-15) | confirmed | no (blocked testing) |
@@ -55,10 +63,9 @@ inspecting the schema/migrations; *inferred* means it was established by reading
 | [F17](#f17--getpurposefilteredevaluations-collapses-same-named-rules) | `array_merge` collapses same-named rules | Evaluator | Low | inferred | no |
 
 Of the findings still open, **F3 and F5 will change how many vouchers some households receive** if
-corrected, and **F2** changes which warnings are shown but not the totals. These are called out
-again in [4.2](#42-entitlement-affecting--needs-a-sponsor-decision). (**F9** and **F11** were also
-entitlement-affecting; their correction shipped with the Scottish refactor — see
-[Section D](#d-scotland) for who was affected and in which direction.)
+corrected. (**F2** changes which warnings are shown but not totals; its correction shipped on
+2026-09-16. **F9** and **F11** were also entitlement-affecting; their correction shipped with the
+Scottish refactor — see [Section D](#d-scotland) for who was affected and in which direction.)
 
 ---
 
@@ -233,8 +240,14 @@ raise an undefined-key warning for an entity configured with only, say, `credits
 
 #### F2 — "Almost" notice windows are two months, not one
 
-**Severity:** High. **Verified:** confirmed (executed Carbon probe). **Reproduction test:**
+**Status: ✅ RESOLVED (2026-09-16).** `IsAlmostYears` and `IsAlmostStartDate` now use month-boundary
+comparisons (`diffInMonths($targetDate, false)` between 0 and 1) matching `IsScottishAlmostStartDate`.
+Carbon date mutation risks were also eliminated with `->copy()` in `Child` and `IsUnderYears`.
+Verified by unit tests `IsAlmostYearsTest`, `IsAlmostStartDateTest`, and the un-skipped regression test
 `EvaluatorAuditTest::testAuditF2AlmostNoticeFiresAlmostTwoMonthsEarly`.
+
+**Severity (original):** High. **Verified:** confirmed (executed Carbon probe). **Reproduction test:**
+`EvaluatorAuditTest::testAuditF2AlmostNoticeFiresAlmostTwoMonthsEarly` *(now a live regression test — finding resolved)*.
 
 **What.** The "almost" specifications intend to warn when a milestone falls in *this month or next
 month*. They were written against Carbon 2, where `diffInMonths()` returned an **absolute integer**.
@@ -1001,7 +1014,7 @@ In suggested order (cheapest, most user-visible first):
 | 4 | [F10](#f10--scottishfamilyhasnoeligiblechildrens-specification-is-a-tautology) | ~~Restore the dropped `IsUnderStartDate` clause~~ | ✅ **Done** (2026-09-15) via `IsScottishUnderSchoolAge` in the Scottish refactor |
 | 5 | [F16](#f16--basechildevaluationtoreason-drops-negative-values) | Align `BaseChildEvaluation::toReason()` with the family version | Latent; no live rule affected |
 | 6 | [F17](#f17--getpurposefilteredevaluations-collapses-same-named-rules) | `+=` with `?? []` instead of `array_merge` | Latent; display-only |
-| 7 | [Carbon mutability](#latent-risk--carbon-3-dates-are-still-mutable) | `->copy()` before mutating calls | Behaviour-preserving; pairs naturally with F2 |
+| 7 | [Carbon mutability](#latent-risk--carbon-3-dates-are-still-mutable) | ~~`->copy()` before mutating calls~~ | ✅ **Done** (2026-09-16) alongside F2 |
 | 8 | [F4](#f4--unborn-children-cause-a-permanent-needs-id-warning) | `AndSpec(IsBorn, IsVerified)` + born-only count | Notice-visibility only; clears a nuisance warning for pregnant households |
 
 Each fix flips its reproduction test in `EvaluatorAuditTest` from a skipped bug-pin into a live
@@ -1017,7 +1030,7 @@ report beforehand to size the affected population.
 |---|---|---|
 | [F3](#f3--stale-pregnancy-credits-and-twins-credited-once) stale pregnancy credit | Any household with an unborn-child record whose dob has passed | **Down** — removes 4/week from overdue records; twins decision could move totals **up** |
 | [F5](#f5--the-household-has-left-guard-is-a-no-op-on-children) left-household child credits | Social-prescribing households with `leaving_on` set and children | **Down** — departed households stop earning 7/child |
-| [F2](#f2--almost-notice-windows-are-two-months-not-one) two-month "almost" windows | All programmes using `ChildIsAlmostOne` / almost-school notices | **No totals move** — but households stop seeing a warning up to a month earlier than they do today |
+| [F2](#f2--almost-notice-windows-are-two-months-not-one) two-month "almost" windows | All programmes using `ChildIsAlmostOne` / almost-school notices | ~~**No totals move**~~ ✅ **Shipped** (2026-09-16) — notice windows strictly 0–1 month |
 | ~~[F9](#f9--school-month-comparison-does-not-wrap-the-year) Scottish year-wrap~~ | Scottish households with a 4-year-old already at school, evaluated Jan–Jul | ✅ **Shipped** (2026-09-15) with the Scottish refactor — totals went **down** for those households and deferral/almost notices now appear; F11's deferred-child under-crediting was corrected **up** at the same time |
 
 Recommended sequence: run the data reports (overdue pregnancies; SP families with `leaving_on` and
@@ -1156,6 +1169,15 @@ OK, but some tests were skipped! Tests: 44, Assertions: 104, Skipped: 7.
 
 The F1, F8, and F10 audit tests now run un-skipped as regression tests.
 
+**Test state after F2 remediation (2026-09-16):**
+
+```
+./vendor/bin/phpunit tests/Unit/Services/VoucherEvaluator tests/Unit/Specifications
+OK, but some tests were skipped! Tests: 47, Assertions: 119, Skipped: 6.
+```
+
+The F1, F2, F8, and F10 audit tests now run un-skipped as regression tests.
+
 **Reproduction tests:** every test in
 `tests/Unit/Services/VoucherEvaluator/EvaluatorAuditTest.php` was run **un-skipped once** during
 authoring and passed — i.e. genuinely demonstrated its flaw — before the `markTestSkipped()` line
@@ -1168,7 +1190,7 @@ OK — Tests: 10, Assertions: 23.
 | Finding | Reproduction test |
 |---|---|
 | F1 | `testAuditF1DisqualifierReasonsAreLostFromNoticeReasons` *(now a live regression test — finding resolved)* |
-| F2 | `testAuditF2AlmostNoticeFiresAlmostTwoMonthsEarly` |
+| F2 | `testAuditF2AlmostNoticeFiresAlmostTwoMonthsEarly` *(now a live regression test — finding resolved)* |
 | F3 | `testAuditF3PregnancyCreditSurvivesItsDueDate`, `testAuditF3TwinPregnancyCreditsOnce` |
 | F4 | `testAuditF4UnbornChildTriggersUnverifiedNotice` |
 | F5 | `testAuditF5DepartedHouseholdStillCreditsMembers` |

@@ -32,7 +32,7 @@ class IsUnderYears extends AbstractSpecification
     public function isSatisfiedBy(Child $candidate)
     {
         /** @var Carbon $targetDate */
-        $targetDate = $candidate->dob->endOfMonth()->addYears($this->years);
+        $targetDate = $candidate->dob->copy()->endOfMonth()->addYears($this->years);
         return $this->offsetDate->lessThan($targetDate);
     }
 

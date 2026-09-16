@@ -139,7 +139,7 @@ class Child extends Model implements IEvaluee
             : $years
         ;
         // Calculate our birth year in that many years time
-        $future_year = $this->dob->addYears($years)->year;
+        $future_year = $this->dob->copy()->addYears($years)->year;
         // Return the desired month in that many years time
         return Carbon::createFromDate($future_year, $month, 1);
     }

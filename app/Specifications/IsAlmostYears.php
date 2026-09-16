@@ -30,9 +30,10 @@ class IsAlmostYears extends AbstractSpecification
     public function isSatisfiedBy(Child $candidate): bool
     {
         /** @var Carbon $targetDate */
-        $targetDate = $candidate->dob->endOfMonth()->addYears($this->years);
-        return $targetDate->isFuture() &&
-            (int) $this->offsetDate->diffInMonths($targetDate) <= 1;
+        $targetDate = $candidate->dob->copy()->startOfMonth()->addYears($this->years);
+        $diffInMonths = $this->offsetDate->copy()->startOfMonth()->diffInMonths($targetDate, false);
+
+        return $diffInMonths >= 0 && $diffInMonths <= 1;
     }
 
 }
