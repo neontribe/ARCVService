@@ -19,6 +19,7 @@ _ide_helper.php
 /.nova
 /.vscode
 /.zed
+/.junie
 
 # Dependencies
 /node_modules
