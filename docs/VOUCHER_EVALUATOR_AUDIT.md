@@ -21,6 +21,11 @@ disqualification reasons a Store worker sees.
   `tests/Unit/Specifications/`), and the two `Waiting for hotfix` skips have been removed and pass.
   The original findings are retained below, marked **RESOLVED**, with notes on residual
   observations in the new code.
+* **Revision (2026-09-16):** **F1 is resolved** — `Valuation::getNoticeReasons()` now merges
+  `$this->flat('disqualifiers')` instead of the non-existent `'disqualifications'` key
+  (`Valuation.php:47`). Disqualification reasons now reach notice consumers and the regression
+  test `EvaluatorAuditTest::testAuditF1DisqualifierReasonsAreLostFromNoticeReasons` is un-skipped
+  and passing.
 
 Every finding records **how it was verified**. *Confirmed* means it was proven by running code or by
 inspecting the schema/migrations; *inferred* means it was established by reading only.
@@ -31,7 +36,7 @@ inspecting the schema/migrations; *inferred* means it was established by reading
 
 | # | Flaw | Area | Severity | Verified | Moves voucher totals? |
 |---|------|------|----------|----------|-----------------------|
-| [F1](#f1--disqualification-reasons-never-reach-the-ui) | `getNoticeReasons()` merges a non-existent `disqualifications` key | Valuation | **High** | confirmed | no |
+| [F1](#f1--disqualification-reasons-never-reach-the-ui) | `getNoticeReasons()` merges a non-existent `disqualifications` key | Valuation | ~~High~~ **RESOLVED** (2026-09-16) | confirmed | no |
 | [F2](#f2--almost-notice-windows-are-two-months-not-one) | Carbon 3 `diffInMonths()` is a signed float, not an absolute int | Specifications | **High** | confirmed | no (warnings only) |
 | [F3](#f3--stale-pregnancy-credits-and-twins-credited-once) | Stale / duplicate pregnancy credit | Family | **High** | confirmed | **yes** |
 | [F5](#f5--the-household-has-left-guard-is-a-no-op-on-children) | `HouseholdMember` tests `leaving_on` on a `Child` | Social prescribing | **High** | confirmed | **yes** |
@@ -109,8 +114,14 @@ Each finding uses a fixed shape: **What / Where / Evidence / Effect / Recommenda
 
 #### F1 — Disqualification reasons never reach the UI
 
-**Severity:** High. **Verified:** confirmed (executed probe). **Reproduction test:**
-`EvaluatorAuditTest::testAuditF1DisqualifierReasonsAreLostFromNoticeReasons`.
+**Status: ✅ RESOLVED (2026-09-16).** `Valuation::getNoticeReasons()` now merges
+`$this->flat('disqualifiers')` instead of the non-existent `'disqualifications'` key (`Valuation.php:47`).
+Verified by the un-skipped regression test
+`EvaluatorAuditTest::testAuditF1DisqualifierReasonsAreLostFromNoticeReasons`: a disqualified 6-year-old
+now has their `Child|primary school age` reason returned in `getNoticeReasons()`.
+
+**Severity (original):** High. **Verified:** confirmed (executed probe). **Reproduction test:**
+`EvaluatorAuditTest::testAuditF1DisqualifierReasonsAreLostFromNoticeReasons` *(now a live regression test — finding resolved)*.
 
 **What.** The disqualification reasons collected during evaluation are never rendered, because
 `getNoticeReasons()` asks the `Valuation` for a bucket name that does not exist.
@@ -984,7 +995,7 @@ In suggested order (cheapest, most user-visible first):
 
 | Order | Finding | Fix | Note |
 |---|---|---|---|
-| 1 | [F1](#f1--disqualification-reasons-never-reach-the-ui) | `'disqualifications'` → `'disqualifiers'` in `Valuation.php:47` | One-word fix; previously-silent warnings will start appearing — tell users |
+| 1 | [F1](#f1--disqualification-reasons-never-reach-the-ui) | ~~`'disqualifications'` → `'disqualifiers'` in `Valuation.php:47`~~ | ✅ **Done** (2026-09-16) — previously-silent warnings now appear in UI |
 | 2 | [F7](#f7--deductfromcarer-never-actually-tests-for-a-carer) | Real collection check + non-empty `$reason` | Choose the intent first: `isNotEmpty()` keeps today's totals; `contains('is_pri_carer', true)` does not |
 | 3 | [F6](#f6--negative-entitlement-is-reachable) | `max(0, …)` clamp in `getEntitlement()` | Only ever moves a nonsensical negative to 0; log when the raw sum is negative |
 | 4 | [F10](#f10--scottishfamilyhasnoeligiblechildrens-specification-is-a-tautology) | ~~Restore the dropped `IsUnderStartDate` clause~~ | ✅ **Done** (2026-09-15) via `IsScottishUnderSchoolAge` in the Scottish refactor |
@@ -1136,6 +1147,15 @@ OK, but some tests were skipped! Tests: 44, Assertions: 102, Skipped: 8.
 All eight remaining skips are this audit's own reproduction tests for still-open findings; the
 F8/F10 audit tests now run un-skipped as regression tests.
 
+**Test state after F1 remediation (2026-09-16):**
+
+```
+./vendor/bin/phpunit tests/Unit/Services/VoucherEvaluator tests/Unit/Specifications
+OK, but some tests were skipped! Tests: 44, Assertions: 104, Skipped: 7.
+```
+
+The F1, F8, and F10 audit tests now run un-skipped as regression tests.
+
 **Reproduction tests:** every test in
 `tests/Unit/Services/VoucherEvaluator/EvaluatorAuditTest.php` was run **un-skipped once** during
 authoring and passed — i.e. genuinely demonstrated its flaw — before the `markTestSkipped()` line
@@ -1147,7 +1167,7 @@ OK — Tests: 10, Assertions: 23.
 
 | Finding | Reproduction test |
 |---|---|
-| F1 | `testAuditF1DisqualifierReasonsAreLostFromNoticeReasons` |
+| F1 | `testAuditF1DisqualifierReasonsAreLostFromNoticeReasons` *(now a live regression test — finding resolved)* |
 | F2 | `testAuditF2AlmostNoticeFiresAlmostTwoMonthsEarly` |
 | F3 | `testAuditF3PregnancyCreditSurvivesItsDueDate`, `testAuditF3TwinPregnancyCreditsOnce` |
 | F4 | `testAuditF4UnbornChildTriggersUnverifiedNotice` |

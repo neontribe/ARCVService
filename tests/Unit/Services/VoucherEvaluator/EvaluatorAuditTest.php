@@ -143,13 +143,12 @@ class EvaluatorAuditTest extends TestCase
     }
 
     /**
-     * F1: a disqualified child's reason is present in the raw 'disqualifiers'
-     * bucket but absent from getNoticeReasons(), because Valuation.php:47 merges
-     * the non-existent 'disqualifications' key instead of 'disqualifiers'.
+     * F1 (FIXED — regression test): a disqualified child's reason is present in the raw 'disqualifiers'
+     * bucket and now reaches getNoticeReasons(), because Valuation.php:47 merges
+     * the 'disqualifiers' key instead of the non-existent 'disqualifications' key.
      */
     public function testAuditF1DisqualifierReasonsAreLostFromNoticeReasons(): void
     {
-        $this->markTestSkipped('AUDIT F1 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
         // A six-year-old: disqualified by ChildIsPrimarySchoolAge, no notices due.
         $child = factory(Child::class)->make([
             'born' => true,
@@ -162,8 +161,14 @@ class EvaluatorAuditTest extends TestCase
         // The raw bucket has the reason...
         $this->assertContains(['reason' => 'Child|primary school age'], $evaluation["disqualifiers"]);
 
-        // BUG: ...but getNoticeReasons() loses it entirely.
-        $this->assertEquals([], $evaluation->getNoticeReasons());
+        // FIXED: ...and getNoticeReasons() includes it.
+        $this->assertEquals([
+            [
+                'entity' => 'Child',
+                'reason' => 'primary school age',
+                'count' => 1,
+            ],
+        ], $evaluation->getNoticeReasons());
     }
 
     /**
