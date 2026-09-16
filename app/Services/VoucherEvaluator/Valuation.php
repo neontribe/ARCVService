@@ -44,7 +44,7 @@ class Valuation extends ArrayObject
         $notice_reasons = [];
 
         // get all notices
-        $notices = array_merge($this->flat("notices"), $this->flat('disqualifications'));
+        $notices = array_merge($this->flat("notices"), $this->flat('disqualifiers'));
 
         // get distinct reasons and frequency.
         $reason_count = array_count_values(array_column($notices, 'reason'));
