@@ -251,17 +251,16 @@ class EvaluatorAuditTest extends TestCase
     }
 
     /**
-     * F4: an unborn child can never be ID-verified, but is still counted by
-     * FamilyHasUnverifiedChildren — so a pregnant family with all born children
-     * verified shows an un-clearable "needs ID" notice.
+     * F4: an unconfirmed pregnancy (unborn child with verified = false) triggers
+     * FamilyHasUnverifiedChildren, reminding staff to confirm the existence of
+     * the child/pregnancy entity. Once confirmed (verified = true), the warning clears.
      */
     public function testAuditF4UnbornChildTriggersUnverifiedNotice(): void
     {
-        $this->markTestSkipped('AUDIT F4 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
         $family = factory(Family::class)->create();
         $bornAndVerified = factory(Child::class)->states('betweenOneAndPrimarySchoolAge', 'verified')->make();
-        $unborn = factory(Child::class)->states('unbornChild', 'unverified')->make();
-        $family->children()->saveMany([$bornAndVerified, $unborn]);
+        $unbornUnverified = factory(Child::class)->states('unbornChild', 'unverified')->make();
+        $family->children()->saveMany([$bornAndVerified, $unbornUnverified]);
 
         $rulesMods = collect([
             new Evaluation([
@@ -275,8 +274,14 @@ class EvaluatorAuditTest extends TestCase
         $evaluator = EvaluatorFactory::make($rulesMods);
         $evaluation = $evaluator->evaluate($family->fresh());
 
-        // BUG: every born child is verified, yet the notice fires for the pregnancy.
+        // INTENDED: An unconfirmed unborn child triggers the notice to remind staff to confirm existence.
         $this->assertContains(self::NOTICE_TYPES['FamilyHasUnverifiedChildren'], $evaluation["notices"]);
+
+        // Once confirmed (verified = true), the notice does not fire.
+        $unbornUnverified->verified = true;
+        $unbornUnverified->save();
+        $evaluationCleared = $evaluator->evaluate($family->fresh());
+        $this->assertNotContains(self::NOTICE_TYPES['FamilyHasUnverifiedChildren'], $evaluationCleared["notices"]);
     }
 
     /**
