@@ -311,13 +311,11 @@ class EvaluatorAuditTest extends TestCase
     }
 
     /**
-     * F6: getEntitlement() has no floor, so a departed social-prescribing family
-     * with no children computes a negative entitlement (DeductFromCarer always
-     * fires — see F7).
+     * F6 (RESOLVED — regression test): getEntitlement() clamps negative credit sums to 0,
+     * ensuring entitlements cannot go negative even when negative credits outweigh positive ones.
      */
     public function testAuditF6EntitlementCanGoNegative(): void
     {
-        $this->markTestSkipped('AUDIT F6 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
         $family = factory(Family::class)->create();
         $child = factory(Child::class)->create([
             'dob' => '2000-01-01',
@@ -346,8 +344,8 @@ class EvaluatorAuditTest extends TestCase
         $evaluator = EvaluatorFactory::make($mods);
         $evaluation = $evaluator->evaluate($family->fresh());
 
-        // BUG: -7 — entitlement has no floor and returns negative.
-        $this->assertEquals(-7, $evaluation->getEntitlement());
+        // FIXED: 0 — entitlement has a floor of 0.
+        $this->assertEquals(0, $evaluation->getEntitlement());
     }
 
     /**
