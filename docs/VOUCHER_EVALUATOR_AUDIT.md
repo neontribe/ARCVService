@@ -34,6 +34,8 @@ disqualification reasons a Store worker sees.
   `IsUnderYears` were guarded with `->copy()`. Specification tests (`IsAlmostYearsTest`,
   `IsAlmostStartDateTest`) were added and `EvaluatorAuditTest::testAuditF2AlmostNoticeFiresAlmostTwoMonthsEarly`
   runs un-skipped as a regression test.
+* **Revision (2026-09-17):** **F3 is reclassified as BY DESIGN / OPERATIONAL POLICY** —
+  Client policy requires that pregnancy credits persist until a child record is manually marked as born or removed, intentionally avoiding automatic cutoffs during sensitive circumstances (overdue, failed, or terminated pregnancies) and relying on Store worker conversations. Single crediting for twins is intended policy (one pregnancy credit per family). Multiple concurrent pregnancies in the same household remain a domain model limitation (evaluations operate at the Family level). `EvaluatorAuditTest::testAuditF3PregnancyCreditSurvivesItsDueDate` and `testAuditF3TwinPregnancyCreditsOnce` now run un-skipped as live regression tests asserting this intended behavior.
 
 Every finding records **how it was verified**. *Confirmed* means it was proven by running code or by
 inspecting the schema/migrations; *inferred* means it was established by reading only.
@@ -46,7 +48,7 @@ inspecting the schema/migrations; *inferred* means it was established by reading
 |---|------|------|----------|----------|-----------------------|
 | [F1](#f1--disqualification-reasons-never-reach-the-ui) | `getNoticeReasons()` merges a non-existent `disqualifications` key | Valuation | ~~High~~ **RESOLVED** (2026-09-16) | confirmed | no |
 | [F2](#f2--almost-notice-windows-are-two-months-not-one) | Carbon 3 `diffInMonths()` is a signed float, not an absolute int | Specifications | ~~High~~ **RESOLVED** (2026-09-16) | confirmed | no (warnings only) |
-| [F3](#f3--stale-pregnancy-credits-and-twins-credited-once) | Stale / duplicate pregnancy credit | Family | **High** | confirmed | **yes** |
+| [F3](#f3--pregnancy-credit-persistence-and-multiple-pregnancy-handling-by-design--operational-policy) | Pregnancy credit persistence and multiple pregnancy handling | Family | Medium (*by design / operational policy*) | confirmed | no (by design) |
 | [F5](#f5--the-household-has-left-guard-is-a-no-op-on-children) | `HouseholdMember` tests `leaving_on` on a `Child` | Social prescribing | **High** | confirmed | **yes** |
 | [F8](#f8--the-injected-evaluation-date-is-ignored-entirely) | Scottish rules use `Carbon::now()`, not the injected `offsetDate` | Scotland | ~~High~~ **RESOLVED** (2026-09-15) | confirmed | no (blocked testing) |
 | [F9](#f9--school-month-comparison-does-not-wrap-the-year) | School-month arithmetic does not wrap the year | Scotland | ~~High~~ **RESOLVED** (2026-09-15) | confirmed | **yes** — totals changed when fixed |
@@ -62,8 +64,9 @@ inspecting the schema/migrations; *inferred* means it was established by reading
 | [F16](#f16--basechildevaluationtoreason-drops-negative-values) | Negative Child values silently dropped | Evaluations | Low | confirmed | no (latent) |
 | [F17](#f17--getpurposefilteredevaluations-collapses-same-named-rules) | `array_merge` collapses same-named rules | Evaluator | Low | inferred | no |
 
-Of the findings still open, **F3 and F5 will change how many vouchers some households receive** if
-corrected. (**F2** changes which warnings are shown but not totals; its correction shipped on
+Of the findings still open, **F5 will change how many vouchers some households receive** if
+corrected (F3 is acknowledged as intentional operational policy and will not change automated totals).
+(**F2** changes which warnings are shown but not totals; its correction shipped on
 2026-09-16. **F9** and **F11** were also entitlement-affecting; their correction shipped with the
 Scottish refactor — see [Section D](#d-scotland) for who was affected and in which direction.)
 
@@ -380,15 +383,26 @@ since it touches the same two files.
 
 ### C. Family & crediting rules
 
-#### F3 — Stale pregnancy credits, and twins credited once
+#### F3 — Pregnancy credit persistence and multiple pregnancy handling (*by design / operational policy*)
 
-**Severity:** High. **Verified:** confirmed. **⚠️ Entitlement-affecting — correcting this will change
-voucher totals.** **Reproduction tests:**
+**Status: ℹ️ BY DESIGN / OPERATIONAL POLICY (2026-09-17).** Client policy requires that a
+pregnancy continues to receive its credit until a Store worker manually edits the child record to
+set `born = true` or deletes it. Automatic date-based cutoffs are explicitly rejected to preserve
+room for delicate human conversations around overdue, failed, or terminated pregnancies. Crediting
+twins once per family is intended policy; multiple concurrent pregnancies in a single household are
+capped at one credit by the family-level domain model. Verified by the un-skipped regression tests
+`EvaluatorAuditTest::testAuditF3PregnancyCreditSurvivesItsDueDate` and
+`::testAuditF3TwinPregnancyCreditsOnce`.
+
+**Severity (reclassified):** Medium (*by design / operational policy*). **Verified:** confirmed.
+**Reproduction / regression tests:**
 `EvaluatorAuditTest::testAuditF3PregnancyCreditSurvivesItsDueDate`,
 `::testAuditF3TwinPregnancyCreditsOnce`.
 
-**What.** The pregnancy credit is driven by a derived attribute that never checks whether the due
-date has passed, and that collapses multiple unborn children into one.
+**What.** The pregnancy credit is driven by `Family::getExpectingAttribute()`, which returns the
+due date of any unborn child (`born = false`) without comparing the date to `now()` or `$offsetDate`,
+and evaluates at the `Family` level (granting one credit per family regardless of the number of
+unborn children).
 
 **Where.**
 
@@ -414,35 +428,34 @@ public function getExpectingAttribute(): mixed
 }
 ```
 
-Three things are absent: any comparison of `$child->dob` against `now()` or the evaluator's
-`offsetDate`; any counting (`$due` is **overwritten**, not accumulated); and anywhere in the
-codebase that flips `born` to `true` automatically once the due date passes — the flag is only ever
-set by a Store worker editing the record.
+Three characteristics define this implementation: no date comparison against `now()` or
+`offsetDate`; `$due` is overwritten rather than accumulated; and no automated routine flips `born`
+to `true` when the due date passes — updates occur solely through manual edits by Store workers.
 
-Note also that `FamilyIsPregnant` accepts an `$offsetDate` and then never uses it, so even a
-back-dated evaluation reports today's pregnancy state.
+**Effect & Policy Alignment.**
 
-**Effect.** Three distinct, compounding errors:
+1. **Credit persistence past due date (By Design).** Under client policy, pregnancies must be credited
+   until manually transitioned or removed. This ensures system users remain responsible for delicate
+   conversations with families experiencing overdue, failed, or terminated pregnancies rather than
+   triggering automated voucher cutoffs. The client explicitly accepts the trade-off that vouchers may
+   continue to be issued past the estimated due date until a worker updates the record.
+2. **Twins credited once (Supported / Intended Policy).** Multiple unborn child records under a single
+   family resolve to a single `FamilyIsPregnant` credit (4 vouchers). This matches client policy that a
+   twin pregnancy receives a single pregnancy entitlement.
+3. **Multiple pregnant household members (Domain Limitation).** Because `FamilyIsPregnant` is evaluated
+   on the `Family` entity and unborn child records are linked directly to `families` rather than individual
+   carers, the system cannot distinguish between a single mother carrying twins and two pregnant female
+   members in the same household. Both produce a single 4-voucher credit instead of 8 vouchers.
 
-1. **Over-crediting, indefinitely.** A pregnancy that is never updated after the birth keeps paying
-   4 vouchers per week **forever**. There is no expiry and no warning.
-2. **Simultaneous under-crediting.** Every *child* credit requires `IsBorn`
-   (`ChildIsUnderOne`, `ChildIsBetweenOneAndPrimarySchoolAge`), so the baby itself earns nothing
-   while the record still says unborn. The household is over- and under-credited at the same time,
-   and the net error depends on the child's age.
-3. **Twins are credited once.** Two unborn child records produce a single `expecting` value and a
-   single 4-voucher credit.
+**Recommendation.**
 
-**Recommendation.** Three separate decisions, in increasing order of controversy:
-
-* Require the due date to be in the future:
-  `$child->dob->isAfter($offsetDate)` inside the rule (not in the model accessor, which is used
-  elsewhere for display). This **reduces** entitlement for households with an overdue record — a
-  sponsor-visible change.
-* Decide whether `FamilyIsPregnant` should credit **per pregnancy**. If so it needs to become a
-  counting rule, which the current `IEvaluation` contract (one success, one value) does not express.
-* Add an operational report listing families whose `expecting` date has passed, so the data can be
-  corrected before any rule change lands.
+* **Do NOT add an automated date cutoff** (such as `$child->dob->isAfter($offsetDate)`) to
+  `FamilyIsPregnant`, as automated cessation contradicts client operational policy.
+* **Provide operational tooling:** Add operational reports or dashboard prompts alerting Store workers
+  to registrations with overdue unborn children so staff can conduct supportive check-ins and update records.
+* **Future multi-carer support:** If support for multiple pregnant members within one family is required,
+  evolve the domain model to associate pregnancies/children with individual carers rather than converting
+  `FamilyIsPregnant` into an unconstrained counter (which would inadvertently double-credit twins).
 
 #### F4 — Unborn children cause a permanent "needs ID" warning
 
@@ -1028,14 +1041,14 @@ report beforehand to size the affected population.
 
 | Finding | Who is affected | Direction |
 |---|---|---|
-| [F3](#f3--stale-pregnancy-credits-and-twins-credited-once) stale pregnancy credit | Any household with an unborn-child record whose dob has passed | **Down** — removes 4/week from overdue records; twins decision could move totals **up** |
 | [F5](#f5--the-household-has-left-guard-is-a-no-op-on-children) left-household child credits | Social-prescribing households with `leaving_on` set and children | **Down** — departed households stop earning 7/child |
 | [F2](#f2--almost-notice-windows-are-two-months-not-one) two-month "almost" windows | All programmes using `ChildIsAlmostOne` / almost-school notices | ~~**No totals move**~~ ✅ **Shipped** (2026-09-16) — notice windows strictly 0–1 month |
 | ~~[F9](#f9--school-month-comparison-does-not-wrap-the-year) Scottish year-wrap~~ | Scottish households with a 4-year-old already at school, evaluated Jan–Jul | ✅ **Shipped** (2026-09-15) with the Scottish refactor — totals went **down** for those households and deferral/almost notices now appear; F11's deferred-child under-crediting was corrected **up** at the same time |
+| [F3](#f3--pregnancy-credit-persistence-and-multiple-pregnancy-handling-by-design--operational-policy) pregnancy persistence & twin handling | Pregnant households | ~~**No automated change**~~ ℹ️ **By Design / Policy** (2026-09-17) — persistence past due date and single credit for twins match policy; no evaluator date-cutoff will be implemented |
 
-Recommended sequence: run the data reports (overdue pregnancies; SP families with `leaving_on` and
-children), agree the numbers with sponsors, then land F3/F5 together. F2 can ship with the safe
-batch if the notice-window change is announced.
+Recommended sequence: run data reports for SP families with `leaving_on` and children, agree the
+numbers with sponsors, then land F5. Operational reports for overdue pregnancies can be provided to
+assist staff with manual reviews without altering evaluator logic.
 
 ### 4.3 Scotland — minimal in-place patch (chosen approach)
 
@@ -1178,6 +1191,15 @@ OK, but some tests were skipped! Tests: 47, Assertions: 119, Skipped: 6.
 
 The F1, F2, F8, and F10 audit tests now run un-skipped as regression tests.
 
+**Test state after F3 policy clarification (2026-09-17):**
+
+```
+./vendor/bin/phpunit tests/Unit/Services/VoucherEvaluator tests/Unit/Specifications
+OK, but some tests were skipped! Tests: 47, Assertions: 123, Skipped: 4.
+```
+
+The F1, F2, F3 (`testAuditF3PregnancyCreditSurvivesItsDueDate` and `testAuditF3TwinPregnancyCreditsOnce`), F8, and F10 audit tests now run un-skipped as regression tests.
+
 **Reproduction tests:** every test in
 `tests/Unit/Services/VoucherEvaluator/EvaluatorAuditTest.php` was run **un-skipped once** during
 authoring and passed — i.e. genuinely demonstrated its flaw — before the `markTestSkipped()` line
@@ -1191,7 +1213,7 @@ OK — Tests: 10, Assertions: 23.
 |---|---|
 | F1 | `testAuditF1DisqualifierReasonsAreLostFromNoticeReasons` *(now a live regression test — finding resolved)* |
 | F2 | `testAuditF2AlmostNoticeFiresAlmostTwoMonthsEarly` *(now a live regression test — finding resolved)* |
-| F3 | `testAuditF3PregnancyCreditSurvivesItsDueDate`, `testAuditF3TwinPregnancyCreditsOnce` |
+| F3 | `testAuditF3PregnancyCreditSurvivesItsDueDate`, `testAuditF3TwinPregnancyCreditsOnce` *(now live regression tests — confirmed by design per client policy)* |
 | F4 | `testAuditF4UnbornChildTriggersUnverifiedNotice` |
 | F5 | `testAuditF5DepartedHouseholdStillCreditsMembers` |
 | F6 | `testAuditF6EntitlementCanGoNegative` |

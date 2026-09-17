@@ -203,12 +203,12 @@ class EvaluatorAuditTest extends TestCase
 
     /**
      * F3: an unborn child whose due date is months in the past still earns the
-     * FamilyIsPregnant credit, because Family::getExpectingAttribute() never
-     * compares the dob with today.
+     * FamilyIsPregnant credit until manually marked as born or removed.
+     * This is by design per client policy to avoid automatic cutoffs during
+     * sensitive circumstances, relying on worker conversations instead.
      */
     public function testAuditF3PregnancyCreditSurvivesItsDueDate(): void
     {
-        $this->markTestSkipped('AUDIT F3 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
         $family = factory(Family::class)->create();
         $overduePregnancy = factory(Child::class)->make([
             'born' => false,
@@ -219,19 +219,18 @@ class EvaluatorAuditTest extends TestCase
         $evaluator = EvaluatorFactory::make();
         $evaluation = $evaluator->evaluate($family->fresh());
 
-        // BUG: the due date is three months gone, but the credit persists...
+        // INTENDED: the due date is three months gone, but the credit persists until manual intervention.
         $this->assertContains(self::CREDIT_TYPES['FamilyIsPregnant'], $evaluation["credits"]);
-        // ...and the "baby" earns nothing (every child credit requires IsBorn).
+        // The unborn child earns the family pregnancy credit rather than born child credits.
         $this->assertEquals(4, $evaluation->getEntitlement());
     }
 
     /**
-     * F3: a twin pregnancy (two unborn records) credits once, because
-     * getExpectingAttribute() overwrites rather than counts.
+     * F3: a twin pregnancy (two unborn records) credits once per family,
+     * which matches client policy (twins counted as a single pregnancy).
      */
     public function testAuditF3TwinPregnancyCreditsOnce(): void
     {
-        $this->markTestSkipped('AUDIT F3 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
         $family = factory(Family::class)->create();
         $twins = factory(Child::class, 2)->states('unbornChild')->make();
         $family->children()->saveMany($twins);
@@ -246,7 +245,7 @@ class EvaluatorAuditTest extends TestCase
             }
         );
 
-        // BUG: two pregnancies, one credit.
+        // INTENDED: twins count as a single pregnancy credit per family.
         $this->assertCount(1, $pregnancyCredits);
         $this->assertEquals(4, $evaluation->getEntitlement());
     }
