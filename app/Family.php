@@ -7,6 +7,7 @@ use App\Services\VoucherEvaluator\EvaluatorFactory;
 use App\Services\VoucherEvaluator\IEvaluee;
 use App\Traits\Aliasable;
 use App\Traits\Evaluable;
+use Carbon\Carbon;
 use DB;
 use Eloquent;
 use Illuminate\Database\Eloquent\Collection;
@@ -124,17 +125,25 @@ class Family extends Model implements IEvaluee
     }
 
     /**
-     * Gets the due date or Null
+     * Gets the due date of the earliest extant pregnancy or Null
+     *
+     * @return Carbon|null
      */
-    public function getExpectingAttribute(): mixed
+    public function getExpectingAttribute(): ?Carbon
     {
-        $due = null;
-        foreach ($this->children as $child) {
-            if (!$child->born) {
-                $due = $child->dob;
-            }
-        }
-        return $due;
+        return $this->children
+            ->where('born', false)
+            ->min('dob');
+    }
+
+    /**
+     * Check if family has any unborn children (active pregnancy)
+     *
+     * @return bool
+     */
+    public function isPregnant(): bool
+    {
+        return $this->children->contains(fn (Child $child) => !$child->born);
     }
 
     /**

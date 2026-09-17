@@ -38,6 +38,8 @@ disqualification reasons a Store worker sees.
   Client policy requires that pregnancy credits persist until a child record is manually marked as born or removed, intentionally avoiding automatic cutoffs during sensitive circumstances (overdue, failed, or terminated pregnancies) and relying on Store worker conversations. Single crediting for twins is intended policy (one pregnancy credit per family). Multiple concurrent pregnancies in the same household remain a domain model limitation (evaluations operate at the Family level). `EvaluatorAuditTest::testAuditF3PregnancyCreditSurvivesItsDueDate` and `testAuditF3TwinPregnancyCreditsOnce` now run un-skipped as live regression tests asserting this intended behavior.
 * **Revision (2026-09-17):** **F4 is reclassified as BY DESIGN / OPERATIONAL POLICY** —
   The requirement for ID produces a warning that serves as a reminder for system users to confirm they are satisfied that a child/pregnancy entity exists, rather than requiring specific ID documents from an authority. An existing or outstanding pregnancy (`born = false`) is intended to produce this warning when unconfirmed (`verified = false`), prompting staff to confirm its existence with the family. Once confirmed (`verified = true`), the warning clears. `EvaluatorAuditTest::testAuditF4UnbornChildTriggersUnverifiedNotice` now runs un-skipped as a live regression test confirming this behavior.
+* **Revision (2026-09-17):** **F15 is resolved** —
+  The pregnancy definition was consolidated across evaluation rules, domain models, and presentation views. `FamilyIsPregnant` now evaluates `$candidate->isPregnant()` directly (matching the `NotSpec(new IsBorn())` specification used in `FamilyHasNoEligibleChildren` and `ScottishFamilyHasNoEligibleChildren`). `Family::isPregnant()` checks for active pregnancies using short-circuit collection inspection (`$this->children->contains(fn ($child) => !$child->born)`). `Family::getExpectingAttribute()` was refactored to deterministically return the earliest extant due date (`$this->children->where('born', false)->min('dob')`), and `resources/views/store/registrations/other_info.blade.php` now checks `@if ($family->isPregnant())`. Pregnancy qualification (preventing disqualification) is clearly separated from credit valuation (which can be configured/zeroed independently per programme). Verified by `EvaluatorAuditTest::testAuditF15PregnancyDefinitionConsolidated` and `FamilyModelTest::testItCanDetermineIfFamilyIsPregnant`.
 
 Every finding records **how it was verified**. *Confirmed* means it was proven by running code or by
 inspecting the schema/migrations; *inferred* means it was established by reading only.
@@ -62,7 +64,7 @@ inspecting the schema/migrations; *inferred* means it was established by reading
 | [F12](#f12--duplicated-divergent-at-school-logic) | `isScottishChildAtSchool()` triplicated and divergent | Scotland | ~~Medium~~ **RESOLVED** (2026-09-15) | inferred | no |
 | [F13](#f13--asymmetric-upper-age-bound-design-question) | Asymmetric upper age bound | Child rules | Medium (*design question*) | inferred | depends on decision |
 | [F14](#f14--a-family-level-disqualifier-silently-deletes-every-child-credit-by-design) | A family disqualifier zeroes the whole household | Valuation | Medium (*by design*) | confirmed | n/a |
-| [F15](#f15--two-conflicting-definitions-of-pregnant-design-question) | Two conflicting definitions of "pregnant" | Family | Medium (*design question*) | inferred | depends on decision |
+| [F15](#f15--two-conflicting-definitions-of-pregnant) | Consolidated definition of "pregnant" across rules | Family | ~~Medium (*design question*)~~ **RESOLVED** (2026-09-17) | confirmed | no |
 | [F16](#f16--basechildevaluationtoreason-drops-negative-values) | Negative Child values silently dropped | Evaluations | Low | confirmed | no (latent) |
 | [F17](#f17--getpurposefilteredevaluations-collapses-same-named-rules) | `array_merge` collapses same-named rules | Evaluator | Low | inferred | no |
 
@@ -549,31 +551,47 @@ reason are silent today, so this is hard to notice.
 `ChildIsPrimarySchoolAge` disqualifies everyone at or above primary start. Whichever is chosen, the
 two programmes should be made to agree.
 
-#### F15 — Two conflicting definitions of "pregnant" (*design question*)
+#### F15 — Two conflicting definitions of "pregnant"
 
-**Severity:** Medium, **design question**. **Verified:** inferred (code reading).
+**Status: ✅ RESOLVED (2026-09-17).** The pregnancy definition has been consolidated across
+evaluation rules, domain models, and presentation views:
+* `FamilyIsPregnant` now evaluates `$candidate->isPregnant()` directly, rather than reading the
+  expecting date accessor.
+* `Family::isPregnant()` evaluates `$this->children->contains(fn (Child $child) => !$child->born)`,
+  short-circuiting on in-memory collections and matching the exact predicate of the child-level
+  `NotSpec(new IsBorn())` specification used in `FamilyHasNoEligibleChildren` and
+  `ScottishFamilyHasNoEligibleChildren`.
+* `Family::getExpectingAttribute()` has been refactored to deterministically return the earliest
+  extant due date (`$this->children->where('born', false)->min('dob')`), and
+  `resources/views/store/registrations/other_info.blade.php` uses `@if ($family->isPregnant())`.
+* The design clearly decouples qualification (an unborn child acts as a qualifying satisfier
+  preventing disqualification) from valuation (credit totals configured per sponsor programme).
+Verified by `EvaluatorAuditTest::testAuditF15PregnancyDefinitionConsolidated` and
+`FamilyModelTest::testItCanDetermineIfFamilyIsPregnant`.
 
-**What.** Two rules answer "is this household pregnant?" by different routes, and can therefore
-disagree.
+**Severity (original):** Medium, **design question**. **Verified:** confirmed (code reading + test suite).
+**Reproduction / regression test:**
+`EvaluatorAuditTest::testAuditF15PregnancyDefinitionConsolidated` *(now a live regression test — finding resolved)*.
+
+**What.** Previously, two rules answered "is this household pregnant?" by different routes and could
+diverge in behavior.
 
 **Where.**
 
-* `FamilyIsPregnant.php:25` — via the `Family::expecting` accessor (the **last** unborn child's dob)
-* `FamilyHasNoEligibleChildren.php:26-34` — via `new NotSpec(new IsBorn())` on **each** child, where
-  a pregnancy counts as a *satisfier* that keeps the family qualified
+* `FamilyIsPregnant.php:25` — previously evaluated via the `Family::expecting` date accessor
+  (the last unborn child's dob from a full loop)
+* `FamilyHasNoEligibleChildren.php:26-34` & `ScottishFamilyHasNoEligibleChildren.php:33-41` — evaluated
+  via `new NotSpec(new IsBorn())` on each child, where an unborn child counts as a satisfier avoiding
+  disqualification
 
-**Evidence.** `FamilyHasNoEligibleChildren`'s specification is
+**Evidence & Consolidation.**
+`FamilyHasNoEligibleChildren`'s specification is
 `OrSpec(AndSpec(IsBorn, IsUnderStartDate(5)), NotSpec(IsBorn))` — an unborn child alone is enough to
-avoid the disqualifier. Meanwhile `FamilyIsPregnant` is a **credit**, and is removed entirely for
-social prescribing (`config/evaluations.php:94-99`, `"value" => null`).
-
-**Effect.** For a social-prescribing sponsor the two notions come apart: a pregnancy no longer earns
-anything, but it still keeps the family out of the "no eligible children" disqualifier. That may be
-intended; it is not written down anywhere.
-
-**Recommendation.** Decide on one definition of pregnancy, expose it as a single specification
-(e.g. `IsExpected`, or a `Family::isPregnant()` used by both) and state in the sponsor configuration
-docs whether a pregnancy is expected to be a qualifier when it is not a credit.
+avoid the disqualifier. `FamilyIsPregnant` now evaluates `$candidate->isPregnant()`, meaning both the
+family credit rule and family eligibility filter evaluate the identical unborn state (`!$child->born`).
+For programmes that do not credit pregnancies (e.g. social prescribing, `"value" => null`),
+`FamilyIsPregnant` awards 0 credits, while the family still satisfies eligibility and avoids wrongful
+disqualification.
 
 ### D. Scotland
 
@@ -1026,7 +1044,7 @@ with no `is_pri_carer` child — check the data before choosing.
 Fixes are grouped by blast radius. Everything in 4.1 can be shipped without changing anyone's
 voucher totals; everything in 4.2 will move totals and needs sponsor sign-off first; 4.3 records the
 agreed direction for Scotland *(since executed — see the update in that section)*. Findings
-labelled *by design* (F14) or *design question* (F13, F15) need a product decision, not a fix, and
+labelled *by design* (F14) or *design question* (F13) need a product decision, not a fix, and
 are deliberately absent from these lists.
 
 ### 4.1 Safe — cannot change totals
@@ -1043,6 +1061,7 @@ In suggested order (cheapest, most user-visible first):
 | 6 | [F17](#f17--getpurposefilteredevaluations-collapses-same-named-rules) | `+=` with `?? []` instead of `array_merge` | Latent; display-only |
 | 7 | [Carbon mutability](#latent-risk--carbon-3-dates-are-still-mutable) | ~~`->copy()` before mutating calls~~ | ✅ **Done** (2026-09-16) alongside F2 |
 | 8 | [F4](#f4--unborn-children-trigger-unconfirmed-warning-until-confirmed-by-design--operational-policy) | ~~`AndSpec(IsBorn, IsVerified)` + born-only count~~ | ℹ️ **By Design / Policy** (2026-09-17) — unconfirmed pregnancies triggering notice is intended policy; no rule change needed |
+| 9 | [F15](#f15--two-conflicting-definitions-of-pregnant) | ~~Unify pregnancy check (`Family::isPregnant()` + `NotSpec(IsBorn)`)~~ | ✅ **Done** (2026-09-17) — consolidated definition across rules, models, and views |
 
 Each fix flips its reproduction test in `EvaluatorAuditTest` from a skipped bug-pin into a live
 regression test: remove the `markTestSkipped()` line and invert the buggy assertion.
@@ -1214,6 +1233,15 @@ OK, but some tests were skipped! Tests: 47, Assertions: 125, Skipped: 3.
 
 The F1, F2, F3 (`testAuditF3PregnancyCreditSurvivesItsDueDate` and `testAuditF3TwinPregnancyCreditsOnce`), F4 (`testAuditF4UnbornChildTriggersUnverifiedNotice`), F8, and F10 audit tests now run un-skipped as regression tests.
 
+**Test state after F15 resolution (2026-09-17):**
+
+```
+./vendor/bin/phpunit tests/Unit/Services/VoucherEvaluator tests/Unit/Specifications
+OK, but some tests were skipped! Tests: 48, Assertions: 131, Skipped: 3.
+```
+
+The F1, F2, F3 (`testAuditF3PregnancyCreditSurvivesItsDueDate` and `testAuditF3TwinPregnancyCreditsOnce`), F4 (`testAuditF4UnbornChildTriggersUnverifiedNotice`), F8, F10, and F15 (`testAuditF15PregnancyDefinitionConsolidated`) audit tests now run un-skipped as regression tests.
+
 **Reproduction tests:** every test in
 `tests/Unit/Services/VoucherEvaluator/EvaluatorAuditTest.php` was run **un-skipped once** during
 authoring and passed — i.e. genuinely demonstrated its flaw — before the `markTestSkipped()` line
@@ -1233,10 +1261,11 @@ OK — Tests: 10, Assertions: 23.
 | F6 | `testAuditF6EntitlementCanGoNegative` |
 | F8 | `testAuditF8ScottishRulesRespectOffsetDate` *(now a live regression test — finding resolved)* |
 | F10 | `testAuditF10ScottishEligibilitySpecExcludesSchoolAgeChildren` *(now a live regression test — finding resolved)* |
+| F15 | `testAuditF15PregnancyDefinitionConsolidated` *(now a live regression test — finding resolved)* |
 | F16 | `testAuditF16NegativeChildCreditValueIsDropped` |
 
 F7 is confirmed by framework behaviour (above) rather than a dedicated test; F9's regression tests
 are the formerly-skipped `ScottishVoucherEvaluatorTest` notice tests (now passing) plus
 `IsScottishAlmostStartDateTest`'s explicit year-wrap cases; F11 is pinned by the deferral cases in
-`tests/Unit/Specifications/`; F12, F13, F15 and F17 were *inferred* from code reading; F14 is
+`tests/Unit/Specifications/`; F12, F13 and F17 were *inferred* from code reading; F14 is
 asserted by the existing `VoucherEvaluatorTest.php:215`.
