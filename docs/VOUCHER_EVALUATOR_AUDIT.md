@@ -46,27 +46,45 @@ inspecting the schema/migrations; *inferred* means it was established by reading
 
 ---
 
-## 1. Summary & severity table
+## 1. Summary & severity tables
+
+### Outstanding
+
+*Findings that have not been resolved.*
+
+| # | Flaw | Area | Severity | Verified | Moves voucher totals? |
+|---|------|------|----------|----------|-----------------------|
+| [F5](#f5--the-household-has-left-guard-is-a-no-op-on-children) | `HouseholdMember` tests `leaving_on` on a `Child` | Social prescribing | **High** | confirmed | **yes** |
+| [F6](#f6--negative-entitlement-is-reachable) | Entitlement has no floor and can go negative | Social prescribing | Medium | confirmed | no (corrects a wrong total) |
+| [F7](#f7--deductfromcarer-never-actually-tests-for-a-carer) | `$candidate->has('children')` is always truthy | Social prescribing | Medium | confirmed | no |
+| [F13](#f13--asymmetric-upper-age-bound-design-question) | Asymmetric upper age bound | Child rules | Medium (*design question*) | inferred | depends on decision |
+| [F16](#f16--basechildevaluationtoreason-drops-negative-values) | Negative Child values silently dropped | Evaluations | Low | confirmed | no (latent) |
+| [F17](#f17--getpurposefilteredevaluations-collapses-same-named-rules) | `array_merge` collapses same-named rules | Evaluator | Low | inferred | no |
+
+### Resolved
+
+*Findings that have been resolved by fixes.*
 
 | # | Flaw | Area | Severity | Verified | Moves voucher totals? |
 |---|------|------|----------|----------|-----------------------|
 | [F1](#f1--disqualification-reasons-never-reach-the-ui) | `getNoticeReasons()` merges a non-existent `disqualifications` key | Valuation | ~~High~~ **RESOLVED** (2026-09-16) | confirmed | no |
 | [F2](#f2--almost-notice-windows-are-two-months-not-one) | Carbon 3 `diffInMonths()` is a signed float, not an absolute int | Specifications | ~~High~~ **RESOLVED** (2026-09-16) | confirmed | no (warnings only) |
-| [F3](#f3--pregnancy-credit-persistence-and-multiple-pregnancy-handling-by-design--operational-policy) | Pregnancy credit persistence and multiple pregnancy handling | Family | Medium (*by design / operational policy*) | confirmed | no (by design) |
-| [F5](#f5--the-household-has-left-guard-is-a-no-op-on-children) | `HouseholdMember` tests `leaving_on` on a `Child` | Social prescribing | **High** | confirmed | **yes** |
 | [F8](#f8--the-injected-evaluation-date-is-ignored-entirely) | Scottish rules use `Carbon::now()`, not the injected `offsetDate` | Scotland | ~~High~~ **RESOLVED** (2026-09-15) | confirmed | no (blocked testing) |
 | [F9](#f9--school-month-comparison-does-not-wrap-the-year) | School-month arithmetic does not wrap the year | Scotland | ~~High~~ **RESOLVED** (2026-09-15) | confirmed | **yes** — totals changed when fixed |
 | [F10](#f10--scottishfamilyhasnoeligiblechildrens-specification-is-a-tautology) | `ScottishFamilyHasNoEligibleChildren` specification is always true | Scotland | ~~High~~ **RESOLVED** (2026-09-15) | confirmed | no |
-| [F4](#f4--unborn-children-trigger-unconfirmed-warning-until-confirmed-by-design--operational-policy) | Unborn child triggers unconfirmed warning until confirmed | Family | Medium (*by design / operational policy*) | confirmed | no (by design) |
-| [F6](#f6--negative-entitlement-is-reachable) | Entitlement has no floor and can go negative | Social prescribing | Medium | confirmed | no (corrects a wrong total) |
-| [F7](#f7--deductfromcarer-never-actually-tests-for-a-carer) | `$candidate->has('children')` is always truthy | Social prescribing | Medium | confirmed | no |
 | [F11](#f11--deferral-is-ignored-the-moment-a-child-turns-5) | Deferral lost at the fifth birthday | Scotland | ~~Medium~~ **RESOLVED** (2026-09-15) | inferred | **yes** — totals changed when fixed |
 | [F12](#f12--duplicated-divergent-at-school-logic) | `isScottishChildAtSchool()` triplicated and divergent | Scotland | ~~Medium~~ **RESOLVED** (2026-09-15) | inferred | no |
-| [F13](#f13--asymmetric-upper-age-bound-design-question) | Asymmetric upper age bound | Child rules | Medium (*design question*) | inferred | depends on decision |
-| [F14](#f14--a-family-level-disqualifier-silently-deletes-every-child-credit-by-design) | A family disqualifier zeroes the whole household | Valuation | Medium (*by design*) | confirmed | n/a |
 | [F15](#f15--two-conflicting-definitions-of-pregnant) | Consolidated definition of "pregnant" across rules | Family | ~~Medium (*design question*)~~ **RESOLVED** (2026-09-17) | confirmed | no |
-| [F16](#f16--basechildevaluationtoreason-drops-negative-values) | Negative Child values silently dropped | Evaluations | Low | confirmed | no (latent) |
-| [F17](#f17--getpurposefilteredevaluations-collapses-same-named-rules) | `array_merge` collapses same-named rules | Evaluator | Low | inferred | no |
+
+### By Design
+
+*Findings that have been marked "by design" and are unlikely to be resolved by fixes.*
+
+| # | Flaw | Area | Severity | Verified | Moves voucher totals? |
+|---|------|------|----------|----------|-----------------------|
+| [F3](#f3--pregnancy-credit-persistence-and-multiple-pregnancy-handling-by-design--operational-policy) | Pregnancy credit persistence and multiple pregnancy handling | Family | Medium (*by design / operational policy*) | confirmed | no (by design) |
+| [F4](#f4--unborn-children-trigger-unconfirmed-warning-until-confirmed-by-design--operational-policy) | Unborn child triggers unconfirmed warning until confirmed | Family | Medium (*by design / operational policy*) | confirmed | no (by design) |
+| [F14](#f14--a-family-level-disqualifier-silently-deletes-every-child-credit-by-design) | A family disqualifier zeroes the whole household | Valuation | Medium (*by design*) | confirmed | n/a |
 
 Of the findings still open, **F5 will change how many vouchers some households receive** if
 corrected (F3 is acknowledged as intentional operational policy and will not change automated totals).
