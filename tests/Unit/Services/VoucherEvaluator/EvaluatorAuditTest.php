@@ -402,6 +402,37 @@ class EvaluatorAuditTest extends TestCase
     }
 
     /**
+     * F15 (RESOLVED — regression test): the pregnancy definition is consolidated.
+     * FamilyIsPregnant evaluates $candidate->isPregnant() (matching NotSpec(new IsBorn())),
+     * and FamilyHasNoEligibleChildren treats unborn children as qualifying satisfiers.
+     * In both standard and social prescribing setups, pregnancy qualification behaves
+     * consistently without conflicting accessor loops or date-parsing side effects.
+     */
+    public function testAuditF15PregnancyDefinitionConsolidated(): void
+    {
+        $pregnantFamily = factory(Family::class)->create();
+        $unbornChild = factory(Child::class)->states('unbornChild')->make();
+        $pregnantFamily->children()->save($unbornChild);
+
+        // Standard evaluator: pregnancy qualifies and earns credit
+        $evaluator = EvaluatorFactory::make();
+        $evaluation = $evaluator->evaluate($pregnantFamily->fresh());
+
+        $this->assertTrue($pregnantFamily->isPregnant());
+        $this->assertContains(self::CREDIT_TYPES['FamilyIsPregnant'], $evaluation["credits"]);
+        $this->assertEmpty($evaluation["disqualifiers"]);
+        $this->assertEquals(4, $evaluation->getEntitlement());
+
+        // Social prescribing evaluator (FamilyIsPregnant credit disabled):
+        // Family is still qualifying/not disqualified, but earns 0 pregnancy credit.
+        $spEvaluator = EvaluatorFactory::make($this->socialPrescribingMods());
+        $spEvaluation = $spEvaluator->evaluate($pregnantFamily->fresh());
+
+        $this->assertEmpty($spEvaluation["disqualifiers"]);
+        $this->assertNotContains(self::CREDIT_TYPES['FamilyIsPregnant'], $spEvaluation["credits"]);
+    }
+
+    /**
      * F16: BaseChildEvaluation::toReason() only includes 'value' when it is > 0,
      * so a Child credit configured with a negative value silently contributes
      * zero to the entitlement.
