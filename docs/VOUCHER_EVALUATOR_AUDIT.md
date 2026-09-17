@@ -36,6 +36,8 @@ disqualification reasons a Store worker sees.
   runs un-skipped as a regression test.
 * **Revision (2026-09-17):** **F3 is reclassified as BY DESIGN / OPERATIONAL POLICY** —
   Client policy requires that pregnancy credits persist until a child record is manually marked as born or removed, intentionally avoiding automatic cutoffs during sensitive circumstances (overdue, failed, or terminated pregnancies) and relying on Store worker conversations. Single crediting for twins is intended policy (one pregnancy credit per family). Multiple concurrent pregnancies in the same household remain a domain model limitation (evaluations operate at the Family level). `EvaluatorAuditTest::testAuditF3PregnancyCreditSurvivesItsDueDate` and `testAuditF3TwinPregnancyCreditsOnce` now run un-skipped as live regression tests asserting this intended behavior.
+* **Revision (2026-09-17):** **F4 is reclassified as BY DESIGN / OPERATIONAL POLICY** —
+  The requirement for ID produces a warning that serves as a reminder for system users to confirm they are satisfied that a child/pregnancy entity exists, rather than requiring specific ID documents from an authority. An existing or outstanding pregnancy (`born = false`) is intended to produce this warning when unconfirmed (`verified = false`), prompting staff to confirm its existence with the family. Once confirmed (`verified = true`), the warning clears. `EvaluatorAuditTest::testAuditF4UnbornChildTriggersUnverifiedNotice` now runs un-skipped as a live regression test confirming this behavior.
 
 Every finding records **how it was verified**. *Confirmed* means it was proven by running code or by
 inspecting the schema/migrations; *inferred* means it was established by reading only.
@@ -53,7 +55,7 @@ inspecting the schema/migrations; *inferred* means it was established by reading
 | [F8](#f8--the-injected-evaluation-date-is-ignored-entirely) | Scottish rules use `Carbon::now()`, not the injected `offsetDate` | Scotland | ~~High~~ **RESOLVED** (2026-09-15) | confirmed | no (blocked testing) |
 | [F9](#f9--school-month-comparison-does-not-wrap-the-year) | School-month arithmetic does not wrap the year | Scotland | ~~High~~ **RESOLVED** (2026-09-15) | confirmed | **yes** — totals changed when fixed |
 | [F10](#f10--scottishfamilyhasnoeligiblechildrens-specification-is-a-tautology) | `ScottishFamilyHasNoEligibleChildren` specification is always true | Scotland | ~~High~~ **RESOLVED** (2026-09-15) | confirmed | no |
-| [F4](#f4--unborn-children-cause-a-permanent-needs-id-warning) | Unborn child counts as unverified | Family | Medium | confirmed | no |
+| [F4](#f4--unborn-children-trigger-unconfirmed-warning-until-confirmed-by-design--operational-policy) | Unborn child triggers unconfirmed warning until confirmed | Family | Medium (*by design / operational policy*) | confirmed | no (by design) |
 | [F6](#f6--negative-entitlement-is-reachable) | Entitlement has no floor and can go negative | Social prescribing | Medium | confirmed | no (corrects a wrong total) |
 | [F7](#f7--deductfromcarer-never-actually-tests-for-a-carer) | `$candidate->has('children')` is always truthy | Social prescribing | Medium | confirmed | no |
 | [F11](#f11--deferral-is-ignored-the-moment-a-child-turns-5) | Deferral lost at the fifth birthday | Scotland | ~~Medium~~ **RESOLVED** (2026-09-15) | inferred | **yes** — totals changed when fixed |
@@ -457,37 +459,49 @@ to `true` when the due date passes — updates occur solely through manual edits
   evolve the domain model to associate pregnancies/children with individual carers rather than converting
   `FamilyIsPregnant` into an unconstrained counter (which would inadvertently double-credit twins).
 
-#### F4 — Unborn children cause a permanent "needs ID" warning
+#### F4 — Unborn children trigger unconfirmed warning until confirmed (*by design / operational policy*)
 
-**Severity:** Medium. **Verified:** confirmed. **Reproduction test:**
+**Status: ℹ️ BY DESIGN / OPERATIONAL POLICY (2026-09-17).** The ID requirement warning produced by
+`FamilyHasUnverifiedChildren` reminds Store staff to confirm they are satisfied that a child/pregnancy
+entity exists, rather than requiring formal ID documents issued by an authority. An existing or
+outstanding pregnancy (`born = false`) is intended to trigger this warning if unconfirmed
+(`verified = false`), prompting workers to check in and verify the pregnancy with the family. Once
+confirmed (`verified = true`), the warning clears. Verified by the un-skipped regression test
 `EvaluatorAuditTest::testAuditF4UnbornChildTriggersUnverifiedNotice`.
 
-**What.** The "some children need ID checking" notice counts unborn children, whose ID can never be
-checked, so the notice cannot be cleared.
+**Severity (reclassified):** Medium (*by design / operational policy*). **Verified:** confirmed.
+**Reproduction / regression test:**
+`EvaluatorAuditTest::testAuditF4UnbornChildTriggersUnverifiedNotice` *(now a live regression test)*.
+
+**What.** `FamilyHasUnverifiedChildren` evaluates all child entities under the family (including
+unborn child records) against `IsVerified`. If any child/pregnancy entity has `verified = false`,
+the evaluation succeeds and returns the notice `"has one or more children that you haven't checked ID for yet"`.
 
 **Where.** `app/Services/VoucherEvaluator/Evaluations/FamilyHasUnverifiedChildren.php:37-52`.
 
 **Evidence.**
 
 ```php
-$children = $candidate->children->all();          // ALL children, born or not
+$children = $candidate->children->all();          // ALL children, born or unborn
 $satisfiers = array_filter($children, fn ($child) => $this->specification->isSatisfiedBy($child));
 if (count($satisfiers) !== count($children)) {
-    return $this->success();                       // "needs ID"
+    return $this->success();                       // "needs ID / confirmation"
 }
 ```
 
-The specification is a bare `new IsVerified()` (`:23`) with no `IsBorn` conjunct — unlike every
-other child-facing rule in the codebase, all of which begin with `IsBorn`.
+**Effect & Policy Alignment.**
+The warning ensures system users are reminded to confirm their satisfaction that each child/pregnancy
+entity exists. For pregnancies, Store workers confirm this in the registration form/modal (via the
+"ID Checked" / verified checkbox) when adding or editing the pregnancy. An unconfirmed pregnancy
+appropriately triggers the warning until confirmed by staff, preventing phantom registrations while
+avoiding burdensome formal documentation requirements on vulnerable families.
 
-**Effect.** Any pregnant household under a sponsor with this notice enabled shows an un-clearable
-warning. The rule is enabled for Scotland (`config/evaluations.php:76-81`). The worker's only way to
-silence it is to tick "verified" on an unborn child, i.e. to record a false ID check.
-
-**Recommendation.** Change the specification to `new AndSpec(new IsBorn(), new IsVerified())` and
-restrict `$children` to born children so the two counts stay comparable — for example
-`$children = $candidate->children->filter(fn ($c) => $c->born)->all();`. This is a pure
-notice-visibility change; no entitlement moves.
+**Recommendation.**
+* **Do NOT restrict the rule to born children** (i.e. do not add `IsBorn` or filter `$children` by `born`):
+  the current behavior matches client operational policy.
+* **UI clarification (optional):** If helpful, the UI label or notice text can be worded to clarify that
+  the prompt represents general existence confirmation (e.g. "ID / pregnancy checked") rather than formal
+  state-issued identity documents.
 
 #### F13 — Asymmetric upper age bound (*design question*)
 
@@ -1028,7 +1042,7 @@ In suggested order (cheapest, most user-visible first):
 | 5 | [F16](#f16--basechildevaluationtoreason-drops-negative-values) | Align `BaseChildEvaluation::toReason()` with the family version | Latent; no live rule affected |
 | 6 | [F17](#f17--getpurposefilteredevaluations-collapses-same-named-rules) | `+=` with `?? []` instead of `array_merge` | Latent; display-only |
 | 7 | [Carbon mutability](#latent-risk--carbon-3-dates-are-still-mutable) | ~~`->copy()` before mutating calls~~ | ✅ **Done** (2026-09-16) alongside F2 |
-| 8 | [F4](#f4--unborn-children-cause-a-permanent-needs-id-warning) | `AndSpec(IsBorn, IsVerified)` + born-only count | Notice-visibility only; clears a nuisance warning for pregnant households |
+| 8 | [F4](#f4--unborn-children-trigger-unconfirmed-warning-until-confirmed-by-design--operational-policy) | ~~`AndSpec(IsBorn, IsVerified)` + born-only count~~ | ℹ️ **By Design / Policy** (2026-09-17) — unconfirmed pregnancies triggering notice is intended policy; no rule change needed |
 
 Each fix flips its reproduction test in `EvaluatorAuditTest` from a skipped bug-pin into a live
 regression test: remove the `markTestSkipped()` line and invert the buggy assertion.
@@ -1191,14 +1205,14 @@ OK, but some tests were skipped! Tests: 47, Assertions: 119, Skipped: 6.
 
 The F1, F2, F8, and F10 audit tests now run un-skipped as regression tests.
 
-**Test state after F3 policy clarification (2026-09-17):**
+**Test state after F3 & F4 policy clarifications (2026-09-17):**
 
 ```
 ./vendor/bin/phpunit tests/Unit/Services/VoucherEvaluator tests/Unit/Specifications
-OK, but some tests were skipped! Tests: 47, Assertions: 123, Skipped: 4.
+OK, but some tests were skipped! Tests: 47, Assertions: 125, Skipped: 3.
 ```
 
-The F1, F2, F3 (`testAuditF3PregnancyCreditSurvivesItsDueDate` and `testAuditF3TwinPregnancyCreditsOnce`), F8, and F10 audit tests now run un-skipped as regression tests.
+The F1, F2, F3 (`testAuditF3PregnancyCreditSurvivesItsDueDate` and `testAuditF3TwinPregnancyCreditsOnce`), F4 (`testAuditF4UnbornChildTriggersUnverifiedNotice`), F8, and F10 audit tests now run un-skipped as regression tests.
 
 **Reproduction tests:** every test in
 `tests/Unit/Services/VoucherEvaluator/EvaluatorAuditTest.php` was run **un-skipped once** during
@@ -1214,7 +1228,7 @@ OK — Tests: 10, Assertions: 23.
 | F1 | `testAuditF1DisqualifierReasonsAreLostFromNoticeReasons` *(now a live regression test — finding resolved)* |
 | F2 | `testAuditF2AlmostNoticeFiresAlmostTwoMonthsEarly` *(now a live regression test — finding resolved)* |
 | F3 | `testAuditF3PregnancyCreditSurvivesItsDueDate`, `testAuditF3TwinPregnancyCreditsOnce` *(now live regression tests — confirmed by design per client policy)* |
-| F4 | `testAuditF4UnbornChildTriggersUnverifiedNotice` |
+| F4 | `testAuditF4UnbornChildTriggersUnverifiedNotice` *(now a live regression test — confirmed by design per client policy)* |
 | F5 | `testAuditF5DepartedHouseholdStillCreditsMembers` |
 | F6 | `testAuditF6EntitlementCanGoNegative` |
 | F8 | `testAuditF8ScottishRulesRespectOffsetDate` *(now a live regression test — finding resolved)* |
