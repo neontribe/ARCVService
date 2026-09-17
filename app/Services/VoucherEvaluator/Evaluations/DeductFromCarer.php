@@ -21,7 +21,7 @@ class DeductFromCarer extends BaseFamilyEvaluation
     public function test($candidate)
     {
         parent::test($candidate);
-        return ($candidate->has('children'))
+        return ($candidate->children->isNotEmpty())
             ? $this->success()
             : $this->fail()
         ;
