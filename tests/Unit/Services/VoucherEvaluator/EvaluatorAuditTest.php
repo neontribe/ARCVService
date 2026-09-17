@@ -319,14 +319,60 @@ class EvaluatorAuditTest extends TestCase
     {
         $this->markTestSkipped('AUDIT F6 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
         $family = factory(Family::class)->create();
+        $child = factory(Child::class)->create([
+            'dob' => '2000-01-01',
+            'family_id' => $family->id,
+            'born' => 1,
+        ]);
         $family->leaving_on = Carbon::now()->subMonths(2);
         $family->save();
 
-        $evaluator = EvaluatorFactory::make($this->socialPrescribingMods());
+        // With HouseholdMember disabled or zeroed, HouseholdExists failing, and DeductFromCarer firing:
+        $mods = collect([
+            new Evaluation([
+                "name" => "HouseholdExists",
+                "value" => 7,
+                "purpose" => "credits",
+                "entity" => "App\Family",
+            ]),
+            new Evaluation([
+                "name" => "DeductFromCarer",
+                "value" => -7,
+                "purpose" => "credits",
+                "entity" => "App\Family",
+            ]),
+        ]);
+
+        $evaluator = EvaluatorFactory::make($mods);
         $evaluation = $evaluator->evaluate($family->fresh());
 
-        // BUG: -7 — HouseholdExists fails, but the carer deduction still applies.
+        // BUG: -7 — entitlement has no floor and returns negative.
         $this->assertEquals(-7, $evaluation->getEntitlement());
+    }
+
+    /**
+     * F7 (RESOLVED — regression test): DeductFromCarer uses isNotEmpty() on the
+     * family's children collection rather than has('children'), ensuring the
+     * deduction only fires when the family actually has child/carer records.
+     */
+    public function testAuditF7DeductFromCarerRequiresChildren(): void
+    {
+        $familyWithoutChildren = factory(Family::class)->create();
+
+        $familyWithChild = factory(Family::class)->create();
+        $child = factory(Child::class)->create([
+            'dob' => '2000-01-01',
+            'family_id' => $familyWithChild->id,
+            'born' => 1,
+        ]);
+
+        $evaluator = EvaluatorFactory::make($this->socialPrescribingMods());
+
+        $evalWithout = $evaluator->evaluate($familyWithoutChildren->fresh());
+        $this->assertNotContains(self::CREDIT_TYPES['DeductFromCarer'], $evalWithout->flat('credits'));
+
+        $evalWith = $evaluator->evaluate($familyWithChild->fresh());
+        $this->assertContains(self::CREDIT_TYPES['DeductFromCarer'], $evalWith->flat('credits'));
     }
 
     /**
