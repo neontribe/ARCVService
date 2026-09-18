@@ -285,13 +285,13 @@ class EvaluatorAuditTest extends TestCase
     }
 
     /**
-     * F5: HouseholdMember (a Child evaluation) tests leaving_on/rejoin_on, which
-     * only exist on the families table — so children of a household that has
-     * left still earn their member credit.
+     * F5 (RESOLVED — regression test): HouseholdMember (a Child evaluation) used to
+     * test leaving_on/rejoin_on on the Child, where they do not exist, so children
+     * of a household that had left still earned their member credit. It now
+     * evaluates the child's Family via Family::status(), matching HouseholdExists.
      */
     public function testAuditF5DepartedHouseholdStillCreditsMembers(): void
     {
-        $this->markTestSkipped('AUDIT F5 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
         $family = factory(Family::class)->create();
         $family->leaving_on = Carbon::now()->subMonths(2);
         $family->save();
@@ -304,10 +304,37 @@ class EvaluatorAuditTest extends TestCase
 
         $allCredits = $evaluation->flat("credits");
 
-        // The family-level rule correctly notices the departure...
+        // The family-level rule notices the departure...
         $this->assertNotContains(self::CREDIT_TYPES['HouseholdExists'], $allCredits);
-        // BUG: ...but the child still earns its 7-voucher member credit.
+        // FIXED: ...and so does the child-level member rule.
+        $this->assertNotContains(self::CREDIT_TYPES['HouseholdMember'], $allCredits);
+        // A departed household is entitled to nothing.
+        $this->assertEquals(0, $evaluation->getEntitlement());
+    }
+
+    /**
+     * F5 (RESOLVED — regression test): a household that left and has since
+     * rejoined is active again, so both the family and member credits return.
+     */
+    public function testAuditF5RejoinedHouseholdCreditsMembersAgain(): void
+    {
+        $family = factory(Family::class)->create();
+        $family->leaving_on = Carbon::now()->subMonths(2);
+        $family->rejoin_on = Carbon::now()->subMonths(1);
+        $family->save();
+
+        $child = factory(Child::class)->states('betweenOneAndPrimarySchoolAge')->make();
+        $family->children()->save($child);
+
+        $evaluator = EvaluatorFactory::make($this->socialPrescribingMods());
+        $evaluation = $evaluator->evaluate($family->fresh());
+
+        $allCredits = $evaluation->flat("credits");
+
+        $this->assertContains(self::CREDIT_TYPES['HouseholdExists'], $allCredits);
         $this->assertContains(self::CREDIT_TYPES['HouseholdMember'], $allCredits);
+        // HouseholdExists (7) + HouseholdMember (7) + DeductFromCarer (-7)
+        $this->assertEquals(7, $evaluation->getEntitlement());
     }
 
     /**
