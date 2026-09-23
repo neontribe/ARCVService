@@ -7,6 +7,7 @@ use App\Child;
 use App\Centre;
 use App\Family;
 use App\Registration;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -122,6 +123,9 @@ class FamilyModelTest extends TestCase
         // Create Family
         $family = factory(Family::class)->create([]);
 
+        // Empty family has no expecting date
+        $this->assertNull($family->expecting);
+
         // Add 2 Carers
         $family->carers()->saveMany(factory(Carer::class, 2)->make());
 
@@ -135,9 +139,9 @@ class FamilyModelTest extends TestCase
                 ])->flatten()
             );
         // Test we've not got an expecting date
-        $this->assertEquals(null, $family->expecting);
+        $this->assertNull($family->expecting);
 
-        // Add a pregnant Family
+        // Add a pregnant Family with single pregnancy
         $pregnant_family = factory(Family::class)->create();
         $pregnancy = factory(Child::class)->state('unbornChild')->make();
         $pregnant_family->children()
@@ -149,8 +153,41 @@ class FamilyModelTest extends TestCase
                     factory(Child::class)->state('isSecondarySchoolAge')->make(),
                 ])->flatten()
             );
-        // Test we've not got an expecting date
+        // Test we've got an expecting date matching the pregnancy
         $this->assertEquals($pregnancy->dob, $pregnant_family->expecting);
+
+        // Add a family with multiple pregnancies with different due dates
+        $multi_pregnant_family = factory(Family::class)->create();
+        $earlier_pregnancy = factory(Child::class)->state('unbornChild')->make([
+            'dob' => Carbon::now()->addWeeks(4),
+        ]);
+        $later_pregnancy = factory(Child::class)->state('unbornChild')->make([
+            'dob' => Carbon::now()->addWeeks(12),
+        ]);
+        $multi_pregnant_family->children()->saveMany([$later_pregnancy, $earlier_pregnancy]);
+
+        // Expecting attribute must return the earliest due date
+        $this->assertEquals($earlier_pregnancy->dob, $multi_pregnant_family->expecting);
+    }
+
+    public function testItCanDetermineIfFamilyIsPregnant(): void
+    {
+        // Create Family with no children
+        $family = factory(Family::class)->create([]);
+        $this->assertFalse($family->isPregnant());
+
+        // Add born children only
+        $family->children()->saveMany([
+            factory(Child::class)->state('underOne')->make(),
+            factory(Child::class)->state('betweenOneAndPrimarySchoolAge')->make(),
+        ]);
+        $this->assertFalse($family->fresh()->isPregnant());
+
+        // Add an unborn child
+        $family->children()->save(
+            factory(Child::class)->state('unbornChild')->make()
+        );
+        $this->assertTrue($family->fresh()->isPregnant());
     }
 
 

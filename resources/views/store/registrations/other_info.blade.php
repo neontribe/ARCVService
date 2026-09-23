@@ -19,7 +19,7 @@
                     <strong>{{ count($family->children) }}</strong>
                     {{ str_plural('child', count($family->children)) }}
                     registered
-                    @if ($family->expecting != null)
+                    @if ($family->isPregnant())
                         including one pregnancy
                     @endif
                     <span class="clickable-span">(more)</span>
