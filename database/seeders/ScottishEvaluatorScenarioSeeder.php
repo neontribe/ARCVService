@@ -30,6 +30,9 @@ use Illuminate\Support\Facades\Hash;
  * ae14917c (modelled from the old month arithmetic), for today's date and the current
  * ARC_SCOTTISH_SCHOOL_MONTH. Re-running it tears its own entities down first, so it is safe to repeat.
  *
+ * Since the F1 fix (Valuation::getNoticeReasons reading 'disqualifiers') the live "This branch" column also
+ * lists disqualifier reasons as "!" lines; the ae14917c model never does, matching that commit.
+ *
  * The walkthrough for testers lives in docs/tests/MANUAL_TEST_SCOTTISH_EVALUATOR.md.
  */
 class ScottishEvaluatorScenarioSeeder extends Seeder

@@ -72,9 +72,12 @@ and reprints the sheet. Do that whenever you change the date or `ARC_SCOTTISH_SC
    school age (SCOTLAND)" and repeats the Reminder notices. The entitlement and Reminder box are also
    shown in **Voucher manager**.
 
-> **Expected quirk (unresolved audit finding F1):** when a family is disqualified you see
-> **0 per week with no explanation** – no reason text is shown for disqualifiers. "0 and silent" is the
-> correct broken symptom, not a display bug you have found.
+> **About disqualified families (audit finding F1):** on **this branch** a family that drops to 0/wk
+> also shows a Reminder line explaining why – for the Scottish rules it reads "A family has no child
+> under primary school age then children of primary school age get (SCOTLAND)" (clumsy wording, known
+> follow-up). On **`ae14917c`** you see **0 per week with no explanation**: F1 was fixed in a later
+> commit on this branch, so "0 and silent" is the correct *unpatched* symptom, not a display bug you
+> have found. F1 has its own script: [`MANUAL_TEST_EVALUATOR_NOTICES.md`](MANUAL_TEST_EVALUATOR_NOTICES.md).
 
 ## 3. Check the fixed behaviour (default school month = 8)
 
@@ -86,13 +89,14 @@ Tick each against the cheat-sheet. In a September–December run you should see:
 | **SCOT-B** | F11 – 5-year-old with **Defer** ticked, starts next August | **4/wk**, same reason |
 | SCOT-C | control – deferred child still 4 | 4/wk |
 | SCOT-D | control – genuinely at school + toddler | **8/wk**, one "primary school age (SCOTLAND)" and one "between 1 and…" |
-| SCOT-E | reserved for step 6 | 0/wk (only child already at school) |
-| SCOT-F | control – 7-year-old only child | 0/wk |
+| SCOT-E | reserved for step 6 | 0/wk (only child already at school), family reason in the Reminder box |
+| SCOT-F | control – 7-year-old only child | 0/wk, family reason in the Reminder box |
 | SCOT-G | control – pregnancy only | 4/wk, "pregnant" |
 | SCOT-H1 | reserved for step 7 (also shows the F9/F10 bug Sep–Dec) | 4/wk |
 | SCOT-H2–H4 | reserved for step 7 | as printed |
 
-Nothing should be in any Reminder box with the default school month.
+With the default school month the only Reminder lines are the family disqualifier reasons on the
+0/wk families (SCOT-E, SCOT-F, SCOT-H2, SCOT-H3); no "almost" or "defer" notices anywhere.
 
 Optional interactive check on **SCOT-B**: untick **Defer**, save, and the family should drop to
 0/wk (child now counted as at school since last August); re-tick and save to restore 4/wk. The
@@ -120,8 +124,11 @@ Refresh the family pages (the figure is recalculated on every page load, so no r
 |---|---|---|---|
 | **SCOT-A** | 4/wk | **0/wk, no reason** | old code treats any 4y1m+ child as at school once September arrives |
 | **SCOT-B** | 4/wk | **0/wk, no reason** | `age >= 5` wins before the Defer flag is looked at – **visible in every month** |
-| SCOT-C, D, F, G | – | unchanged | controls – the fix does not alter correct cases |
+| SCOT-C, D, G | – | unchanged | controls – the fix does not alter correct cases |
+| SCOT-E, F | 0/wk with the family reason | 0/wk, **Reminder box gone** | same entitlement; only the F1 reason text disappears on the old commit |
 | SCOT-H1 | 4/wk | 0/wk | same bug as A |
+
+"No reason" above is F1, not F9–F11: the old commit never shows why a family is disqualified.
 
 If you are testing between **January and August**, SCOT-A and SCOT-H1 will *not* differ (the old bug
 flips direction; see step 6) but **SCOT-B always does**. Trust the cheat-sheet's `Differs?` column
@@ -163,6 +170,9 @@ month of school start. Set the school month to **next month** to open the window
 | SCOT-H2 (5y5m, this cohort) | almost primary school age | nothing | fix uses the real start cohort; old string check misses over-5s |
 | SCOT-H3 (4y10m, this cohort) | almost **and** able to defer | almost only | deferral eligibility is "under 5 at start", not "4y1m–4y6m" |
 | SCOT-H4 (4y9m, **Defer ticked**) | nothing | almost primary school age | old code never reads the Defer flag for notices |
+
+   (SCOT-H2 and SCOT-H3 are 0/wk families, so on the fix their Reminder box also carries the family
+   disqualifier line described in step 2; ignore it here, the "almost"/"defer" lines are the point.)
 
 3. Switch to `ae14917c`, refresh, compare with the right-hand column; switch back.
 4. Put `.env` back to `ARC_SCOTTISH_SCHOOL_MONTH=8`, `php artisan config:clear`, and re-run the

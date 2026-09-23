@@ -143,13 +143,12 @@ class EvaluatorAuditTest extends TestCase
     }
 
     /**
-     * F1: a disqualified child's reason is present in the raw 'disqualifiers'
-     * bucket but absent from getNoticeReasons(), because Valuation.php:47 merges
-     * the non-existent 'disqualifications' key instead of 'disqualifiers'.
+     * F1 (FIXED — regression test): a disqualified child's reason is present in the raw 'disqualifiers'
+     * bucket and now reaches getNoticeReasons(), because Valuation.php:47 merges
+     * the 'disqualifiers' key instead of the non-existent 'disqualifications' key.
      */
     public function testAuditF1DisqualifierReasonsAreLostFromNoticeReasons(): void
     {
-        $this->markTestSkipped('AUDIT F1 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
         // A six-year-old: disqualified by ChildIsPrimarySchoolAge, no notices due.
         $child = factory(Child::class)->make([
             'born' => true,
@@ -162,37 +161,44 @@ class EvaluatorAuditTest extends TestCase
         // The raw bucket has the reason...
         $this->assertContains(['reason' => 'Child|primary school age'], $evaluation["disqualifiers"]);
 
-        // BUG: ...but getNoticeReasons() loses it entirely.
-        $this->assertEquals([], $evaluation->getNoticeReasons());
+        // FIXED: ...and getNoticeReasons() includes it.
+        $this->assertEquals([
+            [
+                'entity' => 'Child',
+                'reason' => 'primary school age',
+                'count' => 1,
+            ],
+        ], $evaluation->getNoticeReasons());
     }
 
     /**
-     * F2: the 'almost 1' notice fires when the milestone is still nearly two
-     * months away, because (int) diffInMonths(...) <= 1 truncates Carbon 3's
-     * signed float.
+     * F2 (FIXED — regression test): the 'almost 1' notice fires only when the
+     * milestone is in the current or next month, rather than firing nearly two
+     * months early due to Carbon 3 float truncation.
      */
     public function testAuditF2AlmostNoticeFiresAlmostTwoMonthsEarly(): void
     {
-        $this->markTestSkipped('AUDIT F2 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
-        $offsetDate = Carbon::now()->startOfMonth();
-        // First birthday falls next month; IsAlmostYears targets the END of that
-        // month, ~2 months after the offset date.
-        $dob = Carbon::now()->startOfMonth()->addMonthsNoOverflow(1)->subYears(1);
-        $targetDate = $dob->copy()->endOfMonth()->addYears(1);
+        // Child turns 1 two months in the future (e.g. November for a September offset).
+        $offsetDate = Carbon::parse('2026-09-15');
+        $dobTwoMonthsOut = Carbon::parse('2025-11-10');
 
-        // The milestone is comfortably more than one month out...
-        $this->assertGreaterThanOrEqual(55, $offsetDate->diffInDays($targetDate));
-
-        $child = factory(Child::class)->make([
+        $childTwoMonthsOut = factory(Child::class)->make([
             'born' => true,
-            'dob' => $dob->toDateTimeString(),
+            'dob' => $dobTwoMonthsOut->toDateTimeString(),
         ]);
 
         $evaluator = EvaluatorFactory::make(null, $offsetDate);
-        $evaluation = $evaluator->evaluate($child);
+        $evaluation = $evaluator->evaluate($childTwoMonthsOut);
 
-        // BUG: ...yet the notice already fires.
-        $this->assertContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $evaluation["notices"]);
+        // FIXED: two months out, the notice does not fire.
+        $this->assertNotContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $evaluation["notices"]);
+
+        // Next month (October) or this month (November), the notice fires.
+        $evaluationNextMonth = EvaluatorFactory::make(null, Carbon::parse('2026-10-15'))->evaluate($childTwoMonthsOut);
+        $this->assertContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $evaluationNextMonth["notices"]);
+
+        $evaluationSameMonth = EvaluatorFactory::make(null, Carbon::parse('2026-11-05'))->evaluate($childTwoMonthsOut);
+        $this->assertContains(self::NOTICE_TYPES['ChildIsAlmostOne'], $evaluationSameMonth["notices"]);
     }
 
     /**
