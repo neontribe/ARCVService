@@ -285,13 +285,13 @@ class EvaluatorAuditTest extends TestCase
     }
 
     /**
-     * F5: HouseholdMember (a Child evaluation) tests leaving_on/rejoin_on, which
-     * only exist on the families table — so children of a household that has
-     * left still earn their member credit.
+     * F5 (RESOLVED — regression test): HouseholdMember (a Child evaluation) used to
+     * test leaving_on/rejoin_on on the Child, where they do not exist, so children
+     * of a household that had left still earned their member credit. It now
+     * evaluates the child's Family via Family::status(), matching HouseholdExists.
      */
     public function testAuditF5DepartedHouseholdStillCreditsMembers(): void
     {
-        $this->markTestSkipped('AUDIT F5 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
         $family = factory(Family::class)->create();
         $family->leaving_on = Carbon::now()->subMonths(2);
         $family->save();
@@ -304,29 +304,100 @@ class EvaluatorAuditTest extends TestCase
 
         $allCredits = $evaluation->flat("credits");
 
-        // The family-level rule correctly notices the departure...
+        // The family-level rule notices the departure...
         $this->assertNotContains(self::CREDIT_TYPES['HouseholdExists'], $allCredits);
-        // BUG: ...but the child still earns its 7-voucher member credit.
-        $this->assertContains(self::CREDIT_TYPES['HouseholdMember'], $allCredits);
+        // FIXED: ...and so does the child-level member rule.
+        $this->assertNotContains(self::CREDIT_TYPES['HouseholdMember'], $allCredits);
+        // A departed household is entitled to nothing.
+        $this->assertEquals(0, $evaluation->getEntitlement());
     }
 
     /**
-     * F6: getEntitlement() has no floor, so a departed social-prescribing family
-     * with no children computes a negative entitlement (DeductFromCarer always
-     * fires — see F7).
+     * F5 (RESOLVED — regression test): a household that left and has since
+     * rejoined is active again, so both the family and member credits return.
      */
-    public function testAuditF6EntitlementCanGoNegative(): void
+    public function testAuditF5RejoinedHouseholdCreditsMembersAgain(): void
     {
-        $this->markTestSkipped('AUDIT F6 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
         $family = factory(Family::class)->create();
         $family->leaving_on = Carbon::now()->subMonths(2);
+        $family->rejoin_on = Carbon::now()->subMonths(1);
         $family->save();
+
+        $child = factory(Child::class)->states('betweenOneAndPrimarySchoolAge')->make();
+        $family->children()->save($child);
 
         $evaluator = EvaluatorFactory::make($this->socialPrescribingMods());
         $evaluation = $evaluator->evaluate($family->fresh());
 
-        // BUG: -7 — HouseholdExists fails, but the carer deduction still applies.
-        $this->assertEquals(-7, $evaluation->getEntitlement());
+        $allCredits = $evaluation->flat("credits");
+
+        $this->assertContains(self::CREDIT_TYPES['HouseholdExists'], $allCredits);
+        $this->assertContains(self::CREDIT_TYPES['HouseholdMember'], $allCredits);
+        // HouseholdExists (7) + HouseholdMember (7) + DeductFromCarer (-7)
+        $this->assertEquals(7, $evaluation->getEntitlement());
+    }
+
+    /**
+     * F6 (RESOLVED — regression test): getEntitlement() clamps negative credit sums to 0,
+     * ensuring entitlements cannot go negative even when negative credits outweigh positive ones.
+     */
+    public function testAuditF6EntitlementCanGoNegative(): void
+    {
+        $family = factory(Family::class)->create();
+        $child = factory(Child::class)->create([
+            'dob' => '2000-01-01',
+            'family_id' => $family->id,
+            'born' => 1,
+        ]);
+        $family->leaving_on = Carbon::now()->subMonths(2);
+        $family->save();
+
+        // With HouseholdMember disabled or zeroed, HouseholdExists failing, and DeductFromCarer firing:
+        $mods = collect([
+            new Evaluation([
+                "name" => "HouseholdExists",
+                "value" => 7,
+                "purpose" => "credits",
+                "entity" => "App\Family",
+            ]),
+            new Evaluation([
+                "name" => "DeductFromCarer",
+                "value" => -7,
+                "purpose" => "credits",
+                "entity" => "App\Family",
+            ]),
+        ]);
+
+        $evaluator = EvaluatorFactory::make($mods);
+        $evaluation = $evaluator->evaluate($family->fresh());
+
+        // FIXED: 0 — entitlement has a floor of 0.
+        $this->assertEquals(0, $evaluation->getEntitlement());
+    }
+
+    /**
+     * F7 (RESOLVED — regression test): DeductFromCarer uses isNotEmpty() on the
+     * family's children collection rather than has('children'), ensuring the
+     * deduction only fires when the family actually has child/carer records.
+     */
+    public function testAuditF7DeductFromCarerRequiresChildren(): void
+    {
+        $familyWithoutChildren = factory(Family::class)->create();
+
+        $familyWithChild = factory(Family::class)->create();
+        $child = factory(Child::class)->create([
+            'dob' => '2000-01-01',
+            'family_id' => $familyWithChild->id,
+            'born' => 1,
+        ]);
+
+        $evaluator = EvaluatorFactory::make($this->socialPrescribingMods());
+
+        $evalWithout = $evaluator->evaluate($familyWithoutChildren->fresh());
+        $this->assertNotContains(self::CREDIT_TYPES['DeductFromCarer'], $evalWithout->flat('credits'));
+
+        $evalWith = $evaluator->evaluate($familyWithChild->fresh());
+        $this->assertContains(self::CREDIT_TYPES['DeductFromCarer'], $evalWith->flat('credits'));
     }
 
     /**
