@@ -664,11 +664,11 @@ $factory->state(App\Child::class, 'readyForPrimarySchool', function (Faker\Gener
     ];
 });
 
-// Child - ready for Primary School when the school_month rolls around ( QUESTION )
+// Child - ready for Primary School when the school_month rolls around
 $factory->state(App\Child::class, 'readyForScottishPrimarySchool', function (Faker\Generator $faker) {
 
-    // Make a child who's four now, and thus due to start school soon(ish)
-    $dob = Carbon::now()->month(1)->startOfMonth()->subYears(4);
+    // Make a child who's turning 5 before school starts, so ready for school and not eligible to defer
+    $dob = Carbon::now()->month(4)->startOfMonth()->subYears(5);
 
     return [
         'born' => $dob->isPast(),
@@ -679,12 +679,9 @@ $factory->state(App\Child::class, 'readyForScottishPrimarySchool', function (Fak
 // Child - ready for Primary School in Scotland, but will still be four.
 $factory->state(App\Child::class, 'canDefer', function (Faker\Generator $faker) {
 
-    // Make a child who's four now, and thus due to start school soon(ish)
-    $now = Carbon::now()->startOfMonth()->subYears(4);
-    $year = $now->year;
-    $dob = Carbon::now();
-    $schoolStartMonth = config('arc.scottish_school_month');
-    $dob->year($year)->subMonths($schoolStartMonth - 6)->day(1);
+    // Make a child who's four at school start (born Jan/Feb or Sept-Dec)
+    $dob = Carbon::now()->month(1)->startOfMonth()->subYears(4);
+
     return [
         'born' => $dob->isPast(),
         'dob' => $dob->toDateTimeString(),
@@ -694,12 +691,8 @@ $factory->state(App\Child::class, 'canDefer', function (Faker\Generator $faker) 
 // Child - ready for Primary School in Scotland, but won't be four.
 $factory->state(App\Child::class, 'canNotDefer', function (Faker\Generator $faker) {
 
-    // Make a child who's four now, and thus due to start school soon(ish)
-    $now = Carbon::now()->startOfMonth()->subYears(5);
-    $year = $now->year;
-    $dob = Carbon::now();
-    $schoolStartMonth = config('arc.scottish_school_month');
-    $dob->year($year)->day(1);
+    // Make a child who's five at school start (born March-August)
+    $dob = Carbon::now()->month(4)->startOfMonth()->subYears(5);
 
     return [
         'born' => $dob->isPast(),
