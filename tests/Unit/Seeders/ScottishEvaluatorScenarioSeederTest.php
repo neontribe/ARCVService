@@ -107,11 +107,20 @@ class ScottishEvaluatorScenarioSeederTest extends TestCase
         $this->assertStringContainsString('1x primary school age (SCOTLAND)', $rows['D']['patched']);
         $this->assertStringContainsString('1x between 1 and start of primary school age (SCOTLAND)', $rows['D']['patched']);
 
-        // No notices from either branch in September with an August start.
-        foreach ($rows as $row) {
-            $this->assertStringNotContainsString('!', $row['patched']);
-            $this->assertStringNotContainsString('!', $row['unpatched']);
+        // No "almost"/"defer" notices from either branch in September with an August start. The only
+        // Reminder line on this branch is the family disqualifier reason, which reaches the UI since the
+        // F1 fix (later on this branch than ae14917c, where the unpatched column stays silent).
+        $disqualified = '! 1x has no child under primary school age then children of primary school age get (SCOTLAND)';
+        foreach ($rows as $key => $row) {
+            $this->assertStringNotContainsString('!', $row['unpatched'], "$key unpatched");
+            if ($row['entitlement'] === 0) {
+                $this->assertStringContainsString($disqualified, $row['patched'], "$key patched");
+                $this->assertSame(1, substr_count($row['patched'], '!'), "$key patched has only the disqualifier");
+            } else {
+                $this->assertStringNotContainsString('!', $row['patched'], "$key patched");
+            }
         }
+        $this->assertSame(['E', 'F', 'H2', 'H3'], array_keys(array_filter($rows, fn($row) => $row['entitlement'] === 0)));
     }
 
     /**
