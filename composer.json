@@ -36,28 +36,27 @@
     "maennchen/zipstream-php": "3.1.2",
     "neontribe/laravel-specification": "dev-master",
     "propaganistas/laravel-phone": "^6.0",
-    "ramsey/uuid": "4.9.2",
+    "ramsey/uuid": "4.9.4",
     "sebdesign/laravel-state-machine": "v3.4.7",
     "spatie/laravel-ciphersweet": "1.7.4",
-    "symfony/http-client": "v7.4.7",
-    "symfony/lock": "v7.4.6",
-    "symfony/mailchimp-mailer": "v7.4.6",
+    "symfony/http-client": "v7.4.20",
+    "symfony/lock": "v7.4.20",
+    "symfony/mailchimp-mailer": "v7.4.19",
     "usmanhalalit/laracsv": "2.1.0",
     "werk365/etagconditionals": "dev-master"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "v3.7.0",
     "friendsofphp/php-cs-fixer": "v3.94.2",
-    "larastan/larastan": "v3.9.3",
+    "larastan/larastan": "v3.9.6",
     "laravel/browser-kit-testing": "v7.2.8",
     "laravel/dusk": "v8.5.0",
-    "mockery/mockery": "1.6.12",
-    "nunomaduro/collision": "v8.9.1",
+    "mockery/mockery": "1.6.15",
+    "nunomaduro/collision": "v8.9.5",
     "phpmd/phpmd": "2.15.0",
-    "phpstan/phpstan": "2.1.43",
-    "phpunit/phpunit": "11.5.55",
+    "phpunit/phpunit": "11.5.57",
     "spatie/laravel-ignition": "2.12.0",
-    "squizlabs/php_codesniffer": "4.0.1"
+    "squizlabs/php_codesniffer": "4.0.4"
   },
   "autoload": {
     "psr-4": {

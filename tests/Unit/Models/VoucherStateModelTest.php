@@ -98,15 +98,15 @@ class VoucherStateModelTest extends TestCase
     }
 
 
-    public function testOnlyADispatchedVoucherCanBeExpiredOrVoided(): void
+    public function testOnlyAPrintedOrDispatchedVoucherCanBeExpiredOrVoided(): void
     {
         Auth::login($this->marketUser);
         $v = factory(Voucher::class)->state('printed')->create();
         $this->assertEquals('printed', $v->currentstate);
 
-        // Cant get there from printed
-        $this->assertFalse($v->transitionAllowed("expire"));
-        $this->assertFalse($v->transitionAllowed("void"));
+        // Can get there from printed
+        $this->assertTrue($v->transitionAllowed("expire"));
+        $this->assertTrue($v->transitionAllowed("void"));
 
         $route = [
             'dispatch' => 'dispatched',
