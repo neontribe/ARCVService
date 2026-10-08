@@ -24,8 +24,8 @@
         "ie 11",
         "last 3 versions"
     ],
-    "dependencies": {},
     "overrides": {
-        "webpackbar": "^7.0.0"
+        "webpackbar": "^7.0.0",
+        "websocket-driver": "0.7.5"
     }
 }
