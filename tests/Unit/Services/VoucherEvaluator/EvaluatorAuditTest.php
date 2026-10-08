@@ -203,12 +203,12 @@ class EvaluatorAuditTest extends TestCase
 
     /**
      * F3: an unborn child whose due date is months in the past still earns the
-     * FamilyIsPregnant credit, because Family::getExpectingAttribute() never
-     * compares the dob with today.
+     * FamilyIsPregnant credit until manually marked as born or removed.
+     * This is by design per client policy to avoid automatic cutoffs during
+     * sensitive circumstances, relying on worker conversations instead.
      */
     public function testAuditF3PregnancyCreditSurvivesItsDueDate(): void
     {
-        $this->markTestSkipped('AUDIT F3 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
         $family = factory(Family::class)->create();
         $overduePregnancy = factory(Child::class)->make([
             'born' => false,
@@ -219,19 +219,18 @@ class EvaluatorAuditTest extends TestCase
         $evaluator = EvaluatorFactory::make();
         $evaluation = $evaluator->evaluate($family->fresh());
 
-        // BUG: the due date is three months gone, but the credit persists...
+        // INTENDED: the due date is three months gone, but the credit persists until manual intervention.
         $this->assertContains(self::CREDIT_TYPES['FamilyIsPregnant'], $evaluation["credits"]);
-        // ...and the "baby" earns nothing (every child credit requires IsBorn).
+        // The unborn child earns the family pregnancy credit rather than born child credits.
         $this->assertEquals(4, $evaluation->getEntitlement());
     }
 
     /**
-     * F3: a twin pregnancy (two unborn records) credits once, because
-     * getExpectingAttribute() overwrites rather than counts.
+     * F3: a twin pregnancy (two unborn records) credits once per family,
+     * which matches client policy (twins counted as a single pregnancy).
      */
     public function testAuditF3TwinPregnancyCreditsOnce(): void
     {
-        $this->markTestSkipped('AUDIT F3 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
         $family = factory(Family::class)->create();
         $twins = factory(Child::class, 2)->states('unbornChild')->make();
         $family->children()->saveMany($twins);
@@ -246,23 +245,22 @@ class EvaluatorAuditTest extends TestCase
             }
         );
 
-        // BUG: two pregnancies, one credit.
+        // INTENDED: twins count as a single pregnancy credit per family.
         $this->assertCount(1, $pregnancyCredits);
         $this->assertEquals(4, $evaluation->getEntitlement());
     }
 
     /**
-     * F4: an unborn child can never be ID-verified, but is still counted by
-     * FamilyHasUnverifiedChildren — so a pregnant family with all born children
-     * verified shows an un-clearable "needs ID" notice.
+     * F4: an unconfirmed pregnancy (unborn child with verified = false) triggers
+     * FamilyHasUnverifiedChildren, reminding staff to confirm the existence of
+     * the child/pregnancy entity. Once confirmed (verified = true), the warning clears.
      */
     public function testAuditF4UnbornChildTriggersUnverifiedNotice(): void
     {
-        $this->markTestSkipped('AUDIT F4 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
         $family = factory(Family::class)->create();
         $bornAndVerified = factory(Child::class)->states('betweenOneAndPrimarySchoolAge', 'verified')->make();
-        $unborn = factory(Child::class)->states('unbornChild', 'unverified')->make();
-        $family->children()->saveMany([$bornAndVerified, $unborn]);
+        $unbornUnverified = factory(Child::class)->states('unbornChild', 'unverified')->make();
+        $family->children()->saveMany([$bornAndVerified, $unbornUnverified]);
 
         $rulesMods = collect([
             new Evaluation([
@@ -276,8 +274,14 @@ class EvaluatorAuditTest extends TestCase
         $evaluator = EvaluatorFactory::make($rulesMods);
         $evaluation = $evaluator->evaluate($family->fresh());
 
-        // BUG: every born child is verified, yet the notice fires for the pregnancy.
+        // INTENDED: An unconfirmed unborn child triggers the notice to remind staff to confirm existence.
         $this->assertContains(self::NOTICE_TYPES['FamilyHasUnverifiedChildren'], $evaluation["notices"]);
+
+        // Once confirmed (verified = true), the notice does not fire.
+        $unbornUnverified->verified = true;
+        $unbornUnverified->save();
+        $evaluationCleared = $evaluator->evaluate($family->fresh());
+        $this->assertNotContains(self::NOTICE_TYPES['FamilyHasUnverifiedChildren'], $evaluationCleared["notices"]);
     }
 
     /**
@@ -395,6 +399,37 @@ class EvaluatorAuditTest extends TestCase
         $this->assertTrue($specification->isSatisfiedBy($baby));
         $this->assertFalse($specification->isSatisfiedBy($teenager));
         $this->assertTrue($specification->isSatisfiedBy($unborn));
+    }
+
+    /**
+     * F15 (RESOLVED — regression test): the pregnancy definition is consolidated.
+     * FamilyIsPregnant evaluates $candidate->isPregnant() (matching NotSpec(new IsBorn())),
+     * and FamilyHasNoEligibleChildren treats unborn children as qualifying satisfiers.
+     * In both standard and social prescribing setups, pregnancy qualification behaves
+     * consistently without conflicting accessor loops or date-parsing side effects.
+     */
+    public function testAuditF15PregnancyDefinitionConsolidated(): void
+    {
+        $pregnantFamily = factory(Family::class)->create();
+        $unbornChild = factory(Child::class)->states('unbornChild')->make();
+        $pregnantFamily->children()->save($unbornChild);
+
+        // Standard evaluator: pregnancy qualifies and earns credit
+        $evaluator = EvaluatorFactory::make();
+        $evaluation = $evaluator->evaluate($pregnantFamily->fresh());
+
+        $this->assertTrue($pregnantFamily->isPregnant());
+        $this->assertContains(self::CREDIT_TYPES['FamilyIsPregnant'], $evaluation["credits"]);
+        $this->assertEmpty($evaluation["disqualifiers"]);
+        $this->assertEquals(4, $evaluation->getEntitlement());
+
+        // Social prescribing evaluator (FamilyIsPregnant credit disabled):
+        // Family is still qualifying/not disqualified, but earns 0 pregnancy credit.
+        $spEvaluator = EvaluatorFactory::make($this->socialPrescribingMods());
+        $spEvaluation = $spEvaluator->evaluate($pregnantFamily->fresh());
+
+        $this->assertEmpty($spEvaluation["disqualifiers"]);
+        $this->assertNotContains(self::CREDIT_TYPES['FamilyIsPregnant'], $spEvaluation["credits"]);
     }
 
     /**
