@@ -504,13 +504,13 @@ class EvaluatorAuditTest extends TestCase
     }
 
     /**
-     * F16: BaseChildEvaluation::toReason() only includes 'value' when it is > 0,
-     * so a Child credit configured with a negative value silently contributes
-     * zero to the entitlement.
+     * F16 (RESOLVED — regression test): BaseChildEvaluation::toReason() includes
+     * non-zero negative values, and test() short-circuits on null values.
+     * Child credits configured with negative values preserve their 'value' key
+     * and properly contribute to entitlement calculations.
      */
     public function testAuditF16NegativeChildCreditValueIsDropped(): void
     {
-        $this->markTestSkipped('AUDIT F16 — see docs/VOUCHER_EVALUATOR_AUDIT.md');
         $child = factory(Child::class)->states('underOne')->make();
 
         $rulesMods = collect([
@@ -528,8 +528,19 @@ class EvaluatorAuditTest extends TestCase
         $credits = $evaluation["credits"];
         $this->assertCount(1, $credits);
 
-        // BUG: the credit fired, but its -3 value has been dropped entirely.
-        $this->assertArrayNotHasKey('value', $credits[0]);
-        $this->assertEquals(0, $evaluation->getEntitlement());
+        // FIXED: the credit fired and its -3 value is preserved.
+        $this->assertArrayHasKey('value', $credits[0]);
+        $this->assertEquals(-3, $credits[0]['value']);
+        $this->assertEquals(['reason' => 'Child|under 1 year old', 'value' => -3], $credits[0]);
+
+        // When combined in a family with positive credits (e.g. pregnancy credit +4),
+        // the negative child credit reduces entitlement: 4 + (-3) = 1.
+        $family = factory(Family::class)->create();
+        $unbornChild = factory(Child::class)->states('unbornChild')->make();
+        $family->children()->save($unbornChild);
+        $family->children()->save($child);
+        $familyEvaluation = $evaluator->evaluate($family->fresh());
+
+        $this->assertEquals(1, $familyEvaluation->getEntitlement());
     }
 }

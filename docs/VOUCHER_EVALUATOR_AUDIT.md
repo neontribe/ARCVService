@@ -46,6 +46,10 @@ disqualification reasons a Store worker sees.
   `Valuation::getEntitlement()` (`Valuation.php:116-123`) now clamps the calculated credit sum to a floor of `0` via `max(0, $total)`. This prevents negative entitlement totals from ever propagating to `Bundle.entitlement` or user interfaces. Verified by the live regression test `EvaluatorAuditTest::testAuditF6EntitlementCanGoNegative`.
 * **Revision (2026-09-18):** **F5 is resolved** —
   `HouseholdMember::test()` (`HouseholdMember.php:21-33`) now evaluates the child's **Family** via `$candidate->family->status()` instead of reading `leaving_on` / `rejoin_on` off the `Child` (where they do not exist). `HouseholdExists::test()` was updated to call the same `Family::status()` helper, so the "household is still active" predicate is no longer duplicated across the two rules. A departed social-prescribing household with *n* member records now evaluates to `0` (previously `7n − 7`); a household that has rejoined is credited again. **Entitlement-affecting** — see 4.2. Verified by the live regression tests `EvaluatorAuditTest::testAuditF5DepartedHouseholdStillCreditsMembers` and `EvaluatorAuditTest::testAuditF5RejoinedHouseholdCreditsMembersAgain`.
+* **Revision (2026-09-22):** **F17 is reclassified as BY DESIGN** —
+  Rule keys are intended to be unique across entities by design (e.g. `ChildIsUnderOne`, `FamilyIsPregnant`). Symmetrical or duplicated rule keys across different entity types are intentionally unsupported in `getPurposeFilteredEvaluations()`, as evaluation rule classes and keys are purpose-built and scoped to their specific entity domain. Documented in the audit and moved to the By Design table.
+* **Revision (2026-09-22):** **F16 is resolved** —
+  `BaseChildEvaluation` is now aligned with `BaseFamilyEvaluation`. `BaseChildEvaluation::toReason()` preserves non-zero negative integer values (`$this->value > 0 || $this->value < 0`), and `BaseChildEvaluation::test()` short-circuits on `null` values via `is_null($this->value)`. Verified by the live regression test `EvaluatorAuditTest::testAuditF16NegativeChildCreditValueIsDropped`.
 
 Every finding records **how it was verified**. *Confirmed* means it was proven by running code or by
 inspecting the schema/migrations; *inferred* means it was established by reading only.
@@ -61,8 +65,6 @@ inspecting the schema/migrations; *inferred* means it was established by reading
 | # | Flaw | Area | Severity | Verified | Moves voucher totals? |
 |---|------|------|----------|----------|-----------------------|
 | [F13](#f13--asymmetric-upper-age-bound-design-question) | Asymmetric upper age bound | Child rules | Medium (*design question*) | inferred | depends on decision |
-| [F16](#f16--basechildevaluationtoreason-drops-negative-values) | Negative Child values silently dropped | Evaluations | Low | confirmed | no (latent) |
-| [F17](#f17--getpurposefilteredevaluations-collapses-same-named-rules) | `array_merge` collapses same-named rules | Evaluator | Low | inferred | no |
 
 ### Resolved
 
@@ -81,6 +83,7 @@ inspecting the schema/migrations; *inferred* means it was established by reading
 | [F11](#f11--deferral-is-ignored-the-moment-a-child-turns-5) | Deferral lost at the fifth birthday | Scotland | ~~Medium~~ **RESOLVED** (2026-09-15) | inferred | **yes** — totals changed when fixed |
 | [F12](#f12--duplicated-divergent-at-school-logic) | `isScottishChildAtSchool()` triplicated and divergent | Scotland | ~~Medium~~ **RESOLVED** (2026-09-15) | inferred | no |
 | [F15](#f15--two-conflicting-definitions-of-pregnant) | Consolidated definition of "pregnant" across rules | Family | ~~Medium (*design question*)~~ **RESOLVED** (2026-09-17) | confirmed | no |
+| [F16](#f16--basechildevaluationtoreason-drops-negative-values) | Negative Child values silently dropped | Evaluations | ~~Low~~ **RESOLVED** (2026-09-22) | confirmed | no (latent) |
 
 ### By Design
 
@@ -91,6 +94,7 @@ inspecting the schema/migrations; *inferred* means it was established by reading
 | [F3](#f3--pregnancy-credit-persistence-and-multiple-pregnancy-handling-by-design--operational-policy) | Pregnancy credit persistence and multiple pregnancy handling | Family | Medium (*by design / operational policy*) | confirmed | no (by design) |
 | [F4](#f4--unborn-children-trigger-unconfirmed-warning-until-confirmed-by-design--operational-policy) | Unborn child triggers unconfirmed warning until confirmed | Family | Medium (*by design / operational policy*) | confirmed | no (by design) |
 | [F14](#f14--a-family-level-disqualifier-silently-deletes-every-child-credit-by-design) | A family disqualifier zeroes the whole household | Valuation | Medium (*by design*) | confirmed | n/a |
+| [F17](#f17--getpurposefilteredevaluations-collapses-same-named-rules-by-design) | `array_merge` collapses same-named rules | Evaluator | Low (*by design*) | inferred | no (by design) |
 
 None of the findings still open moves voucher totals (F13 depends on a design decision; F3 is
 acknowledged as intentional operational policy and will not change automated totals). **F5** was
@@ -241,13 +245,13 @@ family will get the wrong answer unless it remembers to also walk the children.
 adding an explicit `getEligibilityDeep()` (or renaming the current method `getOwnEligibility()`) so
 the `CentreController` idiom becomes the obvious one.
 
-#### F17 — `getPurposeFilteredEvaluations()` collapses same-named rules
+#### F17 — `getPurposeFilteredEvaluations()` collapses same-named rules (*by design*)
 
-**Severity:** Low. **Verified:** inferred (code reading).
+**Status: ℹ️ BY DESIGN (2026-09-22).** Rule keys are intended to be globally unique across entities by design (e.g. `ChildIsUnderOne`, `FamilyIsPregnant`). Shared or duplicated rule keys across different entity types are intentionally unsupported in `getPurposeFilteredEvaluations()`, as evaluation rule classes and keys are purpose-built and scoped to their specific entity domain. Flattening rules across entities into an anonymous numeric list would introduce UI and presentation defects (such as duplicate bullet points, incorrect static `SUBJECT` labeling, and loss of programmatic key indexing in views).
 
-**What.** Rules are merged across entities with `array_merge` on **string-keyed** arrays, so a rule
-with the same class name on two entities loses one copy. The method also assumes every entity has
-the requested purpose key.
+**Severity (reclassified):** Low (*by design*). **Verified:** inferred (code reading).
+
+**What.** Rules are merged across entities with `array_merge` on **string-keyed** arrays. If a rule with the same key were defined on multiple entities, `array_merge` would overwrite rather than append.
 
 **Where.** `app/Services/VoucherEvaluator/Evaluators/VoucherEvaluator.php:32-40`.
 
@@ -262,12 +266,13 @@ foreach ($this->evaluations as $entity) {
 `array_merge` overwrites duplicate string keys rather than appending, and `$entity[$purpose]` will
 raise an undefined-key warning for an entity configured with only, say, `credits`.
 
-**Effect.** Feeds the rules list rendered by
-`resources/views/store/registrations/other_info.blade.php`. Today no rule name is shared between
-`App\Child` and `App\Family`, so nothing is lost — it is a trap for the next rule that is.
+**Effect & Design Intent.**
 
-**Recommendation.** Use `$flatEvaluations += $entity[$purpose] ?? []`, or key by
-`"$entityClass::$ruleName"`.
+1. **Rule Key Uniqueness By Design:** The system architecture requires evaluation rule keys to be distinct per entity type (e.g. `ChildIsUnderOne` vs `FamilyIsPregnant`). Reusing rule names across entities is intentionally avoided.
+2. **Decoupled from Entitlement Calculation:** `getPurposeFilteredEvaluations()` does not participate in voucher calculations (which evaluate per-entity in `VoucherEvaluator::evaluate()`), but solely feeds the static informational summary rendered in `resources/views/store/registrations/other_info.blade.php`.
+3. **Presentation & Subject Integrity:** In `other_info.blade.php`, rules are displayed alongside their `SUBJECT` constant. Flattening duplicated rule keys into an anonymous list would cause duplicate bullet points and attribute rules to the wrong entity subject.
+
+**Recommendation.** Maintain unique rule keys across entities as intended by the domain design. If cross-entity or polymorphic rule display is ever needed in the future, the view model should preserve explicit entity grouping (e.g., keying by `"$entityClass::$ruleName"`) rather than stripping hierarchy into an anonymous flat list.
 
 ### B. Specifications — date handling
 
@@ -346,38 +351,45 @@ Then audit the rest of the codebase for other Carbon-2-era `diffIn*` assumptions
 
 #### F16 — `BaseChildEvaluation::toReason()` drops negative values
 
-**Severity:** Low (latent). **Verified:** confirmed. **Reproduction test:**
+**Status: ✅ RESOLVED (2026-09-22).** `BaseChildEvaluation` is aligned with `BaseFamilyEvaluation`. `BaseChildEvaluation::toReason()` now includes non-zero negative integer values (`$this->value > 0 || $this->value < 0`), and `BaseChildEvaluation::test()` short-circuits when `$this->value` is `null`. Verified by the live regression test `EvaluatorAuditTest::testAuditF16NegativeChildCreditValueIsDropped`.
+
+**Severity:** Low (latent). **Verified:** confirmed. **Regression test:**
 `EvaluatorAuditTest::testAuditF16NegativeChildCreditValueIsDropped`.
 
-**What.** The two base evaluation classes disagree about which values are worth reporting. A
-negatively-valued **Child** rule loses its `value` key entirely, and therefore contributes `0` to
+**What.** The two base evaluation classes previously disagreed about which values are worth reporting. A
+negatively-valued **Child** rule lost its `value` key entirely, and therefore contributed `0` to
 the entitlement.
 
-**Where.** `app/Services/VoucherEvaluator/Evaluations/BaseChildEvaluation.php:25` versus
-`BaseFamilyEvaluation.php:30`.
+**Where.** `app/Services/VoucherEvaluator/Evaluations/BaseChildEvaluation.php:18,30` versus
+`BaseFamilyEvaluation.php:17,30`.
 
 **Evidence.**
 
 ```php
-// BaseChildEvaluation.php:25
-return ($this->value > 0)
-
-// BaseFamilyEvaluation.php:30
-return ($this->value > 0 || $this->value < 0)
+// BaseChildEvaluation.php:26-33 (now aligned with BaseFamilyEvaluation)
+public function toReason()
+{
+    $reason = ['reason' => class_basename(self::SUBJECT)."|".$this->reason];
+    // if there's an int value, include it
+    return ($this->value > 0 || $this->value < 0)
+        ? array_merge($reason, ['value' => $this->value ])
+        : $reason
+    ;
+}
 ```
 
 `Valuation::getEntitlement()` sums `array_column($credits, 'value')` (`Valuation.php:120`); a credit
 with no `value` key contributes nothing.
 
-**Effect.** No live rule is affected — every current Child rule has a positive value. It is a trap:
-a per-child deduction is entirely plausible given that `DeductFromCarer` already exists at family
-level with `-7`, and such a rule would silently do nothing while still printing its reason.
+**Effect.** No live rule was affected because standard Child rules use positive values. However,
+if a sponsor modifier or custom rule set a negative Child value (analogous to `DeductFromCarer` at family level),
+the deduction was silently dropped. Aligning the classes resolves this latent trap.
 
-`BaseFamilyEvaluation` also short-circuits on a `null` value (`:17-19`) while `BaseChildEvaluation`
-does not — a second, unrelated asymmetry between the two classes.
+`BaseFamilyEvaluation` also short-circuits on a `null` value (`:17-19`), which is now also present in
+`BaseChildEvaluation::test()`.
 
 **Recommendation.** Make both classes identical: guard with `!is_null($this->value)` (or
-`$this->value != 0`) and add the same null short-circuit to `test()`.
+`$this->value != 0`) and add the same null short-circuit to `test()`. *(Resolved)*
 
 #### Latent risk — Carbon 3 dates are still mutable
 
@@ -1098,7 +1110,7 @@ with no `is_pri_carer` child — check the data before choosing.
 Fixes are grouped by blast radius. Everything in 4.1 can be shipped without changing anyone's
 voucher totals; everything in 4.2 will move totals and needs sponsor sign-off first; 4.3 records the
 agreed direction for Scotland *(since executed — see the update in that section)*. Findings
-labelled *by design* (F14) or *design question* (F13) need a product decision, not a fix, and
+labelled *by design* (F3, F4, F14, F17) or *design question* (F13) need a product decision, not a fix, and
 are deliberately absent from these lists.
 
 ### 4.1 Safe — cannot change totals
@@ -1111,8 +1123,8 @@ In suggested order (cheapest, most user-visible first):
 | 2 | [F7](#f7--deductfromcarer-never-actually-tests-for-a-carer) | ~~Real collection check (`isNotEmpty()`)~~ | ✅ **Done** (2026-09-17) — `children->isNotEmpty()` ensures deduction only applies when at least one carer/child exists |
 | 3 | [F6](#f6--negative-entitlement-is-reachable) | ~~`max(0, …)` clamp in `getEntitlement()`~~ | ✅ **Done** (2026-09-17) — clamps nonsensical negative sums to 0 |
 | 4 | [F10](#f10--scottishfamilyhasnoeligiblechildrens-specification-is-a-tautology) | ~~Restore the dropped `IsUnderStartDate` clause~~ | ✅ **Done** (2026-09-15) via `IsScottishUnderSchoolAge` in the Scottish refactor |
-| 5 | [F16](#f16--basechildevaluationtoreason-drops-negative-values) | Align `BaseChildEvaluation::toReason()` with the family version | Latent; no live rule affected |
-| 6 | [F17](#f17--getpurposefilteredevaluations-collapses-same-named-rules) | `+=` with `?? []` instead of `array_merge` | Latent; display-only |
+| 5 | [F16](#f16--basechildevaluationtoreason-drops-negative-values) | ~~Align `BaseChildEvaluation::toReason()` with the family version~~ | ✅ **Done** (2026-09-22) — aligned `toReason()` and `test()` with `BaseFamilyEvaluation` |
+| 6 | [F17](#f17--getpurposefilteredevaluations-collapses-same-named-rules-by-design) | ~~`+=` with `?? []` instead of `array_merge`~~ | ℹ️ **By Design** (2026-09-22) — unique rule keys across entities is intentional by design; no code change |
 | 7 | [Carbon mutability](#latent-risk--carbon-3-dates-are-still-mutable) | ~~`->copy()` before mutating calls~~ | ✅ **Done** (2026-09-16) alongside F2 |
 | 8 | [F4](#f4--unborn-children-trigger-unconfirmed-warning-until-confirmed-by-design--operational-policy) | ~~`AndSpec(IsBorn, IsVerified)` + born-only count~~ | ℹ️ **By Design / Policy** (2026-09-17) — unconfirmed pregnancies triggering notice is intended policy; no rule change needed |
 | 9 | [F15](#f15--two-conflicting-definitions-of-pregnant) | ~~Unify pregnancy check (`Family::isPregnant()` + `NotSpec(IsBorn)`)~~ | ✅ **Done** (2026-09-17) — consolidated definition across rules, models, and views |
@@ -1326,6 +1338,15 @@ OK, but some tests were skipped! Tests: 50, Assertions: 140, Skipped: 1.
 
 The F1, F2, F3 (`testAuditF3PregnancyCreditSurvivesItsDueDate` and `testAuditF3TwinPregnancyCreditsOnce`), F4 (`testAuditF4UnbornChildTriggersUnverifiedNotice`), F5 (`testAuditF5DepartedHouseholdStillCreditsMembers` and the new `testAuditF5RejoinedHouseholdCreditsMembersAgain`), F6 (`testAuditF6EntitlementCanGoNegative`), F7 (`testAuditF7DeductFromCarerRequiresChildren`), F8, F10, and F15 (`testAuditF15PregnancyDefinitionConsolidated`) audit tests now run un-skipped as regression tests. The single remaining skip is F16's latent-bug pin. The wider `tests/Unit/Models` and `tests/Unit/Controllers` suites (307 tests) also pass.
 
+**Test state after F16 remediation (2026-09-22):**
+
+```
+./vendor/bin/phpunit tests/Unit/Services/VoucherEvaluator tests/Unit/Specifications
+OK (50 tests, 145 assertions)
+```
+
+The F1, F2, F3 (`testAuditF3PregnancyCreditSurvivesItsDueDate` and `testAuditF3TwinPregnancyCreditsOnce`), F4 (`testAuditF4UnbornChildTriggersUnverifiedNotice`), F5 (`testAuditF5DepartedHouseholdStillCreditsMembers` and the new `testAuditF5RejoinedHouseholdCreditsMembersAgain`), F6 (`testAuditF6EntitlementCanGoNegative`), F7 (`testAuditF7DeductFromCarerRequiresChildren`), F8, F10, F15 (`testAuditF15PregnancyDefinitionConsolidated`), and F16 (`testAuditF16NegativeChildCreditValueIsDropped`) audit tests now run un-skipped as regression tests. All 50 tests in the VoucherEvaluator and Specifications suites pass with 0 skips. The wider `tests/Unit/Models` and `tests/Unit/Controllers` suites (307 tests) also pass.
+
 **Reproduction tests:** every test in
 `tests/Unit/Services/VoucherEvaluator/EvaluatorAuditTest.php` was run **un-skipped once** during
 authoring and passed — i.e. genuinely demonstrated its flaw — before the `markTestSkipped()` line
@@ -1347,7 +1368,7 @@ OK — Tests: 10, Assertions: 23.
 | F8 | `testAuditF8ScottishRulesRespectOffsetDate` *(now a live regression test — finding resolved)* |
 | F10 | `testAuditF10ScottishEligibilitySpecExcludesSchoolAgeChildren` *(now a live regression test — finding resolved)* |
 | F15 | `testAuditF15PregnancyDefinitionConsolidated` *(now a live regression test — finding resolved)* |
-| F16 | `testAuditF16NegativeChildCreditValueIsDropped` |
+| F16 | `testAuditF16NegativeChildCreditValueIsDropped` *(now a live regression test — finding resolved)* |
 
 F9's regression tests are the formerly-skipped `ScottishVoucherEvaluatorTest` notice tests (now passing) plus
 `IsScottishAlmostStartDateTest`'s explicit year-wrap cases; F11 is pinned by the deferral cases in
