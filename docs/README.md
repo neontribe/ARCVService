@@ -83,3 +83,5 @@ We suggest that you use the TLD `.test` as others, like `.app` may now be in the
  * [Creating test vouchers](TEST_VOUCHERS.md) in bulk
  * [Setting up reporting](REPORTING.md)
  * [Styling](STYLING.md)
+ * [Voucher evaluator logic audit](VOUCHER_EVALUATOR_AUDIT.md), findings and remediation plan
+ * [Manual test: Scottish evaluator fixes](tests/MANUAL_TEST_SCOTTISH_EVALUATOR.md), seeded scenarios for testers
