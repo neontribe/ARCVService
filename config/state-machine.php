@@ -28,11 +28,11 @@ return [
                 'to' => 'dispatched',
             ],
             'void' => [
-                'from' => ['dispatched'],
+                'from' => ['printed','dispatched'],
                 'to' =>  'voided',
             ],
             'expire' => [
-                'from' => ['dispatched'],
+                'from' => ['printed','dispatched'],
                 'to' =>  'expired',
             ],
             'collect' => [
