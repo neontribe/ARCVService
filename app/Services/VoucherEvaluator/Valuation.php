@@ -116,8 +116,10 @@ class Valuation extends ArrayObject
     {
         // Get only eligible credits from this and relation valuations.
         $credits = $this->flat("credits", true);
-        // return summed value
-        return array_sum(array_column($credits, 'value'));
+        $total = array_sum(array_column($credits, 'value'));
+
+        // Return non-negative entitlement total
+        return max(0, $total);
     }
 
     /**

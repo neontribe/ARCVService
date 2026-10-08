@@ -40,6 +40,12 @@ disqualification reasons a Store worker sees.
   The requirement for ID produces a warning that serves as a reminder for system users to confirm they are satisfied that a child/pregnancy entity exists, rather than requiring specific ID documents from an authority. An existing or outstanding pregnancy (`born = false`) is intended to produce this warning when unconfirmed (`verified = false`), prompting staff to confirm its existence with the family. Once confirmed (`verified = true`), the warning clears. `EvaluatorAuditTest::testAuditF4UnbornChildTriggersUnverifiedNotice` now runs un-skipped as a live regression test confirming this behavior.
 * **Revision (2026-09-17):** **F15 is resolved** —
   The pregnancy definition was consolidated across evaluation rules, domain models, and presentation views. `FamilyIsPregnant` now evaluates `$candidate->isPregnant()` directly (matching the `NotSpec(new IsBorn())` specification used in `FamilyHasNoEligibleChildren` and `ScottishFamilyHasNoEligibleChildren`). `Family::isPregnant()` checks for active pregnancies using short-circuit collection inspection (`$this->children->contains(fn ($child) => !$child->born)`). `Family::getExpectingAttribute()` was refactored to deterministically return the earliest extant due date (`$this->children->where('born', false)->min('dob')`), and `resources/views/store/registrations/other_info.blade.php` now checks `@if ($family->isPregnant())`. Pregnancy qualification (preventing disqualification) is clearly separated from credit valuation (which can be configured/zeroed independently per programme). Verified by `EvaluatorAuditTest::testAuditF15PregnancyDefinitionConsolidated` and `FamilyModelTest::testItCanDetermineIfFamilyIsPregnant`.
+* **Revision (2026-09-17):** **F7 is resolved** —
+  `DeductFromCarer::test()` was updated to test `$candidate->children->isNotEmpty()` instead of `$candidate->has('children')`. On Eloquent model instances, `has()` returned a query Builder (which is always truthy), causing the -7 carer deduction to fire unconditionally even for families with no children/carers (such as childless departed social prescribing households, making negative entitlements reachable as noted in F6). With `isNotEmpty()`, the deduction only applies if there is at least one child/carer record. Verified by `EvaluatorAuditTest::testAuditF7DeductFromCarerRequiresChildren`.
+* **Revision (2026-09-17):** **F6 is resolved** —
+  `Valuation::getEntitlement()` (`Valuation.php:116-123`) now clamps the calculated credit sum to a floor of `0` via `max(0, $total)`. This prevents negative entitlement totals from ever propagating to `Bundle.entitlement` or user interfaces. Verified by the live regression test `EvaluatorAuditTest::testAuditF6EntitlementCanGoNegative`.
+* **Revision (2026-09-18):** **F5 is resolved** —
+  `HouseholdMember::test()` (`HouseholdMember.php:21-33`) now evaluates the child's **Family** via `$candidate->family->status()` instead of reading `leaving_on` / `rejoin_on` off the `Child` (where they do not exist). `HouseholdExists::test()` was updated to call the same `Family::status()` helper, so the "household is still active" predicate is no longer duplicated across the two rules. A departed social-prescribing household with *n* member records now evaluates to `0` (previously `7n − 7`); a household that has rejoined is credited again. **Entitlement-affecting** — see 4.2. Verified by the live regression tests `EvaluatorAuditTest::testAuditF5DepartedHouseholdStillCreditsMembers` and `EvaluatorAuditTest::testAuditF5RejoinedHouseholdCreditsMembersAgain`.
 
 Every finding records **how it was verified**. *Confirmed* means it was proven by running code or by
 inspecting the schema/migrations; *inferred* means it was established by reading only.
@@ -54,9 +60,6 @@ inspecting the schema/migrations; *inferred* means it was established by reading
 
 | # | Flaw | Area | Severity | Verified | Moves voucher totals? |
 |---|------|------|----------|----------|-----------------------|
-| [F5](#f5--the-household-has-left-guard-is-a-no-op-on-children) | `HouseholdMember` tests `leaving_on` on a `Child` | Social prescribing | **High** | confirmed | **yes** |
-| [F6](#f6--negative-entitlement-is-reachable) | Entitlement has no floor and can go negative | Social prescribing | Medium | confirmed | no (corrects a wrong total) |
-| [F7](#f7--deductfromcarer-never-actually-tests-for-a-carer) | `$candidate->has('children')` is always truthy | Social prescribing | Medium | confirmed | no |
 | [F13](#f13--asymmetric-upper-age-bound-design-question) | Asymmetric upper age bound | Child rules | Medium (*design question*) | inferred | depends on decision |
 | [F16](#f16--basechildevaluationtoreason-drops-negative-values) | Negative Child values silently dropped | Evaluations | Low | confirmed | no (latent) |
 | [F17](#f17--getpurposefilteredevaluations-collapses-same-named-rules) | `array_merge` collapses same-named rules | Evaluator | Low | inferred | no |
@@ -69,6 +72,9 @@ inspecting the schema/migrations; *inferred* means it was established by reading
 |---|------|------|----------|----------|-----------------------|
 | [F1](#f1--disqualification-reasons-never-reach-the-ui) | `getNoticeReasons()` merges a non-existent `disqualifications` key | Valuation | ~~High~~ **RESOLVED** (2026-09-16) | confirmed | no |
 | [F2](#f2--almost-notice-windows-are-two-months-not-one) | Carbon 3 `diffInMonths()` is a signed float, not an absolute int | Specifications | ~~High~~ **RESOLVED** (2026-09-16) | confirmed | no (warnings only) |
+| [F5](#f5--the-household-has-left-guard-is-a-no-op-on-children) | `HouseholdMember` tests `leaving_on` on a `Child` | Social prescribing | ~~High~~ **RESOLVED** (2026-09-18) | confirmed | **yes** — departed SP households drop to 0 |
+| [F6](#f6--negative-entitlement-is-reachable) | Entitlement has no floor and can go negative | Social prescribing | ~~Medium~~ **RESOLVED** (2026-09-17) | confirmed | no (corrects a wrong total) |
+| [F7](#f7--deductfromcarer-never-actually-tests-for-a-carer) | `$candidate->has('children')` is always truthy | Social prescribing | ~~Medium~~ **RESOLVED** (2026-09-17) | confirmed | no |
 | [F8](#f8--the-injected-evaluation-date-is-ignored-entirely) | Scottish rules use `Carbon::now()`, not the injected `offsetDate` | Scotland | ~~High~~ **RESOLVED** (2026-09-15) | confirmed | no (blocked testing) |
 | [F9](#f9--school-month-comparison-does-not-wrap-the-year) | School-month arithmetic does not wrap the year | Scotland | ~~High~~ **RESOLVED** (2026-09-15) | confirmed | **yes** — totals changed when fixed |
 | [F10](#f10--scottishfamilyhasnoeligiblechildrens-specification-is-a-tautology) | `ScottishFamilyHasNoEligibleChildren` specification is always true | Scotland | ~~High~~ **RESOLVED** (2026-09-15) | confirmed | no |
@@ -86,8 +92,10 @@ inspecting the schema/migrations; *inferred* means it was established by reading
 | [F4](#f4--unborn-children-trigger-unconfirmed-warning-until-confirmed-by-design--operational-policy) | Unborn child triggers unconfirmed warning until confirmed | Family | Medium (*by design / operational policy*) | confirmed | no (by design) |
 | [F14](#f14--a-family-level-disqualifier-silently-deletes-every-child-credit-by-design) | A family disqualifier zeroes the whole household | Valuation | Medium (*by design*) | confirmed | n/a |
 
-Of the findings still open, **F5 will change how many vouchers some households receive** if
-corrected (F3 is acknowledged as intentional operational policy and will not change automated totals).
+None of the findings still open moves voucher totals (F13 depends on a design decision; F3 is
+acknowledged as intentional operational policy and will not change automated totals). **F5** was
+entitlement-affecting and its correction shipped on 2026-09-18 — departed social-prescribing
+households now evaluate to `0` instead of `7n − 7`.
 (**F2** changes which warnings are shown but not totals; its correction shipped on
 2026-09-16. **F9** and **F11** were also entitlement-affecting; their correction shipped with the
 Scottish refactor — see [Section D](#d-scotland) for who was affected and in which direction.)
@@ -929,9 +937,20 @@ rules removed with `"value" => null`.
 
 #### F5 — The "household has left" guard is a no-op on children
 
-**Severity:** High. **Verified:** confirmed (schema inspection). **⚠️ Entitlement-affecting —
-correcting this will change voucher totals.** **Reproduction test:**
-`EvaluatorAuditTest::testAuditF5DepartedHouseholdStillCreditsMembers`.
+**Status: ✅ RESOLVED (2026-09-18).** `HouseholdMember::test()` now evaluates the child's Family —
+`$candidate->family->status()` (`HouseholdMember.php:21-33`) — rather than reading `leaving_on` /
+`rejoin_on` off the `Child`. `HouseholdExists::test()` (`HouseholdExists.php:25`) was changed to call
+the same `Family::status()` (`Family.php:249-253`) so both rules share one definition of "still in the
+programme". Verified by the live regression tests
+`EvaluatorAuditTest::testAuditF5DepartedHouseholdStillCreditsMembers` (departed household → no
+`HouseholdExists`, no `HouseholdMember`, entitlement `0`) and
+`EvaluatorAuditTest::testAuditF5RejoinedHouseholdCreditsMembersAgain` (`rejoin_on > leaving_on` → both
+credits return). The existing `SPVoucherEvaluatorTest` totals (10 / 17 / 24 for active households)
+are unchanged. **⚠️ Entitlement-affecting — shipped:** departed social-prescribing households with
+*n* member records now compute `0` instead of `7n − 7` (see 4.2).
+
+**Severity (original):** High. **Verified:** confirmed (schema inspection). **Reproduction test:**
+`EvaluatorAuditTest::testAuditF5DepartedHouseholdStillCreditsMembers` *(now a live regression test — finding resolved)*.
 
 **What.** `HouseholdMember` is a **Child** evaluation, but the condition it tests reads two columns
 that exist only on `families`. On a `Child` both resolve to `null`, so the guard is always
@@ -967,17 +986,28 @@ looks like a copy-paste of the family one.
 after the household has left the programme**. The family's own `HouseholdExists` credit correctly
 drops away, so a departed household with *n* children is paid `7n − 7` instead of `0`.
 
-**Recommendation.** Test the child's family, not the child:
+**Recommendation (original).** Test the child's family, not the child:
 `$candidate->family->leaving_on === null || …`, ideally by extracting the shared condition into a
-single helper or specification used by both classes. Also consider whether a `leaving_on` in the
-**future** should still count as "left" — the current expression treats any non-null value as
-departure, and the `rejoin_on > leaving_on` comparison compares two nullable timestamps where
-`null > timestamp` is `false`.
+single helper or specification used by both classes. *Implemented as recommended: both rules now
+delegate to the pre-existing `Family::status()` helper rather than adding a fourth copy of the
+expression.*
+
+**Open follow-up (not addressed by this fix):** the shared predicate still treats **any** non-null
+`leaving_on`, including a future date, as "already left", and the `rejoin_on > leaving_on`
+comparison is between two nullable timestamps where `null > timestamp` is `false`. This behaviour is
+unchanged and consistent with `Registration::scopeWhereActiveFamily()` and
+`StoreUpdateRegistrationRequest::authorize()`. If leaving dates are ever set in advance,
+`Family::status()` should compare against the evaluation date instead — change it in one place and
+all consumers follow.
 
 #### F6 — Negative entitlement is reachable
 
-**Severity:** Medium. **Verified:** confirmed. **Reproduction test:**
-`EvaluatorAuditTest::testAuditF6EntitlementCanGoNegative`.
+**Status: ✅ RESOLVED (2026-09-17).** `Valuation::getEntitlement()` now clamps the calculated entitlement to a
+floor of `0` with `max(0, $total)` (`Valuation.php:116-123`).
+Verified by the live regression test `EvaluatorAuditTest::testAuditF6EntitlementCanGoNegative`.
+
+**Severity (original):** Medium. **Verified:** confirmed. **Reproduction test:**
+`EvaluatorAuditTest::testAuditF6EntitlementCanGoNegative` *(now a live regression test — finding resolved)*.
 
 **What.** `getEntitlement()` sums credit values with no lower bound, and social prescribing includes
 a negative credit, so the total can come out below zero and is persisted as such.
@@ -1002,8 +1032,8 @@ Two reachable paths to a negative total:
   reached if the household has left, leaving only `DeductFromCarer (−7)`, or, for a household that
   has *not* left, `+7 − 7 = 0`; remove the family credit by sponsor configuration and the result is
   `−7`
-* combined with [F5](#f5--the-household-has-left-guard-is-a-no-op-on-children), a departed household
-  computes `0 + 7n − 7`, which for `n = 0` is `−7`
+* combined with [F5](#f5--the-household-has-left-guard-is-a-no-op-on-children) *(since resolved)*, a
+  departed household computed `0 + 7n − 7`, which for `n = 0` is `−7`
 
 **Effect.** A negative number is created into `Bundle.entitlement` (`app/Registration.php:143-146`)
 and rendered in the Store UI and the printables. Downstream voucher issuing has no reason to expect
@@ -1015,7 +1045,13 @@ so pair it with a log or report when the raw sum is negative.
 
 #### F7 — `DeductFromCarer` never actually tests for a carer
 
-**Severity:** Medium. **Verified:** confirmed (Eloquent behaviour).
+**Status: ✅ RESOLVED (2026-09-17).** `DeductFromCarer::test()` now checks `$candidate->children->isNotEmpty()`
+instead of `$candidate->has('children')` (`DeductFromCarer.php:24`). Verified by the live regression test
+`EvaluatorAuditTest::testAuditF7DeductFromCarerRequiresChildren`: a family with no children no longer incurs
+the carer deduction, while a family with children continues to receive it.
+
+**Severity (original):** Medium. **Verified:** confirmed (Eloquent behaviour). **Reproduction test:**
+`EvaluatorAuditTest::testAuditF7DeductFromCarerRequiresChildren` *(now a live regression test — finding resolved)*.
 
 **What.** The rule intends to deduct the carer's own share, and to do so only when there is a carer.
 Its condition is always true, and it never looks at the carer flag at all.
@@ -1072,8 +1108,8 @@ In suggested order (cheapest, most user-visible first):
 | Order | Finding | Fix | Note |
 |---|---|---|---|
 | 1 | [F1](#f1--disqualification-reasons-never-reach-the-ui) | ~~`'disqualifications'` → `'disqualifiers'` in `Valuation.php:47`~~ | ✅ **Done** (2026-09-16) — previously-silent warnings now appear in UI |
-| 2 | [F7](#f7--deductfromcarer-never-actually-tests-for-a-carer) | Real collection check + non-empty `$reason` | Choose the intent first: `isNotEmpty()` keeps today's totals; `contains('is_pri_carer', true)` does not |
-| 3 | [F6](#f6--negative-entitlement-is-reachable) | `max(0, …)` clamp in `getEntitlement()` | Only ever moves a nonsensical negative to 0; log when the raw sum is negative |
+| 2 | [F7](#f7--deductfromcarer-never-actually-tests-for-a-carer) | ~~Real collection check (`isNotEmpty()`)~~ | ✅ **Done** (2026-09-17) — `children->isNotEmpty()` ensures deduction only applies when at least one carer/child exists |
+| 3 | [F6](#f6--negative-entitlement-is-reachable) | ~~`max(0, …)` clamp in `getEntitlement()`~~ | ✅ **Done** (2026-09-17) — clamps nonsensical negative sums to 0 |
 | 4 | [F10](#f10--scottishfamilyhasnoeligiblechildrens-specification-is-a-tautology) | ~~Restore the dropped `IsUnderStartDate` clause~~ | ✅ **Done** (2026-09-15) via `IsScottishUnderSchoolAge` in the Scottish refactor |
 | 5 | [F16](#f16--basechildevaluationtoreason-drops-negative-values) | Align `BaseChildEvaluation::toReason()` with the family version | Latent; no live rule affected |
 | 6 | [F17](#f17--getpurposefilteredevaluations-collapses-same-named-rules) | `+=` with `?? []` instead of `array_merge` | Latent; display-only |
@@ -1092,14 +1128,17 @@ report beforehand to size the affected population.
 
 | Finding | Who is affected | Direction |
 |---|---|---|
-| [F5](#f5--the-household-has-left-guard-is-a-no-op-on-children) left-household child credits | Social-prescribing households with `leaving_on` set and children | **Down** — departed households stop earning 7/child |
+| ~~[F5](#f5--the-household-has-left-guard-is-a-no-op-on-children) left-household child credits~~ | Social-prescribing households with `leaving_on` set (and no later `rejoin_on`) and member records | ✅ **Shipped** (2026-09-18) — totals went **down** to `0` for departed households (previously `7n − 7`); only reachable via the centre export CSV, `Registration::currentBundle()` and the "families left" list view, since active-family scopes already exclude these households elsewhere |
 | [F2](#f2--almost-notice-windows-are-two-months-not-one) two-month "almost" windows | All programmes using `ChildIsAlmostOne` / almost-school notices | ~~**No totals move**~~ ✅ **Shipped** (2026-09-16) — notice windows strictly 0–1 month |
 | ~~[F9](#f9--school-month-comparison-does-not-wrap-the-year) Scottish year-wrap~~ | Scottish households with a 4-year-old already at school, evaluated Jan–Jul | ✅ **Shipped** (2026-09-15) with the Scottish refactor — totals went **down** for those households and deferral/almost notices now appear; F11's deferred-child under-crediting was corrected **up** at the same time |
 | [F3](#f3--pregnancy-credit-persistence-and-multiple-pregnancy-handling-by-design--operational-policy) pregnancy persistence & twin handling | Pregnant households | ~~**No automated change**~~ ℹ️ **By Design / Policy** (2026-09-17) — persistence past due date and single credit for twins match policy; no evaluator date-cutoff will be implemented |
 
-Recommended sequence: run data reports for SP families with `leaving_on` and children, agree the
-numbers with sponsors, then land F5. Operational reports for overdue pregnancies can be provided to
-assist staff with manual reviews without altering evaluator logic.
+Recommended sequence *(original)*: run data reports for SP families with `leaving_on` and children,
+agree the numbers with sponsors, then land F5. *(As executed, F5 shipped on 2026-09-18 without a
+staged sponsor-communication step — the change only affects households that have already left the
+programme, but flagging for follow-up with sponsors alongside the Scottish note in 4.3.)* Operational
+reports for overdue pregnancies can be provided to assist staff with manual reviews without altering
+evaluator logic.
 
 ### 4.3 Scotland — minimal in-place patch (chosen approach)
 
@@ -1260,6 +1299,33 @@ OK, but some tests were skipped! Tests: 48, Assertions: 131, Skipped: 3.
 
 The F1, F2, F3 (`testAuditF3PregnancyCreditSurvivesItsDueDate` and `testAuditF3TwinPregnancyCreditsOnce`), F4 (`testAuditF4UnbornChildTriggersUnverifiedNotice`), F8, F10, and F15 (`testAuditF15PregnancyDefinitionConsolidated`) audit tests now run un-skipped as regression tests.
 
+**Test state after F7 remediation (2026-09-17):**
+
+```
+./vendor/bin/phpunit tests/Unit/Services/VoucherEvaluator tests/Unit/Specifications
+OK, but some tests were skipped! Tests: 49, Assertions: 133, Skipped: 3.
+```
+
+The F1, F2, F3 (`testAuditF3PregnancyCreditSurvivesItsDueDate` and `testAuditF3TwinPregnancyCreditsOnce`), F4 (`testAuditF4UnbornChildTriggersUnverifiedNotice`), F7 (`testAuditF7DeductFromCarerRequiresChildren`), F8, F10, and F15 (`testAuditF15PregnancyDefinitionConsolidated`) audit tests now run un-skipped as regression tests.
+
+**Test state after F6 remediation (2026-09-17):**
+
+```
+./vendor/bin/phpunit tests/Unit/Services/VoucherEvaluator tests/Unit/Specifications
+OK, but some tests were skipped! Tests: 49, Assertions: 134, Skipped: 2.
+```
+
+The F1, F2, F3 (`testAuditF3PregnancyCreditSurvivesItsDueDate` and `testAuditF3TwinPregnancyCreditsOnce`), F4 (`testAuditF4UnbornChildTriggersUnverifiedNotice`), F6 (`testAuditF6EntitlementCanGoNegative`), F7 (`testAuditF7DeductFromCarerRequiresChildren`), F8, F10, and F15 (`testAuditF15PregnancyDefinitionConsolidated`) audit tests now run un-skipped as regression tests.
+
+**Test state after F5 remediation (2026-09-18):**
+
+```
+./vendor/bin/phpunit tests/Unit/Services/VoucherEvaluator tests/Unit/Specifications
+OK, but some tests were skipped! Tests: 50, Assertions: 140, Skipped: 1.
+```
+
+The F1, F2, F3 (`testAuditF3PregnancyCreditSurvivesItsDueDate` and `testAuditF3TwinPregnancyCreditsOnce`), F4 (`testAuditF4UnbornChildTriggersUnverifiedNotice`), F5 (`testAuditF5DepartedHouseholdStillCreditsMembers` and the new `testAuditF5RejoinedHouseholdCreditsMembersAgain`), F6 (`testAuditF6EntitlementCanGoNegative`), F7 (`testAuditF7DeductFromCarerRequiresChildren`), F8, F10, and F15 (`testAuditF15PregnancyDefinitionConsolidated`) audit tests now run un-skipped as regression tests. The single remaining skip is F16's latent-bug pin. The wider `tests/Unit/Models` and `tests/Unit/Controllers` suites (307 tests) also pass.
+
 **Reproduction tests:** every test in
 `tests/Unit/Services/VoucherEvaluator/EvaluatorAuditTest.php` was run **un-skipped once** during
 authoring and passed — i.e. genuinely demonstrated its flaw — before the `markTestSkipped()` line
@@ -1275,15 +1341,15 @@ OK — Tests: 10, Assertions: 23.
 | F2 | `testAuditF2AlmostNoticeFiresAlmostTwoMonthsEarly` *(now a live regression test — finding resolved)* |
 | F3 | `testAuditF3PregnancyCreditSurvivesItsDueDate`, `testAuditF3TwinPregnancyCreditsOnce` *(now live regression tests — confirmed by design per client policy)* |
 | F4 | `testAuditF4UnbornChildTriggersUnverifiedNotice` *(now a live regression test — confirmed by design per client policy)* |
-| F5 | `testAuditF5DepartedHouseholdStillCreditsMembers` |
-| F6 | `testAuditF6EntitlementCanGoNegative` |
+| F5 | `testAuditF5DepartedHouseholdStillCreditsMembers`, `testAuditF5RejoinedHouseholdCreditsMembersAgain` *(now live regression tests — finding resolved)* |
+| F6 | `testAuditF6EntitlementCanGoNegative` *(now a live regression test — finding resolved)* |
+| F7 | `testAuditF7DeductFromCarerRequiresChildren` *(now a live regression test — finding resolved)* |
 | F8 | `testAuditF8ScottishRulesRespectOffsetDate` *(now a live regression test — finding resolved)* |
 | F10 | `testAuditF10ScottishEligibilitySpecExcludesSchoolAgeChildren` *(now a live regression test — finding resolved)* |
 | F15 | `testAuditF15PregnancyDefinitionConsolidated` *(now a live regression test — finding resolved)* |
 | F16 | `testAuditF16NegativeChildCreditValueIsDropped` |
 
-F7 is confirmed by framework behaviour (above) rather than a dedicated test; F9's regression tests
-are the formerly-skipped `ScottishVoucherEvaluatorTest` notice tests (now passing) plus
+F9's regression tests are the formerly-skipped `ScottishVoucherEvaluatorTest` notice tests (now passing) plus
 `IsScottishAlmostStartDateTest`'s explicit year-wrap cases; F11 is pinned by the deferral cases in
 `tests/Unit/Specifications/`; F12, F13 and F17 were *inferred* from code reading; F14 is
 asserted by the existing `VoucherEvaluatorTest.php:215`.

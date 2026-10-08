@@ -22,7 +22,11 @@ class HouseholdMember extends BaseChildEvaluation
     {
         parent::test($candidate);
 
-        return ($candidate->leaving_on === null || $candidate->rejoin_on > $candidate->leaving_on)
+        // A household member only earns credit while their Family is still active.
+        // leaving_on / rejoin_on live on the Family, not the Child.
+        $family = $candidate->family;
+
+        return ($family !== null && $family->status())
             ? $this->success()
             : $this->fail()
         ;
