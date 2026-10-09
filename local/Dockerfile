@@ -39,4 +39,4 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www
 
 # PHP config
-# COPY php.ini /usr/local/etc/php/php.ini
+COPY php.ini /usr/local/etc/php/php.ini
