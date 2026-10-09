@@ -4,6 +4,13 @@ namespace App\Services\VoucherEvaluator\Evaluations;
 
 use Carbon\Carbon;
 
+/**
+ * Disqualifies families that are not on the project (Family::status() is false).
+ *
+ * This is the only place leavers are handled: HouseholdExists and HouseholdMember
+ * credit any family. If a sponsor overrides this rule to NULL, leavers will get
+ * household credit again.
+ */
 class FamilyHasLeftProject extends BaseFamilyEvaluation
 {
     public $reason = 'has left the project';

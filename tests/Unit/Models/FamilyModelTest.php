@@ -48,6 +48,33 @@ class FamilyModelTest extends TestCase
     }
 
 
+    public function testOnProjectScopeMatchesStatus(): void
+    {
+        $now = Carbon::now();
+        $expected = [
+            'never left' => [null, null, true],
+            'left' => [$now->copy()->subDays(10), null, false],
+            'rejoined after leaving' => [$now->copy()->subDays(10), $now->copy()->subDays(5), true],
+            'left again after rejoining' => [$now->copy()->subDays(5), $now->copy()->subDays(10), false],
+        ];
+
+        $families = [];
+        foreach ($expected as $scenario => [$leaving_on, $rejoin_on, $active]) {
+            $families[$scenario] = factory(Family::class)->create([
+                'leaving_on' => $leaving_on,
+                'rejoin_on' => $rejoin_on,
+            ]);
+        }
+
+        $onProjectIds = Family::onProject()->pluck('id')->all();
+
+        foreach ($expected as $scenario => [, , $active]) {
+            $family = $families[$scenario]->fresh();
+            $this->assertSame($active, $family->status(), $scenario);
+            $this->assertSame($active, in_array($family->id, $onProjectIds), $scenario);
+        }
+    }
+
     public function testItCanHaveCarers(): void
     {
         // Create Family

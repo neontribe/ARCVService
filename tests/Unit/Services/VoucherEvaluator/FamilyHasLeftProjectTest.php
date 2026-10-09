@@ -91,6 +91,21 @@ class FamilyHasLeftProjectTest extends TestCase
         $this->assertEquals($active ? 10 : 0, $valuation->getEntitlement());
     }
 
+    public function testLeaversGetHouseholdCreditWhenDisqualifierIsSwitchedOff(): void
+    {
+        // Household rules no longer check status; leaver handling relies on FamilyHasLeftProject.
+        $family = $this->makeFamily(Carbon::now()->subDays(3), null);
+        $mods = $this->spMods()->push(new Evaluation([
+            "name" => "FamilyHasLeftProject",
+            "value" => null,
+            "purpose" => "disqualifiers",
+            "entity" => "App\Family",
+        ]));
+        $valuation = EvaluatorFactory::make($mods)->evaluate($family);
+
+        $this->assertEquals(10, $valuation->getEntitlement());
+    }
+
     public function testRegistrationValuationOfALeaverIsZero(): void
     {
         $sponsor = factory(Sponsor::class)->create();

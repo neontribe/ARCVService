@@ -7,7 +7,6 @@ use Carbon\Carbon;
 class HouseholdExists extends BaseFamilyEvaluation
 {
     public $reason = 'exists';
-    private $specification;
 
     /**
      * HouseholdExists constructor.
@@ -22,9 +21,7 @@ class HouseholdExists extends BaseFamilyEvaluation
     {
         parent::test($candidate);
 
-        return $candidate->status()
-            ? $this->success()
-            : $this->fail()
-        ;
+        // Families that have left are disqualified by FamilyHasLeftProject.
+        return $this->success();
     }
 }

@@ -180,8 +180,7 @@ class Registration extends Model implements IEvaluee
     public function scopeWhereActiveFamily(Builder $query): Builder
     {
         return $query->whereHas('family', function ($q) {
-            $q->whereNull('leaving_on');
-            $q->orWhereColumn('rejoin_on', '>', 'leaving_on');
+            $q->onProject();
         });
     }
 
