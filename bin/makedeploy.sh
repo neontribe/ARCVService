@@ -51,7 +51,7 @@ tar --no-xattrs --no-acls -cvzf "${SRCNAME}"_"${RELVER}".tgz  \
     --exclude="${SRCNAME}/.husky" \
     --exclude="${SRCNAME}/.idea" \
     --exclude="${SRCNAME}/.nvmrc" \
-    --exclude="${SRCNAME}/.nodeenv" \
+    --exclude="${SRCNAME}/.node-version" \
     --exclude="${SRCNAME}/.shellcheck.sh" \
     --exclude="${SRCNAME}/build" \
     --exclude="${SRCNAME}/docs" \
