@@ -215,7 +215,8 @@ class SocialPrescribingScenarioSeederTest extends TestCase
         }
 
         // E: total is 0 on both, but the old breakdown carried the departed member's +7.
+        // Departed families are now disqualified outright (FamilyHasLeftProject), so no credits at all.
         $this->assertContains('1x ' . self::MEMBER . ' (+7)', $rows['E']['unpatched_credits']);
-        $this->assertSame([self::CARER_DEDUCTION], $rows['E']['patched_credits']);
+        $this->assertSame([], $rows['E']['patched_credits']);
     }
 }
