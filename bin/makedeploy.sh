@@ -38,6 +38,7 @@ rm -f "${SRCNAME}"_"${RELVER}".tgz
 tar --no-xattrs --no-acls -cvzf "${SRCNAME}"_"${RELVER}".tgz  \
     --exclude=".DS_Store" \
     --exclude="._*" \
+    --exclude="${SRCNAME}/.junie" \
     --exclude="${SRCNAME}/.editorconfig" \
     --exclude="${SRCNAME}/.env" \
     --exclude="${SRCNAME}/.env.example" \
@@ -50,6 +51,7 @@ tar --no-xattrs --no-acls -cvzf "${SRCNAME}"_"${RELVER}".tgz  \
     --exclude="${SRCNAME}/.husky" \
     --exclude="${SRCNAME}/.idea" \
     --exclude="${SRCNAME}/.nvmrc" \
+    --exclude="${SRCNAME}/.nodeenv" \
     --exclude="${SRCNAME}/.shellcheck.sh" \
     --exclude="${SRCNAME}/build" \
     --exclude="${SRCNAME}/docs" \
@@ -65,6 +67,7 @@ tar --no-xattrs --no-acls -cvzf "${SRCNAME}"_"${RELVER}".tgz  \
     --exclude="${SRCNAME}/Brewfile" \
     --exclude="${SRCNAME}/phpstan.neon" \
     --exclude="${SRCNAME}/phpunit.xml" \
+    --exclude="${SRCNAME}/.phpunit.cache" \
     --exclude="${SRCNAME}/README.md" \
     --exclude="${SRCNAME}/staging_rsa.enc" \
     --exclude="${SRCNAME}/package-lock.json" \
