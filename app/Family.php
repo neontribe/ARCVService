@@ -10,6 +10,7 @@ use App\Traits\Evaluable;
 use Carbon\Carbon;
 use DB;
 use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -250,5 +251,18 @@ class Family extends Model implements IEvaluee
     {
         return $this->leaving_on === null
             || ($this->rejoin_on > $this->leaving_on);
+    }
+
+    /**
+     * Fetches only Families on the project; the SQL equivalent of status()
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeOnProject(Builder $query): Builder
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('leaving_on')
+                ->orWhereColumn('rejoin_on', '>', 'leaving_on');
+        });
     }
 }

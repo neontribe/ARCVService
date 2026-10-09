@@ -11,6 +11,7 @@ use App\Family;
 use App\Http\Controllers\Service\Admin\SponsorsController;
 use App\Registration;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsPrimarySchoolAge;
+use App\Services\VoucherEvaluator\Evaluations\FamilyHasLeftProject;
 use App\Services\VoucherEvaluator\Evaluations\FamilyHasNoEligibleChildren;
 use App\Sponsor;
 use Carbon\Carbon;
@@ -429,9 +430,10 @@ class EditPageTest extends StoreTestCase
         $rule = new ChildIsPrimarySchoolAge();
         $this->see($rule->reason);
 
-        // See a single disqualifier, that the system gets anyway
+        // See the disqualifiers the system gets anyway (ChildIsPrimarySchoolAge, FamilyHasLeftProject)
         $this->see("Reminders:");
-        $this->assertCount(1, $this->crawler->filter('ul#disqualifiers li'));
+        $this->assertCount(2, $this->crawler->filter('ul#disqualifiers li'));
+        $this->see((new FamilyHasLeftProject())->reason);
 
         // Add a disqualifier to the defaults it doesn't have
         $this->centre->sponsor->evaluations()->save(
@@ -448,7 +450,7 @@ class EditPageTest extends StoreTestCase
             ->visit(URL::route('store.registration.edit', $this->registration->id));
 
         // See another disqualifier
-        $this->assertCount(2, $this->crawler->filter('ul#disqualifiers li'));
+        $this->assertCount(3, $this->crawler->filter('ul#disqualifiers li'));
 
         // See the reason
         $rule = new FamilyHasNoEligibleChildren();

@@ -137,7 +137,7 @@ class RetireCentre extends Command
     protected function markFamiliesAsLeft(Centre $centre, Collection $familyIds): void
     {
         $affected = Family::whereIn('id', $familyIds)
-            ->whereNull('leaving_on')
+            ->onProject()
             ->update([
                 'leaving_on' => Carbon::now(),
                 'leaving_reason' => 'centre retired',

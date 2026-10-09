@@ -8,6 +8,7 @@ use App\Services\VoucherEvaluator\Evaluations\ChildIsAlmostPrimarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsBetweenOneAndPrimarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsPrimarySchoolAge;
 use App\Services\VoucherEvaluator\Evaluations\ChildIsUnderOne;
+use App\Services\VoucherEvaluator\Evaluations\FamilyHasLeftProject;
 use App\Services\VoucherEvaluator\Evaluations\FamilyIsPregnant;
 use App\Services\VoucherEvaluator\Evaluators\VoucherEvaluator;
 use Carbon\Carbon;
@@ -74,7 +75,10 @@ class EvaluatorFactory
                 ],
                 'notices' => [
                 ],
-                'disqualifiers' => [],
+                'disqualifiers' => [
+                    // Families not on the project (per Family::status()) are entitled to nothing
+                    "FamilyHasLeftProject" => new FamilyHasLeftProject($offsetDate, 0),
+                ],
                 'relations' => ['children'],
             ],
             "App\Registration" => [

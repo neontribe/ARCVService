@@ -7,7 +7,6 @@ use Carbon\Carbon;
 class HouseholdMember extends BaseChildEvaluation
 {
     public $reason = 'member of the household';
-    private $specification;
 
     /**
      * HouseholdMember constructor.
@@ -22,11 +21,8 @@ class HouseholdMember extends BaseChildEvaluation
     {
         parent::test($candidate);
 
-        // A household member only earns credit while their Family is still active.
-        // leaving_on / rejoin_on live on the Family, not the Child.
-        $family = $candidate->family;
-
-        return ($family !== null && $family->status())
+        // Families that have left are disqualified by FamilyHasLeftProject.
+        return $candidate->family !== null
             ? $this->success()
             : $this->fail()
         ;

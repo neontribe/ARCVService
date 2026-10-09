@@ -108,6 +108,27 @@ class RetireCentreCommandTest extends TestCase
         $this->assertEquals($originalDate->toDateTimeString(), $family->leaving_on->toDateTimeString());
     }
 
+    public function testItMarksRejoinedFamiliesAsLeft(): void
+    {
+        $centre = factory(Centre::class)->create();
+        $registration = factory(Registration::class)->create(['centre_id' => $centre->id]);
+        $family = $registration->family;
+
+        $originalDate = now()->subMonths(2);
+        $family->leaving_on = $originalDate;
+        $family->leaving_reason = 'original_reason';
+        $family->rejoin_on = now()->subMonth();
+        $family->save();
+        $this->assertTrue($family->fresh()->status());
+
+        $this->retireCentre($centre->id);
+
+        $family = $family->fresh();
+        $this->assertFalse($family->status());
+        $this->assertEquals('centre retired', $family->leaving_reason);
+        $this->assertTrue($family->leaving_on->greaterThan($originalDate));
+    }
+
     public function testItOnlyMarksFamiliesRegisteredAtTheRetiringCentre(): void
     {
         $centreA = factory(Centre::class)->create();

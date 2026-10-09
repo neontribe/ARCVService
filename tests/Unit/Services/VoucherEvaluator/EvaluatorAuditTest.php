@@ -287,8 +287,8 @@ class EvaluatorAuditTest extends TestCase
     /**
      * F5 (RESOLVED — regression test): HouseholdMember (a Child evaluation) used to
      * test leaving_on/rejoin_on on the Child, where they do not exist, so children
-     * of a household that had left still earned their member credit. It now
-     * evaluates the child's Family via Family::status(), matching HouseholdExists.
+     * of a household that had left still earned their member credit. Departed
+     * households are now disqualified outright by FamilyHasLeftProject.
      */
     public function testAuditF5DepartedHouseholdStillCreditsMembers(): void
     {
@@ -302,12 +302,14 @@ class EvaluatorAuditTest extends TestCase
         $evaluator = EvaluatorFactory::make($this->socialPrescribingMods());
         $evaluation = $evaluator->evaluate($family->fresh());
 
-        $allCredits = $evaluation->flat("credits");
+        // Only eligible credits count towards entitlement and the credit breakdown.
+        $eligibleCredits = $evaluation->flat("credits", true);
 
-        // The family-level rule notices the departure...
-        $this->assertNotContains(self::CREDIT_TYPES['HouseholdExists'], $allCredits);
-        // FIXED: ...and so does the child-level member rule.
-        $this->assertNotContains(self::CREDIT_TYPES['HouseholdMember'], $allCredits);
+        // The household is disqualified as having left...
+        $this->assertContains(['reason' => 'Family|has left the project'], $evaluation->disqualifiers);
+        // ...so neither the family-level nor the child-level member credit counts.
+        $this->assertNotContains(self::CREDIT_TYPES['HouseholdExists'], $eligibleCredits);
+        $this->assertNotContains(self::CREDIT_TYPES['HouseholdMember'], $eligibleCredits);
         // A departed household is entitled to nothing.
         $this->assertEquals(0, $evaluation->getEntitlement());
     }
