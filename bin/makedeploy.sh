@@ -1,6 +1,8 @@
 #!/bin/bash
 RELVER=$1
 
+export COPYFILE_DISABLE=1
+
 # get the right version of npm using nvm
 # shellcheck source=/dev/null
 source ~/.nvm/nvm.sh
@@ -33,7 +35,9 @@ SRCNAME=${PWD##*/}
 cd ..
 # pack it up without most of the dev extras
 rm -f "${SRCNAME}"_"${RELVER}".tgz
-tar -cvzf "${SRCNAME}"_"${RELVER}".tgz  \
+tar --no-xattrs --no-acls -cvzf "${SRCNAME}"_"${RELVER}".tgz  \
+    --exclude=".DS_Store" \
+    --exclude="._*" \
     --exclude="${SRCNAME}/.editorconfig" \
     --exclude="${SRCNAME}/.env" \
     --exclude="${SRCNAME}/.env.example" \

@@ -1,6 +1,8 @@
 #!/bin/bash
 RELVER=$1
 
+export COPYFILE_DISABLE=1
+
 # get the right version of npm using nvm
 # shellcheck source=/dev/null
 source ~/.nvm/nvm.sh
@@ -33,7 +35,9 @@ SRCNAME=${PWD##*/}
 cd ..
 # pack it up without most of the dev extras
 rm -f "${SRCNAME}"_"${RELVER}"_staging.tgz
-tar -cvzf "${SRCNAME}"_"${RELVER}"_staging.tgz  \
+tar --no-xattrs --no-acls -cvzf "${SRCNAME}"_"${RELVER}"_staging.tgz  \
+    --exclude=".DS_Store" \
+    --exclude="._*" \
     --exclude="${SRCNAME}/.editorconfig" \
     --exclude="${SRCNAME}/.env" \
     --exclude="${SRCNAME}/.env.example" \
@@ -46,6 +50,7 @@ tar -cvzf "${SRCNAME}"_"${RELVER}"_staging.tgz  \
     --exclude="${SRCNAME}/.husky" \
     --exclude="${SRCNAME}/.idea" \
     --exclude="${SRCNAME}/.nvmrc" \
+    --exclude="${SRCNAME}/.shellcheck.sh" \
     --exclude="${SRCNAME}/build" \
     --exclude="${SRCNAME}/docs" \
     --exclude="${SRCNAME}/node_modules" \
@@ -57,7 +62,6 @@ tar -cvzf "${SRCNAME}"_"${RELVER}"_staging.tgz  \
     --exclude="${SRCNAME}/Brewfile" \
     --exclude="${SRCNAME}/script" \
     --exclude="${SRCNAME}/local" \
-    --exclude="${SRCNAME}/shellcheck.sh" \
     --exclude="${SRCNAME}/phpstan.neon" \
     --exclude="${SRCNAME}/README.md" \
     --exclude="${SRCNAME}/staging_rsa.enc" \
