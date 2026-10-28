@@ -70,22 +70,21 @@ Now you should be able to view
 
 We suggest that you use the TLD `.test` as others, like `.app` may now be in the public domain and you will experience difficulty with respect to browser behavior over HTTP/HTTPS.
 
-## More detailed information
+## More detailed information and resources
 
- * [Homestead](HOMESTEAD.md) the laravel vagrant vm manager
- * [Resetting/reseeding](DATA_RESET.md) the database with fixtures
- * [Database schema](DATABASE_SCHEMA.md) (diagram)
- * [Voucher state transitions](VOUCHER_STATE_TRANSITIONS.md) (diagram)
- * [Development cycle](DEVELOPMENT_CYCLE.md), sprints, hotfixes, tagging and releases
+### Development Wrinkles
+* [Homestead](HOMESTEAD.md) optionally use the laravel vagrant vm manager for dev
+* [Database schema](DATABASE_SCHEMA.md) (diagram)
+* [Setting up reporting](REPORTING.md) and scheduled tasks
+* [Voucher state transitions](VOUCHER_STATE_TRANSITIONS.md) (diagram)
+* [Development cycle](DEVELOPMENT_CYCLE.md), sprints, hotfixes, tagging and releases
+* [Upgrading javascript](JS_UPGRADE.md)
+* [Styling](STYLING.md)
+
+### Maintenance Wrinkles
+* [Resetting/reseeding](DATA_RESET.md) the database with fixtures
+* [Creating test vouchers](TEST_VOUCHERS.md) in bulk
+* [MVL exports](MVL-EXPORT.md), monthly/yearly voucher export
+
+### Historical Wrinkles
  * [Current infrastructure](DEPLOYMENT.md), live and staging droplet details
- * [Upgrading javascript](JS_UPGRADE.md)
- * [MVL exports](MVL-EXPORT.md), monthly/yearly voucher export
- * [Creating test vouchers](TEST_VOUCHERS.md) in bulk
- * [Setting up reporting](REPORTING.md)
- * [Styling](STYLING.md)
- * [Voucher evaluator logic audit](VOUCHER_EVALUATOR_AUDIT.md), findings and remediation plan
- * [Manual test: Scottish evaluator fixes](tests/MANUAL_TEST_SCOTTISH_EVALUATOR.md), seeded scenarios for testers
- * [Manual test: evaluator notice fixes (F1/F2)](tests/MANUAL_TEST_EVALUATOR_NOTICES.md), seeded scenarios for testers
- * [Manual test: pregnancy rule no-regression (F15)](tests/MANUAL_TEST_PREGNANCY_REGRESSION.md), seeded scenarios for testers
- * [Manual test: social-prescribing evaluator fixes (F5/F6/F7)](tests/MANUAL_TEST_SP_EVALUATOR.md), seeded scenarios for testers
- * [Manual test: negative Child credit values (F16)](tests/MANUAL_TEST_NEGATIVE_CHILD_CREDIT.md), seeded scenarios for testers
